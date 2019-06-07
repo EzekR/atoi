@@ -65,7 +65,7 @@ class ManagerToAssign extends StatelessWidget {
                         new Icon(
                           Icons.assignment_ind,
                           color: Colors.deepOrangeAccent,
-                          size: 16.0,
+                          size: 20.0,
                         ),
                         Text(
                           status,
@@ -98,6 +98,64 @@ class ManagerToAssign extends StatelessWidget {
                   )
                 ],
               ),
+            ),
+            new Padding(
+              padding: EdgeInsets.symmetric(vertical: 5.0),
+              child: new Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisSize: MainAxisSize.max,
+                children: <Widget>[
+                  Expanded(
+                    flex: 5,
+                    child: new Row(
+                      mainAxisSize: MainAxisSize.max,
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: <Widget>[
+                        new Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 5.0),
+                        ),
+                        new Text(
+                          '请求编号: ',
+                          style: new TextStyle(
+                            color: Colors.black,
+                            fontSize: 14.0
+                          )
+                        ),
+                        new Text(
+                          requestNo,
+                          style: new TextStyle(
+                            color: Colors.blue,
+                            fontSize: 14.0
+                          ),
+                        )
+                      ],
+                    ),
+                  ),
+                  Expanded(
+                    flex: 5,
+                    child: new Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.max,
+                      children: <Widget>[
+                        new Text(
+                          '请求时间: ',
+                          style: new TextStyle(
+                            color: Colors.black,
+                            fontSize: 14.0
+                          ),
+                        ),
+                        new Text(
+                          requestTime,
+                          style: new TextStyle(
+                            color: Colors.blue,
+                            fontSize: 14.0
+                          ),
+                        )
+                      ],
+                    ),
+                  )
+                ],
+              ),
             )
           ],
         ),
@@ -107,7 +165,7 @@ class ManagerToAssign extends StatelessWidget {
     return new ListView.builder(
       padding: const EdgeInsets.all(8.0),
       itemCount: 20,
-      itemBuilder: (context, i) => buildCardItem('Philips 781-296 放射科', 'LSRM002020900002 上呼吸道内窥镜EW34-49','无法开机，屏幕闪烁，有异响', '待派工', 'C000000001', '2019-03-22 14：33'),
+      itemBuilder: (context, i) => buildCardItem('Philips 781-296 放射科', 'LSRM002020900002 上呼吸道内窥镜EW34-49','无法开机，屏幕闪烁，有异响', '待派工', 'C000000001', '2019-03-22 14:33'),
     );
   }
 }
