@@ -3,6 +3,7 @@ import 'package:atoi/pages/manager/manager_menu.dart';
 import 'package:atoi/pages/manager/manager_to_assign.dart';
 import 'package:atoi/pages/manager/manager_to_audit.dart';
 import 'package:atoi/pages/manager/manager_to_complete.dart';
+import 'package:badges/badges.dart';
 
 
 class HomePage extends StatefulWidget {
@@ -45,18 +46,42 @@ class _HomePageState extends State<HomePage>
           tabs: <Widget>[
             new Tab(
               icon: new Icon(Icons.view_module),
-              text: '首页',
+              text: '首页'
             ),
             new Tab(
-              icon: new Icon(Icons.assignment_late),
+              icon: new Badge(
+                badgeContent: Text(
+                  '3',
+                  style: new TextStyle(
+                    color: Colors.white
+                  ),
+                ),
+                child: new Icon(Icons.assignment_late),
+              ),
               text: '待派工'
             ),
             new Tab(
-              icon: new Icon(Icons.hourglass_full),
-              text: '待审核'
+              icon: new Badge(
+                badgeContent: Text(
+                  '2',
+                  style: new TextStyle(
+                      color: Colors.white
+                  ),
+                ),
+                child: new Icon(Icons.hourglass_full),
+              ),
+              text: '待审核',
             ),
             new Tab(
-              icon: new Icon(Icons.event_note),
+              icon: new Badge(
+                badgeContent: Text(
+                  '1',
+                  style: new TextStyle(
+                      color: Colors.white
+                  ),
+                ),
+                child: new Icon(Icons.event_note),
+              ),
               text: '待完成'
             )
           ],
