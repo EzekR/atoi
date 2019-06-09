@@ -7,7 +7,7 @@ import 'package:badges/badges.dart';
 
 
 class HomePage extends StatefulWidget {
-
+  static String tag = 'home-page';
   @override
   _HomePageState createState() => new _HomePageState();
 }

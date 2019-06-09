@@ -12,7 +12,12 @@ class ManagerMenu extends StatelessWidget {
         mainAxisSize: MainAxisSize.values[1],
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          new Icon(icon, color: color, size: 50.0,),
+          new IconButton(
+            icon: new Icon(icon),
+            onPressed: () {},
+            color: color,
+            iconSize: 50.0,
+          ),
           new Container(
             margin: const EdgeInsets.only(top: 8.0),
             child: new Text(
