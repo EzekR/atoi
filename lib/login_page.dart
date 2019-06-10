@@ -8,6 +8,10 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
+
+  TextEditingController phoneController = new TextEditingController();
+  TextEditingController passwordController = new TextEditingController();
+
   @override
   Widget build(BuildContext context) {
     final logo = Hero(
@@ -19,10 +23,10 @@ class _LoginPageState extends State<LoginPage> {
       ),
     );
 
-    final email = TextFormField(
-      keyboardType: TextInputType.emailAddress,
+    final phone = TextFormField(
+      keyboardType: TextInputType.number,
+      controller: phoneController,
       autofocus: false,
-      initialValue: '',
       decoration: InputDecoration(
         hintText: '手机号',
         contentPadding: EdgeInsets.fromLTRB(20.0, 10.0, 20.0, 10.0),
@@ -32,7 +36,7 @@ class _LoginPageState extends State<LoginPage> {
 
     final password = TextFormField(
       autofocus: false,
-      initialValue: '',
+      controller: passwordController,
       obscureText: true,
       decoration: InputDecoration(
         hintText: '密码',
@@ -48,10 +52,19 @@ class _LoginPageState extends State<LoginPage> {
           borderRadius: BorderRadius.circular(24),
         ),
         onPressed: () {
-          Navigator.of(context).pushNamed(HomePage.tag);
+          if (phoneController.text == '1') {
+            Navigator.of(context).pushNamed(HomePage.tag);
+          } else {
+            showDialog(
+              context: context,
+              builder: (context) => AlertDialog(
+                title: Text('still in development')
+              )
+            );
+          }
         },
         padding: EdgeInsets.all(12),
-        color: Colors.lightBlueAccent,
+        color: Theme.of(context).accentColor,
         child: Text('登录', style: TextStyle(color: Colors.white)),
       ),
     );
@@ -73,7 +86,7 @@ class _LoginPageState extends State<LoginPage> {
           children: <Widget>[
             logo,
             SizedBox(height: 48.0),
-            email,
+            phone,
             SizedBox(height: 8.0),
             password,
             SizedBox(height: 24.0),
