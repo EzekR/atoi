@@ -28,6 +28,8 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
+  flutter_localizations:
+    sdk: flutter
 
 
 # For information on the generic Dart part of this file, see the
@@ -44,6 +46,7 @@ flutter:
     - assets/logo.png
     - assets/alucard.jpg
     - assets/atoi.png
+    - assets/qm.jpg
   fonts:
     - family: Nunito
       fonts:

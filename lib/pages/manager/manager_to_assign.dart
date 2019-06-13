@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:atoi/pages/manager/manager_assign_page.dart';
 
 class ManagerToAssign extends StatelessWidget {
   @override
@@ -43,7 +44,7 @@ class ManagerToAssign extends StatelessWidget {
                           ),
                         ),
                         new Padding(
-                          padding: EdgeInsets.symmetric(horizontal: 8.0),
+                          padding: EdgeInsets.symmetric(horizontal: 0.0),
                           child: new Text(
                               describe,
                               style: new TextStyle(
@@ -85,7 +86,9 @@ class ManagerToAssign extends StatelessWidget {
                       mainAxisSize: MainAxisSize.max,
                       children: <Widget>[
                         new RaisedButton(
-                          onPressed: () {},
+                          onPressed: () {
+                            Navigator.of(context).pushNamed(ManagerAssignPage.tag);
+                          },
                           textColor: Colors.white,
                           color: Theme.of(context).accentColor,
                           shape: new RoundedRectangleBorder(borderRadius: new BorderRadius.circular(30.0)),
@@ -108,11 +111,11 @@ class ManagerToAssign extends StatelessWidget {
                   Expanded(
                     flex: 5,
                     child: new Row(
-                      mainAxisSize: MainAxisSize.max,
+                      mainAxisSize: MainAxisSize.min,
                       mainAxisAlignment: MainAxisAlignment.start,
                       children: <Widget>[
                         new Padding(
-                          padding: EdgeInsets.symmetric(horizontal: 5.0),
+                          padding: EdgeInsets.symmetric(horizontal: 2.0),
                         ),
                         new Text(
                           '请求编号: ',
@@ -135,7 +138,7 @@ class ManagerToAssign extends StatelessWidget {
                     flex: 5,
                     child: new Row(
                       mainAxisAlignment: MainAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.max,
+                      mainAxisSize: MainAxisSize.min,
                       children: <Widget>[
                         new Text(
                           '请求时间: ',
@@ -163,7 +166,7 @@ class ManagerToAssign extends StatelessWidget {
     }
 
     return new ListView.builder(
-      padding: const EdgeInsets.all(8.0),
+      padding: const EdgeInsets.all(2.0),
       itemCount: 20,
       itemBuilder: (context, i) => buildCardItem('Philips 781-296 放射科', 'LSRM002020900002 上呼吸道内窥镜EW34-49','无法开机，屏幕闪烁，有异响', '待派工', 'C000000001', '2019-03-22 14:33'),
     );

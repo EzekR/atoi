@@ -52,7 +52,7 @@ class ManagerMenu extends StatelessWidget {
       child: new Column(
         children: <Widget>[
           new Padding(
-            padding: const EdgeInsets.symmetric(vertical: 40.0),
+            padding: const EdgeInsets.symmetric(vertical: 30.0),
             child: new Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: <Widget>[
@@ -72,7 +72,7 @@ class ManagerMenu extends StatelessWidget {
             ),
           ),
           new Padding(
-            padding: const EdgeInsets.symmetric(vertical: 40.0),
+            padding: const EdgeInsets.symmetric(vertical: 30.0),
             child: new Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: <Widget>[
@@ -92,7 +92,7 @@ class ManagerMenu extends StatelessWidget {
             ),
           ),
           new Padding(
-            padding: const EdgeInsets.symmetric(vertical: 40.0),
+            padding: const EdgeInsets.symmetric(vertical: 30.0),
             child: new Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: <Widget>[

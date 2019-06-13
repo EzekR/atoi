@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:atoi/pages/manager/manager_audit_voucher_page.dart';
+import 'package:atoi/pages/manager/manager_audit_report_page.dart';
 
 class ManagerToAudit extends StatelessWidget {
   @override
@@ -86,13 +88,17 @@ class ManagerToAudit extends StatelessWidget {
                       children: <Widget>[
                         IconButton(
                             icon: Icon(Icons.fingerprint),
-                            onPressed: () {},
+                            onPressed: () {
+                                Navigator.of(context).pushNamed(ManagerAuditVoucherPage.tag);
+                            },
                             color: Theme.of(context).accentColor,
                             tooltip: '审核凭证'
                         ),
                         IconButton(
                             icon: Icon(Icons.work),
-                            onPressed: () {},
+                            onPressed: () {
+                                Navigator.of(context).pushNamed(ManagerAuditReportPage.tag);
+                            },
                             color: Theme.of(context).accentColor,
                             tooltip: '审核报告'
                         ),

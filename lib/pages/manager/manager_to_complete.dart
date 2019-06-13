@@ -63,7 +63,7 @@ class ManagerToComplete extends StatelessWidget {
                       mainAxisSize: MainAxisSize.max,
                       children: <Widget>[
                         new Icon(
-                          Icons.assignment_ind,
+                          Icons.thumb_up,
                           color: Colors.deepOrangeAccent,
                           size: 20.0,
                         ),
@@ -165,7 +165,7 @@ class ManagerToComplete extends StatelessWidget {
     return new ListView.builder(
       padding: const EdgeInsets.all(8.0),
       itemCount: 20,
-      itemBuilder: (context, i) => buildCardItem('Philips 781-296 放射科', 'LSRM002020900002 上呼吸道内窥镜EW34-49','无法开机，屏幕闪烁，有异响', '待派工', 'C000000001', '2019-03-22 14:33'),
+      itemBuilder: (context, i) => buildCardItem('Philips 781-296 放射科', 'LSRM002020900002 上呼吸道内窥镜EW34-49','无法开机，屏幕闪烁，有异响', '待完成', 'C000000001', '2019-03-22 14:33'),
     );
   }
 }
