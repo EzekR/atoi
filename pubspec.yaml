@@ -47,6 +47,7 @@ flutter:
     - assets/alucard.jpg
     - assets/atoi.png
     - assets/qm.jpg
+    - assets/mri.jpg
   fonts:
     - family: Nunito
       fonts:

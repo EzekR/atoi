@@ -64,7 +64,7 @@ class _LoginPageState extends State<LoginPage> {
           }
         },
         padding: EdgeInsets.all(12),
-        color: Theme.of(context).accentColor,
+        color: new Color(0xff183dca),
         child: Text('登录', style: TextStyle(color: Colors.white)),
       ),
     );

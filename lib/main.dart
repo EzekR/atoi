@@ -23,8 +23,8 @@ class MyApp extends StatelessWidget {
     return new MaterialApp(
       title: '资产管理系统',
       theme: new ThemeData(
-          primaryColor: new Color(0xff3b4674),
-          accentColor: new Color(0xff2c5c85),
+          primaryColor: new Color(0xff183dca),
+          accentColor: new Color(0xff53b1df),
       ),
       home: new LoginPage(),
       routes: routes,

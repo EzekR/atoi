@@ -158,7 +158,7 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
       controller: new TextEditingController(text: defaultText),
       enabled: isEnabled,
       style: new TextStyle(
-          fontSize: 20.0
+          fontSize: 16.0
       ),
     );
   }
@@ -255,7 +255,7 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
                             padding: EdgeInsets.symmetric(vertical: 5.0),
                             child: new Text('处理方式',
                               style: new TextStyle(
-                                fontSize: 16.0,
+                                fontSize: 14.0,
                                 color: Colors.grey
                               ),
                             ),
@@ -294,7 +294,8 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
                               new Padding(
                                 padding: const EdgeInsets.all(10.0),
                                 child: Image.asset(
-                                  'assets/logo.png',
+                                  'assets/mri.jpg',
+                                  width: 200.0,
                                 ),
                               ),
                             ],
