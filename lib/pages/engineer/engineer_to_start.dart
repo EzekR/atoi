@@ -1,20 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:atoi/pages/manager/manager_assign_page.dart';
 
-class ManagerToAssign extends StatelessWidget {
+class EngineerToStart extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // TODO: implement build
 
     List<Map<String, dynamic>> _tasks = [
-      {"time": "2019-03-21 14:33", "deviceModel": "医用磁共振设备	Philips 781-296", "deviceNo": "ZC00000001", "deviceLocation": "磁共振1室", "subject": "系统报错", "detail": "系统报错，设备无法启动"},
-      {"time": "2019-04-22 9:21", "deviceModel": "医用CT	GE 8080-9527", "deviceNo": "ZC00000022", "deviceLocation": "放射科", "subject": "系统报错", "detail": "无法开机"},
-      {"time": "2019-05-24 19:56", "deviceModel": "医用X光设备 SIEMENZ 781-296", "deviceNo": "ZC00000221", "deviceLocation": "介入科", "subject": "系统报错", "detail": "显示器蓝屏"},
-      {"time": "2019-03-2 14:33", "deviceModel": "医用磁共振设备	Philips 781-296", "deviceNo": "ZC00000001", "deviceLocation": "磁共振1室", "subject": "系统报错", "detail": "系统报错，设备无法启动"},
-      {"time": "2019-03-22 14:33", "deviceModel": "医用磁共振设备	Philips 781-296", "deviceNo": "ZC00000001", "deviceLocation": "磁共振1室", "subject": "系统报错", "detail": "系统报错，设备无法启动"},
+      {"time": "2019-03-21 14:33", "deviceModel": "医用磁共振设备	Philips 781-296", "deviceLocation": "磁共振1室", "category": "系统原因", "detail": "系统报错，设备无法启动", "level": "紧急", "method": "上门服务"},
+      {"time": "2019-03-21 14:33", "deviceModel": "医用磁共振设备	Philips 781-296", "deviceLocation": "磁共振1室", "category": "系统原因", "detail": "系统报错，设备无法启动", "level": "紧急", "method": "上门服务"},
+      {"time": "2019-03-21 14:33", "deviceModel": "医用磁共振设备	Philips 781-296", "deviceLocation": "磁共振1室", "category": "系统原因", "detail": "系统报错，设备无法启动", "level": "紧急", "method": "上门服务"},
+      {"time": "2019-03-21 14:33", "deviceModel": "医用磁共振设备	Philips 781-296", "deviceLocation": "磁共振1室", "category": "系统原因", "detail": "系统报错，设备无法启动", "level": "紧急", "method": "上门服务"},
+      {"time": "2019-03-21 14:33", "deviceModel": "医用磁共振设备	Philips 781-296", "deviceLocation": "磁共振1室", "category": "系统原因", "detail": "系统报错，设备无法启动", "level": "紧急", "method": "上门服务"},
     ];
 
-    Card buildCardItem(String taskNo, String time, String deviceModel, String deviceNo, String deviceLocation, String subject, String detail) {
+    Card buildCardItem(String taskNo, String time, String deviceModel, String deviceLocation, String category, String detail, String level, String method) {
       return new Card(
         child: Column(
           mainAxisSize: MainAxisSize.max,
@@ -22,21 +22,21 @@ class ManagerToAssign extends StatelessWidget {
           children: <Widget>[
             ListTile(
               leading: Icon(
-                  Icons.build,
-                  color: Color(0xff14BD98),
-                  size: 36.0,
+                Icons.build,
+                color: Color(0xff14BD98),
+                size: 36.0,
               ),
               title: Text(
-                  "请求编号：$taskNo",
-                  style: new TextStyle(
+                "派工单号：$taskNo",
+                style: new TextStyle(
                     fontSize: 16.0,
                     color: Theme.of(context).primaryColor
-                  ),
+                ),
               ),
               subtitle: Text(
                 "请求时间：$time",
                 style: new TextStyle(
-                  color: Theme.of(context).accentColor
+                    color: Theme.of(context).accentColor
                 ),
               ),
             ),
@@ -52,31 +52,12 @@ class ManagerToAssign extends StatelessWidget {
                       new Text(
                         '设备型号：',
                         style: new TextStyle(
-                          fontSize: 16.0,
-                          fontWeight: FontWeight.w600
-                        ),
-                      ),
-                      new Text(
-                        deviceModel,
-                        style: new TextStyle(
-                          fontSize: 16.0,
-                          fontWeight: FontWeight.w400,
-                          color: Colors.grey
-                        ),
-                      )
-                    ],
-                  ),
-                  new Row(
-                    children: <Widget>[
-                      new Text(
-                        '设备编号：',
-                        style: new TextStyle(
                             fontSize: 16.0,
                             fontWeight: FontWeight.w600
                         ),
                       ),
                       new Text(
-                        deviceNo,
+                        deviceModel,
                         style: new TextStyle(
                             fontSize: 16.0,
                             fontWeight: FontWeight.w400,
@@ -88,7 +69,7 @@ class ManagerToAssign extends StatelessWidget {
                   new Row(
                     children: <Widget>[
                       new Text(
-                        '安装位置：',
+                        '设备位置：',
                         style: new TextStyle(
                             fontSize: 16.0,
                             fontWeight: FontWeight.w600
@@ -105,18 +86,37 @@ class ManagerToAssign extends StatelessWidget {
                     ],
                   ),
                   new Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.max,
                     children: <Widget>[
                       new Text(
-                        '请求主题：',
+                        '故障分类：',
                         style: new TextStyle(
                             fontSize: 16.0,
                             fontWeight: FontWeight.w600
                         ),
                       ),
                       new Text(
-                        subject,
+                        category,
+                        style: new TextStyle(
+                            fontSize: 16.0,
+                            fontWeight: FontWeight.w400,
+                            color: Colors.grey
+                        ),
+                      )
+                    ],
+                  ),
+                  new Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.max,
+                    children: <Widget>[
+                      new Text(
+                        '故障描述：',
+                        style: new TextStyle(
+                            fontSize: 16.0,
+                            fontWeight: FontWeight.w600
+                        ),
+                      ),
+                      new Text(
+                        detail,
                         style: new TextStyle(
                             fontSize: 16.0,
                             fontWeight: FontWeight.w400,
@@ -128,14 +128,33 @@ class ManagerToAssign extends StatelessWidget {
                   new Row(
                     children: <Widget>[
                       new Text(
-                        '故障详情：',
+                        '紧急程度：',
                         style: new TextStyle(
                             fontSize: 16.0,
                             fontWeight: FontWeight.w600
                         ),
                       ),
                       new Text(
-                        detail,
+                        level,
+                        style: new TextStyle(
+                            fontSize: 16.0,
+                            fontWeight: FontWeight.w400,
+                            color: Colors.grey
+                        ),
+                      ),
+                    ],
+                  ),
+                  new Row(
+                    children: <Widget>[
+                      new Text(
+                        '处理方式：',
+                        style: new TextStyle(
+                            fontSize: 16.0,
+                            fontWeight: FontWeight.w600
+                        ),
+                      ),
+                      new Text(
+                        method,
                         style: new TextStyle(
                             fontSize: 16.0,
                             fontWeight: FontWeight.w400,
@@ -165,7 +184,7 @@ class ManagerToAssign extends StatelessWidget {
                             new Text(
                               '详情',
                               style: new TextStyle(
-                                color: Colors.white
+                                  color: Colors.white
                               ),
                             )
                           ],
@@ -185,11 +204,11 @@ class ManagerToAssign extends StatelessWidget {
                         child: new Row(
                           children: <Widget>[
                             new Icon(
-                              Icons.cancel,
+                              Icons.play_arrow,
                               color: Colors.white,
                             ),
                             new Text(
-                              '取消',
+                              '开始作业',
                               style: new TextStyle(
                                   color: Colors.white
                               ),
@@ -210,7 +229,7 @@ class ManagerToAssign extends StatelessWidget {
     return new ListView.builder(
       padding: const EdgeInsets.all(2.0),
       itemCount: 5,
-      itemBuilder: (context, i) => buildCardItem('C00000000$i', _tasks[i]['time'], _tasks[i]['deviceModel'], _tasks[i]['deviceNo'], _tasks[i]['deviceLocation'], _tasks[i]['subject'], _tasks[i]['detail']),
+      itemBuilder: (context, i) => buildCardItem('PGD0000000$i', _tasks[i]['time'], _tasks[i]['deviceModel'], _tasks[i]['deviceLocation'], _tasks[i]['category'], _tasks[i]['detail'], _tasks[i]['level'], _tasks[i]["method"]),
     );
   }
 }

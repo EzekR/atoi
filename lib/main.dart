@@ -5,6 +5,7 @@ import 'package:atoi/pages/manager/manager_assign_page.dart';
 import 'package:atoi/pages/manager/manager_audit_voucher_page.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:atoi/pages/manager/manager_audit_report_page.dart';
+import 'package:atoi/engineer_home_page.dart';
 
 
 void main() => runApp(new MyApp());
@@ -13,6 +14,7 @@ class MyApp extends StatelessWidget {
   final routes = <String, WidgetBuilder>{
     LoginPage.tag: (context) => LoginPage(),
     HomePage.tag: (context) => HomePage(),
+    EngineerHomePage.tag: (context) => EngineerHomePage(),
     ManagerAssignPage.tag: (context) => ManagerAssignPage(),
     ManagerAuditVoucherPage.tag: (context) => ManagerAuditVoucherPage(),
     ManagerAuditReportPage.tag: (context) => ManagerAuditReportPage()
@@ -21,10 +23,10 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return new MaterialApp(
-      title: '资产管理系统',
+      title: 'ATOI医疗设备管理系统',
       theme: new ThemeData(
-          primaryColor: new Color(0xff183dca),
-          accentColor: new Color(0xff53b1df),
+          primaryColor: new Color(0xff3b4674),
+          accentColor: new Color(0xff2c5c85),
       ),
       home: new LoginPage(),
       routes: routes,

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:atoi/pages/manager/manager_menu.dart';
 import 'package:atoi/pages/manager/manager_to_assign.dart';
-import 'package:atoi/pages/manager/manager_to_audit.dart';
+import 'package:atoi/pages/manager/manager_to_audit_page.dart';
 import 'package:atoi/pages/manager/manager_to_complete.dart';
 import 'package:badges/badges.dart';
 
@@ -26,7 +26,7 @@ class _HomePageState extends State<HomePage>
   Widget build(BuildContext context) {
     return new Scaffold(
       appBar: new AppBar(
-        title: new Text('资产管理系统'),
+        title: new Text('ATOI医疗设备管理系统'),
         elevation: 0.7,
         flexibleSpace: Container(
           decoration: BoxDecoration(
@@ -99,7 +99,7 @@ class _HomePageState extends State<HomePage>
         children: <Widget>[
           new ManagerMenu(),
           new ManagerToAssign(),
-          new ManagerToAudit(),
+          new ManagerToAuditPage(),
           new ManagerToComplete()
         ],
       )

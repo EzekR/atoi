@@ -6,7 +6,7 @@ class ManagerMenu extends StatelessWidget {
     // TODO: implement build
 
     Column buildIconColumn(IconData icon, String label) {
-      Color color = new Color(0xff4597da);
+      Color color = Theme.of(context).primaryColor;
 
       return new Column(
         mainAxisSize: MainAxisSize.values[1],

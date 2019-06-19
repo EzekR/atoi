@@ -405,8 +405,8 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
                 mainAxisSize: MainAxisSize.max,
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: <Widget>[
-                  new Expanded(
-                    flex: 4,
+                  new Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 5.0),
                     child: new RaisedButton(
                       onPressed: () {
                         showDialog(
@@ -424,8 +424,8 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
                       child: Text('安排派工', style: TextStyle(color: Colors.white)),
                     ),
                   ),
-                  new Expanded(
-                    flex: 4,
+                  new Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 5.0),
                     child: new RaisedButton(
                       onPressed: () {
                         showDialog(
