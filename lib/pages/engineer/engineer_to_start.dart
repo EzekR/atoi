@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:atoi/pages/manager/manager_assign_page.dart';
+import 'package:atoi/pages/engineer/engineer_start_page.dart';
 
 class EngineerToStart extends StatelessWidget {
   @override
@@ -169,7 +169,7 @@ class EngineerToStart extends StatelessWidget {
                     children: <Widget>[
                       new RaisedButton(
                         onPressed: (){
-                          Navigator.of(context).pushNamed(ManagerAssignPage.tag);
+                          Navigator.of(context).pushNamed(EngineerStartPage.tag);
                         },
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(24),
@@ -195,7 +195,12 @@ class EngineerToStart extends StatelessWidget {
                       ),
                       new RaisedButton(
                         onPressed: (){
-                          return null;
+                          showDialog(
+                            context: context,
+                            builder: (context) => AlertDialog(
+                              title: Text('开始作业！'),
+                            )
+                          );
                         },
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(24),

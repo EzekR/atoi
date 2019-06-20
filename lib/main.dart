@@ -6,6 +6,8 @@ import 'package:atoi/pages/manager/manager_audit_voucher_page.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:atoi/pages/manager/manager_audit_report_page.dart';
 import 'package:atoi/engineer_home_page.dart';
+import 'package:atoi/pages/engineer/engineer_start_page.dart';
+import 'package:atoi/pages/engineer/engineer_voucher_page.dart';
 
 
 void main() => runApp(new MyApp());
@@ -17,7 +19,9 @@ class MyApp extends StatelessWidget {
     EngineerHomePage.tag: (context) => EngineerHomePage(),
     ManagerAssignPage.tag: (context) => ManagerAssignPage(),
     ManagerAuditVoucherPage.tag: (context) => ManagerAuditVoucherPage(),
-    ManagerAuditReportPage.tag: (context) => ManagerAuditReportPage()
+    ManagerAuditReportPage.tag: (context) => ManagerAuditReportPage(),
+    EngineerStartPage.tag: (context) => EngineerStartPage(),
+    EngineerVoucherPage.tag: (context) => EngineerVoucherPage()
   };
 
   @override
