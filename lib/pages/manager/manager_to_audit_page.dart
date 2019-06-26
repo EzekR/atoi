@@ -182,7 +182,7 @@ class ManagerToAuditPage extends StatelessWidget {
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(24),
                         ),
-                        color: new Color(0xffD25565),
+                        color: new Color(0xff2E94B9),
                         child: new Row(
                           children: <Widget>[
                             new Icon(
@@ -210,7 +210,7 @@ class ManagerToAuditPage extends StatelessWidget {
 
     return new ListView.builder(
       padding: const EdgeInsets.all(2.0),
-      itemCount: 20,
+      itemCount: 5,
       itemBuilder: (context, i) => buildCardItem('PGD0000000$i', _reports[i]['time'], _reports[i]['deviceModel'], _reports[i]['deviceNo'], _reports[i]['engineer'], _reports[i]['client'], _reports[i]['content']),
     );
   }

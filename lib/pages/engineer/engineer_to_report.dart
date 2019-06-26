@@ -1,20 +1,21 @@
 import 'package:flutter/material.dart';
-import 'package:atoi/pages/engineer/engineer_start_page.dart';
+import 'package:atoi/pages/engineer/engineer_voucher_page.dart';
+import 'package:atoi/pages/engineer/engineer_report_page.dart';
 
-class EngineerToStart extends StatelessWidget {
+class EngineerToReport extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // TODO: implement build
 
-    List<Map<String, dynamic>> _tasks = [
-      {"time": "2019-03-21 14:33", "deviceModel": "医用磁共振设备	Philips 781-296", "deviceLocation": "磁共振1室", "category": "系统原因", "detail": "系统报错，设备无法启动", "level": "紧急", "method": "上门服务"},
-      {"time": "2019-03-21 14:33", "deviceModel": "医用磁共振设备	Philips 781-296", "deviceLocation": "磁共振1室", "category": "系统原因", "detail": "系统报错，设备无法启动", "level": "紧急", "method": "上门服务"},
-      {"time": "2019-03-21 14:33", "deviceModel": "医用磁共振设备	Philips 781-296", "deviceLocation": "磁共振1室", "category": "系统原因", "detail": "系统报错，设备无法启动", "level": "紧急", "method": "上门服务"},
-      {"time": "2019-03-21 14:33", "deviceModel": "医用磁共振设备	Philips 781-296", "deviceLocation": "磁共振1室", "category": "系统原因", "detail": "系统报错，设备无法启动", "level": "紧急", "method": "上门服务"},
-      {"time": "2019-03-21 14:33", "deviceModel": "医用磁共振设备	Philips 781-296", "deviceLocation": "磁共振1室", "category": "系统原因", "detail": "系统报错，设备无法启动", "level": "紧急", "method": "上门服务"},
+    List<Map<String, String>> _reports = [
+      {"time": "2019-03-21 14:33", "deviceModel": "医用磁共振设备	Philips 781-296", "deviceNo": "ZC00000001", "location": "放射科", "client": "李老师", "content": "监督外部供应商更换球馆"},
+      {"time": "2019-04-22 14:33", "deviceModel": "医用CT	GE 8080-9527", "deviceNo": "ZC00000022", "location": "放射科", "client": "王老师", "content": "更换显示器线"},
+      {"time": "2019-05-24 14:33", "deviceModel": "医用X光设备 SIEMENZ 781-296", "deviceNo": "ZC00000221", "location": "放射科", "client": "罗老师", "content": "重启系统"},
+      {"time": "2019-03-2 14:33", "deviceModel": "医用磁共振设备	Philips 781-296", "deviceNo": "ZC00000001", "location": "放射科", "client": "赵老师", "content": "系统报错，设备无法启动"},
+      {"time": "2019-03-22 14:33", "deviceModel": "医用磁共振设备	Philips 781-296", "deviceNo": "ZC00000001", "location": "放射科", "client": "系统报错", "content": "系统报错，设备无法启动"},
     ];
 
-    Card buildCardItem(String taskNo, String time, String deviceModel, String deviceLocation, String category, String detail, String level, String method) {
+    Card buildCardItem(String title, String subtitle, String deviceModel, String deviceNo, String location, String client, String content) {
       return new Card(
         child: Column(
           mainAxisSize: MainAxisSize.max,
@@ -22,19 +23,19 @@ class EngineerToStart extends StatelessWidget {
           children: <Widget>[
             ListTile(
               leading: Icon(
-                Icons.build,
+                Icons.visibility,
                 color: Color(0xff14BD98),
-                size: 36.0,
+                size: 40.0,
               ),
               title: Text(
-                "派工单号：$taskNo",
+                "派工单号：$title",
                 style: new TextStyle(
                     fontSize: 16.0,
                     color: Theme.of(context).primaryColor
                 ),
               ),
               subtitle: Text(
-                "请求时间：$time",
+                "出发时间：$subtitle",
                 style: new TextStyle(
                     color: Theme.of(context).accentColor
                 ),
@@ -69,14 +70,14 @@ class EngineerToStart extends StatelessWidget {
                   new Row(
                     children: <Widget>[
                       new Text(
-                        '设备位置：',
+                        '设备编号：',
                         style: new TextStyle(
                             fontSize: 16.0,
                             fontWeight: FontWeight.w600
                         ),
                       ),
                       new Text(
-                        deviceLocation,
+                        deviceNo,
                         style: new TextStyle(
                             fontSize: 16.0,
                             fontWeight: FontWeight.w400,
@@ -88,14 +89,14 @@ class EngineerToStart extends StatelessWidget {
                   new Row(
                     children: <Widget>[
                       new Text(
-                        '故障分类：',
+                        '安装位置：',
                         style: new TextStyle(
                             fontSize: 16.0,
                             fontWeight: FontWeight.w600
                         ),
                       ),
                       new Text(
-                        category,
+                        location,
                         style: new TextStyle(
                             fontSize: 16.0,
                             fontWeight: FontWeight.w400,
@@ -109,14 +110,14 @@ class EngineerToStart extends StatelessWidget {
                     mainAxisSize: MainAxisSize.max,
                     children: <Widget>[
                       new Text(
-                        '故障描述：',
+                        '客户姓名：',
                         style: new TextStyle(
                             fontSize: 16.0,
                             fontWeight: FontWeight.w600
                         ),
                       ),
                       new Text(
-                        detail,
+                        client,
                         style: new TextStyle(
                             fontSize: 16.0,
                             fontWeight: FontWeight.w400,
@@ -128,33 +129,14 @@ class EngineerToStart extends StatelessWidget {
                   new Row(
                     children: <Widget>[
                       new Text(
-                        '紧急程度：',
+                        '工作内容：',
                         style: new TextStyle(
                             fontSize: 16.0,
                             fontWeight: FontWeight.w600
                         ),
                       ),
                       new Text(
-                        level,
-                        style: new TextStyle(
-                            fontSize: 16.0,
-                            fontWeight: FontWeight.w400,
-                            color: Colors.grey
-                        ),
-                      ),
-                    ],
-                  ),
-                  new Row(
-                    children: <Widget>[
-                      new Text(
-                        '处理方式：',
-                        style: new TextStyle(
-                            fontSize: 16.0,
-                            fontWeight: FontWeight.w600
-                        ),
-                      ),
-                      new Text(
-                        method,
+                        content,
                         style: new TextStyle(
                             fontSize: 16.0,
                             fontWeight: FontWeight.w400,
@@ -169,7 +151,7 @@ class EngineerToStart extends StatelessWidget {
                     children: <Widget>[
                       new RaisedButton(
                         onPressed: (){
-                          Navigator.of(context).pushNamed(EngineerStartPage.tag);
+                          Navigator.of(context).pushNamed(EngineerVoucherPage.tag);
                         },
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(24),
@@ -178,11 +160,37 @@ class EngineerToStart extends StatelessWidget {
                         child: new Row(
                           children: <Widget>[
                             new Icon(
-                              Icons.play_arrow,
+                              Icons.fingerprint,
                               color: Colors.white,
                             ),
                             new Text(
-                              '开始作业',
+                              '凭证',
+                              style: new TextStyle(
+                                  color: Colors.white
+                              ),
+                            )
+                          ],
+                        ),
+                      ),
+                      new Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 5.0),
+                      ),
+                      new RaisedButton(
+                        onPressed: (){
+                          Navigator.of(context).pushNamed(EngineerReportPage.tag);
+                        },
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(24),
+                        ),
+                        color: new Color(0xff2E94B9),
+                        child: new Row(
+                          children: <Widget>[
+                            new Icon(
+                              Icons.work,
+                              color: Colors.white,
+                            ),
+                            new Text(
+                              '报告',
                               style: new TextStyle(
                                   color: Colors.white
                               ),
@@ -203,7 +211,7 @@ class EngineerToStart extends StatelessWidget {
     return new ListView.builder(
       padding: const EdgeInsets.all(2.0),
       itemCount: 5,
-      itemBuilder: (context, i) => buildCardItem('PGD0000000$i', _tasks[i]['time'], _tasks[i]['deviceModel'], _tasks[i]['deviceLocation'], _tasks[i]['category'], _tasks[i]['detail'], _tasks[i]['level'], _tasks[i]["method"]),
+      itemBuilder: (context, i) => buildCardItem('PGD0000000$i', _reports[i]['time'], _reports[i]['deviceModel'], _reports[i]['deviceNo'], _reports[i]['location'], _reports[i]['client'], _reports[i]['content']),
     );
   }
 }

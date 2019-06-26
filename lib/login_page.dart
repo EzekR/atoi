@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:atoi/home_page.dart';
 import 'package:atoi/engineer_home_page.dart';
+import 'package:atoi/user_home_page.dart';
 
 class LoginPage extends StatefulWidget {
   static String tag = 'login-page';
@@ -58,6 +59,8 @@ class _LoginPageState extends State<LoginPage> {
           } else {
             if (phoneController.text == '2') {
               Navigator.of(context).pushNamed(EngineerHomePage.tag);
+            } else {
+              Navigator.of(context).pushNamed(UserHomePage.tag);
             }
           }
         },

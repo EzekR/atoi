@@ -10,9 +10,9 @@ class EngineerStartPage extends StatefulWidget {
 
 class _EngineerStartPageState extends State<EngineerStartPage> {
 
-  var _isExpandedBasic = true;
+  var _isExpandedBasic = false;
   var _isExpandedDetail = false;
-  var _isExpandedAssign = false;
+  var _isExpandedAssign = true;
 
   void initState() {
     super.initState();
@@ -40,6 +40,37 @@ class _EngineerStartPageState extends State<EngineerStartPage> {
     );
   }
 
+  Padding buildRow(String labelText, String defaultText) {
+    return new Padding(
+      padding: EdgeInsets.symmetric(vertical: 5.0),
+      child: new Row(
+        children: <Widget>[
+          new Expanded(
+            flex: 4,
+            child: new Text(
+              labelText,
+              style: new TextStyle(
+                  fontSize: 20.0,
+                  fontWeight: FontWeight.w600
+              ),
+            ),
+          ),
+          new Expanded(
+            flex: 6,
+            child: new Text(
+              defaultText,
+              style: new TextStyle(
+                  fontSize: 20.0,
+                  fontWeight: FontWeight.w400,
+                  color: Colors.black54
+              ),
+            ),
+          )
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context){
     return new Scaffold(
@@ -62,7 +93,7 @@ class _EngineerStartPageState extends State<EngineerStartPage> {
           new Icon(Icons.face),
           new Padding(
             padding: const EdgeInsets.symmetric(horizontal: 5.0, vertical: 19.0),
-            child: const Text('Jin'),
+            child: const Text('武田信玄'),
           ),
         ],
       ),
@@ -90,21 +121,32 @@ class _EngineerStartPageState extends State<EngineerStartPage> {
                   new ExpansionPanel(
                     headerBuilder: (context, isExpanded) {
                       return ListTile(
-                          title: Text('设备基本信息')
+                          leading: new Icon(
+                            Icons.info,
+                            size: 24.0,
+                            color: Colors.blue,
+                          ),
+                          title: Text(
+                              '设备基本信息',
+                              style: new TextStyle(
+                                fontSize: 22.0,
+                                fontWeight: FontWeight.w400
+                              ),
+                          )
                       );
                     },
                     body: new Padding(
                       padding: EdgeInsets.symmetric(horizontal: 8.0),
                       child: new Column(
                         children: <Widget>[
-                          buildTextField('设备系统编号', 'ZC00000001', false),
-                          buildTextField('设备名称', '医用磁共振设备', false),
-                          buildTextField('使用科室', '磁共振', false),
-                          buildTextField('设备厂商', '飞利浦', false),
-                          buildTextField('资产等级', '重要', false),
-                          buildTextField('设备型号', 'Philips 781-296', false),
-                          buildTextField('安装地点', '磁共振1室', false),
-                          buildTextField('保修状况', '保内', false),
+                          buildRow('设备系统编号：', 'ZC00000001'),
+                          buildRow('设备名称：', '医用磁共振设备'),
+                          buildRow('使用科室：', '磁共振'),
+                          buildRow('设备厂商：', '飞利浦'),
+                          buildRow('资产等级：', '重要'),
+                          buildRow('设备型号：', 'Philips 781-296'),
+                          buildRow('安装地点：', '磁共振1室'),
+                          buildRow('保修状况：', '保内'),
                         ],
                       ),
                     ),
@@ -113,7 +155,18 @@ class _EngineerStartPageState extends State<EngineerStartPage> {
                   new ExpansionPanel(
                     headerBuilder: (context, isExpanded) {
                       return ListTile(
-                          title: Text('请求内容')
+                          leading: new Icon(
+                            Icons.description,
+                            size: 24.0,
+                            color: Colors.blue,
+                          ),
+                          title: new Text(
+                            '请求内容',
+                            style: new TextStyle(
+                              fontWeight: FontWeight.w400,
+                              fontSize: 22.0
+                            ),
+                          )
                       );
                     },
                     body: new Padding(
@@ -123,13 +176,13 @@ class _EngineerStartPageState extends State<EngineerStartPage> {
                         mainAxisSize: MainAxisSize.max,
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: <Widget>[
-                          buildTextField('类型', '客户请求-报修', false),
-                          buildTextField('主题', '系统报错', false),
-                          buildTextField('故障描述', '系统报错，设备无法启动', false),
-                          buildTextField('故障分类', '未知', false),
-                          buildTextField('请求人', '马云', false),
-                          buildTextField('处理方式', '现场处理', false),
-                          buildTextField('优先级', '中', false),
+                          buildRow('类型：', '客户请求-报修'),
+                          buildRow('主题：', '系统报错'),
+                          buildRow('故障描述：', '系统报错，设备无法启动'),
+                          buildRow('故障分类：', '未知'),
+                          buildRow('请求人：', '马云'),
+                          buildRow('处理方式：', '现场处理'),
+                          buildRow('优先级：', '中'),
                           new Padding(
                             padding: EdgeInsets.symmetric(vertical: 5.0),
                             child: new Text('请求附件',
@@ -159,7 +212,18 @@ class _EngineerStartPageState extends State<EngineerStartPage> {
                   new ExpansionPanel(
                     headerBuilder: (context, isExpanded) {
                       return ListTile(
-                        title: Text('派工内容'),
+                        leading: new Icon(
+                          Icons.perm_contact_calendar,
+                          size: 24.0,
+                          color: Colors.blue,
+                        ),
+                        title: Text(
+                            '派工内容',
+                            style: new TextStyle(
+                              fontSize: 22.0,
+                              fontWeight: FontWeight.w400
+                            ),
+                        ),
                         subtitle: Text('编号:PGD00000001'),
                       );
                     },
@@ -170,12 +234,12 @@ class _EngineerStartPageState extends State<EngineerStartPage> {
                         mainAxisSize: MainAxisSize.max,
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: <Widget>[
-                          buildTextField('派工类型', '维修', false),
-                          buildTextField('紧急程度', '普通', false),
-                          buildTextField('机器状态', '正常', false),
-                          buildTextField('工程师', '张三', false),
-                          buildTextField('主管备注', '请立即解决', false),
-                          buildTextField('出发日期', '2019年6月20日14点', false),
+                          buildRow('派工类型：', '维修'),
+                          buildRow('紧急程度：', '普通'),
+                          buildRow('机器状态：', '正常'),
+                          buildRow('工程师：', '张三'),
+                          buildRow('主管备注：', '请立即解决'),
+                          buildRow('出发日期：', '2019年6月20日14点'),
                         ],
                       ),
                     ),
@@ -189,30 +253,27 @@ class _EngineerStartPageState extends State<EngineerStartPage> {
                 mainAxisSize: MainAxisSize.max,
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: <Widget>[
-                  new Expanded(
-                    flex: 5,
-                    child: new RaisedButton(
-                      onPressed: () {
-                        showDialog(
-                            context: context,
-                            builder: (context) => AlertDialog(
-                              title: Text('开始作业'),
-                            )
-                        );
-                      },
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(24),
-                      ),
-                      padding: EdgeInsets.all(12.0),
-                      color: new Color(0xfffd5f00),
-                      child: Text(
-                          '开始作业',
-                          style: TextStyle(
-                            color: Colors.white
+                  new RaisedButton(
+                    onPressed: () {
+                      showDialog(
+                          context: context,
+                          builder: (context) => AlertDialog(
+                            title: Text('开始作业'),
                           )
-                      ),
+                      );
+                    },
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(24),
                     ),
-                  ),
+                    padding: EdgeInsets.all(12.0),
+                    color: Colors.indigo,
+                    child: Text(
+                        '开始作业',
+                        style: TextStyle(
+                            color: Colors.white
+                        )
+                    ),
+                  )
                 ],
               )
             ],

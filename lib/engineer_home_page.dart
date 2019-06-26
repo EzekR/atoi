@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:atoi/pages/manager/manager_menu.dart';
-import 'package:atoi/pages/manager/manager_to_audit_page.dart';
+import 'package:atoi/pages/engineer/engineer_menu.dart';
+import 'package:atoi/pages/engineer/engineer_to_report.dart';
 import 'package:badges/badges.dart';
 import 'package:atoi/pages/engineer/engineer_to_start.dart';
 
@@ -25,7 +25,15 @@ class _EngineerHomePageState extends State<EngineerHomePage>
   Widget build(BuildContext context) {
     return new Scaffold(
         appBar: new AppBar(
-          title: new Text('ATOI医疗设备管理系统'),
+//          title: new Align(
+//            alignment: Alignment(-3.0, 0),
+//            child: new Text('ATOI医疗设备管理系统'),
+//          ),
+          leading: new Container(),
+          title: new Align(
+            alignment: Alignment(-4.0, 0),
+            child: new Text('ATOI医疗设备管理系统'),
+          ),
           elevation: 0.7,
           flexibleSpace: Container(
             decoration: BoxDecoration(
@@ -77,7 +85,7 @@ class _EngineerHomePageState extends State<EngineerHomePage>
             new Icon(Icons.face),
             new Padding(
               padding: const EdgeInsets.symmetric(horizontal: 5.0, vertical: 19.0),
-              child: const Text('Jin'),
+              child: const Text('武田信玄'),
             ),
           ],
         ),
@@ -85,8 +93,8 @@ class _EngineerHomePageState extends State<EngineerHomePage>
           controller: _tabController,
           children: <Widget>[
             new EngineerToStart(),
-            new ManagerToAuditPage(),
-            new ManagerMenu(),
+            new EngineerToReport(),
+            new EngineerMenu(),
           ],
         )
     );

@@ -26,12 +26,27 @@ class ManagerToAssign extends StatelessWidget {
                   color: Color(0xff14BD98),
                   size: 36.0,
               ),
-              title: Text(
-                  "请求编号：$taskNo",
-                  style: new TextStyle(
-                    fontSize: 16.0,
-                    color: Theme.of(context).primaryColor
+              title: new Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: <Widget>[
+                  Text(
+                    "请求编号：",
+                    style: new TextStyle(
+                        fontSize: 18.0,
+                        color: Theme.of(context).primaryColor,
+                        fontWeight: FontWeight.w500
+                    ),
                   ),
+                  Text(
+                    taskNo,
+                    style: new TextStyle(
+                      fontSize: 18.0,
+                      color: Colors.red,
+                      //color: new Color(0xffD25565),
+                      fontWeight: FontWeight.w400
+                    ),
+                  )
+                ],
               ),
               subtitle: Text(
                 "请求时间：$time",
@@ -155,7 +170,7 @@ class ManagerToAssign extends StatelessWidget {
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(24),
                         ),
-                        color: new Color(0xff005792),
+                        color: new Color(0xff2E94B9),
                         child: new Row(
                           children: <Widget>[
                             new Icon(
@@ -163,7 +178,7 @@ class ManagerToAssign extends StatelessWidget {
                               color: Colors.white,
                             ),
                             new Text(
-                              '详情',
+                              '派工',
                               style: new TextStyle(
                                 color: Colors.white
                               ),
@@ -181,7 +196,7 @@ class ManagerToAssign extends StatelessWidget {
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(24),
                         ),
-                        color: new Color(0xfffd5f00),
+                        color: new Color(0xffD25565),
                         child: new Row(
                           children: <Widget>[
                             new Icon(

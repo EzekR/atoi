@@ -1,6 +1,5 @@
-
 import 'package:flutter/material.dart';
-import 'package:atoi/pages/manager/manager_assign_page.dart';
+import 'package:atoi/pages/manager/manager_complete_page.dart';
 
 class ManagerToComplete extends StatelessWidget {
   @override
@@ -151,7 +150,7 @@ class ManagerToComplete extends StatelessWidget {
                     children: <Widget>[
                       new RaisedButton(
                         onPressed: (){
-                          Navigator.of(context).pushNamed(ManagerAssignPage.tag);
+                          Navigator.of(context).pushNamed(ManagerCompletePage.tag);
                         },
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(24),
@@ -164,7 +163,7 @@ class ManagerToComplete extends StatelessWidget {
                               color: Colors.white,
                             ),
                             new Text(
-                              '更新请求',
+                              '查看详情',
                               style: new TextStyle(
                                   color: Colors.white
                               ),
@@ -177,142 +176,6 @@ class ManagerToComplete extends StatelessWidget {
                 ],
               ),
             )
-            //new Padding(
-            //  padding: EdgeInsets.symmetric(vertical: 5.0),
-            //  child: new Row(
-            //    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            //    children: <Widget>[
-            //      Expanded(
-            //        flex: 4,
-            //        child: new Column(
-            //          mainAxisAlignment: MainAxisAlignment.center,
-            //          mainAxisSize: MainAxisSize.max,
-            //          children: <Widget>[
-            //            new Text(
-            //              '故障描述',
-            //              style: new TextStyle(
-            //                color: Colors.black,
-            //                fontSize: 16.0,
-            //                fontWeight: FontWeight.w600
-            //              ),
-            //            ),
-            //            new Padding(
-            //              padding: EdgeInsets.symmetric(horizontal: 0.0),
-            //              child: new Text(
-            //                  describe,
-            //                  style: new TextStyle(
-            //                    color: Colors.grey,
-            //                    fontSize: 12.0,
-            //                    fontWeight: FontWeight.w400,
-            //                  )
-            //              )
-            //            )
-            //          ],
-            //        ),
-            //      ),
-            //      Expanded(
-            //        flex: 3,
-            //        child: new Column(
-            //          mainAxisAlignment: MainAxisAlignment.center,
-            //          mainAxisSize: MainAxisSize.max,
-            //          children: <Widget>[
-            //            new Icon(
-            //              Icons.assignment_ind,
-            //              color: Colors.deepOrangeAccent,
-            //              size: 20.0,
-            //            ),
-            //            Text(
-            //              status,
-            //              style: new TextStyle(
-            //                fontSize: 14.0,
-            //                color: Colors.black,
-            //                fontWeight: FontWeight.w400
-            //              ),
-            //            )
-            //          ],
-            //        ),
-            //      ),
-            //      Expanded(
-            //        flex: 4,
-            //        child: new Column(
-            //          mainAxisAlignment: MainAxisAlignment.center,
-            //          mainAxisSize: MainAxisSize.max,
-            //          children: <Widget>[
-            //            new RaisedButton(
-            //              onPressed: () {
-            //                Navigator.of(context).pushNamed(ManagerAssignPage.tag);
-            //              },
-            //              textColor: Colors.white,
-            //              color: Theme.of(context).accentColor,
-            //              shape: new RoundedRectangleBorder(borderRadius: new BorderRadius.circular(30.0)),
-            //              child: Text(
-            //                '安排派工'
-            //              ),
-            //            )
-            //          ],
-            //        ),
-            //      )
-            //    ],
-            //  ),
-            //),
-            //new Padding(
-            //  padding: EdgeInsets.symmetric(vertical: 5.0),
-            //  child: new Row(
-            //    mainAxisAlignment: MainAxisAlignment.center,
-            //    mainAxisSize: MainAxisSize.max,
-            //    children: <Widget>[
-            //      Expanded(
-            //        flex: 5,
-            //        child: new Row(
-            //          mainAxisSize: MainAxisSize.min,
-            //          mainAxisAlignment: MainAxisAlignment.start,
-            //          children: <Widget>[
-            //            new Padding(
-            //              padding: EdgeInsets.symmetric(horizontal: 2.0),
-            //            ),
-            //            new Text(
-            //              '请求编号: ',
-            //              style: new TextStyle(
-            //                color: Colors.black,
-            //                fontSize: 14.0
-            //              )
-            //            ),
-            //            new Text(
-            //              requestNo,
-            //              style: new TextStyle(
-            //                color: Colors.blue,
-            //                fontSize: 14.0
-            //              ),
-            //            )
-            //          ],
-            //        ),
-            //      ),
-            //      Expanded(
-            //        flex: 5,
-            //        child: new Row(
-            //          mainAxisAlignment: MainAxisAlignment.start,
-            //          mainAxisSize: MainAxisSize.min,
-            //          children: <Widget>[
-            //            new Text(
-            //              '请求时间: ',
-            //              style: new TextStyle(
-            //                color: Colors.black,
-            //                fontSize: 14.0
-            //              ),
-            //            ),
-            //            new Text(
-            //              requestTime,
-            //              style: new TextStyle(
-            //                color: Colors.blue,
-            //                fontSize: 14.0
-            //              ),
-            //            )
-            //          ],
-            //        ),
-            //      )
-            //    ],
-            //  ),
-            //)
           ],
         ),
       );

@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 
-class ManagerAssignPage extends StatefulWidget {
-  static String tag = 'mananger-assign-page';
+class ManagerCompletePage extends StatefulWidget {
+  static String tag = 'mananger-complete-page';
 
   @override
-  _ManagerAssignPageState createState() => new _ManagerAssignPageState();
+  _ManagerCompletePageState createState() => new _ManagerCompletePageState();
 
 }
 
-class _ManagerAssignPageState extends State<ManagerAssignPage> {
+class _ManagerCompletePageState extends State<ManagerCompletePage> {
 
   var _isExpandedBasic = true;
   var _isExpandedDetail = false;
@@ -43,7 +43,7 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
   ];
 
   List _levels = [
-    '普通  ',
+    '普通',
     '紧急',
     '特急'
   ];
@@ -55,7 +55,7 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
   ];
 
   List _engineerNames = [
-    '张三  ',
+    '张三',
     '李四'
   ];
 
@@ -97,7 +97,7 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
           value: method,
           child: new Text(method,
             style: new TextStyle(
-              fontSize: 20.0
+                fontSize: 20.0
             ),
           )
       ));
@@ -149,10 +149,10 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
               fontSize: 20.0
           ),
           disabledBorder: UnderlineInputBorder(
-            borderSide: BorderSide(
-              color: Colors.grey,
-              width: 1
-            )
+              borderSide: BorderSide(
+                  color: Colors.grey,
+                  width: 1
+              )
           )
       ),
       controller: new TextEditingController(text: defaultText),
@@ -168,58 +168,23 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
       padding: EdgeInsets.symmetric(vertical: 5.0),
       child: new Row(
         children: <Widget>[
-          new Expanded(
-            flex: 4,
-            child: new Text(
-              labelText,
-              style: new TextStyle(
-                  fontSize: 20.0,
-                  fontWeight: FontWeight.w600
-              ),
+          new Text(
+            labelText,
+            style: new TextStyle(
+                fontSize: 20.0,
+                fontWeight: FontWeight.w600
             ),
           ),
-          new Expanded(
-            flex: 6,
-            child: new Text(
-              defaultText,
-              style: new TextStyle(
-                  fontSize: 20.0,
-                  fontWeight: FontWeight.w400,
-                  color: Colors.black54
-              ),
+          new Text(
+            defaultText,
+            style: new TextStyle(
+                fontSize: 20.0,
+                fontWeight: FontWeight.w400,
+                color: Colors.black54
             ),
-          )
+          ),
         ],
       ),
-    );
-  }
-
-  Row buildDropdown(String title, String currentItem, List dropdownItems, Function changeDropdown) {
-    return new Row(
-      mainAxisAlignment: MainAxisAlignment.start,
-      children: <Widget>[
-        new Expanded(
-          flex: 4,
-          child: new Padding(
-            padding: EdgeInsets.symmetric(vertical: 5.0),
-            child: new Text(
-              title,
-              style: new TextStyle(
-                  fontSize: 20.0,
-                  fontWeight: FontWeight.w600
-              ),
-            ),
-          ),
-        ),
-        new Expanded(
-          flex: 6,
-          child: new DropdownButton(
-            value: currentItem,
-            items: dropdownItems,
-            onChanged: changeDropdown,
-          ),
-        )
-      ],
     );
   }
 
@@ -271,40 +236,40 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
                 },
                 children: [
                   new ExpansionPanel(
-                      headerBuilder: (context, isExpanded) {
-                        return ListTile(
+                    headerBuilder: (context, isExpanded) {
+                      return ListTile(
                           leading: new Icon(Icons.info,
                             size: 24.0,
                             color: Colors.blue,
                           ),
                           title: new Align(
-                            child: Text('设备基本信息',
-                              style: new TextStyle(
-                                  fontSize: 22.0,
-                                  fontWeight: FontWeight.w400
+                              child: Text('设备基本信息',
+                                style: new TextStyle(
+                                    fontSize: 22.0,
+                                    fontWeight: FontWeight.w400
+                                ),
                               ),
-                            ),
-                            alignment: Alignment(-1.4, 0)
+                              alignment: Alignment(-1.4, 0)
                           )
-                        );
-                      },
-                      body: new Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 12.0),
-                        child: new Column(
-                          children: <Widget>[
-                            buildRow('设备编号：', 'ZC00000001'),
-                            buildRow('设备名称：', '医用磁共振设备'),
-                            buildRow('使用科室：', '磁共振'),
-                            buildRow('设备厂商：', '飞利浦'),
-                            buildRow('资产等级：', '重要'),
-                            buildRow('设备型号：', 'Philips 781-296'),
-                            buildRow('安装地点：', '磁共振1室'),
-                            buildRow('保修状况：', '保内'),
-                            new Padding(padding: EdgeInsets.symmetric(vertical: 8.0))
-                          ],
-                        ),
+                      );
+                    },
+                    body: new Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 12.0),
+                      child: new Column(
+                        children: <Widget>[
+                          buildRow('设备编号：', 'ZC00000001'),
+                          buildRow('设备名称：', '医用磁共振设备'),
+                          buildRow('使用科室：', '磁共振'),
+                          buildRow('设备厂商：', '飞利浦'),
+                          buildRow('资产等级：', '重要'),
+                          buildRow('设备型号：', 'Philips 781-296'),
+                          buildRow('安装地点：', '磁共振1室'),
+                          buildRow('保修状况：', '保内'),
+                          new Padding(padding: EdgeInsets.symmetric(vertical: 8.0))
+                        ],
                       ),
-                      isExpanded: _isExpandedBasic,
+                    ),
+                    isExpanded: _isExpandedBasic,
                   ),
                   new ExpansionPanel(
                     headerBuilder: (context, isExpanded) {
@@ -336,8 +301,34 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
                           buildRow('故障描述：', '系统报错，设备无法启动'),
                           buildRow('故障分类：', '未知'),
                           buildRow('请求人：', '马云'),
-                          buildDropdown('处理方式：', _currentMethod, _dropDownMenuItems, changedDropDownMethod),
-                          buildDropdown('优先级：', _currentPriority, _dropDownMenuPris, changedDropDownPri),
+                          new Padding(
+                            padding: EdgeInsets.symmetric(vertical: 5.0),
+                            child: new Text('处理方式：',
+                              style: new TextStyle(
+                                  fontSize: 20.0,
+                                  fontWeight: FontWeight.w600
+                              ),
+                            ),
+                          ),
+                          new DropdownButton(
+                            value: _currentMethod,
+                            items: _dropDownMenuItems,
+                            onChanged: changedDropDownMethod,
+                          ),
+                          new Padding(
+                            padding: EdgeInsets.symmetric(vertical: 5.0),
+                            child: new Text('优先级',
+                              style: new TextStyle(
+                                  fontSize: 20.0,
+                                  fontWeight: FontWeight.w600
+                              ),
+                            ),
+                          ),
+                          new DropdownButton(
+                            value: _currentPriority,
+                            items: _dropDownMenuPris,
+                            onChanged: changedDropDownPri,
+                          ),
                           new Padding(
                             padding: EdgeInsets.symmetric(vertical: 5.0),
                             child: new Text('请求附件',
@@ -389,21 +380,65 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
                         mainAxisSize: MainAxisSize.max,
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: <Widget>[
-                          buildDropdown('派工类型：', _currentType, _dropDownMenuTypes, changedDropDownType),
-                          buildDropdown('紧急程度：', _currentLevel, _dropDownMenuLevels, changedDropDownLevel),
-                          buildDropdown('机器状态：', _currentStatus, _dropDownMenuStatuses, changedDropDownStatus),
-                          buildDropdown('工程师姓名：', _currentName, _dropDownMenuNames, changedDropDownName),
-                          new MaterialButton(
-                            child: new Align(
-                              alignment: Alignment(-1.1, 0.0),
-                              child: new Text(
-                                '选择日期',
-                                style: new TextStyle(
-                                    fontWeight: FontWeight.w600,
-                                    fontSize: 20.0
-                                ),
+                          new Padding(
+                            padding: EdgeInsets.symmetric(vertical: 5.0),
+                            child: new Text('派工类型：',
+                              style: new TextStyle(
+                                  fontSize: 20.0,
+                                  fontWeight: FontWeight.w600
                               ),
                             ),
+                          ),
+                          new DropdownButton(
+                            value: _currentType,
+                            items: _dropDownMenuTypes,
+                            onChanged: changedDropDownType,
+                          ),
+                          new Padding(
+                            padding: EdgeInsets.symmetric(vertical: 5.0),
+                            child: new Text('紧急程度：',
+                              style: new TextStyle(
+                                  fontSize: 20.0,
+                                  fontWeight: FontWeight.w600
+                              ),
+                            ),
+                          ),
+                          new DropdownButton(
+                            value: _currentLevel,
+                            items: _dropDownMenuLevels,
+                            onChanged: changedDropDownLevel,
+                          ),
+                          new Padding(
+                            padding: EdgeInsets.symmetric(vertical: 5.0),
+                            child: new Text('机器状态：',
+                              style: new TextStyle(
+                                  fontSize: 20.0,
+                                  fontWeight: FontWeight.w600
+                              ),
+                            ),
+                          ),
+                          new DropdownButton(
+                            value: _currentStatus,
+                            items: _dropDownMenuStatuses,
+                            onChanged: changedDropDownStatus,
+                          ),
+                          new Padding(
+                            padding: EdgeInsets.symmetric(vertical: 5.0),
+                            child: new Text('工程师姓名：',
+                              style: new TextStyle(
+                                  fontSize: 20.0,
+                                  fontWeight: FontWeight.w600
+                              ),
+                            ),
+                          ),
+                          new DropdownButton(
+                            value: _currentName,
+                            items: _dropDownMenuNames,
+                            onChanged: changedDropDownName,
+                          ),
+                          buildTextField('主管备注', '', true),
+                          new MaterialButton(
+                            child: new Text('选择日期'),
                             onPressed: () {
                               showDatePicker(
                                   context: context,
@@ -418,24 +453,6 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
                               });
                             },
                           ),
-                          new Padding(
-                            padding: EdgeInsets.symmetric(vertical: 5.0),
-                            child: new Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: <Widget>[
-                                new Text(
-                                  '主管备注：',
-                                  style: new TextStyle(
-                                      fontSize: 20.0,
-                                      fontWeight: FontWeight.w600
-                                  ),
-                                ),
-                                new TextField(
-
-                                )
-                              ],
-                            ),
-                          ),
                         ],
                       ),
                     ),
@@ -444,51 +461,6 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
                 ],
               ),
               SizedBox(height: 24.0),
-              new Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                mainAxisSize: MainAxisSize.max,
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: <Widget>[
-                  new Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 5.0),
-                    child: new RaisedButton(
-                      onPressed: () {
-                        showDialog(
-                          context: context,
-                          builder: (context) => AlertDialog(
-                            title: Text('已安排'),
-                          )
-                        );
-                      },
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(24),
-                      ),
-                      padding: EdgeInsets.all(12.0),
-                      color: new Color(0xff2E94B9),
-                      child: Text('安排派工', style: TextStyle(color: Colors.white)),
-                    ),
-                  ),
-                  new Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 5.0),
-                    child: new RaisedButton(
-                      onPressed: () {
-                        showDialog(
-                          context: context,
-                          builder: (context) => AlertDialog(
-                            title: Text('已取消')
-                          )
-                        );
-                      },
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(24),
-                      ),
-                      padding: EdgeInsets.all(12.0),
-                      color: new Color(0xffD25565),
-                      child: Text('拒绝请求', style: TextStyle(color: Colors.white)),
-                    ),
-                  ),
-                ],
-              )
             ],
           ),
         ),

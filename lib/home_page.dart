@@ -22,9 +22,12 @@ class _HomePageState extends State<HomePage>
     _tabController = new TabController(length: 4, vsync: this, initialIndex: 0);
   }
 
+  GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey();
+
   @override
   Widget build(BuildContext context) {
     return new Scaffold(
+      backgroundColor: new Color(0xfffafafa),
       appBar: new AppBar(
         title: new Text('ATOI医疗设备管理系统'),
         elevation: 0.7,
@@ -82,15 +85,20 @@ class _HomePageState extends State<HomePage>
                 ),
                 child: new Icon(Icons.event_note),
               ),
-              text: '待完成'
+              text: '未完成'
             )
           ],
         ),
         actions: <Widget>[
-          new Icon(Icons.face),
+          new IconButton(
+            icon: Icon(Icons.face),
+            onPressed: () {
+              _scaffoldKey.currentState.openEndDrawer();
+            },
+          ),
           new Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 5.0, vertical: 19.0),
-              child: const Text('Jin'),
+              padding: const EdgeInsets.symmetric(horizontal: 0.0, vertical: 19.0),
+              child: const Text('上杉谦信'),
           ),
         ],
       ),
@@ -102,7 +110,59 @@ class _HomePageState extends State<HomePage>
           new ManagerToAuditPage(),
           new ManagerToComplete()
         ],
-      )
+      ),
+      endDrawer: Drawer(
+        child: ListView(
+          // Important: Remove any padding from the ListView.
+          padding: EdgeInsets.zero,
+          children: <Widget>[
+            DrawerHeader(
+              child: CircleAvatar(
+                backgroundColor: Colors.transparent,
+                radius: 48.0,
+                child: Image.asset('assets/alucard.jpg'),
+              ),
+              decoration: BoxDecoration(
+                color: Theme.of(context).accentColor,
+              ),
+            ),
+            ListTile(
+              title: Text('姓名'),
+              onTap: () {
+                Navigator.pop(context);
+              },
+            ),
+            ListTile(
+              title: Text('手机号'),
+              onTap: () {
+                _scaffoldKey.currentState.showBottomSheet((BuildContext context) {
+                  return new Container(
+                    decoration: BoxDecoration(
+                        border: Border(top: BorderSide(color: Colors.grey))
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(32.0),
+                      child: Text('This is a Material persistent bottom sheet. Drag downwards to dismiss it.',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          color: Colors.indigo,
+                          fontSize: 24.0,
+                        ),
+                      ),
+                    ),
+                  );
+                });
+              },
+            ),
+            ListTile(
+              title: Text('修改信息'),
+              onTap: () {
+
+              },
+            )
+          ],
+        ),
+      ),
     );
   }
 }

@@ -8,7 +8,9 @@ import 'package:atoi/pages/manager/manager_audit_report_page.dart';
 import 'package:atoi/engineer_home_page.dart';
 import 'package:atoi/pages/engineer/engineer_start_page.dart';
 import 'package:atoi/pages/engineer/engineer_voucher_page.dart';
-
+import 'package:atoi/pages/engineer/engineer_report_page.dart';
+import 'package:atoi/pages/manager/manager_complete_page.dart';
+import 'package:atoi/user_home_page.dart';
 
 void main() => runApp(new MyApp());
 
@@ -21,7 +23,10 @@ class MyApp extends StatelessWidget {
     ManagerAuditVoucherPage.tag: (context) => ManagerAuditVoucherPage(),
     ManagerAuditReportPage.tag: (context) => ManagerAuditReportPage(),
     EngineerStartPage.tag: (context) => EngineerStartPage(),
-    EngineerVoucherPage.tag: (context) => EngineerVoucherPage()
+    EngineerVoucherPage.tag: (context) => EngineerVoucherPage(),
+    EngineerReportPage.tag: (context) => EngineerReportPage(),
+    ManagerCompletePage.tag: (context) => ManagerCompletePage(),
+    UserHomePage.tag: (context) => UserHomePage()
   };
 
   @override
@@ -31,6 +36,7 @@ class MyApp extends StatelessWidget {
       theme: new ThemeData(
           primaryColor: new Color(0xff3b4674),
           accentColor: new Color(0xff2c5c85),
+          buttonColor: new Color(0xff2E94B9)
       ),
       home: new LoginPage(),
       routes: routes,

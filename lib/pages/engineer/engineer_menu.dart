@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:atoi/pages/manager/manager_new_service_page.dart';
 
-class ManagerMenu extends StatelessWidget {
+class EngineerMenu extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // TODO: implement build
@@ -15,11 +14,7 @@ class ManagerMenu extends StatelessWidget {
         children: [
           new IconButton(
             icon: new Icon(icon),
-            onPressed: () {
-              Navigator.of(context).push(new MaterialPageRoute(builder: (_){
-                return new ManagerNewServicePage(type: 'TypeR');
-              }));
-            },
+            onPressed: () {},
             color: color,
             iconSize: 50.0,
           ),
@@ -97,24 +92,24 @@ class ManagerMenu extends StatelessWidget {
             ),
           ),
           new Padding(
-            padding: const EdgeInsets.symmetric(vertical: 30.0),
-            child: new Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: <Widget>[
-                Expanded(
-                  flex: 4,
-                  child: buildIconColumn(Icons.queue, '新增'),
-                ),
-                Expanded(
-                  flex: 3,
-                  child: buildIconColumn(Icons.insert_chart, '生命周期管理'),
-                ),
-                Expanded(
-                  flex: 4,
-                  child: buildIconColumn(Icons.event_busy, '不良事件'),
-                )
-              ],
-            )
+              padding: const EdgeInsets.symmetric(vertical: 30.0),
+              child: new Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: <Widget>[
+                  Expanded(
+                    flex: 4,
+                    child: buildIconColumn(Icons.queue, '新增'),
+                  ),
+                  Expanded(
+                    flex: 3,
+                    child: buildIconColumn(Icons.insert_chart, '生命周期管理'),
+                  ),
+                  Expanded(
+                    flex: 4,
+                    child: buildIconColumn(Icons.event_busy, '不良事件'),
+                  )
+                ],
+              )
           )
         ],
       ),

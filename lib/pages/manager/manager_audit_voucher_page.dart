@@ -72,6 +72,66 @@ class _ManagerAuditVoucherPageState extends State<ManagerAuditVoucherPage> {
     );
   }
 
+  Padding buildRow(String labelText, String defaultText) {
+    return new Padding(
+      padding: EdgeInsets.symmetric(vertical: 5.0),
+      child: new Row(
+        children: <Widget>[
+          new Expanded(
+            flex: 4,
+            child: new Text(
+              labelText,
+              style: new TextStyle(
+                  fontSize: 20.0,
+                  fontWeight: FontWeight.w600
+              ),
+            ),
+          ),
+          new Expanded(
+            flex: 6,
+            child: new Text(
+              defaultText,
+              style: new TextStyle(
+                  fontSize: 20.0,
+                  fontWeight: FontWeight.w400,
+                  color: Colors.black54
+              ),
+            ),
+          )
+        ],
+      ),
+    );
+  }
+
+  Row buildDropdown(String title, String currentItem, List dropdownItems, Function changeDropdown) {
+    return new Row(
+      mainAxisAlignment: MainAxisAlignment.start,
+      children: <Widget>[
+        new Expanded(
+          flex: 4,
+          child: new Padding(
+            padding: EdgeInsets.symmetric(vertical: 5.0),
+            child: new Text(
+              title,
+              style: new TextStyle(
+                  fontSize: 20.0,
+                  fontWeight: FontWeight.w600
+              ),
+            ),
+          ),
+        ),
+        new Expanded(
+          flex: 6,
+          child: new DropdownButton(
+            value: currentItem,
+            items: dropdownItems,
+            onChanged: changeDropdown,
+          ),
+        )
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     // TODO: implement build
@@ -95,7 +155,7 @@ class _ManagerAuditVoucherPageState extends State<ManagerAuditVoucherPage> {
           new Icon(Icons.face),
           new Padding(
             padding: const EdgeInsets.symmetric(horizontal: 5.0, vertical: 19.0),
-            child: const Text('Jin'),
+            child: const Text('上杉谦信'),
           ),
         ],
       ),
@@ -123,21 +183,33 @@ class _ManagerAuditVoucherPageState extends State<ManagerAuditVoucherPage> {
                   new ExpansionPanel(
                     headerBuilder: (context, isExpanded) {
                       return ListTile(
-                          title: Text('设备基本信息')
+                          leading: new Icon(Icons.info,
+                            size: 24.0,
+                            color: Colors.blue,
+                          ),
+                          title: new Align(
+                              child: Text('设备基本信息',
+                                style: new TextStyle(
+                                    fontSize: 22.0,
+                                    fontWeight: FontWeight.w400
+                                ),
+                              ),
+                              alignment: Alignment(-1.4, 0)
+                          )
                       );
                     },
                     body: new Padding(
                       padding: EdgeInsets.symmetric(horizontal: 8.0),
                       child: new Column(
                         children: <Widget>[
-                          buildTextField('设备系统编号', 'ZC00000001', false),
-                          buildTextField('设备名称', '医用磁共振设备', false),
-                          buildTextField('使用科室', '磁共振', false),
-                          buildTextField('设备厂商', '飞利浦', false),
-                          buildTextField('资产等级', '重要', false),
-                          buildTextField('设备型号', 'Philips 781-296', false),
-                          buildTextField('安装地点', '磁共振1室', false),
-                          buildTextField('保修状况', '保内', false),
+                          buildRow('设备编号：', 'ZC00000001'),
+                          buildRow('设备名称：', '医用磁共振设备'),
+                          buildRow('使用科室：', '磁共振'),
+                          buildRow('设备厂商：', '飞利浦'),
+                          buildRow('资产等级：', '重要'),
+                          buildRow('设备型号：', 'Philips 781-296'),
+                          buildRow('安装地点：', '磁共振1室'),
+                          buildRow('保修状况：', '保内'),
                         ],
                       ),
                     ),
@@ -146,21 +218,33 @@ class _ManagerAuditVoucherPageState extends State<ManagerAuditVoucherPage> {
                   new ExpansionPanel(
                     headerBuilder: (context, isExpanded) {
                       return ListTile(
-                          title: Text('派工单信息')
+                          leading: new Icon(Icons.description,
+                            size: 24.0,
+                            color: Colors.blue,
+                          ),
+                          title: new Align(
+                              child: Text('派工单信息',
+                                style: new TextStyle(
+                                    fontSize: 22.0,
+                                    fontWeight: FontWeight.w400
+                                ),
+                              ),
+                              alignment: Alignment(-1.4, 0)
+                          )
                       );
                     },
                     body: new Padding(
                       padding: EdgeInsets.symmetric(horizontal: 8.0),
                       child: new Column(
                         children: <Widget>[
-                          buildTextField('派工单编号', 'PGD00000001', false),
-                          buildTextField('紧急程度	', '紧急', false),
-                          buildTextField('派工类型', '保内维修', false),
-                          buildTextField('机器状态', '停机', false),
-                          buildTextField('工程师姓名', '马云', false),
-                          buildTextField('工作任务', '系统报错', false),
-                          buildTextField('出发时间', '2019-01-01', false),
-                          buildTextField('备注', '', false),
+                          buildRow('派工单编号：', 'PGD00000001'),
+                          buildRow('紧急程度：', '紧急'),
+                          buildRow('派工类型：', '保内维修'),
+                          buildRow('机器状态：', '停机'),
+                          buildRow('工程师姓名：', '马云'),
+                          buildRow('工作任务：', '系统报错'),
+                          buildRow('出发时间：', '2019-01-01'),
+                          buildRow('备注：', '' ),
                         ],
                       ),
                     ),
@@ -169,32 +253,45 @@ class _ManagerAuditVoucherPageState extends State<ManagerAuditVoucherPage> {
                   new ExpansionPanel(
                     headerBuilder: (context, isExpanded) {
                       return ListTile(
-                          title: Text('服务详情')
+                          leading: new Icon(Icons.perm_contact_calendar,
+                            size: 24.0,
+                            color: Colors.blue,
+                          ),
+                          title: new Align(
+                              child: Text('服务详情',
+                                style: new TextStyle(
+                                    fontSize: 22.0,
+                                    fontWeight: FontWeight.w400
+                                ),
+                              ),
+                              alignment: Alignment(-1.3, 0)
+                          )
                       );
                     },
                     body: new Padding(
                       padding: EdgeInsets.symmetric(horizontal: 8.0),
                       child: new Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: <Widget>[
-                          buildTextField('服务凭证编号', 'FWPZ00000001', false),
-                          buildTextField('客户姓名', '李老师', false),
-                          buildTextField('客户电话', '18521110011', false),
-                          buildTextField('故障现象/错误代码/事由', '保内维修', false),
-                          buildTextField('工作内容', '监督外部供应商更换球馆', false),
-                          buildTextField('待跟进问题', '无待跟进问题', false),
-                          buildTextField('待确认问题', '无待确认问题', false),
-                          buildTextField('建议留言', '这是建议留言的内容', false),
+                          buildRow('服务凭证编号：', 'FWPZ00000001'),
+                          buildRow('客户姓名：', '李老师'),
+                          buildRow('客户电话：', '18521110011'),
+                          buildRow('故障现象/错误代码/事由：', '保内维修'),
+                          buildRow('工作内容：', '监督外部供应商更换球馆'),
+                          buildRow('待跟进问题：', '无待跟进问题'),
+                          buildRow('待确认问题：', '无待确认问题'),
+                          buildRow('建议留言：', '这是建议留言的内容'),
                           new Padding(
                             padding: EdgeInsets.symmetric(vertical: 5.0),
-                            child: new Text('客户签名',
+                            child: new Text('客户签名：',
                               style: new TextStyle(
-                                  fontSize: 16.0,
-                                  color: Colors.grey
+                                  fontSize: 20.0,
+                                  fontWeight: FontWeight.w600
                               ),
                             ),
                           ),
                           new Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
+                            mainAxisAlignment: MainAxisAlignment.start,
                             children: <Widget>[
                               new Padding(
                                 padding: const EdgeInsets.all(10.0),
@@ -205,20 +302,7 @@ class _ManagerAuditVoucherPageState extends State<ManagerAuditVoucherPage> {
                               ),
                             ],
                           ),
-                          new Padding(
-                            padding: EdgeInsets.symmetric(vertical: 5.0),
-                            child: new Text('服务结果',
-                              style: new TextStyle(
-                                  fontSize: 16.0,
-                                  color: Colors.grey
-                              ),
-                            ),
-                          ),
-                          new DropdownButton(
-                            value: _currentResult,
-                            items: _dropDownMenuItems,
-                            onChanged: changedDropDownMethod,
-                          ),
+                          buildDropdown('服务结果：', _currentResult, _dropDownMenuItems, changedDropDownMethod),
                         ],
                       ),
                     ),
@@ -232,43 +316,37 @@ class _ManagerAuditVoucherPageState extends State<ManagerAuditVoucherPage> {
                 mainAxisSize: MainAxisSize.max,
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: <Widget>[
-                  new Expanded(
-                    flex: 4,
-                    child: new RaisedButton(
-                      onPressed: () {
-                        showDialog(
-                            context: context,
-                            builder: (context) => AlertDialog(
-                              title: Text('通过'),
-                            )
-                        );
-                      },
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(24),
-                      ),
-                      padding: EdgeInsets.all(12.0),
-                      color: Theme.of(context).accentColor,
-                      child: Text('通过凭证', style: TextStyle(color: Colors.white)),
+                  new RaisedButton(
+                    onPressed: () {
+                      showDialog(
+                          context: context,
+                          builder: (context) => AlertDialog(
+                            title: Text('通过凭证'),
+                          )
+                      );
+                    },
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(24),
                     ),
+                    padding: EdgeInsets.all(12.0),
+                    color: new Color(0xff2E94B9),
+                    child: Text('通过凭证', style: TextStyle(color: Colors.white)),
                   ),
-                  new Expanded(
-                    flex: 4,
-                    child: new RaisedButton(
-                      onPressed: () {
-                        showDialog(
-                            context: context,
-                            builder: (context) => AlertDialog(
-                                title: Text('退回')
-                            )
-                        );
-                      },
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(24),
-                      ),
-                      padding: EdgeInsets.all(12.0),
-                      color: Theme.of(context).accentColor,
-                      child: Text('退回凭证', style: TextStyle(color: Colors.white)),
+                  new RaisedButton(
+                    onPressed: () {
+                      showDialog(
+                          context: context,
+                          builder: (context) => AlertDialog(
+                              title: Text('退回凭证')
+                          )
+                      );
+                    },
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(24),
                     ),
+                    padding: EdgeInsets.all(12.0),
+                    color: new Color(0xffD25565),
+                    child: Text('退回凭证', style: TextStyle(color: Colors.white)),
                   ),
                 ],
               )
