@@ -11,6 +11,8 @@ import 'package:atoi/pages/engineer/engineer_voucher_page.dart';
 import 'package:atoi/pages/engineer/engineer_report_page.dart';
 import 'package:atoi/pages/manager/manager_complete_page.dart';
 import 'package:atoi/user_home_page.dart';
+import 'package:scoped_model/scoped_model.dart';
+import 'package:atoi/models/models.dart';
 
 void main() => runApp(new MyApp());
 
@@ -29,25 +31,29 @@ class MyApp extends StatelessWidget {
     UserHomePage.tag: (context) => UserHomePage()
   };
 
+  MainModel mainModel = MainModel();
   @override
   Widget build(BuildContext context) {
-    return new MaterialApp(
-      title: 'ATOI医疗设备管理系统',
-      theme: new ThemeData(
-          primaryColor: new Color(0xff3b4674),
-          accentColor: new Color(0xff2c5c85),
-          buttonColor: new Color(0xff2E94B9)
-      ),
-      home: new LoginPage(),
-      routes: routes,
-      localizationsDelegates: [
-        GlobalMaterialLocalizations.delegate,
-        GlobalWidgetsLocalizations.delegate,
-      ],
-      supportedLocales: [
-        const Locale('zh', 'CH'),
-        const Locale('en', 'US'),
-      ]
+    return ScopedModel<MainModel>(
+      model: mainModel,
+      child: new MaterialApp(
+          title: 'ATOI医疗设备管理系统',
+          theme: new ThemeData(
+              primaryColor: new Color(0xff3b4674),
+              accentColor: new Color(0xff2c5c85),
+              buttonColor: new Color(0xff2E94B9)
+          ),
+          home: new LoginPage(),
+          routes: routes,
+          localizationsDelegates: [
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+          ],
+          supportedLocales: [
+            const Locale('zh', 'CH'),
+            const Locale('en', 'US'),
+          ]
+      )
     );
   }
 }

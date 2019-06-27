@@ -76,19 +76,30 @@ class _ManagerAuditVoucherPageState extends State<ManagerAuditVoucherPage> {
     return new Padding(
       padding: EdgeInsets.symmetric(vertical: 5.0),
       child: new Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           new Expanded(
             flex: 4,
             child: new Text(
               labelText,
               style: new TextStyle(
-                  fontSize: 20.0,
-                  fontWeight: FontWeight.w600
+                fontSize: 20.0,
+                fontWeight: FontWeight.w600,
+              ),
+              textAlign: TextAlign.justify,
+            ),
+          ),
+          new Expanded(
+            flex: 1,
+            child: new Text(':',
+              style: new TextStyle(
+                fontSize: 20.0,
+                fontWeight: FontWeight.w600
               ),
             ),
           ),
           new Expanded(
-            flex: 6,
+            flex: 5,
             child: new Text(
               defaultText,
               style: new TextStyle(
@@ -202,14 +213,14 @@ class _ManagerAuditVoucherPageState extends State<ManagerAuditVoucherPage> {
                       padding: EdgeInsets.symmetric(horizontal: 8.0),
                       child: new Column(
                         children: <Widget>[
-                          buildRow('设备编号：', 'ZC00000001'),
-                          buildRow('设备名称：', '医用磁共振设备'),
-                          buildRow('使用科室：', '磁共振'),
-                          buildRow('设备厂商：', '飞利浦'),
-                          buildRow('资产等级：', '重要'),
-                          buildRow('设备型号：', 'Philips 781-296'),
-                          buildRow('安装地点：', '磁共振1室'),
-                          buildRow('保修状况：', '保内'),
+                          buildRow('设备编号', 'ZC00000001'),
+                          buildRow('设备名称', '医用磁共振设备'),
+                          buildRow('使用科室', '磁共振'),
+                          buildRow('设备厂商', '飞利浦'),
+                          buildRow('资产等级', '重要'),
+                          buildRow('设备型号', 'Philips 781-296'),
+                          buildRow('安装地点', '磁共振1室'),
+                          buildRow('保修状况', '保内'),
                         ],
                       ),
                     ),
@@ -237,14 +248,14 @@ class _ManagerAuditVoucherPageState extends State<ManagerAuditVoucherPage> {
                       padding: EdgeInsets.symmetric(horizontal: 8.0),
                       child: new Column(
                         children: <Widget>[
-                          buildRow('派工单编号：', 'PGD00000001'),
-                          buildRow('紧急程度：', '紧急'),
-                          buildRow('派工类型：', '保内维修'),
-                          buildRow('机器状态：', '停机'),
-                          buildRow('工程师姓名：', '马云'),
-                          buildRow('工作任务：', '系统报错'),
-                          buildRow('出发时间：', '2019-01-01'),
-                          buildRow('备注：', '' ),
+                          buildRow('派工单编号', 'PGD00000001'),
+                          buildRow('紧急程度', '紧急'),
+                          buildRow('派工类型', '保内维修'),
+                          buildRow('机器状态', '停机'),
+                          buildRow('工程师姓名', '马云'),
+                          buildRow('工作任务', '系统报错'),
+                          buildRow('出发时间', '2019-01-01'),
+                          buildRow('备注', '' ),
                         ],
                       ),
                     ),
@@ -273,14 +284,14 @@ class _ManagerAuditVoucherPageState extends State<ManagerAuditVoucherPage> {
                       child: new Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: <Widget>[
-                          buildRow('服务凭证编号：', 'FWPZ00000001'),
-                          buildRow('客户姓名：', '李老师'),
-                          buildRow('客户电话：', '18521110011'),
-                          buildRow('故障现象/错误代码/事由：', '保内维修'),
-                          buildRow('工作内容：', '监督外部供应商更换球馆'),
-                          buildRow('待跟进问题：', '无待跟进问题'),
-                          buildRow('待确认问题：', '无待确认问题'),
-                          buildRow('建议留言：', '这是建议留言的内容'),
+                          buildRow('服务凭证编号', 'FWPZ00000001'),
+                          buildRow('客户姓名', '李老师'),
+                          buildRow('客户电话', '18521110011'),
+                          buildRow('故障现象/错误代码/事由', '保内维修'),
+                          buildRow('工作内容', '监督外部供应商更换球馆'),
+                          buildRow('待跟进问题', '无待跟进问题'),
+                          buildRow('待确认问题', '无待确认问题'),
+                          buildRow('建议留言', '这是建议留言的内容'),
                           new Padding(
                             padding: EdgeInsets.symmetric(vertical: 5.0),
                             child: new Text('客户签名：',

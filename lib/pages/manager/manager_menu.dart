@@ -17,7 +17,7 @@ class ManagerMenu extends StatelessWidget {
             icon: new Icon(icon),
             onPressed: () {
               Navigator.of(context).push(new MaterialPageRoute(builder: (_){
-                return new ManagerNewServicePage(type: 'TypeR');
+                return new ManagerNewServicePage(type: label);
               }));
             },
             color: color,

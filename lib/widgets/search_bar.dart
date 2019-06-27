@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:atoi/models/models.dart';
+import 'package:scoped_model/scoped_model.dart';
+
 
 class SearchBarDelegate extends SearchDelegate<String> {
 
@@ -12,8 +15,8 @@ class SearchBarDelegate extends SearchDelegate<String> {
   ];
 
   static const recentSuggest = [
-    "suggest1",
-    "suggest2"
+    "编号：0000001",
+    "编号：0000002"
   ];
 
   final Map<String, String> equipmentInfo = {};
@@ -31,21 +34,46 @@ class SearchBarDelegate extends SearchDelegate<String> {
         onPressed: () => close(context, null));
   }
 
+
   @override
   Widget buildResults(BuildContext context) {
+    return ScopedModelDescendant<MainModel>(
+      builder: (context, child, mainModel) {
 
-    return Center(child: Container(
-      width: 100.0,
-      height: 100.0,
-      child: Card(
-        color: Colors.redAccent,
-        child: Center(
-          child: Text(query),
-        ),
-      ),
-    ),);
+        return Center(
+          child: Container(
+            width: 100.0,
+            height: 100.0,
+            child: Card(
+              color: Colors.redAccent,
+              child: Center(
+                child: Text(query),
+              ),
+            ),
+          ),
+        );
+      },
+    );
   }
 
+  @override
+  void showResults(BuildContext context) {
+    Map<String, String> mutated = {
+      'equipNo': '10086',
+      'equipLevel': '重要',
+      'name': '医用磁共振设备',
+      'model': 'Philips 781-296',
+      'department': '磁共振',
+      'location': '磁共振1室',
+      'manufacturer': '飞利浦',
+      'guarantee': '保内'
+    };
+    MainModel mainModel = ScopedModel.of<MainModel>(context);
+    mainModel.setResult(mutated);
+    print(mainModel.result);
+    close(context, null);
+  }
+  
   @override
   Widget buildSuggestions(BuildContext context) {
     final suggestionList = query.isEmpty
