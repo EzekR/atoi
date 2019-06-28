@@ -14,6 +14,17 @@ class ManagerNewServicePage extends StatefulWidget{
 
 class _ManagerNewServicePageState extends State<ManagerNewServicePage> {
 
+  Map<String, String> _result = {
+    'equipNo': '',
+    'equipLevel': '',
+    'name': '',
+    'model': '',
+    'department': '',
+    'location': '',
+    'manufacturer': '',
+    'guarantee': ''
+  };
+
   var _isExpandedBasic = true;
   var _isExpandedDetail = false;
   var _isExpandedAssign = false;
@@ -33,6 +44,12 @@ class _ManagerNewServicePageState extends State<ManagerNewServicePage> {
     _currentResult = _dropDownMenuItems[0].value;
 
     super.initState();
+  }
+
+  void setResult(Map result){
+    setState(() {
+      _result = result;
+    });
   }
 
   List<DropdownMenuItem<String>> getDropDownMenuItems(List list) {
