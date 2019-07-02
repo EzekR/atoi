@@ -13,6 +13,8 @@ import 'package:atoi/pages/manager/manager_complete_page.dart';
 import 'package:atoi/user_home_page.dart';
 import 'package:scoped_model/scoped_model.dart';
 import 'package:atoi/models/models.dart';
+import 'package:atoi/pages/user/user_scan_page.dart';
+import 'package:atoi/pages/user/user_repair_page.dart';
 
 void main() => runApp(new MyApp());
 
@@ -28,10 +30,12 @@ class MyApp extends StatelessWidget {
     EngineerVoucherPage.tag: (context) => EngineerVoucherPage(),
     EngineerReportPage.tag: (context) => EngineerReportPage(),
     ManagerCompletePage.tag: (context) => ManagerCompletePage(),
-    UserHomePage.tag: (context) => UserHomePage()
+    UserHomePage.tag: (context) => UserHomePage(),
+    UserScanPage.tag: (context) => UserScanPage(),
+    UserRepairPage.tag: (context) => UserRepairPage()
   };
 
-  MainModel mainModel = MainModel();
+  final MainModel mainModel = MainModel();
   @override
   Widget build(BuildContext context) {
     return ScopedModel<MainModel>(

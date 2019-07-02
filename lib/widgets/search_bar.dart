@@ -39,7 +39,6 @@ class SearchBarDelegate extends SearchDelegate<String> {
   Widget buildResults(BuildContext context) {
     return ScopedModelDescendant<MainModel>(
       builder: (context, child, mainModel) {
-
         return Center(
           child: Container(
             width: 100.0,

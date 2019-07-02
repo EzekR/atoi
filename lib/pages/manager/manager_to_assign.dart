@@ -1,18 +1,57 @@
 import 'package:flutter/material.dart';
 import 'package:atoi/pages/manager/manager_assign_page.dart';
+import 'dart:async';
 
-class ManagerToAssign extends StatelessWidget {
+class ManagerToAssign extends StatefulWidget {
+  @override
+  _ManagerToAssignState createState() => _ManagerToAssignState();
+
+}
+
+class _ManagerToAssignState extends State<ManagerToAssign> {
+
+  List<Map<String, dynamic>> _tasks = [];
+
+  void initState() {
+    super.initState();
+    getData();
+  }
+
+  Future getData() async {
+    await Future.delayed(Duration(seconds: 2), () {
+      setState(() {
+        _tasks = [
+          {"time": "2019-03-21 14:33", "deviceModel": "医用磁共振设备	Philips 781-296", "deviceNo": "ZC00000001", "deviceLocation": "磁共振1室", "subject": "系统报错", "detail": "系统报错，设备无法启动"},
+          {"time": "2019-04-22 9:21", "deviceModel": "医用CT	GE 8080-9527", "deviceNo": "ZC00000022", "deviceLocation": "放射科", "subject": "系统报错", "detail": "无法开机"},
+          {"time": "2019-05-24 19:56", "deviceModel": "医用X光设备 SIEMENZ 781-296", "deviceNo": "ZC00000221", "deviceLocation": "介入科", "subject": "系统报错", "detail": "显示器蓝屏"},
+          {"time": "2019-03-2 14:33", "deviceModel": "医用磁共振设备	Philips 781-296", "deviceNo": "ZC00000001", "deviceLocation": "磁共振1室", "subject": "系统报错", "detail": "系统报错，设备无法启动"},
+          {"time": "2019-03-22 14:33", "deviceModel": "医用磁共振设备	Philips 781-296", "deviceNo": "ZC00000001", "deviceLocation": "磁共振1室", "subject": "系统报错", "detail": "系统报错，设备无法启动"},
+        ];
+      });
+    });
+  }
+
+  Future<Null> _onRefresh() async {
+    await Future.delayed(Duration(seconds: 3), () {
+      print('refresh');
+      setState(() {
+        _tasks = [
+          {"time": "2019-03-20 14:33", "deviceModel": "医用磁共振设备	Philips 781-296", "deviceNo": "ZC00000001", "deviceLocation": "磁共振1室", "subject": "系统报错", "detail": "系统报错，设备无法启动"},
+          {"time": "2019-03-01 14:33", "deviceModel": "医用磁共振设备	Philips 781-296", "deviceNo": "ZC00000001", "deviceLocation": "磁共振1室", "subject": "系统报错", "detail": "系统报错，设备无法启动"},
+          {"time": "2019-03-02 14:33", "deviceModel": "医用磁共振设备	Philips 781-296", "deviceNo": "ZC00000001", "deviceLocation": "磁共振1室", "subject": "系统报错", "detail": "系统报错，设备无法启动"},
+          {"time": "2019-03-21 14:33", "deviceModel": "医用磁共振设备	Philips 781-296", "deviceNo": "ZC00000001", "deviceLocation": "磁共振1室", "subject": "系统报错", "detail": "系统报错，设备无法启动"},
+          {"time": "2019-04-22 9:21", "deviceModel": "医用CT	GE 8080-9527", "deviceNo": "ZC00000022", "deviceLocation": "放射科", "subject": "系统报错", "detail": "无法开机"},
+          {"time": "2019-05-24 19:56", "deviceModel": "医用X光设备 SIEMENZ 781-296", "deviceNo": "ZC00000221", "deviceLocation": "介入科", "subject": "系统报错", "detail": "显示器蓝屏"},
+          {"time": "2019-03-2 14:33", "deviceModel": "医用磁共振设备	Philips 781-296", "deviceNo": "ZC00000001", "deviceLocation": "磁共振1室", "subject": "系统报错", "detail": "系统报错，设备无法启动"},
+          {"time": "2019-03-22 14:33", "deviceModel": "医用磁共振设备	Philips 781-296", "deviceNo": "ZC00000001", "deviceLocation": "磁共振1室", "subject": "系统报错", "detail": "系统报错，设备无法启动"},
+        ];
+      });
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     // TODO: implement build
-
-    List<Map<String, dynamic>> _tasks = [
-      {"time": "2019-03-21 14:33", "deviceModel": "医用磁共振设备	Philips 781-296", "deviceNo": "ZC00000001", "deviceLocation": "磁共振1室", "subject": "系统报错", "detail": "系统报错，设备无法启动"},
-      {"time": "2019-04-22 9:21", "deviceModel": "医用CT	GE 8080-9527", "deviceNo": "ZC00000022", "deviceLocation": "放射科", "subject": "系统报错", "detail": "无法开机"},
-      {"time": "2019-05-24 19:56", "deviceModel": "医用X光设备 SIEMENZ 781-296", "deviceNo": "ZC00000221", "deviceLocation": "介入科", "subject": "系统报错", "detail": "显示器蓝屏"},
-      {"time": "2019-03-2 14:33", "deviceModel": "医用磁共振设备	Philips 781-296", "deviceNo": "ZC00000001", "deviceLocation": "磁共振1室", "subject": "系统报错", "detail": "系统报错，设备无法启动"},
-      {"time": "2019-03-22 14:33", "deviceModel": "医用磁共振设备	Philips 781-296", "deviceNo": "ZC00000001", "deviceLocation": "磁共振1室", "subject": "系统报错", "detail": "系统报错，设备无法启动"},
-    ];
 
     Card buildCardItem(String taskNo, String time, String deviceModel, String deviceNo, String deviceLocation, String subject, String detail) {
       return new Card(
@@ -222,10 +261,13 @@ class ManagerToAssign extends StatelessWidget {
       );
     }
 
-    return new ListView.builder(
-      padding: const EdgeInsets.all(2.0),
-      itemCount: 5,
-      itemBuilder: (context, i) => buildCardItem('C00000000$i', _tasks[i]['time'], _tasks[i]['deviceModel'], _tasks[i]['deviceNo'], _tasks[i]['deviceLocation'], _tasks[i]['subject'], _tasks[i]['detail']),
+    return new RefreshIndicator(
+        child: ListView.builder(
+          padding: const EdgeInsets.all(2.0),
+          itemCount: _tasks.length,
+          itemBuilder: (context, i) => buildCardItem('C00000000$i', _tasks[i]['time'], _tasks[i]['deviceModel'], _tasks[i]['deviceNo'], _tasks[i]['deviceLocation'], _tasks[i]['subject'], _tasks[i]['detail']),
+        ),
+        onRefresh: _onRefresh
     );
   }
 }

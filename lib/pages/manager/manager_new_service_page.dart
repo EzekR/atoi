@@ -42,7 +42,6 @@ class _ManagerNewServicePageState extends State<ManagerNewServicePage> {
   void initState(){
     _dropDownMenuItems = getDropDownMenuItems(_serviceResults);
     _currentResult = _dropDownMenuItems[0].value;
-
     super.initState();
   }
 

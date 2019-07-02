@@ -1,5 +1,10 @@
+import 'package:atoi/pages/user/user_scan_page.dart';
 import 'package:flutter/material.dart';
 import 'package:carousel_slider/carousel_slider.dart';
+import 'package:barcode_scan/barcode_scan.dart';
+import 'dart:async';
+import 'package:flutter/services.dart';
+import 'package:atoi/pages/user/user_repair_page.dart';
 
 class UserHomePage extends StatefulWidget{
   static String tag = 'user-home-page';
@@ -8,6 +13,32 @@ class UserHomePage extends StatefulWidget{
 }
 
 class _UserHomePageState extends State<UserHomePage> {
+
+  String barcode = '';
+
+  Future scan() async {
+    try {
+      String barcode = await BarcodeScanner.scan();
+      Navigator.of(context).pushNamed(UserRepairPage.tag);
+      setState(() {
+        return this.barcode = barcode;
+      });
+    } on PlatformException catch (e) {
+      if (e.code == BarcodeScanner.CameraAccessDenied) {
+        setState(() {
+          return this.barcode = 'The user did not grant the camera permission!';
+        });
+      } else {
+        setState(() {
+          return this.barcode = 'Unknown error: $e';
+        });
+      }
+    } on FormatException{
+      setState(() => this.barcode = 'null (User returned using the "back"-button before scanning anything. Result)');
+    } catch (e) {
+      setState(() => this.barcode = 'Unknown error: $e');
+    }
+  }
 
   Column buildIconColumn(IconData icon, String label) {
     Color color = Theme.of(context).primaryColor;
@@ -18,7 +49,9 @@ class _UserHomePageState extends State<UserHomePage> {
       children: [
         new IconButton(
           icon: new Icon(icon),
-          onPressed: () {},
+          onPressed: () {
+            Navigator.of(context).pushNamed(UserScanPage.tag);
+          },
           color: color,
           iconSize: 50.0,
         ),
@@ -93,34 +126,50 @@ class _UserHomePageState extends State<UserHomePage> {
             ],
           ),
           new Padding(
-              padding: EdgeInsets.symmetric(vertical: 50.0),
+            padding: EdgeInsets.symmetric(vertical: 15.0),
+            child: new Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: <Widget>[
+                new IconButton(
+                    icon: new Icon(Icons.crop_free),
+                    iconSize: 60.0,
+                    color: Colors.orange,
+                    onPressed: scan
+                ),
+                new Container(
+                  margin: const EdgeInsets.only(top: 8.0),
+                  child: new Text(
+                    '扫码报修',
+                    style: new TextStyle(
+                      fontSize: 16.0,
+                      fontWeight: FontWeight.w400,
+                      color: new Color(0xff000000),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          new Padding(
+              padding: EdgeInsets.symmetric(vertical: 5.0),
               child: new Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: <Widget>[
                   new Expanded(
                     flex: 4,
-                    child: buildIconColumn(Icons.build, '维修'),
-                  ),
-                  new Expanded(
-                    flex: 3,
                     child: buildIconColumn(Icons.remove_red_eye, '其他服务'),
                   ),
                   new Expanded(
-                    flex: 4,
+                    flex: 3,
                     child: buildIconColumn(Icons.history, '服务记录'),
+                  ),
+                  new Expanded(
+                    flex: 4,
+                    child: buildIconColumn(Icons.assignment_late, '未响应服务'),
                   )
                 ],
               ),
           ),
-          new Row(
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: <Widget>[
-              new Expanded(
-                flex: 5,
-                child: buildIconColumn(Icons.assignment_ind, '未响应服务'),
-              )
-            ],
-          )
         ],
       ),
       endDrawer: Drawer(
