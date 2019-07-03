@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'dart:io';
+import 'dart:async';
+import 'package:dio/dio.dart';
+import 'package:image_picker/image_picker.dart';
 
 class UserRepairPage extends StatefulWidget {
   static String tag = 'user-repair-page';
@@ -13,7 +16,11 @@ class _UserRepairPageState extends State<UserRepairPage> {
 
   var _isExpandedBasic = true;
   var _isExpandedDetail = false;
-  var _isExpandedAssign = false;
+
+  List<File> _imageList = [];
+
+  TextEditingController _describe = new TextEditingController();
+  TextEditingController _category = new TextEditingController();
 
   void initState() {
     super.initState();
@@ -23,6 +30,43 @@ class _UserRepairPageState extends State<UserRepairPage> {
     'name': '真田新村',
     'phone': ''
   };
+
+  Future getImage() async {
+    var image = await ImagePicker.pickImage(
+        source: ImageSource.camera,
+        maxWidth: 200.0
+    );
+    setState(() {
+      _imageList.add(image);
+    });
+  }
+
+  Future uploadImage() async {
+    FormData _formData = new FormData.from({
+      "describe": _describe.text,
+      "category": _category.text
+    });
+    if (_imageList.length > 0) {
+      for(var i=0; i<_imageList.length; i++) {
+        var path = _imageList[i].path;
+        var name = path.substring(path.lastIndexOf("/") + 1, path.length);
+        var suffix = name.substring(name.lastIndexOf(".") + 1, name.length);
+        _formData.add("file$i", new UploadFileInfo(_imageList[i], _imageList[i].path, contentType: ContentType.parse("image/$suffix")));
+      }
+    }
+    print(_formData);
+    Dio dio = new Dio();
+    var response = await dio.post<String>("http://api.stramogroup.com/request", data: _formData);
+    if (response.statusCode == 200) {
+      var result = await showDialog(
+              context: context,
+              builder: (context) => AlertDialog(
+                title: Text('报修成功'),
+              )
+          );
+      Navigator.of(context).pop();
+    }
+  }
 
   TextField buildTextField(String labelText, String defaultText, bool isEnabled) {
     return new TextField(
@@ -77,7 +121,7 @@ class _UserRepairPageState extends State<UserRepairPage> {
     );
   }
 
-  Padding buildInput(String labelText) {
+  Padding buildInput(String labelText, TextEditingController controller) {
     return new Padding(
       padding: EdgeInsets.symmetric(vertical: 5.0),
       child: new Row(
@@ -96,6 +140,7 @@ class _UserRepairPageState extends State<UserRepairPage> {
             flex: 6,
             child: new TextField(
               enabled: true,
+              controller: controller,
               style: new TextStyle(
                 fontSize: 18.0
               ),
@@ -103,6 +148,30 @@ class _UserRepairPageState extends State<UserRepairPage> {
           )
         ],
       ),
+    );
+  }
+
+  Row buildImageRow(List imageList) {
+    List<Widget> _list = [];
+
+    if (imageList.length >0 ){
+      for(var image in imageList) {
+        _list.add(
+            new Container(
+              width: 100.0,
+              child: Image.file(image),
+            )
+        );
+      }
+    }
+
+    _list.add(new IconButton(icon: Icon(Icons.add_a_photo), onPressed: () {
+      getImage();
+    }));
+
+    return new Row(
+      mainAxisAlignment: MainAxisAlignment.start,
+      children: _list
     );
   }
 
@@ -147,7 +216,6 @@ class _UserRepairPageState extends State<UserRepairPage> {
                       if (index == 1) {
                         _isExpandedDetail = !isExpanded;
                       } else {
-                        _isExpandedAssign =!isExpanded;
                       }
                     }
                   });
@@ -211,8 +279,8 @@ class _UserRepairPageState extends State<UserRepairPage> {
                         mainAxisSize: MainAxisSize.max,
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: <Widget>[
-                          buildInput('故障描述：'),
-                          buildInput('故障分类：'),
+                          buildInput('故障描述：', _describe),
+                          buildInput('故障分类：', _category),
                           new Padding(
                             padding: EdgeInsets.symmetric(vertical: 5.0),
                             child: new Text('上传故障照片',
@@ -222,18 +290,27 @@ class _UserRepairPageState extends State<UserRepairPage> {
                               ),
                             ),
                           ),
-                          new Row(
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            children: <Widget>[
-                              new Padding(
-                                padding: const EdgeInsets.all(10.0),
-                                child: Image.asset(
-                                  'assets/mri.jpg',
-                                  width: 200.0,
-                                ),
-                              ),
-                            ],
-                          ),
+                          buildImageRow(_imageList)
+                          //new Row(
+                          //  mainAxisAlignment: MainAxisAlignment.start,
+                          //  children: <Widget>[
+                          //    new ListView.builder(
+                          //        shrinkWrap: true,
+                          //        scrollDirection: Axis.horizontal,
+                          //        itemCount: _imageList.length,
+                          //        itemBuilder: (context, i) => new Container(
+                          //          width: 200.0,
+                          //          child: new Image.file(_imageList[i], width: 200.0),
+                          //        )
+                          //    ),
+                          //    new IconButton(
+                          //        icon: Icon(Icons.add_a_photo),
+                          //        onPressed: () {
+                          //          getImage();
+                          //        }
+                          //    )
+                          //  ],
+                          //),
                         ],
                       ),
                     ),
@@ -249,12 +326,7 @@ class _UserRepairPageState extends State<UserRepairPage> {
                 children: <Widget>[
                   new RaisedButton(
                     onPressed: () {
-                      showDialog(
-                          context: context,
-                          builder: (context) => AlertDialog(
-                            title: Text('报修成功'),
-                          )
-                      );
+                      uploadImage();
                     },
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(24),
