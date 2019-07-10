@@ -11,6 +11,7 @@
 		3B3967161E833CAA004F5970 /* AppFrameworkInfo.plist in Resources */ = {isa = PBXBuildFile; fileRef = 3B3967151E833CAA004F5970 /* AppFrameworkInfo.plist */; };
 		3B80C3941E831B6300D905FE /* App.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3B80C3931E831B6300D905FE /* App.framework */; };
 		3B80C3951E831B6300D905FE /* App.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 3B80C3931E831B6300D905FE /* App.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		43F12CF83728B2058C780219 /* libPods-Runner.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 7A79C65CE5629402B9E13C26 /* libPods-Runner.a */; };
 		9705A1C61CF904A100538489 /* Flutter.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9740EEBA1CF902C7004384FC /* Flutter.framework */; };
 		9705A1C71CF904A300538489 /* Flutter.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 9740EEBA1CF902C7004384FC /* Flutter.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		9740EEB41CF90195004384FC /* Debug.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = 9740EEB21CF90195004384FC /* Debug.xcconfig */; };
@@ -31,6 +32,18 @@
 		E25E8AC022C4C24B00C2545E /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FA1CF9000F007C117D /* Main.storyboard */; };
 		E25E8AC222C4C24B00C2545E /* App.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 3B80C3931E831B6300D905FE /* App.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		E25E8AC322C4C24B00C2545E /* Flutter.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 9740EEBA1CF902C7004384FC /* Flutter.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		E2B275C522CEE29F00834AA9 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 7AFFD8EE1D35381100E5BB4D /* AppDelegate.m */; };
+		E2B275C622CEE29F00834AA9 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 97C146F21CF9000F007C117D /* main.m */; };
+		E2B275C722CEE29F00834AA9 /* GeneratedPluginRegistrant.m in Sources */ = {isa = PBXBuildFile; fileRef = 1498D2331E8E89220040F4C2 /* GeneratedPluginRegistrant.m */; };
+		E2B275C922CEE29F00834AA9 /* Flutter.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9740EEBA1CF902C7004384FC /* Flutter.framework */; };
+		E2B275CA22CEE29F00834AA9 /* App.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3B80C3931E831B6300D905FE /* App.framework */; };
+		E2B275CD22CEE29F00834AA9 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FF1CF9000F007C117D /* LaunchScreen.storyboard */; };
+		E2B275CE22CEE29F00834AA9 /* AppFrameworkInfo.plist in Resources */ = {isa = PBXBuildFile; fileRef = 3B3967151E833CAA004F5970 /* AppFrameworkInfo.plist */; };
+		E2B275CF22CEE29F00834AA9 /* Debug.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = 9740EEB21CF90195004384FC /* Debug.xcconfig */; };
+		E2B275D022CEE29F00834AA9 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FD1CF9000F007C117D /* Assets.xcassets */; };
+		E2B275D122CEE29F00834AA9 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FA1CF9000F007C117D /* Main.storyboard */; };
+		E2B275D322CEE29F00834AA9 /* App.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 3B80C3931E831B6300D905FE /* App.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		E2B275D422CEE29F00834AA9 /* Flutter.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 9740EEBA1CF902C7004384FC /* Flutter.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		FF394D6F552F13F935C4D916 /* libPods-Runner.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 7A79C65CE5629402B9E13C26 /* libPods-Runner.a */; };
 /* End PBXBuildFile section */
 
@@ -55,6 +68,18 @@
 			files = (
 				E25E8AC222C4C24B00C2545E /* App.framework in Embed Frameworks */,
 				E25E8AC322C4C24B00C2545E /* Flutter.framework in Embed Frameworks */,
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		E2B275D222CEE29F00834AA9 /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				E2B275D322CEE29F00834AA9 /* App.framework in Embed Frameworks */,
+				E2B275D422CEE29F00834AA9 /* Flutter.framework in Embed Frameworks */,
 			);
 			name = "Embed Frameworks";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -84,6 +109,8 @@
 		D9C1D4AAC5BB21EF94B1348B /* Pods-Runner.profile.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Runner.profile.xcconfig"; path = "Target Support Files/Pods-Runner/Pods-Runner.profile.xcconfig"; sourceTree = "<group>"; };
 		E25E8AC922C4C24B00C2545E /* Runner copy.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Runner copy.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		E25E8ACA22C4C24B00C2545E /* Runner copy-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = "Runner copy-Info.plist"; path = "/Users/stef/farm/atoi/ios/Runner copy-Info.plist"; sourceTree = "<absolute>"; };
+		E2B275DB22CEE29F00834AA9 /* Runner copy 2.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Runner copy 2.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		E2B275DC22CEE29F00834AA9 /* Runner copy 2-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = "Runner copy 2-Info.plist"; path = "/Users/stef/farm/atoi/ios/Runner copy 2-Info.plist"; sourceTree = "<absolute>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -94,6 +121,7 @@
 				9705A1C61CF904A100538489 /* Flutter.framework in Frameworks */,
 				3B80C3941E831B6300D905FE /* App.framework in Frameworks */,
 				FF394D6F552F13F935C4D916 /* libPods-Runner.a in Frameworks */,
+				43F12CF83728B2058C780219 /* libPods-Runner.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -103,6 +131,15 @@
 			files = (
 				E25E8AB922C4C24B00C2545E /* Flutter.framework in Frameworks */,
 				E25E8ABA22C4C24B00C2545E /* App.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		E2B275C822CEE29F00834AA9 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				E2B275C922CEE29F00834AA9 /* Flutter.framework in Frameworks */,
+				E2B275CA22CEE29F00834AA9 /* App.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -139,6 +176,7 @@
 				E25E8ACA22C4C24B00C2545E /* Runner copy-Info.plist */,
 				E9025E5D4B830114A1B01489 /* Pods */,
 				0A13FD9A8E384EB6DBDCD550 /* Frameworks */,
+				E2B275DC22CEE29F00834AA9 /* Runner copy 2-Info.plist */,
 			);
 			sourceTree = "<group>";
 		};
@@ -147,6 +185,7 @@
 			children = (
 				97C146EE1CF9000F007C117D /* Runner.app */,
 				E25E8AC922C4C24B00C2545E /* Runner copy.app */,
+				E2B275DB22CEE29F00834AA9 /* Runner copy 2.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -230,6 +269,26 @@
 			productReference = E25E8AC922C4C24B00C2545E /* Runner copy.app */;
 			productType = "com.apple.product-type.application";
 		};
+		E2B275C122CEE29F00834AA9 /* Runner copy 2 */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = E2B275D722CEE29F00834AA9 /* Build configuration list for PBXNativeTarget "Runner copy 2" */;
+			buildPhases = (
+				E2B275C322CEE29F00834AA9 /* Run Script */,
+				E2B275C422CEE29F00834AA9 /* Sources */,
+				E2B275C822CEE29F00834AA9 /* Frameworks */,
+				E2B275CC22CEE29F00834AA9 /* Resources */,
+				E2B275D222CEE29F00834AA9 /* Embed Frameworks */,
+				E2B275D522CEE29F00834AA9 /* Thin Binary */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "Runner copy 2";
+			productName = Runner;
+			productReference = E2B275DB22CEE29F00834AA9 /* Runner copy 2.app */;
+			productType = "com.apple.product-type.application";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -244,6 +303,9 @@
 						DevelopmentTeam = 47F35DTRN2;
 					};
 					E25E8AB222C4C24B00C2545E = {
+						DevelopmentTeam = 47F35DTRN2;
+					};
+					E2B275C122CEE29F00834AA9 = {
 						DevelopmentTeam = 47F35DTRN2;
 					};
 				};
@@ -264,6 +326,7 @@
 			targets = (
 				97C146ED1CF9000F007C117D /* Runner */,
 				E25E8AB222C4C24B00C2545E /* Runner copy */,
+				E2B275C122CEE29F00834AA9 /* Runner copy 2 */,
 			);
 		};
 /* End PBXProject section */
@@ -290,6 +353,18 @@
 				E25E8ABE22C4C24B00C2545E /* Debug.xcconfig in Resources */,
 				E25E8ABF22C4C24B00C2545E /* Assets.xcassets in Resources */,
 				E25E8AC022C4C24B00C2545E /* Main.storyboard in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		E2B275CC22CEE29F00834AA9 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				E2B275CD22CEE29F00834AA9 /* LaunchScreen.storyboard in Resources */,
+				E2B275CE22CEE29F00834AA9 /* AppFrameworkInfo.plist in Resources */,
+				E2B275CF22CEE29F00834AA9 /* Debug.xcconfig in Resources */,
+				E2B275D022CEE29F00834AA9 /* Assets.xcassets in Resources */,
+				E2B275D122CEE29F00834AA9 /* Main.storyboard in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -392,6 +467,34 @@
 			shellPath = /bin/sh;
 			shellScript = "/bin/sh \"$FLUTTER_ROOT/packages/flutter_tools/bin/xcode_backend.sh\" thin";
 		};
+		E2B275C322CEE29F00834AA9 /* Run Script */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "Run Script";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "/bin/sh \"$FLUTTER_ROOT/packages/flutter_tools/bin/xcode_backend.sh\" build";
+		};
+		E2B275D522CEE29F00834AA9 /* Thin Binary */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "Thin Binary";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "/bin/sh \"$FLUTTER_ROOT/packages/flutter_tools/bin/xcode_backend.sh\" thin";
+		};
 /* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
@@ -412,6 +515,16 @@
 				E25E8AB522C4C24B00C2545E /* AppDelegate.m in Sources */,
 				E25E8AB622C4C24B00C2545E /* main.m in Sources */,
 				E25E8AB722C4C24B00C2545E /* GeneratedPluginRegistrant.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		E2B275C422CEE29F00834AA9 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				E2B275C522CEE29F00834AA9 /* AppDelegate.m in Sources */,
+				E2B275C622CEE29F00834AA9 /* main.m in Sources */,
+				E2B275C722CEE29F00834AA9 /* GeneratedPluginRegistrant.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -731,6 +844,78 @@
 			};
 			name = Profile;
 		};
+		E2B275D822CEE29F00834AA9 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 9740EEB21CF90195004384FC /* Debug.xcconfig */;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
+				DEVELOPMENT_TEAM = 47F35DTRN2;
+				ENABLE_BITCODE = NO;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/Flutter",
+				);
+				INFOPLIST_FILE = "Runner copy 2-Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/Flutter",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.stramogroup.atoi;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				VERSIONING_SYSTEM = "apple-generic";
+			};
+			name = Debug;
+		};
+		E2B275D922CEE29F00834AA9 /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 7AFA3C8E1D35360C0083082E /* Release.xcconfig */;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
+				DEVELOPMENT_TEAM = 47F35DTRN2;
+				ENABLE_BITCODE = NO;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/Flutter",
+				);
+				INFOPLIST_FILE = "Runner copy 2-Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/Flutter",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.stramogroup.atoi;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				VERSIONING_SYSTEM = "apple-generic";
+			};
+			name = Release;
+		};
+		E2B275DA22CEE29F00834AA9 /* Profile */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 7AFA3C8E1D35360C0083082E /* Release.xcconfig */;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
+				DEVELOPMENT_TEAM = 47F35DTRN2;
+				ENABLE_BITCODE = NO;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/Flutter",
+				);
+				INFOPLIST_FILE = "Runner copy 2-Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/Flutter",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.stramogroup.atoi;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				VERSIONING_SYSTEM = "apple-generic";
+			};
+			name = Profile;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -760,6 +945,16 @@
 				E25E8AC622C4C24B00C2545E /* Debug */,
 				E25E8AC722C4C24B00C2545E /* Release */,
 				E25E8AC822C4C24B00C2545E /* Profile */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		E2B275D722CEE29F00834AA9 /* Build configuration list for PBXNativeTarget "Runner copy 2" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				E2B275D822CEE29F00834AA9 /* Debug */,
+				E2B275D922CEE29F00834AA9 /* Release */,
+				E2B275DA22CEE29F00834AA9 /* Profile */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

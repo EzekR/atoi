@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:atoi/models/models.dart';
 import 'package:scoped_model/scoped_model.dart';
+import 'dart:convert';
 
 
 class SearchBarDelegate extends SearchDelegate<String> {
@@ -69,8 +70,7 @@ class SearchBarDelegate extends SearchDelegate<String> {
     };
     MainModel mainModel = ScopedModel.of<MainModel>(context);
     mainModel.setResult(mutated);
-    print(mainModel.result);
-    close(context, null);
+    close(context, jsonEncode(mutated));
   }
   
   @override
@@ -81,11 +81,9 @@ class SearchBarDelegate extends SearchDelegate<String> {
     return ListView.builder(
         itemCount: suggestionList.length,
         itemBuilder: (context, index) => ListTile(
-
           onTap: (){
             query = suggestionList[index];
             showResults(context);},
-
           title: RichText(
               text: TextSpan(
                   text: suggestionList[index].substring(0, query.length),

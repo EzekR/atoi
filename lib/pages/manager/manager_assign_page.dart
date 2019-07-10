@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'dart:async';
+import 'package:dio/dio.dart';
+import 'dart:convert';
 
 class ManagerAssignPage extends StatefulWidget {
   static String tag = 'mananger-assign-page';
@@ -13,6 +16,16 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
   var _isExpandedBasic = true;
   var _isExpandedDetail = false;
   var _isExpandedAssign = false;
+  Map<String, dynamic> _request = {
+      'name': "",
+      'telephone': "",
+      'subject': "",
+      'detail': "",
+      'time': "",
+      'image': ""
+  };
+
+  String _imageUri = '';
 
   List _handleMethods = [
     '现场服务',
@@ -87,6 +100,7 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
     _currentStatus = _dropDownMenuStatuses[0].value;
     _currentName = _dropDownMenuNames[0].value;
 
+    getReport();
     super.initState();
   }
 
@@ -223,6 +237,46 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
     );
   }
 
+  Future getReport() async {
+    Dio dio = new Dio();
+    var response = await dio.get<String>('http://api.stramogroup.com/m_get_request');
+    Map _data = jsonDecode(response.data);
+    if (response.statusCode == 200 && _data['error'] == 0) {
+      Map<String, dynamic> _payload = {
+        'name': _data['data']['name'],
+        'telephone': _data['data']['phone'],
+        'subject': _data['data']['category'],
+        'detail': _data['data']['describe'],
+        'time': _data['data']['time'],
+        'image': _data['data']['image']
+      };
+      setState(() {
+        _request = _payload;
+        _imageUri = 'http://api.stramogroup.com/'+_payload['image'];
+      });
+    }
+  }
+
+  Future assignRequest() async {
+    FormData _formData = new FormData.from({
+      "level": _currentLevel,
+      "method": _currentMethod,
+      "time": _request['time'],
+      "subject": _request['subject'],
+      "detail": _request['detail']
+    });
+    Dio dio = new Dio();
+    var response = await dio.post<String>('http://api.stramogroup.com/m_assign_request', data: _formData);
+    if (response.statusCode == 200) {
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: new Text('派工成功'),
+        )
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context){
     return new Scaffold(
@@ -332,10 +386,11 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: <Widget>[
                           buildRow('类型：', '客户请求-报修'),
-                          buildRow('主题：', '系统报错'),
-                          buildRow('故障描述：', '系统报错，设备无法启动'),
+                          buildRow('主题：', _request['subject']),
+                          buildRow('故障描述：', _request['detail']),
                           buildRow('故障分类：', '未知'),
-                          buildRow('请求人：', '马云'),
+                          buildRow('请求人：', _request['name']),
+                          buildRow('联系电话：', _request['telephone']),
                           buildDropdown('处理方式：', _currentMethod, _dropDownMenuItems, changedDropDownMethod),
                           buildDropdown('优先级：', _currentPriority, _dropDownMenuPris, changedDropDownPri),
                           new Padding(
@@ -352,8 +407,8 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
                             children: <Widget>[
                               new Padding(
                                 padding: const EdgeInsets.all(10.0),
-                                child: Image.asset(
-                                  'assets/mri.jpg',
+                                child: Image.network(
+                                  _imageUri,
                                   width: 200.0,
                                 ),
                               ),
@@ -453,12 +508,7 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
                     padding: EdgeInsets.symmetric(horizontal: 5.0),
                     child: new RaisedButton(
                       onPressed: () {
-                        showDialog(
-                          context: context,
-                          builder: (context) => AlertDialog(
-                            title: Text('已安排'),
-                          )
-                        );
+                        assignRequest();
                       },
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(24),

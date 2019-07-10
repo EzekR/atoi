@@ -34,7 +34,7 @@ class _UserRepairPageState extends State<UserRepairPage> {
   Future getImage() async {
     var image = await ImagePicker.pickImage(
         source: ImageSource.camera,
-        maxWidth: 200.0
+        maxWidth: 800.0
     );
     setState(() {
       _imageList.add(image);
@@ -163,6 +163,8 @@ class _UserRepairPageState extends State<UserRepairPage> {
             )
         );
       }
+    } else {
+      _list.add(new Container());
     }
 
     _list.add(new IconButton(icon: Icon(Icons.add_a_photo), onPressed: () {
@@ -197,7 +199,7 @@ class _UserRepairPageState extends State<UserRepairPage> {
           new Icon(Icons.face),
           new Padding(
             padding: const EdgeInsets.symmetric(horizontal: 5.0, vertical: 19.0),
-            child: const Text('武田信玄'),
+            child: const Text('真田信村'),
           ),
         ],
       ),

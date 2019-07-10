@@ -18,18 +18,22 @@ class _HomePageState extends State<HomePage>
 
   @override
   void initState() {
-    super.initState();
     _tabController = new TabController(length: 4, vsync: this, initialIndex: 0);
+    super.initState();
   }
 
-  GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey();
+  GlobalKey<ScaffoldState> _scaffoldKeyManager = new GlobalKey();
 
   @override
   Widget build(BuildContext context) {
     return new Scaffold(
       backgroundColor: new Color(0xfffafafa),
       appBar: new AppBar(
-        title: new Text('ATOI医疗设备管理系统'),
+        leading: new Container(),
+        title: new Align(
+          alignment: Alignment(-20.0, 0),
+          child: new Text('ATOI医疗设备管理系统'),
+        ),
         elevation: 0.7,
         flexibleSpace: Container(
           decoration: BoxDecoration(
@@ -90,15 +94,15 @@ class _HomePageState extends State<HomePage>
           ],
         ),
         actions: <Widget>[
-          new IconButton(
-            icon: Icon(Icons.face),
-            onPressed: () {
-              _scaffoldKey.currentState.openEndDrawer();
-            },
-          ),
+          new Icon(Icons.face),
           new Padding(
               padding: const EdgeInsets.symmetric(horizontal: 0.0, vertical: 19.0),
-              child: const Text('上杉谦信'),
+              child: new GestureDetector(
+                onTap: () {
+                  _scaffoldKeyManager.currentState.openEndDrawer();
+                },
+                child: new Text('上杉谦信'),
+              ),
           ),
         ],
       ),
@@ -135,7 +139,7 @@ class _HomePageState extends State<HomePage>
             ListTile(
               title: Text('手机号'),
               onTap: () {
-                _scaffoldKey.currentState.showBottomSheet((BuildContext context) {
+                _scaffoldKeyManager.currentState.showBottomSheet((BuildContext context) {
                   return new Container(
                     decoration: BoxDecoration(
                         border: Border(top: BorderSide(color: Colors.grey))

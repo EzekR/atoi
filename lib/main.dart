@@ -15,6 +15,8 @@ import 'package:scoped_model/scoped_model.dart';
 import 'package:atoi/models/models.dart';
 import 'package:atoi/pages/user/user_scan_page.dart';
 import 'package:atoi/pages/user/user_repair_page.dart';
+import 'package:atoi/pages/engineer/signature_page.dart';
+import 'package:atoi/pages/request/repair_request.dart';
 
 void main() => runApp(new MyApp());
 
@@ -32,7 +34,9 @@ class MyApp extends StatelessWidget {
     ManagerCompletePage.tag: (context) => ManagerCompletePage(),
     UserHomePage.tag: (context) => UserHomePage(),
     UserScanPage.tag: (context) => UserScanPage(),
-    UserRepairPage.tag: (context) => UserRepairPage()
+    UserRepairPage.tag: (context) => UserRepairPage(),
+    SignaturePage.tag: (context) => SignaturePage(),
+    RepairRequest.tag: (context) => RepairRequest(),
   };
 
   final MainModel mainModel = MainModel();

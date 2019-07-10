@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:atoi/pages/engineer/signature_page.dart';
+import 'dart:convert';
+import 'dart:math';
+import 'dart:typed_data';
 
 class EngineerVoucherPage extends StatefulWidget {
   static String tag = 'engineer-voucher-page';
@@ -125,9 +129,21 @@ class _EngineerVoucherPageState extends State<EngineerVoucherPage> {
     );
   }
 
+  ByteData _img = ByteData(0);
+
   @override
   Widget build(BuildContext context) {
     // TODO: implement build
+    toSignature (BuildContext context) async {
+      final result = await Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => SignaturePage()),
+      );
+      setState(() {
+        _img = result;
+      });
+    }
+
     return new Scaffold(
       appBar: new AppBar(
         title: new Text('上传凭证'),
@@ -282,18 +298,7 @@ class _EngineerVoucherPageState extends State<EngineerVoucherPage> {
                               ),
                             ),
                           ),
-                          new Row(
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            children: <Widget>[
-                              new Padding(
-                                padding: const EdgeInsets.all(10.0),
-                                child: Image.asset(
-                                  'assets/qm.jpg',
-                                  width: 200.0,
-                                ),
-                              ),
-                            ],
-                          ),
+                          _img.buffer.lengthInBytes == 0? new RaisedButton(onPressed: () {toSignature(context);}, child: new Icon(Icons.add_box)):new Container(width: 400.0, child: new Image.memory(_img.buffer.asUint8List())),
                         ],
                       ),
                     ),
@@ -332,3 +337,5 @@ class _EngineerVoucherPageState extends State<EngineerVoucherPage> {
     );
   }
 }
+
+

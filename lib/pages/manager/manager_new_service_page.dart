@@ -2,28 +2,24 @@ import 'package:flutter/material.dart';
 import 'package:atoi/widgets/search_bar.dart';
 import 'package:atoi/models/models.dart';
 import 'package:scoped_model/scoped_model.dart';
+import 'package:barcode_scan/barcode_scan.dart';
+import 'dart:async';
+import 'package:flutter/services.dart';
+import 'dart:convert';
 
 class ManagerNewServicePage extends StatefulWidget{
   static String tag = 'manager-new-service-page';
   final String type;
+  final String title;
 
-  ManagerNewServicePage({this.type});
+  ManagerNewServicePage({this.title, this.type});
 
   _ManagerNewServicePageState createState() => new _ManagerNewServicePageState();
 }
 
 class _ManagerNewServicePageState extends State<ManagerNewServicePage> {
 
-  Map<String, String> _result = {
-    'equipNo': '',
-    'equipLevel': '',
-    'name': '',
-    'model': '',
-    'department': '',
-    'location': '',
-    'manufacturer': '',
-    'guarantee': ''
-  };
+  String barcode = "";
 
   var _isExpandedBasic = true;
   var _isExpandedDetail = false;
@@ -36,6 +32,17 @@ class _ManagerNewServicePageState extends State<ManagerNewServicePage> {
     '已知'
   ];
 
+  Map<String, dynamic> _result = {
+    'equipNo': '',
+    'equipLevel': '',
+    'name': '',
+    'model': '',
+    'department': '',
+    'location': '',
+    'manufacturer': '',
+    'guarantee': ''
+  };
+
   List<DropdownMenuItem<String>> _dropDownMenuItems;
   String _currentResult;
 
@@ -45,11 +52,6 @@ class _ManagerNewServicePageState extends State<ManagerNewServicePage> {
     super.initState();
   }
 
-  void setResult(Map result){
-    setState(() {
-      _result = result;
-    });
-  }
 
   List<DropdownMenuItem<String>> getDropDownMenuItems(List list) {
     List<DropdownMenuItem<String>> items = new List();
@@ -70,6 +72,14 @@ class _ManagerNewServicePageState extends State<ManagerNewServicePage> {
   void changedDropDownMethod(String selectedMethod) {
     setState(() {
       _currentResult = selectedMethod;
+    });
+  }
+
+  Future toSearch() async {
+    final _searchResult = await showSearch(context: context, delegate: SearchBarDelegate());
+    Map _data = jsonDecode(_searchResult);
+    setState(() {
+      _result.addAll(_data);
     });
   }
 
@@ -107,10 +117,9 @@ class _ManagerNewServicePageState extends State<ManagerNewServicePage> {
   Widget build(BuildContext context) {
     return ScopedModelDescendant<MainModel>(
       builder: (context, child, mainModel) {
-        print('page data:'+mainModel.result.toString());
         return new Scaffold(
           appBar: new AppBar(
-            title: new Text('新增${widget.type}'),
+            title: new Text('新增${widget.title}'),
             elevation: 0.7,
             flexibleSpace: Container(
               decoration: BoxDecoration(
@@ -129,15 +138,20 @@ class _ManagerNewServicePageState extends State<ManagerNewServicePage> {
                 icon: Icon(Icons.search),
                 color: Colors.white,
                 iconSize: 30.0,
-                onPressed: () =>
-                    showSearch(context: context, delegate: SearchBarDelegate())
+                onPressed: () {
+                  toSearch();
+                  print('callback');
+                  print(_result);
+                }
                 ,
               ),
               new IconButton(
                   icon: Icon(Icons.crop_free),
                   color: Colors.white,
                   iconSize: 30.0,
-                  onPressed: () {})
+                  onPressed: () {
+                    scan();
+                  })
             ],
           ),
           body: new Padding(
@@ -183,14 +197,14 @@ class _ManagerNewServicePageState extends State<ManagerNewServicePage> {
                           padding: EdgeInsets.symmetric(horizontal: 12.0),
                           child: new Column(
                             children: <Widget>[
-                              buildRow('设备编号：', mainModel.result['equipNo']),
-                              buildRow('设备名称：', mainModel.result['name']),
-                              buildRow('使用科室：', mainModel.result['department']),
-                              buildRow('设备厂商：', mainModel.result['manufacturer']),
-                              buildRow('资产等级：', mainModel.result['equipLevel']),
-                              buildRow('设备型号：', mainModel.result['model']),
-                              buildRow('安装地点：', mainModel.result['location']),
-                              buildRow('保修状况：', mainModel.result['guarantee']),
+                              buildRow('设备编号：', _result['equipNo']),
+                              buildRow('设备名称：', _result['name']),
+                              buildRow('使用科室：', _result['department']),
+                              buildRow('设备厂商：', _result['manufacturer']),
+                              buildRow('资产等级：', _result['equipLevel']),
+                              buildRow('设备型号：', _result['model']),
+                              buildRow('安装地点：', _result['location']),
+                              buildRow('保修状况：', _result['guarantee']),
                               new Padding(padding: EdgeInsets.symmetric(vertical: 8.0))
                             ],
                           ),
@@ -219,53 +233,35 @@ class _ManagerNewServicePageState extends State<ManagerNewServicePage> {
                           padding: EdgeInsets.symmetric(horizontal: 12.0),
                           child: new Column(
                             children: <Widget>[
-                              buildRow('类型：', widget.type),
+                              buildRow('类型：', widget.title),
                               buildRow('请求人：', '超级管理员'),
-                              new Padding(
-                                  padding: EdgeInsets.symmetric(vertical: 5.0),
-                                  child: new Row(
-                                    children: <Widget>[
-                                      new Expanded(
-                                        flex: 4,
-                                        child: new Text(
-                                          '主题：',
-                                          style: new TextStyle(
-                                              fontSize: 20.0,
-                                              fontWeight: FontWeight.w600
-                                          ),
-                                        ),
-                                      ),
-                                      new Expanded(
-                                        flex: 6,
-                                        child: new TextField(),
-                                      )
-                                    ],
-                                  ),
-                              ),
-                              new Padding(
-                                  padding: EdgeInsets.symmetric(vertical: 5.0),
-                                  child: new Row(
-                                    children: <Widget>[
-                                      new Expanded(
-                                        flex: 4,
-                                        child: new Text(
-                                          '故障分类：',
-                                          style: new TextStyle(
+                              buildRow('主题', widget.title),
+                              widget.type == 'repair'?new Padding(
+                                padding: EdgeInsets.symmetric(vertical: 5.0),
+                                child: new Row(
+                                  children: <Widget>[
+                                    new Expanded(
+                                      flex: 4,
+                                      child: new Text(
+                                        '故障分类：',
+                                        style: new TextStyle(
                                             fontSize: 20.0,
                                             fontWeight: FontWeight.w600
-                                          ),
                                         ),
                                       ),
-                                      new Expanded(
-                                        flex: 6,
-                                        child: new DropdownButton(
-                                          value: _currentResult,
-                                          items: _dropDownMenuItems,
-                                          onChanged: changedDropDownMethod,
-                                        ),
-                                      )
-                                    ],
-                                  ),
+                                    ),
+                                    new Expanded(
+                                      flex: 6,
+                                      child: new DropdownButton(
+                                        value: _currentResult,
+                                        items: _dropDownMenuItems,
+                                        onChanged: changedDropDownMethod,
+                                      ),
+                                    )
+                                  ],
+                                ),
+                              ):new Padding(
+                                padding: EdgeInsets.symmetric(vertical: 5.0),
                               ),
                               new Padding(padding: EdgeInsets.symmetric(vertical: 8.0))
                             ],
@@ -318,6 +314,29 @@ class _ManagerNewServicePageState extends State<ManagerNewServicePage> {
         );
       },
     );
+  }
+
+  Future scan() async {
+    try {
+      String barcode = await BarcodeScanner.scan();
+      setState(() {
+        return this.barcode = barcode;
+      });
+    } on PlatformException catch (e) {
+      if (e.code == BarcodeScanner.CameraAccessDenied) {
+        setState(() {
+          return this.barcode = 'The user did not grant the camera permission!';
+        });
+      } else {
+        setState(() {
+          return this.barcode = 'Unknown error: $e';
+        });
+      }
+    } on FormatException{
+      setState(() => this.barcode = 'null (User returned using the "back"-button before scanning anything. Result)');
+    } catch (e) {
+      setState(() => this.barcode = 'Unknown error: $e');
+    }
   }
 }
 

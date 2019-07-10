@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:atoi/pages/manager/manager_assign_page.dart';
 import 'dart:async';
+import 'package:dio/dio.dart';
+import 'dart:convert';
 
 class ManagerToAssign extends StatefulWidget {
   @override
@@ -18,35 +20,88 @@ class _ManagerToAssignState extends State<ManagerToAssign> {
   }
 
   Future getData() async {
-    await Future.delayed(Duration(seconds: 2), () {
-      setState(() {
-        _tasks = [
-          {"time": "2019-03-21 14:33", "deviceModel": "医用磁共振设备	Philips 781-296", "deviceNo": "ZC00000001", "deviceLocation": "磁共振1室", "subject": "系统报错", "detail": "系统报错，设备无法启动"},
-          {"time": "2019-04-22 9:21", "deviceModel": "医用CT	GE 8080-9527", "deviceNo": "ZC00000022", "deviceLocation": "放射科", "subject": "系统报错", "detail": "无法开机"},
-          {"time": "2019-05-24 19:56", "deviceModel": "医用X光设备 SIEMENZ 781-296", "deviceNo": "ZC00000221", "deviceLocation": "介入科", "subject": "系统报错", "detail": "显示器蓝屏"},
-          {"time": "2019-03-2 14:33", "deviceModel": "医用磁共振设备	Philips 781-296", "deviceNo": "ZC00000001", "deviceLocation": "磁共振1室", "subject": "系统报错", "detail": "系统报错，设备无法启动"},
-          {"time": "2019-03-22 14:33", "deviceModel": "医用磁共振设备	Philips 781-296", "deviceNo": "ZC00000001", "deviceLocation": "磁共振1室", "subject": "系统报错", "detail": "系统报错，设备无法启动"},
-        ];
-      });
+    setState(() {
+      _tasks = [
+        {
+          "time": "2019-03-21 14:33",
+          "deviceModel": "医用磁共振设备	Philips 781-296",
+          "deviceNo": "ZC00000001",
+          "deviceLocation": "磁共振1室",
+          "subject": "系统报错",
+          "detail": "系统报错，设备无法启动"
+        },
+        {
+          "time": "2019-04-22 9:21",
+          "deviceModel": "医用CT	GE 8080-9527",
+          "deviceNo": "ZC00000022",
+          "deviceLocation": "放射科",
+          "subject": "系统报错",
+          "detail": "无法开机"
+        },
+        {
+          "time": "2019-05-24 19:56",
+          "deviceModel": "医用X光设备 SIEMENZ 781-296",
+          "deviceNo": "ZC00000221",
+          "deviceLocation": "介入科",
+          "subject": "系统报错",
+          "detail": "显示器蓝屏"
+        },
+        {
+          "time": "2019-03-2 14:33",
+          "deviceModel": "医用磁共振设备	Philips 781-296",
+          "deviceNo": "ZC00000001",
+          "deviceLocation": "磁共振1室",
+          "subject": "系统报错",
+          "detail": "系统报错，设备无法启动"
+        },
+        {
+          "time": "2019-03-22 14:33",
+          "deviceModel": "医用磁共振设备	Philips 781-296",
+          "deviceNo": "ZC00000001",
+          "deviceLocation": "磁共振1室",
+          "subject": "系统报错",
+          "detail": "系统报错，设备无法启动"
+        },
+      ];
     });
   }
 
   Future<Null> _onRefresh() async {
-    await Future.delayed(Duration(seconds: 3), () {
-      print('refresh');
+    Dio dio = new Dio();
+    var response = await dio.get<String>('http://api.stramogroup.com/m_get_request');
+    Map _data = jsonDecode(response.data);
+    if (response.statusCode == 200 && _data['error'] == 0) {
+      Map<String, dynamic> _newRecord = {
+        "time": _data['data']['request_time'],
+        "deviceModel": "医用磁共振设备	Philips 781-296",
+        "deviceNo": "ZC00000001",
+        "deviceLocation": "磁共振1室",
+        "subject": _data['data']['category'],
+        "detail": _data['data']['describe']
+      };
       setState(() {
-        _tasks = [
-          {"time": "2019-03-20 14:33", "deviceModel": "医用磁共振设备	Philips 781-296", "deviceNo": "ZC00000001", "deviceLocation": "磁共振1室", "subject": "系统报错", "detail": "系统报错，设备无法启动"},
-          {"time": "2019-03-01 14:33", "deviceModel": "医用磁共振设备	Philips 781-296", "deviceNo": "ZC00000001", "deviceLocation": "磁共振1室", "subject": "系统报错", "detail": "系统报错，设备无法启动"},
-          {"time": "2019-03-02 14:33", "deviceModel": "医用磁共振设备	Philips 781-296", "deviceNo": "ZC00000001", "deviceLocation": "磁共振1室", "subject": "系统报错", "detail": "系统报错，设备无法启动"},
-          {"time": "2019-03-21 14:33", "deviceModel": "医用磁共振设备	Philips 781-296", "deviceNo": "ZC00000001", "deviceLocation": "磁共振1室", "subject": "系统报错", "detail": "系统报错，设备无法启动"},
-          {"time": "2019-04-22 9:21", "deviceModel": "医用CT	GE 8080-9527", "deviceNo": "ZC00000022", "deviceLocation": "放射科", "subject": "系统报错", "detail": "无法开机"},
-          {"time": "2019-05-24 19:56", "deviceModel": "医用X光设备 SIEMENZ 781-296", "deviceNo": "ZC00000221", "deviceLocation": "介入科", "subject": "系统报错", "detail": "显示器蓝屏"},
-          {"time": "2019-03-2 14:33", "deviceModel": "医用磁共振设备	Philips 781-296", "deviceNo": "ZC00000001", "deviceLocation": "磁共振1室", "subject": "系统报错", "detail": "系统报错，设备无法启动"},
-          {"time": "2019-03-22 14:33", "deviceModel": "医用磁共振设备	Philips 781-296", "deviceNo": "ZC00000001", "deviceLocation": "磁共振1室", "subject": "系统报错", "detail": "系统报错，设备无法启动"},
-        ];
+        _tasks.insert(0, _newRecord);
       });
-    });
+    } else {
+      showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: new Text('没有新报修'),
+          )
+      );
+    }
+  }
+
+  Future _cancelRequest() async {
+    Dio dio = new Dio();
+    var response = await dio.get<String>('http://api.stramogroup.com/delete_key');
+    if (response.data == 'ok') {
+      showDialog(context: context,
+        builder: (context) => AlertDialog(
+          title: new Text('取消请求'),
+        )
+      );
+    }
   }
 
   @override
@@ -230,7 +285,7 @@ class _ManagerToAssignState extends State<ManagerToAssign> {
                       ),
                       new RaisedButton(
                         onPressed: (){
-                          return null;
+                          _cancelRequest();
                         },
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(24),

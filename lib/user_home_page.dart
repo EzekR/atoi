@@ -79,7 +79,7 @@ class _UserHomePageState extends State<UserHomePage> {
       appBar: new AppBar(
         leading: new Container(),
         title: new Align(
-          alignment: Alignment(-3.0, 0),
+          alignment: Alignment(-20.0, 0),
           child: new Text('ATOI医疗设备管理系统'),
         ),
         elevation: 0.7,
@@ -96,20 +96,15 @@ class _UserHomePageState extends State<UserHomePage> {
           ),
         ),
         actions: <Widget>[
-          new Align(
-            alignment: Alignment(10.0, 0),
-            child: new IconButton(
-              icon: Icon(Icons.face),
-              onPressed: () {
-                _scaffoldKey.currentState.openEndDrawer();
-              },
-            ),
-          ),
+          new Icon(Icons.face),
           new Padding(
             padding: const EdgeInsets.symmetric(vertical: 19.0),
-            child: const Text(
-                '真田幸村',
-            ),
+            child: new GestureDetector(
+              onTap: () {
+                _scaffoldKey.currentState.openEndDrawer();
+              },
+              child: new Text("真田信村"),
+            )
           ),
         ],
       ),
@@ -126,13 +121,13 @@ class _UserHomePageState extends State<UserHomePage> {
             ],
           ),
           new Padding(
-            padding: EdgeInsets.symmetric(vertical: 15.0),
+            padding: EdgeInsets.symmetric(vertical: 30.0),
             child: new Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: <Widget>[
                 new IconButton(
                     icon: new Icon(Icons.crop_free),
-                    iconSize: 60.0,
+                    iconSize: 100.0,
                     color: Colors.orange,
                     onPressed: scan
                 ),
@@ -151,22 +146,18 @@ class _UserHomePageState extends State<UserHomePage> {
             ),
           ),
           new Padding(
-              padding: EdgeInsets.symmetric(vertical: 5.0),
+              padding: EdgeInsets.symmetric(vertical: 0.0),
               child: new Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: <Widget>[
                   new Expanded(
-                    flex: 4,
+                    flex: 6,
                     child: buildIconColumn(Icons.remove_red_eye, '其他服务'),
                   ),
                   new Expanded(
-                    flex: 3,
+                    flex: 6,
                     child: buildIconColumn(Icons.history, '服务记录'),
                   ),
-                  new Expanded(
-                    flex: 4,
-                    child: buildIconColumn(Icons.assignment_late, '未响应服务'),
-                  )
                 ],
               ),
           ),

@@ -25,13 +25,9 @@ class _EngineerHomePageState extends State<EngineerHomePage>
   Widget build(BuildContext context) {
     return new Scaffold(
         appBar: new AppBar(
-//          title: new Align(
-//            alignment: Alignment(-3.0, 0),
-//            child: new Text('ATOI医疗设备管理系统'),
-//          ),
           leading: new Container(),
           title: new Align(
-            alignment: Alignment(-4.0, 0),
+            alignment: Alignment(-20.0, 0),
             child: new Text('ATOI医疗设备管理系统'),
           ),
           elevation: 0.7,
@@ -84,7 +80,7 @@ class _EngineerHomePageState extends State<EngineerHomePage>
           actions: <Widget>[
             new Icon(Icons.face),
             new Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 5.0, vertical: 19.0),
+              padding: const EdgeInsets.symmetric(vertical: 19.0),
               child: const Text('武田信玄'),
             ),
           ],
