@@ -2,6 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:atoi/home_page.dart';
 import 'package:atoi/engineer_home_page.dart';
 import 'package:atoi/user_home_page.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:device_info/device_info.dart';
+import 'package:atoi/utils/http_request.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginPage extends StatefulWidget {
   static String tag = 'login-page';
@@ -13,7 +17,42 @@ class _LoginPageState extends State<LoginPage> {
 
   TextEditingController phoneController = new TextEditingController();
   TextEditingController passwordController = new TextEditingController();
+  bool _loading = false;
 
+  Future _doLogin() async {
+    setState(() {
+      _loading = !_loading;
+    });
+    var _data = await HttpRequest.request(
+      '/app/User/Login',
+      method: HttpRequest.POST,
+      data: {
+        'Telephone': phoneController.text,
+        'Password': passwordController.text
+      }
+    );
+    setState(() {
+      _loading = !_loading;
+    });
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    if (_data['ErrorCode'] == '00') {
+      print(_data);
+      switch (_data['Data']) {
+        case '1':
+          prefs.setString('role', '超级管理员');
+          Navigator.of(context).pushNamed(HomePage.tag);
+          break;
+        case '2':
+          prefs.setString('role', '工程师');
+          Navigator.of(context).pushNamed(EngineerHomePage.tag);
+          break;
+        case '3':
+          prefs.setString('role', '用户');
+          Navigator.of(context).pushNamed(UserHomePage.tag);
+          break;
+      }
+    }
+  }
   @override
   Widget build(BuildContext context) {
     final logo = Hero(
@@ -54,15 +93,16 @@ class _LoginPageState extends State<LoginPage> {
           borderRadius: BorderRadius.circular(24),
         ),
         onPressed: () {
-          if (phoneController.text == '1') {
-            Navigator.of(context).pushNamed(HomePage.tag);
-          } else {
-            if (phoneController.text == '2') {
-              Navigator.of(context).pushNamed(EngineerHomePage.tag);
-            } else {
-              Navigator.of(context).pushNamed(UserHomePage.tag);
-            }
-          }
+          _doLogin();
+//          if (phoneController.text == '1') {
+//            Navigator.of(context).pushNamed(HomePage.tag);
+//          } else {
+//            if (phoneController.text == '2') {
+//              Navigator.of(context).pushNamed(EngineerHomePage.tag);
+//            } else {
+//              Navigator.of(context).pushNamed(UserHomePage.tag);
+//            }
+//          }
         },
         padding: EdgeInsets.all(12),
         color: new Color(0xff183dca),
@@ -86,7 +126,7 @@ class _LoginPageState extends State<LoginPage> {
           padding: EdgeInsets.only(left: 24.0, right: 24.0),
           children: <Widget>[
             logo,
-            SizedBox(height: 48.0),
+            _loading?SpinKitWave(color: Colors.grey):SizedBox(height: 50.0),
             phone,
             SizedBox(height: 8.0),
             password,

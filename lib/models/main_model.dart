@@ -3,6 +3,5 @@ import 'package:atoi/models/search_model.dart';
 
 class MainModel extends Model with SearchModel{
   MainModel() {
-    
   }
 }

@@ -152,7 +152,7 @@ class _MaintainRequestState extends State<MaintainRequest> {
       builder: (context, child, mainModel) {
         return new Scaffold(
             appBar: new AppBar(
-              title: new Text('新增报修'),
+              title: new Text('新增保养'),
               elevation: 0.7,
               flexibleSpace: Container(
                 decoration: BoxDecoration(

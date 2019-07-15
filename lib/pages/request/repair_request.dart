@@ -7,6 +7,7 @@ import 'dart:async';
 import 'package:flutter/services.dart';
 import 'dart:convert';
 import 'package:image_picker/image_picker.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class RepairRequest extends StatefulWidget{
   static String tag = 'repair-request';
@@ -17,6 +18,7 @@ class RepairRequest extends StatefulWidget{
 class _RepairRequestState extends State<RepairRequest> {
 
   String barcode = "";
+  String _role = "";
 
   var _isExpandedBasic = true;
   var _isExpandedDetail = false;
@@ -43,10 +45,17 @@ class _RepairRequestState extends State<RepairRequest> {
   List<DropdownMenuItem<String>> _dropDownMenuItems;
   String _currentResult;
   List<dynamic> _imageList = [];
+  Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
+
+  Future getRole() async {
+    final SharedPreferences prefs = await _prefs;
+    _role = await prefs.getString('role');
+  }
 
   void initState(){
     _dropDownMenuItems = getDropDownMenuItems(_serviceResults);
     _currentResult = _dropDownMenuItems[0].value;
+    getRole();
     super.initState();
   }
 
@@ -265,7 +274,7 @@ class _RepairRequestState extends State<RepairRequest> {
                             child: new Column(
                               children: <Widget>[
                                 buildRow('类型：', '报修'),
-                                buildRow('请求人：', '超级管理员'),
+                                buildRow('请求人：', _role),
                                 buildRow('主题', '--报修'),
                                 new Padding(
                                   padding: EdgeInsets.symmetric(vertical: 5.0),

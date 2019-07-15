@@ -17,6 +17,19 @@ import 'package:atoi/pages/user/user_scan_page.dart';
 import 'package:atoi/pages/user/user_repair_page.dart';
 import 'package:atoi/pages/engineer/signature_page.dart';
 import 'package:atoi/pages/request/repair_request.dart';
+import 'package:atoi/pages/request/bad_request.dart';
+import 'package:atoi/pages/request/correction_request.dart';
+import 'package:atoi/pages/request/equipment_request.dart';
+import 'package:atoi/pages/request/maintain_request.dart';
+import 'package:atoi/pages/request/mandatory_request.dart';
+import 'package:atoi/pages/request/other_request.dart';
+import 'package:atoi/pages/request/patrol_request.dart';
+import 'package:atoi/pages/lifecycle/equipment_check.dart';
+import 'package:atoi/pages/lifecycle/equipment_contract.dart';
+import 'package:atoi/pages/lifecycle/equipment_install.dart';
+import 'package:atoi/pages/lifecycle/equipment_lending.dart';
+import 'package:atoi/pages/lifecycle/equipment_scrap.dart';
+import 'package:atoi/pages/lifecycle/equipment_transfer.dart';
 
 void main() => runApp(new MyApp());
 
@@ -37,6 +50,19 @@ class MyApp extends StatelessWidget {
     UserRepairPage.tag: (context) => UserRepairPage(),
     SignaturePage.tag: (context) => SignaturePage(),
     RepairRequest.tag: (context) => RepairRequest(),
+    BadRequest.tag: (context) => BadRequest(),
+    CorrectionRequest.tag: (context) => CorrectionRequest(),
+    EquipmentRequest.tag: (context) => EquipmentRequest(),
+    MaintainRequest.tag: (context) => MaintainRequest(),
+    MandatoryRequest.tag: (context) => MandatoryRequest(),
+    OtherRequest.tag: (context) => OtherRequest(),
+    PatrolRequest.tag: (context) => PatrolRequest(),
+    EquipmentCheck.tag: (context) => EquipmentCheck(),
+    EquipmentContract.tag: (context) => EquipmentContract(),
+    EquipmentInstall.tag: (context) => EquipmentInstall(),
+    EquipmentLending.tag: (context) => EquipmentLending(),
+    EquipmentScrap.tag: (context) => EquipmentScrap(),
+    EquipmentTransfer.tag: (context) => EquipmentTransfer()
   };
 
   final MainModel mainModel = MainModel();

@@ -9,7 +9,7 @@ import 'dart:convert';
 import 'package:image_picker/image_picker.dart';
 
 class EquipmentTransfer extends StatefulWidget{
-  static String tag = 'equipment-install';
+  static String tag = 'equipment-transfer';
 
   _EquipmentTransferState createState() => new _EquipmentTransferState();
 }
