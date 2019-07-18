@@ -1,7 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:atoi/utils/http_request.dart';
 
 class ManagerAuditReportPage extends StatefulWidget {
   static String tag = 'manager-audit-report-page';
+  ManagerAuditReportPage({Key key, this.request, this.reportId}): super(key: key);
+  final Map request;
+  final String reportId;
 
   @override
   _ManagerAuditReportPageState createState() => new _ManagerAuditReportPageState();
@@ -133,6 +138,54 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
         )
       ],
     );
+  }
+
+  Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
+
+  Future<Null> approveReport() async {
+    final SharedPreferences prefs = await _prefs;
+    var UserId = await prefs.getString('userId');
+    Map<String, dynamic> _data = {
+      'UserId': UserId,
+      'RequestJournalId': widget.reportId
+    };
+    var _response = await HttpRequest.request(
+        '/DispatchJournal/ApproveDispatchReport',
+        method: HttpRequest.POST,
+        data: _data
+    );
+    print(_response);
+    if (_response['ErrorCode'] == '00') {
+      showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: new Text('通过报告'),
+          )
+      );
+    }
+  }
+
+  Future<Null> rejectReport() async {
+    final SharedPreferences prefs = await _prefs;
+    var UserId = await prefs.getString('userId');
+    Map<String, dynamic> _data = {
+      'UserId': UserId,
+      'RequestJournalId': widget.reportId
+    };
+    var _response = await HttpRequest.request(
+        '/DispatchJournal/RejectDispatchReport',
+        method: HttpRequest.POST,
+        data: _data
+    );
+    print(_response);
+    if (_response['ErrorCode'] == '00') {
+      showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: new Text('拒绝报告'),
+          )
+      );
+    }
   }
 
   @override

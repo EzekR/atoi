@@ -119,10 +119,12 @@ class _RepairRequestState extends State<RepairRequest> {
 
   Future toSearch() async {
     final _searchResult = await showSearch(context: context, delegate: SearchBarDelegate());
-    Map _data = jsonDecode(_searchResult);
-    setState(() {
-      _result.addAll(_data);
-    });
+    if (_searchResult != null) {
+      Map _data = jsonDecode(_searchResult);
+      setState(() {
+        _result.addAll(_data);
+      });
+    }
   }
 
   Padding buildRow(String labelText, String defaultText) {

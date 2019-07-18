@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:atoi/pages/engineer/engineer_start_page.dart';
 import 'package:dio/dio.dart';
 import 'dart:convert';
+import 'package:atoi/utils/http_request.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class EngineerToStart extends StatefulWidget{
 
@@ -19,7 +21,27 @@ class _EngineerToStartState extends State<EngineerToStart> {
     {"time": "2019-03-22 14:33", "deviceModel": "医用磁共振设备	Philips 781-296", "deviceNo": "ZC00000001", "deviceLocation": "磁共振1室", "subject": "系统报错", "detail": "系统报错，设备无法启动", "level": "紧急", "method": "上门维修"},
   ];
 
+  Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
+
+  Future<Null> getTask() async {
+    final SharedPreferences pref = await _prefs;
+    var userId = await pref.getString('UserId');
+    Map<String, dynamic> params = {
+      'UserId': userId
+    };
+    var resp = await HttpRequest.request(
+      '/Dispatch/GetDispatches',
+      method: HttpRequest.GET,
+      data: params
+    );
+    print(resp);
+    setState(() {
+      _tasks = resp['Data'];
+    });
+  }
+
   void initState() {
+    getTask();
     super.initState();
   }
 
@@ -214,7 +236,8 @@ class _EngineerToStartState extends State<EngineerToStart> {
                     children: <Widget>[
                       new RaisedButton(
                         onPressed: (){
-                          Navigator.of(context).pushNamed(EngineerStartPage.tag);
+                          //Navigator.of(context).pushNamed(EngineerStartPage.tag);
+                          //todo: navigate to start page
                         },
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(24),
@@ -251,7 +274,7 @@ class _EngineerToStartState extends State<EngineerToStart> {
           itemCount: _tasks.length,
           itemBuilder: (context, i) => buildCardItem('PGD0000000$i', _tasks[i]['time'], _tasks[i]['deviceModel'], _tasks[i]['deviceLocation'], _tasks[i]['subject'], _tasks[i]['detail'], _tasks[i]['level'], _tasks[i]["method"]),
         ),
-        onRefresh: _onRefresh
+        onRefresh: getTask
     );
   }
 }

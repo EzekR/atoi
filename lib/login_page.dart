@@ -3,7 +3,6 @@ import 'package:atoi/home_page.dart';
 import 'package:atoi/engineer_home_page.dart';
 import 'package:atoi/user_home_page.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
-import 'package:device_info/device_info.dart';
 import 'package:atoi/utils/http_request.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -24,29 +23,32 @@ class _LoginPageState extends State<LoginPage> {
       _loading = !_loading;
     });
     var _data = await HttpRequest.request(
-      '/app/User/Login',
+      '/User/Login',
       method: HttpRequest.POST,
       data: {
-        'Telephone': phoneController.text,
-        'Password': passwordController.text
+        'LoginID': phoneController.text,
+        'LoginPwd': passwordController.text,
+        'DeviceToken': 'test token',
+        'OSName': 'iOS'
       }
     );
     setState(() {
       _loading = !_loading;
     });
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    if (_data['ErrorCode'] == '00') {
+    if (_data['ResultCode'] == '00') {
       print(_data);
+      prefs.setInt('userID', _data['Data']);
       switch (_data['Data']) {
-        case '1':
+        case 31:
           prefs.setString('role', '超级管理员');
           Navigator.of(context).pushNamed(HomePage.tag);
           break;
-        case '2':
+        case 32:
           prefs.setString('role', '工程师');
           Navigator.of(context).pushNamed(EngineerHomePage.tag);
           break;
-        case '3':
+        case 33:
           prefs.setString('role', '用户');
           Navigator.of(context).pushNamed(UserHomePage.tag);
           break;
@@ -65,11 +67,11 @@ class _LoginPageState extends State<LoginPage> {
     );
 
     final phone = TextFormField(
-      keyboardType: TextInputType.number,
+      keyboardType: TextInputType.text,
       controller: phoneController,
       autofocus: false,
       decoration: InputDecoration(
-        hintText: '手机号',
+        hintText: '用户名',
         contentPadding: EdgeInsets.fromLTRB(20.0, 10.0, 20.0, 10.0),
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(32.0)),
       ),

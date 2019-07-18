@@ -6,6 +6,8 @@ import 'dart:convert';
 class ManagerAssignPage extends StatefulWidget {
   static String tag = 'mananger-assign-page';
 
+  ManagerAssignPage({Key key, this.request}) : super(key: key);
+  final Map request;
   @override
   _ManagerAssignPageState createState() => new _ManagerAssignPageState();
 
@@ -16,13 +18,13 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
   var _isExpandedBasic = true;
   var _isExpandedDetail = false;
   var _isExpandedAssign = false;
-  Map<String, dynamic> _request = {
+  Map<dynamic, dynamic> _request = {
       'name': "",
-      'telephone': "",
-      'subject': "",
-      'detail': "",
-      'time': "",
-      'image': ""
+      'telephone': "1",
+      'subject': "2",
+      'detail': "3",
+      'time': "4",
+      'image': "5"
   };
 
   String _imageUri = '';
@@ -86,6 +88,10 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
   String _currentStatus;
   String _currentName;
 
+  Future<Null> getRequest() async {
+
+  }
+
   void initState() {
     _dropDownMenuItems = getDropDownMenuItems(_handleMethods);
     _currentMethod = _dropDownMenuItems[0].value;
@@ -100,7 +106,7 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
     _currentStatus = _dropDownMenuStatuses[0].value;
     _currentName = _dropDownMenuNames[0].value;
 
-    getReport();
+    //getReport();
     super.initState();
   }
 
@@ -346,9 +352,9 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
                         padding: EdgeInsets.symmetric(horizontal: 12.0),
                         child: new Column(
                           children: <Widget>[
-                            buildRow('设备编号：', 'ZC00000001'),
-                            buildRow('设备名称：', '医用磁共振设备'),
-                            buildRow('使用科室：', '磁共振'),
+                            buildRow('设备编号：', widget.request['EquipmentNo']),
+                            buildRow('设备名称：', widget.request['EquipmentName']),
+                            buildRow('使用科室：', widget.request['Department']),
                             buildRow('设备厂商：', '飞利浦'),
                             buildRow('资产等级：', '重要'),
                             buildRow('设备型号：', 'Philips 781-296'),
@@ -386,11 +392,11 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: <Widget>[
                           buildRow('类型：', '客户请求-报修'),
-                          buildRow('主题：', _request['subject']),
-                          buildRow('故障描述：', _request['detail']),
+                          buildRow('主题：', widget.request['Subject']),
+                          buildRow('故障描述：', widget.request['Detail']),
                           buildRow('故障分类：', '未知'),
-                          buildRow('请求人：', _request['name']),
-                          buildRow('联系电话：', _request['telephone']),
+                          buildRow('请求人：', 'John Wick'),
+                          buildRow('联系电话：', '11212121'),
                           buildDropdown('处理方式：', _currentMethod, _dropDownMenuItems, changedDropDownMethod),
                           buildDropdown('优先级：', _currentPriority, _dropDownMenuPris, changedDropDownPri),
                           new Padding(

@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 
 class EngineerReportPage extends StatefulWidget {
   static String tag = 'engineer-report-page';
+  EngineerReportPage({Key key, this.dispatchId}):super(key: key);
+  final String dispatchId;
 
   @override
   _EngineerReportPageState createState() => new _EngineerReportPageState();

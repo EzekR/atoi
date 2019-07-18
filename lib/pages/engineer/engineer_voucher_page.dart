@@ -6,6 +6,8 @@ import 'dart:typed_data';
 
 class EngineerVoucherPage extends StatefulWidget {
   static String tag = 'engineer-voucher-page';
+  EngineerVoucherPage({Key key, this.dispatchId}):super(key: key);
+  final String dispatchId;
 
   @override
   _EngineerVoucherPageState createState() => new _EngineerVoucherPageState();

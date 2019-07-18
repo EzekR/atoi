@@ -17,7 +17,7 @@ class HttpRequest {
   static Dio dio;
 
   /// default options
-  static const String API_PREFIX = 'http://api.stramogroup.com';
+  static const String API_PREFIX = 'http://159.226.128.250/MEMS/APP';
   static const int CONNECT_TIMEOUT = 10000;
   static const int RECEIVE_TIMEOUT = 3000;
 
@@ -31,9 +31,10 @@ class HttpRequest {
   /// request method
   static Future<Map> request (
       String url,
-      { data, method }) async {
+      { params, data, method }) async {
 
-    data = data ?? {};
+    data ?? {};
+    params ?? {};
     method = method ?? 'GET';
 
     /// restful 请求处理
@@ -47,13 +48,14 @@ class HttpRequest {
 
     /// 打印请求相关信息：请求地址、请求方式、请求参数
     print('请求地址：【' + method + '  ' + url + '】');
-    print('请求参数：' + data.toString());
+    print('请求body：' + data.toString());
+    print('请求params：'+params.toString());
 
     Dio dio = createInstance();
     var result;
 
     try {
-      Response response = await dio.request(url, data: new FormData.from(data), options: new Options(method: method));
+      Response response = await dio.request(url, queryParameters: params, data: data, options: new Options(method: method));
 
       result = response.data;
 

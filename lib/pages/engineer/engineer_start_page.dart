@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:atoi/utils/http_request.dart';
 
 class EngineerStartPage extends StatefulWidget {
   static String tag = 'engineer-start-page';
+
+  EngineerStartPage({Key key, this.dispatchId}):super(key: key);
+  final String dispatchId;
 
   @override
   _EngineerStartPageState createState() => new _EngineerStartPageState();
@@ -13,6 +17,22 @@ class _EngineerStartPageState extends State<EngineerStartPage> {
   var _isExpandedBasic = false;
   var _isExpandedDetail = false;
   var _isExpandedAssign = true;
+  
+  Future<Null> startDispatch() async {
+    Map<String, dynamic> params = {};
+    var resp = await HttpRequest.request(
+      '/Dispatch/StartDispatch',
+      method: HttpRequest.POST,
+      data: params
+    );
+    print(resp);
+    showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: new Text('开始作业'),
+        )
+    );
+  }
 
   void initState() {
     super.initState();
