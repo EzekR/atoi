@@ -154,8 +154,8 @@ class _ManagerAuditVoucherPageState extends State<ManagerAuditVoucherPage> {
     final SharedPreferences prefs = await _prefs;
     var UserId = await prefs.getString('userId');
     Map<String, dynamic> _data = {
-      'UserId': UserId,
-      'RequestJournalId': widget.journalId
+      'userID': UserId,
+      'dispatchJournalID': widget.journalId
     };
     var _response = await HttpRequest.request(
       '/DispatchJournal/ApproveDispatchJournal',
@@ -177,8 +177,8 @@ class _ManagerAuditVoucherPageState extends State<ManagerAuditVoucherPage> {
     final SharedPreferences prefs = await _prefs;
     var UserId = await prefs.getString('userId');
     Map<String, dynamic> _data = {
-      'UserId': UserId,
-      'RequestJournalId': widget.journalId
+      'userID': UserId,
+      'dispatchJournalID': widget.journalId
     };
     var _response = await HttpRequest.request(
         '/DispatchJournal/RejectDispatchJournal',

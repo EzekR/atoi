@@ -5,6 +5,8 @@ import 'package:barcode_scan/barcode_scan.dart';
 import 'dart:async';
 import 'package:flutter/services.dart';
 import 'package:atoi/pages/user/user_repair_page.dart';
+import 'package:atoi/utils/http_request.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class UserHomePage extends StatefulWidget{
   static String tag = 'user-home-page';
@@ -19,10 +21,10 @@ class _UserHomePageState extends State<UserHomePage> {
   Future scan() async {
     try {
       String barcode = await BarcodeScanner.scan();
-      Navigator.of(context).pushNamed(UserRepairPage.tag);
       setState(() {
         return this.barcode = barcode;
       });
+      await getDevice();
     } on PlatformException catch (e) {
       if (e.code == BarcodeScanner.CameraAccessDenied) {
         setState(() {
@@ -38,6 +40,21 @@ class _UserHomePageState extends State<UserHomePage> {
     } catch (e) {
       setState(() => this.barcode = 'Unknown error: $e');
     }
+  }
+
+  Future<Null> getDevice() async {
+    Map<String, dynamic> params = {
+      'codeContent': barcode,
+    };
+    var resp = await HttpRequest.request(
+        '/Equipment/GetDeviceByQRCode',
+        method: HttpRequest.GET,
+        params: params
+    );
+    print(resp);
+    Navigator.of(context).push(new MaterialPageRoute(builder: (_){
+      return new UserRepairPage(equipment: resp['Data']);
+    }));
   }
 
   Column buildIconColumn(IconData icon, String label) {
@@ -129,7 +146,9 @@ class _UserHomePageState extends State<UserHomePage> {
                     icon: new Icon(Icons.crop_free),
                     iconSize: 100.0,
                     color: Colors.orange,
-                    onPressed: scan
+                    onPressed: () {
+                      scan();
+                    }
                 ),
                 new Container(
                   margin: const EdgeInsets.only(top: 8.0),

@@ -18,7 +18,8 @@ class RepairRequest extends StatefulWidget{
 class _RepairRequestState extends State<RepairRequest> {
 
   String barcode = "";
-  String _role = "";
+  int _role;
+  String _roleName = "";
 
   var _isExpandedBasic = true;
   var _isExpandedDetail = false;
@@ -49,7 +50,9 @@ class _RepairRequestState extends State<RepairRequest> {
 
   Future getRole() async {
     final SharedPreferences prefs = await _prefs;
-    _role = await prefs.getString('role');
+    _role = await prefs.getInt('role');
+    _roleName = prefs.getString('roleName');
+
   }
 
   void initState(){
@@ -276,7 +279,7 @@ class _RepairRequestState extends State<RepairRequest> {
                             child: new Column(
                               children: <Widget>[
                                 buildRow('类型：', '报修'),
-                                buildRow('请求人：', _role),
+                                buildRow('请求人：', _roleName),
                                 buildRow('主题', '--报修'),
                                 new Padding(
                                   padding: EdgeInsets.symmetric(vertical: 5.0),

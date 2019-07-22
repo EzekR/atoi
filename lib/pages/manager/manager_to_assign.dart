@@ -3,6 +3,8 @@ import 'package:atoi/pages/manager/manager_assign_page.dart';
 import 'dart:async';
 import 'package:atoi/utils/http_request.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:scoped_model/scoped_model.dart';
+import 'package:atoi/models/models.dart';
 
 class ManagerToAssign extends StatefulWidget {
   @override
@@ -13,9 +15,7 @@ class ManagerToAssign extends StatefulWidget {
 class _ManagerToAssignState extends State<ManagerToAssign> {
 
   List<dynamic> _tasks = [];
-  bool _loading = false;
   Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
-  //var _tasks;
 
   void initState() {
     getData();
@@ -28,7 +28,7 @@ class _ManagerToAssignState extends State<ManagerToAssign> {
     Map<String, dynamic> params = {
       'userID': userID,
       'statusID': 1,
-      'typeID': 1
+      'typeID': 0
     };
     var _data = await HttpRequest.request(
       '/Request/GetRequests',
@@ -36,78 +36,11 @@ class _ManagerToAssignState extends State<ManagerToAssign> {
       params: params
     );
     print(_data['Data']);
+    prefs.setString('badgeA', _data['Data'].length.toString());
     setState(() {
       _tasks = _data['Data'];
-      // _tasks = [
-      //   {
-      //     "time": "2019-03-21 14:33",
-      //     "deviceModel": "医用磁共振设备	Philips 781-296",
-      //     "deviceNo": "ZC00000001",
-      //     "deviceLocation": "磁共振1室",
-      //     "subject": "系统报错",
-      //     "detail": "系统报错，设备无法启动"
-      //   },
-      //   {
-      //     "time": "2019-04-22 9:21",
-      //     "deviceModel": "医用CT	GE 8080-9527",
-      //     "deviceNo": "ZC00000022",
-      //     "deviceLocation": "放射科",
-      //     "subject": "系统报错",
-      //     "detail": "无法开机"
-      //   },
-      //   {
-      //     "time": "2019-05-24 19:56",
-      //     "deviceModel": "医用X光设备 SIEMENZ 781-296",
-      //     "deviceNo": "ZC00000221",
-      //     "deviceLocation": "介入科",
-      //     "subject": "系统报错",
-      //     "detail": "显示器蓝屏"
-      //   },
-      //   {
-      //     "time": "2019-03-2 14:33",
-      //     "deviceModel": "医用磁共振设备	Philips 781-296",
-      //     "deviceNo": "ZC00000001",
-      //     "deviceLocation": "磁共振1室",
-      //     "subject": "系统报错",
-      //     "detail": "系统报错，设备无法启动"
-      //   },
-      //   {
-      //     "time": "2019-03-22 14:33",
-      //     "deviceModel": "医用磁共振设备	Philips 781-296",
-      //     "deviceNo": "ZC00000001",
-      //     "deviceLocation": "磁共振1室",
-      //     "subject": "系统报错",
-      //     "detail": "系统报错，设备无法启动"
-      //   },
-      // ];
     });
   }
-
-//  Future<Null> _onRefresh() async {
-//    Dio dio = new Dio();
-//    var response = await dio.get<String>('http://api.stramogroup.com/m_get_request');
-//    Map _data = jsonDecode(response.data);
-//    if (response.statusCode == 200 && _data['error'] == 0) {
-//      Map<String, dynamic> _newRecord = {
-//        "time": _data['data']['request_time'],
-//        "deviceModel": "医用磁共振设备	Philips 781-296",
-//        "deviceNo": "ZC00000001",
-//        "deviceLocation": "磁共振1室",
-//        "subject": _data['data']['category'],
-//        "detail": _data['data']['describe']
-//      };
-//      setState(() {
-//        _tasks.insert(0, _newRecord);
-//      });
-//    } else {
-//      showDialog(
-//          context: context,
-//          builder: (context) => AlertDialog(
-//            title: new Text('没有新报修'),
-//          )
-//      );
-//    }
-//  }
 
   Future _cancelRequest(int requestId) async {
     var prefs = await _prefs;
@@ -132,11 +65,41 @@ class _ManagerToAssignState extends State<ManagerToAssign> {
     }
   }
 
+  Row buildRow(String leading, String content) {
+    return new Row(
+      children: <Widget>[
+        new Expanded(
+          flex: 3,
+          child: new Text(
+            leading,
+            style: new TextStyle(
+                fontSize: 16.0,
+                fontWeight: FontWeight.w600
+            ),
+          ),
+        ),
+        new Expanded(
+          flex: 7,
+          child: new Text(
+            content,
+            style: new TextStyle(
+                fontSize: 16.0,
+                fontWeight: FontWeight.w400,
+                color: Colors.grey
+            ),
+          ),
+        )
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     // TODO: implement build
 
-    Card buildCardItem(Map task, int requestId, String taskNo, String time, String deviceModel, String deviceNo, String deviceLocation, String subject, String detail) {
+    Card buildCardItem(Map task, int requestId, String taskNo, String time, String equipmentName, String equipmentNo, String departmentName, String requestPerson, String requestType, String status, String detail) {
+      var _dataVal = DateTime.parse(time);
+      var _format = '${_dataVal.year}-${_dataVal.month}-${_dataVal.day} ${_dataVal.hour}:${_dataVal.minute}:${_dataVal.second}';
       return new Card(
         child: Column(
           mainAxisSize: MainAxisSize.max,
@@ -171,7 +134,7 @@ class _ManagerToAssignState extends State<ManagerToAssign> {
                 ],
               ),
               subtitle: Text(
-                "请求时间：$time",
+                "请求时间：$_format",
                 style: new TextStyle(
                   color: Theme.of(context).accentColor
                 ),
@@ -184,103 +147,13 @@ class _ManagerToAssignState extends State<ManagerToAssign> {
                 mainAxisAlignment: MainAxisAlignment.start,
                 mainAxisSize: MainAxisSize.max,
                 children: <Widget>[
-                  new Row(
-                    children: <Widget>[
-                      new Text(
-                        '设备型号：',
-                        style: new TextStyle(
-                          fontSize: 16.0,
-                          fontWeight: FontWeight.w600
-                        ),
-                      ),
-                      new Text(
-                        deviceModel,
-                        style: new TextStyle(
-                          fontSize: 16.0,
-                          fontWeight: FontWeight.w400,
-                          color: Colors.grey
-                        ),
-                      )
-                    ],
-                  ),
-                  new Row(
-                    children: <Widget>[
-                      new Text(
-                        '设备编号：',
-                        style: new TextStyle(
-                            fontSize: 16.0,
-                            fontWeight: FontWeight.w600
-                        ),
-                      ),
-                      new Text(
-                        deviceNo,
-                        style: new TextStyle(
-                            fontSize: 16.0,
-                            fontWeight: FontWeight.w400,
-                            color: Colors.grey
-                        ),
-                      )
-                    ],
-                  ),
-                  new Row(
-                    children: <Widget>[
-                      new Text(
-                        '安装位置：',
-                        style: new TextStyle(
-                            fontSize: 16.0,
-                            fontWeight: FontWeight.w600
-                        ),
-                      ),
-                      new Text(
-                        deviceLocation,
-                        style: new TextStyle(
-                            fontSize: 16.0,
-                            fontWeight: FontWeight.w400,
-                            color: Colors.grey
-                        ),
-                      )
-                    ],
-                  ),
-                  new Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.max,
-                    children: <Widget>[
-                      new Text(
-                        '请求主题：',
-                        style: new TextStyle(
-                            fontSize: 16.0,
-                            fontWeight: FontWeight.w600
-                        ),
-                      ),
-                      new Text(
-                        subject,
-                        style: new TextStyle(
-                            fontSize: 16.0,
-                            fontWeight: FontWeight.w400,
-                            color: Colors.grey
-                        ),
-                      ),
-                    ],
-                  ),
-                  new Row(
-                    children: <Widget>[
-                      new Text(
-                        '故障详情：',
-                        style: new TextStyle(
-                            fontSize: 16.0,
-                            fontWeight: FontWeight.w600
-                        ),
-                      ),
-                      new Text(
-                        detail,
-                        style: new TextStyle(
-                            fontSize: 16.0,
-                            fontWeight: FontWeight.w400,
-                            color: Colors.grey
-                        ),
-                      ),
-                    ],
-                  ),
+                  buildRow('设备编号：', equipmentNo),
+                  buildRow('设备名称：', equipmentName),
+                  buildRow('请求科室：', departmentName),
+                  buildRow('请求人员：', requestPerson),
+                  buildRow('请求类型：', requestType),
+                  buildRow('请求状态：', status),
+                  buildRow('请求详情：', detail),
                   new Row(
                     mainAxisAlignment: MainAxisAlignment.end,
                     mainAxisSize: MainAxisSize.max,
@@ -347,13 +220,20 @@ class _ManagerToAssignState extends State<ManagerToAssign> {
       );
     }
 
-    return new RefreshIndicator(
-        child: _tasks.length == 0?ListView(padding: const EdgeInsets.symmetric(vertical: 150.0), children: <Widget>[new Center(child: new Text('没有待派工请求'),)],):ListView.builder(
-          padding: const EdgeInsets.all(2.0),
-          itemCount: _tasks.length,
-          itemBuilder: (context, i) => buildCardItem(_tasks[i], _tasks[i]['ID'], _tasks[i]['OID'], _tasks[i]['RequestDate'], _tasks[i]['EquipmentName'], _tasks[i]['EquipmentOID'], _tasks[i]['DepartmentName'], _tasks[i]['Subject'], _tasks[i]['FaultDesc']),
-        ),
-        onRefresh: getData
+    return ScopedModelDescendant<MainModel>(
+      builder: (context, child, model) {
+        if(_tasks.length > 0) {
+          model.setBadge(_tasks.length.toString(), 'A');
+        }
+        return new RefreshIndicator(
+            child: _tasks.length == 0?ListView(padding: const EdgeInsets.symmetric(vertical: 150.0), children: <Widget>[new Center(child: new Text('没有待派工请求'),)],):ListView.builder(
+                padding: const EdgeInsets.all(2.0),
+                itemCount: _tasks.length,
+                itemBuilder: (context, i) => buildCardItem(_tasks[i], _tasks[i]['ID'], _tasks[i]['OID'], _tasks[i]['RequestDate'], _tasks[i]['EquipmentOID'], _tasks[i]['EquipmentName'], _tasks[i]['DepartmentName'], _tasks[i]['RequestUser']['Name'], _tasks[i]['RequestType']['Name'], _tasks[i]['Status']['Name'], _tasks[i]['FaultDesc'])
+            ),
+            onRefresh: getData
+        );
+      }
     );
   }
 }

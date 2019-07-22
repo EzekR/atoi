@@ -1,11 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import 'dart:io';
 import 'dart:async';
 import 'package:dio/dio.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:atoi/utils/constants.dart';
+import 'package:atoi/utils/http_request.dart';
+import 'dart:convert';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:atoi/user_home_page.dart';
 
 class UserRepairPage extends StatefulWidget {
   static String tag = 'user-repair-page';
+  UserRepairPage({Key key, this.equipment}):super(key: key);
+  final Map<dynamic, dynamic> equipment;
 
   @override
   _UserRepairPageState createState() => new _UserRepairPageState();
@@ -21,6 +29,8 @@ class _UserRepairPageState extends State<UserRepairPage> {
 
   TextEditingController _describe = new TextEditingController();
   TextEditingController _category = new TextEditingController();
+
+  Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
 
   void initState() {
     super.initState();
@@ -65,6 +75,68 @@ class _UserRepairPageState extends State<UserRepairPage> {
               )
           );
       Navigator.of(context).pop();
+    }
+  }
+
+  Future<Null> submit() async {
+    List<dynamic> Files = [];
+    for(var image in _imageList) {
+      List<int> imageBytes = await image.readAsBytes();
+      var content = base64Encode(imageBytes);
+      Map _json = {
+        'FileContent': content,
+        'FileName': image.path,
+        'ID': 0,
+        'FileType': 1
+      };
+      Files.add(_json);
+    }
+    var prefs = await _prefs;
+    var userID = prefs.getInt('userID');
+    Map<String, dynamic> _data = {
+      'userID': userID,
+      'requestInfo': {
+        'Equipments': [
+          {
+            'ID': widget.equipment['ID']
+          }
+        ],
+        'RequestType': {
+          'ID': 1
+        },
+        'Subject': '用户报修',
+        'FaultDesc': _describe.text,
+        'StatudID': 1,
+        'FaultType': {
+          'ID': 1
+        },
+        'Files': Files
+      }
+    };
+    var resp = await HttpRequest.request(
+      '/Request/AddRequest',
+      method: HttpRequest.POST,
+      data: _data,
+    );
+    print(resp);
+    if (resp['ResultCode'] == '00') {
+      print('yes');
+      showCupertinoDialog(context: context, builder: (context) => CupertinoAlertDialog(
+        title: new Text('报修成功'),
+        actions: <Widget>[
+          new RaisedButton(
+              onPressed: (){
+                Navigator.of(context).pushNamed(UserHomePage.tag);
+              },
+              child: new Text('返回首页',
+                style: new TextStyle(
+                  color: Colors.white
+                ),
+              ),
+          )
+        ],
+      ),
+      );
     }
   }
 
@@ -244,14 +316,14 @@ class _UserRepairPageState extends State<UserRepairPage> {
                       padding: EdgeInsets.symmetric(horizontal: 8.0),
                       child: new Column(
                         children: <Widget>[
-                          buildRow('设备系统编号：', 'ZC00000001'),
-                          buildRow('设备名称：', '医用磁共振设备'),
-                          buildRow('使用科室：', '磁共振'),
-                          buildRow('设备厂商：', '飞利浦'),
-                          buildRow('资产等级：', '重要'),
-                          buildRow('设备型号：', 'Philips 781-296'),
-                          buildRow('安装地点：', '磁共振1室'),
-                          buildRow('保修状况：', '保内'),
+                          buildRow('设备系统编号：', widget.equipment['OID']),
+                          buildRow('设备名称：', widget.equipment['Name']),
+                          buildRow('使用科室：', widget.equipment['Department']['Name']),
+                          buildRow('设备厂商：', widget.equipment['Manufacturer']['Name']),
+                          buildRow('资产等级：', widget.equipment['AssetLevel']['Name']),
+                          buildRow('设备型号：', widget.equipment['EquipmentCode']),
+                          buildRow('安装地点：', widget.equipment['InstalSite']),
+                          buildRow('保修状况：', widget.equipment['WarrantyStatus']),
                         ],
                       ),
                     ),
@@ -282,7 +354,7 @@ class _UserRepairPageState extends State<UserRepairPage> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: <Widget>[
                           buildInput('故障描述：', _describe),
-                          buildInput('故障分类：', _category),
+                          buildRow('故障分类：', '未知'),
                           new Padding(
                             padding: EdgeInsets.symmetric(vertical: 5.0),
                             child: new Text('上传故障照片',
@@ -328,7 +400,7 @@ class _UserRepairPageState extends State<UserRepairPage> {
                 children: <Widget>[
                   new RaisedButton(
                     onPressed: () {
-                      uploadImage();
+                      submit();
                     },
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(24),

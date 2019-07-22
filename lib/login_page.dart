@@ -38,18 +38,17 @@ class _LoginPageState extends State<LoginPage> {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     if (_data['ResultCode'] == '00') {
       print(_data);
-      prefs.setInt('userID', _data['Data']);
-      switch (_data['Data']) {
-        case 31:
-          prefs.setString('role', '超级管理员');
+      prefs.setInt('userID', _data['Data']['ID']);
+      prefs.setInt('role', _data['Data']['Role']['ID']);
+      prefs.setString('roleName', _data['Data']['Role']['Name']);
+      switch (_data['Data']['Role']['ID']) {
+        case 1:
           Navigator.of(context).pushNamed(HomePage.tag);
           break;
-        case 32:
-          prefs.setString('role', '工程师');
+        case 2:
           Navigator.of(context).pushNamed(EngineerHomePage.tag);
           break;
-        case 33:
-          prefs.setString('role', '用户');
+        case 4:
           Navigator.of(context).pushNamed(UserHomePage.tag);
           break;
       }

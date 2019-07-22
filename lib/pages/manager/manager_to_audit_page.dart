@@ -3,6 +3,8 @@ import 'package:atoi/pages/manager/manager_audit_voucher_page.dart';
 import 'package:atoi/pages/manager/manager_audit_report_page.dart';
 import 'package:atoi/utils/http_request.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:atoi/models/models.dart';
+import 'package:scoped_model/scoped_model.dart';
 
 class ManagerToAuditPage extends StatefulWidget {
   static String tag = 'manager-to-audit-page';
@@ -20,10 +22,9 @@ class _ManagerToAuditPageState extends State<ManagerToAuditPage> {
     Map<String, dynamic> params = {
       'userID': userID,
       'statusID': 1,
-      'typeID': 1
     };
     var _data = await HttpRequest.request(
-        '/Request/GetRequests',
+        '/Dispatch/GetDispatchs',
         method: HttpRequest.GET,
         params: params
     );
@@ -41,16 +42,9 @@ class _ManagerToAuditPageState extends State<ManagerToAuditPage> {
   Widget build(BuildContext context) {
     // TODO: implement build
 
-//    List<Map<String, String>> _reports = [
-//      {"time": "2019-03-21 14:33", "deviceModel": "医用磁共振设备	Philips 781-296", "deviceNo": "ZC00000001", "engineer": "张学友", "client": "李老师", "content": "监督外部供应商更换球馆"},
-//      {"time": "2019-04-22 14:33", "deviceModel": "医用CT	GE 8080-9527", "deviceNo": "ZC00000022", "engineer": "刘德华", "client": "王老师", "content": "更换显示器线"},
-//      {"time": "2019-05-24 14:33", "deviceModel": "医用X光设备 SIEMENZ 781-296", "deviceNo": "ZC00000221", "engineer": "郭富城", "client": "罗老师", "content": "重启系统"},
-//      {"time": "2019-03-2 14:33", "deviceModel": "医用磁共振设备	Philips 781-296", "deviceNo": "ZC00000001", "engineer": "金城武", "client": "赵老师", "content": "系统报错，设备无法启动"},
-//      {"time": "2019-03-22 14:33", "deviceModel": "医用磁共振设备	Philips 781-296", "deviceNo": "ZC00000001", "engineer": "磁共振1室", "client": "系统报错", "content": "系统报错，设备无法启动"},
-//    ];
-
-
-    Card buildCardItem(Map request, String title, String subtitle, String deviceModel, String deviceNo, String engineer, String client, String content) {
+    Card buildCardItem(Map dispatch, int dispatchId, int reportId,  String dispatchOID, String date, String deviceNo, String deviceName, String dispatchType, String urgency, String requestOID) {
+      var _dataVal = DateTime.parse(date);
+      var _format = '${_dataVal.year}-${_dataVal.month}-${_dataVal.day} ${_dataVal.hour}:${_dataVal.minute}:${_dataVal.second}';
       return new Card(
         child: Column(
           mainAxisSize: MainAxisSize.max,
@@ -63,14 +57,14 @@ class _ManagerToAuditPageState extends State<ManagerToAuditPage> {
                   size: 40.0,
               ),
               title: Text(
-                "派工单号：$title",
+                "派工单号：$dispatchOID",
                 style: new TextStyle(
                     fontSize: 16.0,
                     color: Theme.of(context).primaryColor
                 ),
               ),
               subtitle: Text(
-                "出发时间：$subtitle",
+                "结束时间：$_format",
                 style: new TextStyle(
                     color: Theme.of(context).accentColor
                 ),
@@ -83,25 +77,6 @@ class _ManagerToAuditPageState extends State<ManagerToAuditPage> {
                 mainAxisAlignment: MainAxisAlignment.start,
                 mainAxisSize: MainAxisSize.max,
                 children: <Widget>[
-                  new Row(
-                    children: <Widget>[
-                      new Text(
-                        '设备型号：',
-                        style: new TextStyle(
-                            fontSize: 16.0,
-                            fontWeight: FontWeight.w600
-                        ),
-                      ),
-                      new Text(
-                        deviceModel,
-                        style: new TextStyle(
-                            fontSize: 16.0,
-                            fontWeight: FontWeight.w400,
-                            color: Colors.grey
-                        ),
-                      )
-                    ],
-                  ),
                   new Row(
                     children: <Widget>[
                       new Text(
@@ -124,14 +99,33 @@ class _ManagerToAuditPageState extends State<ManagerToAuditPage> {
                   new Row(
                     children: <Widget>[
                       new Text(
-                        '工程师姓名：',
+                        '设备名称：',
                         style: new TextStyle(
                             fontSize: 16.0,
                             fontWeight: FontWeight.w600
                         ),
                       ),
                       new Text(
-                        engineer,
+                        deviceName,
+                        style: new TextStyle(
+                            fontSize: 16.0,
+                            fontWeight: FontWeight.w400,
+                            color: Colors.grey
+                        ),
+                      )
+                    ],
+                  ),
+                  new Row(
+                    children: <Widget>[
+                      new Text(
+                        '派工类型：',
+                        style: new TextStyle(
+                            fontSize: 16.0,
+                            fontWeight: FontWeight.w600
+                        ),
+                      ),
+                      new Text(
+                        dispatchType,
                         style: new TextStyle(
                             fontSize: 16.0,
                             fontWeight: FontWeight.w400,
@@ -145,14 +139,14 @@ class _ManagerToAuditPageState extends State<ManagerToAuditPage> {
                     mainAxisSize: MainAxisSize.max,
                     children: <Widget>[
                       new Text(
-                        '客户姓名：',
+                        '紧急程度：',
                         style: new TextStyle(
                             fontSize: 16.0,
                             fontWeight: FontWeight.w600
                         ),
                       ),
                       new Text(
-                        client,
+                        urgency,
                         style: new TextStyle(
                             fontSize: 16.0,
                             fontWeight: FontWeight.w400,
@@ -164,14 +158,14 @@ class _ManagerToAuditPageState extends State<ManagerToAuditPage> {
                   new Row(
                     children: <Widget>[
                       new Text(
-                        '工作内容：',
+                        '请求单号：',
                         style: new TextStyle(
                             fontSize: 16.0,
                             fontWeight: FontWeight.w600
                         ),
                       ),
                       new Text(
-                        content,
+                        requestOID,
                         style: new TextStyle(
                             fontSize: 16.0,
                             fontWeight: FontWeight.w400,
@@ -188,7 +182,7 @@ class _ManagerToAuditPageState extends State<ManagerToAuditPage> {
                         onPressed: (){
                           //Navigator.of(context).pushNamed(ManagerAuditVoucherPage.tag);
                           Navigator.of(context).push(new MaterialPageRoute(builder: (_) {
-                            return new ManagerAuditVoucherPage(request: request);
+                            return new ManagerAuditVoucherPage(request: dispatch);
                           }));
                         },
                         shape: RoundedRectangleBorder(
@@ -217,7 +211,7 @@ class _ManagerToAuditPageState extends State<ManagerToAuditPage> {
                         onPressed: (){
                           //Navigator.of(context).pushNamed(ManagerAuditReportPage.tag);
                           Navigator.of(context).push(new MaterialPageRoute(builder: (_){
-                            return new ManagerAuditReportPage(request: request);
+                            return new ManagerAuditReportPage(request: dispatch);
                           }));
                         },
                         shape: RoundedRectangleBorder(
@@ -249,13 +243,20 @@ class _ManagerToAuditPageState extends State<ManagerToAuditPage> {
       );
     }
 
-    return new RefreshIndicator(
-        child: _reports.length == 0?ListView(padding: const EdgeInsets.symmetric(vertical: 150.0), children: <Widget>[new Center(child: new Text('没有待审核工单'),)],):ListView.builder(
-          padding: const EdgeInsets.all(2.0),
-          itemCount: _reports.length,
-          itemBuilder: (context, i) => buildCardItem(_reports[i], 'PGD0000000$i', _reports[i]['Date'], _reports[i]['EquipmentName'], _reports[i]['EquipmentNo'], 'John Wick', 'Winston', _reports[i]['Detail']),
-        ),
-        onRefresh: getData
+    return ScopedModelDescendant<MainModel>(
+      builder: (context, child, model) {
+        if(_reports.length > 0) {
+          model.setBadge(_reports.length.toString(), 'B');
+        }
+        return new RefreshIndicator(
+            child: _reports.length == 0?ListView(padding: const EdgeInsets.symmetric(vertical: 150.0), children: <Widget>[new Center(child: new Text('没有待审核工单'),)],):ListView.builder(
+              padding: const EdgeInsets.all(2.0),
+              itemCount: _reports.length,
+              itemBuilder: (context, i) => buildCardItem(_reports[i], _reports[i]['DispatchJournal']['ID'], _reports[i]['DispatchReport']['ID'], _reports[i]['OID'], _reports[i]['StartDate'], _reports[i]['Request']['Equipments'][0]['Name'], _reports[i]['Request']['Equipments'][0]['OID'], _reports[i]['RequestType']['Name'], _reports[i]['Urgency']['Name'], _reports[i]['Request']['OID']),
+            ),
+            onRefresh: getData
+        );
+      },
     );
   }
 }

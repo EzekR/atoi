@@ -146,11 +146,13 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
     final SharedPreferences prefs = await _prefs;
     var UserId = await prefs.getString('userId');
     Map<String, dynamic> _data = {
-      'UserId': UserId,
-      'RequestJournalId': widget.reportId
+      'userID': UserId,
+      'reportID': widget.reportId,
+      'solutionResultID': '2',
+      'comments': 'api'
     };
     var _response = await HttpRequest.request(
-        '/DispatchJournal/ApproveDispatchReport',
+        '/DispatchReport/ApproveDispatchReport',
         method: HttpRequest.POST,
         data: _data
     );
@@ -169,11 +171,12 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
     final SharedPreferences prefs = await _prefs;
     var UserId = await prefs.getString('userId');
     Map<String, dynamic> _data = {
-      'UserId': UserId,
-      'RequestJournalId': widget.reportId
+      'userID': UserId,
+      'ReportID': widget.reportId,
+      'comments': 'api'
     };
     var _response = await HttpRequest.request(
-        '/DispatchJournal/RejectDispatchReport',
+        '/DispatchReport/RejectDispatchReport',
         method: HttpRequest.POST,
         data: _data
     );

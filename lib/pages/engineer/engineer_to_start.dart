@@ -13,26 +13,27 @@ class EngineerToStart extends StatefulWidget{
 class _EngineerToStartState extends State<EngineerToStart> {
 
 
-  List<Map<String, dynamic>> _tasks = [
-    {"time": "2019-03-21 14:33", "deviceModel": "医用磁共振设备	Philips 781-296", "deviceNo": "ZC00000001", "deviceLocation": "磁共振1室", "subject": "系统报错", "detail": "系统报错，设备无法启动", "level": "紧急", "method": "上门维修"},
-    {"time": "2019-04-22 9:21", "deviceModel": "医用CT	GE 8080-9527", "deviceNo": "ZC00000022", "deviceLocation": "放射科", "subject": "系统报错", "detail": "无法开机", "level": "紧急", "method": "上门维修"},
-    {"time": "2019-05-24 19:56", "deviceModel": "医用X光设备 SIEMENZ 781-296", "deviceNo": "ZC00000221", "deviceLocation": "介入科", "subject": "系统报错", "detail": "显示器蓝屏", "level": "紧急", "method": "上门维修"},
-    {"time": "2019-03-2 14:33", "deviceModel": "医用磁共振设备	Philips 781-296", "deviceNo": "ZC00000001", "deviceLocation": "磁共振1室", "subject": "系统报错", "detail": "系统报错，设备无法启动", "level": "紧急", "method": "上门维修"},
-    {"time": "2019-03-22 14:33", "deviceModel": "医用磁共振设备	Philips 781-296", "deviceNo": "ZC00000001", "deviceLocation": "磁共振1室", "subject": "系统报错", "detail": "系统报错，设备无法启动", "level": "紧急", "method": "上门维修"},
+  List<dynamic> _tasks = [
+    //{"time": "2019-03-21 14:33", "deviceModel": "医用磁共振设备	Philips 781-296", "deviceNo": "ZC00000001", "deviceLocation": "磁共振1室", "subject": "系统报错", "detail": "系统报错，设备无法启动", "level": "紧急", "method": "上门维修"},
+    //{"time": "2019-04-22 9:21", "deviceModel": "医用CT	GE 8080-9527", "deviceNo": "ZC00000022", "deviceLocation": "放射科", "subject": "系统报错", "detail": "无法开机", "level": "紧急", "method": "上门维修"},
+    //{"time": "2019-05-24 19:56", "deviceModel": "医用X光设备 SIEMENZ 781-296", "deviceNo": "ZC00000221", "deviceLocation": "介入科", "subject": "系统报错", "detail": "显示器蓝屏", "level": "紧急", "method": "上门维修"},
+    //{"time": "2019-03-2 14:33", "deviceModel": "医用磁共振设备	Philips 781-296", "deviceNo": "ZC00000001", "deviceLocation": "磁共振1室", "subject": "系统报错", "detail": "系统报错，设备无法启动", "level": "紧急", "method": "上门维修"},
+    //{"time": "2019-03-22 14:33", "deviceModel": "医用磁共振设备	Philips 781-296", "deviceNo": "ZC00000001", "deviceLocation": "磁共振1室", "subject": "系统报错", "detail": "系统报错，设备无法启动", "level": "紧急", "method": "上门维修"},
   ];
 
   Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
 
   Future<Null> getTask() async {
     final SharedPreferences pref = await _prefs;
-    var userId = await pref.getString('UserId');
+    var userId = await pref.getInt('userID');
     Map<String, dynamic> params = {
-      'UserId': userId
+      'userID': userId,
+      'statusID': 1
     };
     var resp = await HttpRequest.request(
-      '/Dispatch/GetDispatches',
+      '/Dispatch/GetDispatchs',
       method: HttpRequest.GET,
-      data: params
+      params: params
     );
     print(resp);
     setState(() {
@@ -46,6 +47,7 @@ class _EngineerToStartState extends State<EngineerToStart> {
   }
 
   Future getData() async {
+
   }
 
   Future<Null> _onRefresh() async {
@@ -269,7 +271,7 @@ class _EngineerToStartState extends State<EngineerToStart> {
     }
 
     return new RefreshIndicator(
-        child: new ListView.builder(
+        child: _tasks.length == 0?ListView(padding: const EdgeInsets.symmetric(vertical: 150.0), children: <Widget>[new Center(child: new Text('没有待开始工单'),)],):ListView.builder(
           padding: const EdgeInsets.all(2.0),
           itemCount: _tasks.length,
           itemBuilder: (context, i) => buildCardItem('PGD0000000$i', _tasks[i]['time'], _tasks[i]['deviceModel'], _tasks[i]['deviceLocation'], _tasks[i]['subject'], _tasks[i]['detail'], _tasks[i]['level'], _tasks[i]["method"]),

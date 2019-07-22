@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
-import 'package:dio/dio.dart';
-import 'dart:convert';
+import 'package:atoi/utils/http_request.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:atoi/utils/constants.dart';
 
 class ManagerAssignPage extends StatefulWidget {
   static String tag = 'mananger-assign-page';
@@ -18,14 +19,9 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
   var _isExpandedBasic = true;
   var _isExpandedDetail = false;
   var _isExpandedAssign = false;
-  Map<dynamic, dynamic> _request = {
-      'name': "",
-      'telephone': "1",
-      'subject': "2",
-      'detail': "3",
-      'time': "4",
-      'image': "5"
-  };
+  String departureDate = '';
+
+  Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
 
   String _imageUri = '';
 
@@ -58,9 +54,8 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
   ];
 
   List _levels = [
-    '普通  ',
-    '紧急',
-    '特急'
+    '普通',
+    '紧急'
   ];
 
   List _deviceStatuses = [
@@ -243,43 +238,38 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
     );
   }
 
-  Future getReport() async {
-    Dio dio = new Dio();
-    var response = await dio.get<String>('http://api.stramogroup.com/m_get_request');
-    Map _data = jsonDecode(response.data);
-    if (response.statusCode == 200 && _data['error'] == 0) {
-      Map<String, dynamic> _payload = {
-        'name': _data['data']['name'],
-        'telephone': _data['data']['phone'],
-        'subject': _data['data']['category'],
-        'detail': _data['data']['describe'],
-        'time': _data['data']['time'],
-        'image': _data['data']['image']
-      };
-      setState(() {
-        _request = _payload;
-        _imageUri = 'http://api.stramogroup.com/'+_payload['image'];
-      });
-    }
-  }
-
   Future assignRequest() async {
-    FormData _formData = new FormData.from({
-      "level": _currentLevel,
-      "method": _currentMethod,
-      "time": _request['time'],
-      "subject": _request['subject'],
-      "detail": _request['detail']
-    });
-    Dio dio = new Dio();
-    var response = await dio.post<String>('http://api.stramogroup.com/m_assign_request', data: _formData);
-    if (response.statusCode == 200) {
-      showDialog(
-        context: context,
+    var prefs = await _prefs;
+    var userID = prefs.getInt('userID');
+    Map<String, dynamic> _data = {
+      'userID': userID,
+      'RequestID': widget.request['ID'],
+      'dispatchInfo': {
+        'Request': {
+          'ID': widget.request['ID']
+        },
+        'Urgency': {
+          'ID': AppConstants().UrgencyID[_currentLevel]
+        },
+        'Engineer': {
+          'ID': 32
+        },
+        'ScheduleDate': departureDate
+      }
+    };
+    var resp = await HttpRequest.request(
+      '/Request/CreateDispatch',
+      method: HttpRequest.POST,
+      data: _data
+    );
+    print(resp);
+    if (resp['ResultCode'] == '00') {
+      showDialog(context: context,
         builder: (context) => AlertDialog(
-          title: new Text('派工成功'),
+          title: new Text('安排派工成功'),
         )
       );
+      Navigator.of(context).pop();
     }
   }
 
@@ -352,13 +342,13 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
                         padding: EdgeInsets.symmetric(horizontal: 12.0),
                         child: new Column(
                           children: <Widget>[
-                            buildRow('设备编号：', widget.request['EquipmentNo']),
+                            buildRow('设备编号：', widget.request['EquipmentOID']),
                             buildRow('设备名称：', widget.request['EquipmentName']),
-                            buildRow('使用科室：', widget.request['Department']),
-                            buildRow('设备厂商：', '飞利浦'),
-                            buildRow('资产等级：', '重要'),
-                            buildRow('设备型号：', 'Philips 781-296'),
-                            buildRow('安装地点：', '磁共振1室'),
+                            buildRow('使用科室：', widget.request['DepartmentName']),
+                            buildRow('设备厂商：', widget.request['Equipments'][0]['Manufacturer']['OID']),
+                            buildRow('资产等级：', widget.request['Equipments'][0]['AssetLevel']['ID'].toString()),
+                            buildRow('设备型号：', widget.request['Equipments'][0]['SerialCode']),
+                            buildRow('安装地点：', widget.request['Equipments'][0]['Department']['Name']),
                             buildRow('保修状况：', '保内'),
                             new Padding(padding: EdgeInsets.symmetric(vertical: 8.0))
                           ],
@@ -391,12 +381,12 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
                         mainAxisSize: MainAxisSize.max,
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: <Widget>[
-                          buildRow('类型：', '客户请求-报修'),
+                          buildRow('类型：', widget.request['SourceType']),
                           buildRow('主题：', widget.request['Subject']),
-                          buildRow('故障描述：', widget.request['Detail']),
-                          buildRow('故障分类：', '未知'),
-                          buildRow('请求人：', 'John Wick'),
-                          buildRow('联系电话：', '11212121'),
+                          buildRow('故障描述：', widget.request['FaultDesc']),
+                          buildRow('故障分类：', widget.request['FaultType']['Name']),
+                          buildRow('请求人：', widget.request['RequestUser']['Name']),
+                          buildRow('联系电话：', widget.request['RequestUser']['Mobile']),
                           buildDropdown('处理方式：', _currentMethod, _dropDownMenuItems, changedDropDownMethod),
                           buildDropdown('优先级：', _currentPriority, _dropDownMenuPris, changedDropDownPri),
                           new Padding(
@@ -473,12 +463,17 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
                                   lastDate: new DateTime.now().add(new Duration(days: 30)),       // 加 30 天
                                   locale: Locale('zh')
                               ).then((DateTime val) {
-                                print(val);   // 2018-07-12 00:00:00.000
+                                print(val); // 2018-07-12 00:00:00.000
+                                var date = '${val.year}-${val.month}-${val.day}';
+                                setState(() {
+                                  departureDate = date;
+                                });
                               }).catchError((err) {
                                 print(err);
                               });
                             },
                           ),
+                          departureDate != ''?new Text(departureDate):new Container(),
                           new Padding(
                             padding: EdgeInsets.symmetric(vertical: 5.0),
                             child: new Column(

@@ -3,6 +3,7 @@ import 'package:atoi/pages/engineer/engineer_menu.dart';
 import 'package:atoi/pages/engineer/engineer_to_report.dart';
 import 'package:badges/badges.dart';
 import 'package:atoi/pages/engineer/engineer_to_start.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 
 class EngineerHomePage extends StatefulWidget {
@@ -15,6 +16,18 @@ class _EngineerHomePageState extends State<EngineerHomePage>
     with SingleTickerProviderStateMixin{
   TabController _tabController;
 
+  Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
+
+  String badgeEA = '0';
+  String badgeEB = '0';
+  String badgeEC = '0';
+
+  Future<Null> getBadge() async {
+    var prefs = await _prefs;
+    badgeEA = prefs.getString('badgeEA');
+    badgeEB = prefs.getString('badgeEB');
+    badgeEC = prefs.getString('badgeEC');
+  }
   @override
   void initState() {
     super.initState();
@@ -50,7 +63,7 @@ class _EngineerHomePageState extends State<EngineerHomePage>
               new Tab(
                   icon: new Badge(
                     badgeContent: Text(
-                      '3',
+                      badgeEA,
                       style: new TextStyle(
                           color: Colors.white
                       ),
@@ -62,7 +75,7 @@ class _EngineerHomePageState extends State<EngineerHomePage>
               new Tab(
                 icon: new Badge(
                   badgeContent: Text(
-                    '2',
+                    badgeEB,
                     style: new TextStyle(
                         color: Colors.white
                     ),

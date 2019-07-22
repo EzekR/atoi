@@ -1,19 +1,39 @@
 import 'package:flutter/material.dart';
 import 'package:atoi/pages/engineer/engineer_voucher_page.dart';
 import 'package:atoi/pages/engineer/engineer_report_page.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:atoi/utils/http_request.dart';
 
-class EngineerToReport extends StatelessWidget {
+class EngineerToReport extends StatefulWidget{
+  _EngineerToReportState createState() => _EngineerToReportState();
+}
+
+class _EngineerToReportState extends State<EngineerToReport> {
+
+  Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
+
+  List<dynamic> _tasks = [];
+
+  Future<Null> getTask() async {
+    final SharedPreferences pref = await _prefs;
+    var userId = await pref.getInt('userID');
+    Map<String, dynamic> params = {
+      'userID': userId,
+      'statusID': 2
+    };
+    var resp = await HttpRequest.request(
+        '/Dispatch/GetDispatchs',
+        method: HttpRequest.GET,
+        params: params
+    );
+    print(resp);
+    setState(() {
+      _tasks = resp['Data'];
+    });
+  }
   @override
   Widget build(BuildContext context) {
     // TODO: implement build
-
-    List<Map<String, String>> _reports = [
-      {"time": "2019-03-21 14:33", "deviceModel": "医用磁共振设备	Philips 781-296", "deviceNo": "ZC00000001", "location": "放射科", "client": "李老师", "content": "监督外部供应商更换球馆"},
-      {"time": "2019-04-22 14:33", "deviceModel": "医用CT	GE 8080-9527", "deviceNo": "ZC00000022", "location": "放射科", "client": "王老师", "content": "更换显示器线"},
-      {"time": "2019-05-24 14:33", "deviceModel": "医用X光设备 SIEMENZ 781-296", "deviceNo": "ZC00000221", "location": "放射科", "client": "罗老师", "content": "重启系统"},
-      {"time": "2019-03-2 14:33", "deviceModel": "医用磁共振设备	Philips 781-296", "deviceNo": "ZC00000001", "location": "放射科", "client": "赵老师", "content": "系统报错，设备无法启动"},
-      {"time": "2019-03-22 14:33", "deviceModel": "医用磁共振设备	Philips 781-296", "deviceNo": "ZC00000001", "location": "放射科", "client": "系统报错", "content": "系统报错，设备无法启动"},
-    ];
 
     Card buildCardItem(String title, String subtitle, String deviceModel, String deviceNo, String location, String client, String content) {
       return new Card(
@@ -208,10 +228,13 @@ class EngineerToReport extends StatelessWidget {
       );
     }
 
-    return new ListView.builder(
-      padding: const EdgeInsets.all(2.0),
-      itemCount: 5,
-      itemBuilder: (context, i) => buildCardItem('PGD0000000$i', _reports[i]['time'], _reports[i]['deviceModel'], _reports[i]['deviceNo'], _reports[i]['location'], _reports[i]['client'], _reports[i]['content']),
+    return new RefreshIndicator(
+        child: _tasks.length == 0?ListView(padding: const EdgeInsets.symmetric(vertical: 150.0), children: <Widget>[new Center(child: new Text('没有待报告工单'),)],):ListView.builder(
+          padding: const EdgeInsets.all(2.0),
+          itemCount: _tasks.length,
+          itemBuilder: (context, i) => buildCardItem('PGD0000000$i', _tasks[i]['time'], _tasks[i]['deviceLocation'], _tasks[i]['subject'], _tasks[i]['detail'], _tasks[i]['level'], _tasks[i]["method"]),
+        ),
+        onRefresh: getTask
     );
   }
 }
