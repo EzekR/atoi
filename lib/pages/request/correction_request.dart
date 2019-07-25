@@ -7,6 +7,8 @@ import 'dart:async';
 import 'package:flutter/services.dart';
 import 'dart:convert';
 import 'package:image_picker/image_picker.dart';
+import 'package:atoi/utils/http_request.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class CorrectionRequest extends StatefulWidget{
   static String tag = 'correction-request';
@@ -21,6 +23,9 @@ class _CorrectionRequestState extends State<CorrectionRequest> {
   var _isExpandedBasic = true;
   var _isExpandedDetail = false;
   var _isExpandedAssign = false;
+  Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
+  var _fault = new TextEditingController();
+  var _roleName;
 
   MainModel mainModel = MainModel();
 
@@ -40,13 +45,10 @@ class _CorrectionRequestState extends State<CorrectionRequest> {
     'guarantee': ''
   };
 
-  List<DropdownMenuItem<String>> _dropDownMenuItems;
-  String _currentResult;
   List<dynamic> _imageList = [];
 
   void initState(){
-    _dropDownMenuItems = getDropDownMenuItems(_serviceResults);
-    _currentResult = _dropDownMenuItems[0].value;
+    getRole();
     super.initState();
   }
 
@@ -60,9 +62,60 @@ class _CorrectionRequestState extends State<CorrectionRequest> {
     });
   }
 
+  Future getRole() async {
+    final SharedPreferences prefs = await _prefs;
+    setState(() {
+      _roleName = prefs.getString('roleName');
+    });
+  }
+
+  Future<Null> submit() async {
+    var prefs = await _prefs;
+    var userID = prefs.getInt('userID');
+    var fileList = [];
+    for (var image in _imageList) {
+      List<int> imageBytes = await image.readAsBytes();
+      var fileContent = base64Encode(imageBytes);
+      var file = {
+        'FileContent': fileContent,
+        'FileName': image.path,
+        'FiltType': 1,
+        'ID': 0
+      };
+      fileList.add(file);
+    }
+    var _data = {
+      'userID': userID,
+      'requestInfo': {
+        'RequestType': {
+          'ID': 5
+        },
+        'Equipments': [
+          {
+            'ID': 2
+          }
+        ],
+        'FaultDesc': _fault.text,
+        'Files': fileList
+      }
+    };
+    var resp = await HttpRequest.request(
+        '/Request/AddRequest',
+        method: HttpRequest.POST,
+        data: _data
+    );
+    print(resp);
+    if (resp['ResultCode'] == '00') {
+      showDialog(context: context, builder: (buider) => AlertDialog(
+        title: new Text('提交校正成功'),
+      )).then((result) =>
+          Navigator.of(context, rootNavigator: true).pop(result)
+      );
+    }
+  }
+
   Row buildImageRow(List imageList) {
     List<Widget> _list = [];
-
     if (imageList.length >0 ){
       for(var image in imageList) {
         _list.add(
@@ -104,7 +157,6 @@ class _CorrectionRequestState extends State<CorrectionRequest> {
 
   void changedDropDownMethod(String selectedMethod) {
     setState(() {
-      _currentResult = selectedMethod;
     });
   }
 
@@ -265,7 +317,7 @@ class _CorrectionRequestState extends State<CorrectionRequest> {
                             child: new Column(
                               children: <Widget>[
                                 buildRow('类型：', '校正'),
-                                buildRow('请求人：', '超级管理员'),
+                                buildRow('请求人：', _roleName),
                                 buildRow('主题', '--校正'),
                                 new Padding(
                                   padding: EdgeInsets.symmetric(vertical: 5.0),
@@ -283,7 +335,9 @@ class _CorrectionRequestState extends State<CorrectionRequest> {
                                       ),
                                       new Expanded(
                                         flex: 6,
-                                        child: new TextField(),
+                                        child: new TextField(
+                                          controller: _fault,
+                                        ),
                                       )
                                     ],
                                   ),
@@ -319,12 +373,7 @@ class _CorrectionRequestState extends State<CorrectionRequest> {
                       children: <Widget>[
                         new RaisedButton(
                           onPressed: () {
-                            showDialog(
-                                context: context,
-                                builder: (context) => AlertDialog(
-                                  title: Text('提交请求'),
-                                )
-                            );
+                            submit();
                           },
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(24),
@@ -347,7 +396,6 @@ class _CorrectionRequestState extends State<CorrectionRequest> {
                       ],
                     )
                   ],
-
                 ),
               ),
             )

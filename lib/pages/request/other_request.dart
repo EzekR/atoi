@@ -7,6 +7,9 @@ import 'dart:async';
 import 'package:flutter/services.dart';
 import 'dart:convert';
 import 'package:image_picker/image_picker.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:atoi/utils/http_request.dart';
+import 'package:atoi/utils/constants.dart';
 
 class OtherRequest extends StatefulWidget{
   static String tag = 'other-request';
@@ -20,6 +23,8 @@ class _OtherRequestState extends State<OtherRequest> {
 
   var _isExpandedDetail = true;
   var _isExpandedAssign = false;
+  var _fault = new TextEditingController();
+  Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
 
   MainModel mainModel = MainModel();
 
@@ -113,6 +118,46 @@ class _OtherRequestState extends State<OtherRequest> {
     setState(() {
       _result.addAll(_data);
     });
+  }
+
+  Future<Null> submit() async {
+    var prefs = await _prefs;
+    var userID = prefs.getInt('userID');
+    var fileList = [];
+    for (var image in _imageList) {
+      List<int> imageBytes = await image.readAsBytes();
+      var fileContent = base64Encode(imageBytes);
+      var file = {
+        'FileContent': fileContent,
+        'FileName': image.path,
+        'FiltType': 1,
+        'ID': 0
+      };
+      fileList.add(file);
+    }
+    var _data = {
+      'userID': userID,
+      'requestInfo': {
+        'RequestType': {
+          'ID': 14
+        },
+        'FaultDesc': _fault.text,
+        'Files': fileList
+      }
+    };
+    var resp = await HttpRequest.request(
+        '/Request/AddRequest',
+        method: HttpRequest.POST,
+        data: _data
+    );
+    print(resp);
+    if (resp['ResultCode'] == '00') {
+      showDialog(context: context, builder: (buider) => AlertDialog(
+        title: new Text('提交其他服务成功'),
+      )).then((result) =>
+          Navigator.of(context, rootNavigator: true).pop(result)
+      );
+    }
   }
 
   Padding buildRow(String labelText, String defaultText) {
@@ -242,7 +287,9 @@ class _OtherRequestState extends State<OtherRequest> {
                                       ),
                                       new Expanded(
                                         flex: 6,
-                                        child: new TextField(),
+                                        child: new TextField(
+                                          controller: _fault,
+                                        ),
                                       )
                                     ],
                                   ),
@@ -278,12 +325,7 @@ class _OtherRequestState extends State<OtherRequest> {
                       children: <Widget>[
                         new RaisedButton(
                           onPressed: () {
-                            showDialog(
-                                context: context,
-                                builder: (context) => AlertDialog(
-                                  title: Text('提交请求'),
-                                )
-                            );
+                            submit();
                           },
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(24),

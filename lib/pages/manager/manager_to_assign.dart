@@ -5,6 +5,7 @@ import 'package:atoi/utils/http_request.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:scoped_model/scoped_model.dart';
 import 'package:atoi/models/models.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 
 class ManagerToAssign extends StatefulWidget {
   @override
@@ -16,6 +17,8 @@ class _ManagerToAssignState extends State<ManagerToAssign> {
 
   List<dynamic> _tasks = [];
   Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
+
+  bool _loading = false;
 
   void initState() {
     getData();
@@ -30,6 +33,9 @@ class _ManagerToAssignState extends State<ManagerToAssign> {
       'statusID': 1,
       'typeID': 0
     };
+    setState(() {
+      _loading = true;
+    });
     var _data = await HttpRequest.request(
       '/Request/GetRequests',
       method: HttpRequest.GET,
@@ -39,6 +45,7 @@ class _ManagerToAssignState extends State<ManagerToAssign> {
     prefs.setString('badgeA', _data['Data'].length.toString());
     setState(() {
       _tasks = _data['Data'];
+      _loading = false;
     });
   }
 
@@ -226,7 +233,7 @@ class _ManagerToAssignState extends State<ManagerToAssign> {
           model.setBadge(_tasks.length.toString(), 'A');
         }
         return new RefreshIndicator(
-            child: _tasks.length == 0?ListView(padding: const EdgeInsets.symmetric(vertical: 150.0), children: <Widget>[new Center(child: new Text('没有待派工请求'),)],):ListView.builder(
+            child: _tasks.length == 0?ListView(padding: const EdgeInsets.symmetric(vertical: 150.0), children: <Widget>[new Center(child: _loading?SpinKitRotatingPlain(color: Colors.blue):new Text('没有待派工请求'),)],):ListView.builder(
                 padding: const EdgeInsets.all(2.0),
                 itemCount: _tasks.length,
                 itemBuilder: (context, i) => buildCardItem(_tasks[i], _tasks[i]['ID'], _tasks[i]['OID'], _tasks[i]['RequestDate'], _tasks[i]['EquipmentOID'], _tasks[i]['EquipmentName'], _tasks[i]['DepartmentName'], _tasks[i]['RequestUser']['Name'], _tasks[i]['RequestType']['Name'], _tasks[i]['Status']['Name'], _tasks[i]['FaultDesc'])

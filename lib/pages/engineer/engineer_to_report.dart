@@ -3,6 +3,8 @@ import 'package:atoi/pages/engineer/engineer_voucher_page.dart';
 import 'package:atoi/pages/engineer/engineer_report_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:atoi/utils/http_request.dart';
+import 'package:scoped_model/scoped_model.dart';
+import 'package:atoi/models/models.dart';
 
 class EngineerToReport extends StatefulWidget{
   _EngineerToReportState createState() => _EngineerToReportState();
@@ -31,11 +33,16 @@ class _EngineerToReportState extends State<EngineerToReport> {
       _tasks = resp['Data'];
     });
   }
+
+  void initState() {
+    getTask();
+    super.initState();
+  }
   @override
   Widget build(BuildContext context) {
     // TODO: implement build
 
-    Card buildCardItem(String title, String subtitle, String deviceModel, String deviceNo, String location, String client, String content) {
+    Card buildCardItem(int dispatchId, int journalId, int reportId, String OID, String scheduleDate, String deviceName, String deviceNo, String location, String requestType, String urgency, String remark) {
       return new Card(
         child: Column(
           mainAxisSize: MainAxisSize.max,
@@ -48,14 +55,14 @@ class _EngineerToReportState extends State<EngineerToReport> {
                 size: 40.0,
               ),
               title: Text(
-                "派工单号：$title",
+                "派工单号：$OID",
                 style: new TextStyle(
                     fontSize: 16.0,
                     color: Theme.of(context).primaryColor
                 ),
               ),
               subtitle: Text(
-                "出发时间：$subtitle",
+                "出发时间：$scheduleDate",
                 style: new TextStyle(
                     color: Theme.of(context).accentColor
                 ),
@@ -71,14 +78,14 @@ class _EngineerToReportState extends State<EngineerToReport> {
                   new Row(
                     children: <Widget>[
                       new Text(
-                        '设备型号：',
+                        '设备名称：',
                         style: new TextStyle(
                             fontSize: 16.0,
                             fontWeight: FontWeight.w600
                         ),
                       ),
                       new Text(
-                        deviceModel,
+                        deviceName,
                         style: new TextStyle(
                             fontSize: 16.0,
                             fontWeight: FontWeight.w400,
@@ -130,14 +137,14 @@ class _EngineerToReportState extends State<EngineerToReport> {
                     mainAxisSize: MainAxisSize.max,
                     children: <Widget>[
                       new Text(
-                        '客户姓名：',
+                        '请求类型：',
                         style: new TextStyle(
                             fontSize: 16.0,
                             fontWeight: FontWeight.w600
                         ),
                       ),
                       new Text(
-                        client,
+                        requestType,
                         style: new TextStyle(
                             fontSize: 16.0,
                             fontWeight: FontWeight.w400,
@@ -149,14 +156,14 @@ class _EngineerToReportState extends State<EngineerToReport> {
                   new Row(
                     children: <Widget>[
                       new Text(
-                        '工作内容：',
+                        '紧急程度：',
                         style: new TextStyle(
                             fontSize: 16.0,
                             fontWeight: FontWeight.w600
                         ),
                       ),
                       new Text(
-                        content,
+                        urgency,
                         style: new TextStyle(
                             fontSize: 16.0,
                             fontWeight: FontWeight.w400,
@@ -171,16 +178,24 @@ class _EngineerToReportState extends State<EngineerToReport> {
                     children: <Widget>[
                       new RaisedButton(
                         onPressed: (){
-                          Navigator.of(context).pushNamed(EngineerVoucherPage.tag);
+                          if (journalId == 0) {
+                            Navigator.of(context).push(
+                                new MaterialPageRoute(builder: (_) {
+                                  return new EngineerVoucherPage(
+                                      dispatchId: dispatchId);
+                                }));
+                          } else {
+                            return null;
+                          }
                         },
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(24),
                         ),
-                        color: new Color(0xff2E94B9),
+                        color: journalId == 0?new Color(0xff2E94B9):new Color(0xffF0B775),
                         child: new Row(
                           children: <Widget>[
                             new Icon(
-                              Icons.fingerprint,
+                              journalId==0?Icons.fingerprint:Icons.check,
                               color: Colors.white,
                             ),
                             new Text(
@@ -197,16 +212,24 @@ class _EngineerToReportState extends State<EngineerToReport> {
                       ),
                       new RaisedButton(
                         onPressed: (){
-                          Navigator.of(context).pushNamed(EngineerReportPage.tag);
+                          if (reportId == 0) {
+                            Navigator.of(context).push(
+                                new MaterialPageRoute(builder: (_) {
+                                  return new EngineerReportPage(
+                                      dispatchId: dispatchId);
+                                }));
+                          } else {
+                            return null;
+                          }
                         },
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(24),
                         ),
-                        color: new Color(0xff2E94B9),
+                        color: reportId == 0?new Color(0xff2E94B9):new Color(0xffF0B775),
                         child: new Row(
                           children: <Widget>[
                             new Icon(
-                              Icons.work,
+                              reportId==0?Icons.work:Icons.check,
                               color: Colors.white,
                             ),
                             new Text(
@@ -228,13 +251,20 @@ class _EngineerToReportState extends State<EngineerToReport> {
       );
     }
 
-    return new RefreshIndicator(
-        child: _tasks.length == 0?ListView(padding: const EdgeInsets.symmetric(vertical: 150.0), children: <Widget>[new Center(child: new Text('没有待报告工单'),)],):ListView.builder(
-          padding: const EdgeInsets.all(2.0),
-          itemCount: _tasks.length,
-          itemBuilder: (context, i) => buildCardItem('PGD0000000$i', _tasks[i]['time'], _tasks[i]['deviceLocation'], _tasks[i]['subject'], _tasks[i]['detail'], _tasks[i]['level'], _tasks[i]["method"]),
-        ),
-        onRefresh: getTask
+    return ScopedModelDescendant<MainModel>(
+      builder: (context, child, model) {
+        if (_tasks.length > 0){
+          model.setBadge(_tasks.length.toString(), 'EB');
+        }
+        return new RefreshIndicator(
+            child: _tasks.length == 0?ListView(padding: const EdgeInsets.symmetric(vertical: 150.0), children: <Widget>[new Center(child: new Text('没有待报告工单'),)],):ListView.builder(
+                padding: const EdgeInsets.all(2.0),
+                itemCount: _tasks.length,
+                itemBuilder: (context, i) => buildCardItem(_tasks[i]['ID'], _tasks[i]['DispatchJournalID'], _tasks[i]['DispatchReport']['ID'], _tasks[i]['OID'], _tasks[i]['ScheduleDate'], _tasks[i]['Request']['Equipments'][0]['Name'], _tasks[i]['Request']['Equipments'][0]['SerialCode'], _tasks[i]['Request']['DepartmentName'], _tasks[i]['RequestType']['Name'], _tasks[i]['Urgency']['Name'], _tasks[i]['LeaderComments'])
+            ),
+            onRefresh: getTask
+        );
+      },
     );
   }
 }

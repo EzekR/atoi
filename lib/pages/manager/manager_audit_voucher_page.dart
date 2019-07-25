@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:atoi/utils/http_request.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'dart:convert';
+import 'package:atoi/utils/constants.dart';
 
 class ManagerAuditVoucherPage extends StatefulWidget {
   static String tag = 'manager-audit-voucher-page';
-  ManagerAuditVoucherPage({Key key, this.request, this.journalId}):super(key: key);
+  ManagerAuditVoucherPage({Key key, this.journalId, this.request}):super(key: key);
+  final int journalId;
   final Map request;
-  final String journalId;
 
   @override
   _ManagerAuditVoucherPageState createState() => new _ManagerAuditVoucherPageState();
@@ -25,13 +28,39 @@ class _ManagerAuditVoucherPageState extends State<ManagerAuditVoucherPage> {
     '待跟进'
   ];
 
+  List<int> imageBytes;
+
+  Map<String, dynamic> _journal = {};
+
+  Future<Null> getJournal() async {
+    var prefs = await _prefs;
+    var userId = prefs.getInt('userID');
+    var journalId = widget.journalId;
+    var resp = await HttpRequest.request(
+      '/DispatchJournal/GetDispatchJournal',
+      method: HttpRequest.GET,
+      params: {
+        'userID': userId,
+        'dispatchJournalId': journalId
+      },
+    );
+    print(resp);
+    if (resp['ResultCode'] == '00') {
+      setState(() {
+        _journal = resp['Data'];
+        imageBytes = base64Decode(resp['Data']['FileContent']);
+      });
+    }
+  }
+
   List<DropdownMenuItem<String>> _dropDownMenuItems;
   String _currentResult;
 
   void initState(){
     _dropDownMenuItems = getDropDownMenuItems(_serviceResults);
     _currentResult = _dropDownMenuItems[0].value;
-
+    print('widget info:${widget.request}');
+    getJournal();
     super.initState();
   }
 
@@ -152,10 +181,11 @@ class _ManagerAuditVoucherPageState extends State<ManagerAuditVoucherPage> {
 
   Future<Null> approveJournal() async {
     final SharedPreferences prefs = await _prefs;
-    var UserId = await prefs.getString('userId');
+    var UserId = await prefs.getInt('userID');
     Map<String, dynamic> _data = {
       'userID': UserId,
-      'dispatchJournalID': widget.journalId
+      'dispatchJournalID': widget.journalId,
+      'resultStatusID': AppConstants.ResultStatusID[_currentResult]
     };
     var _response = await HttpRequest.request(
       '/DispatchJournal/ApproveDispatchJournal',
@@ -163,19 +193,28 @@ class _ManagerAuditVoucherPageState extends State<ManagerAuditVoucherPage> {
       data: _data
     );
     print(_response);
-    if (_response['ErrorCode'] == '00') {
+    if (_response['ResultCode'] == '00') {
       showDialog(
           context: context,
           builder: (context) => AlertDialog(
             title: new Text('通过凭证'),
           )
+      ).then((result) {
+        Navigator.of(context, rootNavigator: true).pop(result);
+      });
+    } else {
+      showDialog(context: context,
+        builder: (context) => AlertDialog(
+          title: new Text(_response['ResultMessage'])
+        )
       );
     }
   }
 
   Future<Null> rejectJournal() async {
     final SharedPreferences prefs = await _prefs;
-    var UserId = await prefs.getString('userId');
+    var UserId = await prefs.getInt('userID');
+    print(widget.journalId);
     Map<String, dynamic> _data = {
       'userID': UserId,
       'dispatchJournalID': widget.journalId
@@ -186,12 +225,18 @@ class _ManagerAuditVoucherPageState extends State<ManagerAuditVoucherPage> {
         data: _data
     );
     print(_response);
-    if (_response['ErrorCode'] == '00') {
+    if (_response['ResultCode'] == '00') {
       showDialog(
           context: context,
           builder: (context) => AlertDialog(
             title: new Text('拒绝凭证'),
           )
+      );
+    } else {
+      showDialog(context: context,
+        builder: (context) => AlertDialog(
+          title: new Text(_response['ResultMessage']),
+        )
       );
     }
   }
@@ -223,7 +268,7 @@ class _ManagerAuditVoucherPageState extends State<ManagerAuditVoucherPage> {
           ),
         ],
       ),
-      body: new Padding(
+      body: _journal.isEmpty?new Center(child: SpinKitRotatingPlain(color: Colors.blue,),):new Padding(
         padding: EdgeInsets.symmetric(vertical: 5.0),
         child: new Card(
           child: new ListView(
@@ -266,14 +311,13 @@ class _ManagerAuditVoucherPageState extends State<ManagerAuditVoucherPage> {
                       padding: EdgeInsets.symmetric(horizontal: 8.0),
                       child: new Column(
                         children: <Widget>[
-                          buildRow('设备编号', 'ZC00000001'),
-                          buildRow('设备名称', '医用磁共振设备'),
-                          buildRow('使用科室', '磁共振'),
-                          buildRow('设备厂商', '飞利浦'),
-                          buildRow('资产等级', '重要'),
-                          buildRow('设备型号', 'Philips 781-296'),
-                          buildRow('安装地点', '磁共振1室'),
-                          buildRow('保修状况', '保内'),
+                          buildRow('设备编号', widget.request['Request']['Equipments'][0]['OID']),
+                          buildRow('设备名称', widget.request['Request']['Equipments'][0]['Name']),
+                          buildRow('使用科室', widget.request['Request']['Equipments'][0]['Department']['Name']),
+                          buildRow('设备厂商', widget.request['Request']['Equipments'][0]['Supplier']['Name']??''),
+                          buildRow('资产等级', widget.request['Request']['Equipments'][0]['AssetLevel']['Name']??''),
+                          buildRow('设备型号', widget.request['Request']['Equipments'][0]['SerialCode']),
+                          buildRow('安装地点', widget.request['Request']['DepartmentName']),
                         ],
                       ),
                     ),
@@ -301,13 +345,13 @@ class _ManagerAuditVoucherPageState extends State<ManagerAuditVoucherPage> {
                       padding: EdgeInsets.symmetric(horizontal: 8.0),
                       child: new Column(
                         children: <Widget>[
-                          buildRow('派工单编号', 'PGD00000001'),
-                          buildRow('紧急程度', '紧急'),
-                          buildRow('派工类型', '保内维修'),
-                          buildRow('机器状态', '停机'),
-                          buildRow('工程师姓名', '马云'),
-                          buildRow('工作任务', '系统报错'),
-                          buildRow('出发时间', '2019-01-01'),
+                          buildRow('派工单编号', widget.request['OID']),
+                          buildRow('紧急程度', widget.request['Urgency']['Name']),
+                          buildRow('派工类型', widget.request['RequestType']['Name']),
+                          buildRow('机器状态', widget.request['MachineStatus']['Name']),
+                          buildRow('工程师姓名', widget.request['Engineer']['ID'].toString()),
+                          buildRow('工作任务', widget.request['LeaderComments']),
+                          buildRow('出发时间', widget.request['ScheduleDate']),
                           buildRow('备注', '' ),
                         ],
                       ),
@@ -337,14 +381,12 @@ class _ManagerAuditVoucherPageState extends State<ManagerAuditVoucherPage> {
                       child: new Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: <Widget>[
-                          buildRow('服务凭证编号', 'FWPZ00000001'),
-                          buildRow('客户姓名', '李老师'),
-                          buildRow('客户电话', '18521110011'),
-                          buildRow('故障现象/错误代码/事由', '保内维修'),
-                          buildRow('工作内容', '监督外部供应商更换球馆'),
-                          buildRow('待跟进问题', '无待跟进问题'),
-                          buildRow('待确认问题', '无待确认问题'),
-                          buildRow('建议留言', '这是建议留言的内容'),
+                          buildRow('服务凭证编号', _journal['OID']),
+                          buildRow('故障现象/错误代码/事由', _journal['FaultCode']),
+                          buildRow('工作内容', _journal['JobContent']),
+                          buildRow('待跟进问题', _journal['FollowProblem']),
+                          buildRow('待确认问题', _journal['UnconfirmedProblem']),
+                          buildRow('建议留言', _journal['Advice']),
                           new Padding(
                             padding: EdgeInsets.symmetric(vertical: 5.0),
                             child: new Text('客户签名：',
@@ -359,9 +401,9 @@ class _ManagerAuditVoucherPageState extends State<ManagerAuditVoucherPage> {
                             children: <Widget>[
                               new Padding(
                                 padding: const EdgeInsets.all(10.0),
-                                child: Image.asset(
-                                  'assets/qm.jpg',
-                                  width: 200.0,
+                                child: Image.memory(
+                                  imageBytes??[],
+                                  width: 300.0,
                                 ),
                               ),
                             ],
@@ -382,12 +424,7 @@ class _ManagerAuditVoucherPageState extends State<ManagerAuditVoucherPage> {
                 children: <Widget>[
                   new RaisedButton(
                     onPressed: () {
-                      showDialog(
-                          context: context,
-                          builder: (context) => AlertDialog(
-                            title: Text('通过凭证'),
-                          )
-                      );
+                      approveJournal();
                     },
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(24),
@@ -398,12 +435,7 @@ class _ManagerAuditVoucherPageState extends State<ManagerAuditVoucherPage> {
                   ),
                   new RaisedButton(
                     onPressed: () {
-                      showDialog(
-                          context: context,
-                          builder: (context) => AlertDialog(
-                              title: Text('退回凭证')
-                          )
-                      );
+                      rejectJournal();
                     },
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(24),

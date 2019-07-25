@@ -7,6 +7,9 @@ import 'dart:async';
 import 'package:flutter/services.dart';
 import 'dart:convert';
 import 'package:image_picker/image_picker.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:atoi/utils/http_request.dart';
+import 'package:atoi/utils/constants.dart';
 
 class MandatoryRequest extends StatefulWidget{
   static String tag = 'mandatory-request';
@@ -21,12 +24,22 @@ class _MandatoryRequestState extends State<MandatoryRequest> {
   var _isExpandedBasic = true;
   var _isExpandedDetail = false;
   var _isExpandedAssign = false;
+  var _role;
+  var _roleName;
+  var _fault = new TextEditingController();
+  Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
 
   MainModel mainModel = MainModel();
 
   List _serviceResults = [
-    '未知',
-    '已知'
+    '政府要求',
+    '医院要求',
+    '自主强检'
+  ];
+
+  List _recall = [
+    '是',
+    '否'
   ];
 
   Map<String, dynamic> _result = {
@@ -41,12 +54,17 @@ class _MandatoryRequestState extends State<MandatoryRequest> {
   };
 
   List<DropdownMenuItem<String>> _dropDownMenuItems;
+  List<DropdownMenuItem<String>> _dropDownMenuStatus;
+  String _currentStatus;
   String _currentResult;
   List<dynamic> _imageList = [];
 
   void initState(){
     _dropDownMenuItems = getDropDownMenuItems(_serviceResults);
+    _dropDownMenuStatus = getDropDownMenuItems(_recall);
     _currentResult = _dropDownMenuItems[0].value;
+    _currentStatus = _dropDownMenuStatus[0].value;
+    getRole();
     super.initState();
   }
 
@@ -101,10 +119,71 @@ class _MandatoryRequestState extends State<MandatoryRequest> {
     return items;
   }
 
+  Future getRole() async {
+    final SharedPreferences prefs = await _prefs;
+    setState(() {
+      _roleName = prefs.getString('roleName');
+    });
+  }
+
+  Future<Null> submit() async {
+    var prefs = await _prefs;
+    var userID = prefs.getInt('userID');
+    var fileList = [];
+    for (var image in _imageList) {
+      List<int> imageBytes = await image.readAsBytes();
+      var fileContent = base64Encode(imageBytes);
+      var file = {
+        'FileContent': fileContent,
+        'FileName': image.path,
+        'FiltType': 1,
+        'ID': 0
+      };
+      fileList.add(file);
+    }
+    var _data = {
+      'userID': userID,
+      'requestInfo': {
+        'RequestType': {
+          'ID': 3
+        },
+        'Equipments': [
+          {
+            'ID': 2
+          }
+        ],
+        'FaultType': {
+          'ID': AppConstants.FaultCheck[_currentResult],
+        },
+        'IsRecall': _currentStatus=='是'?true:false,
+        'FaultDesc': _fault.text,
+        'Files': fileList
+      }
+    };
+    var resp = await HttpRequest.request(
+        '/Request/AddRequest',
+        method: HttpRequest.POST,
+        data: _data
+    );
+    print(resp);
+    if (resp['ResultCode'] == '00') {
+      showDialog(context: context, builder: (buider) => AlertDialog(
+        title: new Text('提交强检成功'),
+      )).then((result) =>
+          Navigator.of(context, rootNavigator: true).pop(result)
+      );
+    }
+  }
 
   void changedDropDownMethod(String selectedMethod) {
     setState(() {
       _currentResult = selectedMethod;
+    });
+  }
+
+  void changedDropDownStatus(String selectedMethod) {
+    setState(() {
+      _currentStatus = selectedMethod;
     });
   }
 
@@ -265,7 +344,7 @@ class _MandatoryRequestState extends State<MandatoryRequest> {
                             child: new Column(
                               children: <Widget>[
                                 buildRow('类型：', '强检'),
-                                buildRow('请求人：', '超级管理员'),
+                                buildRow('请求人：', _roleName),
                                 buildRow('主题', '--强检'),
                                 new Padding(
                                   padding: EdgeInsets.symmetric(vertical: 5.0),
@@ -299,6 +378,31 @@ class _MandatoryRequestState extends State<MandatoryRequest> {
                                       new Expanded(
                                         flex: 4,
                                         child: new Text(
+                                          '是否召回：',
+                                          style: new TextStyle(
+                                              fontSize: 20.0,
+                                              fontWeight: FontWeight.w600
+                                          ),
+                                        ),
+                                      ),
+                                      new Expanded(
+                                        flex: 6,
+                                        child: new DropdownButton(
+                                          value: _currentStatus,
+                                          items: _dropDownMenuStatus,
+                                          onChanged: changedDropDownStatus,
+                                        ),
+                                      )
+                                    ],
+                                  ),
+                                ),
+                                new Padding(
+                                  padding: EdgeInsets.symmetric(vertical: 5.0),
+                                  child: new Row(
+                                    children: <Widget>[
+                                      new Expanded(
+                                        flex: 4,
+                                        child: new Text(
                                           '强检要求：',
                                           style: new TextStyle(
                                               fontSize: 20.0,
@@ -308,7 +412,9 @@ class _MandatoryRequestState extends State<MandatoryRequest> {
                                       ),
                                       new Expanded(
                                         flex: 6,
-                                        child: new TextField(),
+                                        child: new TextField(
+                                          controller: _fault,
+                                        ),
                                       )
                                     ],
                                   ),
@@ -344,12 +450,7 @@ class _MandatoryRequestState extends State<MandatoryRequest> {
                       children: <Widget>[
                         new RaisedButton(
                           onPressed: () {
-                            showDialog(
-                                context: context,
-                                builder: (context) => AlertDialog(
-                                  title: Text('提交请求'),
-                                )
-                            );
+                            submit();
                           },
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(24),

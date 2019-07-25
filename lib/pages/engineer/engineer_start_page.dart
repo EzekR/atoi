@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:atoi/utils/http_request.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 
 class EngineerStartPage extends StatefulWidget {
   static String tag = 'engineer-start-page';
 
   EngineerStartPage({Key key, this.dispatchId}):super(key: key);
-  final String dispatchId;
+  final int dispatchId;
 
   @override
   _EngineerStartPageState createState() => new _EngineerStartPageState();
@@ -17,24 +19,59 @@ class _EngineerStartPageState extends State<EngineerStartPage> {
   var _isExpandedBasic = false;
   var _isExpandedDetail = false;
   var _isExpandedAssign = true;
-  
+
+  Map<String, dynamic> _dispatch = {};
+
+  Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
+
   Future<Null> startDispatch() async {
-    Map<String, dynamic> params = {};
+    var prefs = await _prefs;
+    var userID = prefs.getInt('userID');
+    Map<String, dynamic> params = {
+      'userID': userID,
+      'dispatchId': widget.dispatchId
+    };
     var resp = await HttpRequest.request(
       '/Dispatch/StartDispatch',
       method: HttpRequest.POST,
       data: params
     );
     print(resp);
+    if (resp['ResultCode'] == '00') {
     showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
-          title: new Text('开始作业'),
-        )
+      context: context,
+      builder: (context) => AlertDialog(
+      title: new Text('开始作业'),
+      )
+    ).then((result) {
+      Navigator.of(context, rootNavigator: true).pop(result);
+    });
+    }
+  }
+
+
+  Future<Null> getDispatch() async {
+    var prefs = await _prefs;
+    var userID = prefs.getInt('userID');
+    var dispatchId = widget.dispatchId;
+    var resp = await HttpRequest.request(
+      '/Dispatch/GetDispatchByID',
+      method: HttpRequest.GET,
+      params: {
+        'userID': userID,
+        'dispatchId': dispatchId
+      }
     );
+    print(resp);
+    if (resp['ResultCode'] == '00') {
+      setState(() {
+        _dispatch = resp['Data'];
+      });
+    }
   }
 
   void initState() {
+    getDispatch();
     super.initState();
   }
 
@@ -117,7 +154,7 @@ class _EngineerStartPageState extends State<EngineerStartPage> {
           ),
         ],
       ),
-      body: new Padding(
+      body: _dispatch.isEmpty?new Center(child: new SpinKitRotatingPlain(color: Colors.blue),):new Padding(
         padding: EdgeInsets.symmetric(vertical: 5.0),
         child: new Card(
           child: new ListView(
@@ -159,14 +196,13 @@ class _EngineerStartPageState extends State<EngineerStartPage> {
                       padding: EdgeInsets.symmetric(horizontal: 8.0),
                       child: new Column(
                         children: <Widget>[
-                          buildRow('设备系统编号：', 'ZC00000001'),
-                          buildRow('设备名称：', '医用磁共振设备'),
-                          buildRow('使用科室：', '磁共振'),
-                          buildRow('设备厂商：', '飞利浦'),
-                          buildRow('资产等级：', '重要'),
-                          buildRow('设备型号：', 'Philips 781-296'),
-                          buildRow('安装地点：', '磁共振1室'),
-                          buildRow('保修状况：', '保内'),
+                          buildRow('设备系统编号：', _dispatch['Request']['Equipments'][0]['OID']),
+                          buildRow('设备名称：', _dispatch['Request']['Equipments'][0]['Name']),
+                          buildRow('使用科室：', _dispatch['Request']['Equipments'][0]['Department']['Name']),
+                          buildRow('设备厂商：', _dispatch['Request']['Equipments'][0]['Manufacturer']['Name']),
+                          buildRow('资产等级：', _dispatch['Request']['Equipments'][0]['AssetLevel']['Name']),
+                          buildRow('设备型号：', _dispatch['Request']['Equipments'][0]['SerialCode']),
+                          buildRow('保修状况：', _dispatch['Request']['Equipments'][0]['WarrantyStatus']),
                         ],
                       ),
                     ),
@@ -196,13 +232,13 @@ class _EngineerStartPageState extends State<EngineerStartPage> {
                         mainAxisSize: MainAxisSize.max,
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: <Widget>[
-                          buildRow('类型：', '客户请求-报修'),
-                          buildRow('主题：', '系统报错'),
-                          buildRow('故障描述：', '系统报错，设备无法启动'),
-                          buildRow('故障分类：', '未知'),
-                          buildRow('请求人：', '马云'),
-                          buildRow('处理方式：', '现场处理'),
-                          buildRow('优先级：', '中'),
+                          buildRow('类型：', _dispatch['Request']['SourceType']),
+                          buildRow('主题：', _dispatch['Request']['RequestType']['Name']),
+                          buildRow('故障描述：', _dispatch['Request']['FaultDesc']),
+                          buildRow('故障分类：', _dispatch['Request']['FaultType']['Name']),
+                          buildRow('请求人：', _dispatch['Request']['RequestUser']['Name']),
+                          buildRow('处理方式：', _dispatch['Request']['DealType']['Name']),
+                          buildRow('优先级：', _dispatch['Request']['Priority']['Name']),
                           new Padding(
                             padding: EdgeInsets.symmetric(vertical: 5.0),
                             child: new Text('请求附件',
@@ -254,12 +290,12 @@ class _EngineerStartPageState extends State<EngineerStartPage> {
                         mainAxisSize: MainAxisSize.max,
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: <Widget>[
-                          buildRow('派工类型：', '维修'),
-                          buildRow('紧急程度：', '普通'),
-                          buildRow('机器状态：', '正常'),
-                          buildRow('工程师：', '张三'),
-                          buildRow('主管备注：', '请立即解决'),
-                          buildRow('出发日期：', '2019年6月20日14点'),
+                          buildRow('派工类型：', _dispatch['RequestType']['Name']),
+                          buildRow('紧急程度：', _dispatch['Urgency']['Name']),
+                          buildRow('机器状态：', _dispatch['MachineStatus']['Name']),
+                          buildRow('工程师：', _dispatch['Engineer']['Name']),
+                          buildRow('主管备注：', _dispatch['LeaderComments']),
+                          buildRow('出发日期：', _dispatch['ScheduleDate']),
                         ],
                       ),
                     ),
@@ -275,12 +311,7 @@ class _EngineerStartPageState extends State<EngineerStartPage> {
                 children: <Widget>[
                   new RaisedButton(
                     onPressed: () {
-                      showDialog(
-                          context: context,
-                          builder: (context) => AlertDialog(
-                            title: Text('开始作业'),
-                          )
-                      );
+                      startDispatch();
                     },
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(24),

@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:atoi/pages/engineer/signature_page.dart';
 import 'dart:convert';
-import 'dart:math';
 import 'dart:typed_data';
+import 'package:atoi/utils/http_request.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:atoi/utils/constants.dart';
 
 class EngineerVoucherPage extends StatefulWidget {
   static String tag = 'engineer-voucher-page';
   EngineerVoucherPage({Key key, this.dispatchId}):super(key: key);
-  final String dispatchId;
+  final int dispatchId;
 
   @override
   _EngineerVoucherPageState createState() => new _EngineerVoucherPageState();
@@ -18,19 +21,86 @@ class _EngineerVoucherPageState extends State<EngineerVoucherPage> {
   var _isExpandedBasic = false;
   var _isExpandedDetail = false;
   var _isExpandedAssign = true;
+  var _faultCode = new TextEditingController();
+  var _jobContent = new TextEditingController();
+  var _followProblem = new TextEditingController();
+  var _unconfirmed = new TextEditingController();
+  var _advice = new TextEditingController();
 
   List _serviceResults = [
     '完成',
     '待跟进'
   ];
 
+  Map<String, dynamic> _dispatch = {};
+
   List<DropdownMenuItem<String>> _dropDownMenuItems;
   String _currentResult;
+  Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
+
+  Future<Null> getDispatch() async {
+    var prefs = await _prefs;
+    var userID = prefs.getInt('userID');
+    var dispatchId = widget.dispatchId;
+    var resp = await HttpRequest.request(
+      '/Dispatch/GetDispatchByID',
+      method: HttpRequest.GET,
+      params: {
+        'userID': userID,
+        'dispatchID': dispatchId
+      }
+    );
+    print(resp);
+    if (resp['ResultCode'] == '00') {
+      setState(() {
+        _dispatch = resp['Data'];
+      });
+    }
+  }
+
+  Future<Null> uploadJournal() async {
+    var prefs = await _prefs;
+    var userId = prefs.getInt('userID');
+    var dispatchId = widget.dispatchId;
+    var image = base64Encode(_img.buffer.asUint8List());
+    var status = AppConstants.ResultStatusID[_currentResult];
+    var resp = await HttpRequest.request(
+      '/DispatchJournal/SaveDispatchJournal',
+      method: HttpRequest.POST,
+      data: {
+        'userID': userId,
+        'dispatchJournalInfo': {
+          'ID': 0,
+          'dispatch': {
+            'ID': dispatchId
+          },
+          'FaultCode': _faultCode.text,
+          'JobContent': _jobContent.text,
+          'FollowProblem': _followProblem.text,
+          'UnconfirmedProblem': _unconfirmed.text,
+          'ResultStatus': {
+            'ID': status
+          },
+          'FileContent': image
+        }
+      }
+    );
+    print(resp);
+    if (resp['ResultCode'] == '00') {
+      showDialog(context: context,
+        builder: (context) => AlertDialog(
+          title: new Text('上传凭证成功')
+        )
+      ).then((result) =>
+        Navigator.of(context, rootNavigator: true).pop(result)
+      );
+    }
+  }
 
   void initState(){
     _dropDownMenuItems = getDropDownMenuItems(_serviceResults);
     _currentResult = _dropDownMenuItems[0].value;
-
+    getDispatch();
     super.initState();
   }
 
@@ -81,6 +151,35 @@ class _EngineerVoucherPageState extends State<EngineerVoucherPage> {
     );
   }
 
+  Row buildDropdown(String title, String currentItem, List dropdownItems, Function changeDropdown) {
+    return new Row(
+      mainAxisAlignment: MainAxisAlignment.start,
+      children: <Widget>[
+        new Expanded(
+          flex: 4,
+          child: new Padding(
+            padding: EdgeInsets.symmetric(vertical: 5.0),
+            child: new Text(
+              title,
+              style: new TextStyle(
+                  fontSize: 20.0,
+                  fontWeight: FontWeight.w600
+              ),
+            ),
+          ),
+        ),
+        new Expanded(
+          flex: 6,
+          child: new DropdownButton(
+            value: currentItem,
+            items: dropdownItems,
+            onChanged: changeDropdown,
+          ),
+        )
+      ],
+    );
+  }
+
   Column buildField(String label, String defaultText) {
     return new Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -94,6 +193,25 @@ class _EngineerVoucherPageState extends State<EngineerVoucherPage> {
         ),
         new TextField(
           controller: new TextEditingController(text: defaultText),
+        ),
+        new SizedBox(height: 5.0,)
+      ],
+    );
+  }
+
+  Column buildEditor(String label, TextEditingController controller) {
+    return new Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        new Text(
+          label,
+          style: new TextStyle(
+              fontSize: 20.0,
+              fontWeight: FontWeight.w600
+          ),
+        ),
+        new TextField(
+          controller: controller,
         ),
         new SizedBox(height: 5.0,)
       ],
@@ -170,7 +288,7 @@ class _EngineerVoucherPageState extends State<EngineerVoucherPage> {
           ),
         ],
       ),
-      body: new Padding(
+      body: _dispatch.isEmpty?new Center(child: new SpinKitRotatingPlain(color: Colors.blue)):new Padding(
         padding: EdgeInsets.symmetric(vertical: 5.0),
         child: new Card(
           child: new ListView(
@@ -213,14 +331,13 @@ class _EngineerVoucherPageState extends State<EngineerVoucherPage> {
                       padding: EdgeInsets.symmetric(horizontal: 8.0),
                       child: new Column(
                         children: <Widget>[
-                          buildRow('设备编号：', 'ZC00000001'),
-                          buildRow('设备名称：', '医用磁共振设备'),
-                          buildRow('使用科室：', '磁共振'),
-                          buildRow('设备厂商：', '飞利浦'),
-                          buildRow('资产等级：', '重要'),
-                          buildRow('设备型号：', 'Philips 781-296'),
-                          buildRow('安装地点：', '磁共振1室'),
-                          buildRow('保修状况：', '保内'),
+                          buildRow('设备系统编号：', _dispatch['Request']['Equipments'][0]['OID']),
+                          buildRow('设备名称：', _dispatch['Request']['Equipments'][0]['Name']),
+                          buildRow('使用科室：', _dispatch['Request']['Equipments'][0]['Department']['Name']),
+                          buildRow('设备厂商：', _dispatch['Request']['Equipments'][0]['Manufacturer']['Name']),
+                          buildRow('资产等级：', _dispatch['Request']['Equipments'][0]['AssetLevel']['Name']),
+                          buildRow('设备型号：', _dispatch['Request']['Equipments'][0]['SerialCode']),
+                          buildRow('保修状况：', _dispatch['Request']['Equipments'][0]['WarrantyStatus']),
                         ],
                       ),
                     ),
@@ -248,14 +365,13 @@ class _EngineerVoucherPageState extends State<EngineerVoucherPage> {
                       padding: EdgeInsets.symmetric(horizontal: 8.0),
                       child: new Column(
                         children: <Widget>[
-                          buildRow('派工单编号：', 'PGD00000001'),
-                          buildRow('紧急程度：', '紧急'),
-                          buildRow('派工类型：', '保内维修'),
-                          buildRow('机器状态：', '停机'),
-                          buildRow('工程师姓名：', '马云'),
-                          buildRow('工作任务：', '系统报错'),
-                          buildRow('出发时间：', '2019-01-01'),
-                          buildRow('备注：', '' ),
+                          buildRow('类型：', _dispatch['Request']['SourceType']),
+                          buildRow('主题：', _dispatch['Request']['RequestType']['Name']),
+                          buildRow('故障描述：', _dispatch['Request']['FaultDesc']),
+                          buildRow('故障分类：', _dispatch['Request']['FaultType']['Name']),
+                          buildRow('请求人：', _dispatch['Request']['RequestUser']['Name']),
+                          buildRow('处理方式：', _dispatch['Request']['DealType']['Name']),
+                          buildRow('优先级：', _dispatch['Request']['Priority']['Name']),
                         ],
                       ),
                     ),
@@ -284,13 +400,14 @@ class _EngineerVoucherPageState extends State<EngineerVoucherPage> {
                       child: new Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: <Widget>[
-                          buildRow('客户姓名：', '李老师'),
-                          buildRow('客户电话：', '18521110011'),
-                          buildField('故障现象/错误代码/事由：', '保内维修'),
-                          buildField('工作内容：', '监督外部供应商更换球馆'),
-                          buildField('待跟进问题：', '无待跟进问题'),
-                          buildField('待确认问题：', '无待确认问题'),
-                          buildField('建议留言：', '这是建议留言的内容'),
+                          buildRow('客户姓名：', _dispatch['Request']['RequestUser']['Name']),
+                          buildRow('客户电话：', _dispatch['Request']['RequestUser']['Mobile']),
+                          buildEditor('故障现象/错误代码/事由：', _faultCode),
+                          buildEditor('工作内容：', _jobContent),
+                          buildEditor('待跟进问题：', _followProblem),
+                          buildEditor('待确认问题：', _unconfirmed),
+                          buildEditor('建议留言：', _advice),
+                          buildDropdown('处理结果：', _currentResult, _dropDownMenuItems, changedDropDownMethod),
                           new Padding(
                             padding: EdgeInsets.symmetric(vertical: 5.0),
                             child: new Text('客户签名：',
@@ -316,12 +433,7 @@ class _EngineerVoucherPageState extends State<EngineerVoucherPage> {
                 children: <Widget>[
                   new RaisedButton(
                     onPressed: () {
-                      showDialog(
-                          context: context,
-                          builder: (context) => AlertDialog(
-                            title: Text('上传凭证'),
-                          )
-                      );
+                      uploadJournal();
                     },
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(24),

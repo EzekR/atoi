@@ -127,7 +127,7 @@ class _LoginPageState extends State<LoginPage> {
           padding: EdgeInsets.only(left: 24.0, right: 24.0),
           children: <Widget>[
             logo,
-            _loading?SpinKitWave(color: Colors.grey):SizedBox(height: 50.0),
+            _loading?SpinKitRotatingPlain(color: Colors.blue):SizedBox(height: 50.0),
             phone,
             SizedBox(height: 8.0),
             password,

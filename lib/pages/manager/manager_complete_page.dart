@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 
 class ManagerCompletePage extends StatefulWidget {
   static String tag = 'mananger-complete-page';
+  ManagerCompletePage({Key key, this.requestId}):super(key: key);
+  final int requestId;
 
   @override
   _ManagerCompletePageState createState() => new _ManagerCompletePageState();
@@ -192,7 +194,7 @@ class _ManagerCompletePageState extends State<ManagerCompletePage> {
   Widget build(BuildContext context){
     return new Scaffold(
       appBar: new AppBar(
-        title: new Text('安排派工'),
+        title: new Text('请求详情'),
         elevation: 0.7,
         flexibleSpace: Container(
           decoration: BoxDecoration(

@@ -2,54 +2,54 @@ import 'package:flutter/material.dart';
 
 class AppConstants {
 
-  Map<String, int> Users = {
+  static Map<String, int> Users = {
     '超级管理员': 1,
     '管理员': 2,
     '超级用户': 3,
     '用户': 4
   };
 
-  Map<String, int> AssetsLevel = {
+  static Map<String, int> AssetsLevel = {
     '重要': 1,
     '一般': 2,
     '特殊': 3
   };
 
-  Map<String, int> ContractScope = {
+  static Map<String, int> ContractScope = {
     '全保': 1,
     '技术保': 2,
     '其他': 3
   };
 
-  Map<String, int> ReportType = {
+  static Map<String, int> ReportType = {
     '通用报告类型': 1
   };
 
-  Map<String, int> SolutionStatus = {
+  static Map<String, int> SolutionStatus = {
     '待分配': 1,
     '问题升级': 2,
     '待第三方支持': 3,
     '已解决': 4
   };
 
-  Map<String, int> ReportStatus = {
+  static Map<String, int> ReportStatus = {
     '新建': 1,
     '待审批': 2,
     '已审批': 3,
     '已终止': 99
   };
 
-  Map<String, int> AccessorySourceType = {
+  static Map<String, int> AccessorySourceType = {
     '外部供应商': 1,
     '备件库': 2
   };
 
-  Map<String, int> AccessoryFileType = {
+  static Map<String, int> AccessoryFileType = {
     '新装': 1,
     '拆下': 2
   };
 
-  Map<String, int> RequestType = {
+  static Map<String, int> RequestType = {
     '维修': 1,
     '保养': 2,
     '强检': 3,
@@ -66,7 +66,7 @@ class AppConstants {
     '其他服务': 14
   };
 
-  Map<String, int> RequestStatus = {
+  static Map<String, int> RequestStatus = {
     '终止': -1,
     '新建': 1,
     '已分配': 2,
@@ -80,51 +80,58 @@ class AppConstants {
     '超时': 97
   };
 
-  Map<String, int> DealType = {
+  static Map<String, int> DealType = {
     '现场服务': 1,
     '电话解决': 2,
     '远程解决': 3,
     '第三方支持': 4
   };
 
-  Map<String, int> PriorityID = {
+  static Map<String, int> PriorityID = {
     '普通': 1,
     '紧急': 2
   };
 
-  Map<String, int> FaultRepair = {
-    '未知': 1
+  static Map<String, int> FaultRepair = {
+    '未知': 1,
+    '已知': 2
   };
 
-  Map<String, int> FaultMaintain = {
+  static Map<String, int> FaultMaintain = {
     '原厂保养': 1,
     '第三方保养': 2,
     'FMTS保养': 3
   };
 
-  Map<String, int> FaultCheck = {
+  static Map<String, int> FaultCheck = {
     '政府要求': 1,
     '医院要求': 2,
     '自主强检': 3
   };
 
-  Map<String, int> FaultBad = {
+  static Map<String, int> MachineStatus = {
+    '正常': 1,
+    '勉强使用': 2,
+    '停机': 3
+  };
+
+  static Map<String, int> FaultBad = {
     '政府通报': 1,
     '医院自检': 2,
     '召回事件': 3
   };
 
-  Map<String, int> UrgencyID = {
+  static Map<String, int> UrgencyID = {
     '普通': 1,
     '紧急': 2
   };
 
-  Map<String, int> EquipmentStatus = {
+  static Map<String, int> EquipmentStatus = {
     '正常': 1,
     '故障': 2
   };
 
-  Map<String, int> DispatchStatus = {
+  static Map<String, int> DispatchStatus = {
     '终止': -1,
     '新建': 1,
     '已响应': 2,
@@ -132,12 +139,12 @@ class AppConstants {
     '已审批': 4
   };
 
-  Map<String, int> ResultStatusID = {
+  static Map<String, int> ResultStatusID = {
     '待跟进': 1,
     '完成': 2
   };
 
-  Map<String, int> JournalStatusID = {
+  static Map<String, int> JournalStatusID = {
     '新建': 1,
     '待审批': 2,
     '已审批': 3,

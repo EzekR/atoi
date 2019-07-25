@@ -8,7 +8,6 @@ import 'package:atoi/utils/constants.dart';
 import 'package:atoi/utils/http_request.dart';
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:atoi/user_home_page.dart';
 
 class UserRepairPage extends StatefulWidget {
   static String tag = 'user-repair-page';
@@ -121,21 +120,11 @@ class _UserRepairPageState extends State<UserRepairPage> {
     print(resp);
     if (resp['ResultCode'] == '00') {
       print('yes');
-      showCupertinoDialog(context: context, builder: (context) => CupertinoAlertDialog(
+      showDialog(context: context, builder: (context) => AlertDialog(
         title: new Text('报修成功'),
-        actions: <Widget>[
-          new RaisedButton(
-              onPressed: (){
-                Navigator.of(context).pushNamed(UserHomePage.tag);
-              },
-              child: new Text('返回首页',
-                style: new TextStyle(
-                  color: Colors.white
-                ),
-              ),
-          )
-        ],
       ),
+      ).then((result) =>
+        Navigator.of(context, rootNavigator: true).pop(result)
       );
     }
   }

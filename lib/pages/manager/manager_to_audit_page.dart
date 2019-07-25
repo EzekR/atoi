@@ -5,6 +5,7 @@ import 'package:atoi/utils/http_request.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:atoi/models/models.dart';
 import 'package:scoped_model/scoped_model.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 
 class ManagerToAuditPage extends StatefulWidget {
   static String tag = 'manager-to-audit-page';
@@ -15,14 +16,18 @@ class _ManagerToAuditPageState extends State<ManagerToAuditPage> {
 
   List<dynamic> _reports = [];
   Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
+  bool _loading = false;
 
   Future<Null> getData() async {
     var prefs = await _prefs;
     var userID = prefs.getInt('userID');
     Map<String, dynamic> params = {
       'userID': userID,
-      'statusID': 1,
+      'statusID': 3,
     };
+    setState(() {
+      _loading = true;
+    });
     var _data = await HttpRequest.request(
         '/Dispatch/GetDispatchs',
         method: HttpRequest.GET,
@@ -30,6 +35,7 @@ class _ManagerToAuditPageState extends State<ManagerToAuditPage> {
     );
     setState(() {
       _reports = _data['Data'];
+      _loading = false;
     });
   }
 
@@ -182,7 +188,7 @@ class _ManagerToAuditPageState extends State<ManagerToAuditPage> {
                         onPressed: (){
                           //Navigator.of(context).pushNamed(ManagerAuditVoucherPage.tag);
                           Navigator.of(context).push(new MaterialPageRoute(builder: (_) {
-                            return new ManagerAuditVoucherPage(request: dispatch);
+                            return new ManagerAuditVoucherPage(journalId: dispatchId, request: dispatch);
                           }));
                         },
                         shape: RoundedRectangleBorder(
@@ -211,7 +217,7 @@ class _ManagerToAuditPageState extends State<ManagerToAuditPage> {
                         onPressed: (){
                           //Navigator.of(context).pushNamed(ManagerAuditReportPage.tag);
                           Navigator.of(context).push(new MaterialPageRoute(builder: (_){
-                            return new ManagerAuditReportPage(request: dispatch);
+                            return new ManagerAuditReportPage(reportId: reportId, request: dispatch);
                           }));
                         },
                         shape: RoundedRectangleBorder(
@@ -249,7 +255,7 @@ class _ManagerToAuditPageState extends State<ManagerToAuditPage> {
           model.setBadge(_reports.length.toString(), 'B');
         }
         return new RefreshIndicator(
-            child: _reports.length == 0?ListView(padding: const EdgeInsets.symmetric(vertical: 150.0), children: <Widget>[new Center(child: new Text('没有待审核工单'),)],):ListView.builder(
+            child: _reports.length == 0?ListView(padding: const EdgeInsets.symmetric(vertical: 150.0), children: <Widget>[_loading?SpinKitRotatingPlain(color: Colors.blue):new Center(child: new Text('没有待审核工单'),)],):ListView.builder(
               padding: const EdgeInsets.all(2.0),
               itemCount: _reports.length,
               itemBuilder: (context, i) => buildCardItem(_reports[i], _reports[i]['DispatchJournal']['ID'], _reports[i]['DispatchReport']['ID'], _reports[i]['OID'], _reports[i]['StartDate'], _reports[i]['Request']['Equipments'][0]['Name'], _reports[i]['Request']['Equipments'][0]['OID'], _reports[i]['RequestType']['Name'], _reports[i]['Urgency']['Name'], _reports[i]['Request']['OID']),

@@ -8,6 +8,8 @@ import 'package:flutter/services.dart';
 import 'dart:convert';
 import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:atoi/utils/constants.dart';
+import 'package:atoi/utils/http_request.dart';
 
 class RepairRequest extends StatefulWidget{
   static String tag = 'repair-request';
@@ -24,6 +26,7 @@ class _RepairRequestState extends State<RepairRequest> {
   var _isExpandedBasic = true;
   var _isExpandedDetail = false;
   var _isExpandedAssign = false;
+  var _fault = new TextEditingController();
 
   MainModel mainModel = MainModel();
 
@@ -52,7 +55,6 @@ class _RepairRequestState extends State<RepairRequest> {
     final SharedPreferences prefs = await _prefs;
     _role = await prefs.getInt('role');
     _roleName = prefs.getString('roleName');
-
   }
 
   void initState(){
@@ -70,6 +72,54 @@ class _RepairRequestState extends State<RepairRequest> {
     setState(() {
       _imageList.add(image);
     });
+  }
+
+  Future<Null> submit() async {
+    var prefs = await _prefs;
+    var userID = prefs.getInt('userID');
+    var fileList = [];
+    for (var image in _imageList) {
+      List<int> imageBytes = await image.readAsBytes();
+      var fileContent = base64Encode(imageBytes);
+      var file = {
+        'FileContent': fileContent,
+        'FileName': image.path,
+        'FiltType': 1,
+        'ID': 0
+      };
+      fileList.add(file);
+    }
+    var _data = {
+      'userID': userID,
+      'requestInfo': {
+        'RequestType': {
+          'ID': 1
+        },
+        'Equipments': [
+          {
+            'ID': 2
+          }
+        ],
+        'FaultType': {
+          'ID': AppConstants.FaultRepair[_currentResult],
+        },
+        'FaultDesc': _fault.text,
+        'Files': fileList
+      }
+    };
+    var resp = await HttpRequest.request(
+      '/Request/AddRequest',
+      method: HttpRequest.POST,
+      data: _data
+    );
+    print(resp);
+    if (resp['ResultCode'] == '00') {
+      showDialog(context: context, builder: (buider) => AlertDialog(
+        title: new Text('报修成功'),
+      )).then((result) =>
+        Navigator.of(context, rootNavigator: true).pop(result)
+      );
+    }
   }
 
   Row buildImageRow(List imageList) {
@@ -322,7 +372,9 @@ class _RepairRequestState extends State<RepairRequest> {
                                       ),
                                       new Expanded(
                                         flex: 6,
-                                        child: new TextField(),
+                                        child: new TextField(
+                                          controller: _fault,
+                                        ),
                                       )
                                     ],
                                   ),
@@ -358,12 +410,7 @@ class _RepairRequestState extends State<RepairRequest> {
                       children: <Widget>[
                         new RaisedButton(
                           onPressed: () {
-                            showDialog(
-                                context: context,
-                                builder: (context) => AlertDialog(
-                                  title: Text('提交请求'),
-                                )
-                            );
+                            submit();
                           },
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(24),

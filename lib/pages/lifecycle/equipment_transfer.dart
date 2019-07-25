@@ -7,6 +7,8 @@ import 'dart:async';
 import 'package:flutter/services.dart';
 import 'dart:convert';
 import 'package:image_picker/image_picker.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:atoi/utils/http_request.dart';
 
 class EquipmentTransfer extends StatefulWidget{
   static String tag = 'equipment-transfer';
@@ -21,6 +23,9 @@ class _EquipmentTransferState extends State<EquipmentTransfer> {
   var _isExpandedBasic = true;
   var _isExpandedDetail = false;
   var _isExpandedAssign = false;
+  Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
+  var _roleName;
+  var _fault = new TextEditingController();
 
   MainModel mainModel = MainModel();
 
@@ -47,6 +52,7 @@ class _EquipmentTransferState extends State<EquipmentTransfer> {
   void initState(){
     _dropDownMenuItems = getDropDownMenuItems(_serviceResults);
     _currentResult = _dropDownMenuItems[0].value;
+    getRole();
     super.initState();
   }
 
@@ -58,6 +64,59 @@ class _EquipmentTransferState extends State<EquipmentTransfer> {
     setState(() {
       _imageList.add(image);
     });
+  }
+
+  Future getRole() async {
+    final SharedPreferences prefs = await _prefs;
+    setState(() {
+      _roleName = prefs.getString('roleName');
+    });
+  }
+
+  Future<Null> submit() async {
+    var prefs = await _prefs;
+    var userID = prefs.getInt('userID');
+    var fileList = [];
+    for (var image in _imageList) {
+      List<int> imageBytes = await image.readAsBytes();
+      var fileContent = base64Encode(imageBytes);
+      var file = {
+        'FileContent': fileContent,
+        'FileName': image.path,
+        'FiltType': 1,
+        'ID': 0
+      };
+      fileList.add(file);
+    }
+    var _data = {
+      'userID': userID,
+      'requestInfo': {
+        'RequestType': {
+          'ID': 10
+        },
+        'Equipments': [
+          {
+            'ID': 2
+          }
+        ],
+        'FaultDesc': _fault.text,
+        'Files': fileList
+      }
+    };
+    var resp = await HttpRequest.request(
+        '/Request/AddRequest',
+        method: HttpRequest.POST,
+        data: _data
+    );
+    print(resp);
+    if (resp['ResultCode'] == '00') {
+      showDialog(context: context, builder: (buider) =>
+          AlertDialog(
+            title: new Text('设备调拨成功'),
+          )).then((result) =>
+          Navigator.of(context, rootNavigator: true).pop(result)
+      );
+    }
   }
 
   Row buildImageRow(List imageList) {
@@ -264,9 +323,9 @@ class _EquipmentTransferState extends State<EquipmentTransfer> {
                             padding: EdgeInsets.symmetric(horizontal: 12.0),
                             child: new Column(
                               children: <Widget>[
-                                buildRow('类型：', '调拨'),
-                                buildRow('请求人：', '超级管理员'),
-                                buildRow('主题', '--调拨'),
+                                buildRow('类型：', '设备调拨'),
+                                buildRow('请求人：', _roleName),
+                                buildRow('主题', '--设备调拨'),
                                 new Padding(
                                   padding: EdgeInsets.symmetric(vertical: 5.0),
                                   child: new Row(
@@ -274,7 +333,7 @@ class _EquipmentTransferState extends State<EquipmentTransfer> {
                                       new Expanded(
                                         flex: 4,
                                         child: new Text(
-                                          '备注：',
+                                          '调拨备注：',
                                           style: new TextStyle(
                                               fontSize: 20.0,
                                               fontWeight: FontWeight.w600
@@ -283,7 +342,9 @@ class _EquipmentTransferState extends State<EquipmentTransfer> {
                                       ),
                                       new Expanded(
                                         flex: 6,
-                                        child: new TextField(),
+                                        child: new TextField(
+                                          controller: _fault,
+                                        ),
                                       )
                                     ],
                                   ),
@@ -319,12 +380,7 @@ class _EquipmentTransferState extends State<EquipmentTransfer> {
                       children: <Widget>[
                         new RaisedButton(
                           onPressed: () {
-                            showDialog(
-                                context: context,
-                                builder: (context) => AlertDialog(
-                                  title: Text('提交请求'),
-                                )
-                            );
+                            submit();
                           },
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(24),

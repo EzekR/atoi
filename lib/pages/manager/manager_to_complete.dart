@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:atoi/pages/manager/manager_assign_page.dart';
+import 'package:atoi/pages/manager/manager_complete_page.dart';
 import 'dart:async';
 import 'package:atoi/utils/http_request.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:scoped_model/scoped_model.dart';
 import 'package:atoi/models/models.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 
 class ManagerToComplete extends StatefulWidget {
   @override
@@ -16,6 +17,7 @@ class _ManagerToCompleteState extends State<ManagerToComplete> {
 
   List<dynamic> _tasks = [];
   Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
+  bool _loading = false;
 
   void initState() {
     getData();
@@ -30,6 +32,9 @@ class _ManagerToCompleteState extends State<ManagerToComplete> {
       'statusID': 98,
       'typeID': 0
     };
+    setState(() {
+      _loading = true;
+    });
     var _data = await HttpRequest.request(
         '/Request/GetRequests',
         method: HttpRequest.GET,
@@ -38,6 +43,7 @@ class _ManagerToCompleteState extends State<ManagerToComplete> {
     print(_data['Data']);
     setState(() {
       _tasks = _data['Data'];
+      _loading = false;
     });
   }
 
@@ -161,7 +167,7 @@ class _ManagerToCompleteState extends State<ManagerToComplete> {
                         onPressed: (){
                           //Navigator.of(context).pushNamed(ManagerAssignPage.tag);
                           Navigator.of(context).push(new MaterialPageRoute(builder: (_) {
-                            return new ManagerAssignPage(request: task);
+                            return new ManagerCompletePage(requestId: requestId);
                           }));
                         },
                         shape: RoundedRectangleBorder(
@@ -202,7 +208,7 @@ class _ManagerToCompleteState extends State<ManagerToComplete> {
             model.setBadge(_tasks.length.toString(), 'C');
           }
           return new RefreshIndicator(
-              child: _tasks.length == 0?ListView(padding: const EdgeInsets.symmetric(vertical: 150.0), children: <Widget>[new Center(child: new Text('没有待派工请求'),)],):ListView.builder(
+              child: _tasks.length == 0?ListView(padding: const EdgeInsets.symmetric(vertical: 150.0), children: <Widget>[_loading?SpinKitRotatingPlain(color: Colors.blue):new Center(child: new Text('没有待派工请求'),)],):ListView.builder(
                   padding: const EdgeInsets.all(2.0),
                   itemCount: _tasks.length,
                   itemBuilder: (context, i) => buildCardItem(_tasks[i], _tasks[i]['ID'], _tasks[i]['OID'], _tasks[i]['RequestDate'], _tasks[i]['EquipmentOID'], _tasks[i]['EquipmentName'], _tasks[i]['DepartmentName'], _tasks[i]['RequestUser']['Name'], _tasks[i]['RequestType']['Name'], _tasks[i]['Status']['Name'], _tasks[i]['FaultDesc'])

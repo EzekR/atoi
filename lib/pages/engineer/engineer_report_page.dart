@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:atoi/utils/http_request.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:atoi/utils/constants.dart';
 
 class EngineerReportPage extends StatefulWidget {
   static String tag = 'engineer-report-page';
   EngineerReportPage({Key key, this.dispatchId}):super(key: key);
-  final String dispatchId;
+  final int dispatchId;
 
   @override
   _EngineerReportPageState createState() => new _EngineerReportPageState();
@@ -25,11 +29,89 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
 
   List<DropdownMenuItem<String>> _dropDownMenuItems;
   String _currentResult;
+  var _dispatch = {};
+  Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
+  var _frequency = new TextEditingController();
+  var _code = new TextEditingController();
+  var _status = new TextEditingController();
+  var _description = new TextEditingController();
+  var _analysis = new TextEditingController();
+  var _solution = new TextEditingController();
+  var _delay = new TextEditingController();
+  var _unsolved = new TextEditingController();
+
+  Future<Null> getDispatch() async {
+    var prefs = await _prefs;
+    var userID = prefs.getInt('userID');
+    var dispatchId = widget.dispatchId;
+    var resp = await HttpRequest.request(
+        '/Dispatch/GetDispatchByID',
+        method: HttpRequest.GET,
+        params: {
+          'userID': userID,
+          'dispatchID': dispatchId
+        }
+    );
+    print(resp);
+    if (resp['ResultCode'] == '00') {
+      setState(() {
+        _dispatch = resp['Data'];
+      });
+    }
+  }
+
+  Future<Null> uploadReport() async {
+    var prefs = await _prefs;
+    var userID = prefs.getInt('userID');
+    var _data = {
+      'userID': userID,
+      'dispatchReport': {
+        'Dispatch': {
+          'ID': widget.dispatchId
+        },
+        'Type': {
+          'ID': 1,
+          'Name': '通用作业报告'
+        },
+        'FaultFrequency': _frequency.text,
+        'FaultCode': _code.text,
+        'FaultSystemStatus': _status.text,
+        'FaultDesc': _description.text,
+        'SolutionCauseAnalysis': _analysis.text,
+        'SolutionWay': _solution.text,
+        'SolutionResultStatus': {
+          'ID': AppConstants.SolutionStatus[_currentResult],
+          'Name': _currentResult
+        },
+        'SolutionUnsolvedComments': _unsolved.text,
+        'DelayReason': _delay.text,
+        'Status': {
+          'ID': 2,
+          'Name': '待审批'
+        }
+      }
+    };
+    var resp = await HttpRequest.request(
+      '/DispatchReport/SaveDispatchReport',
+      method: HttpRequest.POST,
+      data: _data
+    );
+    print(resp);
+    if (resp['ResultCode'] == '00') {
+      showDialog(context: context,
+        builder: (context) => AlertDialog(
+          title: new Text('上传报告成功')
+        )
+      ).then((result) =>
+        Navigator.of(context, rootNavigator: true).pop(result)
+      );
+    }
+  }
 
   void initState(){
     _dropDownMenuItems = getDropDownMenuItems(_serviceResults);
     _currentResult = _dropDownMenuItems[0].value;
-
+    getDispatch();
     super.initState();
   }
 
@@ -48,7 +130,7 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
     return items;
   }
 
-  Column buildField(String label, String defaultText) {
+  Column buildField(String label, TextEditingController controller) {
     return new Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
@@ -60,7 +142,7 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
           ),
         ),
         new TextField(
-          controller: new TextEditingController(text: defaultText),
+          controller: controller,
         ),
         new SizedBox(height: 5.0,)
       ],
@@ -183,7 +265,7 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
           ),
         ],
       ),
-      body: new Padding(
+      body: _dispatch.isEmpty?new Center(child: new SpinKitRotatingPlain(color: Colors.blue),):new Padding(
         padding: EdgeInsets.symmetric(vertical: 5.0),
         child: new Card(
           child: new ListView(
@@ -230,14 +312,13 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
                       padding: EdgeInsets.symmetric(horizontal: 8.0),
                       child: new Column(
                         children: <Widget>[
-                          buildRow('设备编号：', 'ZC00000001'),
-                          buildRow('设备名称：', '医用磁共振设备'),
-                          buildRow('使用科室：', '磁共振'),
-                          buildRow('设备厂商：', '飞利浦'),
-                          buildRow('资产等级：', '重要'),
-                          buildRow('设备型号：', 'Philips 781-296'),
-                          buildRow('安装地点：', '磁共振1室'),
-                          buildRow('保修状况：', '保内'),
+                          buildRow('设备系统编号：', _dispatch['Request']['Equipments'][0]['OID']),
+                          buildRow('设备名称：', _dispatch['Request']['Equipments'][0]['Name']),
+                          buildRow('使用科室：', _dispatch['Request']['Equipments'][0]['Department']['Name']),
+                          buildRow('设备厂商：', _dispatch['Request']['Equipments'][0]['Manufacturer']['Name']),
+                          buildRow('资产等级：', _dispatch['Request']['Equipments'][0]['AssetLevel']['Name']),
+                          buildRow('设备型号：', _dispatch['Request']['Equipments'][0]['SerialCode']),
+                          buildRow('保修状况：', _dispatch['Request']['Equipments'][0]['WarrantyStatus']),
                         ],
                       ),
                     ),
@@ -265,14 +346,14 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
                       padding: EdgeInsets.symmetric(horizontal: 8.0),
                       child: new Column(
                         children: <Widget>[
-                          buildRow('派工单编号：', 'PGD00000001'),
-                          buildRow('紧急程度：', '紧急'),
-                          buildRow('派工类型：', '保内维修'),
-                          buildRow('机器状态：', '停机'),
-                          buildRow('工程师姓名：', '马云'),
-                          buildRow('工作任务：', '系统报错'),
-                          buildRow('出发时间：', '2019-01-01'),
-                          buildRow('备注：', '' ),
+                          buildRow('派工单编号：', _dispatch['OID']),
+                          buildRow('类型：', _dispatch['Request']['SourceType']),
+                          buildRow('主题：', _dispatch['Request']['RequestType']['Name']),
+                          buildRow('故障描述：', _dispatch['Request']['FaultDesc']),
+                          buildRow('故障分类：', _dispatch['Request']['FaultType']['Name']),
+                          buildRow('请求人：', _dispatch['Request']['RequestUser']['Name']),
+                          buildRow('处理方式：', _dispatch['Request']['DealType']['Name']),
+                          buildRow('优先级：', _dispatch['Request']['Priority']['Name']),
                         ],
                       ),
                     ),
@@ -301,18 +382,15 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
                       child: new Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: <Widget>[
-                          buildField('作业报告类型：', '通用作业报告'),
-                          buildField('发生频率：', '一直'),
-                          buildField('设备状态：', '正常'),
-                          buildField('设备位置：', '放射科'),
-                          buildField('错误代码：', 'oxe2135	'),
-                          buildField('故障描述：', '系统无法启动'),
-                          buildField('分析原因：', '这个是分析原因内容'),
-                          buildField('处理方法：', '更新球馆	'),
-                          buildField('结果：', '联络外部供应商更换球馆'),
-                          buildField('未解决备注：', '这个是未解决备注内容'),
-                          buildField('误工说明：', '误工说明原因的信息'),
-                          buildDropdown('作业报告结果：', _currentResult, _dropDownMenuItems, changedDropDownMethod),
+                          buildField('发生频率：', _frequency),
+                          buildField('设备状态：', _status),
+                          buildField('错误代码：', _code	),
+                          buildField('故障描述：', _description),
+                          buildField('分析原因：', _analysis),
+                          buildField('处理方法：', _solution),
+                          buildField('未解决备注：', _unsolved),
+                          buildField('误工说明：', _delay),
+                          buildDropdown('处理结果：', _currentResult, _dropDownMenuItems, changedDropDownMethod),
                         ],
                       ),
                     ),
@@ -355,12 +433,7 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
                 children: <Widget>[
                   new RaisedButton(
                     onPressed: () {
-                      showDialog(
-                          context: context,
-                          builder: (context) => AlertDialog(
-                              title: Text('上传报告')
-                          )
-                      );
+                      uploadReport();
                     },
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(24),

@@ -7,6 +7,9 @@ import 'dart:async';
 import 'package:flutter/services.dart';
 import 'dart:convert';
 import 'package:image_picker/image_picker.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:atoi/utils/http_request.dart';
+import 'package:atoi/utils/constants.dart';
 
 class MaintainRequest extends StatefulWidget{
   static String tag = 'maintain-request';
@@ -21,13 +24,17 @@ class _MaintainRequestState extends State<MaintainRequest> {
   var _isExpandedBasic = true;
   var _isExpandedDetail = false;
   var _isExpandedAssign = false;
+  var _userID;
+  var roleName;
+  var _fault = new TextEditingController();
 
   MainModel mainModel = MainModel();
 
   List<dynamic> _imageList = [];
   List _serviceResults = [
-    '未知',
-    '已知'
+    '原厂保养',
+    '第三方保养',
+    'FMTS保养'
   ];
 
   Map<String, dynamic> _result = {
@@ -47,6 +54,7 @@ class _MaintainRequestState extends State<MaintainRequest> {
   void initState(){
     _dropDownMenuItems = getDropDownMenuItems(_serviceResults);
     _currentResult = _dropDownMenuItems[0].value;
+    getRole();
     super.initState();
   }
 
@@ -58,6 +66,62 @@ class _MaintainRequestState extends State<MaintainRequest> {
     setState(() {
       _imageList.add(image);
     });
+  }
+
+  Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
+
+  Future<Null> getRole() async {
+    var prefs = await _prefs;
+    setState(() {
+      _userID = prefs.getInt('userID');
+      roleName = prefs.getString('roleName');
+    });
+  }
+
+  Future<Null> submit() async {
+    var fileList = [];
+    for (var image in _imageList) {
+      List<int> imageBytes = await image.readAsBytes();
+      var fileContent = base64Encode(imageBytes);
+      var file = {
+        'FileContent': fileContent,
+        'FileName': image.path,
+        'FiltType': 1,
+        'ID': 0
+      };
+      fileList.add(file);
+    }
+    var _data = {
+      'userID': _userID,
+      'requestInfo': {
+        'RequestType': {
+          'ID': 2
+        },
+        'Equipments': [
+          {
+            'ID': 2
+          }
+        ],
+        'FaultType': {
+          'ID': AppConstants.FaultMaintain[_currentResult],
+        },
+        'FaultDesc': _fault.text,
+        'Files': fileList
+      }
+    };
+    var resp = await HttpRequest.request(
+        '/Request/AddRequest',
+        method: HttpRequest.POST,
+        data: _data
+    );
+    print(resp);
+    if (resp['ResultCode'] == '00') {
+      showDialog(context: context, builder: (buider) => AlertDialog(
+        title: new Text('提交保养成功'),
+      )).then((result) =>
+          Navigator.of(context, rootNavigator: true).pop(result)
+      );
+    }
   }
 
   Row buildImageRow(List imageList) {
@@ -265,8 +329,33 @@ class _MaintainRequestState extends State<MaintainRequest> {
                             child: new Column(
                               children: <Widget>[
                                 buildRow('类型：', '保养'),
-                                buildRow('请求人：', '超级管理员'),
+                                buildRow('请求人：', roleName),
                                 buildRow('主题', '--保养'),
+                                new Padding(
+                                  padding: EdgeInsets.symmetric(vertical: 5.0),
+                                  child: new Row(
+                                    children: <Widget>[
+                                      new Expanded(
+                                        flex: 4,
+                                        child: new Text(
+                                          '保养类型：',
+                                          style: new TextStyle(
+                                              fontSize: 20.0,
+                                              fontWeight: FontWeight.w600
+                                          ),
+                                        ),
+                                      ),
+                                      new Expanded(
+                                        flex: 6,
+                                        child: new DropdownButton(
+                                          value: _currentResult,
+                                          items: _dropDownMenuItems,
+                                          onChanged: changedDropDownMethod,
+                                        ),
+                                      )
+                                    ],
+                                  ),
+                                ),
                                 new Padding(
                                   padding: EdgeInsets.symmetric(vertical: 5.0),
                                   child: new Row(
@@ -283,11 +372,9 @@ class _MaintainRequestState extends State<MaintainRequest> {
                                       ),
                                       new Expanded(
                                         flex: 6,
-                                        child: new DropdownButton(
-                                          value: _currentResult,
-                                          items: _dropDownMenuItems,
-                                          onChanged: changedDropDownMethod,
-                                        ),
+                                        child: new TextField(
+                                          controller: _fault,
+                                        )
                                       )
                                     ],
                                   ),
@@ -323,12 +410,7 @@ class _MaintainRequestState extends State<MaintainRequest> {
                       children: <Widget>[
                         new RaisedButton(
                           onPressed: () {
-                            showDialog(
-                                context: context,
-                                builder: (context) => AlertDialog(
-                                  title: Text('提交请求'),
-                                )
-                            );
+                            submit();
                           },
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(24),

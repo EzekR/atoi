@@ -1,8 +1,12 @@
-import 'package:flutter/material.dart';
+import 'dart:core';
 import 'dart:async';
+import 'package:flutter/material.dart';
 import 'package:atoi/utils/http_request.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:atoi/utils/constants.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:atoi/home_page.dart';
+import 'dart:convert';
 
 class ManagerAssignPage extends StatefulWidget {
   static String tag = 'mananger-assign-page';
@@ -21,9 +25,11 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
   var _isExpandedAssign = false;
   String departureDate = '';
 
+  Map<String, dynamic> _request = {};
+
   Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
 
-  String _imageUri = '';
+  List<int> imageBytes = [];
 
   List _handleMethods = [
     '现场服务',
@@ -33,7 +39,8 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
   ];
 
   List _priorities = [
-    '高','中','低'
+    '普通',
+    '紧急'
   ];
 
   List _assignTypes = [
@@ -64,10 +71,10 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
     '停机'
   ];
 
-  List _engineerNames = [
-    '张三  ',
-    '李四'
-  ];
+  List _engineerNames = [];
+
+  Map<String, int> _engineers = {};
+  //final String roleName = await LocalStorage().getStorage('roleName', String);
 
   List<DropdownMenuItem<String>> _dropDownMenuItems;
   List<DropdownMenuItem<String>> _dropDownMenuPris;
@@ -75,6 +82,8 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
   List<DropdownMenuItem<String>> _dropDownMenuLevels;
   List<DropdownMenuItem<String>> _dropDownMenuStatuses;
   List<DropdownMenuItem<String>> _dropDownMenuNames;
+
+  var _leaderComment = new TextEditingController();
 
   String _currentMethod;
   String _currentPriority;
@@ -84,7 +93,66 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
   String _currentName;
 
   Future<Null> getRequest() async {
+    int requestId = widget.request['ID'];
+    var prefs = await _prefs;
+    var userId = prefs.getInt('userID');
+    var params = {
+      'userId': userId,
+      'requestId': requestId
+    };
+    var resp = await HttpRequest.request(
+      '/Request/GetRequestByID',
+      method: HttpRequest.GET,
+      params: params,
+    );
+    print(resp);
+    if (resp['ResultCode'] == '00') {
+      var files = resp['Data']['Files'];
+      for (var file in files) {
+        getImage(file['ID']);
+      }
+      setState(() {
+        _request = resp['Data'];
+      });
+    }
+  }
 
+  Future<Null> getImage(int fileId) async {
+    var resp = await HttpRequest.request(
+      '/Request/DownloadUploadFile',
+      params: {
+        'ID': fileId
+      },
+      method: HttpRequest.GET
+    );
+    if (resp['ResultCode'] == '00') {
+      setState(() {
+        imageBytes = base64Decode(resp['Data']);
+      });
+    }
+  }
+
+  Future<Null> getEngineers() async {
+    List<String> _listName = [];
+    Map<String, int> _listID = {};
+    var resp = await HttpRequest.request(
+      '/User/GetAdmins',
+      method: HttpRequest.GET
+    );
+    print(resp);
+    if (resp['ResultCode'] == '00') {
+      for (var item in resp['Data']) {
+        _listName.add(item['Name']);
+        _listID[item['Name']] = item['ID'];
+      }
+      print(_listID);
+      setState(() {
+        _engineerNames = _listName;
+        _engineers = _listID;
+        _dropDownMenuNames = getDropDownMenuItems(_engineerNames);
+        _currentName = _dropDownMenuNames[0].value;
+      });
+    }
   }
 
   void initState() {
@@ -95,13 +163,11 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
     _dropDownMenuTypes = getDropDownMenuItems(_assignTypes);
     _dropDownMenuLevels = getDropDownMenuItems(_levels);
     _dropDownMenuStatuses = getDropDownMenuItems(_deviceStatuses);
-    _dropDownMenuNames = getDropDownMenuItems(_engineerNames);
     _currentType = _dropDownMenuTypes[0].value;
     _currentLevel = _dropDownMenuLevels[0].value;
     _currentStatus = _dropDownMenuStatuses[0].value;
-    _currentName = _dropDownMenuNames[0].value;
-
-    //getReport();
+    getRequest();
+    getEngineers();
     super.initState();
   }
 
@@ -243,18 +309,34 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
     var userID = prefs.getInt('userID');
     Map<String, dynamic> _data = {
       'userID': userID,
-      'RequestID': widget.request['ID'],
       'dispatchInfo': {
         'Request': {
-          'ID': widget.request['ID']
+          'ID': _request['ID'],
+          'Priority': {
+            'ID': AppConstants.PriorityID[_currentPriority],
+          },
+          'DealType': {
+            'ID': AppConstants.DealType[_currentMethod]
+          },
+          'FaultDesc': _request['FaultDesc'],
+          'FaultType': {
+            'ID': _request['FaultType']['ID']
+          }
         },
         'Urgency': {
-          'ID': AppConstants().UrgencyID[_currentLevel]
+          'ID': AppConstants.UrgencyID[_currentLevel]
         },
         'Engineer': {
-          'ID': 32
+          'ID': _engineers[_currentName]
         },
-        'ScheduleDate': departureDate
+        'MachineStatus': {
+          'ID': AppConstants.MachineStatus[_currentStatus]
+        },
+        'ScheduleDate': departureDate,
+        'LeaderComments': _leaderComment.text,
+        'RequestType': {
+          'ID': AppConstants.RequestType[_currentType]
+        }
       }
     };
     var resp = await HttpRequest.request(
@@ -267,9 +349,28 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
       showDialog(context: context,
         builder: (context) => AlertDialog(
           title: new Text('安排派工成功'),
+          actions: <Widget>[
+            new RaisedButton(onPressed: () {
+              Navigator.of(context).pushNamed(HomePage.tag);
+            },
+              child: new Text('确定',
+                style: new TextStyle(
+                  color: Colors.white
+                ),
+              ),
+            )
+          ],
         )
       );
-      Navigator.of(context).pop();
+    } else {
+      showDialog(context: context,
+        builder: (context) => AlertDialog(
+          title: new Text('派工失败:'),
+          actions: <Widget>[
+            new Text(resp['ResultMessage'])
+          ],
+        )
+      );
     }
   }
 
@@ -295,11 +396,11 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
           new Icon(Icons.face),
           new Padding(
             padding: const EdgeInsets.symmetric(horizontal: 5.0, vertical: 19.0),
-            child: const Text('上杉谦信'),
+            child: const Text('超级管理员'),
           ),
         ],
       ),
-      body: new Padding(
+      body: _request.isEmpty?new Center(child: SpinKitRotatingPlain(color: Colors.blue),):new Padding(
         padding: EdgeInsets.symmetric(vertical: 5.0),
         child: new Card(
           child: new ListView(
@@ -342,14 +443,14 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
                         padding: EdgeInsets.symmetric(horizontal: 12.0),
                         child: new Column(
                           children: <Widget>[
-                            buildRow('设备编号：', widget.request['EquipmentOID']),
-                            buildRow('设备名称：', widget.request['EquipmentName']),
-                            buildRow('使用科室：', widget.request['DepartmentName']),
-                            buildRow('设备厂商：', widget.request['Equipments'][0]['Manufacturer']['OID']),
-                            buildRow('资产等级：', widget.request['Equipments'][0]['AssetLevel']['ID'].toString()),
-                            buildRow('设备型号：', widget.request['Equipments'][0]['SerialCode']),
-                            buildRow('安装地点：', widget.request['Equipments'][0]['Department']['Name']),
-                            buildRow('保修状况：', '保内'),
+                            buildRow('设备编号：', _request['EquipmentOID']),
+                            buildRow('设备名称：', _request['EquipmentName']),
+                            buildRow('使用科室：', _request['DepartmentName']),
+                            buildRow('设备厂商：', _request['Equipments'][0]['Supplier']['Name']??''),
+                            buildRow('资产等级：', _request['Equipments'][0]['AssetLevel']['Name']??''),
+                            buildRow('设备型号：', _request['Equipments'][0]['EquipmentCode']??''),
+                            buildRow('安装地点：', _request['Equipments'][0]['Department']['Name']??''),
+                            buildRow('保修状况：', _request['Equipments'][0]['WarrantyStatus']??''),
                             new Padding(padding: EdgeInsets.symmetric(vertical: 8.0))
                           ],
                         ),
@@ -381,12 +482,12 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
                         mainAxisSize: MainAxisSize.max,
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: <Widget>[
-                          buildRow('类型：', widget.request['SourceType']),
-                          buildRow('主题：', widget.request['Subject']),
-                          buildRow('故障描述：', widget.request['FaultDesc']),
-                          buildRow('故障分类：', widget.request['FaultType']['Name']),
-                          buildRow('请求人：', widget.request['RequestUser']['Name']),
-                          buildRow('联系电话：', widget.request['RequestUser']['Mobile']),
+                          buildRow('类型：', _request['SourceType']),
+                          buildRow('主题：', _request['Subject']),
+                          buildRow('故障描述：', _request['FaultDesc']),
+                          buildRow('故障分类：', _request['FaultType']['Name']),
+                          buildRow('请求人：', _request['RequestUser']['Name']),
+                          buildRow('联系电话：', _request['RequestUser']['Mobile']),
                           buildDropdown('处理方式：', _currentMethod, _dropDownMenuItems, changedDropDownMethod),
                           buildDropdown('优先级：', _currentPriority, _dropDownMenuPris, changedDropDownPri),
                           new Padding(
@@ -403,8 +504,8 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
                             children: <Widget>[
                               new Padding(
                                 padding: const EdgeInsets.all(10.0),
-                                child: Image.network(
-                                  _imageUri,
+                                child: imageBytes.isEmpty?new Container():new Image.memory(
+                                  imageBytes,
                                   width: 200.0,
                                 ),
                               ),
@@ -443,7 +544,7 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
                           buildDropdown('派工类型：', _currentType, _dropDownMenuTypes, changedDropDownType),
                           buildDropdown('紧急程度：', _currentLevel, _dropDownMenuLevels, changedDropDownLevel),
                           buildDropdown('机器状态：', _currentStatus, _dropDownMenuStatuses, changedDropDownStatus),
-                          buildDropdown('工程师姓名：', _currentName, _dropDownMenuNames, changedDropDownName),
+                          _engineerNames.isEmpty?new Container():buildDropdown('工程师姓名：', _currentName, _dropDownMenuNames, changedDropDownName),
                           new MaterialButton(
                             child: new Align(
                               alignment: Alignment(-1.1, 0.0),
@@ -487,7 +588,7 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
                                   ),
                                 ),
                                 new TextField(
-
+                                  controller: _leaderComment,
                                 )
                               ],
                             ),

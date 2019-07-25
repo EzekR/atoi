@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:atoi/utils/http_request.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:atoi/utils/constants.dart';
 
 class ManagerAuditReportPage extends StatefulWidget {
   static String tag = 'manager-audit-report-page';
-  ManagerAuditReportPage({Key key, this.request, this.reportId}): super(key: key);
+  ManagerAuditReportPage({Key key, this.reportId, this.request}): super(key: key);
+  final int reportId;
   final Map request;
-  final String reportId;
 
   @override
   _ManagerAuditReportPageState createState() => new _ManagerAuditReportPageState();
@@ -28,11 +30,12 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
 
   List<DropdownMenuItem<String>> _dropDownMenuItems;
   String _currentResult;
+  Map<String, dynamic> _report = {};
 
   void initState(){
     _dropDownMenuItems = getDropDownMenuItems(_serviceResults);
     _currentResult = _dropDownMenuItems[0].value;
-
+    getReport();
     super.initState();
   }
 
@@ -142,13 +145,33 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
 
   Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
 
+  Future<Null> getReport() async {
+    var prefs = await _prefs;
+    var userID = prefs.getInt('userID');
+    var reportId = widget.reportId;
+    var resp = await HttpRequest.request(
+      '/DispatchReport/GetDispatchReport',
+      method: HttpRequest.GET,
+      params: {
+        'userID': userID,
+        'DispatchReportId': reportId
+      }
+    );
+    print(resp);
+    if (resp['ResultCode'] == '00') {
+      setState(() {
+        _report = resp['Data'];
+      });
+    }
+  }
+
   Future<Null> approveReport() async {
     final SharedPreferences prefs = await _prefs;
-    var UserId = await prefs.getString('userId');
+    var UserId = await prefs.getInt('userID');
     Map<String, dynamic> _data = {
       'userID': UserId,
       'reportID': widget.reportId,
-      'solutionResultID': '2',
+      'solutionResultID': AppConstants.SolutionStatus[_currentResult],
       'comments': 'api'
     };
     var _response = await HttpRequest.request(
@@ -157,12 +180,20 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
         data: _data
     );
     print(_response);
-    if (_response['ErrorCode'] == '00') {
+    if (_response['ResultCode'] == '00') {
       showDialog(
           context: context,
           builder: (context) => AlertDialog(
             title: new Text('通过报告'),
           )
+      ).then((result) {
+        Navigator.of(context).pop(result);
+      });
+    } else {
+      showDialog(context: context,
+        builder: (context) => AlertDialog(
+          title: new Text(_response['ResultMessage']),
+        )
       );
     }
   }
@@ -172,7 +203,7 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
     var UserId = await prefs.getString('userId');
     Map<String, dynamic> _data = {
       'userID': UserId,
-      'ReportID': widget.reportId,
+      'reportID': widget.reportId,
       'comments': 'api'
     };
     var _response = await HttpRequest.request(
@@ -181,7 +212,7 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
         data: _data
     );
     print(_response);
-    if (_response['ErrorCode'] == '00') {
+    if (_response['ResultCode'] == '00') {
       showDialog(
           context: context,
           builder: (context) => AlertDialog(
@@ -218,7 +249,7 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
           ),
         ],
       ),
-      body: new Padding(
+      body: _report.isEmpty?new Center(child: SpinKitRotatingPlain(color: Colors.blue,),):new Padding(
         padding: EdgeInsets.symmetric(vertical: 5.0),
         child: new Card(
           child: new ListView(
@@ -265,14 +296,13 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
                       padding: EdgeInsets.symmetric(horizontal: 8.0),
                       child: new Column(
                         children: <Widget>[
-                          buildRow('设备编号：', 'ZC00000001'),
-                          buildRow('设备名称：', '医用磁共振设备'),
-                          buildRow('使用科室：', '磁共振'),
-                          buildRow('设备厂商：', '飞利浦'),
-                          buildRow('资产等级：', '重要'),
-                          buildRow('设备型号：', 'Philips 781-296'),
-                          buildRow('安装地点：', '磁共振1室'),
-                          buildRow('保修状况：', '保内'),
+                          buildRow('设备编号', widget.request['Request']['Equipments'][0]['OID']),
+                          buildRow('设备名称', widget.request['Request']['Equipments'][0]['Name']),
+                          buildRow('使用科室', widget.request['Request']['Equipments'][0]['Department']['Name']),
+                          buildRow('设备厂商', widget.request['Request']['Equipments'][0]['Supplier']['Name']??''),
+                          buildRow('资产等级', widget.request['Request']['Equipments'][0]['AssetLevel']['Name']??''),
+                          buildRow('设备型号', widget.request['Request']['Equipments'][0]['SerialCode']),
+                          buildRow('安装地点', widget.request['Request']['DepartmentName']),
                         ],
                       ),
                     ),
@@ -300,14 +330,14 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
                       padding: EdgeInsets.symmetric(horizontal: 8.0),
                       child: new Column(
                         children: <Widget>[
-                          buildRow('派工单编号：', 'PGD00000001'),
-                          buildRow('紧急程度：', '紧急'),
-                          buildRow('派工类型：', '保内维修'),
-                          buildRow('机器状态：', '停机'),
-                          buildRow('工程师姓名：', '马云'),
-                          buildRow('工作任务：', '系统报错'),
-                          buildRow('出发时间：', '2019-01-01'),
-                          buildRow('备注：', '' ),
+                          buildRow('派工单编号', widget.request['OID']),
+                          buildRow('紧急程度', widget.request['Urgency']['Name']),
+                          buildRow('派工类型', widget.request['RequestType']['Name']),
+                          buildRow('机器状态', widget.request['MachineStatus']['Name']),
+                          buildRow('工程师姓名', widget.request['Engineer']['ID'].toString()),
+                          buildRow('工作任务', widget.request['LeaderComments']),
+                          buildRow('出发时间', widget.request['ScheduleDate']),
+                          buildRow('备注', '' ),
                         ],
                       ),
                     ),
@@ -336,17 +366,17 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
                       child: new Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: <Widget>[
-                          buildRow('作业报告编号：', 'ZYBG00000001'),
-                          buildRow('作业报告类型：', '通用作业报告'),
-                          buildRow('发生频率：', '一直'),
-                          buildRow('设备状态：', '正常'),
-                          buildRow('错误代码：', 'oxe2135	'),
-                          buildRow('故障描述：', '系统无法启动'),
-                          buildRow('分析原因：', '这个是分析原因内容'),
-                          buildRow('处理方法：', '更新球馆	'),
-                          buildRow('结果：', '联络外部供应商更换球馆'),
-                          buildRow('未解决备注：', '这个是未解决备注内容'),
-                          buildRow('误工说明：', '误工说明原因的信息'),
+                          buildRow('作业报告编号：', _report['OID']),
+                          buildRow('作业报告类型：', _report['Type']['Name']),
+                          buildRow('发生频率：', _report['FaultFrequency']),
+                          buildRow('设备状态：', _report['Dispatch']['MachineStatus']['Name']??'正常'),
+                          buildRow('错误代码：', _report['FaultCode']),
+                          buildRow('故障描述：', _report['FaultDesc']),
+                          buildRow('分析原因：', _report['SolutionCauseAnalysis']),
+                          buildRow('处理方法：', _report['SolutionWay']),
+                          buildRow('结果：', _report['SolutionResultStatus']['Name']),
+                          buildRow('未解决备注：', _report['SolutionUnsolvedComments']),
+                          buildRow('误工说明：', _report['DelayReason']),
                           buildDropdown('作业报告结果：', _currentResult, _dropDownMenuItems, changedDropDownMethod)
                         ],
                       ),
@@ -390,12 +420,7 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
                 children: <Widget>[
                   new RaisedButton(
                     onPressed: () {
-                      showDialog(
-                          context: context,
-                          builder: (context) => AlertDialog(
-                            title: Text('通过凭证'),
-                          )
-                      );
+                      approveReport();
                     },
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(24),
@@ -406,12 +431,7 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
                   ),
                   new RaisedButton(
                     onPressed: () {
-                      showDialog(
-                          context: context,
-                          builder: (context) => AlertDialog(
-                              title: Text('退回报告')
-                          )
-                      );
+                      rejectReport();
                     },
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(24),
