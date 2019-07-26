@@ -22,6 +22,7 @@ class _RepairRequestState extends State<RepairRequest> {
   String barcode = "";
   int _role;
   String _roleName = "";
+  Map _equipment = {};
 
   var _isExpandedBasic = true;
   var _isExpandedDetail = false;
@@ -97,7 +98,7 @@ class _RepairRequestState extends State<RepairRequest> {
         },
         'Equipments': [
           {
-            'ID': 2
+            'ID': _equipment['ID']
           }
         ],
         'FaultType': {
@@ -174,8 +175,9 @@ class _RepairRequestState extends State<RepairRequest> {
     final _searchResult = await showSearch(context: context, delegate: SearchBarDelegate());
     if (_searchResult != null) {
       Map _data = jsonDecode(_searchResult);
+      print(_data);
       setState(() {
-        _result.addAll(_data);
+        _equipment = _data;
       });
     }
   }
@@ -290,17 +292,17 @@ class _RepairRequestState extends State<RepairRequest> {
                           },
                           body: new Padding(
                             padding: EdgeInsets.symmetric(horizontal: 12.0),
-                            child: new Column(
+                            child: _equipment.isEmpty?new Center(child: new Text('请选择设备'),):new Column(
                               children: <Widget>[
-                                buildRow('设备编号：', _result['equipNo']),
-                                buildRow('设备名称：', _result['name']),
-                                buildRow('使用科室：', _result['department']),
-                                buildRow('设备厂商：', _result['manufacturer']),
-                                buildRow('资产等级：', _result['equipLevel']),
-                                buildRow('设备型号：', _result['model']),
-                                buildRow('安装地点：', _result['location']),
-                                buildRow('保修状况：', _result['guarantee']),
-                                new Padding(padding: EdgeInsets.symmetric(vertical: 8.0))
+                                buildRow('设备编号：', _equipment['OID']??''),
+                                buildRow('设备名称：', _equipment['Name']??''),
+                                buildRow('使用科室：', _equipment['Department']['Name']??''),
+                                buildRow('设备厂商：', _equipment['Manufacturer']['Name']??''),
+                                buildRow('资产等级：', _equipment['AssetLevel']['Name']??''),
+                                buildRow('设备型号：', _equipment['EquipmentCode']??''),
+                                buildRow('安装地点：', _equipment['InstalSite']??''),
+                                buildRow('报修状况', _equipment['WarrantyStatus']??''),
+                                new Padding(padding: EdgeInsets.symmetric(vertical: 8.0)??'')
                               ],
                             ),
                           ),

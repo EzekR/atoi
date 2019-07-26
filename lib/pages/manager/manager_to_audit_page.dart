@@ -258,7 +258,7 @@ class _ManagerToAuditPageState extends State<ManagerToAuditPage> {
             child: _reports.length == 0?ListView(padding: const EdgeInsets.symmetric(vertical: 150.0), children: <Widget>[_loading?SpinKitRotatingPlain(color: Colors.blue):new Center(child: new Text('没有待审核工单'),)],):ListView.builder(
               padding: const EdgeInsets.all(2.0),
               itemCount: _reports.length,
-              itemBuilder: (context, i) => buildCardItem(_reports[i], _reports[i]['DispatchJournal']['ID'], _reports[i]['DispatchReport']['ID'], _reports[i]['OID'], _reports[i]['StartDate'], _reports[i]['Request']['Equipments'][0]['Name'], _reports[i]['Request']['Equipments'][0]['OID'], _reports[i]['RequestType']['Name'], _reports[i]['Urgency']['Name'], _reports[i]['Request']['OID']),
+              itemBuilder: (context, i) => buildCardItem(_reports[i], _reports[i]['DispatchJournal']['ID'], _reports[i]['DispatchReport']['ID'], _reports[i]['OID'], _reports[i]['ScheduleDate'], _reports[i]['Request']['Equipments'][0]['Name'], _reports[i]['Request']['Equipments'][0]['OID'], _reports[i]['RequestType']['Name'], _reports[i]['Urgency']['Name'], _reports[i]['Request']['OID']),
             ),
             onRefresh: getData
         );

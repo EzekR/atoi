@@ -7,6 +7,9 @@ import 'dart:async';
 import 'package:flutter/services.dart';
 import 'dart:convert';
 import 'package:image_picker/image_picker.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:atoi/utils/http_request.dart';
+import 'package:atoi/utils/constants.dart';
 
 class PatrolRequest extends StatefulWidget{
   static String tag = 'patrol-request';
@@ -21,7 +24,9 @@ class _PatrolRequestState extends State<PatrolRequest> {
   var _isExpandedBasic = true;
   var _isExpandedDetail = false;
   var _isExpandedAssign = false;
+  var _fault = new TextEditingController();
 
+  Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
   MainModel mainModel = MainModel();
 
   List _serviceResults = [
@@ -39,6 +44,8 @@ class _PatrolRequestState extends State<PatrolRequest> {
     'manufacturer': '',
     'guarantee': ''
   };
+
+  List<Map> _equipments = [];
 
   List<DropdownMenuItem<String>> _dropDownMenuItems;
   String _currentResult;
@@ -86,6 +93,52 @@ class _PatrolRequestState extends State<PatrolRequest> {
     );
   }
 
+  Future<Null> submit() async {
+    var prefs = await _prefs;
+    var userID = prefs.getInt('userID');
+    var fileList = [];
+    for (var image in _imageList) {
+      List<int> imageBytes = await image.readAsBytes();
+      var fileContent = base64Encode(imageBytes);
+      var file = {
+        'FileContent': fileContent,
+        'FileName': image.path,
+        'FiltType': 1,
+        'ID': 0
+      };
+      fileList.add(file);
+    }
+    var _list = [];
+    for (var item in _equipments) {
+      _list.add({
+        'ID': item['ID']
+      });
+    }
+    var _data = {
+      'userID': userID,
+      'requestInfo': {
+        'RequestType': {
+          'ID': 4
+        },
+        'Equipments': _list,
+        'FaultDesc': _fault.text,
+        'Files': fileList
+      }
+    };
+    var resp = await HttpRequest.request(
+        '/Request/AddRequest',
+        method: HttpRequest.POST,
+        data: _data
+    );
+    print(resp);
+    if (resp['ResultCode'] == '00') {
+      showDialog(context: context, builder: (buider) => AlertDialog(
+        title: new Text('提交巡检成功'),
+      )).then((result) =>
+          Navigator.of(context, rootNavigator: true).pop(result)
+      );
+    }
+  }
   List<DropdownMenuItem<String>> getDropDownMenuItems(List list) {
     List<DropdownMenuItem<String>> items = new List();
     for (String method in list) {
@@ -112,7 +165,7 @@ class _PatrolRequestState extends State<PatrolRequest> {
     final _searchResult = await showSearch(context: context, delegate: SearchBarDelegate());
     Map _data = jsonDecode(_searchResult);
     setState(() {
-      _result.addAll(_data);
+      _equipments.add(_data);
     });
   }
 
@@ -145,6 +198,35 @@ class _PatrolRequestState extends State<PatrolRequest> {
         ],
       ),
     );
+  }
+
+  Widget buildEquip() {
+    List<Widget> tiles = [];
+    Widget content;
+    for(var _equipment in _equipments) {
+      tiles.add(
+        new Padding(
+          padding: EdgeInsets.symmetric(horizontal: 12.0),
+          child: new Column(
+            children: <Widget>[
+              buildRow('设备编号：', _equipment['OID']??''),
+              buildRow('设备名称：', _equipment['Name']??''),
+              buildRow('使用科室：', _equipment['Department']['Name']??''),
+              buildRow('设备厂商：', _equipment['Manufacturer']['Name']??''),
+              buildRow('资产等级：', _equipment['AssetLevel']['Name']??''),
+              buildRow('设备型号：', _equipment['EquipmentCode']??''),
+              buildRow('安装地点：', _equipment['InstalSite']??''),
+              buildRow('报修状况', _equipment['WarrantyStatus']??''),
+              new Padding(padding: EdgeInsets.symmetric(vertical: 8.0)??'')
+            ],
+          ),
+        ),
+      );
+    }
+    content = new Column(
+      children: tiles,
+    );
+    return content;
   }
 
   Widget build(BuildContext context) {
@@ -224,22 +306,7 @@ class _PatrolRequestState extends State<PatrolRequest> {
                                 )
                             );
                           },
-                          body: new Padding(
-                            padding: EdgeInsets.symmetric(horizontal: 12.0),
-                            child: new Column(
-                              children: <Widget>[
-                                buildRow('设备编号：', _result['equipNo']),
-                                buildRow('设备名称：', _result['name']),
-                                buildRow('使用科室：', _result['department']),
-                                buildRow('设备厂商：', _result['manufacturer']),
-                                buildRow('资产等级：', _result['equipLevel']),
-                                buildRow('设备型号：', _result['model']),
-                                buildRow('安装地点：', _result['location']),
-                                buildRow('保修状况：', _result['guarantee']),
-                                new Padding(padding: EdgeInsets.symmetric(vertical: 8.0))
-                              ],
-                            ),
-                          ),
+                          body: _equipments.isEmpty?new Center(child: new Text('请选择设备')):buildEquip(),
                           isExpanded: _isExpandedBasic,
                         ),
                         new ExpansionPanel(
@@ -274,31 +341,6 @@ class _PatrolRequestState extends State<PatrolRequest> {
                                       new Expanded(
                                         flex: 4,
                                         child: new Text(
-                                          '巡检类型：',
-                                          style: new TextStyle(
-                                              fontSize: 20.0,
-                                              fontWeight: FontWeight.w600
-                                          ),
-                                        ),
-                                      ),
-                                      new Expanded(
-                                        flex: 6,
-                                        child: new DropdownButton(
-                                          value: _currentResult,
-                                          items: _dropDownMenuItems,
-                                          onChanged: changedDropDownMethod,
-                                        ),
-                                      )
-                                    ],
-                                  ),
-                                ),
-                                new Padding(
-                                  padding: EdgeInsets.symmetric(vertical: 5.0),
-                                  child: new Row(
-                                    children: <Widget>[
-                                      new Expanded(
-                                        flex: 4,
-                                        child: new Text(
                                           '巡检要求',
                                           style: new TextStyle(
                                               fontSize: 20.0,
@@ -308,7 +350,9 @@ class _PatrolRequestState extends State<PatrolRequest> {
                                       ),
                                       new Expanded(
                                         flex: 6,
-                                        child: new TextField(),
+                                        child: new TextField(
+                                          controller: _fault,
+                                        ),
                                       )
                                     ],
                                   ),
@@ -344,12 +388,7 @@ class _PatrolRequestState extends State<PatrolRequest> {
                       children: <Widget>[
                         new RaisedButton(
                           onPressed: () {
-                            showDialog(
-                                context: context,
-                                builder: (context) => AlertDialog(
-                                  title: Text('提交请求'),
-                                )
-                            );
+                            submit();
                           },
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(24),

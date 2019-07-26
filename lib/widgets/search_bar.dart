@@ -2,9 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:atoi/models/models.dart';
 import 'package:scoped_model/scoped_model.dart';
 import 'dart:convert';
+import 'package:atoi/utils/http_request.dart';
 
 
-class SearchBarDelegate extends SearchDelegate<String> {
+class SearchBarDelegate extends SearchDelegate<String>{
 
   static const searchList = [
     "ChengDu",
@@ -19,6 +20,21 @@ class SearchBarDelegate extends SearchDelegate<String> {
     "编号：0000001",
     "编号：0000002"
   ];
+
+  var suggestionList = [];
+  var selected;
+
+  Future<Null> getDevices(String filter) async {
+    var resp = await HttpRequest.request(
+      '/Equipment/Getdevices',
+      method: HttpRequest.GET,
+      params: {
+        'filterText': filter
+      }
+    );
+    print(resp);
+    suggestionList = resp['Data'];
+  }
 
   final Map<String, String> equipmentInfo = {};
 
@@ -70,30 +86,34 @@ class SearchBarDelegate extends SearchDelegate<String> {
     };
     MainModel mainModel = ScopedModel.of<MainModel>(context);
     mainModel.setResult(mutated);
-    close(context, jsonEncode(mutated));
+    close(context, jsonEncode(selected));
   }
   
   @override
   Widget buildSuggestions(BuildContext context) {
-    final suggestionList = query.isEmpty
-        ? recentSuggest
-        : searchList.where((input) => input.startsWith(query)).toList();
-    return ListView.builder(
-        itemCount: suggestionList.length,
-        itemBuilder: (context, index) => ListTile(
-          onTap: (){
-            query = suggestionList[index];
-            showResults(context);},
-          title: RichText(
-              text: TextSpan(
-                  text: suggestionList[index].substring(0, query.length),
-                  style: TextStyle(
-                      color: Colors.black, fontWeight: FontWeight.bold),
-                  children: [
-                    TextSpan(
-                        text: suggestionList[index].substring(query.length),
-                        style: TextStyle(color: Colors.grey))
-                  ])),
-        ));
+    return FutureBuilder(
+      builder: (context, snapshot) {
+        return ListView.builder(
+            itemCount: suggestionList.length,
+            itemBuilder: (context, i) => ListTile(
+              onTap: (){
+                query = suggestionList[i]['Name'];
+                selected = suggestionList[i];
+                showResults(context);
+              },
+              title: RichText(
+                  text: TextSpan(
+                      text: suggestionList[i]['Name'].substring(0, query.length),
+                      style: TextStyle(
+                          color: Colors.black, fontWeight: FontWeight.bold),
+                      children: [
+                        TextSpan(
+                            text: suggestionList[i]['Name'].substring(query.length),
+                            style: TextStyle(color: Colors.grey))
+                      ])),
+            ));
+      },
+      future: getDevices(query),
+    );
   }
 }

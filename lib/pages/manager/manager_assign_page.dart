@@ -349,18 +349,9 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
       showDialog(context: context,
         builder: (context) => AlertDialog(
           title: new Text('安排派工成功'),
-          actions: <Widget>[
-            new RaisedButton(onPressed: () {
-              Navigator.of(context).pushNamed(HomePage.tag);
-            },
-              child: new Text('确定',
-                style: new TextStyle(
-                  color: Colors.white
-                ),
-              ),
-            )
-          ],
         )
+      ).then((result) =>
+        Navigator.of(context, rootNavigator: true).pop(result)
       );
     } else {
       showDialog(context: context,

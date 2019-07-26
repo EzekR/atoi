@@ -211,22 +211,6 @@ class _OtherRequestState extends State<OtherRequest> {
                 ),
               ),
               actions: <Widget>[
-                new IconButton(
-                  icon: Icon(Icons.search),
-                  color: Colors.white,
-                  iconSize: 30.0,
-                  onPressed: () {
-                    toSearch();
-                  }
-                  ,
-                ),
-                new IconButton(
-                    icon: Icon(Icons.crop_free),
-                    color: Colors.white,
-                    iconSize: 30.0,
-                    onPressed: () {
-                      scan();
-                    })
               ],
             ),
             body: new Padding(
