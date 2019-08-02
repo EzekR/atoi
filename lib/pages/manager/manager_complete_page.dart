@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:atoi/utils/http_request.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:atoi/utils/constants.dart';
 
 class ManagerCompletePage extends StatefulWidget {
   static String tag = 'mananger-complete-page';
@@ -15,6 +19,9 @@ class _ManagerCompletePageState extends State<ManagerCompletePage> {
   var _isExpandedBasic = true;
   var _isExpandedDetail = false;
   var _isExpandedAssign = false;
+  Map<String, dynamic> _request = {};
+
+  Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
 
   List _handleMethods = [
     '现场服务',
@@ -89,6 +96,7 @@ class _ManagerCompletePageState extends State<ManagerCompletePage> {
     _currentStatus = _dropDownMenuStatuses[0].value;
     _currentName = _dropDownMenuNames[0].value;
 
+    getRequest();
     super.initState();
   }
 
@@ -105,6 +113,30 @@ class _ManagerCompletePageState extends State<ManagerCompletePage> {
       ));
     }
     return items;
+  }
+
+  Future<Null> getRequest() async {
+    var prefs = await _prefs;
+    var userID = prefs.getInt('userID');
+    var requestID = widget.requestId;
+    var resp = await HttpRequest.request(
+      '/Request/GetRequestByID',
+      method: HttpRequest.GET,
+      params: {
+        'userID': userID,
+        'requestID': requestID
+      }
+    );
+    print(resp);
+    if (resp['ResultCode'] == '00') {
+      setState(() {
+        _request = resp['Data'];
+      });
+    }
+  }
+
+  Future<Null> getImages() async {
+
   }
 
   void changedDropDownMethod(String selectedMethod) {
@@ -165,7 +197,7 @@ class _ManagerCompletePageState extends State<ManagerCompletePage> {
     );
   }
 
-  Padding buildRow(String labelText, String defaultText) {
+  Padding _buildRow(String labelText, String defaultText) {
     return new Padding(
       padding: EdgeInsets.symmetric(vertical: 5.0),
       child: new Row(
@@ -188,6 +220,63 @@ class _ManagerCompletePageState extends State<ManagerCompletePage> {
         ],
       ),
     );
+  }
+
+  Padding buildRow(String labelText, String defaultText) {
+    return new Padding(
+      padding: EdgeInsets.symmetric(vertical: 5.0),
+      child: new Row(
+        children: <Widget>[
+          new Expanded(
+            flex: 4,
+            child: new Text(
+              labelText,
+              style: new TextStyle(
+                  fontSize: 20.0,
+                  fontWeight: FontWeight.w600
+              ),
+            ),
+          ),
+          new Expanded(
+            flex: 6,
+            child: new Text(
+              defaultText,
+              style: new TextStyle(
+                  fontSize: 20.0,
+                  fontWeight: FontWeight.w400,
+                  color: Colors.black54
+              ),
+            ),
+          )
+        ],
+      ),
+    );
+  }
+
+  List<Widget> buildEquipment() {
+    if (_request.isNotEmpty) {
+      var _equipments = _request['Equipments'];
+      List<Widget> _equipList = [];
+      for (var _equipment in _equipments) {
+        var _list = [
+          buildRow('系统编号:', _equipment['OID']??''),
+          buildRow('设备名称：', _equipment['Name']??''),
+          buildRow('设备型号：', _equipment['EquipmentCode']??''),
+          buildRow('设备序列号：', _equipment['SerialCode']??''),
+          buildRow('使用科室：', _equipment['Department']['Name']??''),
+          buildRow('安装地点：', _equipment['InstalSite']??''),
+          buildRow('设备厂商：', _equipment['Manufacturer']['Name']??''),
+          buildRow('资产等级：', _equipment['AssetLevel']['Name']??''),
+          buildRow('维保状态：', _equipment['WarrantyStatus']??''),
+          buildRow('服务范围：', _equipment['ContractScopeComments']??''),
+          new Padding(padding: EdgeInsets.symmetric(vertical: 8.0))
+        ];
+        _equipList.addAll(_list);
+      }
+      return _equipList;
+    } else {
+      return [];
+    }
   }
 
   @override
@@ -216,7 +305,7 @@ class _ManagerCompletePageState extends State<ManagerCompletePage> {
           ),
         ],
       ),
-      body: new Padding(
+      body: _request.isEmpty?new Center(child: new SpinKitRotatingPlain(color: Colors.blue,),):new Padding(
         padding: EdgeInsets.symmetric(vertical: 5.0),
         child: new Card(
           child: new ListView(
@@ -258,17 +347,7 @@ class _ManagerCompletePageState extends State<ManagerCompletePage> {
                     body: new Padding(
                       padding: EdgeInsets.symmetric(horizontal: 12.0),
                       child: new Column(
-                        children: <Widget>[
-                          buildRow('设备编号：', 'ZC00000001'),
-                          buildRow('设备名称：', '医用磁共振设备'),
-                          buildRow('使用科室：', '磁共振'),
-                          buildRow('设备厂商：', '飞利浦'),
-                          buildRow('资产等级：', '重要'),
-                          buildRow('设备型号：', 'Philips 781-296'),
-                          buildRow('安装地点：', '磁共振1室'),
-                          buildRow('保修状况：', '保内'),
-                          new Padding(padding: EdgeInsets.symmetric(vertical: 8.0))
-                        ],
+                        children: buildEquipment(),
                       ),
                     ),
                     isExpanded: _isExpandedBasic,
@@ -298,39 +377,13 @@ class _ManagerCompletePageState extends State<ManagerCompletePage> {
                         mainAxisSize: MainAxisSize.max,
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: <Widget>[
-                          buildRow('类型：', '客户请求-报修'),
-                          buildRow('主题：', '系统报错'),
-                          buildRow('故障描述：', '系统报错，设备无法启动'),
-                          buildRow('故障分类：', '未知'),
-                          buildRow('请求人：', '马云'),
-                          new Padding(
-                            padding: EdgeInsets.symmetric(vertical: 5.0),
-                            child: new Text('处理方式：',
-                              style: new TextStyle(
-                                  fontSize: 20.0,
-                                  fontWeight: FontWeight.w600
-                              ),
-                            ),
-                          ),
-                          new DropdownButton(
-                            value: _currentMethod,
-                            items: _dropDownMenuItems,
-                            onChanged: changedDropDownMethod,
-                          ),
-                          new Padding(
-                            padding: EdgeInsets.symmetric(vertical: 5.0),
-                            child: new Text('优先级',
-                              style: new TextStyle(
-                                  fontSize: 20.0,
-                                  fontWeight: FontWeight.w600
-                              ),
-                            ),
-                          ),
-                          new DropdownButton(
-                            value: _currentPriority,
-                            items: _dropDownMenuPris,
-                            onChanged: changedDropDownPri,
-                          ),
+                          buildRow('类型：', _request['SourceType']),
+                          buildRow('主题：', _request['Subject']),
+                          buildRow(AppConstants.Remark[_request['RequestType']['ID']], _request['FaultDesc']),
+                          _request['FaultType']['ID'] != 0?buildRow(AppConstants.RemarkType[_request['RequestType']['ID']], _request['FaultType']['Name']):new Container(),
+                          buildRow('请求人：', _request['RequestUser']['Name']),
+                          buildRow('处理方式：', _request['DealType']['Name']),
+                          buildRow('紧急程度：', _request['Priority']['Name']),
                           new Padding(
                             padding: EdgeInsets.symmetric(vertical: 5.0),
                             child: new Text('请求附件',
@@ -356,109 +409,6 @@ class _ManagerCompletePageState extends State<ManagerCompletePage> {
                       ),
                     ),
                     isExpanded: _isExpandedDetail,
-                  ),
-                  new ExpansionPanel(
-                    headerBuilder: (context, isExpanded) {
-                      return ListTile(
-                          leading: new Icon(Icons.perm_contact_calendar,
-                            size: 24.0,
-                            color: Colors.blue,
-                          ),
-                          title: new Align(
-                              child: Text('派工内容',
-                                style: new TextStyle(
-                                    fontSize: 22.0,
-                                    fontWeight: FontWeight.w400
-                                ),
-                              ),
-                              alignment: Alignment(-1.3, 0)
-                          )
-                      );
-                    },
-                    body: new Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 8.0),
-                      child: new Column(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        mainAxisSize: MainAxisSize.max,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: <Widget>[
-                          new Padding(
-                            padding: EdgeInsets.symmetric(vertical: 5.0),
-                            child: new Text('派工类型：',
-                              style: new TextStyle(
-                                  fontSize: 20.0,
-                                  fontWeight: FontWeight.w600
-                              ),
-                            ),
-                          ),
-                          new DropdownButton(
-                            value: _currentType,
-                            items: _dropDownMenuTypes,
-                            onChanged: changedDropDownType,
-                          ),
-                          new Padding(
-                            padding: EdgeInsets.symmetric(vertical: 5.0),
-                            child: new Text('紧急程度：',
-                              style: new TextStyle(
-                                  fontSize: 20.0,
-                                  fontWeight: FontWeight.w600
-                              ),
-                            ),
-                          ),
-                          new DropdownButton(
-                            value: _currentLevel,
-                            items: _dropDownMenuLevels,
-                            onChanged: changedDropDownLevel,
-                          ),
-                          new Padding(
-                            padding: EdgeInsets.symmetric(vertical: 5.0),
-                            child: new Text('机器状态：',
-                              style: new TextStyle(
-                                  fontSize: 20.0,
-                                  fontWeight: FontWeight.w600
-                              ),
-                            ),
-                          ),
-                          new DropdownButton(
-                            value: _currentStatus,
-                            items: _dropDownMenuStatuses,
-                            onChanged: changedDropDownStatus,
-                          ),
-                          new Padding(
-                            padding: EdgeInsets.symmetric(vertical: 5.0),
-                            child: new Text('工程师姓名：',
-                              style: new TextStyle(
-                                  fontSize: 20.0,
-                                  fontWeight: FontWeight.w600
-                              ),
-                            ),
-                          ),
-                          new DropdownButton(
-                            value: _currentName,
-                            items: _dropDownMenuNames,
-                            onChanged: changedDropDownName,
-                          ),
-                          buildTextField('主管备注', '', true),
-                          new MaterialButton(
-                            child: new Text('选择日期'),
-                            onPressed: () {
-                              showDatePicker(
-                                  context: context,
-                                  initialDate: new DateTime.now(),
-                                  firstDate: new DateTime.now().subtract(new Duration(days: 30)), // 减 30 天
-                                  lastDate: new DateTime.now().add(new Duration(days: 30)),       // 加 30 天
-                                  locale: Locale('zh')
-                              ).then((DateTime val) {
-                                print(val);   // 2018-07-12 00:00:00.000
-                              }).catchError((err) {
-                                print(err);
-                              });
-                            },
-                          ),
-                        ],
-                      ),
-                    ),
-                    isExpanded: _isExpandedAssign,
                   ),
                 ],
               ),

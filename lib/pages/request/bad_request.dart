@@ -84,51 +84,59 @@ class _BadRequestState extends State<BadRequest> {
   }
 
   Future<Null> submit() async {
-    var prefs = await _prefs;
-    var userID = prefs.getInt('userID');
-    var fileList = [];
-    for (var image in _imageList) {
-      List<int> imageBytes = await image.readAsBytes();
-      var fileContent = base64Encode(imageBytes);
-      var file = {
-        'FileContent': fileContent,
-        'FileName': image.path,
-        'FiltType': 1,
-        'ID': 0
-      };
-      fileList.add(file);
-    }
-    var _data = {
-      'userID': userID,
-      'requestInfo': {
-        'RequestType': {
-          'ID': 7
-        },
-        'Equipments': [
-          {
-            'ID': _equipment['ID']
-          }
-        ],
-        'FaultType': {
-          'ID': AppConstants.FaultBad[_currentResult],
-        },
-        'FaultDesc': _fault.text,
-        'Files': fileList
-      }
-    };
-    var resp = await HttpRequest.request(
-        '/Request/AddRequest',
-        method: HttpRequest.POST,
-        data: _data
-    );
-    print(resp);
-    if (resp['ResultCode'] == '00') {
-      showDialog(context: context, builder: (buider) =>
-          AlertDialog(
-            title: new Text('提交不良事件成功'),
-          )).then((result) =>
-          Navigator.of(context, rootNavigator: true).pop(result)
+    if (_fault.text.isEmpty || _fault.text == null) {
+      showDialog(context: context,
+        builder: (context) => AlertDialog(
+          title: new Text('不良事件备注不可为空'),
+        )
       );
+    } else {
+      var prefs = await _prefs;
+      var userID = prefs.getInt('userID');
+      var fileList = [];
+      for (var image in _imageList) {
+        List<int> imageBytes = await image.readAsBytes();
+        var fileContent = base64Encode(imageBytes);
+        var file = {
+          'FileContent': fileContent,
+          'FileName': image.path,
+          'FiltType': 1,
+          'ID': 0
+        };
+        fileList.add(file);
+      }
+      var _data = {
+        'userID': userID,
+        'requestInfo': {
+          'RequestType': {
+            'ID': 7
+          },
+          'Equipments': [
+            {
+              'ID': _equipment['ID']
+            }
+          ],
+          'FaultType': {
+            'ID': AppConstants.FaultBad[_currentResult],
+          },
+          'FaultDesc': _fault.text,
+          'Files': fileList
+        }
+      };
+      var resp = await HttpRequest.request(
+          '/Request/AddRequest',
+          method: HttpRequest.POST,
+          data: _data
+      );
+      print(resp);
+      if (resp['ResultCode'] == '00') {
+        showDialog(context: context, builder: (buider) =>
+            AlertDialog(
+              title: new Text('提交不良事件成功'),
+            )).then((result) =>
+            Navigator.of(context, rootNavigator: true).pop(result)
+        );
+      }
     }
   }
   Row buildImageRow(List imageList) {
@@ -300,14 +308,16 @@ class _BadRequestState extends State<BadRequest> {
                             padding: EdgeInsets.symmetric(horizontal: 12.0),
                             child: _equipment.isEmpty?new Center(child: new Text('请选择设备')):new Column(
                               children: <Widget>[
-                                buildRow('设备编号：', _equipment['OID']??''),
+                                buildRow('系统编号:', _equipment['OID']??''),
                                 buildRow('设备名称：', _equipment['Name']??''),
+                                buildRow('设备型号：', _equipment['EquipmentCode']??''),
+                                buildRow('设备序列号', _equipment['SerialCode']??''),
                                 buildRow('使用科室：', _equipment['Department']['Name']??''),
+                                buildRow('安装地点：', _equipment['InstalSite']??''),
                                 buildRow('设备厂商：', _equipment['Manufacturer']['Name']??''),
                                 buildRow('资产等级：', _equipment['AssetLevel']['Name']??''),
-                                buildRow('设备型号：', _equipment['EquipmentCode']??''),
-                                buildRow('安装地点：', _equipment['InstalSite']??''),
-                                buildRow('报修状况', _equipment['WarrantyStatus']??''),
+                                buildRow('维保状态：', _equipment['WarrantyStatus']??''),
+                                buildRow('服务范围：', _equipment['ContractScopeComments']??''),
                                 new Padding(padding: EdgeInsets.symmetric(vertical: 8.0))
                               ],
                             ),
@@ -338,7 +348,7 @@ class _BadRequestState extends State<BadRequest> {
                               children: <Widget>[
                                 buildRow('类型：', '不良事件'),
                                 buildRow('请求人：', _roleName),
-                                buildRow('主题', '--不良事件'),
+                                buildRow('主题', _equipment.isNotEmpty?'--不良事件':'${_equipment['Name']}--不良事件'),
                                 new Padding(
                                   padding: EdgeInsets.symmetric(vertical: 5.0),
                                   child: new Row(

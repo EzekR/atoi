@@ -31,7 +31,38 @@ class _UserRepairPageState extends State<UserRepairPage> {
 
   Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
 
+  List _serviceResults = [
+  '未知',
+  '已知'
+  ];
+
+  List<DropdownMenuItem<String>> _dropDownMenuItems;
+  String _currentResult;
+
+  List<DropdownMenuItem<String>> getDropDownMenuItems(List list) {
+    List<DropdownMenuItem<String>> items = new List();
+    for (String method in list) {
+      items.add(new DropdownMenuItem(
+          value: method,
+          child: new Text(method,
+            style: new TextStyle(
+                fontSize: 20.0
+            ),
+          )
+      ));
+    }
+    return items;
+  }
+
+  void changedDropDownMethod(String selectedMethod) {
+    setState(() {
+      _currentResult = selectedMethod;
+    });
+  }
+
   void initState() {
+    _dropDownMenuItems = getDropDownMenuItems(_serviceResults);
+    _currentResult = _dropDownMenuItems[0].value;
     super.initState();
   }
 
@@ -103,11 +134,9 @@ class _UserRepairPageState extends State<UserRepairPage> {
         'RequestType': {
           'ID': 1
         },
-        'Subject': '用户报修',
         'FaultDesc': _describe.text,
-        'StatudID': 1,
         'FaultType': {
-          'ID': 1
+          'ID': AppConstants.FaultRepair[_currentResult]
         },
         'Files': Files
       }
@@ -343,7 +372,31 @@ class _UserRepairPageState extends State<UserRepairPage> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: <Widget>[
                           buildInput('故障描述：', _describe),
-                          buildRow('故障分类：', '未知'),
+                          new Padding(
+                            padding: EdgeInsets.symmetric(vertical: 5.0),
+                            child: new Row(
+                              children: <Widget>[
+                                new Expanded(
+                                  flex: 4,
+                                  child: new Text(
+                                    '故障分类：',
+                                    style: new TextStyle(
+                                        fontSize: 20.0,
+                                        fontWeight: FontWeight.w600
+                                    ),
+                                  ),
+                                ),
+                                new Expanded(
+                                  flex: 6,
+                                  child: new DropdownButton(
+                                    value: _currentResult,
+                                    items: _dropDownMenuItems,
+                                    onChanged: changedDropDownMethod,
+                                  ),
+                                )
+                              ],
+                            ),
+                          ),
                           new Padding(
                             padding: EdgeInsets.symmetric(vertical: 5.0),
                             child: new Text('上传故障照片',

@@ -21,12 +21,12 @@ class _EngineerToReportState extends State<EngineerToReport> {
     var userId = await pref.getInt('userID');
     Map<String, dynamic> params = {
       'userID': userId,
-      'statusID': 2
+      'statusIDs': 2,
+      'statusIDs': 3,
     };
     var resp = await HttpRequest.request(
-        '/Dispatch/GetDispatchs',
+        '/Dispatch/GetDispatchs?userID=${userId}&statusIDs=2&statusIDs=3',
         method: HttpRequest.GET,
-        params: params
     );
     print(resp);
     setState(() {
@@ -260,7 +260,7 @@ class _EngineerToReportState extends State<EngineerToReport> {
             child: _tasks.length == 0?ListView(padding: const EdgeInsets.symmetric(vertical: 150.0), children: <Widget>[new Center(child: new Text('没有待报告工单'),)],):ListView.builder(
                 padding: const EdgeInsets.all(2.0),
                 itemCount: _tasks.length,
-                itemBuilder: (context, i) => buildCardItem(_tasks[i]['ID'], _tasks[i]['DispatchJournalID'], _tasks[i]['DispatchReport']['ID'], _tasks[i]['OID'], _tasks[i]['ScheduleDate'], _tasks[i]['Request']['Equipments'][0]['Name'], _tasks[i]['Request']['Equipments'][0]['SerialCode'], _tasks[i]['Request']['DepartmentName'], _tasks[i]['RequestType']['Name'], _tasks[i]['Urgency']['Name'], _tasks[i]['LeaderComments'])
+                itemBuilder: (context, i) => buildCardItem(_tasks[i]['ID'], _tasks[i]['DispatchJournal']['ID'], _tasks[i]['DispatchReport']['ID'], _tasks[i]['OID'], _tasks[i]['ScheduleDate'], _tasks[i]['Request']['Equipments'][0]['Name'], _tasks[i]['Request']['Equipments'][0]['SerialCode'], _tasks[i]['Request']['DepartmentName'], _tasks[i]['RequestType']['Name'], _tasks[i]['Urgency']['Name'], _tasks[i]['LeaderComments'])
             ),
             onRefresh: getTask
         );

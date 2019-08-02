@@ -59,41 +59,50 @@ class _EngineerVoucherPageState extends State<EngineerVoucherPage> {
   }
 
   Future<Null> uploadJournal() async {
-    var prefs = await _prefs;
-    var userId = prefs.getInt('userID');
-    var dispatchId = widget.dispatchId;
-    var image = base64Encode(_img.buffer.asUint8List());
-    var status = AppConstants.ResultStatusID[_currentResult];
-    var resp = await HttpRequest.request(
-      '/DispatchJournal/SaveDispatchJournal',
-      method: HttpRequest.POST,
-      data: {
-        'userID': userId,
-        'dispatchJournalInfo': {
-          'ID': 0,
-          'dispatch': {
-            'ID': dispatchId
-          },
-          'FaultCode': _faultCode.text,
-          'JobContent': _jobContent.text,
-          'FollowProblem': _followProblem.text,
-          'UnconfirmedProblem': _unconfirmed.text,
-          'ResultStatus': {
-            'ID': status
-          },
-          'FileContent': image
-        }
-      }
-    );
-    print(resp);
-    if (resp['ResultCode'] == '00') {
+    if (_faultCode.text.isEmpty || _jobContent.text.isEmpty) {
       showDialog(context: context,
         builder: (context) => AlertDialog(
-          title: new Text('上传凭证成功')
+          title: new Text('故障事由与工作内容不可为空'),
         )
-      ).then((result) =>
-        Navigator.of(context, rootNavigator: true).pop(result)
       );
+    } else {
+      var prefs = await _prefs;
+      var userId = prefs.getInt('userID');
+      var dispatchId = widget.dispatchId;
+      var image = base64Encode(_img.buffer.asUint8List());
+      var status = AppConstants.ResultStatusID[_currentResult];
+      var resp = await HttpRequest.request(
+          '/DispatchJournal/SaveDispatchJournal',
+          method: HttpRequest.POST,
+          data: {
+            'userID': userId,
+            'dispatchJournalInfo': {
+              'ID': 0,
+              'dispatch': {
+                'ID': dispatchId
+              },
+              'FaultCode': _faultCode.text,
+              'JobContent': _jobContent.text,
+              'FollowProblem': _followProblem.text,
+              'UnconfirmedProblem': _unconfirmed.text,
+              'ResultStatus': {
+                'ID': status
+              },
+              'FileContent': image
+            }
+          }
+      );
+      print(resp);
+      if (resp['ResultCode'] == '00') {
+        showDialog(context: context,
+            builder: (context) =>
+                AlertDialog(
+                    title: new Text('上传凭证成功')
+                )
+        ).then((result) =>
+            Navigator.of(context, rootNavigator: true).pop(result)
+        );
+      }
     }
   }
 
@@ -336,7 +345,7 @@ class _EngineerVoucherPageState extends State<EngineerVoucherPage> {
                           buildRow('使用科室：', _dispatch['Request']['Equipments'][0]['Department']['Name']),
                           buildRow('设备厂商：', _dispatch['Request']['Equipments'][0]['Manufacturer']['Name']),
                           buildRow('资产等级：', _dispatch['Request']['Equipments'][0]['AssetLevel']['Name']),
-                          buildRow('设备型号：', _dispatch['Request']['Equipments'][0]['SerialCode']),
+                          //buildRow('设备型号：', _dispatch['Request']['Equipments'][0]['SerialCode']),
                           buildRow('保修状况：', _dispatch['Request']['Equipments'][0]['WarrantyStatus']),
                         ],
                       ),
@@ -351,7 +360,7 @@ class _EngineerVoucherPageState extends State<EngineerVoucherPage> {
                             color: Colors.blue,
                           ),
                           title: new Align(
-                              child: Text('派工单信息',
+                              child: Text('派工单内容',
                                 style: new TextStyle(
                                     fontSize: 22.0,
                                     fontWeight: FontWeight.w400
@@ -365,13 +374,13 @@ class _EngineerVoucherPageState extends State<EngineerVoucherPage> {
                       padding: EdgeInsets.symmetric(horizontal: 8.0),
                       child: new Column(
                         children: <Widget>[
+                          buildRow('派工单编号：', _dispatch['OID']),
                           buildRow('类型：', _dispatch['Request']['SourceType']),
-                          buildRow('主题：', _dispatch['Request']['RequestType']['Name']),
-                          buildRow('故障描述：', _dispatch['Request']['FaultDesc']),
-                          buildRow('故障分类：', _dispatch['Request']['FaultType']['Name']),
                           buildRow('请求人：', _dispatch['Request']['RequestUser']['Name']),
                           buildRow('处理方式：', _dispatch['Request']['DealType']['Name']),
-                          buildRow('优先级：', _dispatch['Request']['Priority']['Name']),
+                          buildRow('紧急程度：', _dispatch['Request']['Priority']['Name']),
+                          buildRow('机器状态：', _dispatch['MachineStatus']['Name']),
+                          buildRow('出发时间：', _dispatch['ScheduleDate']),
                         ],
                       ),
                     ),
@@ -407,7 +416,7 @@ class _EngineerVoucherPageState extends State<EngineerVoucherPage> {
                           buildEditor('待跟进问题：', _followProblem),
                           buildEditor('待确认问题：', _unconfirmed),
                           buildEditor('建议留言：', _advice),
-                          buildDropdown('处理结果：', _currentResult, _dropDownMenuItems, changedDropDownMethod),
+                          buildDropdown('服务结果：', _currentResult, _dropDownMenuItems, changedDropDownMethod),
                           new Padding(
                             padding: EdgeInsets.symmetric(vertical: 5.0),
                             child: new Text('客户签名：',

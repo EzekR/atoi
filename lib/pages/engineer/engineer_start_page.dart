@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:atoi/utils/http_request.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:atoi/utils/constants.dart';
 
 class EngineerStartPage extends StatefulWidget {
   static String tag = 'engineer-start-page';
@@ -29,7 +30,7 @@ class _EngineerStartPageState extends State<EngineerStartPage> {
     var userID = prefs.getInt('userID');
     Map<String, dynamic> params = {
       'userID': userID,
-      'dispatchId': widget.dispatchId
+      'dispatchID': widget.dispatchId
     };
     var resp = await HttpRequest.request(
       '/Dispatch/StartDispatch',
@@ -41,14 +42,17 @@ class _EngineerStartPageState extends State<EngineerStartPage> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-      title: new Text('开始作业'),
+      title: new Text('开始作业成功'),
       )
     ).then((result) {
       Navigator.of(context, rootNavigator: true).pop(result);
     });
+    } else {
+      showDialog(context: context,
+        builder: (context) => AlertDialog(title: new Text(resp['ResultMessage']),)
+      );
     }
   }
-
 
   Future<Null> getDispatch() async {
     var prefs = await _prefs;
@@ -217,7 +221,7 @@ class _EngineerStartPageState extends State<EngineerStartPage> {
                             color: Colors.blue,
                           ),
                           title: new Text(
-                            '请求内容',
+                            '请求相信信息',
                             style: new TextStyle(
                               fontWeight: FontWeight.w400,
                               fontSize: 22.0
@@ -232,10 +236,11 @@ class _EngineerStartPageState extends State<EngineerStartPage> {
                         mainAxisSize: MainAxisSize.max,
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: <Widget>[
+                          buildRow('请求编号：', _dispatch['Request']['OID']),
                           buildRow('类型：', _dispatch['Request']['SourceType']),
-                          buildRow('主题：', _dispatch['Request']['RequestType']['Name']),
-                          buildRow('故障描述：', _dispatch['Request']['FaultDesc']),
-                          buildRow('故障分类：', _dispatch['Request']['FaultType']['Name']),
+                          buildRow('主题：', '${_dispatch['Request']['EquipmentName']}--${_dispatch['Request']['RequestType']['Name']}'),
+                          buildRow(AppConstants.Remark[_dispatch['Request']['RequestType']['ID']], _dispatch['Request']['FaultDesc']),
+                          _dispatch['Request']['FaultType']['ID'] != 0?buildRow(AppConstants.RemarkType[_dispatch['Request']['RequestType']['ID']], _dispatch['Request']['FaultType']['Name']):new Container(),
                           buildRow('请求人：', _dispatch['Request']['RequestUser']['Name']),
                           buildRow('处理方式：', _dispatch['Request']['DealType']['Name']),
                           buildRow('优先级：', _dispatch['Request']['Priority']['Name']),

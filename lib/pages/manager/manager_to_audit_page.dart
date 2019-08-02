@@ -23,7 +23,7 @@ class _ManagerToAuditPageState extends State<ManagerToAuditPage> {
     var userID = prefs.getInt('userID');
     Map<String, dynamic> params = {
       'userID': userID,
-      'statusID': 3,
+      'statusIDs': 3,
     };
     setState(() {
       _loading = true;
@@ -44,11 +44,25 @@ class _ManagerToAuditPageState extends State<ManagerToAuditPage> {
     super.initState();
   }
 
+  Color iconColor(int statusId) {
+    if (statusId == 0) {
+      return Colors.grey;
+    } else {
+      if (statusId == 2) {
+        return new Color(0xff2E94B9);
+      } else {
+        if (statusId == 3) {
+          return new Color(0xffF0B775);
+        }
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     // TODO: implement build
 
-    Card buildCardItem(Map dispatch, int dispatchId, int reportId,  String dispatchOID, String date, String deviceNo, String deviceName, String dispatchType, String urgency, String requestOID) {
+    Card buildCardItem(Map dispatch, int dispatchId, int reportId,  String dispatchOID, String date, String deviceNo, String deviceName, String dispatchType, String urgency, String requestOID, Map journalStatus, Map reportStatus) {
       var _dataVal = DateTime.parse(date);
       var _format = '${_dataVal.year}-${_dataVal.month}-${_dataVal.day} ${_dataVal.hour}:${_dataVal.minute}:${_dataVal.second}';
       return new Card(
@@ -186,19 +200,24 @@ class _ManagerToAuditPageState extends State<ManagerToAuditPage> {
                     children: <Widget>[
                       new RaisedButton(
                         onPressed: (){
-                          //Navigator.of(context).pushNamed(ManagerAuditVoucherPage.tag);
-                          Navigator.of(context).push(new MaterialPageRoute(builder: (_) {
-                            return new ManagerAuditVoucherPage(journalId: dispatchId, request: dispatch);
-                          }));
+                          if (journalStatus['ID'] == 2) {
+                            Navigator.of(context).push(
+                                new MaterialPageRoute(builder: (_) {
+                                  return new ManagerAuditVoucherPage(
+                                      journalId: dispatchId, request: dispatch);
+                                }));
+                          } else {
+                            null;
+                          }
                         },
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(24),
                         ),
-                        color: new Color(0xff2E94B9),
+                        color: iconColor(journalStatus['ID']),
                         child: new Row(
                           children: <Widget>[
                             new Icon(
-                              Icons.fingerprint,
+                              journalStatus['ID'] == 3?Icons.check:Icons.fingerprint,
                               color: Colors.white,
                             ),
                             new Text(
@@ -216,18 +235,18 @@ class _ManagerToAuditPageState extends State<ManagerToAuditPage> {
                       new RaisedButton(
                         onPressed: (){
                           //Navigator.of(context).pushNamed(ManagerAuditReportPage.tag);
-                          Navigator.of(context).push(new MaterialPageRoute(builder: (_){
+                          reportId == 0?null:Navigator.of(context).push(new MaterialPageRoute(builder: (_){
                             return new ManagerAuditReportPage(reportId: reportId, request: dispatch);
                           }));
                         },
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(24),
                         ),
-                        color: new Color(0xff2E94B9),
+                        color: iconColor(reportStatus['ID']),
                         child: new Row(
                           children: <Widget>[
                             new Icon(
-                              Icons.work,
+                              reportStatus['ID'] == 3?Icons.check:Icons.work,
                               color: Colors.white,
                             ),
                             new Text(
@@ -258,7 +277,7 @@ class _ManagerToAuditPageState extends State<ManagerToAuditPage> {
             child: _reports.length == 0?ListView(padding: const EdgeInsets.symmetric(vertical: 150.0), children: <Widget>[_loading?SpinKitRotatingPlain(color: Colors.blue):new Center(child: new Text('没有待审核工单'),)],):ListView.builder(
               padding: const EdgeInsets.all(2.0),
               itemCount: _reports.length,
-              itemBuilder: (context, i) => buildCardItem(_reports[i], _reports[i]['DispatchJournal']['ID'], _reports[i]['DispatchReport']['ID'], _reports[i]['OID'], _reports[i]['ScheduleDate'], _reports[i]['Request']['Equipments'][0]['Name'], _reports[i]['Request']['Equipments'][0]['OID'], _reports[i]['RequestType']['Name'], _reports[i]['Urgency']['Name'], _reports[i]['Request']['OID']),
+              itemBuilder: (context, i) => buildCardItem(_reports[i], _reports[i]['DispatchJournal']['ID'], _reports[i]['DispatchReport']['ID'], _reports[i]['OID'], _reports[i]['ScheduleDate'], _reports[i]['Request']['Equipments'][0]['Name'], _reports[i]['Request']['Equipments'][0]['OID'], _reports[i]['RequestType']['Name'], _reports[i]['Urgency']['Name'], _reports[i]['Request']['OID'], _reports[i]['DispatchJournal']['Status'], _reports[i]['DispatchReport']['Status']),
             ),
             onRefresh: getData
         );

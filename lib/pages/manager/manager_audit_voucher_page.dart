@@ -20,6 +20,7 @@ class _ManagerAuditVoucherPageState extends State<ManagerAuditVoucherPage> {
   var _isExpandedBasic = true;
   var _isExpandedDetail = false;
   var _isExpandedAssign = false;
+  Map<String, dynamic> _dispatch = {};
 
   Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
 
@@ -60,6 +61,7 @@ class _ManagerAuditVoucherPageState extends State<ManagerAuditVoucherPage> {
     _dropDownMenuItems = getDropDownMenuItems(_serviceResults);
     _currentResult = _dropDownMenuItems[0].value;
     print('widget info:${widget.request}');
+    getDispatch();
     getJournal();
     super.initState();
   }
@@ -177,6 +179,26 @@ class _ManagerAuditVoucherPageState extends State<ManagerAuditVoucherPage> {
         )
       ],
     );
+  }
+
+  Future<Null> getDispatch() async {
+    var prefs = await _prefs;
+    var userID = prefs.getInt('userID');
+    var dispatchId = widget.request['ID'];
+    var resp = await HttpRequest.request(
+        '/Dispatch/GetDispatchByID',
+        method: HttpRequest.GET,
+        params: {
+          'userID': userID,
+          'dispatchId': dispatchId
+        }
+    );
+    print(resp);
+    if (resp['ResultCode'] == '00') {
+      setState(() {
+        _dispatch = resp['Data'];
+      });
+    }
   }
 
   Future<Null> approveJournal() async {
@@ -314,9 +336,9 @@ class _ManagerAuditVoucherPageState extends State<ManagerAuditVoucherPage> {
                           buildRow('设备编号', widget.request['Request']['Equipments'][0]['OID']),
                           buildRow('设备名称', widget.request['Request']['Equipments'][0]['Name']),
                           buildRow('使用科室', widget.request['Request']['Equipments'][0]['Department']['Name']),
-                          buildRow('设备厂商', widget.request['Request']['Equipments'][0]['Supplier']['Name']??''),
-                          buildRow('资产等级', widget.request['Request']['Equipments'][0]['AssetLevel']['Name']??''),
-                          buildRow('设备型号', widget.request['Request']['Equipments'][0]['SerialCode']),
+                          buildRow('设备厂商', _dispatch['Request']['Equipments'][0]['Manufacturer']['Name']??''),
+                          buildRow('资产等级', _dispatch['Request']['Equipments'][0]['AssetLevel']['Name']),
+                          buildRow('设备型号', _dispatch['Request']['Equipments'][0]['SerialCode']),
                           buildRow('安装地点', widget.request['Request']['DepartmentName']),
                         ],
                       ),
@@ -349,10 +371,9 @@ class _ManagerAuditVoucherPageState extends State<ManagerAuditVoucherPage> {
                           buildRow('紧急程度', widget.request['Urgency']['Name']),
                           buildRow('派工类型', widget.request['RequestType']['Name']),
                           buildRow('机器状态', widget.request['MachineStatus']['Name']),
-                          buildRow('工程师姓名', widget.request['Engineer']['ID'].toString()),
-                          buildRow('工作任务', widget.request['LeaderComments']),
+                          buildRow('工程师姓名', _dispatch['Engineer']['Name']),
+                          buildRow('领导备注', widget.request['LeaderComments']),
                           buildRow('出发时间', widget.request['ScheduleDate']),
-                          buildRow('备注', '' ),
                         ],
                       ),
                     ),
@@ -409,6 +430,7 @@ class _ManagerAuditVoucherPageState extends State<ManagerAuditVoucherPage> {
                             ],
                           ),
                           buildDropdown('服务结果：', _currentResult, _dropDownMenuItems, changedDropDownMethod),
+                          buildTextField('审批备注', '', true),
                         ],
                       ),
                     ),

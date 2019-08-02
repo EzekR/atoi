@@ -61,50 +61,59 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
   }
 
   Future<Null> uploadReport() async {
-    var prefs = await _prefs;
-    var userID = prefs.getInt('userID');
-    var _data = {
-      'userID': userID,
-      'dispatchReport': {
-        'Dispatch': {
-          'ID': widget.dispatchId
-        },
-        'Type': {
-          'ID': 1,
-          'Name': '通用作业报告'
-        },
-        'FaultFrequency': _frequency.text,
-        'FaultCode': _code.text,
-        'FaultSystemStatus': _status.text,
-        'FaultDesc': _description.text,
-        'SolutionCauseAnalysis': _analysis.text,
-        'SolutionWay': _solution.text,
-        'SolutionResultStatus': {
-          'ID': AppConstants.SolutionStatus[_currentResult],
-          'Name': _currentResult
-        },
-        'SolutionUnsolvedComments': _unsolved.text,
-        'DelayReason': _delay.text,
-        'Status': {
-          'ID': 2,
-          'Name': '待审批'
-        }
-      }
-    };
-    var resp = await HttpRequest.request(
-      '/DispatchReport/SaveDispatchReport',
-      method: HttpRequest.POST,
-      data: _data
-    );
-    print(resp);
-    if (resp['ResultCode'] == '00') {
+    if (_frequency.text.isEmpty || _code.text.isEmpty || _status.text.isEmpty || _description.text.isEmpty || _analysis.text.isEmpty || _solution.text.isEmpty) {
       showDialog(context: context,
         builder: (context) => AlertDialog(
-          title: new Text('上传报告成功')
+          title: new Text('报告不可有空字段'),
         )
-      ).then((result) =>
-        Navigator.of(context, rootNavigator: true).pop(result)
       );
+    } else {
+      var prefs = await _prefs;
+      var userID = prefs.getInt('userID');
+      var _data = {
+        'userID': userID,
+        'dispatchReport': {
+          'Dispatch': {
+            'ID': widget.dispatchId
+          },
+          'Type': {
+            'ID': 1,
+            'Name': '通用作业报告'
+          },
+          'FaultFrequency': _frequency.text,
+          'FaultCode': _code.text,
+          'FaultSystemStatus': _status.text,
+          'FaultDesc': _description.text,
+          'SolutionCauseAnalysis': _analysis.text,
+          'SolutionWay': _solution.text,
+          'SolutionResultStatus': {
+            'ID': AppConstants.SolutionStatus[_currentResult],
+            'Name': _currentResult
+          },
+          'SolutionUnsolvedComments': _unsolved.text,
+          'DelayReason': _delay.text,
+          'Status': {
+            'ID': 2,
+            'Name': '待审批'
+          }
+        }
+      };
+      var resp = await HttpRequest.request(
+          '/DispatchReport/SaveDispatchReport',
+          method: HttpRequest.POST,
+          data: _data
+      );
+      print(resp);
+      if (resp['ResultCode'] == '00') {
+        showDialog(context: context,
+            builder: (context) =>
+                AlertDialog(
+                    title: new Text('上传报告成功')
+                )
+        ).then((result) =>
+            Navigator.of(context, rootNavigator: true).pop(result)
+        );
+      }
     }
   }
 
@@ -317,7 +326,7 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
                           buildRow('使用科室：', _dispatch['Request']['Equipments'][0]['Department']['Name']),
                           buildRow('设备厂商：', _dispatch['Request']['Equipments'][0]['Manufacturer']['Name']),
                           buildRow('资产等级：', _dispatch['Request']['Equipments'][0]['AssetLevel']['Name']),
-                          buildRow('设备型号：', _dispatch['Request']['Equipments'][0]['SerialCode']),
+                          //buildRow('设备型号：', _dispatch['Request']['Equipments'][0]['SerialCode']),
                           buildRow('保修状况：', _dispatch['Request']['Equipments'][0]['WarrantyStatus']),
                         ],
                       ),
@@ -332,7 +341,7 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
                             color: Colors.blue,
                           ),
                           title: new Align(
-                              child: Text('派工单信息',
+                              child: Text('派工内容',
                                 style: new TextStyle(
                                     fontSize: 22.0,
                                     fontWeight: FontWeight.w400
@@ -348,12 +357,11 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
                         children: <Widget>[
                           buildRow('派工单编号：', _dispatch['OID']),
                           buildRow('类型：', _dispatch['Request']['SourceType']),
-                          buildRow('主题：', _dispatch['Request']['RequestType']['Name']),
-                          buildRow('故障描述：', _dispatch['Request']['FaultDesc']),
-                          buildRow('故障分类：', _dispatch['Request']['FaultType']['Name']),
                           buildRow('请求人：', _dispatch['Request']['RequestUser']['Name']),
                           buildRow('处理方式：', _dispatch['Request']['DealType']['Name']),
-                          buildRow('优先级：', _dispatch['Request']['Priority']['Name']),
+                          buildRow('紧急程度：', _dispatch['Request']['Priority']['Name']),
+                          buildRow('机器状态：', _dispatch['MachineStatus']['Name']),
+                          buildRow('出发时间：', _dispatch['ScheduleDate']),
                         ],
                       ),
                     ),
@@ -383,14 +391,14 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: <Widget>[
                           buildField('发生频率：', _frequency),
-                          buildField('设备状态：', _status),
+                          buildField('系统状态：', _status),
                           buildField('错误代码：', _code	),
                           buildField('故障描述：', _description),
                           buildField('分析原因：', _analysis),
                           buildField('处理方法：', _solution),
                           buildField('未解决备注：', _unsolved),
                           buildField('误工说明：', _delay),
-                          buildDropdown('处理结果：', _currentResult, _dropDownMenuItems, changedDropDownMethod),
+                          buildDropdown('作业结果：', _currentResult, _dropDownMenuItems, changedDropDownMethod),
                         ],
                       ),
                     ),

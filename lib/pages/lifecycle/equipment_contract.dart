@@ -76,48 +76,56 @@ class _EquipmentContractState extends State<EquipmentContract> {
   }
 
   Future<Null> submit() async {
-    var prefs = await _prefs;
-    var userID = prefs.getInt('userID');
-    var fileList = [];
-    for (var image in _imageList) {
-      List<int> imageBytes = await image.readAsBytes();
-      var fileContent = base64Encode(imageBytes);
-      var file = {
-        'FileContent': fileContent,
-        'FileName': image.path,
-        'FiltType': 1,
-        'ID': 0
-      };
-      fileList.add(file);
-    }
-    var _data = {
-      'userID': userID,
-      'requestInfo': {
-        'RequestType': {
-          'ID': 8
-        },
-        'Equipments': [
-          {
-            'ID': _equipment['ID']
-          }
-        ],
-        'FaultDesc': _fault.text,
-        'Files': fileList
-      }
-    };
-    var resp = await HttpRequest.request(
-        '/Request/AddRequest',
-        method: HttpRequest.POST,
-        data: _data
-    );
-    print(resp);
-    if (resp['ResultCode'] == '00') {
-      showDialog(context: context, builder: (buider) =>
-          AlertDialog(
-            title: new Text('提交合同档案成功'),
-          )).then((result) =>
-          Navigator.of(context, rootNavigator: true).pop(result)
+    if (_fault.text.isEmpty || _fault.text == null) {
+      showDialog(context: context,
+          builder: (context) => AlertDialog(
+            title: new Text('备注不可为空'),
+          )
       );
+    } else {
+      var prefs = await _prefs;
+      var userID = prefs.getInt('userID');
+      var fileList = [];
+      for (var image in _imageList) {
+        List<int> imageBytes = await image.readAsBytes();
+        var fileContent = base64Encode(imageBytes);
+        var file = {
+          'FileContent': fileContent,
+          'FileName': image.path,
+          'FiltType': 1,
+          'ID': 0
+        };
+        fileList.add(file);
+      }
+      var _data = {
+        'userID': userID,
+        'requestInfo': {
+          'RequestType': {
+            'ID': 8
+          },
+          'Equipments': [
+            {
+              'ID': _equipment['ID']
+            }
+          ],
+          'FaultDesc': _fault.text,
+          'Files': fileList
+        }
+      };
+      var resp = await HttpRequest.request(
+          '/Request/AddRequest',
+          method: HttpRequest.POST,
+          data: _data
+      );
+      print(resp);
+      if (resp['ResultCode'] == '00') {
+        showDialog(context: context, builder: (buider) =>
+            AlertDialog(
+              title: new Text('提交合同档案成功'),
+            )).then((result) =>
+            Navigator.of(context, rootNavigator: true).pop(result)
+        );
+      }
     }
   }
 

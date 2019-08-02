@@ -104,7 +104,7 @@ class _ManagerToAssignState extends State<ManagerToAssign> {
   Widget build(BuildContext context) {
     // TODO: implement build
 
-    Card buildCardItem(Map task, int requestId, String taskNo, String time, String equipmentName, String equipmentNo, String departmentName, String requestPerson, String requestType, String status, String detail) {
+    Card buildCardItem(Map task, int requestId, String taskNo, String time, String equipmentNo, String equipmentName, String departmentName, String requestPerson, String requestType, String status, String detail, List _equipments) {
       var _dataVal = DateTime.parse(time);
       var _format = '${_dataVal.year}-${_dataVal.month}-${_dataVal.day} ${_dataVal.hour}:${_dataVal.minute}:${_dataVal.second}';
       return new Card(
@@ -236,7 +236,7 @@ class _ManagerToAssignState extends State<ManagerToAssign> {
             child: _tasks.length == 0?ListView(padding: const EdgeInsets.symmetric(vertical: 150.0), children: <Widget>[new Center(child: _loading?SpinKitRotatingPlain(color: Colors.blue):new Text('没有待派工请求'),)],):ListView.builder(
                 padding: const EdgeInsets.all(2.0),
                 itemCount: _tasks.length,
-                itemBuilder: (context, i) => buildCardItem(_tasks[i], _tasks[i]['ID'], _tasks[i]['OID'], _tasks[i]['RequestDate'], _tasks[i]['EquipmentOID'], _tasks[i]['EquipmentName'], _tasks[i]['DepartmentName'], _tasks[i]['RequestUser']['Name'], _tasks[i]['RequestType']['Name'], _tasks[i]['Status']['Name'], _tasks[i]['FaultDesc'])
+                itemBuilder: (context, i) => buildCardItem(_tasks[i], _tasks[i]['ID'], _tasks[i]['OID'], _tasks[i]['RequestDate'], _tasks[i]['EquipmentOID'], _tasks[i]['EquipmentName'], _tasks[i]['DepartmentName'], _tasks[i]['RequestUser']['Name'], _tasks[i]['RequestType']['Name'], _tasks[i]['Status']['Name'], _tasks[i]['FaultDesc'], _tasks[i]['Equipments'])
             ),
             onRefresh: getData
         );

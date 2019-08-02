@@ -5,8 +5,8 @@ import 'package:atoi/utils/http_request.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:atoi/utils/constants.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
-import 'package:atoi/home_page.dart';
 import 'dart:convert';
+import 'package:photo_view/photo_view.dart';
 
 class ManagerAssignPage extends StatefulWidget {
   static String tag = 'mananger-assign-page';
@@ -29,7 +29,7 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
 
   Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
 
-  List<int> imageBytes = [];
+  var imageBytes;
 
   List _handleMethods = [
     '现场服务',
@@ -125,9 +125,10 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
       },
       method: HttpRequest.GET
     );
+    print(resp);
     if (resp['ResultCode'] == '00') {
       setState(() {
-        imageBytes = base64Decode(resp['Data']);
+        imageBytes = resp['Data'];
       });
     }
   }
@@ -159,7 +160,7 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
     _dropDownMenuItems = getDropDownMenuItems(_handleMethods);
     _currentMethod = _dropDownMenuItems[0].value;
     _dropDownMenuPris = getDropDownMenuItems(_priorities);
-    _currentPriority = _dropDownMenuPris[1].value;
+    _currentPriority = _dropDownMenuPris[0].value;
     _dropDownMenuTypes = getDropDownMenuItems(_assignTypes);
     _dropDownMenuLevels = getDropDownMenuItems(_levels);
     _dropDownMenuStatuses = getDropDownMenuItems(_deviceStatuses);
@@ -304,6 +305,36 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
     );
   }
 
+  Future<Null> terminate() async {
+    var prefs = await _prefs;
+    var userID = prefs.getInt('userID');
+    Map<String, dynamic> _data = {
+      'userID': userID,
+      'requestID': _request['ID']
+    };
+    var resp = await HttpRequest.request(
+      '/Request/EndRequest',
+      method: HttpRequest.POST,
+      data: _data
+    );
+    print(resp);
+    if (resp['ResultCode'] == '00') {
+      showDialog(context: context,
+        builder: (context) => AlertDialog(
+          title: new Text('终止请求成功'),
+        )
+      ).then((result) =>
+        Navigator.of(context, rootNavigator: true).pop(result)
+      );
+    } else {
+      showDialog(context: context,
+        builder: (context) => AlertDialog(
+          title: new Text(resp['ResultMessage']),
+        )
+      );
+    }
+  }
+
   Future assignRequest() async {
     var prefs = await _prefs;
     var userID = prefs.getInt('userID');
@@ -362,6 +393,32 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
           ],
         )
       );
+    }
+  }
+
+  List<Widget> buildEquipment() {
+    if (_request.isNotEmpty) {
+      var _equipments = _request['Equipments'];
+      List<Widget> _equipList = [];
+      for (var _equipment in _equipments) {
+        var _list = [
+          buildRow('系统编号:', _equipment['OID']??''),
+          buildRow('设备名称：', _equipment['Name']??''),
+          buildRow('设备型号：', _equipment['EquipmentCode']??''),
+          buildRow('设备序列号：', _equipment['SerialCode']??''),
+          buildRow('使用科室：', _equipment['Department']['Name']??''),
+          buildRow('安装地点：', _equipment['InstalSite']??''),
+          buildRow('设备厂商：', _equipment['Manufacturer']['Name']??''),
+          buildRow('资产等级：', _equipment['AssetLevel']['Name']??''),
+          buildRow('维保状态：', _equipment['WarrantyStatus']??''),
+          buildRow('服务范围：', _equipment['ContractScopeComments']??''),
+          new Padding(padding: EdgeInsets.symmetric(vertical: 8.0))
+        ];
+        _equipList.addAll(_list);
+      }
+      return _equipList;
+    } else {
+      return [];
     }
   }
 
@@ -433,17 +490,7 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
                       body: new Padding(
                         padding: EdgeInsets.symmetric(horizontal: 12.0),
                         child: new Column(
-                          children: <Widget>[
-                            buildRow('设备编号：', _request['EquipmentOID']),
-                            buildRow('设备名称：', _request['EquipmentName']),
-                            buildRow('使用科室：', _request['DepartmentName']),
-                            buildRow('设备厂商：', _request['Equipments'][0]['Supplier']['Name']??''),
-                            buildRow('资产等级：', _request['Equipments'][0]['AssetLevel']['Name']??''),
-                            buildRow('设备型号：', _request['Equipments'][0]['EquipmentCode']??''),
-                            buildRow('安装地点：', _request['Equipments'][0]['Department']['Name']??''),
-                            buildRow('保修状况：', _request['Equipments'][0]['WarrantyStatus']??''),
-                            new Padding(padding: EdgeInsets.symmetric(vertical: 8.0))
-                          ],
+                          children: buildEquipment(),
                         ),
                       ),
                       isExpanded: _isExpandedBasic,
@@ -475,12 +522,11 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
                         children: <Widget>[
                           buildRow('类型：', _request['SourceType']),
                           buildRow('主题：', _request['Subject']),
-                          buildRow('故障描述：', _request['FaultDesc']),
-                          buildRow('故障分类：', _request['FaultType']['Name']),
+                          buildRow(AppConstants.Remark[_request['RequestType']['ID']], _request['FaultDesc']),
+                          _request['FaultType']['ID'] != 0?buildRow(AppConstants.RemarkType[_request['RequestType']['ID']], _request['FaultType']['Name']):new Container(),
                           buildRow('请求人：', _request['RequestUser']['Name']),
-                          buildRow('联系电话：', _request['RequestUser']['Mobile']),
                           buildDropdown('处理方式：', _currentMethod, _dropDownMenuItems, changedDropDownMethod),
-                          buildDropdown('优先级：', _currentPriority, _dropDownMenuPris, changedDropDownPri),
+                          buildDropdown('紧急程度：', _currentPriority, _dropDownMenuPris, changedDropDownPri),
                           new Padding(
                             padding: EdgeInsets.symmetric(vertical: 5.0),
                             child: new Text('请求附件',
@@ -490,18 +536,24 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
                               ),
                             ),
                           ),
-                          new Row(
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            children: <Widget>[
-                              new Padding(
-                                padding: const EdgeInsets.all(10.0),
-                                child: imageBytes.isEmpty?new Container():new Image.memory(
-                                  imageBytes,
-                                  width: 200.0,
-                                ),
-                              ),
-                            ],
-                          ),
+                          imageBytes != null?new Container(
+                            child: new PhotoView(imageProvider: MemoryImage(base64Decode(imageBytes))),
+                            width: 400.0,
+                            height: 400.0,
+                          ):new Container(),
+                          //new Row(
+                          //  mainAxisAlignment: MainAxisAlignment.start,
+                          //  children: <Widget>[
+                          //    new Padding(
+                          //      padding: const EdgeInsets.all(10.0),
+                          //      child: new Container(
+                          //        child: imageBytes.isEmpty?new Stack():new PhotoView(
+                          //            imageProvider: MemoryImage(imageBytes),
+                          //        ),
+                          //      ),
+                          //    ),
+                          //  ],
+                          //),
                         ],
                       ),
                     ),
@@ -532,7 +584,7 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
                         mainAxisSize: MainAxisSize.max,
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: <Widget>[
-                          buildDropdown('派工类型：', _currentType, _dropDownMenuTypes, changedDropDownType),
+                          buildDropdown('派工类型：', _request['RequestType']['Name'], _dropDownMenuTypes, changedDropDownType),
                           buildDropdown('紧急程度：', _currentLevel, _dropDownMenuLevels, changedDropDownLevel),
                           buildDropdown('机器状态：', _currentStatus, _dropDownMenuStatuses, changedDropDownStatus),
                           _engineerNames.isEmpty?new Container():buildDropdown('工程师姓名：', _currentName, _dropDownMenuNames, changedDropDownName),
@@ -615,19 +667,14 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
                     padding: EdgeInsets.symmetric(horizontal: 5.0),
                     child: new RaisedButton(
                       onPressed: () {
-                        showDialog(
-                          context: context,
-                          builder: (context) => AlertDialog(
-                            title: Text('已取消')
-                          )
-                        );
+                        terminate();
                       },
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(24),
                       ),
                       padding: EdgeInsets.all(12.0),
                       color: new Color(0xffD25565),
-                      child: Text('拒绝请求', style: TextStyle(color: Colors.white)),
+                      child: Text('终止请求', style: TextStyle(color: Colors.white)),
                     ),
                   ),
                 ],

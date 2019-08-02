@@ -52,6 +52,8 @@ class _LoginPageState extends State<LoginPage> {
           Navigator.of(context).pushNamed(UserHomePage.tag);
           break;
       }
+    } else {
+      showDialog(context: context, builder: (context) => AlertDialog(title: new Text(_data['ResultMessage']),));
     }
   }
   @override

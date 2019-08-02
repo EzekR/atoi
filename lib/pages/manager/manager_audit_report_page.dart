@@ -31,11 +31,12 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
   List<DropdownMenuItem<String>> _dropDownMenuItems;
   String _currentResult;
   Map<String, dynamic> _report = {};
+  Map<String, dynamic> _dispatch = {};
 
   void initState(){
     _dropDownMenuItems = getDropDownMenuItems(_serviceResults);
-    _currentResult = _dropDownMenuItems[0].value;
     getReport();
+    getDispatch();
     super.initState();
   }
 
@@ -160,7 +161,28 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
     print(resp);
     if (resp['ResultCode'] == '00') {
       setState(() {
+        _currentResult = resp['Data']['SolutionResultStatus']['Name'];
         _report = resp['Data'];
+      });
+    }
+  }
+
+  Future<Null> getDispatch() async {
+    var prefs = await _prefs;
+    var userID = prefs.getInt('userID');
+    var dispatchId = widget.request['ID'];
+    var resp = await HttpRequest.request(
+      '/Dispatch/GetDispatchByID',
+      method: HttpRequest.GET,
+      params: {
+        'userID': userID,
+        'dispatchId': dispatchId
+      }
+    );
+    print(resp);
+    if (resp['ResultCode'] == '00') {
+      setState(() {
+        _dispatch = resp['Data'];
       });
     }
   }
@@ -299,9 +321,9 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
                           buildRow('设备编号', widget.request['Request']['Equipments'][0]['OID']),
                           buildRow('设备名称', widget.request['Request']['Equipments'][0]['Name']),
                           buildRow('使用科室', widget.request['Request']['Equipments'][0]['Department']['Name']),
-                          buildRow('设备厂商', widget.request['Request']['Equipments'][0]['Supplier']['Name']??''),
-                          buildRow('资产等级', widget.request['Request']['Equipments'][0]['AssetLevel']['Name']??''),
-                          buildRow('设备型号', widget.request['Request']['Equipments'][0]['SerialCode']),
+                          buildRow('设备厂商', _dispatch['Request']['Equipments'][0]['Manufacturer']['Name']??''),
+                          buildRow('资产等级', _dispatch['Request']['Equipments'][0]['AssetLevel']['Name']),
+                          buildRow('设备型号', _dispatch['Request']['Equipments'][0]['SerialCode']),
                           buildRow('安装地点', widget.request['Request']['DepartmentName']),
                         ],
                       ),
@@ -334,10 +356,10 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
                           buildRow('紧急程度', widget.request['Urgency']['Name']),
                           buildRow('派工类型', widget.request['RequestType']['Name']),
                           buildRow('机器状态', widget.request['MachineStatus']['Name']),
-                          buildRow('工程师姓名', widget.request['Engineer']['ID'].toString()),
+                          buildRow('工程师姓名', _dispatch['Engineer']['Name']),
                           buildRow('工作任务', widget.request['LeaderComments']),
                           buildRow('出发时间', widget.request['ScheduleDate']),
-                          buildRow('备注', '' ),
+                          buildRow('备注', _dispatch['LeaderComments']),
                         ],
                       ),
                     ),
@@ -374,10 +396,9 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
                           buildRow('故障描述：', _report['FaultDesc']),
                           buildRow('分析原因：', _report['SolutionCauseAnalysis']),
                           buildRow('处理方法：', _report['SolutionWay']),
-                          buildRow('结果：', _report['SolutionResultStatus']['Name']),
                           buildRow('未解决备注：', _report['SolutionUnsolvedComments']),
                           buildRow('误工说明：', _report['DelayReason']),
-                          buildDropdown('作业报告结果：', _currentResult, _dropDownMenuItems, changedDropDownMethod)
+                          buildDropdown('作业结果：', _currentResult, _dropDownMenuItems, changedDropDownMethod)
                         ],
                       ),
                     ),
