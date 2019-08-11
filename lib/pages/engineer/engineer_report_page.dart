@@ -3,11 +3,14 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:atoi/utils/http_request.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:atoi/utils/constants.dart';
+import 'package:image_picker/image_picker.dart';
+import 'dart:convert';
 
 class EngineerReportPage extends StatefulWidget {
   static String tag = 'engineer-report-page';
-  EngineerReportPage({Key key, this.dispatchId}):super(key: key);
+  EngineerReportPage({Key key, this.dispatchId, this.reportId}):super(key: key);
   final int dispatchId;
+  final int reportId;
 
   @override
   _EngineerReportPageState createState() => new _EngineerReportPageState();
@@ -19,16 +22,26 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
   var _isExpandedDetail = false;
   var _isExpandedAssign = true;
   var _isExpandedComponent = false;
+  bool _isDelayed = false;
+  var _accessory = [];
 
   List _serviceResults = [
     '待分配',
     '问题升级',
-    '待第三方解决',
+    '第三方解决',
     '已解决'
   ];
 
+  List _sources = [
+    '外部供应商',
+    '备件库'
+  ];
+
+
   List<DropdownMenuItem<String>> _dropDownMenuItems;
+  List<DropdownMenuItem<String>> _dropDownMenuSources;
   String _currentResult;
+  String _currentSource;
   var _dispatch = {};
   Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
   var _frequency = new TextEditingController();
@@ -39,6 +52,48 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
   var _solution = new TextEditingController();
   var _delay = new TextEditingController();
   var _unsolved = new TextEditingController();
+  List<dynamic> _imageList = [];
+
+  Future getImage() async {
+    var image = await ImagePicker.pickImage(
+        source: ImageSource.camera,
+        maxWidth: 800.0
+    );
+    setState(() {
+      _imageList.add(image);
+    });
+  }
+
+  Future<Null> getReport() async {
+    if (widget.reportId != 0) {
+      var prefs = await _prefs;
+      var userID = prefs.getInt('userID');
+      var reportId = widget.reportId;
+      var resp = await HttpRequest.request(
+        '/DispatchReport/GetDispatchReport',
+        method: HttpRequest.GET,
+        params: {
+          'userID': userID,
+          'dispatchReportId': reportId
+        }
+      );
+      print(resp);
+      if (resp['ResultCode'] == '00') {
+        var data = resp['Data'];
+        setState(() {
+          _frequency.text = data['FaultFrequency'];
+          _code.text = data['FaultCode'];
+          _status.text = data['FaultSystemStatus'];
+          _description.text = data['FaultDesc'];
+          _analysis.text = data['SolutionCauseAnalysis'];
+          _solution.text = data['SolutionWay'];
+          _currentResult = data['SolutionResultStatus']['Name'];
+          _delay.text = data['DelayReason'];
+          _unsolved.text = data['SolutionUnsolvedComments'];
+        });
+      }
+    }
+  }
 
   Future<Null> getDispatch() async {
     var prefs = await _prefs;
@@ -57,17 +112,37 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
       setState(() {
         _dispatch = resp['Data'];
       });
+      var _createTime = DateTime.parse(resp['Data']['CreateDate']);
+      var _startTime = DateTime.parse(resp['Data']['StartDate']);
+      var _duration = _startTime.difference(_createTime).inSeconds;
+      if (_duration > resp['Data']['Request']['Equipments'][0]['ResponseTimeLength']) {
+        setState(() {
+          _isDelayed = true;
+        });
+      }
     }
   }
 
   Future<Null> uploadReport() async {
-    if (_frequency.text.isEmpty || _code.text.isEmpty || _status.text.isEmpty || _description.text.isEmpty || _analysis.text.isEmpty || _solution.text.isEmpty) {
+    if (_frequency.text.isEmpty || _code.text.isEmpty || _status.text.isEmpty || _analysis.text.isEmpty || _solution.text.isEmpty) {
       showDialog(context: context,
         builder: (context) => AlertDialog(
           title: new Text('报告不可有空字段'),
         )
       );
     } else {
+      List<dynamic> Files = [];
+      for(var image in _imageList) {
+        List<int> imageBytes = await image.readAsBytes();
+        var content = base64Encode(imageBytes);
+        Map _json = {
+          'FileContent': content,
+          'FileName': image.path,
+          'ID': 0,
+          'FileType': 1
+        };
+        Files.add(_json);
+      }
       var prefs = await _prefs;
       var userID = prefs.getInt('userID');
       var _data = {
@@ -95,7 +170,9 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
           'Status': {
             'ID': 2,
             'Name': '待审批'
-          }
+          },
+          'Files': Files,
+          'ReportAccessories': _accessory
         }
       };
       var resp = await HttpRequest.request(
@@ -113,14 +190,23 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
         ).then((result) =>
             Navigator.of(context, rootNavigator: true).pop(result)
         );
+      } else {
+        showDialog(context: context,
+          builder: (context) => AlertDialog(
+            title: new Text(resp['ResultMessage']),
+          )
+        );
       }
     }
   }
 
   void initState(){
     _dropDownMenuItems = getDropDownMenuItems(_serviceResults);
+    _dropDownMenuSources = getDropDownMenuItems(_sources);
     _currentResult = _dropDownMenuItems[0].value;
+    _currentSource = _dropDownMenuSources[0].value;
     getDispatch();
+    getReport();
     super.initState();
   }
 
@@ -162,6 +248,12 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
   void changedDropDownMethod(String selectedMethod) {
     setState(() {
       _currentResult = selectedMethod;
+    });
+  }
+
+  void changedDropDownSource(String selectedMethod) {
+    setState(() {
+      _currentSource = selectedMethod;
     });
   }
 
@@ -247,6 +339,183 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
     );
   }
 
+  Row buildImageRow(List imageList) {
+    List<Widget> _list = [];
+
+    if (imageList.length >0 ){
+      for(var image in imageList) {
+        _list.add(
+            new Container(
+              width: 100.0,
+              child: Image.file(image),
+            )
+        );
+      }
+    } else {
+      _list.add(new Container());
+    }
+
+    _list.add(new IconButton(icon: Icon(Icons.add_a_photo), onPressed: () {
+      getImage();
+    }));
+
+    return new Row(
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: _list
+    );
+  }
+
+  List<Widget> buildAccessory() {
+    List<Widget> _list = [];
+    var _name = new TextEditingController();
+    var _vendor = new TextEditingController();
+    var _number = new TextEditingController();
+    var _price = new TextEditingController();
+    var _amount = new TextEditingController();
+    var _imageNew;
+    var _imagePre;
+    var _numberPre =  new TextEditingController();
+
+    void saveAccessory() async {
+      if (_imageNew == null || _imagePre == null) {
+        return;
+      }
+      var _newByte = await _imageNew.readAsBytes();
+      var imageNew = base64Encode(_newByte);
+      var _oldByte = await _imagePre.readAsBytes();
+      var imageOld = base64Encode(_oldByte);
+      var data = {
+        'Name': _name.text,
+        'Source': {
+          'Name': _currentSource,
+          'ID': AppConstants.AccessorySourceType[_currentSource]
+        },
+        'Supplier': {
+          'Name': _vendor.text
+        },
+        'NewSerialCode': _number.text,
+        'OldSerialCode': _numberPre.text,
+        'Qty': _amount.text,
+        'Amount': _price.text,
+        'FileInfos': [
+          {
+            'FileName': _imageNew.path,
+            'ID': 0,
+            'FileType': 1,
+            'FileContent': imageNew
+          },
+          {
+            'FileName': _imagePre.path,
+            'ID': 0,
+            'FileType': 1,
+            'FileContent': imageOld
+          },
+        ]
+      };
+      setState(() {
+        _accessory.add(data);
+      });
+    }
+
+    void _addAccessory() async {
+      showDialog(context: context,
+        builder: (context) => SimpleDialog(
+          title: new Text('新增零件'),
+          contentPadding: EdgeInsets.all(8.0),
+          children: <Widget>[
+            buildField('名称：', _name),
+            buildDropdown('来源：', _currentSource, _dropDownMenuSources, changedDropDownSource),
+            _currentSource=='外部供应商'?buildField('外部供应商：', _vendor):new Container(),
+            buildField('新装编号：', _number),
+            buildField('新装部件金额（元/件）：', _price),
+            buildField('数量：', _amount),
+            new Text('附件：'),
+            new Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: <Widget>[
+                new IconButton(icon: Icon(Icons.add_a_photo), onPressed: () async {
+                  _imageNew = await ImagePicker.pickImage(
+                      source: ImageSource.camera,
+                      maxWidth: 800.0
+                  );
+                }),
+                _imageNew==null?new Container():new Container(width: 100.0, child: new Image.file(_imageNew),)
+              ],
+            ),
+            buildField('拆下编号：', _numberPre),
+            new Text('附件：'),
+            new Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: <Widget>[
+                new IconButton(icon: Icon(Icons.add_a_photo), onPressed: () async {
+                  _imagePre = await ImagePicker.pickImage(
+                      source: ImageSource.camera,
+                      maxWidth: 800.0
+                  );
+                }),
+                _imagePre==null?new Container():new Container(width: 100.0, child: new Image.file(_imagePre),)
+              ],
+            ),
+            new Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              mainAxisSize: MainAxisSize.max,
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: <Widget>[
+                new RaisedButton(
+                  onPressed: () {
+                    saveAccessory();
+                  },
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(24),
+                  ),
+                  padding: EdgeInsets.all(12.0),
+                  color: new Color(0xff2E94B9),
+                  child: Text('保存', style: TextStyle(color: Colors.white)),
+                ),
+                new RaisedButton(
+                  onPressed: () {
+                    //uploadReport();
+                    Navigator.of(context).pop();
+                  },
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(24),
+                  ),
+                  padding: EdgeInsets.all(12.0),
+                  color: new Color(0xff2E94B9),
+                  child: Text('取消', style: TextStyle(color: Colors.white)),
+                ),
+              ],
+            )
+          ],
+        )
+      );
+    }
+    _list.add(new Row(
+      mainAxisAlignment: MainAxisAlignment.end,
+      children: <Widget>[
+        new Text('新增零件'),
+        new IconButton(icon: Icon(Icons.add), onPressed: () {
+          _addAccessory();
+        })
+      ],
+    )); 
+    if (_accessory != null) {
+      for(var _acc in _accessory) {
+        var _accList = [
+          buildRow('名称：', _acc['Name']),
+          buildRow('来源：', _acc['Source']['Name']),
+          buildRow('外部供应商：', _acc['Supplier']['Name']),
+          buildRow('新装零件编号：', _acc['NewSerialCode']),
+          buildRow('金额（元/件）：', _acc['Amount']),
+          buildRow('数量：', _acc['Qty']),
+          new Divider()
+        ];
+        _list.addAll(_accList);
+      }
+    }
+    return _list;
+  }
+
   @override
   Widget build(BuildContext context) {
     // TODO: implement build
@@ -321,13 +590,16 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
                       padding: EdgeInsets.symmetric(horizontal: 8.0),
                       child: new Column(
                         children: <Widget>[
-                          buildRow('设备系统编号：', _dispatch['Request']['Equipments'][0]['OID']),
-                          buildRow('设备名称：', _dispatch['Request']['Equipments'][0]['Name']),
-                          buildRow('使用科室：', _dispatch['Request']['Equipments'][0]['Department']['Name']),
-                          buildRow('设备厂商：', _dispatch['Request']['Equipments'][0]['Manufacturer']['Name']),
-                          buildRow('资产等级：', _dispatch['Request']['Equipments'][0]['AssetLevel']['Name']),
-                          //buildRow('设备型号：', _dispatch['Request']['Equipments'][0]['SerialCode']),
-                          buildRow('保修状况：', _dispatch['Request']['Equipments'][0]['WarrantyStatus']),
+                          buildRow('系统编号:', _dispatch['Request']['Equipments'][0]['OID']??''),
+                          buildRow('设备名称：', _dispatch['Request']['Equipments'][0]['Name']??''),
+                          buildRow('设备型号：', _dispatch['Request']['Equipments'][0]['EquipmentCode']??''),
+                          buildRow('设备序列号：', _dispatch['Request']['Equipments'][0]['SerialCode']??''),
+                          buildRow('使用科室：', _dispatch['Request']['Equipments'][0]['Department']['Name']??''),
+                          buildRow('安装地点：', _dispatch['Request']['Equipments'][0]['InstalSite']??''),
+                          buildRow('设备厂商：', _dispatch['Request']['Equipments'][0]['Manufacturer']['Name']??''),
+                          buildRow('资产等级：', _dispatch['Request']['Equipments'][0]['AssetLevel']['Name']??''),
+                          buildRow('维保状态：', _dispatch['Request']['Equipments'][0]['WarrantyStatus']??''),
+                          buildRow('服务范围：', _dispatch['Request']['Equipments'][0]['ContractScope']['Name']??''),
                         ],
                       ),
                     ),
@@ -356,12 +628,13 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
                       child: new Column(
                         children: <Widget>[
                           buildRow('派工单编号：', _dispatch['OID']),
-                          buildRow('类型：', _dispatch['Request']['SourceType']),
-                          buildRow('请求人：', _dispatch['Request']['RequestUser']['Name']),
+                          buildRow('派工类型：', _dispatch['RequestType']['Name']),
+                          buildRow('工程师姓名：', _dispatch['Engineer']['Name']),
                           buildRow('处理方式：', _dispatch['Request']['DealType']['Name']),
                           buildRow('紧急程度：', _dispatch['Request']['Priority']['Name']),
                           buildRow('机器状态：', _dispatch['MachineStatus']['Name']),
-                          buildRow('出发时间：', _dispatch['ScheduleDate']),
+                          buildRow('出发时间：', AppConstants.TimeForm(_dispatch['ScheduleDate'], 'yyyy-mm-dd')),
+                          buildRow('备注：', _dispatch['LeaderComments']),
                         ],
                       ),
                     ),
@@ -375,7 +648,7 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
                           color: Colors.blue,
                         ),
                         title: new Align(
-                            child: Text('作业报告',
+                            child: Text('作业报告信息',
                               style: new TextStyle(
                                   fontSize: 22.0,
                                   fontWeight: FontWeight.w400
@@ -391,14 +664,24 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: <Widget>[
                           buildField('发生频率：', _frequency),
+                          buildField('故障描述：', _description),
                           buildField('系统状态：', _status),
                           buildField('错误代码：', _code	),
-                          buildField('故障描述：', _description),
                           buildField('分析原因：', _analysis),
                           buildField('处理方法：', _solution),
                           buildField('未解决备注：', _unsolved),
-                          buildField('误工说明：', _delay),
+                          _isDelayed?buildField('误工说明：', _delay):new Container(),
                           buildDropdown('作业结果：', _currentResult, _dropDownMenuItems, changedDropDownMethod),
+                          new Padding(
+                            padding: EdgeInsets.symmetric(vertical: 5.0),
+                            child: new Text('上传附件',
+                              style: new TextStyle(
+                                  fontSize: 16.0,
+                                  color: Colors.grey
+                              ),
+                            ),
+                          ),
+                          buildImageRow(_imageList)
                         ],
                       ),
                     ),
@@ -425,8 +708,7 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
                     body: new Padding(
                       padding: EdgeInsets.symmetric(horizontal: 8.0),
                       child: new Column(
-                        children: <Widget>[
-                        ],
+                        children: buildAccessory(),
                       ),
                     ),
                     isExpanded: _isExpandedComponent,

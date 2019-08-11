@@ -9,8 +9,9 @@ import 'package:atoi/utils/constants.dart';
 
 class EngineerVoucherPage extends StatefulWidget {
   static String tag = 'engineer-voucher-page';
-  EngineerVoucherPage({Key key, this.dispatchId}):super(key: key);
+  EngineerVoucherPage({Key key, this.dispatchId, this.journalId}):super(key: key);
   final int dispatchId;
+  final int journalId;
 
   @override
   _EngineerVoucherPageState createState() => new _EngineerVoucherPageState();
@@ -26,6 +27,7 @@ class _EngineerVoucherPageState extends State<EngineerVoucherPage> {
   var _followProblem = new TextEditingController();
   var _unconfirmed = new TextEditingController();
   var _advice = new TextEditingController();
+  String _signature;
 
   List _serviceResults = [
     '完成',
@@ -37,6 +39,35 @@ class _EngineerVoucherPageState extends State<EngineerVoucherPage> {
   List<DropdownMenuItem<String>> _dropDownMenuItems;
   String _currentResult;
   Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
+
+  Future<Null> getJournal() async {
+    var _journalId = widget.journalId;
+    if (_journalId !=0) {
+      var prefs = await _prefs;
+      var userID = prefs.getInt('userID');
+      var resp = await HttpRequest.request(
+        '/DispatchJournal/GetDispatchJournal',
+        method: HttpRequest.GET,
+        params: {
+          'userID': userID,
+          'dispatchJournalId': _journalId
+        }
+      );
+      print(resp);
+      if (resp['ResultCode'] == '00') {
+        var _data = resp['Data'];
+        setState(() {
+          _signature = _data['FileContent'];
+          _img = base64Decode(_signature).buffer.asByteData();
+          _faultCode.text = _data['FaultCode'];
+          _jobContent.text = _data['JobContent'];
+          _followProblem.text = _data['FollowProblem'];
+          _unconfirmed.text = _data['UnconfirmedProblem'];
+          _advice.text = _data['Advice'];
+        });
+      }
+    }
+  }
 
   Future<Null> getDispatch() async {
     var prefs = await _prefs;
@@ -59,10 +90,26 @@ class _EngineerVoucherPageState extends State<EngineerVoucherPage> {
   }
 
   Future<Null> uploadJournal() async {
-    if (_faultCode.text.isEmpty || _jobContent.text.isEmpty) {
+    if (_img.buffer.lengthInBytes == 0 ) {
+      showDialog(context: context,
+          builder: (context) => AlertDialog(
+          title: new Text('签名不可为空'),
+        )
+      );
+      return;
+    }
+    if (_jobContent.text.isEmpty) {
+      showDialog(context: context,
+          builder: (context) => AlertDialog(
+            title: new Text('工作内容不可为空'),
+          )
+      );
+      return;
+    }
+    if (_faultCode.text.isEmpty) {
       showDialog(context: context,
         builder: (context) => AlertDialog(
-          title: new Text('故障事由与工作内容不可为空'),
+          title: new Text('故障事由不可为空'),
         )
       );
     } else {
@@ -110,6 +157,7 @@ class _EngineerVoucherPageState extends State<EngineerVoucherPage> {
     _dropDownMenuItems = getDropDownMenuItems(_serviceResults);
     _currentResult = _dropDownMenuItems[0].value;
     getDispatch();
+    getJournal();
     super.initState();
   }
 
@@ -340,13 +388,16 @@ class _EngineerVoucherPageState extends State<EngineerVoucherPage> {
                       padding: EdgeInsets.symmetric(horizontal: 8.0),
                       child: new Column(
                         children: <Widget>[
-                          buildRow('设备系统编号：', _dispatch['Request']['Equipments'][0]['OID']),
-                          buildRow('设备名称：', _dispatch['Request']['Equipments'][0]['Name']),
-                          buildRow('使用科室：', _dispatch['Request']['Equipments'][0]['Department']['Name']),
-                          buildRow('设备厂商：', _dispatch['Request']['Equipments'][0]['Manufacturer']['Name']),
-                          buildRow('资产等级：', _dispatch['Request']['Equipments'][0]['AssetLevel']['Name']),
-                          //buildRow('设备型号：', _dispatch['Request']['Equipments'][0]['SerialCode']),
-                          buildRow('保修状况：', _dispatch['Request']['Equipments'][0]['WarrantyStatus']),
+                          buildRow('系统编号:', _dispatch['Request']['Equipments'][0]['OID']??''),
+                          buildRow('设备名称：', _dispatch['Request']['Equipments'][0]['Name']??''),
+                          buildRow('设备型号：', _dispatch['Request']['Equipments'][0]['EquipmentCode']??''),
+                          buildRow('设备序列号：', _dispatch['Request']['Equipments'][0]['SerialCode']??''),
+                          buildRow('使用科室：', _dispatch['Request']['Equipments'][0]['Department']['Name']??''),
+                          buildRow('安装地点：', _dispatch['Request']['Equipments'][0]['InstalSite']??''),
+                          buildRow('设备厂商：', _dispatch['Request']['Equipments'][0]['Manufacturer']['Name']??''),
+                          buildRow('资产等级：', _dispatch['Request']['Equipments'][0]['AssetLevel']['Name']??''),
+                          buildRow('维保状态：', _dispatch['Request']['Equipments'][0]['WarrantyStatus']??''),
+                          buildRow('服务范围：', _dispatch['Request']['Equipments'][0]['ContractScope']['Name']??''),
                         ],
                       ),
                     ),
@@ -360,7 +411,7 @@ class _EngineerVoucherPageState extends State<EngineerVoucherPage> {
                             color: Colors.blue,
                           ),
                           title: new Align(
-                              child: Text('派工单内容',
+                              child: Text('派工内容',
                                 style: new TextStyle(
                                     fontSize: 22.0,
                                     fontWeight: FontWeight.w400
@@ -375,12 +426,13 @@ class _EngineerVoucherPageState extends State<EngineerVoucherPage> {
                       child: new Column(
                         children: <Widget>[
                           buildRow('派工单编号：', _dispatch['OID']),
-                          buildRow('类型：', _dispatch['Request']['SourceType']),
-                          buildRow('请求人：', _dispatch['Request']['RequestUser']['Name']),
+                          buildRow('派工类型：', _dispatch['RequestType']['Name']),
+                          buildRow('工程师姓名：', _dispatch['Engineer']['Name']),
                           buildRow('处理方式：', _dispatch['Request']['DealType']['Name']),
                           buildRow('紧急程度：', _dispatch['Request']['Priority']['Name']),
                           buildRow('机器状态：', _dispatch['MachineStatus']['Name']),
-                          buildRow('出发时间：', _dispatch['ScheduleDate']),
+                          buildRow('出发时间：', AppConstants.TimeForm(_dispatch['ScheduleDate'], 'yyyy-mm-dd')),
+                          buildRow('备注：', _dispatch['LeaderComments']),
                         ],
                       ),
                     ),
@@ -394,7 +446,7 @@ class _EngineerVoucherPageState extends State<EngineerVoucherPage> {
                             color: Colors.blue,
                           ),
                           title: new Align(
-                              child: Text('服务详情',
+                              child: Text('服务详情信息',
                                 style: new TextStyle(
                                     fontSize: 22.0,
                                     fontWeight: FontWeight.w400
@@ -426,7 +478,7 @@ class _EngineerVoucherPageState extends State<EngineerVoucherPage> {
                               ),
                             ),
                           ),
-                          _img.buffer.lengthInBytes == 0? new RaisedButton(onPressed: () {toSignature(context);}, child: new Icon(Icons.add_box)):new Container(width: 400.0, child: new Image.memory(_img.buffer.asUint8List())),
+                          _img.buffer.lengthInBytes == 0? new RaisedButton(onPressed: () {toSignature(context);}, child: new Icon(Icons.add_box)):new Container(width: 400.0, height: 400.0, child: new Image.memory(_img.buffer.asUint8List())),
                         ],
                       ),
                     ),

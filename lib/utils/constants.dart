@@ -158,10 +158,10 @@ class AppConstants {
     '强检要求：' ,
     '巡检要求：' ,
     '校正要求：' ,
-    '新增备注：' ,
+    '备注：' ,
     '不良事件描述：',
     '合同备注：' ,
-    '验收备注：' ,
+    '验收安装备注：' ,
     '调拨备注：' ,
     '借用备注：' ,
     '盘点备注：' ,
@@ -186,4 +186,13 @@ class AppConstants {
     '' ,
     ''
   ];
+
+  static String TimeForm(String time, String format) {
+    var _date = DateTime.parse(time);
+    if (format == 'yyyy-mm-dd') {
+      return '${_date.year}-${_date.month}-${_date.day}';
+    } else {
+      return '${_date.year}-${_date.month}-${_date.day} ${_date.hour}:${_date.minute}:${_date.second}';
+    }
+  }
 }

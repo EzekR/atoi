@@ -58,6 +58,22 @@ class _EquipmentTransferState extends State<EquipmentTransfer> {
     super.initState();
   }
 
+  Future<Null> getDevice() async {
+    Map<String, dynamic> params = {
+      'codeContent': barcode,
+    };
+    var resp = await HttpRequest.request(
+        '/Equipment/GetDeviceByQRCode',
+        method: HttpRequest.GET,
+        params: params
+    );
+    print(resp);
+    if (resp['ResultCode'] == '00') {
+      setState(() {
+        _equipment = resp['Data'];
+      });
+    }
+  }
   Future getImage() async {
     var image = await ImagePicker.pickImage(
         source: ImageSource.camera,
@@ -71,7 +87,7 @@ class _EquipmentTransferState extends State<EquipmentTransfer> {
   Future getRole() async {
     final SharedPreferences prefs = await _prefs;
     setState(() {
-      _roleName = prefs.getString('roleName');
+      _roleName = prefs.getString('userName');
     });
   }
 
@@ -79,7 +95,7 @@ class _EquipmentTransferState extends State<EquipmentTransfer> {
     if (_fault.text.isEmpty || _fault.text == null) {
       showDialog(context: context,
           builder: (context) => AlertDialog(
-            title: new Text('备注不可为空'),
+            title: new Text('设备调拨备注不可为空'),
           )
       );
     } else {
@@ -121,7 +137,7 @@ class _EquipmentTransferState extends State<EquipmentTransfer> {
       if (resp['ResultCode'] == '00') {
         showDialog(context: context, builder: (buider) =>
             AlertDialog(
-              title: new Text('设备调拨成功'),
+              title: new Text('提交请求成功'),
             )).then((result) =>
             Navigator.of(context, rootNavigator: true).pop(result)
         );
@@ -222,7 +238,7 @@ class _EquipmentTransferState extends State<EquipmentTransfer> {
       builder: (context, child, mainModel) {
         return new Scaffold(
             appBar: new AppBar(
-              title: new Text('设备调拨'),
+              title: new Text('新建请求--设备调拨'),
               elevation: 0.7,
               flexibleSpace: Container(
                 decoration: BoxDecoration(
@@ -298,14 +314,16 @@ class _EquipmentTransferState extends State<EquipmentTransfer> {
                             padding: EdgeInsets.symmetric(horizontal: 12.0),
                             child: _equipment.isEmpty?new Center(child: new Text('请选择设备')):new Column(
                               children: <Widget>[
-                                buildRow('设备编号：', _equipment['OID']??''),
+                                buildRow('系统编号:', _equipment['OID']??''),
                                 buildRow('设备名称：', _equipment['Name']??''),
+                                buildRow('设备型号：', _equipment['EquipmentCode']??''),
+                                buildRow('设备序列号：', _equipment['SerialCode']??''),
                                 buildRow('使用科室：', _equipment['Department']['Name']??''),
+                                buildRow('安装地点：', _equipment['InstalSite']??''),
                                 buildRow('设备厂商：', _equipment['Manufacturer']['Name']??''),
                                 buildRow('资产等级：', _equipment['AssetLevel']['Name']??''),
-                                buildRow('设备型号：', _equipment['EquipmentCode']??''),
-                                buildRow('安装地点：', _equipment['InstalSite']??''),
-                                buildRow('报修状况', _equipment['WarrantyStatus']??''),
+                                buildRow('维保状态：', _equipment['WarrantyStatus']??''),
+                                buildRow('服务范围：', _equipment['ContractScope']['Name']??''),
                                 new Padding(padding: EdgeInsets.symmetric(vertical: 8.0))
                               ],
                             ),
@@ -336,7 +354,7 @@ class _EquipmentTransferState extends State<EquipmentTransfer> {
                               children: <Widget>[
                                 buildRow('类型：', '设备调拨'),
                                 buildRow('请求人：', _roleName),
-                                buildRow('主题', '--设备调拨'),
+                                buildRow('主题：', _equipment.isEmpty?'--设备调拨':'${_equipment['Name']}--设备调拨'),
                                 new Padding(
                                   padding: EdgeInsets.symmetric(vertical: 5.0),
                                   child: new Row(
@@ -365,7 +383,7 @@ class _EquipmentTransferState extends State<EquipmentTransfer> {
                                   child: new Row(
                                     children: <Widget>[
                                       new Text(
-                                        '添加附件',
+                                        '添加附件：',
                                         style: new TextStyle(
                                             fontSize: 20.0,
                                             fontWeight: FontWeight.w600
@@ -402,14 +420,14 @@ class _EquipmentTransferState extends State<EquipmentTransfer> {
                         ),
                         new RaisedButton(
                           onPressed: () {
-                            Navigator.of(context).pop;
+                            Navigator.of(context).pop();
                           },
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(24),
                           ),
                           padding: EdgeInsets.all(12.0),
                           color: new Color(0xffD25565),
-                          child: Text('返回主页', style: TextStyle(color: Colors.white)),
+                          child: Text('返回首页', style: TextStyle(color: Colors.white)),
                         ),
                       ],
                     )
@@ -429,6 +447,7 @@ class _EquipmentTransferState extends State<EquipmentTransfer> {
       setState(() {
         return this.barcode = barcode;
       });
+      await getDevice();
     } on PlatformException catch (e) {
       if (e.code == BarcodeScanner.CameraAccessDenied) {
         setState(() {

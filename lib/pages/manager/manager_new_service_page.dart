@@ -302,7 +302,7 @@ class _ManagerNewServicePageState extends State<ManagerNewServicePage> {
                         ),
                         padding: EdgeInsets.all(12.0),
                         color: new Color(0xffD25565),
-                        child: Text('返回主页', style: TextStyle(color: Colors.white)),
+                        child: Text('返回首页', style: TextStyle(color: Colors.white)),
                       ),
                     ],
                   )

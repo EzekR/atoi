@@ -40,7 +40,7 @@ class _ManagerToAuditPageState extends State<ManagerToAuditPage> {
   }
 
   void initState() {
-    getData();
+    //getData();
     super.initState();
   }
 
@@ -53,6 +53,8 @@ class _ManagerToAuditPageState extends State<ManagerToAuditPage> {
       } else {
         if (statusId == 3) {
           return new Color(0xffF0B775);
+        } else {
+          return Colors.grey;
         }
       }
     }
@@ -83,12 +85,12 @@ class _ManagerToAuditPageState extends State<ManagerToAuditPage> {
                     color: Theme.of(context).primaryColor
                 ),
               ),
-              subtitle: Text(
-                "结束时间：$_format",
-                style: new TextStyle(
-                    color: Theme.of(context).accentColor
-                ),
-              ),
+              //subtitle: Text(
+              //  "结束时间：$_format",
+              //  style: new TextStyle(
+              //      color: Theme.of(context).accentColor
+              //  ),
+              //),
             ),
             new Padding(
               padding: EdgeInsets.symmetric(horizontal: 8.0),
@@ -107,7 +109,7 @@ class _ManagerToAuditPageState extends State<ManagerToAuditPage> {
                         ),
                       ),
                       new Text(
-                        deviceNo,
+                        deviceName,
                         style: new TextStyle(
                             fontSize: 16.0,
                             fontWeight: FontWeight.w400,
@@ -126,7 +128,7 @@ class _ManagerToAuditPageState extends State<ManagerToAuditPage> {
                         ),
                       ),
                       new Text(
-                        deviceName,
+                        deviceNo,
                         style: new TextStyle(
                             fontSize: 16.0,
                             fontWeight: FontWeight.w400,
@@ -270,16 +272,13 @@ class _ManagerToAuditPageState extends State<ManagerToAuditPage> {
 
     return ScopedModelDescendant<MainModel>(
       builder: (context, child, model) {
-        if(_reports.length > 0) {
-          model.setBadge(_reports.length.toString(), 'B');
-        }
         return new RefreshIndicator(
-            child: _reports.length == 0?ListView(padding: const EdgeInsets.symmetric(vertical: 150.0), children: <Widget>[_loading?SpinKitRotatingPlain(color: Colors.blue):new Center(child: new Text('没有待审核工单'),)],):ListView.builder(
+            child: model.dispatches.length == 0?ListView(padding: const EdgeInsets.symmetric(vertical: 150.0), children: <Widget>[_loading?SpinKitRotatingPlain(color: Colors.blue):new Center(child: new Text('没有待审核工单'),)],):ListView.builder(
               padding: const EdgeInsets.all(2.0),
-              itemCount: _reports.length,
-              itemBuilder: (context, i) => buildCardItem(_reports[i], _reports[i]['DispatchJournal']['ID'], _reports[i]['DispatchReport']['ID'], _reports[i]['OID'], _reports[i]['ScheduleDate'], _reports[i]['Request']['Equipments'][0]['Name'], _reports[i]['Request']['Equipments'][0]['OID'], _reports[i]['RequestType']['Name'], _reports[i]['Urgency']['Name'], _reports[i]['Request']['OID'], _reports[i]['DispatchJournal']['Status'], _reports[i]['DispatchReport']['Status']),
+              itemCount: model.dispatches.length,
+              itemBuilder: (context, i) => buildCardItem(model.dispatches[i], model.dispatches[i]['DispatchJournal']['ID'], model.dispatches[i]['DispatchReport']['ID'], model.dispatches[i]['OID'], model.dispatches[i]['ScheduleDate'], model.dispatches[i]['Request']['Equipments'][0]['Name'], model.dispatches[i]['Request']['Equipments'][0]['OID'], model.dispatches[i]['RequestType']['Name'], model.dispatches[i]['Urgency']['Name'], model.dispatches[i]['Request']['OID'], model.dispatches[i]['DispatchJournal']['Status'], model.dispatches[i]['DispatchReport']['Status']),
             ),
-            onRefresh: getData
+            onRefresh: model.getDispatches
         );
       },
     );

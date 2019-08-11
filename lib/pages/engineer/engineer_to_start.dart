@@ -36,7 +36,7 @@ class _EngineerToStartState extends State<EngineerToStart> {
   }
 
   void initState() {
-    getTask();
+    //getTask();
     super.initState();
   }
 
@@ -66,7 +66,7 @@ class _EngineerToStartState extends State<EngineerToStart> {
                 ),
               ),
               subtitle: Text(
-                "开工时间：$departDate",
+                "出发时间：$departDate",
                 style: new TextStyle(
                     color: Theme.of(context).accentColor
                 ),
@@ -79,10 +79,10 @@ class _EngineerToStartState extends State<EngineerToStart> {
                 mainAxisAlignment: MainAxisAlignment.start,
                 mainAxisSize: MainAxisSize.max,
                 children: <Widget>[
-                  new Row(
+                  deviceName == null?new Container():new Row(
                     children: <Widget>[
                       new Text(
-                        '设备型号：',
+                        '设备名称：',
                         style: new TextStyle(
                             fontSize: 16.0,
                             fontWeight: FontWeight.w600
@@ -98,10 +98,29 @@ class _EngineerToStartState extends State<EngineerToStart> {
                       )
                     ],
                   ),
+                  deviceNo == null?new Container():new Row(
+                    children: <Widget>[
+                      new Text(
+                        '设备型号：',
+                        style: new TextStyle(
+                            fontSize: 16.0,
+                            fontWeight: FontWeight.w600
+                        ),
+                      ),
+                      new Text(
+                        deviceNo,
+                        style: new TextStyle(
+                            fontSize: 16.0,
+                            fontWeight: FontWeight.w400,
+                            color: Colors.grey
+                        ),
+                      )
+                    ],
+                  ),
                   new Row(
                     children: <Widget>[
                       new Text(
-                        '设备位置：',
+                        '使用科室：',
                         style: new TextStyle(
                             fontSize: 16.0,
                             fontWeight: FontWeight.w600
@@ -219,16 +238,13 @@ class _EngineerToStartState extends State<EngineerToStart> {
 
     return ScopedModelDescendant<MainModel>(
       builder: (context, child, model) {
-        if (_tasks.length > 0) {
-          model.setBadge(_tasks.length.toString(), 'EA');
-        }
         return new RefreshIndicator(
-            child: _tasks.length == 0?ListView(padding: const EdgeInsets.symmetric(vertical: 150.0), children: <Widget>[new Center(child: new Text('没有待开始工单'),)],):ListView.builder(
+            child: model.tasksToStart.length == 0?ListView(padding: const EdgeInsets.symmetric(vertical: 150.0), children: <Widget>[new Center(child: new Text('没有待开始工单'),)],):ListView.builder(
                 padding: const EdgeInsets.all(2.0),
-                itemCount: _tasks.length,
-                itemBuilder: (context, i) => buildCardItem(_tasks[i]['ID'], _tasks[i]['OID'], _tasks[i]['ScheduleDate'], _tasks[i]['Request']['Equipments'][0]['Name'], _tasks[i]['Request']['Equipments'][0]['SerialCode'], _tasks[i]['Request']['DepartmentName'], _tasks[i]['RequestType']['Name'], _tasks[i]['Urgency']['Name'], _tasks[i]['LeaderComments'])
+                itemCount: model.tasksToStart.length,
+                itemBuilder: (context, i) => buildCardItem(model.tasksToStart[i]['ID'], model.tasksToStart[i]['OID'], model.tasksToStart[i]['ScheduleDate'], model.tasksToStart[i]['Request']['Equipments'].length>0?model.tasksToStart[i]['Request']['Equipments'][0]['Name']:null, model.tasksToStart[i]['Request']['Equipments'].length>0?model.tasksToStart[i]['Request']['Equipments'][0]['EquipmentCode']:null, model.tasksToStart[i]['Request']['DepartmentName'], model.tasksToStart[i]['RequestType']['Name'], model.tasksToStart[i]['Urgency']['Name'], model.tasksToStart[i]['LeaderComments'])
             ),
-            onRefresh: getTask
+            onRefresh: model.getTasksToStart
         );
       },
     );

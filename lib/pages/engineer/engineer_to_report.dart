@@ -35,14 +35,34 @@ class _EngineerToReportState extends State<EngineerToReport> {
   }
 
   void initState() {
-    getTask();
+    //getTask();
     super.initState();
   }
+
+  Color buttonColor(status) {
+    switch (status) {
+      case 0:
+        return new Color(0xff2E94B9);
+        break;
+      case 2:
+        return new Color(0xff14BD98);
+        break;
+      case 3:
+        return new Color(0xffF0B775);
+        break;
+      default:
+        return new Color(0xff2E94B9);
+        break;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     // TODO: implement build
 
-    Card buildCardItem(int dispatchId, int journalId, int reportId, String OID, String scheduleDate, String deviceName, String deviceNo, String location, String requestType, String urgency, String remark) {
+    Card buildCardItem(Map task, int dispatchId, int journalId, int reportId, String OID, String scheduleDate, String createDate, int responseTime, String deviceName, String deviceNo, String location, String requestType, String urgency, String remark) {
+      var _dateParse = DateTime.parse(scheduleDate);
+      var _startTime = '${_dateParse.year}-${_dateParse.month}-${_dateParse.day} ${_dateParse.hour}:${_dateParse.minute}';
       return new Card(
         child: Column(
           mainAxisSize: MainAxisSize.max,
@@ -62,7 +82,7 @@ class _EngineerToReportState extends State<EngineerToReport> {
                 ),
               ),
               subtitle: Text(
-                "出发时间：$scheduleDate",
+                "开始时间：$_startTime",
                 style: new TextStyle(
                     color: Theme.of(context).accentColor
                 ),
@@ -97,7 +117,7 @@ class _EngineerToReportState extends State<EngineerToReport> {
                   new Row(
                     children: <Widget>[
                       new Text(
-                        '设备编号：',
+                        '设备序列号：',
                         style: new TextStyle(
                             fontSize: 16.0,
                             fontWeight: FontWeight.w600
@@ -116,7 +136,7 @@ class _EngineerToReportState extends State<EngineerToReport> {
                   new Row(
                     children: <Widget>[
                       new Text(
-                        '安装位置：',
+                        '使用科室：',
                         style: new TextStyle(
                             fontSize: 16.0,
                             fontWeight: FontWeight.w600
@@ -178,11 +198,11 @@ class _EngineerToReportState extends State<EngineerToReport> {
                     children: <Widget>[
                       new RaisedButton(
                         onPressed: (){
-                          if (journalId == 0) {
+                          if (journalId == 0 || journalId ==1 || journalId == 2) {
                             Navigator.of(context).push(
                                 new MaterialPageRoute(builder: (_) {
                                   return new EngineerVoucherPage(
-                                      dispatchId: dispatchId);
+                                      dispatchId: dispatchId, journalId: task['DispatchJournal']['ID'],);
                                 }));
                           } else {
                             return null;
@@ -191,11 +211,11 @@ class _EngineerToReportState extends State<EngineerToReport> {
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(24),
                         ),
-                        color: journalId == 0?new Color(0xff2E94B9):new Color(0xffF0B775),
+                        color: buttonColor(journalId),
                         child: new Row(
                           children: <Widget>[
                             new Icon(
-                              journalId==0?Icons.fingerprint:Icons.check,
+                              journalId==0||journalId==1||journalId==2?Icons.fingerprint:Icons.check,
                               color: Colors.white,
                             ),
                             new Text(
@@ -212,11 +232,11 @@ class _EngineerToReportState extends State<EngineerToReport> {
                       ),
                       new RaisedButton(
                         onPressed: (){
-                          if (reportId == 0) {
+                          if (reportId == 0 || reportId == 1 || reportId == 2) {
                             Navigator.of(context).push(
                                 new MaterialPageRoute(builder: (_) {
                                   return new EngineerReportPage(
-                                      dispatchId: dispatchId);
+                                      dispatchId: dispatchId, reportId: task['DispatchReport']['ID']);
                                 }));
                           } else {
                             return null;
@@ -225,11 +245,11 @@ class _EngineerToReportState extends State<EngineerToReport> {
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(24),
                         ),
-                        color: reportId == 0?new Color(0xff2E94B9):new Color(0xffF0B775),
+                        color: buttonColor(reportId),
                         child: new Row(
                           children: <Widget>[
                             new Icon(
-                              reportId==0?Icons.work:Icons.check,
+                              reportId==0||reportId==1||reportId==2?Icons.work:Icons.check,
                               color: Colors.white,
                             ),
                             new Text(
@@ -253,16 +273,13 @@ class _EngineerToReportState extends State<EngineerToReport> {
 
     return ScopedModelDescendant<MainModel>(
       builder: (context, child, model) {
-        if (_tasks.length > 0){
-          model.setBadge(_tasks.length.toString(), 'EB');
-        }
         return new RefreshIndicator(
-            child: _tasks.length == 0?ListView(padding: const EdgeInsets.symmetric(vertical: 150.0), children: <Widget>[new Center(child: new Text('没有待报告工单'),)],):ListView.builder(
+            child: model.tasksToReport.length == 0?ListView(padding: const EdgeInsets.symmetric(vertical: 150.0), children: <Widget>[new Center(child: new Text('没有待报告工单'),)],):ListView.builder(
                 padding: const EdgeInsets.all(2.0),
-                itemCount: _tasks.length,
-                itemBuilder: (context, i) => buildCardItem(_tasks[i]['ID'], _tasks[i]['DispatchJournal']['ID'], _tasks[i]['DispatchReport']['ID'], _tasks[i]['OID'], _tasks[i]['ScheduleDate'], _tasks[i]['Request']['Equipments'][0]['Name'], _tasks[i]['Request']['Equipments'][0]['SerialCode'], _tasks[i]['Request']['DepartmentName'], _tasks[i]['RequestType']['Name'], _tasks[i]['Urgency']['Name'], _tasks[i]['LeaderComments'])
+                itemCount: model.tasksToReport.length,
+                itemBuilder: (context, i) => buildCardItem(model.tasksToReport[i], model.tasksToReport[i]['ID'], model.tasksToReport[i]['DispatchJournal']['Status']['ID'], model.tasksToReport[i]['DispatchReport']['Status']['ID'], model.tasksToReport[i]['OID'], model.tasksToReport[i]['StartDate'], model.tasksToReport[i]['CreateDate'], model.tasksToReport[i]['Request']['Equipments'][0]['ResponseTimeLength'], model.tasksToReport[i]['Request']['Equipments'][0]['Name'], model.tasksToReport[i]['Request']['Equipments'][0]['SerialCode'], model.tasksToReport[i]['Request']['DepartmentName'], model.tasksToReport[i]['RequestType']['Name'], model.tasksToReport[i]['Urgency']['Name'], model.tasksToReport[i]['LeaderComments'])
             ),
-            onRefresh: getTask
+            onRefresh: model.getTasksToReport
         );
       },
     );

@@ -20,6 +20,8 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
   var _isExpandedDetail = false;
   var _isExpandedAssign = true;
   var _isExpandedComponent = false;
+  var _equipment = {};
+  var _comment = new TextEditingController();
 
   List _serviceResults = [
     '待分配',
@@ -62,7 +64,7 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
     });
   }
 
-  TextField buildTextField(String labelText, String defaultText, bool isEnabled) {
+  TextField buildTextField(String labelText, TextEditingController controller, bool isEnabled) {
     return new TextField(
       decoration: InputDecoration(
           labelText: labelText,
@@ -76,7 +78,7 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
               )
           )
       ),
-      controller: new TextEditingController(text: defaultText),
+      controller: controller,
       enabled: isEnabled,
       style: new TextStyle(
           fontSize: 20.0
@@ -182,6 +184,7 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
     print(resp);
     if (resp['ResultCode'] == '00') {
       setState(() {
+        _equipment = resp['Data']['Request']['Equipments'][0];
         _dispatch = resp['Data'];
       });
     }
@@ -221,27 +224,56 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
   }
 
   Future<Null> rejectReport() async {
-    final SharedPreferences prefs = await _prefs;
-    var UserId = await prefs.getString('userId');
-    Map<String, dynamic> _data = {
-      'userID': UserId,
-      'reportID': widget.reportId,
-      'comments': 'api'
-    };
-    var _response = await HttpRequest.request(
-        '/DispatchReport/RejectDispatchReport',
-        method: HttpRequest.POST,
-        data: _data
-    );
-    print(_response);
-    if (_response['ResultCode'] == '00') {
-      showDialog(
-          context: context,
-          builder: (context) => AlertDialog(
-            title: new Text('拒绝报告'),
-          )
+    if (_comment.text.isEmpty) {
+      showDialog(context: context,
+        builder: (context) => AlertDialog(
+          title: new Text('备注不可为空'),
+        )
       );
+    } else {
+      final SharedPreferences prefs = await _prefs;
+      var UserId = await prefs.getInt('userID');
+      Map<String, dynamic> _data = {
+        'userID': UserId,
+        'reportID': widget.reportId,
+        'comments': _comment.text
+      };
+      var _response = await HttpRequest.request(
+          '/DispatchReport/RejectDispatchReport',
+          method: HttpRequest.POST,
+          data: _data
+      );
+      print(_response);
+      if (_response['ResultCode'] == '00') {
+        showDialog(
+            context: context,
+            builder: (context) =>
+                AlertDialog(
+                  title: new Text('退回报告成功'),
+                )
+        ).then((result) =>
+          Navigator.of(context, rootNavigator: true).pop(result)
+        );
+      }
     }
+  }
+
+  List<Widget> buildAccessory() {
+    var _accessory = _report['ReportAccessories'];
+    List<Widget> _list = [];
+    for (var _acc in _accessory) {
+      var _accList = [
+        buildRow('名称：', _acc['Name']),
+        buildRow('来源：', _acc['Source']['Name']),
+        buildRow('外部供应商：', _acc['Supplier']['Name']),
+        buildRow('新装零件编号：', _acc['NewSerialCode']),
+        buildRow('金额（元/件）：', _acc['Amount']),
+        buildRow('数量：', _acc['Qty']),
+        new Divider()
+      ];
+      _list.addAll(_accList);
+    }
+    return _list;
   }
 
   @override
@@ -318,13 +350,16 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
                       padding: EdgeInsets.symmetric(horizontal: 8.0),
                       child: new Column(
                         children: <Widget>[
-                          buildRow('设备编号', widget.request['Request']['Equipments'][0]['OID']),
-                          buildRow('设备名称', widget.request['Request']['Equipments'][0]['Name']),
-                          buildRow('使用科室', widget.request['Request']['Equipments'][0]['Department']['Name']),
-                          buildRow('设备厂商', _dispatch['Request']['Equipments'][0]['Manufacturer']['Name']??''),
-                          buildRow('资产等级', _dispatch['Request']['Equipments'][0]['AssetLevel']['Name']),
-                          buildRow('设备型号', _dispatch['Request']['Equipments'][0]['SerialCode']),
-                          buildRow('安装地点', widget.request['Request']['DepartmentName']),
+                          buildRow('系统编号:', _equipment['OID']??''),
+                          buildRow('设备名称：', _equipment['Name']??''),
+                          buildRow('设备型号：', _equipment['EquipmentCode']??''),
+                          buildRow('设备序列号：', _equipment['SerialCode']??''),
+                          buildRow('使用科室：', _equipment['Department']['Name']??''),
+                          buildRow('安装地点：', _equipment['InstalSite']??''),
+                          buildRow('设备厂商：', _equipment['Manufacturer']['Name']??''),
+                          buildRow('资产等级：', _equipment['AssetLevel']['Name']??''),
+                          buildRow('维保状态：', _equipment['WarrantyStatus']??''),
+                          buildRow('服务范围：', _equipment['ContractScopeComments']??''),
                         ],
                       ),
                     ),
@@ -338,7 +373,7 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
                             color: Colors.blue,
                           ),
                           title: new Align(
-                              child: Text('派工单信息',
+                              child: Text('派工内容',
                                 style: new TextStyle(
                                     fontSize: 22.0,
                                     fontWeight: FontWeight.w400
@@ -352,14 +387,13 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
                       padding: EdgeInsets.symmetric(horizontal: 8.0),
                       child: new Column(
                         children: <Widget>[
-                          buildRow('派工单编号', widget.request['OID']),
-                          buildRow('紧急程度', widget.request['Urgency']['Name']),
-                          buildRow('派工类型', widget.request['RequestType']['Name']),
-                          buildRow('机器状态', widget.request['MachineStatus']['Name']),
-                          buildRow('工程师姓名', _dispatch['Engineer']['Name']),
-                          buildRow('工作任务', widget.request['LeaderComments']),
-                          buildRow('出发时间', widget.request['ScheduleDate']),
-                          buildRow('备注', _dispatch['LeaderComments']),
+                          buildRow('派工单编号：', widget.request['OID']),
+                          buildRow('紧急程度：', widget.request['Urgency']['Name']),
+                          buildRow('派工类型：', widget.request['RequestType']['Name']),
+                          buildRow('机器状态：', widget.request['MachineStatus']['Name']),
+                          buildRow('工程师姓名：', _dispatch['Engineer']['Name']),
+                          buildRow('出发时间：',AppConstants.TimeForm(widget.request['ScheduleDate'], 'yyyy-mm-dd')),
+                          buildRow('备注：', _dispatch['LeaderComments']),
                         ],
                       ),
                     ),
@@ -373,7 +407,7 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
                             color: Colors.blue,
                           ),
                           title: new Align(
-                              child: Text('作业报告',
+                              child: Text('作业报告信息',
                                 style: new TextStyle(
                                     fontSize: 22.0,
                                     fontWeight: FontWeight.w400
@@ -391,14 +425,15 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
                           buildRow('作业报告编号：', _report['OID']),
                           buildRow('作业报告类型：', _report['Type']['Name']),
                           buildRow('发生频率：', _report['FaultFrequency']),
-                          buildRow('设备状态：', _report['Dispatch']['MachineStatus']['Name']??'正常'),
+                          buildRow('系统状态：', _report['Dispatch']['MachineStatus']['Name']??'正常'),
                           buildRow('错误代码：', _report['FaultCode']),
                           buildRow('故障描述：', _report['FaultDesc']),
                           buildRow('分析原因：', _report['SolutionCauseAnalysis']),
                           buildRow('处理方法：', _report['SolutionWay']),
                           buildRow('未解决备注：', _report['SolutionUnsolvedComments']),
                           buildRow('误工说明：', _report['DelayReason']),
-                          buildDropdown('作业结果：', _currentResult, _dropDownMenuItems, changedDropDownMethod)
+                          buildDropdown('作业结果：', _currentResult, _dropDownMenuItems, changedDropDownMethod),
+                          buildTextField('审批备注', _comment, true),
                         ],
                       ),
                     ),
@@ -425,8 +460,7 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
                     body: new Padding(
                       padding: EdgeInsets.symmetric(horizontal: 8.0),
                       child: new Column(
-                        children: <Widget>[
-                        ],
+                        children: buildAccessory(),
                       ),
                     ),
                     isExpanded: _isExpandedComponent,

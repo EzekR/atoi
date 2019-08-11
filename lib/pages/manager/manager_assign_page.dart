@@ -7,6 +7,9 @@ import 'package:atoi/utils/constants.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'dart:convert';
 import 'package:photo_view/photo_view.dart';
+import 'package:scoped_model/scoped_model.dart';
+import 'package:atoi/models/models.dart';
+import 'package:atoi/models/manager_model.dart';
 
 class ManagerAssignPage extends StatefulWidget {
   static String tag = 'mananger-assign-page';
@@ -29,7 +32,7 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
 
   Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
 
-  var imageBytes;
+  List<dynamic> imageBytes = [];
 
   List _handleMethods = [
     '现场服务',
@@ -113,6 +116,7 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
       }
       setState(() {
         _request = resp['Data'];
+        _currentType = _request['RequestType']['Name'];
       });
     }
   }
@@ -128,7 +132,7 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
     print(resp);
     if (resp['ResultCode'] == '00') {
       setState(() {
-        imageBytes = resp['Data'];
+        imageBytes.add(resp['Data']);
       });
     }
   }
@@ -164,11 +168,11 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
     _dropDownMenuTypes = getDropDownMenuItems(_assignTypes);
     _dropDownMenuLevels = getDropDownMenuItems(_levels);
     _dropDownMenuStatuses = getDropDownMenuItems(_deviceStatuses);
-    _currentType = _dropDownMenuTypes[0].value;
     _currentLevel = _dropDownMenuLevels[0].value;
     _currentStatus = _dropDownMenuStatuses[0].value;
     getRequest();
     getEngineers();
+    ManagerModel model = MainModel.of(context);
     super.initState();
   }
 
@@ -221,6 +225,22 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
     setState(() {
       _currentName = selectedMethod;
     });
+  }
+
+  Column buildImageColumn() {
+    if (imageBytes == null) {
+      return new Column();
+    } else {
+      List<Widget> _list = [];
+      for(var file in imageBytes) {
+        _list.add(new Container(
+          child: new PhotoView(imageProvider: MemoryImage(base64Decode(file))),
+          width: 400.0,
+          height: 400.0,
+        ));
+      }
+      return new Column(children: _list);
+    }
   }
 
   TextField buildTextField(String labelText, String defaultText, bool isEnabled) {
@@ -422,267 +442,283 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
     }
   }
 
-  @override
-  Widget build(BuildContext context){
-    return new Scaffold(
-      appBar: new AppBar(
-        title: new Text('安排派工'),
-        elevation: 0.7,
-        flexibleSpace: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.centerLeft,
-              end: Alignment.centerRight,
-              colors: [
-                Theme.of(context).primaryColor,
-                Theme.of(context).accentColor
-              ],
-            ),
+  List<dynamic> _buildExpansion() {
+    List<ExpansionPanel> _list = [];
+    if (_request['RequestType']['ID'] != 14) {
+      _list.add(new ExpansionPanel(
+        headerBuilder: (context, isExpanded) {
+          return ListTile(
+              leading: new Icon(Icons.info,
+                size: 24.0,
+                color: Colors.blue,
+              ),
+              title: new Align(
+                  child: Text('设备基本信息',
+                    style: new TextStyle(
+                        fontSize: 22.0,
+                        fontWeight: FontWeight.w400
+                    ),
+                  ),
+                  alignment: Alignment(-1.4, 0)
+              )
+          );
+        },
+        body: new Padding(
+          padding: EdgeInsets.symmetric(horizontal: 12.0),
+          child: new Column(
+            children: buildEquipment(),
           ),
         ),
-        actions: <Widget>[
-          new Icon(Icons.face),
-          new Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 5.0, vertical: 19.0),
-            child: const Text('超级管理员'),
-          ),
-        ],
-      ),
-      body: _request.isEmpty?new Center(child: SpinKitRotatingPlain(color: Colors.blue),):new Padding(
-        padding: EdgeInsets.symmetric(vertical: 5.0),
-        child: new Card(
-          child: new ListView(
-            children: <Widget>[
-              new ExpansionPanelList(
-                animationDuration: Duration(milliseconds: 200),
-                expansionCallback: (index, isExpanded) {
-                  setState(() {
-                    if (index == 0) {
-                      _isExpandedBasic = !isExpanded;
-                    } else {
-                      if (index == 1) {
-                        _isExpandedDetail = !isExpanded;
-                      } else {
-                        _isExpandedAssign =!isExpanded;
-                      }
-                    }
-                  });
-                },
-                children: [
-                  new ExpansionPanel(
-                      headerBuilder: (context, isExpanded) {
-                        return ListTile(
-                          leading: new Icon(Icons.info,
-                            size: 24.0,
-                            color: Colors.blue,
-                          ),
-                          title: new Align(
-                            child: Text('设备基本信息',
-                              style: new TextStyle(
-                                  fontSize: 22.0,
-                                  fontWeight: FontWeight.w400
-                              ),
-                            ),
-                            alignment: Alignment(-1.4, 0)
-                          )
-                        );
-                      },
-                      body: new Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 12.0),
-                        child: new Column(
-                          children: buildEquipment(),
-                        ),
-                      ),
-                      isExpanded: _isExpandedBasic,
-                  ),
-                  new ExpansionPanel(
-                    headerBuilder: (context, isExpanded) {
-                      return ListTile(
-                          leading: new Icon(Icons.description,
-                            size: 24.0,
-                            color: Colors.blue,
-                          ),
-                          title: new Align(
-                              child: Text('请求内容',
-                                style: new TextStyle(
-                                    fontSize: 22.0,
-                                    fontWeight: FontWeight.w400
-                                ),
-                              ),
-                              alignment: Alignment(-1.3, 0)
-                          )
-                      );
-                    },
-                    body: new Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 8.0),
-                      child: new Column(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        mainAxisSize: MainAxisSize.max,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: <Widget>[
-                          buildRow('类型：', _request['SourceType']),
-                          buildRow('主题：', _request['Subject']),
-                          buildRow(AppConstants.Remark[_request['RequestType']['ID']], _request['FaultDesc']),
-                          _request['FaultType']['ID'] != 0?buildRow(AppConstants.RemarkType[_request['RequestType']['ID']], _request['FaultType']['Name']):new Container(),
-                          buildRow('请求人：', _request['RequestUser']['Name']),
-                          buildDropdown('处理方式：', _currentMethod, _dropDownMenuItems, changedDropDownMethod),
-                          buildDropdown('紧急程度：', _currentPriority, _dropDownMenuPris, changedDropDownPri),
-                          new Padding(
-                            padding: EdgeInsets.symmetric(vertical: 5.0),
-                            child: new Text('请求附件',
-                              style: new TextStyle(
-                                  fontSize: 20.0,
-                                  fontWeight: FontWeight.w600
-                              ),
-                            ),
-                          ),
-                          imageBytes != null?new Container(
-                            child: new PhotoView(imageProvider: MemoryImage(base64Decode(imageBytes))),
-                            width: 400.0,
-                            height: 400.0,
-                          ):new Container(),
-                          //new Row(
-                          //  mainAxisAlignment: MainAxisAlignment.start,
-                          //  children: <Widget>[
-                          //    new Padding(
-                          //      padding: const EdgeInsets.all(10.0),
-                          //      child: new Container(
-                          //        child: imageBytes.isEmpty?new Stack():new PhotoView(
-                          //            imageProvider: MemoryImage(imageBytes),
-                          //        ),
-                          //      ),
-                          //    ),
-                          //  ],
-                          //),
-                        ],
-                      ),
-                    ),
-                    isExpanded: _isExpandedDetail,
-                  ),
-                  new ExpansionPanel(
-                    headerBuilder: (context, isExpanded) {
-                      return ListTile(
-                          leading: new Icon(Icons.perm_contact_calendar,
-                            size: 24.0,
-                            color: Colors.blue,
-                          ),
-                          title: new Align(
-                              child: Text('派工内容',
-                                style: new TextStyle(
-                                    fontSize: 22.0,
-                                    fontWeight: FontWeight.w400
-                                ),
-                              ),
-                              alignment: Alignment(-1.3, 0)
-                          )
-                      );
-                    },
-                    body: new Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 8.0),
-                      child: new Column(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        mainAxisSize: MainAxisSize.max,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: <Widget>[
-                          buildDropdown('派工类型：', _request['RequestType']['Name'], _dropDownMenuTypes, changedDropDownType),
-                          buildDropdown('紧急程度：', _currentLevel, _dropDownMenuLevels, changedDropDownLevel),
-                          buildDropdown('机器状态：', _currentStatus, _dropDownMenuStatuses, changedDropDownStatus),
-                          _engineerNames.isEmpty?new Container():buildDropdown('工程师姓名：', _currentName, _dropDownMenuNames, changedDropDownName),
-                          new MaterialButton(
-                            child: new Align(
-                              alignment: Alignment(-1.1, 0.0),
-                              child: new Text(
-                                '选择日期',
-                                style: new TextStyle(
-                                    fontWeight: FontWeight.w600,
-                                    fontSize: 20.0
-                                ),
-                              ),
-                            ),
-                            onPressed: () {
-                              showDatePicker(
-                                  context: context,
-                                  initialDate: new DateTime.now(),
-                                  firstDate: new DateTime.now().subtract(new Duration(days: 30)), // 减 30 天
-                                  lastDate: new DateTime.now().add(new Duration(days: 30)),       // 加 30 天
-                                  locale: Locale('zh')
-                              ).then((DateTime val) {
-                                print(val); // 2018-07-12 00:00:00.000
-                                var date = '${val.year}-${val.month}-${val.day}';
-                                setState(() {
-                                  departureDate = date;
-                                });
-                              }).catchError((err) {
-                                print(err);
-                              });
-                            },
-                          ),
-                          departureDate != ''?new Text(departureDate):new Container(),
-                          new Padding(
-                            padding: EdgeInsets.symmetric(vertical: 5.0),
-                            child: new Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: <Widget>[
-                                new Text(
-                                  '主管备注：',
-                                  style: new TextStyle(
-                                      fontSize: 20.0,
-                                      fontWeight: FontWeight.w600
-                                  ),
-                                ),
-                                new TextField(
-                                  controller: _leaderComment,
-                                )
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    isExpanded: _isExpandedAssign,
-                  ),
-                ],
+        isExpanded: _isExpandedBasic,
+      ));
+    }
+    _list.add(new ExpansionPanel(
+        headerBuilder: (context, isExpanded) {
+          return ListTile(
+              leading: new Icon(Icons.description,
+                size: 24.0,
+                color: Colors.blue,
               ),
-              SizedBox(height: 24.0),
-              new Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                mainAxisSize: MainAxisSize.max,
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: <Widget>[
-                  new Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 5.0),
-                    child: new RaisedButton(
-                      onPressed: () {
-                        assignRequest();
-                      },
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(24),
-                      ),
-                      padding: EdgeInsets.all(12.0),
-                      color: new Color(0xff2E94B9),
-                      child: Text('安排派工', style: TextStyle(color: Colors.white)),
+              title: new Align(
+                  child: Text('请求内容',
+                    style: new TextStyle(
+                        fontSize: 22.0,
+                        fontWeight: FontWeight.w400
                     ),
                   ),
-                  new Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 5.0),
-                    child: new RaisedButton(
-                      onPressed: () {
-                        terminate();
-                      },
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(24),
-                      ),
-                      padding: EdgeInsets.all(12.0),
-                      color: new Color(0xffD25565),
-                      child: Text('终止请求', style: TextStyle(color: Colors.white)),
-                    ),
-                  ),
-                ],
+                  alignment: Alignment(-1.3, 0)
               )
+          );
+        },
+        body: new Padding(
+          padding: EdgeInsets.symmetric(horizontal: 8.0),
+          child: new Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            mainAxisSize: MainAxisSize.max,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              buildRow('类型：', _request['SourceType']),
+              buildRow('主题：', _request['SubjectName']),
+              buildRow(AppConstants.Remark[_request['RequestType']['ID']], _request['FaultDesc']),
+              _request['FaultType']['ID'] != 0?buildRow(AppConstants.RemarkType[_request['RequestType']['ID']], _request['FaultType']['Name']):new Container(),
+              _request['RequestType']['ID'] == 3?buildRow('是否召回：', _request['IsRecall']?'是':'否'):new Container(),
+              buildRow('请求人：', _request['RequestUser']['Name']),
+              buildDropdown('处理方式：', _currentMethod, _dropDownMenuItems, changedDropDownMethod),
+              buildDropdown('紧急程度：', _currentPriority, _dropDownMenuPris, changedDropDownPri),
+              new Padding(
+                padding: EdgeInsets.symmetric(vertical: 5.0),
+                child: new Text('请求附件:',
+                  style: new TextStyle(
+                      fontSize: 20.0,
+                      fontWeight: FontWeight.w600
+                  ),
+                ),
+              ),
+              buildImageColumn(),
+              //new Row(
+              //  mainAxisAlignment: MainAxisAlignment.start,
+              //  children: <Widget>[
+              //    new Padding(
+              //      padding: const EdgeInsets.all(10.0),
+              //      child: new Container(
+              //        child: imageBytes.isEmpty?new Stack():new PhotoView(
+              //            imageProvider: MemoryImage(imageBytes),
+              //        ),
+              //      ),
+              //    ),
+              //  ],
+              //),
             ],
           ),
         ),
+        isExpanded: _isExpandedDetail,
       ),
+    );
+    _list.add(new ExpansionPanel(
+      headerBuilder: (context, isExpanded) {
+        return ListTile(
+            leading: new Icon(Icons.perm_contact_calendar,
+              size: 24.0,
+              color: Colors.blue,
+            ),
+            title: new Align(
+                child: Text('派工内容',
+                  style: new TextStyle(
+                      fontSize: 22.0,
+                      fontWeight: FontWeight.w400
+                  ),
+                ),
+                alignment: Alignment(-1.3, 0)
+            )
+        );
+      },
+      body: new Padding(
+        padding: EdgeInsets.symmetric(horizontal: 8.0),
+        child: new Column(
+          mainAxisAlignment: MainAxisAlignment.start,
+          mainAxisSize: MainAxisSize.max,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            buildDropdown('派工类型：', _currentType, _dropDownMenuTypes, changedDropDownType),
+            buildDropdown('紧急程度：', _currentLevel, _dropDownMenuLevels, changedDropDownLevel),
+            buildDropdown('机器状态：', _currentStatus, _dropDownMenuStatuses, changedDropDownStatus),
+            _engineerNames.isEmpty?new Container():buildDropdown('工程师姓名：', _currentName, _dropDownMenuNames, changedDropDownName),
+            new MaterialButton(
+              child: new Align(
+                alignment: Alignment(-1.1, 0.0),
+                child: new Text(
+                  '出发时间:',
+                  style: new TextStyle(
+                      fontWeight: FontWeight.w600,
+                      fontSize: 20.0
+                  ),
+                ),
+              ),
+              onPressed: () {
+                showDatePicker(
+                    context: context,
+                    initialDate: new DateTime.now(),
+                    firstDate: new DateTime.now().subtract(new Duration(days: 30)), // 减 30 天
+                    lastDate: new DateTime.now().add(new Duration(days: 30)),       // 加 30 天
+                    locale: Locale('zh')
+                ).then((DateTime val) {
+                  print(val); // 2018-07-12 00:00:00.000
+                  var date = '${val.year}-${val.month}-${val.day}';
+                  setState(() {
+                    departureDate = date;
+                  });
+                }).catchError((err) {
+                  print(err);
+                });
+              },
+            ),
+            departureDate != ''?new Text(departureDate):new Container(),
+            new Padding(
+              padding: EdgeInsets.symmetric(vertical: 5.0),
+              child: new Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  new Text(
+                    '主管备注：',
+                    style: new TextStyle(
+                        fontSize: 20.0,
+                        fontWeight: FontWeight.w600
+                    ),
+                  ),
+                  new TextField(
+                    controller: _leaderComment,
+                  )
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+      isExpanded: _isExpandedAssign,
+    ));
+    return _list;
+  }
+
+  @override
+  Widget build(BuildContext context){
+    return ScopedModelDescendant<MainModel>(
+      builder: (context, child, model) {
+        return new Scaffold(
+          appBar: new AppBar(
+            title: new Text('分配请求'),
+            elevation: 0.7,
+            flexibleSpace: Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.centerLeft,
+                  end: Alignment.centerRight,
+                  colors: [
+                    Theme.of(context).primaryColor,
+                    Theme.of(context).accentColor
+                  ],
+                ),
+              ),
+            ),
+            actions: <Widget>[
+              new Icon(Icons.face),
+              new Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 5.0, vertical: 19.0),
+                child: const Text('超级管理员'),
+              ),
+            ],
+          ),
+          body: _request.isEmpty?new Center(child: SpinKitRotatingPlain(color: Colors.blue),):new Padding(
+            padding: EdgeInsets.symmetric(vertical: 5.0),
+            child: new Card(
+              child: new ListView(
+                children: <Widget>[
+                  new ExpansionPanelList(
+                    animationDuration: Duration(milliseconds: 200),
+                    expansionCallback: (index, isExpanded) {
+                      setState(() {
+                        if (index == 0) {
+                          if (_request['RequestType']['ID'] == 14) {
+                            _isExpandedDetail = !isExpanded;
+                          }
+                          _isExpandedBasic = !isExpanded;
+                        } else {
+                          if (index == 1) {
+                            if (_request['RequestType']['ID'] == 14) {
+                              _isExpandedAssign = !isExpanded;
+                            }
+                            _isExpandedDetail = !isExpanded;
+                          } else {
+                            _isExpandedAssign =!isExpanded;
+                          }
+                        }
+                      });
+                    },
+                    children: _buildExpansion(),
+                  ),
+                  SizedBox(height: 24.0),
+                  new Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    mainAxisSize: MainAxisSize.max,
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: <Widget>[
+                      new Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 5.0),
+                        child: new RaisedButton(
+                          onPressed: () {
+                            assignRequest();
+                            model.getRequests();
+                          },
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(24),
+                          ),
+                          padding: EdgeInsets.all(12.0),
+                          color: new Color(0xff2E94B9),
+                          child: Text('安排派工', style: TextStyle(color: Colors.white)),
+                        ),
+                      ),
+                      new Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 5.0),
+                        child: new RaisedButton(
+                          onPressed: () {
+                            terminate();
+                            model.getRequests();
+                          },
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(24),
+                          ),
+                          padding: EdgeInsets.all(12.0),
+                          color: new Color(0xffD25565),
+                          child: Text('终止请求', style: TextStyle(color: Colors.white)),
+                        ),
+                      ),
+                    ],
+                  )
+                ],
+              ),
+            ),
+          ),
+        );
+      },
     );
   }
 }

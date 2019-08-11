@@ -109,6 +109,14 @@ class _UserRepairPageState extends State<UserRepairPage> {
   }
 
   Future<Null> submit() async {
+    if (_describe.text.isEmpty) {
+      showDialog(context: context,
+        builder: (context) => AlertDialog(
+          title: new Text('故障描述不可为空'),
+        )
+      );
+      return;
+    }
     List<dynamic> Files = [];
     for(var image in _imageList) {
       List<int> imageBytes = await image.readAsBytes();

@@ -48,7 +48,7 @@ class SearchBarDelegate extends SearchDelegate<String>{
     return IconButton(
         icon: AnimatedIcon(
             icon: AnimatedIcons.menu_arrow, progress: transitionAnimation),
-        onPressed: () => close(context, null));
+            onPressed: () => close(context, null));
   }
 
 
@@ -103,12 +103,12 @@ class SearchBarDelegate extends SearchDelegate<String>{
               },
               title: RichText(
                   text: TextSpan(
-                      text: suggestionList[i]['Name'].substring(0, query.length),
+                      text: '${suggestionList[i]['Name']} ${suggestionList[i]['EquipmentCode']} ${suggestionList[i]['SerialCode']}'.substring(0, query.length),
                       style: TextStyle(
                           color: Colors.black, fontWeight: FontWeight.bold),
                       children: [
                         TextSpan(
-                            text: suggestionList[i]['Name'].substring(query.length),
+                            text: '${suggestionList[i]['Name']} ${suggestionList[i]['EquipmentCode']} ${suggestionList[i]['SerialCode']}'.substring(query.length),
                             style: TextStyle(color: Colors.grey))
                       ])),
             ));

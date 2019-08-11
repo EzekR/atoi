@@ -3,6 +3,8 @@ import 'package:atoi/utils/http_request.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:atoi/utils/constants.dart';
+import 'package:photo_view/photo_view.dart';
+import 'dart:convert';
 
 class ManagerCompletePage extends StatefulWidget {
   static String tag = 'mananger-complete-page';
@@ -81,6 +83,7 @@ class _ManagerCompletePageState extends State<ManagerCompletePage> {
   String _currentLevel;
   String _currentStatus;
   String _currentName;
+  List<dynamic> imageBytes = [];
 
   void initState() {
     _dropDownMenuItems = getDropDownMenuItems(_handleMethods);
@@ -115,6 +118,22 @@ class _ManagerCompletePageState extends State<ManagerCompletePage> {
     return items;
   }
 
+  Future<Null> getImage(int fileId) async {
+    var resp = await HttpRequest.request(
+        '/Request/DownloadUploadFile',
+        params: {
+          'ID': fileId
+        },
+        method: HttpRequest.GET
+    );
+    print(resp);
+    if (resp['ResultCode'] == '00') {
+      setState(() {
+        imageBytes.add(resp['Data']);
+      });
+    }
+  }
+
   Future<Null> getRequest() async {
     var prefs = await _prefs;
     var userID = prefs.getInt('userID');
@@ -129,14 +148,30 @@ class _ManagerCompletePageState extends State<ManagerCompletePage> {
     );
     print(resp);
     if (resp['ResultCode'] == '00') {
+      var files = resp['Data']['Files'];
+      for (var file in files) {
+        getImage(file['ID']);
+      }
       setState(() {
         _request = resp['Data'];
       });
     }
   }
 
-  Future<Null> getImages() async {
-
+  Column buildImageColumn() {
+    if (imageBytes == null) {
+      return new Column();
+    } else {
+      List<Widget> _list = [];
+      for(var file in imageBytes) {
+        _list.add(new Container(
+          child: new PhotoView(imageProvider: MemoryImage(base64Decode(file))),
+          width: 400.0,
+          height: 400.0,
+        ));
+      }
+      return new Column(children: _list);
+    }
   }
 
   void changedDropDownMethod(String selectedMethod) {
@@ -386,25 +421,14 @@ class _ManagerCompletePageState extends State<ManagerCompletePage> {
                           buildRow('紧急程度：', _request['Priority']['Name']),
                           new Padding(
                             padding: EdgeInsets.symmetric(vertical: 5.0),
-                            child: new Text('请求附件',
+                            child: new Text('请求附件：',
                               style: new TextStyle(
                                   fontSize: 20.0,
                                   fontWeight: FontWeight.w600
                               ),
                             ),
                           ),
-                          new Row(
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            children: <Widget>[
-                              new Padding(
-                                padding: const EdgeInsets.all(10.0),
-                                child: Image.asset(
-                                  'assets/mri.jpg',
-                                  width: 200.0,
-                                ),
-                              ),
-                            ],
-                          ),
+                          buildImageColumn()
                         ],
                       ),
                     ),

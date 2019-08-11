@@ -41,6 +41,7 @@ class _LoginPageState extends State<LoginPage> {
       prefs.setInt('userID', _data['Data']['ID']);
       prefs.setInt('role', _data['Data']['Role']['ID']);
       prefs.setString('roleName', _data['Data']['Role']['Name']);
+      prefs.setString('userName', _data['Data']['Name']);
       switch (_data['Data']['Role']['ID']) {
         case 1:
           Navigator.of(context).pushNamed(HomePage.tag);
@@ -56,6 +57,19 @@ class _LoginPageState extends State<LoginPage> {
       showDialog(context: context, builder: (context) => AlertDialog(title: new Text(_data['ResultMessage']),));
     }
   }
+
+  @override
+  void deactivate() {
+    print('移除时：deactivate');
+    super.deactivate();
+  }
+
+  @override
+  void dispose() {
+    print('移除时：dispose');
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     final logo = Hero(
@@ -97,15 +111,6 @@ class _LoginPageState extends State<LoginPage> {
         ),
         onPressed: () {
           _doLogin();
-//          if (phoneController.text == '1') {
-//            Navigator.of(context).pushNamed(HomePage.tag);
-//          } else {
-//            if (phoneController.text == '2') {
-//              Navigator.of(context).pushNamed(EngineerHomePage.tag);
-//            } else {
-//              Navigator.of(context).pushNamed(UserHomePage.tag);
-//            }
-//          }
         },
         padding: EdgeInsets.all(12),
         color: new Color(0xff183dca),
@@ -119,6 +124,16 @@ class _LoginPageState extends State<LoginPage> {
         style: TextStyle(color: Colors.black54),
       ),
       onPressed: () {},
+    );
+
+    final userRegister = FlatButton(
+      child: Text(
+        '注册',
+        style: TextStyle(color: Colors.blue),
+      ),
+      onPressed: () {
+
+      },
     );
 
     return Scaffold(
@@ -135,7 +150,8 @@ class _LoginPageState extends State<LoginPage> {
             password,
             SizedBox(height: 24.0),
             loginButton,
-            forgotLabel
+            userRegister,
+            forgotLabel,
           ],
         ),
       ),

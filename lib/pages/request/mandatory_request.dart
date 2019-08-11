@@ -70,6 +70,22 @@ class _MandatoryRequestState extends State<MandatoryRequest> {
     super.initState();
   }
 
+  Future<Null> getDevice() async {
+    Map<String, dynamic> params = {
+      'codeContent': barcode,
+    };
+    var resp = await HttpRequest.request(
+        '/Equipment/GetDeviceByQRCode',
+        method: HttpRequest.GET,
+        params: params
+    );
+    print(resp);
+    if (resp['ResultCode'] == '00') {
+      setState(() {
+        _equipment = resp['Data'];
+      });
+    }
+  }
   Future getImage() async {
     var image = await ImagePicker.pickImage(
         source: ImageSource.camera,
@@ -124,7 +140,7 @@ class _MandatoryRequestState extends State<MandatoryRequest> {
   Future getRole() async {
     final SharedPreferences prefs = await _prefs;
     setState(() {
-      _roleName = prefs.getString('roleName');
+      _roleName = prefs.getString('userName');
     });
   }
 
@@ -178,7 +194,7 @@ class _MandatoryRequestState extends State<MandatoryRequest> {
       if (resp['ResultCode'] == '00') {
         showDialog(context: context, builder: (buider) =>
             AlertDialog(
-              title: new Text('提交强检成功'),
+              title: new Text('提交请求成功'),
             )).then((result) =>
             Navigator.of(context, rootNavigator: true).pop(result)
         );
@@ -243,7 +259,7 @@ class _MandatoryRequestState extends State<MandatoryRequest> {
       builder: (context, child, mainModel) {
         return new Scaffold(
             appBar: new AppBar(
-              title: new Text('新增强检'),
+              title: new Text('新建请求--强检'),
               elevation: 0.7,
               flexibleSpace: Container(
                 decoration: BoxDecoration(
@@ -322,7 +338,7 @@ class _MandatoryRequestState extends State<MandatoryRequest> {
                                 buildRow('系统编号:', _equipment['OID']??''),
                                 buildRow('设备名称：', _equipment['Name']??''),
                                 buildRow('设备型号：', _equipment['EquipmentCode']??''),
-                                buildRow('设备序列号', _equipment['SerialCode']??''),
+                                buildRow('设备序列号：', _equipment['SerialCode']??''),
                                 buildRow('使用科室：', _equipment['Department']['Name']??''),
                                 buildRow('安装地点：', _equipment['InstalSite']??''),
                                 buildRow('设备厂商：', _equipment['Manufacturer']['Name']??''),
@@ -438,7 +454,7 @@ class _MandatoryRequestState extends State<MandatoryRequest> {
                                   child: new Row(
                                     children: <Widget>[
                                       new Text(
-                                        '添加附件',
+                                        '添加附件：',
                                         style: new TextStyle(
                                             fontSize: 20.0,
                                             fontWeight: FontWeight.w600
@@ -475,14 +491,14 @@ class _MandatoryRequestState extends State<MandatoryRequest> {
                         ),
                         new RaisedButton(
                           onPressed: () {
-                            Navigator.of(context).pop;
+                            Navigator.of(context).pop();
                           },
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(24),
                           ),
                           padding: EdgeInsets.all(12.0),
                           color: new Color(0xffD25565),
-                          child: Text('返回主页', style: TextStyle(color: Colors.white)),
+                          child: Text('返回首页', style: TextStyle(color: Colors.white)),
                         ),
                       ],
                     )
@@ -502,6 +518,7 @@ class _MandatoryRequestState extends State<MandatoryRequest> {
       setState(() {
         return this.barcode = barcode;
       });
+      await getDevice();
     } on PlatformException catch (e) {
       if (e.code == BarcodeScanner.CameraAccessDenied) {
         setState(() {

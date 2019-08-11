@@ -30,6 +30,7 @@ import 'package:atoi/pages/lifecycle/equipment_install.dart';
 import 'package:atoi/pages/lifecycle/equipment_lending.dart';
 import 'package:atoi/pages/lifecycle/equipment_scrap.dart';
 import 'package:atoi/pages/lifecycle/equipment_transfer.dart';
+import 'package:atoi/widgets/search_bar.dart';
 
 void main() => runApp(new MyApp());
 

@@ -4,7 +4,6 @@ import 'package:atoi/pages/manager/manager_to_assign.dart';
 import 'package:atoi/pages/manager/manager_to_audit_page.dart';
 import 'package:atoi/pages/manager/manager_to_complete.dart';
 import 'package:badges/badges.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:scoped_model/scoped_model.dart';
 import 'package:atoi/models/models.dart';
 
@@ -18,24 +17,15 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage>
   with SingleTickerProviderStateMixin{
   TabController _tabController;
-  String badgeA;
-  String badgeB;
-  String badgeC;
-
-  Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
-
-  Future<Null> getCount() async {
-    var prefs = await _prefs;
-    badgeA = prefs.getString('badgeA');
-    badgeB = prefs.getString('badgeB');
-    badgeC = prefs.getString('badgeC');
-  }
 
   @override
   void initState() {
     _tabController = new TabController(length: 4, vsync: this, initialIndex: 0);
-    getCount();
     super.initState();
+    ManagerModel model = MainModel.of(context);
+    model.getDispatches();
+    model.getRequests();
+    model.getTodos();
   }
 
   GlobalKey<ScaffoldState> _scaffoldKeyManager = new GlobalKey();
@@ -59,8 +49,8 @@ class _HomePageState extends State<HomePage>
                   begin: Alignment.centerLeft,
                   end: Alignment.centerRight,
                   colors: [
-                    Theme.of(context).primaryColor,
-                    Theme.of(context).accentColor
+                    Theme.of(context).accentColor,
+                    new Color(0xff4e8faf)
                   ],
                 ),
               ),

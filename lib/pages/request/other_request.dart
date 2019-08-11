@@ -161,7 +161,7 @@ class _OtherRequestState extends State<OtherRequest> {
       if (resp['ResultCode'] == '00') {
         showDialog(context: context, builder: (buider) =>
             AlertDialog(
-              title: new Text('提交其他服务成功'),
+              title: new Text('提交请求成功'),
             )).then((result) =>
             Navigator.of(context, rootNavigator: true).pop(result)
         );
@@ -205,7 +205,7 @@ class _OtherRequestState extends State<OtherRequest> {
       builder: (context, child, mainModel) {
         return new Scaffold(
             appBar: new AppBar(
-              title: new Text('新增报修'),
+              title: new Text('新建请求--其他服务'),
               elevation: 0.7,
               flexibleSpace: Container(
                 decoration: BoxDecoration(
@@ -292,7 +292,7 @@ class _OtherRequestState extends State<OtherRequest> {
                                   child: new Row(
                                     children: <Widget>[
                                       new Text(
-                                        '添加附件',
+                                        '添加附件：',
                                         style: new TextStyle(
                                             fontSize: 20.0,
                                             fontWeight: FontWeight.w600
@@ -329,14 +329,14 @@ class _OtherRequestState extends State<OtherRequest> {
                         ),
                         new RaisedButton(
                           onPressed: () {
-                            Navigator.of(context).pop;
+                            Navigator.of(context).pop();
                           },
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(24),
                           ),
                           padding: EdgeInsets.all(12.0),
                           color: new Color(0xffD25565),
-                          child: Text('返回主页', style: TextStyle(color: Colors.white)),
+                          child: Text('返回首页', style: TextStyle(color: Colors.white)),
                         ),
                       ],
                     )

@@ -24,6 +24,9 @@ class _EngineerHomePageState extends State<EngineerHomePage>
   void initState() {
     super.initState();
     _tabController = new TabController(length: 3, vsync: this, initialIndex: 0);
+    EngineerModel model = MainModel.of(context);
+    model.getTasksToStart();
+    model.getTasksToReport();
   }
 
   @override

@@ -21,6 +21,8 @@ class _ManagerAuditVoucherPageState extends State<ManagerAuditVoucherPage> {
   var _isExpandedDetail = false;
   var _isExpandedAssign = false;
   Map<String, dynamic> _dispatch = {};
+  var _equipment = {};
+  TextEditingController _comment = new TextEditingController();
 
   Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
 
@@ -88,7 +90,7 @@ class _ManagerAuditVoucherPageState extends State<ManagerAuditVoucherPage> {
     });
   }
 
-  TextField buildTextField(String labelText, String defaultText, bool isEnabled) {
+  TextField buildTextField(String labelText, TextEditingController controller, bool isEnabled) {
     return new TextField(
       decoration: InputDecoration(
           labelText: labelText,
@@ -102,7 +104,7 @@ class _ManagerAuditVoucherPageState extends State<ManagerAuditVoucherPage> {
               )
           )
       ),
-      controller: new TextEditingController(text: defaultText),
+      controller: controller,
       enabled: isEnabled,
       style: new TextStyle(
           fontSize: 20.0
@@ -196,6 +198,7 @@ class _ManagerAuditVoucherPageState extends State<ManagerAuditVoucherPage> {
     print(resp);
     if (resp['ResultCode'] == '00') {
       setState(() {
+        _equipment = resp['Data']['Request']['Equipments'][0];
         _dispatch = resp['Data'];
       });
     }
@@ -239,7 +242,8 @@ class _ManagerAuditVoucherPageState extends State<ManagerAuditVoucherPage> {
     print(widget.journalId);
     Map<String, dynamic> _data = {
       'userID': UserId,
-      'dispatchJournalID': widget.journalId
+      'dispatchJournalID': widget.journalId,
+      'comment': _comment.text
     };
     var _response = await HttpRequest.request(
         '/DispatchJournal/RejectDispatchJournal',
@@ -333,13 +337,16 @@ class _ManagerAuditVoucherPageState extends State<ManagerAuditVoucherPage> {
                       padding: EdgeInsets.symmetric(horizontal: 8.0),
                       child: new Column(
                         children: <Widget>[
-                          buildRow('设备编号', widget.request['Request']['Equipments'][0]['OID']),
-                          buildRow('设备名称', widget.request['Request']['Equipments'][0]['Name']),
-                          buildRow('使用科室', widget.request['Request']['Equipments'][0]['Department']['Name']),
-                          buildRow('设备厂商', _dispatch['Request']['Equipments'][0]['Manufacturer']['Name']??''),
-                          buildRow('资产等级', _dispatch['Request']['Equipments'][0]['AssetLevel']['Name']),
-                          buildRow('设备型号', _dispatch['Request']['Equipments'][0]['SerialCode']),
-                          buildRow('安装地点', widget.request['Request']['DepartmentName']),
+                          buildRow('系统编号', _equipment['OID']??''),
+                          buildRow('设备名称', _equipment['Name']??''),
+                          buildRow('设备型号', _equipment['EquipmentCode']??''),
+                          buildRow('设备序列号', _equipment['SerialCode']??''),
+                          buildRow('使用科室', _equipment['Department']['Name']??''),
+                          buildRow('安装地点', _equipment['InstalSite']??''),
+                          buildRow('设备厂商', _equipment['Manufacturer']['Name']??''),
+                          buildRow('资产等级', _equipment['AssetLevel']['Name']??''),
+                          buildRow('维保状态', _equipment['WarrantyStatus']??''),
+                          buildRow('服务范围', _equipment['ContractScopeComments']??''),
                         ],
                       ),
                     ),
@@ -353,7 +360,7 @@ class _ManagerAuditVoucherPageState extends State<ManagerAuditVoucherPage> {
                             color: Colors.blue,
                           ),
                           title: new Align(
-                              child: Text('派工单信息',
+                              child: Text('派工内容',
                                 style: new TextStyle(
                                     fontSize: 22.0,
                                     fontWeight: FontWeight.w400
@@ -372,7 +379,7 @@ class _ManagerAuditVoucherPageState extends State<ManagerAuditVoucherPage> {
                           buildRow('派工类型', widget.request['RequestType']['Name']),
                           buildRow('机器状态', widget.request['MachineStatus']['Name']),
                           buildRow('工程师姓名', _dispatch['Engineer']['Name']),
-                          buildRow('领导备注', widget.request['LeaderComments']),
+                          buildRow('备注', widget.request['LeaderComments']),
                           buildRow('出发时间', widget.request['ScheduleDate']),
                         ],
                       ),
@@ -387,7 +394,7 @@ class _ManagerAuditVoucherPageState extends State<ManagerAuditVoucherPage> {
                             color: Colors.blue,
                           ),
                           title: new Align(
-                              child: Text('服务详情',
+                              child: Text('服务详情信息',
                                 style: new TextStyle(
                                     fontSize: 22.0,
                                     fontWeight: FontWeight.w400
@@ -430,7 +437,7 @@ class _ManagerAuditVoucherPageState extends State<ManagerAuditVoucherPage> {
                             ],
                           ),
                           buildDropdown('服务结果：', _currentResult, _dropDownMenuItems, changedDropDownMethod),
-                          buildTextField('审批备注', '', true),
+                          buildTextField('审批备注', _comment, true),
                         ],
                       ),
                     ),

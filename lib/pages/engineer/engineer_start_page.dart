@@ -136,7 +136,7 @@ class _EngineerStartPageState extends State<EngineerStartPage> {
   Widget build(BuildContext context){
     return new Scaffold(
       appBar: new AppBar(
-        title: new Text('派工单详情'),
+        title: new Text('服务工单信息'),
         elevation: 0.7,
         flexibleSpace: Container(
           decoration: BoxDecoration(
@@ -200,13 +200,16 @@ class _EngineerStartPageState extends State<EngineerStartPage> {
                       padding: EdgeInsets.symmetric(horizontal: 8.0),
                       child: new Column(
                         children: <Widget>[
-                          buildRow('设备系统编号：', _dispatch['Request']['Equipments'][0]['OID']),
-                          buildRow('设备名称：', _dispatch['Request']['Equipments'][0]['Name']),
-                          buildRow('使用科室：', _dispatch['Request']['Equipments'][0]['Department']['Name']),
-                          buildRow('设备厂商：', _dispatch['Request']['Equipments'][0]['Manufacturer']['Name']),
-                          buildRow('资产等级：', _dispatch['Request']['Equipments'][0]['AssetLevel']['Name']),
-                          buildRow('设备型号：', _dispatch['Request']['Equipments'][0]['SerialCode']),
-                          buildRow('保修状况：', _dispatch['Request']['Equipments'][0]['WarrantyStatus']),
+                          buildRow('系统编号:', _dispatch['Request']['Equipments'][0]['OID']??''),
+                          buildRow('设备名称：', _dispatch['Request']['Equipments'][0]['Name']??''),
+                          buildRow('设备型号：', _dispatch['Request']['Equipments'][0]['EquipmentCode']??''),
+                          buildRow('设备序列号：', _dispatch['Request']['Equipments'][0]['SerialCode']??''),
+                          buildRow('使用科室：', _dispatch['Request']['Equipments'][0]['Department']['Name']??''),
+                          buildRow('安装地点：', _dispatch['Request']['Equipments'][0]['InstalSite']??''),
+                          buildRow('设备厂商：', _dispatch['Request']['Equipments'][0]['Manufacturer']['Name']??''),
+                          buildRow('资产等级：', _dispatch['Request']['Equipments'][0]['AssetLevel']['Name']??''),
+                          buildRow('维保状态：', _dispatch['Request']['Equipments'][0]['WarrantyStatus']??''),
+                          buildRow('服务范围：', _dispatch['Request']['Equipments'][0]['ContractScope']['Name']??''),
                         ],
                       ),
                     ),
@@ -221,7 +224,7 @@ class _EngineerStartPageState extends State<EngineerStartPage> {
                             color: Colors.blue,
                           ),
                           title: new Text(
-                            '请求相信信息',
+                            '请求详细信息',
                             style: new TextStyle(
                               fontWeight: FontWeight.w400,
                               fontSize: 22.0
@@ -236,35 +239,16 @@ class _EngineerStartPageState extends State<EngineerStartPage> {
                         mainAxisSize: MainAxisSize.max,
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: <Widget>[
-                          buildRow('请求编号：', _dispatch['Request']['OID']),
+                          buildRow('服务申请编号：', _dispatch['Request']['OID']),
                           buildRow('类型：', _dispatch['Request']['SourceType']),
                           buildRow('主题：', '${_dispatch['Request']['EquipmentName']}--${_dispatch['Request']['RequestType']['Name']}'),
                           buildRow(AppConstants.Remark[_dispatch['Request']['RequestType']['ID']], _dispatch['Request']['FaultDesc']),
                           _dispatch['Request']['FaultType']['ID'] != 0?buildRow(AppConstants.RemarkType[_dispatch['Request']['RequestType']['ID']], _dispatch['Request']['FaultType']['Name']):new Container(),
                           buildRow('请求人：', _dispatch['Request']['RequestUser']['Name']),
                           buildRow('处理方式：', _dispatch['Request']['DealType']['Name']),
-                          buildRow('优先级：', _dispatch['Request']['Priority']['Name']),
-                          new Padding(
-                            padding: EdgeInsets.symmetric(vertical: 5.0),
-                            child: new Text('请求附件',
-                              style: new TextStyle(
-                                  fontSize: 16.0,
-                                  color: Colors.grey
-                              ),
-                            ),
-                          ),
-                          new Row(
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            children: <Widget>[
-                              new Padding(
-                                padding: const EdgeInsets.all(10.0),
-                                child: Image.asset(
-                                  'assets/mri.jpg',
-                                  width: 200.0,
-                                ),
-                              ),
-                            ],
-                          ),
+                          buildRow('紧急程度：', _dispatch['Request']['Priority']['Name']),
+                          buildRow('当前状态：', _dispatch['Request']['Status']['Name']),
+                          buildRow('请求来源：', _dispatch['Request']['Source']['Name']),
                         ],
                       ),
                     ),
@@ -285,7 +269,7 @@ class _EngineerStartPageState extends State<EngineerStartPage> {
                               fontWeight: FontWeight.w400
                             ),
                         ),
-                        subtitle: Text('编号:PGD00000001'),
+                        subtitle: Text('派工单编号: ${_dispatch['OID']}'),
                       );
                     },
                     body: new Padding(
@@ -298,9 +282,9 @@ class _EngineerStartPageState extends State<EngineerStartPage> {
                           buildRow('派工类型：', _dispatch['RequestType']['Name']),
                           buildRow('紧急程度：', _dispatch['Urgency']['Name']),
                           buildRow('机器状态：', _dispatch['MachineStatus']['Name']),
-                          buildRow('工程师：', _dispatch['Engineer']['Name']),
+                          buildRow('工程师姓名：', _dispatch['Engineer']['Name']),
                           buildRow('主管备注：', _dispatch['LeaderComments']),
-                          buildRow('出发日期：', _dispatch['ScheduleDate']),
+                          buildRow('出发时间：', _dispatch['ScheduleDate']),
                         ],
                       ),
                     ),
@@ -322,7 +306,7 @@ class _EngineerStartPageState extends State<EngineerStartPage> {
                       borderRadius: BorderRadius.circular(24),
                     ),
                     padding: EdgeInsets.all(12.0),
-                    color: Colors.indigo,
+                    color: new Color(0xff2E94B9),
                     child: Text(
                         '开始作业',
                         style: TextStyle(

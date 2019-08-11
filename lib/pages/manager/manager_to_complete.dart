@@ -20,7 +20,7 @@ class _ManagerToCompleteState extends State<ManagerToComplete> {
   bool _loading = false;
 
   void initState() {
-    getData();
+    //getData();
     super.initState();
   }
 
@@ -152,8 +152,8 @@ class _ManagerToCompleteState extends State<ManagerToComplete> {
                 mainAxisAlignment: MainAxisAlignment.start,
                 mainAxisSize: MainAxisSize.max,
                 children: <Widget>[
-                  buildRow('设备编号：', equipmentNo),
-                  buildRow('设备名称：', equipmentName),
+                  buildRow('设备编号：', equipmentName),
+                  buildRow('设备名称：', equipmentNo),
                   buildRow('请求科室：', departmentName),
                   buildRow('请求人员：', requestPerson),
                   buildRow('请求类型：', requestType),
@@ -204,16 +204,13 @@ class _ManagerToCompleteState extends State<ManagerToComplete> {
 
     return ScopedModelDescendant<MainModel>(
         builder: (context, child, model) {
-          if(_tasks.length > 0) {
-            model.setBadge(_tasks.length.toString(), 'C');
-          }
           return new RefreshIndicator(
-              child: _tasks.length == 0?ListView(padding: const EdgeInsets.symmetric(vertical: 150.0), children: <Widget>[_loading?SpinKitRotatingPlain(color: Colors.blue):new Center(child: new Text('没有待派工请求'),)],):ListView.builder(
+              child: model.todos.length == 0?ListView(padding: const EdgeInsets.symmetric(vertical: 150.0), children: <Widget>[_loading?SpinKitRotatingPlain(color: Colors.blue):new Center(child: new Text('没有待派工请求'),)],):ListView.builder(
                   padding: const EdgeInsets.all(2.0),
-                  itemCount: _tasks.length,
-                  itemBuilder: (context, i) => buildCardItem(_tasks[i], _tasks[i]['ID'], _tasks[i]['OID'], _tasks[i]['RequestDate'], _tasks[i]['EquipmentOID'], _tasks[i]['EquipmentName'], _tasks[i]['DepartmentName'], _tasks[i]['RequestUser']['Name'], _tasks[i]['RequestType']['Name'], _tasks[i]['Status']['Name'], _tasks[i]['FaultDesc'])
+                  itemCount: model.todos.length,
+                  itemBuilder: (context, i) => buildCardItem(model.todos[i], model.todos[i]['ID'], model.todos[i]['OID'], model.todos[i]['RequestDate'], model.todos[i]['EquipmentOID'], model.todos[i]['EquipmentName'], model.todos[i]['DepartmentName'], model.todos[i]['RequestUser']['Name'], model.todos[i]['RequestType']['Name'], model.todos[i]['Status']['Name'], model.todos[i]['FaultDesc'])
               ),
-              onRefresh: getData
+              onRefresh: model.getTodos
           );
         }
     );

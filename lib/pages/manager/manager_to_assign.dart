@@ -21,7 +21,7 @@ class _ManagerToAssignState extends State<ManagerToAssign> {
   bool _loading = false;
 
   void initState() {
-    getData();
+    //getData();
     super.initState();
   }
 
@@ -154,12 +154,12 @@ class _ManagerToAssignState extends State<ManagerToAssign> {
                 mainAxisAlignment: MainAxisAlignment.start,
                 mainAxisSize: MainAxisSize.max,
                 children: <Widget>[
-                  buildRow('设备编号：', equipmentNo),
+                  buildRow('系统编号：', equipmentNo),
                   buildRow('设备名称：', equipmentName),
-                  buildRow('请求科室：', departmentName),
-                  buildRow('请求人员：', requestPerson),
-                  buildRow('请求类型：', requestType),
-                  buildRow('请求状态：', status),
+                  buildRow('使用科室：', departmentName),
+                  buildRow('请求人：', requestPerson),
+                  buildRow('类型：', requestType),
+                  buildRow('状态：', status),
                   buildRow('请求详情：', detail),
                   new Row(
                     mainAxisAlignment: MainAxisAlignment.end,
@@ -229,16 +229,13 @@ class _ManagerToAssignState extends State<ManagerToAssign> {
 
     return ScopedModelDescendant<MainModel>(
       builder: (context, child, model) {
-        if(_tasks.length > 0) {
-          model.setBadge(_tasks.length.toString(), 'A');
-        }
         return new RefreshIndicator(
-            child: _tasks.length == 0?ListView(padding: const EdgeInsets.symmetric(vertical: 150.0), children: <Widget>[new Center(child: _loading?SpinKitRotatingPlain(color: Colors.blue):new Text('没有待派工请求'),)],):ListView.builder(
+            child: model.requests.length == 0?ListView(padding: const EdgeInsets.symmetric(vertical: 150.0), children: <Widget>[new Center(child: _loading?SpinKitRotatingPlain(color: Colors.blue):new Text('没有待派工请求'),)],):ListView.builder(
                 padding: const EdgeInsets.all(2.0),
-                itemCount: _tasks.length,
-                itemBuilder: (context, i) => buildCardItem(_tasks[i], _tasks[i]['ID'], _tasks[i]['OID'], _tasks[i]['RequestDate'], _tasks[i]['EquipmentOID'], _tasks[i]['EquipmentName'], _tasks[i]['DepartmentName'], _tasks[i]['RequestUser']['Name'], _tasks[i]['RequestType']['Name'], _tasks[i]['Status']['Name'], _tasks[i]['FaultDesc'], _tasks[i]['Equipments'])
+                itemCount: model.requests.length,
+                itemBuilder: (context, i) => buildCardItem(model.requests[i], model.requests[i]['ID'], model.requests[i]['OID'], model.requests[i]['RequestDate'], model.requests[i]['EquipmentOID'], model.requests[i]['EquipmentName'], model.requests[i]['DepartmentName'], model.requests[i]['RequestUser']['Name'], model.requests[i]['RequestType']['Name'], model.requests[i]['Status']['Name'], model.requests[i]['FaultDesc'], model.requests[i]['Equipments'])
             ),
-            onRefresh: getData
+            onRefresh: model.getRequests
         );
       }
     );

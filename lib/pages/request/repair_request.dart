@@ -55,7 +55,24 @@ class _RepairRequestState extends State<RepairRequest> {
   Future getRole() async {
     final SharedPreferences prefs = await _prefs;
     _role = await prefs.getInt('role');
-    _roleName = prefs.getString('roleName');
+    _roleName = prefs.getString('userName');
+  }
+
+  Future<Null> getDevice() async {
+    Map<String, dynamic> params = {
+      'codeContent': barcode,
+    };
+    var resp = await HttpRequest.request(
+        '/Equipment/GetDeviceByQRCode',
+        method: HttpRequest.GET,
+        params: params
+    );
+    print(resp);
+    if (resp['ResultCode'] == '00') {
+      setState(() {
+        _equipment = resp['Data'];
+      });
+    }
   }
 
   void initState(){
@@ -124,7 +141,7 @@ class _RepairRequestState extends State<RepairRequest> {
       if (resp['ResultCode'] == '00') {
         showDialog(context: context, builder: (buider) =>
             AlertDialog(
-              title: new Text('报修成功'),
+              title: new Text('提交请求成功'),
             )).then((result) =>
             Navigator.of(context, rootNavigator: true).pop(result)
         );
@@ -226,7 +243,7 @@ class _RepairRequestState extends State<RepairRequest> {
       builder: (context, child, mainModel) {
         return new Scaffold(
             appBar: new AppBar(
-              title: new Text('新增维修'),
+              title: new Text('新建请求--维修'),
               elevation: 0.7,
               flexibleSpace: Container(
                 decoration: BoxDecoration(
@@ -305,13 +322,13 @@ class _RepairRequestState extends State<RepairRequest> {
                                 buildRow('系统编号:', _equipment['OID']??''),
                                 buildRow('设备名称：', _equipment['Name']??''),
                                 buildRow('设备型号：', _equipment['EquipmentCode']??''),
-                                buildRow('设备序列号', _equipment['SerialCode']??''),
+                                buildRow('设备序列号：', _equipment['SerialCode']??''),
                                 buildRow('使用科室：', _equipment['Department']['Name']??''),
                                 buildRow('安装地点：', _equipment['InstalSite']??''),
                                 buildRow('设备厂商：', _equipment['Manufacturer']['Name']??''),
                                 buildRow('资产等级：', _equipment['AssetLevel']['Name']??''),
                                 buildRow('维保状态：', _equipment['WarrantyStatus']??''),
-                                buildRow('服务范围：', _equipment['ContractScopeComments']??''),
+                                buildRow('服务范围：', _equipment['ContractScope']['Name']??''),
                                 new Padding(padding: EdgeInsets.symmetric(vertical: 8.0)??'')
                               ],
                             ),
@@ -326,7 +343,7 @@ class _RepairRequestState extends State<RepairRequest> {
                                   color: Colors.blue,
                                 ),
                                 title: new Align(
-                                    child: Text('新增维修',
+                                    child: Text('请求详细信息',
                                       style: new TextStyle(
                                           fontSize: 22.0,
                                           fontWeight: FontWeight.w400
@@ -396,7 +413,7 @@ class _RepairRequestState extends State<RepairRequest> {
                                   child: new Row(
                                     children: <Widget>[
                                       new Text(
-                                        '添加附件',
+                                        '添加附件：',
                                         style: new TextStyle(
                                           fontSize: 20.0,
                                           fontWeight: FontWeight.w600
@@ -440,7 +457,7 @@ class _RepairRequestState extends State<RepairRequest> {
                           ),
                           padding: EdgeInsets.all(12.0),
                           color: new Color(0xffD25565),
-                          child: Text('返回主页', style: TextStyle(color: Colors.white)),
+                          child: Text('返回首页', style: TextStyle(color: Colors.white)),
                         ),
                       ],
                     )
@@ -460,6 +477,7 @@ class _RepairRequestState extends State<RepairRequest> {
       setState(() {
         return this.barcode = barcode;
       });
+      await getDevice();
     } on PlatformException catch (e) {
       if (e.code == BarcodeScanner.CameraAccessDenied) {
         setState(() {

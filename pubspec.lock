@@ -28,7 +28,7 @@ packages:
       name: barcode_scan
       url: "https://pub.flutter-io.cn"
     source: hosted
-    version: "0.0.8"
+    version: "1.0.0"
   boolean_selector:
     dependency: transitive
     description:
@@ -71,13 +71,6 @@ packages:
       url: "https://pub.flutter-io.cn"
     source: hosted
     version: "0.1.2"
-  device_info:
-    dependency: "direct main"
-    description:
-      name: device_info
-      url: "https://pub.flutter-io.cn"
-    source: hosted
-    version: "0.4.0+2"
   dio:
     dependency: "direct main"
     description:
