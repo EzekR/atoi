@@ -4,12 +4,14 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'dart:convert';
 import 'package:atoi/utils/constants.dart';
+import 'package:atoi/widgets/build_widget.dart';
 
 class ManagerAuditVoucherPage extends StatefulWidget {
   static String tag = 'manager-audit-voucher-page';
-  ManagerAuditVoucherPage({Key key, this.journalId, this.request}):super(key: key);
+  ManagerAuditVoucherPage({Key key, this.journalId, this.request, this.status}):super(key: key);
   final int journalId;
   final Map request;
+  final int status;
 
   @override
   _ManagerAuditVoucherPageState createState() => new _ManagerAuditVoucherPageState();
@@ -272,7 +274,9 @@ class _ManagerAuditVoucherPageState extends State<ManagerAuditVoucherPage> {
     // TODO: implement build
     return new Scaffold(
       appBar: new AppBar(
-        title: new Text('审核凭证'),
+        title: new Text(
+            widget.status==3?'查看凭证':'审核凭证'
+        ),
         elevation: 0.7,
         flexibleSpace: Container(
           decoration: BoxDecoration(
@@ -337,16 +341,16 @@ class _ManagerAuditVoucherPageState extends State<ManagerAuditVoucherPage> {
                       padding: EdgeInsets.symmetric(horizontal: 8.0),
                       child: new Column(
                         children: <Widget>[
-                          buildRow('系统编号', _equipment['OID']??''),
-                          buildRow('设备名称', _equipment['Name']??''),
-                          buildRow('设备型号', _equipment['EquipmentCode']??''),
-                          buildRow('设备序列号', _equipment['SerialCode']??''),
-                          buildRow('使用科室', _equipment['Department']['Name']??''),
-                          buildRow('安装地点', _equipment['InstalSite']??''),
-                          buildRow('设备厂商', _equipment['Manufacturer']['Name']??''),
-                          buildRow('资产等级', _equipment['AssetLevel']['Name']??''),
-                          buildRow('维保状态', _equipment['WarrantyStatus']??''),
-                          buildRow('服务范围', _equipment['ContractScopeComments']??''),
+                          BuildWidget.buildRow('系统编号', _equipment['OID']??''),
+                          BuildWidget.buildRow('名称', _equipment['Name']??''),
+                          BuildWidget.buildRow('型号', _equipment['EquipmentCode']??''),
+                          BuildWidget.buildRow('序列号', _equipment['SerialCode']??''),
+                          BuildWidget.buildRow('使用科室', _equipment['Department']['Name']??''),
+                          BuildWidget.buildRow('安装地点', _equipment['InstalSite']??''),
+                          BuildWidget.buildRow('设备厂商', _equipment['Manufacturer']['Name']??''),
+                          BuildWidget.buildRow('资产等级', _equipment['AssetLevel']['Name']??''),
+                          BuildWidget.buildRow('维保状态', _equipment['WarrantyStatus']??''),
+                          BuildWidget.buildRow('服务范围', _equipment['ContractScopeComments']??''),
                         ],
                       ),
                     ),
@@ -374,13 +378,13 @@ class _ManagerAuditVoucherPageState extends State<ManagerAuditVoucherPage> {
                       padding: EdgeInsets.symmetric(horizontal: 8.0),
                       child: new Column(
                         children: <Widget>[
-                          buildRow('派工单编号', widget.request['OID']),
-                          buildRow('紧急程度', widget.request['Urgency']['Name']),
-                          buildRow('派工类型', widget.request['RequestType']['Name']),
-                          buildRow('机器状态', widget.request['MachineStatus']['Name']),
-                          buildRow('工程师姓名', _dispatch['Engineer']['Name']),
-                          buildRow('备注', widget.request['LeaderComments']),
-                          buildRow('出发时间', widget.request['ScheduleDate']),
+                          BuildWidget.buildRow('派工单编号', widget.request['OID']),
+                          BuildWidget.buildRow('紧急程度', widget.request['Urgency']['Name']),
+                          BuildWidget.buildRow('派工类型', widget.request['RequestType']['Name']),
+                          BuildWidget.buildRow('机器状态', widget.request['MachineStatus']['Name']),
+                          BuildWidget.buildRow('工程师姓名', _dispatch['Engineer']['Name']),
+                          BuildWidget.buildRow('备注', widget.request['LeaderComments']),
+                          BuildWidget.buildRow('出发时间', AppConstants.TimeForm(widget.request['ScheduleDate'], 'yyyy-mm-dd')),
                         ],
                       ),
                     ),
@@ -409,21 +413,15 @@ class _ManagerAuditVoucherPageState extends State<ManagerAuditVoucherPage> {
                       child: new Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: <Widget>[
-                          buildRow('服务凭证编号', _journal['OID']),
-                          buildRow('故障现象/错误代码/事由', _journal['FaultCode']),
-                          buildRow('工作内容', _journal['JobContent']),
-                          buildRow('待跟进问题', _journal['FollowProblem']),
-                          buildRow('待确认问题', _journal['UnconfirmedProblem']),
-                          buildRow('建议留言', _journal['Advice']),
-                          new Padding(
-                            padding: EdgeInsets.symmetric(vertical: 5.0),
-                            child: new Text('客户签名：',
-                              style: new TextStyle(
-                                  fontSize: 20.0,
-                                  fontWeight: FontWeight.w600
-                              ),
-                            ),
-                          ),
+                          BuildWidget.buildRow('服务凭证编号', _journal['OID']),
+                          BuildWidget.buildRow('客户姓名', _dispatch['Request']['RequestUser']['Name']),
+                          BuildWidget.buildRow('客户电话', _dispatch['Request']['RequestUser']['Mobile']),
+                          BuildWidget.buildRow('故障现象/错误代码/事由', _journal['FaultCode']),
+                          BuildWidget.buildRow('工作内容', _journal['JobContent']),
+                          BuildWidget.buildRow('待跟进问题', _journal['FollowProblem']),
+                          BuildWidget.buildRow('待确认问题', _journal['UnconfirmedProblem']),
+                          BuildWidget.buildRow('建议留言', _journal['Advice']),
+                          BuildWidget.buildRow('客户签名', ''),
                           new Row(
                             mainAxisAlignment: MainAxisAlignment.start,
                             children: <Widget>[
@@ -432,11 +430,12 @@ class _ManagerAuditVoucherPageState extends State<ManagerAuditVoucherPage> {
                                 child: Image.memory(
                                   imageBytes??[],
                                   width: 300.0,
+                                  height: 300.0,
                                 ),
                               ),
                             ],
                           ),
-                          buildDropdown('服务结果：', _currentResult, _dropDownMenuItems, changedDropDownMethod),
+                          BuildWidget.buildDropdown('服务结果', _currentResult, _dropDownMenuItems, changedDropDownMethod),
                           buildTextField('审批备注', _comment, true),
                         ],
                       ),
@@ -446,7 +445,7 @@ class _ManagerAuditVoucherPageState extends State<ManagerAuditVoucherPage> {
                 ],
               ),
               SizedBox(height: 24.0),
-              new Row(
+              widget.status==3?new Container():new Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 mainAxisSize: MainAxisSize.max,
                 crossAxisAlignment: CrossAxisAlignment.end,

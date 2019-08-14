@@ -6,6 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:scoped_model/scoped_model.dart';
 import 'package:atoi/models/models.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:atoi/widgets/build_widget.dart';
 
 class ManagerToComplete extends StatefulWidget {
   @override
@@ -152,13 +153,13 @@ class _ManagerToCompleteState extends State<ManagerToComplete> {
                 mainAxisAlignment: MainAxisAlignment.start,
                 mainAxisSize: MainAxisSize.max,
                 children: <Widget>[
-                  buildRow('设备编号：', equipmentName),
-                  buildRow('设备名称：', equipmentNo),
-                  buildRow('请求科室：', departmentName),
-                  buildRow('请求人员：', requestPerson),
-                  buildRow('请求类型：', requestType),
-                  buildRow('请求状态：', status),
-                  buildRow('请求详情：', detail),
+                  BuildWidget.buildCardRow('设备编号', equipmentName),
+                  BuildWidget.buildCardRow('名称', equipmentNo),
+                  BuildWidget.buildCardRow('请求科室', departmentName),
+                  BuildWidget.buildCardRow('请求人员', requestPerson),
+                  BuildWidget.buildCardRow('请求类型', requestType),
+                  BuildWidget.buildCardRow('请求状态', status),
+                  BuildWidget.buildCardRow('请求详情', detail),
                   new Row(
                     mainAxisAlignment: MainAxisAlignment.end,
                     mainAxisSize: MainAxisSize.max,

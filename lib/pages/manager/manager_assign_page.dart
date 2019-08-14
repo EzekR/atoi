@@ -10,6 +10,7 @@ import 'package:photo_view/photo_view.dart';
 import 'package:scoped_model/scoped_model.dart';
 import 'package:atoi/models/models.dart';
 import 'package:atoi/models/manager_model.dart';
+import 'package:atoi/widgets/build_widget.dart';
 
 class ManagerAssignPage extends StatefulWidget {
   static String tag = 'mananger-assign-page';
@@ -27,6 +28,7 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
   var _isExpandedDetail = false;
   var _isExpandedAssign = false;
   String departureDate = '';
+  String dispatchDate;
 
   Map<String, dynamic> _request = {};
 
@@ -161,6 +163,8 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
   }
 
   void initState() {
+    var time = new DateTime.now();
+    dispatchDate = '${time.year}-${time.month}-${time.day}';
     _dropDownMenuItems = getDropDownMenuItems(_handleMethods);
     _currentMethod = _dropDownMenuItems[0].value;
     _dropDownMenuPris = getDropDownMenuItems(_priorities);
@@ -272,11 +276,28 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
         children: <Widget>[
           new Expanded(
             flex: 4,
+            child: new Wrap(
+              //mainAxisAlignment: MainAxisAlignment.end,
+              alignment: WrapAlignment.end,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              children: <Widget>[
+                new Text(
+                  labelText,
+                  style: new TextStyle(
+                      fontSize: 20.0,
+                      fontWeight: FontWeight.w600
+                  ),
+                )
+              ],
+            ),
+          ),
+          new Expanded(
+            flex: 1,
             child: new Text(
-              labelText,
+              '',
               style: new TextStyle(
                   fontSize: 20.0,
-                  fontWeight: FontWeight.w600
+                  fontWeight: FontWeight.w600,
               ),
             ),
           ),
@@ -314,7 +335,7 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
           ),
         ),
         new Expanded(
-          flex: 6,
+          flex: 5,
           child: new DropdownButton(
             value: currentItem,
             items: dropdownItems,
@@ -383,7 +404,7 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
         'MachineStatus': {
           'ID': AppConstants.MachineStatus[_currentStatus]
         },
-        'ScheduleDate': departureDate,
+        'ScheduleDate': dispatchDate,
         'LeaderComments': _leaderComment.text,
         'RequestType': {
           'ID': AppConstants.RequestType[_currentType]
@@ -422,16 +443,16 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
       List<Widget> _equipList = [];
       for (var _equipment in _equipments) {
         var _list = [
-          buildRow('系统编号:', _equipment['OID']??''),
-          buildRow('设备名称：', _equipment['Name']??''),
-          buildRow('设备型号：', _equipment['EquipmentCode']??''),
-          buildRow('设备序列号：', _equipment['SerialCode']??''),
-          buildRow('使用科室：', _equipment['Department']['Name']??''),
-          buildRow('安装地点：', _equipment['InstalSite']??''),
-          buildRow('设备厂商：', _equipment['Manufacturer']['Name']??''),
-          buildRow('资产等级：', _equipment['AssetLevel']['Name']??''),
-          buildRow('维保状态：', _equipment['WarrantyStatus']??''),
-          buildRow('服务范围：', _equipment['ContractScopeComments']??''),
+          BuildWidget.buildRow('系统编号', _equipment['OID']??''),
+          BuildWidget.buildRow('名称', _equipment['Name']??''),
+          BuildWidget.buildRow('型号', _equipment['EquipmentCode']??''),
+          BuildWidget.buildRow('序列号', _equipment['SerialCode']??''),
+          BuildWidget.buildRow('使用科室', _equipment['Department']['Name']??''),
+          BuildWidget.buildRow('安装地点', _equipment['InstalSite']??''),
+          BuildWidget.buildRow('设备厂商', _equipment['Manufacturer']['Name']??''),
+          BuildWidget.buildRow('资产等级', _equipment['AssetLevel']['Name']??''),
+          BuildWidget.buildRow('维保状态', _equipment['WarrantyStatus']??''),
+          BuildWidget.buildRow('服务范围', _equipment['ContractScopeComments']??''),
           new Padding(padding: EdgeInsets.symmetric(vertical: 8.0))
         ];
         _equipList.addAll(_list);
@@ -497,23 +518,15 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
             mainAxisSize: MainAxisSize.max,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
-              buildRow('类型：', _request['SourceType']),
-              buildRow('主题：', _request['SubjectName']),
-              buildRow(AppConstants.Remark[_request['RequestType']['ID']], _request['FaultDesc']),
-              _request['FaultType']['ID'] != 0?buildRow(AppConstants.RemarkType[_request['RequestType']['ID']], _request['FaultType']['Name']):new Container(),
-              _request['RequestType']['ID'] == 3?buildRow('是否召回：', _request['IsRecall']?'是':'否'):new Container(),
-              buildRow('请求人：', _request['RequestUser']['Name']),
-              buildDropdown('处理方式：', _currentMethod, _dropDownMenuItems, changedDropDownMethod),
-              buildDropdown('紧急程度：', _currentPriority, _dropDownMenuPris, changedDropDownPri),
-              new Padding(
-                padding: EdgeInsets.symmetric(vertical: 5.0),
-                child: new Text('请求附件:',
-                  style: new TextStyle(
-                      fontSize: 20.0,
-                      fontWeight: FontWeight.w600
-                  ),
-                ),
-              ),
+              BuildWidget.buildRow('类型', _request['SourceType']),
+              BuildWidget.buildRow('主题', _request['SubjectName']),
+              BuildWidget.buildRow(AppConstants.Remark[_request['RequestType']['ID']], _request['FaultDesc']),
+              _request['FaultType']['ID'] != 0?BuildWidget.buildRow(AppConstants.RemarkType[_request['RequestType']['ID']], _request['FaultType']['Name']):new Container(),
+              _request['RequestType']['ID'] == 3?BuildWidget.buildRow('是否召回', _request['IsRecall']?'是':'否'):new Container(),
+              BuildWidget.buildRow('请求人', _request['RequestUser']['Name']),
+              BuildWidget.buildDropdown('处理方式', _currentMethod, _dropDownMenuItems, changedDropDownMethod),
+              BuildWidget.buildDropdown('紧急程度', _currentPriority, _dropDownMenuPris, changedDropDownPri),
+              BuildWidget.buildRow('请求附件', ''),
               buildImageColumn(),
               //new Row(
               //  mainAxisAlignment: MainAxisAlignment.start,
@@ -559,50 +572,91 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
           mainAxisSize: MainAxisSize.max,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
-            buildDropdown('派工类型：', _currentType, _dropDownMenuTypes, changedDropDownType),
-            buildDropdown('紧急程度：', _currentLevel, _dropDownMenuLevels, changedDropDownLevel),
-            buildDropdown('机器状态：', _currentStatus, _dropDownMenuStatuses, changedDropDownStatus),
-            _engineerNames.isEmpty?new Container():buildDropdown('工程师姓名：', _currentName, _dropDownMenuNames, changedDropDownName),
-            new MaterialButton(
-              child: new Align(
-                alignment: Alignment(-1.1, 0.0),
-                child: new Text(
-                  '出发时间:',
-                  style: new TextStyle(
-                      fontWeight: FontWeight.w600,
-                      fontSize: 20.0
+            BuildWidget.buildDropdown('派工类型', _currentType, _dropDownMenuTypes, changedDropDownType),
+            BuildWidget.buildDropdown('紧急程度', _currentLevel, _dropDownMenuLevels, changedDropDownLevel),
+            BuildWidget.buildDropdown('机器状态', _currentStatus, _dropDownMenuStatuses, changedDropDownStatus),
+            _engineerNames.isEmpty?new Container():BuildWidget.buildDropdown('工程师姓名', _currentName, _dropDownMenuNames, changedDropDownName),
+            new Padding(
+              padding: EdgeInsets.symmetric(vertical: 5.0),
+              child: new Row(
+                children: <Widget>[
+                  new Expanded(
+                    flex: 4,
+                    child: new Wrap(
+                      alignment: WrapAlignment.end,
+                      crossAxisAlignment: WrapCrossAlignment.center,
+                      children: <Widget>[
+                        new Text(
+                          '出发时间',
+                          style: new TextStyle(
+                              fontSize: 20.0,
+                              fontWeight: FontWeight.w600
+                          ),
+                        )
+                      ],
+                    ),
                   ),
-                ),
+                  new Expanded(
+                    flex: 1,
+                    child: new Text(
+                      '：',
+                      style: new TextStyle(
+                        fontSize: 20.0,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                  new Expanded(
+                    flex: 4,
+                    child: new Text(
+                      dispatchDate,
+                      style: new TextStyle(
+                          fontSize: 20.0,
+                          fontWeight: FontWeight.w400,
+                          color: Colors.black54
+                      ),
+                    ),
+                  ),
+                  new Expanded(
+                    flex: 2,
+                    child: new IconButton(
+                      color: AppConstants.AppColors['btn_main'],
+                      icon: Icon(Icons.calendar_today),
+                      onPressed: () {
+                        showDatePicker(
+                            context: context,
+                            initialDate: new DateTime.now(),
+                            firstDate: new DateTime.now().subtract(new Duration(days: 30)), // 减 30 天
+                            lastDate: new DateTime.now().add(new Duration(days: 30)),       // 加 30 天
+                            locale: Locale('zh')
+                        ).then((DateTime val) {
+                          print(val); // 2018-07-12 00:00:00.000
+                          var date = '${val.year}-${val.month}-${val.day}';
+                          setState(() {
+                            dispatchDate = date;
+                          });
+                        }).catchError((err) {
+                          print(err);
+                        });
+                      },
+                    ),
+                  )
+                ],
               ),
-              onPressed: () {
-                showDatePicker(
-                    context: context,
-                    initialDate: new DateTime.now(),
-                    firstDate: new DateTime.now().subtract(new Duration(days: 30)), // 减 30 天
-                    lastDate: new DateTime.now().add(new Duration(days: 30)),       // 加 30 天
-                    locale: Locale('zh')
-                ).then((DateTime val) {
-                  print(val); // 2018-07-12 00:00:00.000
-                  var date = '${val.year}-${val.month}-${val.day}';
-                  setState(() {
-                    departureDate = date;
-                  });
-                }).catchError((err) {
-                  print(err);
-                });
-              },
             ),
-            departureDate != ''?new Text(departureDate):new Container(),
             new Padding(
               padding: EdgeInsets.symmetric(vertical: 5.0),
               child: new Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
-                  new Text(
-                    '主管备注：',
-                    style: new TextStyle(
-                        fontSize: 20.0,
-                        fontWeight: FontWeight.w600
+                  new Align(
+                    alignment: Alignment(-0.7, 0),
+                    child: new Text(
+                      '主管备注',
+                      style: new TextStyle(
+                          fontSize: 20.0,
+                          fontWeight: FontWeight.w600
+                      ),
                     ),
                   ),
                   new TextField(

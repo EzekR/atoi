@@ -261,8 +261,8 @@ class _OtherRequestState extends State<OtherRequest> {
                             padding: EdgeInsets.symmetric(horizontal: 12.0),
                             child: new Column(
                               children: <Widget>[
-                                buildRow('类型：', '其他服务'),
-                                buildRow('请求人：', '超级管理员'),
+                                buildRow('类型', '其他服务'),
+                                buildRow('请求人', '超级管理员'),
                                 buildRow('主题', '其他服务'),
                                 new Padding(
                                   padding: EdgeInsets.symmetric(vertical: 5.0),
@@ -271,7 +271,7 @@ class _OtherRequestState extends State<OtherRequest> {
                                       new Expanded(
                                         flex: 4,
                                         child: new Text(
-                                          '备注：',
+                                          '备注',
                                           style: new TextStyle(
                                               fontSize: 20.0,
                                               fontWeight: FontWeight.w600
@@ -292,7 +292,7 @@ class _OtherRequestState extends State<OtherRequest> {
                                   child: new Row(
                                     children: <Widget>[
                                       new Text(
-                                        '添加附件：',
+                                        '添加附件',
                                         style: new TextStyle(
                                             fontSize: 20.0,
                                             fontWeight: FontWeight.w600

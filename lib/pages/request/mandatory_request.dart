@@ -10,6 +10,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:atoi/utils/http_request.dart';
 import 'package:atoi/utils/constants.dart';
+import 'package:atoi/widgets/build_widget.dart';
 
 class MandatoryRequest extends StatefulWidget{
   static String tag = 'mandatory-request';
@@ -335,16 +336,16 @@ class _MandatoryRequestState extends State<MandatoryRequest> {
                             padding: EdgeInsets.symmetric(horizontal: 12.0),
                             child: _equipment.isEmpty?new Center(child: new Text('请选择设备')):new Column(
                               children: <Widget>[
-                                buildRow('系统编号:', _equipment['OID']??''),
-                                buildRow('设备名称：', _equipment['Name']??''),
-                                buildRow('设备型号：', _equipment['EquipmentCode']??''),
-                                buildRow('设备序列号：', _equipment['SerialCode']??''),
-                                buildRow('使用科室：', _equipment['Department']['Name']??''),
-                                buildRow('安装地点：', _equipment['InstalSite']??''),
-                                buildRow('设备厂商：', _equipment['Manufacturer']['Name']??''),
-                                buildRow('资产等级：', _equipment['AssetLevel']['Name']??''),
-                                buildRow('维保状态：', _equipment['WarrantyStatus']??''),
-                                buildRow('服务范围：', _equipment['ContractScopeComments']??''),
+                                BuildWidget.buildRow('系统编号:', _equipment['OID']??''),
+                                BuildWidget.buildRow('名称', _equipment['Name']??''),
+                                BuildWidget.buildRow('型号', _equipment['EquipmentCode']??''),
+                                BuildWidget.buildRow('序列号', _equipment['SerialCode']??''),
+                                BuildWidget.buildRow('使用科室', _equipment['Department']['Name']??''),
+                                BuildWidget.buildRow('安装地点', _equipment['InstalSite']??''),
+                                BuildWidget.buildRow('设备厂商', _equipment['Manufacturer']['Name']??''),
+                                BuildWidget.buildRow('资产等级', _equipment['AssetLevel']['Name']??''),
+                                BuildWidget.buildRow('维保状态', _equipment['WarrantyStatus']??''),
+                                BuildWidget.buildRow('服务范围', _equipment['ContractScopeComments']??''),
                                 new Padding(padding: EdgeInsets.symmetric(vertical: 8.0))
                               ],
                             ),
@@ -373,9 +374,9 @@ class _MandatoryRequestState extends State<MandatoryRequest> {
                             padding: EdgeInsets.symmetric(horizontal: 12.0),
                             child: new Column(
                               children: <Widget>[
-                                buildRow('类型：', '强检'),
-                                buildRow('请求人：', _roleName),
-                                buildRow('主题', _equipment.isEmpty?'--强检':'${_equipment['Name']}--强检'),
+                                BuildWidget.buildRow('类型', '强检'),
+                                BuildWidget.buildRow('请求人', _roleName),
+                                BuildWidget.buildRow('主题', _equipment.isEmpty?'--强检':'${_equipment['Name']}--强检'),
                                 new Padding(
                                   padding: EdgeInsets.symmetric(vertical: 5.0),
                                   child: new Row(
@@ -383,7 +384,7 @@ class _MandatoryRequestState extends State<MandatoryRequest> {
                                       new Expanded(
                                         flex: 4,
                                         child: new Text(
-                                          '强检原因：',
+                                          '强检原因',
                                           style: new TextStyle(
                                               fontSize: 20.0,
                                               fontWeight: FontWeight.w600
@@ -408,7 +409,7 @@ class _MandatoryRequestState extends State<MandatoryRequest> {
                                       new Expanded(
                                         flex: 4,
                                         child: new Text(
-                                          '是否召回：',
+                                          '是否召回',
                                           style: new TextStyle(
                                               fontSize: 20.0,
                                               fontWeight: FontWeight.w600
@@ -433,7 +434,7 @@ class _MandatoryRequestState extends State<MandatoryRequest> {
                                       new Expanded(
                                         flex: 4,
                                         child: new Text(
-                                          '强检要求：',
+                                          '强检要求',
                                           style: new TextStyle(
                                               fontSize: 20.0,
                                               fontWeight: FontWeight.w600
@@ -454,7 +455,7 @@ class _MandatoryRequestState extends State<MandatoryRequest> {
                                   child: new Row(
                                     children: <Widget>[
                                       new Text(
-                                        '添加附件：',
+                                        '添加附件',
                                         style: new TextStyle(
                                             fontSize: 20.0,
                                             fontWeight: FontWeight.w600

@@ -35,13 +35,14 @@ class _LoginPageState extends State<LoginPage> {
     setState(() {
       _loading = !_loading;
     });
-    SharedPreferences prefs = await SharedPreferences.getInstance();
+    Future<SharedPreferences> prefs = SharedPreferences.getInstance();
     if (_data['ResultCode'] == '00') {
       print(_data);
-      prefs.setInt('userID', _data['Data']['ID']);
-      prefs.setInt('role', _data['Data']['Role']['ID']);
-      prefs.setString('roleName', _data['Data']['Role']['Name']);
-      prefs.setString('userName', _data['Data']['Name']);
+      var _prefs = await prefs;
+      _prefs.setInt('userID', _data['Data']['ID']);
+      _prefs.setInt('role', _data['Data']['Role']['ID']);
+      _prefs.setString('roleName', _data['Data']['Role']['Name']);
+      _prefs.setString('userName', _data['Data']['Name']);
       switch (_data['Data']['Role']['ID']) {
         case 1:
           Navigator.of(context).pushNamed(HomePage.tag);
@@ -150,8 +151,8 @@ class _LoginPageState extends State<LoginPage> {
             password,
             SizedBox(height: 24.0),
             loginButton,
-            userRegister,
-            forgotLabel,
+            //userRegister,
+            //forgotLabel,
           ],
         ),
       ),

@@ -86,7 +86,14 @@ class _SignaturePageState extends State<SignaturePage> {
                         setState(() {
                           _img = data;
                         });
-                        debugPrint("onPressed " + encoded);
+                        if (data==null) {
+                          showDialog(context: context,
+                            builder: (context) => AlertDialog(
+                              title: new Text('签名不可为空'),
+                            )
+                          );
+                          return;
+                        }
                         Navigator.pop(context, _img);
                       },
                       child: Text("保存",

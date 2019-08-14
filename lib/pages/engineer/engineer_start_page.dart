@@ -3,6 +3,7 @@ import 'package:atoi/utils/http_request.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:atoi/utils/constants.dart';
+import 'package:atoi/widgets/build_widget.dart';
 
 class EngineerStartPage extends StatefulWidget {
   static String tag = 'engineer-start-page';
@@ -132,6 +133,28 @@ class _EngineerStartPageState extends State<EngineerStartPage> {
     );
   }
 
+  List<Widget> buildEquipments() {
+    var _equipments = _dispatch['Request']['Equipments'];
+    List<Widget> _list = [];
+    for(var _equipment in _equipments) {
+      var equipList = [
+        BuildWidget.buildRow('系统编号:', _equipment['OID']??''),
+        BuildWidget.buildRow('名称', _equipment['Name']??''),
+        BuildWidget.buildRow('型号', _equipment['EquipmentCode']??''),
+        BuildWidget.buildRow('序列号', _equipment['SerialCode']??''),
+        BuildWidget.buildRow('使用科室', _equipment['Department']['Name']??''),
+        BuildWidget.buildRow('安装地点', _equipment['InstalSite']??''),
+        BuildWidget.buildRow('设备厂商', _equipment['Manufacturer']['Name']??''),
+        BuildWidget.buildRow('资产等级', _equipment['AssetLevel']['Name']??''),
+        BuildWidget.buildRow('维保状态', _equipment['WarrantyStatus']??''),
+        BuildWidget.buildRow('服务范围', _equipment['ContractScope']['Name']??''),
+        new Divider()
+      ];
+      _list.addAll(equipList);
+    }
+    return _list;
+  }
+
   @override
   Widget build(BuildContext context){
     return new Scaffold(
@@ -199,18 +222,7 @@ class _EngineerStartPageState extends State<EngineerStartPage> {
                     body: new Padding(
                       padding: EdgeInsets.symmetric(horizontal: 8.0),
                       child: new Column(
-                        children: <Widget>[
-                          buildRow('系统编号:', _dispatch['Request']['Equipments'][0]['OID']??''),
-                          buildRow('设备名称：', _dispatch['Request']['Equipments'][0]['Name']??''),
-                          buildRow('设备型号：', _dispatch['Request']['Equipments'][0]['EquipmentCode']??''),
-                          buildRow('设备序列号：', _dispatch['Request']['Equipments'][0]['SerialCode']??''),
-                          buildRow('使用科室：', _dispatch['Request']['Equipments'][0]['Department']['Name']??''),
-                          buildRow('安装地点：', _dispatch['Request']['Equipments'][0]['InstalSite']??''),
-                          buildRow('设备厂商：', _dispatch['Request']['Equipments'][0]['Manufacturer']['Name']??''),
-                          buildRow('资产等级：', _dispatch['Request']['Equipments'][0]['AssetLevel']['Name']??''),
-                          buildRow('维保状态：', _dispatch['Request']['Equipments'][0]['WarrantyStatus']??''),
-                          buildRow('服务范围：', _dispatch['Request']['Equipments'][0]['ContractScope']['Name']??''),
-                        ],
+                        children: buildEquipments(),
                       ),
                     ),
                     isExpanded: _isExpandedBasic,
@@ -239,16 +251,16 @@ class _EngineerStartPageState extends State<EngineerStartPage> {
                         mainAxisSize: MainAxisSize.max,
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: <Widget>[
-                          buildRow('服务申请编号：', _dispatch['Request']['OID']),
-                          buildRow('类型：', _dispatch['Request']['SourceType']),
-                          buildRow('主题：', '${_dispatch['Request']['EquipmentName']}--${_dispatch['Request']['RequestType']['Name']}'),
-                          buildRow(AppConstants.Remark[_dispatch['Request']['RequestType']['ID']], _dispatch['Request']['FaultDesc']),
-                          _dispatch['Request']['FaultType']['ID'] != 0?buildRow(AppConstants.RemarkType[_dispatch['Request']['RequestType']['ID']], _dispatch['Request']['FaultType']['Name']):new Container(),
-                          buildRow('请求人：', _dispatch['Request']['RequestUser']['Name']),
-                          buildRow('处理方式：', _dispatch['Request']['DealType']['Name']),
-                          buildRow('紧急程度：', _dispatch['Request']['Priority']['Name']),
-                          buildRow('当前状态：', _dispatch['Request']['Status']['Name']),
-                          buildRow('请求来源：', _dispatch['Request']['Source']['Name']),
+                          BuildWidget.buildRow('服务申请编号', _dispatch['Request']['OID']),
+                          BuildWidget.buildRow('类型', _dispatch['Request']['SourceType']),
+                          BuildWidget.buildRow('主题', '${_dispatch['Request']['EquipmentName']}--${_dispatch['Request']['RequestType']['Name']}'),
+                          BuildWidget.buildRow(AppConstants.Remark[_dispatch['Request']['RequestType']['ID']], _dispatch['Request']['FaultDesc']),
+                          _dispatch['Request']['FaultType']['ID'] != 0?BuildWidget.buildRow(AppConstants.RemarkType[_dispatch['Request']['RequestType']['ID']], _dispatch['Request']['FaultType']['Name']):new Container(),
+                          BuildWidget.buildRow('请求人', _dispatch['Request']['RequestUser']['Name']),
+                          BuildWidget.buildRow('处理方式', _dispatch['Request']['DealType']['Name']),
+                          BuildWidget.buildRow('紧急程度', _dispatch['Request']['Priority']['Name']),
+                          BuildWidget.buildRow('当前状态', _dispatch['Request']['Status']['Name']),
+                          BuildWidget.buildRow('请求来源', _dispatch['Request']['Source']['Name']),
                         ],
                       ),
                     ),
@@ -279,12 +291,12 @@ class _EngineerStartPageState extends State<EngineerStartPage> {
                         mainAxisSize: MainAxisSize.max,
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: <Widget>[
-                          buildRow('派工类型：', _dispatch['RequestType']['Name']),
-                          buildRow('紧急程度：', _dispatch['Urgency']['Name']),
-                          buildRow('机器状态：', _dispatch['MachineStatus']['Name']),
-                          buildRow('工程师姓名：', _dispatch['Engineer']['Name']),
-                          buildRow('主管备注：', _dispatch['LeaderComments']),
-                          buildRow('出发时间：', _dispatch['ScheduleDate']),
+                          BuildWidget.buildRow('派工类型', _dispatch['RequestType']['Name']),
+                          BuildWidget.buildRow('紧急程度', _dispatch['Urgency']['Name']),
+                          BuildWidget.buildRow('机器状态', _dispatch['MachineStatus']['Name']),
+                          BuildWidget.buildRow('工程师姓名', _dispatch['Engineer']['Name']),
+                          BuildWidget.buildRow('主管备注', _dispatch['LeaderComments']),
+                          BuildWidget.buildRow('出发时间', AppConstants.TimeForm(_dispatch['ScheduleDate'], 'yyyy-mm-dd')),
                         ],
                       ),
                     ),

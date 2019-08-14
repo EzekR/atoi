@@ -153,27 +153,27 @@ class AppConstants {
 
   static List<String> Remark = [
     '',
-    '故障描述：',
-    '保养要求：' ,
-    '强检要求：' ,
-    '巡检要求：' ,
-    '校正要求：' ,
-    '备注：' ,
-    '不良事件描述：',
-    '合同备注：' ,
-    '验收安装备注：' ,
-    '调拨备注：' ,
-    '借用备注：' ,
-    '盘点备注：' ,
-    '报废备注：' ,
-    '其他服务备注：'
+    '故障描述',
+    '保养要求' ,
+    '强检要求' ,
+    '巡检要求' ,
+    '校正要求' ,
+    '备注' ,
+    '不良事件描述',
+    '合同备注' ,
+    '验收安装备注' ,
+    '调拨备注' ,
+    '借用备注' ,
+    '盘点备注' ,
+    '报废备注' ,
+    '其他服务备注'
   ];
 
   static List<String> RemarkType = [
     '',
-    '故障分类：',
-    '保养类型：' ,
-    '强检原因：' ,
+    '故障分类',
+    '保养类型' ,
+    '强检原因' ,
     '' ,
     '' ,
     '' ,
@@ -195,4 +195,15 @@ class AppConstants {
       return '${_date.year}-${_date.month}-${_date.day} ${_date.hour}:${_date.minute}:${_date.second}';
     }
   }
+
+  static Map<String, Color> AppColors = {
+    'appbar_prime_m': Color(0xff2c5c85),
+    'appbar_accent_m': Color(0xff4e8fa),
+    'appbar_prime_e': Color(0xff3b4674),
+    'appbar_accent_e': Color(0xff2c5c85),
+    'btn_invalid': Colors.grey,
+    'btn_main': Color(0xff2E94B9),
+    'btn_success': Color(0xffF0B775),
+    'btn_cancel': Color(0xffD25565)
+  };
 }

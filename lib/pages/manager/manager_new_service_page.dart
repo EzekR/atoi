@@ -197,14 +197,14 @@ class _ManagerNewServicePageState extends State<ManagerNewServicePage> {
                           padding: EdgeInsets.symmetric(horizontal: 12.0),
                           child: new Column(
                             children: <Widget>[
-                              buildRow('设备编号：', _result['equipNo']),
-                              buildRow('设备名称：', _result['name']),
-                              buildRow('使用科室：', _result['department']),
-                              buildRow('设备厂商：', _result['manufacturer']),
-                              buildRow('资产等级：', _result['equipLevel']),
-                              buildRow('设备型号：', _result['model']),
-                              buildRow('安装地点：', _result['location']),
-                              buildRow('保修状况：', _result['guarantee']),
+                              buildRow('设备编号', _result['equipNo']),
+                              buildRow('名称', _result['name']),
+                              buildRow('使用科室', _result['department']),
+                              buildRow('设备厂商', _result['manufacturer']),
+                              buildRow('资产等级', _result['equipLevel']),
+                              buildRow('型号', _result['model']),
+                              buildRow('安装地点', _result['location']),
+                              buildRow('保修状况', _result['guarantee']),
                               new Padding(padding: EdgeInsets.symmetric(vertical: 8.0))
                             ],
                           ),
@@ -233,8 +233,8 @@ class _ManagerNewServicePageState extends State<ManagerNewServicePage> {
                           padding: EdgeInsets.symmetric(horizontal: 12.0),
                           child: new Column(
                             children: <Widget>[
-                              buildRow('类型：', widget.title),
-                              buildRow('请求人：', '超级管理员'),
+                              buildRow('类型', widget.title),
+                              buildRow('请求人', '超级管理员'),
                               buildRow('主题', widget.title),
                               widget.type == 'repair'?new Padding(
                                 padding: EdgeInsets.symmetric(vertical: 5.0),
@@ -243,7 +243,7 @@ class _ManagerNewServicePageState extends State<ManagerNewServicePage> {
                                     new Expanded(
                                       flex: 4,
                                       child: new Text(
-                                        '故障分类：',
+                                        '故障分类',
                                         style: new TextStyle(
                                             fontSize: 20.0,
                                             fontWeight: FontWeight.w600

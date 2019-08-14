@@ -8,6 +8,7 @@ import 'package:atoi/utils/constants.dart';
 import 'package:atoi/utils/http_request.dart';
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:atoi/widgets/build_widget.dart';
 
 class UserRepairPage extends StatefulWidget {
   static String tag = 'user-repair-page';
@@ -76,9 +77,11 @@ class _UserRepairPageState extends State<UserRepairPage> {
         source: ImageSource.camera,
         maxWidth: 800.0
     );
-    setState(() {
-      _imageList.add(image);
-    });
+    if (image != null) {
+      setState(() {
+        _imageList.add(image);
+      });
+    }
   }
 
   Future uploadImage() async {
@@ -342,14 +345,14 @@ class _UserRepairPageState extends State<UserRepairPage> {
                       padding: EdgeInsets.symmetric(horizontal: 8.0),
                       child: new Column(
                         children: <Widget>[
-                          buildRow('设备系统编号：', widget.equipment['OID']),
-                          buildRow('设备名称：', widget.equipment['Name']),
-                          buildRow('使用科室：', widget.equipment['Department']['Name']),
-                          buildRow('设备厂商：', widget.equipment['Manufacturer']['Name']),
-                          buildRow('资产等级：', widget.equipment['AssetLevel']['Name']),
-                          buildRow('设备型号：', widget.equipment['EquipmentCode']),
-                          buildRow('安装地点：', widget.equipment['InstalSite']),
-                          buildRow('保修状况：', widget.equipment['WarrantyStatus']),
+                          BuildWidget.buildRow('设备系统编号', widget.equipment['OID']),
+                          BuildWidget.buildRow('名称', widget.equipment['Name']),
+                          BuildWidget.buildRow('使用科室', widget.equipment['Department']['Name']),
+                          BuildWidget.buildRow('设备厂商', widget.equipment['Manufacturer']['Name']),
+                          BuildWidget.buildRow('资产等级', widget.equipment['AssetLevel']['Name']),
+                          BuildWidget.buildRow('型号', widget.equipment['EquipmentCode']),
+                          BuildWidget.buildRow('安装地点', widget.equipment['InstalSite']),
+                          BuildWidget.buildRow('保修状况', widget.equipment['WarrantyStatus']),
                         ],
                       ),
                     ),
@@ -379,7 +382,7 @@ class _UserRepairPageState extends State<UserRepairPage> {
                         mainAxisSize: MainAxisSize.max,
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: <Widget>[
-                          buildInput('故障描述：', _describe),
+                          buildInput('故障描述', _describe),
                           new Padding(
                             padding: EdgeInsets.symmetric(vertical: 5.0),
                             child: new Row(
@@ -387,7 +390,7 @@ class _UserRepairPageState extends State<UserRepairPage> {
                                 new Expanded(
                                   flex: 4,
                                   child: new Text(
-                                    '故障分类：',
+                                    '故障分类',
                                     style: new TextStyle(
                                         fontSize: 20.0,
                                         fontWeight: FontWeight.w600

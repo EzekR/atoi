@@ -3,12 +3,14 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:atoi/utils/http_request.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:atoi/utils/constants.dart';
+import 'package:atoi/widgets/build_widget.dart';
 
 class ManagerAuditReportPage extends StatefulWidget {
   static String tag = 'manager-audit-report-page';
-  ManagerAuditReportPage({Key key, this.reportId, this.request}): super(key: key);
+  ManagerAuditReportPage({Key key, this.reportId, this.request, this.status}): super(key: key);
   final int reportId;
   final Map request;
+  final int status;
 
   @override
   _ManagerAuditReportPageState createState() => new _ManagerAuditReportPageState();
@@ -37,8 +39,8 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
 
   void initState(){
     _dropDownMenuItems = getDropDownMenuItems(_serviceResults);
-    getReport();
     getDispatch();
+    getReport();
     super.initState();
   }
 
@@ -263,12 +265,12 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
     List<Widget> _list = [];
     for (var _acc in _accessory) {
       var _accList = [
-        buildRow('名称：', _acc['Name']),
-        buildRow('来源：', _acc['Source']['Name']),
-        buildRow('外部供应商：', _acc['Supplier']['Name']),
-        buildRow('新装零件编号：', _acc['NewSerialCode']),
-        buildRow('金额（元/件）：', _acc['Amount']),
-        buildRow('数量：', _acc['Qty']),
+        BuildWidget.buildRow('名称', _acc['Name']),
+        BuildWidget.buildRow('来源', _acc['Source']['Name']),
+        BuildWidget.buildRow('外部供应商', _acc['Supplier']['Name']),
+        BuildWidget.buildRow('新装零件编号', _acc['NewSerialCode']),
+        BuildWidget.buildRow('金额（元/件）', _acc['Amount']),
+        BuildWidget.buildRow('数量', _acc['Qty']),
         new Divider()
       ];
       _list.addAll(_accList);
@@ -281,7 +283,9 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
     // TODO: implement build
     return new Scaffold(
       appBar: new AppBar(
-        title: new Text('审核报告'),
+        title: new Text(
+            widget.status==3?'查看报告':'审核报告'
+        ),
         elevation: 0.7,
         flexibleSpace: Container(
           decoration: BoxDecoration(
@@ -303,7 +307,7 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
           ),
         ],
       ),
-      body: _report.isEmpty?new Center(child: SpinKitRotatingPlain(color: Colors.blue,),):new Padding(
+      body: _report.isEmpty||_equipment.isEmpty?new Center(child: SpinKitRotatingPlain(color: Colors.blue,),):new Padding(
         padding: EdgeInsets.symmetric(vertical: 5.0),
         child: new Card(
           child: new ListView(
@@ -350,16 +354,16 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
                       padding: EdgeInsets.symmetric(horizontal: 8.0),
                       child: new Column(
                         children: <Widget>[
-                          buildRow('系统编号:', _equipment['OID']??''),
-                          buildRow('设备名称：', _equipment['Name']??''),
-                          buildRow('设备型号：', _equipment['EquipmentCode']??''),
-                          buildRow('设备序列号：', _equipment['SerialCode']??''),
-                          buildRow('使用科室：', _equipment['Department']['Name']??''),
-                          buildRow('安装地点：', _equipment['InstalSite']??''),
-                          buildRow('设备厂商：', _equipment['Manufacturer']['Name']??''),
-                          buildRow('资产等级：', _equipment['AssetLevel']['Name']??''),
-                          buildRow('维保状态：', _equipment['WarrantyStatus']??''),
-                          buildRow('服务范围：', _equipment['ContractScopeComments']??''),
+                          BuildWidget.buildRow('系统编号', _equipment['OID']??''),
+                          BuildWidget.buildRow('名称', _equipment['Name']??''),
+                          BuildWidget.buildRow('型号', _equipment['EquipmentCode']??''),
+                          BuildWidget.buildRow('序列号', _equipment['SerialCode']??''),
+                          BuildWidget.buildRow('使用科室', _equipment['Department']['Name']??''),
+                          BuildWidget.buildRow('安装地点', _equipment['InstalSite']??''),
+                          BuildWidget.buildRow('设备厂商', _equipment['Manufacturer']['Name']??''),
+                          BuildWidget.buildRow('资产等级', _equipment['AssetLevel']['Name']??''),
+                          BuildWidget.buildRow('维保状态', _equipment['WarrantyStatus']??''),
+                          BuildWidget.buildRow('服务范围', _equipment['ContractScopeComments']??''),
                         ],
                       ),
                     ),
@@ -387,13 +391,13 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
                       padding: EdgeInsets.symmetric(horizontal: 8.0),
                       child: new Column(
                         children: <Widget>[
-                          buildRow('派工单编号：', widget.request['OID']),
-                          buildRow('紧急程度：', widget.request['Urgency']['Name']),
-                          buildRow('派工类型：', widget.request['RequestType']['Name']),
-                          buildRow('机器状态：', widget.request['MachineStatus']['Name']),
-                          buildRow('工程师姓名：', _dispatch['Engineer']['Name']),
-                          buildRow('出发时间：',AppConstants.TimeForm(widget.request['ScheduleDate'], 'yyyy-mm-dd')),
-                          buildRow('备注：', _dispatch['LeaderComments']),
+                          BuildWidget.buildRow('派工单编号', widget.request['OID']),
+                          BuildWidget.buildRow('紧急程度', widget.request['Urgency']['Name']),
+                          BuildWidget.buildRow('派工类型', widget.request['RequestType']['Name']),
+                          BuildWidget.buildRow('机器状态', widget.request['MachineStatus']['Name']),
+                          BuildWidget.buildRow('工程师姓名', _dispatch['Engineer']['Name']),
+                          BuildWidget.buildRow('出发时间',AppConstants.TimeForm(widget.request['ScheduleDate'], 'yyyy-mm-dd')),
+                          BuildWidget.buildRow('备注', _dispatch['LeaderComments']),
                         ],
                       ),
                     ),
@@ -422,17 +426,17 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
                       child: new Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: <Widget>[
-                          buildRow('作业报告编号：', _report['OID']),
-                          buildRow('作业报告类型：', _report['Type']['Name']),
-                          buildRow('发生频率：', _report['FaultFrequency']),
-                          buildRow('系统状态：', _report['Dispatch']['MachineStatus']['Name']??'正常'),
-                          buildRow('错误代码：', _report['FaultCode']),
-                          buildRow('故障描述：', _report['FaultDesc']),
-                          buildRow('分析原因：', _report['SolutionCauseAnalysis']),
-                          buildRow('处理方法：', _report['SolutionWay']),
-                          buildRow('未解决备注：', _report['SolutionUnsolvedComments']),
-                          buildRow('误工说明：', _report['DelayReason']),
-                          buildDropdown('作业结果：', _currentResult, _dropDownMenuItems, changedDropDownMethod),
+                          BuildWidget.buildRow('作业报告编号', _report['OID']),
+                          BuildWidget.buildRow('作业报告类型', _report['Type']['Name']),
+                          BuildWidget.buildRow('发生频率', _report['FaultFrequency']),
+                          BuildWidget.buildRow('系统状态', _report['Dispatch']['MachineStatus']['Name']??'正常'),
+                          BuildWidget.buildRow('错误代码', _report['FaultCode']),
+                          BuildWidget.buildRow('故障描述', _report['FaultDesc']),
+                          BuildWidget.buildRow('分析原因', _report['SolutionCauseAnalysis']),
+                          BuildWidget.buildRow('处理方法', _report['SolutionWay']),
+                          BuildWidget.buildRow('未解决备注', _report['SolutionUnsolvedComments']),
+                          BuildWidget.buildRow('误工说明', _report['DelayReason']),
+                          BuildWidget.buildDropdown('作业结果', _currentResult, _dropDownMenuItems, changedDropDownMethod),
                           buildTextField('审批备注', _comment, true),
                         ],
                       ),
@@ -468,7 +472,7 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
                 ],
               ),
               SizedBox(height: 24.0),
-              new Row(
+              widget.status==3?new Container():new Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 mainAxisSize: MainAxisSize.max,
                 crossAxisAlignment: CrossAxisAlignment.end,

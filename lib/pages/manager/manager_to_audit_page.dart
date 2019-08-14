@@ -6,6 +6,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:atoi/models/models.dart';
 import 'package:scoped_model/scoped_model.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:atoi/widgets/build_widget.dart';
+import 'package:atoi/utils/constants.dart';
 
 class ManagerToAuditPage extends StatefulWidget {
   static String tag = 'manager-to-audit-page';
@@ -45,18 +47,22 @@ class _ManagerToAuditPageState extends State<ManagerToAuditPage> {
   }
 
   Color iconColor(int statusId) {
-    if (statusId == 0) {
-      return Colors.grey;
-    } else {
-      if (statusId == 2) {
-        return new Color(0xff2E94B9);
-      } else {
-        if (statusId == 3) {
-          return new Color(0xffF0B775);
-        } else {
-          return Colors.grey;
-        }
-      }
+    switch (statusId) {
+      case 0:
+        return Colors.grey;
+        break;
+      case 1:
+        return AppConstants.AppColors['btn_main'];
+        break;
+      case 2:
+        return AppConstants.AppColors['btn_main'];
+        break;
+      case 3:
+        return AppConstants.AppColors['btn_success'];
+        break;
+      default:
+        return Colors.grey;
+        break;
     }
   }
 
@@ -79,14 +85,14 @@ class _ManagerToAuditPageState extends State<ManagerToAuditPage> {
                   size: 40.0,
               ),
               title: Text(
-                "派工单号：$dispatchOID",
+                "派工单编号：$dispatchOID",
                 style: new TextStyle(
                     fontSize: 16.0,
                     color: Theme.of(context).primaryColor
                 ),
               ),
               //subtitle: Text(
-              //  "结束时间：$_format",
+              //  "结束时间$_format",
               //  style: new TextStyle(
               //      color: Theme.of(context).accentColor
               //  ),
@@ -99,118 +105,24 @@ class _ManagerToAuditPageState extends State<ManagerToAuditPage> {
                 mainAxisAlignment: MainAxisAlignment.start,
                 mainAxisSize: MainAxisSize.max,
                 children: <Widget>[
-                  new Row(
-                    children: <Widget>[
-                      new Text(
-                        '设备编号：',
-                        style: new TextStyle(
-                            fontSize: 16.0,
-                            fontWeight: FontWeight.w600
-                        ),
-                      ),
-                      new Text(
-                        deviceName,
-                        style: new TextStyle(
-                            fontSize: 16.0,
-                            fontWeight: FontWeight.w400,
-                            color: Colors.grey
-                        ),
-                      )
-                    ],
-                  ),
-                  new Row(
-                    children: <Widget>[
-                      new Text(
-                        '设备名称：',
-                        style: new TextStyle(
-                            fontSize: 16.0,
-                            fontWeight: FontWeight.w600
-                        ),
-                      ),
-                      new Text(
-                        deviceNo,
-                        style: new TextStyle(
-                            fontSize: 16.0,
-                            fontWeight: FontWeight.w400,
-                            color: Colors.grey
-                        ),
-                      )
-                    ],
-                  ),
-                  new Row(
-                    children: <Widget>[
-                      new Text(
-                        '派工类型：',
-                        style: new TextStyle(
-                            fontSize: 16.0,
-                            fontWeight: FontWeight.w600
-                        ),
-                      ),
-                      new Text(
-                        dispatchType,
-                        style: new TextStyle(
-                            fontSize: 16.0,
-                            fontWeight: FontWeight.w400,
-                            color: Colors.grey
-                        ),
-                      )
-                    ],
-                  ),
-                  new Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.max,
-                    children: <Widget>[
-                      new Text(
-                        '紧急程度：',
-                        style: new TextStyle(
-                            fontSize: 16.0,
-                            fontWeight: FontWeight.w600
-                        ),
-                      ),
-                      new Text(
-                        urgency,
-                        style: new TextStyle(
-                            fontSize: 16.0,
-                            fontWeight: FontWeight.w400,
-                            color: Colors.grey
-                        ),
-                      ),
-                    ],
-                  ),
-                  new Row(
-                    children: <Widget>[
-                      new Text(
-                        '请求单号：',
-                        style: new TextStyle(
-                            fontSize: 16.0,
-                            fontWeight: FontWeight.w600
-                        ),
-                      ),
-                      new Text(
-                        requestOID,
-                        style: new TextStyle(
-                            fontSize: 16.0,
-                            fontWeight: FontWeight.w400,
-                            color: Colors.grey
-                        ),
-                      ),
-                    ],
-                  ),
+                  BuildWidget.buildCardRow('设备编号', deviceName),
+                  BuildWidget.buildCardRow('名称', deviceNo),
+                  BuildWidget.buildCardRow('派工类型', dispatchType),
+                  BuildWidget.buildCardRow('紧急程度', urgency),
+                  BuildWidget.buildCardRow('请求单号', requestOID),
+                  BuildWidget.buildCardRow('请求状态', dispatch['Status']['Name']),
                   new Row(
                     mainAxisAlignment: MainAxisAlignment.end,
                     mainAxisSize: MainAxisSize.max,
                     children: <Widget>[
                       new RaisedButton(
                         onPressed: (){
-                          if (journalStatus['ID'] == 2) {
-                            Navigator.of(context).push(
-                                new MaterialPageRoute(builder: (_) {
-                                  return new ManagerAuditVoucherPage(
-                                      journalId: dispatchId, request: dispatch);
-                                }));
-                          } else {
-                            null;
-                          }
+                          journalStatus['ID']==0?null:
+                          Navigator.of(context).push(
+                              new MaterialPageRoute(builder: (_) {
+                                return new ManagerAuditVoucherPage(
+                                  journalId: dispatchId, request: dispatch, status: dispatch['DispatchJournal']['Status']['ID'],);
+                              }));
                         },
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(24),
@@ -236,9 +148,8 @@ class _ManagerToAuditPageState extends State<ManagerToAuditPage> {
                       ),
                       new RaisedButton(
                         onPressed: (){
-                          //Navigator.of(context).pushNamed(ManagerAuditReportPage.tag);
                           reportId == 0?null:Navigator.of(context).push(new MaterialPageRoute(builder: (_){
-                            return new ManagerAuditReportPage(reportId: reportId, request: dispatch);
+                            return new ManagerAuditReportPage(reportId: reportId, request: dispatch, status: dispatch['DispatchReport']['Status']['ID'],);
                           }));
                         },
                         shape: RoundedRectangleBorder(

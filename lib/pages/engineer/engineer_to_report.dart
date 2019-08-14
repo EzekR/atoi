@@ -5,6 +5,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:atoi/utils/http_request.dart';
 import 'package:scoped_model/scoped_model.dart';
 import 'package:atoi/models/models.dart';
+import 'package:atoi/widgets/build_widget.dart';
+import 'package:atoi/utils/constants.dart';
 
 class EngineerToReport extends StatefulWidget{
   _EngineerToReportState createState() => _EngineerToReportState();
@@ -39,19 +41,53 @@ class _EngineerToReportState extends State<EngineerToReport> {
     super.initState();
   }
 
+  Icon buttonIconJournal(status) {
+    switch (status) {
+      case 0:
+        return new Icon(Icons.fingerprint, color: Colors.white,);
+        break;
+      case 2:
+        return new Icon(Icons.poll, color: Colors.white,);
+        break;
+      case 3:
+        return new Icon(Icons.check, color: Colors.white,);
+        break;
+      default:
+        return new Icon(Icons.fingerprint, color: Colors.white,);
+        break;
+    }
+  }
+
+  Icon buttonIconReport(status) {
+    switch (status) {
+      case 0:
+        return new Icon(Icons.work, color: Colors.white,);
+        break;
+      case 2:
+        return new Icon(Icons.poll, color: Colors.white,);
+        break;
+      case 3:
+        return new Icon(Icons.check, color: Colors.white,);
+        break;
+      default:
+        return new Icon(Icons.work, color: Colors.white,);
+        break;
+    }
+  }
+
   Color buttonColor(status) {
     switch (status) {
       case 0:
-        return new Color(0xff2E94B9);
+        return AppConstants.AppColors['btn_main'];
         break;
       case 2:
-        return new Color(0xff14BD98);
+        return AppConstants.AppColors['btn_success'];
         break;
       case 3:
-        return new Color(0xffF0B775);
+        return AppConstants.AppColors['btn_success'];
         break;
       default:
-        return new Color(0xff2E94B9);
+        return AppConstants.AppColors['btn_main'];
         break;
     }
   }
@@ -75,14 +111,14 @@ class _EngineerToReportState extends State<EngineerToReport> {
                 size: 40.0,
               ),
               title: Text(
-                "派工单号：$OID",
+                "派工单编号$OID",
                 style: new TextStyle(
                     fontSize: 16.0,
                     color: Theme.of(context).primaryColor
                 ),
               ),
               subtitle: Text(
-                "开始时间：$_startTime",
+                "开始时间$_startTime",
                 style: new TextStyle(
                     color: Theme.of(context).accentColor
                 ),
@@ -95,118 +131,23 @@ class _EngineerToReportState extends State<EngineerToReport> {
                 mainAxisAlignment: MainAxisAlignment.start,
                 mainAxisSize: MainAxisSize.max,
                 children: <Widget>[
-                  new Row(
-                    children: <Widget>[
-                      new Text(
-                        '设备名称：',
-                        style: new TextStyle(
-                            fontSize: 16.0,
-                            fontWeight: FontWeight.w600
-                        ),
-                      ),
-                      new Text(
-                        deviceName,
-                        style: new TextStyle(
-                            fontSize: 16.0,
-                            fontWeight: FontWeight.w400,
-                            color: Colors.grey
-                        ),
-                      )
-                    ],
-                  ),
-                  new Row(
-                    children: <Widget>[
-                      new Text(
-                        '设备序列号：',
-                        style: new TextStyle(
-                            fontSize: 16.0,
-                            fontWeight: FontWeight.w600
-                        ),
-                      ),
-                      new Text(
-                        deviceNo,
-                        style: new TextStyle(
-                            fontSize: 16.0,
-                            fontWeight: FontWeight.w400,
-                            color: Colors.grey
-                        ),
-                      )
-                    ],
-                  ),
-                  new Row(
-                    children: <Widget>[
-                      new Text(
-                        '使用科室：',
-                        style: new TextStyle(
-                            fontSize: 16.0,
-                            fontWeight: FontWeight.w600
-                        ),
-                      ),
-                      new Text(
-                        location,
-                        style: new TextStyle(
-                            fontSize: 16.0,
-                            fontWeight: FontWeight.w400,
-                            color: Colors.grey
-                        ),
-                      )
-                    ],
-                  ),
-                  new Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.max,
-                    children: <Widget>[
-                      new Text(
-                        '请求类型：',
-                        style: new TextStyle(
-                            fontSize: 16.0,
-                            fontWeight: FontWeight.w600
-                        ),
-                      ),
-                      new Text(
-                        requestType,
-                        style: new TextStyle(
-                            fontSize: 16.0,
-                            fontWeight: FontWeight.w400,
-                            color: Colors.grey
-                        ),
-                      ),
-                    ],
-                  ),
-                  new Row(
-                    children: <Widget>[
-                      new Text(
-                        '紧急程度：',
-                        style: new TextStyle(
-                            fontSize: 16.0,
-                            fontWeight: FontWeight.w600
-                        ),
-                      ),
-                      new Text(
-                        urgency,
-                        style: new TextStyle(
-                            fontSize: 16.0,
-                            fontWeight: FontWeight.w400,
-                            color: Colors.grey
-                        ),
-                      ),
-                    ],
-                  ),
+                  BuildWidget.buildCardRow('名称', task['Request']['Equipments'].length>1?'多设备':deviceName),
+                  BuildWidget.buildCardRow('序列号', task['Request']['Equipments'].length>1?'多设备':deviceNo),
+                  BuildWidget.buildCardRow('使用科室', location),
+                  BuildWidget.buildCardRow('请求类型', requestType),
+                  BuildWidget.buildCardRow('紧急程度', urgency),
+                  BuildWidget.buildCardRow('审批状态', task['Status']['Name']),
                   new Row(
                     mainAxisAlignment: MainAxisAlignment.end,
                     mainAxisSize: MainAxisSize.max,
                     children: <Widget>[
                       new RaisedButton(
                         onPressed: (){
-                          if (journalId == 0 || journalId ==1 || journalId == 2) {
-                            Navigator.of(context).push(
-                                new MaterialPageRoute(builder: (_) {
-                                  return new EngineerVoucherPage(
-                                      dispatchId: dispatchId, journalId: task['DispatchJournal']['ID'],);
-                                }));
-                          } else {
-                            return null;
-                          }
+                          Navigator.of(context).push(
+                              new MaterialPageRoute(builder: (_) {
+                                return new EngineerVoucherPage(
+                                  dispatchId: dispatchId, journalId: task['DispatchJournal']['ID'], status: task['DispatchJournal']['Status']['ID'],);
+                              }));
                         },
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(24),
@@ -214,10 +155,7 @@ class _EngineerToReportState extends State<EngineerToReport> {
                         color: buttonColor(journalId),
                         child: new Row(
                           children: <Widget>[
-                            new Icon(
-                              journalId==0||journalId==1||journalId==2?Icons.fingerprint:Icons.check,
-                              color: Colors.white,
-                            ),
+                            buttonIconJournal(task['DispatchJournal']['Status']['ID']),
                             new Text(
                               '凭证',
                               style: new TextStyle(
@@ -232,15 +170,11 @@ class _EngineerToReportState extends State<EngineerToReport> {
                       ),
                       new RaisedButton(
                         onPressed: (){
-                          if (reportId == 0 || reportId == 1 || reportId == 2) {
-                            Navigator.of(context).push(
-                                new MaterialPageRoute(builder: (_) {
-                                  return new EngineerReportPage(
-                                      dispatchId: dispatchId, reportId: task['DispatchReport']['ID']);
-                                }));
-                          } else {
-                            return null;
-                          }
+                          Navigator.of(context).push(
+                              new MaterialPageRoute(builder: (_) {
+                                return new EngineerReportPage(
+                                    dispatchId: dispatchId, reportId: task['DispatchReport']['ID'], status: task['DispatchReport']['Status']['ID'],);
+                              }));
                         },
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(24),
@@ -248,10 +182,7 @@ class _EngineerToReportState extends State<EngineerToReport> {
                         color: buttonColor(reportId),
                         child: new Row(
                           children: <Widget>[
-                            new Icon(
-                              reportId==0||reportId==1||reportId==2?Icons.work:Icons.check,
-                              color: Colors.white,
-                            ),
+                            buttonIconReport(task['DispatchReport']['Status']['ID']),
                             new Text(
                               '报告',
                               style: new TextStyle(

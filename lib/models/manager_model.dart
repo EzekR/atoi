@@ -46,7 +46,7 @@ class ManagerModel extends Model {
       '/Dispatch/GetDispatchs',
       method: HttpRequest.GET,
       params: {
-        'userID': userID,
+        'userID': 31,
         'statusIDs': 3
       }
     );

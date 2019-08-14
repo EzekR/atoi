@@ -4,6 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:atoi/pages/engineer/engineer_start_page.dart';
 import 'package:scoped_model/scoped_model.dart';
 import 'package:atoi/models/models.dart';
+import 'package:atoi/widgets/build_widget.dart';
 
 class EngineerToStart extends StatefulWidget{
 
@@ -44,7 +45,7 @@ class _EngineerToStartState extends State<EngineerToStart> {
   Widget build(BuildContext context) {
     // TODO: implement build
 
-    Card buildCardItem(int dispatchId, String OID, String scheduleDate, String deviceName, String deviceNo, String location, String requestType, String urgency, String remark) {
+    Card buildCardItem(int dispatchId, String OID, String scheduleDate, List deviceName, String deviceNo, String location, String requestType, String urgency, String remark) {
       var _datetime = DateTime.parse(scheduleDate);
       var departDate = '${_datetime.year}-${_datetime.month}-${_datetime.day}';
       return new Card(
@@ -59,7 +60,7 @@ class _EngineerToStartState extends State<EngineerToStart> {
                 size: 36.0,
               ),
               title: Text(
-                "派工单号：$OID",
+                "派工单编号：$OID",
                 style: new TextStyle(
                     fontSize: 16.0,
                     color: Theme.of(context).primaryColor
@@ -79,122 +80,12 @@ class _EngineerToStartState extends State<EngineerToStart> {
                 mainAxisAlignment: MainAxisAlignment.start,
                 mainAxisSize: MainAxisSize.max,
                 children: <Widget>[
-                  deviceName == null?new Container():new Row(
-                    children: <Widget>[
-                      new Text(
-                        '设备名称：',
-                        style: new TextStyle(
-                            fontSize: 16.0,
-                            fontWeight: FontWeight.w600
-                        ),
-                      ),
-                      new Text(
-                        deviceName,
-                        style: new TextStyle(
-                            fontSize: 16.0,
-                            fontWeight: FontWeight.w400,
-                            color: Colors.grey
-                        ),
-                      )
-                    ],
-                  ),
-                  deviceNo == null?new Container():new Row(
-                    children: <Widget>[
-                      new Text(
-                        '设备型号：',
-                        style: new TextStyle(
-                            fontSize: 16.0,
-                            fontWeight: FontWeight.w600
-                        ),
-                      ),
-                      new Text(
-                        deviceNo,
-                        style: new TextStyle(
-                            fontSize: 16.0,
-                            fontWeight: FontWeight.w400,
-                            color: Colors.grey
-                        ),
-                      )
-                    ],
-                  ),
-                  new Row(
-                    children: <Widget>[
-                      new Text(
-                        '使用科室：',
-                        style: new TextStyle(
-                            fontSize: 16.0,
-                            fontWeight: FontWeight.w600
-                        ),
-                      ),
-                      new Text(
-                        location,
-                        style: new TextStyle(
-                            fontSize: 16.0,
-                            fontWeight: FontWeight.w400,
-                            color: Colors.grey
-                        ),
-                      )
-                    ],
-                  ),
-                  new Row(
-                    children: <Widget>[
-                      new Text(
-                        '派工类型：',
-                        style: new TextStyle(
-                            fontSize: 16.0,
-                            fontWeight: FontWeight.w600
-                        ),
-                      ),
-                      new Text(
-                        requestType,
-                        style: new TextStyle(
-                            fontSize: 16.0,
-                            fontWeight: FontWeight.w400,
-                            color: Colors.grey
-                        ),
-                      )
-                    ],
-                  ),
-                  new Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.max,
-                    children: <Widget>[
-                      new Text(
-                        '紧急程度：',
-                        style: new TextStyle(
-                            fontSize: 16.0,
-                            fontWeight: FontWeight.w600
-                        ),
-                      ),
-                      new Text(
-                        urgency,
-                        style: new TextStyle(
-                            fontSize: 16.0,
-                            fontWeight: FontWeight.w400,
-                            color: Colors.grey
-                        ),
-                      ),
-                    ],
-                  ),
-                  new Row(
-                    children: <Widget>[
-                      new Text(
-                        '主管备注：',
-                        style: new TextStyle(
-                            fontSize: 16.0,
-                            fontWeight: FontWeight.w600
-                        ),
-                      ),
-                      new Text(
-                        remark,
-                        style: new TextStyle(
-                            fontSize: 16.0,
-                            fontWeight: FontWeight.w400,
-                            color: Colors.grey
-                        ),
-                      ),
-                    ],
-                  ),
+                  deviceName==null?new Container():BuildWidget.buildCardRow('名称', deviceName.length>1?'多设备':deviceName[0]['Name']),
+                  deviceNo==null?new Container():BuildWidget.buildCardRow('型号', deviceName.length>1?'多设备':deviceNo),
+                  BuildWidget.buildCardRow('使用科室', location),
+                  BuildWidget.buildCardRow('派工类型', requestType),
+                  BuildWidget.buildCardRow('紧急程度', urgency),
+                  BuildWidget.buildCardRow('主管备注', remark),
                   new Row(
                     mainAxisAlignment: MainAxisAlignment.end,
                     mainAxisSize: MainAxisSize.max,
@@ -242,7 +133,7 @@ class _EngineerToStartState extends State<EngineerToStart> {
             child: model.tasksToStart.length == 0?ListView(padding: const EdgeInsets.symmetric(vertical: 150.0), children: <Widget>[new Center(child: new Text('没有待开始工单'),)],):ListView.builder(
                 padding: const EdgeInsets.all(2.0),
                 itemCount: model.tasksToStart.length,
-                itemBuilder: (context, i) => buildCardItem(model.tasksToStart[i]['ID'], model.tasksToStart[i]['OID'], model.tasksToStart[i]['ScheduleDate'], model.tasksToStart[i]['Request']['Equipments'].length>0?model.tasksToStart[i]['Request']['Equipments'][0]['Name']:null, model.tasksToStart[i]['Request']['Equipments'].length>0?model.tasksToStart[i]['Request']['Equipments'][0]['EquipmentCode']:null, model.tasksToStart[i]['Request']['DepartmentName'], model.tasksToStart[i]['RequestType']['Name'], model.tasksToStart[i]['Urgency']['Name'], model.tasksToStart[i]['LeaderComments'])
+                itemBuilder: (context, i) => buildCardItem(model.tasksToStart[i]['ID'], model.tasksToStart[i]['OID'], model.tasksToStart[i]['ScheduleDate'], model.tasksToStart[i]['Request']['Equipments'].length>0?model.tasksToStart[i]['Request']['Equipments']:null, model.tasksToStart[i]['Request']['Equipments'].length>0?model.tasksToStart[i]['Request']['Equipments'][0]['EquipmentCode']:null, model.tasksToStart[i]['Request']['DepartmentName'], model.tasksToStart[i]['RequestType']['Name'], model.tasksToStart[i]['Urgency']['Name'], model.tasksToStart[i]['LeaderComments'])
             ),
             onRefresh: model.getTasksToStart
         );
