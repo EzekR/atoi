@@ -7,6 +7,7 @@ import 'package:scoped_model/scoped_model.dart';
 import 'package:atoi/models/models.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:atoi/widgets/build_widget.dart';
+import 'package:atoi/utils/constants.dart';
 
 class ManagerToComplete extends StatefulWidget {
   @override
@@ -22,6 +23,7 @@ class _ManagerToCompleteState extends State<ManagerToComplete> {
 
   void initState() {
     //getData();
+    refresh();
     super.initState();
   }
 
@@ -64,11 +66,41 @@ class _ManagerToCompleteState extends State<ManagerToComplete> {
     if (resp['ResultCode'] == '00') {
       showDialog(context: context,
           builder: (context) => AlertDialog(
+            title: new Text('终止成功'),
+          )
+      );
+    }
+    refresh();
+  }
+
+  Future<Null> _cancelDispatch(int requestID) async {
+    var prefs = await _prefs;
+    var userId = prefs.getInt('userID');
+    var respDispatch = await HttpRequest.request(
+      '/Dispatch/GetDispatchByRequestID',
+      method: HttpRequest.GET,
+      params: {
+        'ID': requestID
+      }
+    );
+    var dispatchId = respDispatch['Data']['ID'];
+    var resp = await HttpRequest.request(
+      '/Dispatch/EndDispatch',
+      method: HttpRequest.POST,
+      data: {
+        'userID': userId,
+        'dispatchID': dispatchId,
+        'requestID': requestID
+      }
+    );
+    if (resp['ResultCode'] == '00') {
+      showDialog(context: context,
+          builder: (context) => AlertDialog(
             title: new Text('取消成功'),
           )
       );
-      getData();
     }
+    refresh();
   }
 
   Row buildRow(String leading, String content) {
@@ -99,6 +131,10 @@ class _ManagerToCompleteState extends State<ManagerToComplete> {
     );
   }
 
+  Future<Null> refresh() async {
+    ManagerModel _model = MainModel.of(context);
+    _model.getTodos();
+  }
   @override
   Widget build(BuildContext context) {
     // TODO: implement build
@@ -153,13 +189,13 @@ class _ManagerToCompleteState extends State<ManagerToComplete> {
                 mainAxisAlignment: MainAxisAlignment.start,
                 mainAxisSize: MainAxisSize.max,
                 children: <Widget>[
-                  BuildWidget.buildCardRow('设备编号', equipmentName),
-                  BuildWidget.buildCardRow('名称', equipmentNo),
-                  BuildWidget.buildCardRow('请求科室', departmentName),
-                  BuildWidget.buildCardRow('请求人员', requestPerson),
+                  equipmentName==''?new Container():BuildWidget.buildCardRow('设备编号', equipmentName),
+                  equipmentNo==''?new Container():BuildWidget.buildCardRow('设备名称', equipmentNo),
+                  departmentName==''?new Container():BuildWidget.buildCardRow('使用科室', departmentName),
+                  BuildWidget.buildCardRow('请求人', requestPerson),
                   BuildWidget.buildCardRow('请求类型', requestType),
                   BuildWidget.buildCardRow('请求状态', status),
-                  BuildWidget.buildCardRow('请求详情', detail),
+                  BuildWidget.buildCardRow('请求详情', detail.length>10?'${detail.substring(0,10)}...':detail),
                   new Row(
                     mainAxisAlignment: MainAxisAlignment.end,
                     mainAxisSize: MainAxisSize.max,
@@ -169,12 +205,12 @@ class _ManagerToCompleteState extends State<ManagerToComplete> {
                           //Navigator.of(context).pushNamed(ManagerAssignPage.tag);
                           Navigator.of(context).push(new MaterialPageRoute(builder: (_) {
                             return new ManagerCompletePage(requestId: requestId);
-                          }));
+                          })).then((result) => refresh());
                         },
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(24),
                         ),
-                        color: new Color(0xff2E94B9),
+                        color: AppConstants.AppColors['btn_success'],
                         child: new Row(
                           children: <Widget>[
                             new Icon(
@@ -192,6 +228,75 @@ class _ManagerToCompleteState extends State<ManagerToComplete> {
                       ),
                       new Padding(
                         padding: EdgeInsets.symmetric(horizontal: 5.0),
+                      ),
+                      new RaisedButton(
+                        onPressed: (){
+                          if (task['Status']['ID']==1) {
+                            showDialog(context: context,
+                                builder: (context) => AlertDialog(
+                                  title: new Text('是否终止请求？'),
+                                  actions: <Widget>[
+                                    RaisedButton(
+                                      child: const Text('确认', style: TextStyle(color: Colors.white),),
+                                      color: AppConstants.AppColors['btn_cancel'],
+                                      onPressed: () {
+                                        _cancelRequest(requestId);
+                                        Navigator.of(context).pop();
+                                      },
+                                    ),
+                                    RaisedButton(
+                                      child: const Text('取消', style: TextStyle(color: Colors.white),),
+                                      color: AppConstants.AppColors['btn_main'],
+                                      onPressed: () {
+                                        Navigator.of(context).pop();
+                                      },
+                                    ),
+                                  ],
+                                )
+                            );
+                          } else {
+                            showDialog(context: context,
+                                builder: (context) => AlertDialog(
+                                  title: new Text('是否取消派工？'),
+                                  actions: <Widget>[
+                                    RaisedButton(
+                                      child: const Text('确认', style: TextStyle(color: Colors.white),),
+                                      color: AppConstants.AppColors['btn_cancel'],
+                                      onPressed: () {
+                                        _cancelDispatch(requestId);
+                                        Navigator.of(context).pop();
+                                      },
+                                    ),
+                                    RaisedButton(
+                                      child: const Text('取消', style: TextStyle(color: Colors.white),),
+                                      color: AppConstants.AppColors['btn_main'],
+                                      onPressed: () {
+                                        Navigator.of(context).pop();
+                                      },
+                                    ),
+                                  ],
+                                )
+                            );
+                          }
+                        },
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(24),
+                        ),
+                        color: AppConstants.AppColors['btn_cancel'],
+                        child: new Row(
+                          children: <Widget>[
+                            new Icon(
+                              Icons.cancel,
+                              color: Colors.white,
+                            ),
+                            new Text(
+                              task['Status']['ID']>1?'取消派工':'终止请求',
+                              style: new TextStyle(
+                                  color: Colors.white
+                              ),
+                            )
+                          ],
+                        ),
                       ),
                     ],
                   )

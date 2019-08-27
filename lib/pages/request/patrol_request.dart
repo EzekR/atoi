@@ -52,7 +52,16 @@ class _PatrolRequestState extends State<PatrolRequest> {
   String _currentResult;
   List<dynamic> _imageList = [];
 
+  var _role;
+  var _roleName;
+
+  Future getRole() async {
+    final SharedPreferences prefs = await _prefs;
+    _role = await prefs.getInt('role');
+    _roleName = prefs.getString('userName');
+  }
   void initState(){
+    getRole();
     _dropDownMenuItems = getDropDownMenuItems(_serviceResults);
     _currentResult = _dropDownMenuItems[0].value;
     super.initState();
@@ -77,22 +86,38 @@ class _PatrolRequestState extends State<PatrolRequest> {
   Future getImage() async {
     var image = await ImagePicker.pickImage(
         source: ImageSource.camera,
-        maxWidth: 800.0
+        imageQuality: 1
     );
-    setState(() {
-      _imageList.add(image);
-    });
+    if (image != null) {
+      setState(() {
+        _imageList.add(image);
+      });
+    }
   }
 
-  Row buildImageRow(List imageList) {
+  GridView buildImageRow(List imageList) {
     List<Widget> _list = [];
 
     if (imageList.length >0 ){
       for(var image in imageList) {
         _list.add(
-            new Container(
-              width: 100.0,
-              child: Image.file(image),
+            new Stack(
+              alignment: FractionalOffset(1.0, 0),
+              children: <Widget>[
+                new Container(
+                  width: 100.0,
+                  child: Image.file(image),
+                ),
+                new Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 0.0),
+                  child: new IconButton(icon: Icon(Icons.cancel), color: Colors.white, onPressed: (){
+                    imageList.remove(image);
+                    setState(() {
+                      _imageList = imageList;
+                    });
+                  }),
+                )
+              ],
             )
         );
       }
@@ -100,17 +125,25 @@ class _PatrolRequestState extends State<PatrolRequest> {
       _list.add(new Container());
     }
 
-    _list.add(new IconButton(icon: Icon(Icons.add_a_photo), onPressed: () {
-      getImage();
-    }));
-
-    return new Row(
-        mainAxisAlignment: MainAxisAlignment.start,
+    return new GridView.count(
+        shrinkWrap: true,
+        primary: false,
+        mainAxisSpacing: 5,
+        crossAxisSpacing: 5,
+        crossAxisCount: 2,
         children: _list
     );
   }
 
   Future<Null> submit() async {
+    if (_equipments.isEmpty) {
+      showDialog(context: context,
+          builder: (context) => AlertDialog(
+            title: new Text('请选择设备'),
+          )
+      );
+      return;
+    }
     if (_fault.text == null || _fault.text.isEmpty) {
       showDialog(context: context,
         builder: (context) => AlertDialog(
@@ -189,10 +222,16 @@ class _PatrolRequestState extends State<PatrolRequest> {
 
   Future toSearch() async {
     final _searchResult = await showSearch(context: context, delegate: SearchBarDelegate());
-    Map _data = jsonDecode(_searchResult);
-    setState(() {
-      _equipments.add(_data);
-    });
+    if (_searchResult != null && _searchResult != 'null') {
+      print(_searchResult);
+      Map _data = jsonDecode(_searchResult);
+      var _result = _equipments.firstWhere((_equipment) => _equipment['OID'] == _data['OID'], orElse: ()=> null);
+      if (_result == null) {
+        setState(() {
+          _equipments.add(_data);
+        });
+      }
+    }
   }
 
   Padding buildRow(String labelText, String defaultText) {
@@ -235,7 +274,7 @@ class _PatrolRequestState extends State<PatrolRequest> {
           padding: EdgeInsets.symmetric(horizontal: 12.0),
           child: new Column(
             children: <Widget>[
-              BuildWidget.buildRow('系统编号:', _equipment['OID']??''),
+              BuildWidget.buildRow('系统编号', _equipment['OID']??''),
               BuildWidget.buildRow('名称', _equipment['Name']??''),
               BuildWidget.buildRow('型号', _equipment['EquipmentCode']??''),
               BuildWidget.buildRow('序列号', _equipment['SerialCode']??''),
@@ -244,7 +283,7 @@ class _PatrolRequestState extends State<PatrolRequest> {
               BuildWidget.buildRow('设备厂商', _equipment['Manufacturer']['Name']??''),
               BuildWidget.buildRow('资产等级', _equipment['AssetLevel']['Name']??''),
               BuildWidget.buildRow('维保状态', _equipment['WarrantyStatus']??''),
-              BuildWidget.buildRow('服务范围', _equipment['ContractScopeComments']??''),
+              BuildWidget.buildRow('服务范围', _equipment['ContractScope']['Name']??''),
               new Padding(padding: EdgeInsets.symmetric(vertical: 8.0),
                 child: new Row(
                   mainAxisAlignment: MainAxisAlignment.end,
@@ -336,18 +375,15 @@ class _PatrolRequestState extends State<PatrolRequest> {
                                   size: 24.0,
                                   color: Colors.blue,
                                 ),
-                                title: new Align(
-                                    child: Text('设备基本信息',
-                                      style: new TextStyle(
-                                          fontSize: 22.0,
-                                          fontWeight: FontWeight.w400
-                                      ),
-                                    ),
-                                    alignment: Alignment(-1.4, 0)
-                                )
+                                title: Text('设备基本信息',
+                                  style: new TextStyle(
+                                      fontSize: 22.0,
+                                      fontWeight: FontWeight.w400
+                                  ),
+                                ),
                             );
                           },
-                          body: _equipments.isEmpty?new Center(child: new Text('请选择设备')):buildEquip(),
+                          body: _equipments.length==0?new Center(child: new Text('请选择设备')):buildEquip(),
                           isExpanded: _isExpandedBasic,
                         ),
                         new ExpansionPanel(
@@ -357,15 +393,12 @@ class _PatrolRequestState extends State<PatrolRequest> {
                                   size: 24.0,
                                   color: Colors.blue,
                                 ),
-                                title: new Align(
-                                    child: Text('请求详细信息',
-                                      style: new TextStyle(
-                                          fontSize: 22.0,
-                                          fontWeight: FontWeight.w400
-                                      ),
-                                    ),
-                                    alignment: Alignment(-1.4, 0)
-                                )
+                                title:Text('请求详细信息',
+                                  style: new TextStyle(
+                                      fontSize: 22.0,
+                                      fontWeight: FontWeight.w400
+                                  ),
+                                ),
                             );
                           },
                           body: new Padding(
@@ -373,8 +406,9 @@ class _PatrolRequestState extends State<PatrolRequest> {
                             child: new Column(
                               children: <Widget>[
                                 BuildWidget.buildRow('类型', '巡检'),
-                                BuildWidget.buildRow('请求人', '超级管理员'),
+                                BuildWidget.buildRow('请求人', _roleName==null?'':_roleName),
                                 BuildWidget.buildRow('主题', '多设备--巡检'),
+                                new Divider(),
                                 new Padding(
                                   padding: EdgeInsets.symmetric(vertical: 5.0),
                                   child: new Row(
@@ -382,7 +416,7 @@ class _PatrolRequestState extends State<PatrolRequest> {
                                       new Expanded(
                                         flex: 4,
                                         child: new Text(
-                                          '巡检要求',
+                                          '巡检要求：',
                                           style: new TextStyle(
                                               fontSize: 20.0,
                                               fontWeight: FontWeight.w600
@@ -403,16 +437,24 @@ class _PatrolRequestState extends State<PatrolRequest> {
                                   child: new Row(
                                     children: <Widget>[
                                       new Text(
-                                        '添加附件',
+                                        '添加附件：',
                                         style: new TextStyle(
                                             fontSize: 20.0,
                                             fontWeight: FontWeight.w600
                                         ),
-                                      )
+                                      ),
+                                      new IconButton(
+                                          icon: Icon(Icons.add_a_photo),
+                                          onPressed: () {
+                                            getImage();
+                                          })
                                     ],
                                   ),
                                 ),
-                                buildImageRow(_imageList),
+                                new SizedBox(
+                                  width: 250,
+                                  child: buildImageRow(_imageList),
+                                ),
                                 new Padding(padding: EdgeInsets.symmetric(vertical: 8.0))
                               ],
                             ),

@@ -100,7 +100,7 @@ class EngineerMenu extends StatelessWidget {
                 children: <Widget>[
                   Expanded(
                     flex: 4,
-                    child: buildIconColumn(Icons.queue, '新增', 'equipment-request'),
+                    child: buildIconColumn(Icons.queue, '设备新增', 'equipment-request'),
                   ),
                   Expanded(
                     flex: 3,

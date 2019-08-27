@@ -5,7 +5,7 @@ import 'dart:convert';
 import 'package:atoi/utils/http_request.dart';
 
 
-class SearchBarDelegate extends SearchDelegate<String>{
+class SearchBarVendor extends SearchDelegate<String>{
 
   static const searchList = [
     "ChengDu",
@@ -26,11 +26,11 @@ class SearchBarDelegate extends SearchDelegate<String>{
 
   Future<Null> getDevices(String filter) async {
     var resp = await HttpRequest.request(
-      '/Equipment/Getdevices',
-      method: HttpRequest.GET,
-      params: {
-        'filterText': filter
-      }
+        '/DispatchReport/GetSuppliers',
+        method: HttpRequest.GET,
+        params: {
+          'filterText': filter
+        }
     );
     print(resp);
     suggestionList = resp['Data'];
@@ -48,7 +48,7 @@ class SearchBarDelegate extends SearchDelegate<String>{
     return IconButton(
         icon: AnimatedIcon(
             icon: AnimatedIcons.menu_arrow, progress: transitionAnimation),
-            onPressed: () => close(context, null));
+        onPressed: () => close(context, null));
   }
 
 
@@ -88,7 +88,7 @@ class SearchBarDelegate extends SearchDelegate<String>{
     mainModel.setResult(mutated);
     close(context, jsonEncode(selected));
   }
-  
+
   @override
   Widget buildSuggestions(BuildContext context) {
     return FutureBuilder(
@@ -103,12 +103,12 @@ class SearchBarDelegate extends SearchDelegate<String>{
               },
               title: RichText(
                   text: TextSpan(
-                      text: '${suggestionList[i]['Name']}/${suggestionList[i]['EquipmentCode']}/${suggestionList[i]['SerialCode']}'.substring(0, query.length),
+                      text: '${suggestionList[i]['Name']}-${suggestionList[i]['SupplierType']['Name']}'.substring(0, query.length),
                       style: TextStyle(
                           color: Colors.black, fontWeight: FontWeight.bold),
                       children: [
                         TextSpan(
-                            text: '${suggestionList[i]['Name']}/${suggestionList[i]['EquipmentCode']}/${suggestionList[i]['SerialCode']}'.substring(query.length),
+                            text: '${suggestionList[i]['Name']}-${suggestionList[i]['SupplierType']['Name']}'.substring(query.length),
                             style: TextStyle(color: Colors.grey))
                       ])),
             ));

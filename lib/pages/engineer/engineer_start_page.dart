@@ -26,6 +26,18 @@ class _EngineerStartPageState extends State<EngineerStartPage> {
 
   Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
 
+  String _userName = '';
+  String _mobile = '';
+
+  Future<Null> getRole() async {
+    var prefs = await _prefs;
+    var userName = prefs.getString('userName');
+    var mobile = prefs.getString('mobile');
+    setState(() {
+      _userName = userName;
+      _mobile = mobile;
+    });
+  }
   Future<Null> startDispatch() async {
     var prefs = await _prefs;
     var userID = prefs.getInt('userID');
@@ -77,6 +89,7 @@ class _EngineerStartPageState extends State<EngineerStartPage> {
 
   void initState() {
     getDispatch();
+    getRole();
     super.initState();
   }
 
@@ -138,7 +151,7 @@ class _EngineerStartPageState extends State<EngineerStartPage> {
     List<Widget> _list = [];
     for(var _equipment in _equipments) {
       var equipList = [
-        BuildWidget.buildRow('系统编号:', _equipment['OID']??''),
+        BuildWidget.buildRow('系统编号', _equipment['OID']??''),
         BuildWidget.buildRow('名称', _equipment['Name']??''),
         BuildWidget.buildRow('型号', _equipment['EquipmentCode']??''),
         BuildWidget.buildRow('序列号', _equipment['SerialCode']??''),
@@ -152,6 +165,121 @@ class _EngineerStartPageState extends State<EngineerStartPage> {
       ];
       _list.addAll(equipList);
     }
+    return _list;
+  }
+
+  List<ExpansionPanel> buildExpansion() {
+    List<ExpansionPanel> _list = [];
+    if (_dispatch['Request']['RequestType']['ID'] !=14) {
+      _list.add(
+        new ExpansionPanel(
+          headerBuilder: (context, isExpanded) {
+            return ListTile(
+                leading: new Icon(
+                  Icons.info,
+                  size: 24.0,
+                  color: Colors.blue,
+                ),
+                title: Text(
+                  '设备基本信息',
+                  style: new TextStyle(
+                      fontSize: 22.0,
+                      fontWeight: FontWeight.w400
+                  ),
+                )
+            );
+          },
+          body: new Padding(
+            padding: EdgeInsets.symmetric(horizontal: 8.0),
+            child: new Column(
+              children: buildEquipments(),
+            ),
+          ),
+          isExpanded: _isExpandedBasic,
+        ),
+      );
+    }
+    _list.addAll(
+      [
+        new ExpansionPanel(
+          headerBuilder: (context, isExpanded) {
+            return ListTile(
+                leading: new Icon(
+                  Icons.description,
+                  size: 24.0,
+                  color: Colors.blue,
+                ),
+                title: new Text(
+                  '请求详细信息',
+                  style: new TextStyle(
+                      fontWeight: FontWeight.w400,
+                      fontSize: 22.0
+                  ),
+                )
+            );
+          },
+          body: new Padding(
+            padding: EdgeInsets.symmetric(horizontal: 8.0),
+            child: new Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              mainAxisSize: MainAxisSize.max,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                BuildWidget.buildRow('服务申请编号', _dispatch['Request']['OID']),
+                BuildWidget.buildRow('类型', _dispatch['Request']['SourceType']),
+                _dispatch['Request']['RequestType']['ID']==14?BuildWidget.buildRow('主题', '${_dispatch['Request']['RequestType']['Name']}'):
+                BuildWidget.buildRow('主题', '${_dispatch['Request']['EquipmentName']}--${_dispatch['Request']['RequestType']['Name']}'),
+                BuildWidget.buildRow(AppConstants.Remark[_dispatch['Request']['RequestType']['ID']], _dispatch['Request']['FaultDesc']),
+                _dispatch['Request']['FaultType']['ID']==1||_dispatch['Request']['FaultType']['ID']==2||_dispatch['Request']['FaultType']['ID']==3||_dispatch['Request']['FaultType']['ID']==7?BuildWidget.buildRow(AppConstants.RemarkType[_dispatch['Request']['RequestType']['ID']], _dispatch['Request']['FaultType']['Name']):new Container(),
+                _dispatch['Request']['RequestType']['ID']==3?BuildWidget.buildRow('是否召回', _dispatch['Request']['IsRecall']?'是':'否'):new Container(),
+                BuildWidget.buildRow('请求人', _dispatch['Request']['RequestUser']['Name']),
+                BuildWidget.buildRow('处理方式', _dispatch['Request']['DealType']['Name']),
+                BuildWidget.buildRow('紧急程度', _dispatch['Request']['Priority']['Name']),
+                BuildWidget.buildRow('当前状态', _dispatch['Request']['Status']['Name']),
+                BuildWidget.buildRow('请求来源', _dispatch['Request']['Source']['Name']),
+              ],
+            ),
+          ),
+          isExpanded: _isExpandedDetail,
+        ),
+        new ExpansionPanel(
+          headerBuilder: (context, isExpanded) {
+            return ListTile(
+              leading: new Icon(
+                Icons.perm_contact_calendar,
+                size: 24.0,
+                color: Colors.blue,
+              ),
+              title: Text(
+                '派工内容',
+                style: new TextStyle(
+                    fontSize: 22.0,
+                    fontWeight: FontWeight.w400
+                ),
+              ),
+              subtitle: Text('派工单编号: ${_dispatch['OID']}'),
+            );
+          },
+          body: new Padding(
+            padding: EdgeInsets.symmetric(horizontal: 8.0),
+            child: new Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              mainAxisSize: MainAxisSize.max,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                BuildWidget.buildRow('派工类型', _dispatch['RequestType']['Name']),
+                BuildWidget.buildRow('紧急程度', _dispatch['Urgency']['Name']),
+                BuildWidget.buildRow('机器状态', _dispatch['MachineStatus']['Name']),
+                BuildWidget.buildRow('工程师姓名', _dispatch['Engineer']['Name']),
+                BuildWidget.buildRow('主管备注', _dispatch['LeaderComments']),
+                BuildWidget.buildRow('出发时间', AppConstants.TimeForm(_dispatch['ScheduleDate'], 'yyyy-mm-dd')),
+              ],
+            ),
+          ),
+          isExpanded: _isExpandedAssign,
+        ),
+      ]
+    );
     return _list;
   }
 
@@ -174,10 +302,9 @@ class _EngineerStartPageState extends State<EngineerStartPage> {
           ),
         ),
         actions: <Widget>[
-          new Icon(Icons.face),
           new Padding(
             padding: const EdgeInsets.symmetric(horizontal: 5.0, vertical: 19.0),
-            child: const Text('武田信玄'),
+            child: Text(_userName),
           ),
         ],
       ),
@@ -191,118 +318,17 @@ class _EngineerStartPageState extends State<EngineerStartPage> {
                 expansionCallback: (index, isExpanded) {
                   setState(() {
                     if (index == 0) {
-                      _isExpandedBasic = !isExpanded;
+                      _dispatch['Request']['RequestType']['ID']==14?_isExpandedDetail=!isExpanded:_isExpandedBasic = !isExpanded;
                     } else {
                       if (index == 1) {
-                        _isExpandedDetail = !isExpanded;
+                        _dispatch['Request']['RequestType']['ID']==14?_isExpandedAssign=!isExpanded:_isExpandedDetail = !isExpanded;
                       } else {
                         _isExpandedAssign =!isExpanded;
                       }
                     }
                   });
                 },
-                children: [
-                  new ExpansionPanel(
-                    headerBuilder: (context, isExpanded) {
-                      return ListTile(
-                          leading: new Icon(
-                            Icons.info,
-                            size: 24.0,
-                            color: Colors.blue,
-                          ),
-                          title: Text(
-                              '设备基本信息',
-                              style: new TextStyle(
-                                fontSize: 22.0,
-                                fontWeight: FontWeight.w400
-                              ),
-                          )
-                      );
-                    },
-                    body: new Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 8.0),
-                      child: new Column(
-                        children: buildEquipments(),
-                      ),
-                    ),
-                    isExpanded: _isExpandedBasic,
-                  ),
-                  new ExpansionPanel(
-                    headerBuilder: (context, isExpanded) {
-                      return ListTile(
-                          leading: new Icon(
-                            Icons.description,
-                            size: 24.0,
-                            color: Colors.blue,
-                          ),
-                          title: new Text(
-                            '请求详细信息',
-                            style: new TextStyle(
-                              fontWeight: FontWeight.w400,
-                              fontSize: 22.0
-                            ),
-                          )
-                      );
-                    },
-                    body: new Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 8.0),
-                      child: new Column(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        mainAxisSize: MainAxisSize.max,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: <Widget>[
-                          BuildWidget.buildRow('服务申请编号', _dispatch['Request']['OID']),
-                          BuildWidget.buildRow('类型', _dispatch['Request']['SourceType']),
-                          BuildWidget.buildRow('主题', '${_dispatch['Request']['EquipmentName']}--${_dispatch['Request']['RequestType']['Name']}'),
-                          BuildWidget.buildRow(AppConstants.Remark[_dispatch['Request']['RequestType']['ID']], _dispatch['Request']['FaultDesc']),
-                          _dispatch['Request']['FaultType']['ID'] != 0?BuildWidget.buildRow(AppConstants.RemarkType[_dispatch['Request']['RequestType']['ID']], _dispatch['Request']['FaultType']['Name']):new Container(),
-                          BuildWidget.buildRow('请求人', _dispatch['Request']['RequestUser']['Name']),
-                          BuildWidget.buildRow('处理方式', _dispatch['Request']['DealType']['Name']),
-                          BuildWidget.buildRow('紧急程度', _dispatch['Request']['Priority']['Name']),
-                          BuildWidget.buildRow('当前状态', _dispatch['Request']['Status']['Name']),
-                          BuildWidget.buildRow('请求来源', _dispatch['Request']['Source']['Name']),
-                        ],
-                      ),
-                    ),
-                    isExpanded: _isExpandedDetail,
-                  ),
-                  new ExpansionPanel(
-                    headerBuilder: (context, isExpanded) {
-                      return ListTile(
-                        leading: new Icon(
-                          Icons.perm_contact_calendar,
-                          size: 24.0,
-                          color: Colors.blue,
-                        ),
-                        title: Text(
-                            '派工内容',
-                            style: new TextStyle(
-                              fontSize: 22.0,
-                              fontWeight: FontWeight.w400
-                            ),
-                        ),
-                        subtitle: Text('派工单编号: ${_dispatch['OID']}'),
-                      );
-                    },
-                    body: new Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 8.0),
-                      child: new Column(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        mainAxisSize: MainAxisSize.max,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: <Widget>[
-                          BuildWidget.buildRow('派工类型', _dispatch['RequestType']['Name']),
-                          BuildWidget.buildRow('紧急程度', _dispatch['Urgency']['Name']),
-                          BuildWidget.buildRow('机器状态', _dispatch['MachineStatus']['Name']),
-                          BuildWidget.buildRow('工程师姓名', _dispatch['Engineer']['Name']),
-                          BuildWidget.buildRow('主管备注', _dispatch['LeaderComments']),
-                          BuildWidget.buildRow('出发时间', AppConstants.TimeForm(_dispatch['ScheduleDate'], 'yyyy-mm-dd')),
-                        ],
-                      ),
-                    ),
-                    isExpanded: _isExpandedAssign,
-                  ),
-                ],
+                children: buildExpansion(),
               ),
               SizedBox(height: 24.0),
               new Row(

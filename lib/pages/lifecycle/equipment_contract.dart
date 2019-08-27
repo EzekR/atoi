@@ -46,7 +46,7 @@ class _EquipmentContractState extends State<EquipmentContract> {
     'guarantee': ''
   };
 
-  Map _equipment = {};
+  var _equipment;
 
   List<DropdownMenuItem<String>> _dropDownMenuItems;
   String _currentResult;
@@ -78,11 +78,13 @@ class _EquipmentContractState extends State<EquipmentContract> {
   Future getImage() async {
     var image = await ImagePicker.pickImage(
         source: ImageSource.camera,
-        maxWidth: 800.0
+      imageQuality: 1
     );
-    setState(() {
-      _imageList.add(image);
-    });
+    if (image != null) {
+      setState(() {
+        _imageList.add(image);
+      });
+    }
   }
 
   Future getRole() async {
@@ -93,6 +95,14 @@ class _EquipmentContractState extends State<EquipmentContract> {
   }
 
   Future<Null> submit() async {
+    if (_equipment == null) {
+      showDialog(context: context,
+          builder: (context) => AlertDialog(
+            title: new Text('请选择设备'),
+          )
+      );
+      return;
+    }
     if (_fault.text.isEmpty || _fault.text == null) {
       showDialog(context: context,
           builder: (context) => AlertDialog(
@@ -146,15 +156,29 @@ class _EquipmentContractState extends State<EquipmentContract> {
     }
   }
 
-  Row buildImageRow(List imageList) {
+  GridView buildImageRow(List imageList) {
     List<Widget> _list = [];
 
     if (imageList.length >0 ){
       for(var image in imageList) {
         _list.add(
-            new Container(
-              width: 100.0,
-              child: Image.file(image),
+            new Stack(
+              alignment: FractionalOffset(1.0, 0),
+              children: <Widget>[
+                new Container(
+                  width: 100.0,
+                  child: Image.file(image),
+                ),
+                new Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 0.0),
+                  child: new IconButton(icon: Icon(Icons.cancel), color: Colors.white, onPressed: (){
+                    imageList.remove(image);
+                    setState(() {
+                      _imageList = imageList;
+                    });
+                  }),
+                )
+              ],
             )
         );
       }
@@ -162,12 +186,12 @@ class _EquipmentContractState extends State<EquipmentContract> {
       _list.add(new Container());
     }
 
-    _list.add(new IconButton(icon: Icon(Icons.add_a_photo), onPressed: () {
-      getImage();
-    }));
-
-    return new Row(
-        mainAxisAlignment: MainAxisAlignment.start,
+    return new GridView.count(
+        shrinkWrap: true,
+        primary: false,
+        mainAxisSpacing: 5,
+        crossAxisSpacing: 5,
+        crossAxisCount: 2,
         children: _list
     );
   }
@@ -300,22 +324,19 @@ class _EquipmentContractState extends State<EquipmentContract> {
                                   size: 24.0,
                                   color: Colors.blue,
                                 ),
-                                title: new Align(
-                                    child: Text('设备基本信息',
-                                      style: new TextStyle(
-                                          fontSize: 22.0,
-                                          fontWeight: FontWeight.w400
-                                      ),
-                                    ),
-                                    alignment: Alignment(-1.4, 0)
-                                )
+                                title: Text('设备基本信息',
+                                  style: new TextStyle(
+                                      fontSize: 22.0,
+                                      fontWeight: FontWeight.w400
+                                  ),
+                                ),
                             );
                           },
                           body: new Padding(
                             padding: EdgeInsets.symmetric(horizontal: 12.0),
-                            child: _equipment.isEmpty?new Center(child: new Text('请选择设备')):new Column(
+                            child: _equipment==null?new Center(child: new Text('请选择设备')):new Column(
                               children: <Widget>[
-                                BuildWidget.buildRow('系统编号:', _equipment['OID']??''),
+                                BuildWidget.buildRow('系统编号', _equipment['OID']??''),
                                 BuildWidget.buildRow('名称', _equipment['Name']??''),
                                 BuildWidget.buildRow('型号', _equipment['EquipmentCode']??''),
                                 BuildWidget.buildRow('序列号', _equipment['SerialCode']??''),
@@ -338,14 +359,11 @@ class _EquipmentContractState extends State<EquipmentContract> {
                                   size: 24.0,
                                   color: Colors.blue,
                                 ),
-                                title: new Align(
-                                    child: Text('请求详细信息',
-                                      style: new TextStyle(
-                                          fontSize: 22.0,
-                                          fontWeight: FontWeight.w400
-                                      ),
-                                    ),
-                                    alignment: Alignment(-1.4, 0)
+                                title: Text('请求详细信息',
+                                  style: new TextStyle(
+                                      fontSize: 22.0,
+                                      fontWeight: FontWeight.w400
+                                  ),
                                 )
                             );
                           },
@@ -355,7 +373,8 @@ class _EquipmentContractState extends State<EquipmentContract> {
                               children: <Widget>[
                                 BuildWidget.buildRow('类型', '合同档案'),
                                 BuildWidget.buildRow('请求人', _roleName),
-                                BuildWidget.buildRow('主题', _equipment.isEmpty?'--合同档案':'${_equipment['Name']}--合同档案'),
+                                BuildWidget.buildRow('主题', _equipment==null?'--合同档案':'${_equipment['Name']}--合同档案'),
+                                new Divider(),
                                 new Padding(
                                   padding: EdgeInsets.symmetric(vertical: 5.0),
                                   child: new Row(
@@ -363,7 +382,7 @@ class _EquipmentContractState extends State<EquipmentContract> {
                                       new Expanded(
                                         flex: 4,
                                         child: new Text(
-                                          '合同档案备注',
+                                          '合同档案备注：',
                                           style: new TextStyle(
                                               fontSize: 20.0,
                                               fontWeight: FontWeight.w600
@@ -384,12 +403,17 @@ class _EquipmentContractState extends State<EquipmentContract> {
                                   child: new Row(
                                     children: <Widget>[
                                       new Text(
-                                        '添加附件',
+                                        '添加附件：',
                                         style: new TextStyle(
                                             fontSize: 20.0,
                                             fontWeight: FontWeight.w600
                                         ),
-                                      )
+                                      ),
+                                      new IconButton(
+                                          icon: Icon(Icons.add_a_photo),
+                                          onPressed: () {
+                                            getImage();
+                                          })
                                     ],
                                   ),
                                 ),

@@ -10,6 +10,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:atoi/utils/http_request.dart';
 import 'package:atoi/utils/constants.dart';
+import 'package:atoi/widgets/build_widget.dart';
 
 class OtherRequest extends StatefulWidget{
   static String tag = 'other-request';
@@ -47,8 +48,18 @@ class _OtherRequestState extends State<OtherRequest> {
   List<DropdownMenuItem<String>> _dropDownMenuItems;
   String _currentResult;
   List<dynamic> _imageList = [];
+  var _role;
+  var _roleName;
 
+  Future getRole() async {
+     var prefs = await _prefs;
+     setState(() {
+       _role =  prefs.getInt('role');
+       _roleName = prefs.getString('userName');
+     });
+  }
   void initState(){
+    getRole();
     _dropDownMenuItems = getDropDownMenuItems(_serviceResults);
     _currentResult = _dropDownMenuItems[0].value;
     super.initState();
@@ -59,20 +70,36 @@ class _OtherRequestState extends State<OtherRequest> {
         source: ImageSource.camera,
         maxWidth: 800.0
     );
-    setState(() {
-      _imageList.add(image);
-    });
+    if (image != null) {
+      setState(() {
+        _imageList.add(image);
+      });
+    }
   }
 
-  Row buildImageRow(List imageList) {
+  GridView buildImageRow(List imageList) {
     List<Widget> _list = [];
 
     if (imageList.length >0 ){
       for(var image in imageList) {
         _list.add(
-            new Container(
-              width: 100.0,
-              child: Image.file(image),
+            new Stack(
+              alignment: FractionalOffset(1.0, 0),
+              children: <Widget>[
+                new Container(
+                  width: 100.0,
+                  child: Image.file(image),
+                ),
+                new Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 0.0),
+                  child: new IconButton(icon: Icon(Icons.cancel), color: Colors.white, onPressed: (){
+                    imageList.remove(image);
+                    setState(() {
+                      _imageList = imageList;
+                    });
+                  }),
+                )
+              ],
             )
         );
       }
@@ -80,12 +107,12 @@ class _OtherRequestState extends State<OtherRequest> {
       _list.add(new Container());
     }
 
-    _list.add(new IconButton(icon: Icon(Icons.add_a_photo), onPressed: () {
-      getImage();
-    }));
-
-    return new Row(
-        mainAxisAlignment: MainAxisAlignment.start,
+    return new GridView.count(
+        shrinkWrap: true,
+        primary: false,
+        mainAxisSpacing: 5,
+        crossAxisSpacing: 5,
+        crossAxisCount: 2,
         children: _list
     );
   }
@@ -246,24 +273,22 @@ class _OtherRequestState extends State<OtherRequest> {
                                   size: 24.0,
                                   color: Colors.blue,
                                 ),
-                                title: new Align(
-                                    child: Text('请求详细信息',
-                                      style: new TextStyle(
-                                          fontSize: 22.0,
-                                          fontWeight: FontWeight.w400
-                                      ),
-                                    ),
-                                    alignment: Alignment(-1.4, 0)
-                                )
+                                title:Text('请求详细信息',
+                                  style: new TextStyle(
+                                      fontSize: 22.0,
+                                      fontWeight: FontWeight.w400
+                                  ),
+                                ),
                             );
                           },
                           body: new Padding(
                             padding: EdgeInsets.symmetric(horizontal: 12.0),
                             child: new Column(
                               children: <Widget>[
-                                buildRow('类型', '其他服务'),
-                                buildRow('请求人', '超级管理员'),
-                                buildRow('主题', '其他服务'),
+                                BuildWidget.buildRow('类型', '其他服务'),
+                                BuildWidget.buildRow('请求人', _roleName==null?'':_roleName),
+                                BuildWidget.buildRow('主题', '其他服务'),
+                                new Divider(),
                                 new Padding(
                                   padding: EdgeInsets.symmetric(vertical: 5.0),
                                   child: new Row(
@@ -271,7 +296,7 @@ class _OtherRequestState extends State<OtherRequest> {
                                       new Expanded(
                                         flex: 4,
                                         child: new Text(
-                                          '备注',
+                                          '备注：',
                                           style: new TextStyle(
                                               fontSize: 20.0,
                                               fontWeight: FontWeight.w600
@@ -292,12 +317,17 @@ class _OtherRequestState extends State<OtherRequest> {
                                   child: new Row(
                                     children: <Widget>[
                                       new Text(
-                                        '添加附件',
+                                        '添加附件：',
                                         style: new TextStyle(
                                             fontSize: 20.0,
                                             fontWeight: FontWeight.w600
                                         ),
-                                      )
+                                      ),
+                                      new IconButton(
+                                          icon: Icon(Icons.add_a_photo),
+                                          onPressed: () {
+                                            getImage();
+                                          })
                                     ],
                                   ),
                                 ),

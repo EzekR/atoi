@@ -7,6 +7,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:atoi/utils/constants.dart';
 import 'package:atoi/widgets/build_widget.dart';
+import 'package:atoi/utils/image_util.dart';
+import 'package:flutter_image_compress/flutter_image_compress.dart';
 
 class EngineerVoucherPage extends StatefulWidget {
   static String tag = 'engineer-voucher-page';
@@ -29,7 +31,11 @@ class _EngineerVoucherPageState extends State<EngineerVoucherPage> {
   var _followProblem = new TextEditingController();
   var _unconfirmed = new TextEditingController();
   var _advice = new TextEditingController();
+  var _fujiComments = "";
   String _signature;
+  String _journalStatus = '新建';
+  List<int> _img;
+  String _journalOID;
 
   List _serviceResults = [
     '完成',
@@ -42,6 +48,18 @@ class _EngineerVoucherPageState extends State<EngineerVoucherPage> {
   String _currentResult;
   Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
 
+  String _userName = '';
+  String _mobile = '';
+
+  Future<Null> getRole() async {
+    var prefs = await _prefs;
+    var userName = prefs.getString('userName');
+    var mobile = prefs.getString('mobile');
+    setState(() {
+      _userName = userName;
+      _mobile = mobile;
+    });
+  }
   Future<Null> getJournal() async {
     var _journalId = widget.journalId;
     if (_journalId !=0) {
@@ -51,7 +69,7 @@ class _EngineerVoucherPageState extends State<EngineerVoucherPage> {
         '/DispatchJournal/GetDispatchJournal',
         method: HttpRequest.GET,
         params: {
-          'userID': 31,
+          'userID': userID,
           'dispatchJournalId': _journalId
         }
       );
@@ -60,12 +78,16 @@ class _EngineerVoucherPageState extends State<EngineerVoucherPage> {
         var _data = resp['Data'];
         setState(() {
           _signature = _data['FileContent'];
-          _img = base64Decode(_signature).buffer.asByteData();
+          _img = base64Decode(_signature);
           _faultCode.text = _data['FaultCode'];
           _jobContent.text = _data['JobContent'];
           _followProblem.text = _data['FollowProblem'];
           _unconfirmed.text = _data['UnconfirmedProblem'];
           _advice.text = _data['Advice'];
+          _fujiComments = _data['FujiComments'];
+          _journalStatus = _data['Status']['Name'];
+          _journalOID = _data['OID'];
+          _currentResult = _data['ResultStatus']['Name'];
         });
       }
     }
@@ -92,7 +114,7 @@ class _EngineerVoucherPageState extends State<EngineerVoucherPage> {
   }
 
   Future<Null> uploadJournal() async {
-    if (_img.buffer.lengthInBytes == 0 ) {
+    if (_img.length == 0 ) {
       showDialog(context: context,
           builder: (context) => AlertDialog(
           title: new Text('签名不可为空'),
@@ -118,7 +140,7 @@ class _EngineerVoucherPageState extends State<EngineerVoucherPage> {
       var prefs = await _prefs;
       var userId = prefs.getInt('userID');
       var dispatchId = widget.dispatchId;
-      var image = base64Encode(_img.buffer.asUint8List());
+      var image = base64Encode(_img);
       var status = AppConstants.ResultStatusID[_currentResult];
       var resp = await HttpRequest.request(
           '/DispatchJournal/SaveDispatchJournal',
@@ -126,7 +148,7 @@ class _EngineerVoucherPageState extends State<EngineerVoucherPage> {
           data: {
             'userID': userId,
             'dispatchJournalInfo': {
-              'ID': 0,
+              'ID': widget.journalId,
               'dispatch': {
                 'ID': dispatchId
               },
@@ -160,6 +182,7 @@ class _EngineerVoucherPageState extends State<EngineerVoucherPage> {
     _currentResult = _dropDownMenuItems[0].value;
     getDispatch();
     getJournal();
+    getRole();
     super.initState();
   }
 
@@ -317,7 +340,7 @@ class _EngineerVoucherPageState extends State<EngineerVoucherPage> {
     List<Widget> _list = [];
     for(var _equipment in _equipments) {
       var equipList = [
-        BuildWidget.buildRow('系统编号:', _equipment['OID']??''),
+        BuildWidget.buildRow('系统编号', _equipment['OID']??''),
         BuildWidget.buildRow('名称', _equipment['Name']??''),
         BuildWidget.buildRow('型号', _equipment['EquipmentCode']??''),
         BuildWidget.buildRow('序列号', _equipment['SerialCode']??''),
@@ -333,25 +356,149 @@ class _EngineerVoucherPageState extends State<EngineerVoucherPage> {
     }
     return _list;
   }
-  ByteData _img = ByteData(0);
+
+  List<ExpansionPanel> buildExpansion() {
+    List<ExpansionPanel> _list = [];
+    if (_dispatch['Request']['RequestType']['ID'] != 14) {
+      _list.add(
+        new ExpansionPanel(
+          headerBuilder: (context, isExpanded) {
+            return ListTile(
+              leading: new Icon(Icons.info,
+                size: 24.0,
+                color: Colors.blue,
+              ),
+              title: Text('设备基本信息',
+                style: new TextStyle(
+                    fontSize: 22.0,
+                    fontWeight: FontWeight.w400
+                ),
+              ),
+            );
+          },
+          body: new Padding(
+            padding: EdgeInsets.symmetric(horizontal: 8.0),
+            child: new Column(
+              children: buildEquipments(),
+            ),
+          ),
+          isExpanded: _isExpandedBasic,
+        ),
+      );
+    }
+    _list.addAll([
+      new ExpansionPanel(
+        headerBuilder: (context, isExpanded) {
+          return ListTile(
+            leading: new Icon(Icons.description,
+              size: 24.0,
+              color: Colors.blue,
+            ),
+            title: Text('派工内容',
+              style: new TextStyle(
+                  fontSize: 22.0,
+                  fontWeight: FontWeight.w400
+              ),
+            ),
+          );
+        },
+        body: new Padding(
+          padding: EdgeInsets.symmetric(horizontal: 8.0),
+          child: new Column(
+            children: <Widget>[
+              BuildWidget.buildRow('派工单编号', _dispatch['OID']),
+              BuildWidget.buildRow('派工单状态', _dispatch['Status']['Name']),
+              BuildWidget.buildRow('派工类型', _dispatch['RequestType']['Name']),
+              BuildWidget.buildRow('工程师姓名', _dispatch['Engineer']['Name']),
+              //BuildWidget.buildRow('处理方式', _dispatch['Request']['DealType']['Name']),
+              BuildWidget.buildRow('紧急程度', _dispatch['Request']['Priority']['Name']),
+              BuildWidget.buildRow('机器状态', _dispatch['MachineStatus']['Name']),
+              BuildWidget.buildRow('出发时间', AppConstants.TimeForm(_dispatch['ScheduleDate'], 'yyyy-mm-dd')),
+              BuildWidget.buildRow('备注', _dispatch['LeaderComments']),
+            ],
+          ),
+        ),
+        isExpanded: _isExpandedDetail,
+      ),
+      new ExpansionPanel(
+        headerBuilder: (context, isExpanded) {
+          return ListTile(
+            leading: new Icon(Icons.perm_contact_calendar,
+              size: 24.0,
+              color: Colors.blue,
+            ),
+            title: Text('服务详情信息',
+              style: new TextStyle(
+                  fontSize: 22.0,
+                  fontWeight: FontWeight.w400
+              ),
+            ),
+          );
+        },
+        body: new Padding(
+          padding: EdgeInsets.symmetric(horizontal: 8.0),
+          child: new Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              _journalOID!=null?BuildWidget.buildRow('服务凭证编号', _journalOID):new Container(),
+              BuildWidget.buildRow('客户姓名', _dispatch['Request']['RequestUser']['Name']),
+              BuildWidget.buildRow('客户电话', _dispatch['Request']['RequestUser']['Mobile']),
+              BuildWidget.buildRow('审批状态', _journalStatus),
+              _fujiComments.isNotEmpty?BuildWidget.buildRow('审批备注', _fujiComments):new Container(),
+              new Divider(
+                color: Colors.grey,
+              ),
+              widget.status!=0&&widget.status!=1?BuildWidget.buildRow('故障现象/错误代码/事由', _faultCode.text):buildEditor('故障现象/\n错误代码/事由', _faultCode),
+              widget.status!=0&&widget.status!=1?BuildWidget.buildRow('工作内容', _jobContent.text):buildEditor('工作内容', _jobContent),
+              widget.status!=0&&widget.status!=1?BuildWidget.buildRow('待跟进问题', _followProblem.text):buildEditor('待跟进问题', _followProblem),
+              widget.status!=0&&widget.status!=1?BuildWidget.buildRow('待确认问题', _unconfirmed.text):buildEditor('待确认问题', _unconfirmed),
+              widget.status!=0&&widget.status!=1?BuildWidget.buildRow('建议留言', _advice.text):buildEditor('建议留言', _advice),
+              new Divider(),
+              widget.status!=0&&widget.status!=1?BuildWidget.buildRow('服务结果', _currentResult):BuildWidget.buildDropdownLeft('服务结果：', _currentResult, _dropDownMenuItems, changedDropDownMethod),
+              widget.status==0||widget.status==1?new Padding(
+                padding: EdgeInsets.symmetric(vertical: 5.0),
+                child: new Text('客户签名：',
+                  style: new TextStyle(
+                      fontSize: 20.0,
+                      fontWeight: FontWeight.w600
+                  ),
+                ),
+              ):BuildWidget.buildRow('客户签名', ''),
+              widget.status==0||widget.status==1?new RaisedButton(onPressed: () {toSignature(context);}, child: new Icon(Icons.add_box)):new Container(),
+              _img!=null?new Container(width: 400.0, height: 400.0, child: new Image.memory(Uint8List.fromList(_img))):new Container()
+            ],
+          ),
+        ),
+        isExpanded: _isExpandedAssign,
+      ),
+    ]);
+    return _list;
+  }
+
+  toSignature (BuildContext context) async {
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => SignaturePage()),
+    );
+    var compressed = await FlutterImageCompress.compressWithList(
+        result.buffer.asUint8List(),
+        rotate: -90,
+        minHeight: 200,
+        minWidth: 150
+    );
+    print(compressed);
+    setState(() {
+      _img = compressed;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     // TODO: implement build
-    toSignature (BuildContext context) async {
-      final result = await Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => SignaturePage()),
-      );
-      setState(() {
-        _img = result;
-      });
-    }
-
     return new Scaffold(
       appBar: new AppBar(
         title: new Text(
-            widget.status==0?'上传凭证':'查看凭证'
+            widget.status==0||widget.status==1?'上传凭证':'查看凭证'
         ),
         elevation: 0.7,
         flexibleSpace: Container(
@@ -367,10 +514,9 @@ class _EngineerVoucherPageState extends State<EngineerVoucherPage> {
           ),
         ),
         actions: <Widget>[
-          new Icon(Icons.face),
           new Padding(
             padding: const EdgeInsets.symmetric(horizontal: 5.0, vertical: 19.0),
-            child: const Text('武田信玄'),
+            child: Text(_userName),
           ),
         ],
       ),
@@ -384,128 +530,17 @@ class _EngineerVoucherPageState extends State<EngineerVoucherPage> {
                 expansionCallback: (index, isExpanded) {
                   setState(() {
                     if (index == 0) {
-                      _isExpandedBasic = !isExpanded;
+                      _dispatch['Request']['RequestType']['ID']==14?_isExpandedDetail=!isExpanded:_isExpandedBasic = !isExpanded;
                     } else {
                       if (index == 1) {
-                        _isExpandedDetail = !isExpanded;
+                        _dispatch['Request']['RequestType']['ID']==14?_isExpandedAssign=!isExpanded:_isExpandedDetail = !isExpanded;
                       } else {
                         _isExpandedAssign =!isExpanded;
                       }
                     }
                   });
                 },
-                children: [
-                  new ExpansionPanel(
-                    headerBuilder: (context, isExpanded) {
-                      return ListTile(
-                          leading: new Icon(Icons.info,
-                            size: 24.0,
-                            color: Colors.blue,
-                          ),
-                          title: new Align(
-                              child: Text('设备基本信息',
-                                style: new TextStyle(
-                                    fontSize: 22.0,
-                                    fontWeight: FontWeight.w400
-                                ),
-                              ),
-                              alignment: Alignment(-1.4, 0)
-                          )
-                      );
-                    },
-                    body: new Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 8.0),
-                      child: new Column(
-                        children: buildEquipments(),
-                      ),
-                    ),
-                    isExpanded: _isExpandedBasic,
-                  ),
-                  new ExpansionPanel(
-                    headerBuilder: (context, isExpanded) {
-                      return ListTile(
-                          leading: new Icon(Icons.description,
-                            size: 24.0,
-                            color: Colors.blue,
-                          ),
-                          title: new Align(
-                              child: Text('派工内容',
-                                style: new TextStyle(
-                                    fontSize: 22.0,
-                                    fontWeight: FontWeight.w400
-                                ),
-                              ),
-                              alignment: Alignment(-1.4, 0)
-                          )
-                      );
-                    },
-                    body: new Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 8.0),
-                      child: new Column(
-                        children: <Widget>[
-                          BuildWidget.buildRow('派工单编号', _dispatch['OID']),
-                          BuildWidget.buildRow('派工类型', _dispatch['RequestType']['Name']),
-                          BuildWidget.buildRow('工程师姓名', _dispatch['Engineer']['Name']),
-                          //BuildWidget.buildRow('处理方式', _dispatch['Request']['DealType']['Name']),
-                          BuildWidget.buildRow('紧急程度', _dispatch['Request']['Priority']['Name']),
-                          BuildWidget.buildRow('机器状态', _dispatch['MachineStatus']['Name']),
-                          BuildWidget.buildRow('出发时间', AppConstants.TimeForm(_dispatch['ScheduleDate'], 'yyyy-mm-dd')),
-                          BuildWidget.buildRow('备注', _dispatch['LeaderComments']),
-                        ],
-                      ),
-                    ),
-                    isExpanded: _isExpandedDetail,
-                  ),
-                  new ExpansionPanel(
-                    headerBuilder: (context, isExpanded) {
-                      return ListTile(
-                          leading: new Icon(Icons.perm_contact_calendar,
-                            size: 24.0,
-                            color: Colors.blue,
-                          ),
-                          title: new Align(
-                              child: Text('服务详情信息',
-                                style: new TextStyle(
-                                    fontSize: 22.0,
-                                    fontWeight: FontWeight.w400
-                                ),
-                              ),
-                              alignment: Alignment(-1.3, 0)
-                          )
-                      );
-                    },
-                    body: new Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 8.0),
-                      child: new Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: <Widget>[
-                          BuildWidget.buildRow('客户姓名', _dispatch['Request']['RequestUser']['Name']),
-                          BuildWidget.buildRow('客户电话', _dispatch['Request']['RequestUser']['Mobile']),
-                          new Divider(
-                            color: Colors.grey,
-                          ),
-                          widget.status!=0?BuildWidget.buildRow('故障现象/错误代码/事由', _faultCode.text):buildEditor('故障现象/错误代码/事由', _faultCode),
-                          widget.status!=0?BuildWidget.buildRow('工作内容', _jobContent.text):buildEditor('工作内容', _jobContent),
-                          widget.status!=0?BuildWidget.buildRow('待跟进问题', _followProblem.text):buildEditor('待跟进问题', _followProblem),
-                          widget.status!=0?BuildWidget.buildRow('待确认问题', _unconfirmed.text):buildEditor('待确认问题', _unconfirmed),
-                          widget.status!=0?BuildWidget.buildRow('建议留言', _advice.text):buildEditor('建议留言', _advice),
-                          widget.status!=0?BuildWidget.buildRow('服务结果', _currentResult):BuildWidget.buildDropdown('服务结果', _currentResult, _dropDownMenuItems, changedDropDownMethod),
-                          new Padding(
-                            padding: EdgeInsets.symmetric(vertical: 5.0),
-                            child: new Text('客户签名：',
-                              style: new TextStyle(
-                                  fontSize: 20.0,
-                                  fontWeight: FontWeight.w600
-                              ),
-                            ),
-                          ),
-                          _img.buffer.lengthInBytes == 0? new RaisedButton(onPressed: () {toSignature(context);}, child: new Icon(Icons.add_box)):new Container(width: 400.0, height: 400.0, child: new Image.memory(_img.buffer.asUint8List())),
-                        ],
-                      ),
-                    ),
-                    isExpanded: _isExpandedAssign,
-                  ),
-                ],
+                children: buildExpansion(),
               ),
               SizedBox(height: 24.0),
               new Row(
@@ -513,7 +548,7 @@ class _EngineerVoucherPageState extends State<EngineerVoucherPage> {
                 mainAxisSize: MainAxisSize.max,
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: <Widget>[
-                  widget.status==0?new RaisedButton(
+                  widget.status==0||widget.status==1?new RaisedButton(
                     onPressed: () {
                       uploadJournal();
                     },

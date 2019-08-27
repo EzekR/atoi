@@ -7,6 +7,7 @@ import 'package:scoped_model/scoped_model.dart';
 import 'package:atoi/models/models.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:atoi/widgets/build_widget.dart';
+import 'package:atoi/utils/constants.dart';
 
 class ManagerToAssign extends StatefulWidget {
   @override
@@ -23,6 +24,7 @@ class _ManagerToAssignState extends State<ManagerToAssign> {
 
   void initState() {
     //getData();
+    refresh();
     super.initState();
   }
 
@@ -101,6 +103,11 @@ class _ManagerToAssignState extends State<ManagerToAssign> {
     );
   }
 
+  Future<Null> refresh() async {
+    ManagerModel _model = MainModel.of(context);
+    _model.getRequests();
+  }
+
   @override
   Widget build(BuildContext context) {
     // TODO: implement build
@@ -155,13 +162,14 @@ class _ManagerToAssignState extends State<ManagerToAssign> {
                 mainAxisAlignment: MainAxisAlignment.start,
                 mainAxisSize: MainAxisSize.max,
                 children: <Widget>[
-                  BuildWidget.buildCardRow('系统编号', equipmentNo),
-                  BuildWidget.buildCardRow('名称', equipmentName),
-                  BuildWidget.buildCardRow('使用科室', departmentName),
+                  equipmentNo.isNotEmpty?BuildWidget.buildCardRow('设备编号', equipmentNo):new Container(),
+                  equipmentName.isNotEmpty?BuildWidget.buildCardRow('设备名称', equipmentName):new Container(),
+                  departmentName.isNotEmpty?BuildWidget.buildCardRow('使用科室', departmentName):new Container(),
                   BuildWidget.buildCardRow('请求人', requestPerson),
                   BuildWidget.buildCardRow('类型', requestType),
                   BuildWidget.buildCardRow('状态', status),
-                  BuildWidget.buildCardRow('请求详情', detail),
+                  BuildWidget.buildCardRow('请求详情', detail.length>10?'${detail.substring(0,10)}...':detail),
+                  task['SelectiveDate']==null?new Container():BuildWidget.buildCardRow('择期日期', AppConstants.TimeForm(task['SelectiveDate'], 'yyyy-mm-dd')),
                   new Row(
                     mainAxisAlignment: MainAxisAlignment.end,
                     mainAxisSize: MainAxisSize.max,
@@ -171,7 +179,7 @@ class _ManagerToAssignState extends State<ManagerToAssign> {
                           //Navigator.of(context).pushNamed(ManagerAssignPage.tag);
                           Navigator.of(context).push(new MaterialPageRoute(builder: (_) {
                             return new ManagerAssignPage(request: task);
-                          }));
+                          })).then((result) => refresh());
                         },
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(24),
@@ -197,27 +205,105 @@ class _ManagerToAssignState extends State<ManagerToAssign> {
                       ),
                       new RaisedButton(
                         onPressed: (){
-                          _cancelRequest(requestId);
+                          showDatePicker(
+                              context: context,
+                              initialDate: new DateTime.now(),
+                              firstDate: new DateTime.now().subtract(new Duration(days: 1)), // 减 30 天
+                              lastDate: new DateTime.now().add(new Duration(days: 30)),       // 加 30 天
+                              locale: Locale('zh')
+                          ).then((DateTime val) {
+                            var date = '${val.year}-${val.month}-${val.day}';
+                            HttpRequest.request(
+                              '/Request/UpdateSelectiveDate',
+                              method: HttpRequest.POST,
+                              data: {
+                                'requestId': requestId,
+                                'selectiveDate': date
+                              }
+                            ).then((resp) {
+                              if (resp['ResultCode'] == '00') {
+                                showDialog(context: context,
+                                  builder: (context) =>AlertDialog(
+                                    title: new Text('择期成功'),
+                                  )
+                                ).then((result) {
+                                  refresh();
+                                });
+                              } else {
+                                showDialog(context: context,
+                                    builder: (context) =>AlertDialog(
+                                      title: new Text(resp['ResultMessage']),
+                                    )
+                                );
+                              }
+                            });
+                          }).catchError((err) {
+                            print(err);
+                          });
                         },
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(24),
                         ),
-                        color: new Color(0xffD25565),
+                        color: new Color(0xff2E94B9),
                         child: new Row(
                           children: <Widget>[
                             new Icon(
-                              Icons.cancel,
+                              Icons.event_note,
                               color: Colors.white,
                             ),
                             new Text(
-                              '取消',
+                              '择期',
                               style: new TextStyle(
                                   color: Colors.white
                               ),
                             )
                           ],
                         ),
-                      )
+                      ),
+                      //new RaisedButton(
+                      //  onPressed: (){
+                      //    showDialog(context: context,
+                      //        builder: (context) => AlertDialog(
+                      //          title: new Text('是否终止请求？'),
+                      //          actions: <Widget>[
+                      //            RaisedButton(
+                      //              child: const Text('确认', style: TextStyle(color: Colors.white),),
+                      //              color: AppConstants.AppColors['btn_cancel'],
+                      //              onPressed: () {
+                      //                _cancelRequest(requestId);
+                      //                Navigator.of(context).pop();
+                      //              },
+                      //            ),
+                      //            RaisedButton(
+                      //              child: const Text('取消', style: TextStyle(color: Colors.white),),
+                      //              color: AppConstants.AppColors['btn_main'],
+                      //              onPressed: () {
+                      //                Navigator.of(context).pop();
+                      //              },
+                      //            ),
+                      //          ],
+                      //        )
+                      //    );
+                      //  },
+                      //  shape: RoundedRectangleBorder(
+                      //    borderRadius: BorderRadius.circular(24),
+                      //  ),
+                      //  color: new Color(0xffD25565),
+                      //  child: new Row(
+                      //    children: <Widget>[
+                      //      new Icon(
+                      //        Icons.cancel,
+                      //        color: Colors.white,
+                      //      ),
+                      //      new Text(
+                      //        '取消',
+                      //        style: new TextStyle(
+                      //            color: Colors.white
+                      //        ),
+                      //      )
+                      //    ],
+                      //  ),
+                      //)
                     ],
                   )
                 ],

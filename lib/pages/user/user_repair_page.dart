@@ -34,9 +34,20 @@ class _UserRepairPageState extends State<UserRepairPage> {
 
   List _serviceResults = [
   '未知',
-  '已知'
   ];
 
+  String _userName = '';
+  String _mobile = '';
+
+  Future<Null> getRole() async {
+    var prefs = await _prefs;
+    var userName = prefs.getString('userName');
+    var mobile = prefs.getString('mobile');
+    setState(() {
+      _userName = userName;
+      _mobile = mobile;
+    });
+  }
   List<DropdownMenuItem<String>> _dropDownMenuItems;
   String _currentResult;
 
@@ -75,7 +86,7 @@ class _UserRepairPageState extends State<UserRepairPage> {
   Future getImage() async {
     var image = await ImagePicker.pickImage(
         source: ImageSource.camera,
-        maxWidth: 800.0
+        imageQuality: 1
     );
     if (image != null) {
       setState(() {
@@ -252,15 +263,29 @@ class _UserRepairPageState extends State<UserRepairPage> {
     );
   }
 
-  Row buildImageRow(List imageList) {
+  GridView buildImageRow(List imageList) {
     List<Widget> _list = [];
 
     if (imageList.length >0 ){
       for(var image in imageList) {
         _list.add(
-            new Container(
-              width: 100.0,
-              child: Image.file(image),
+            new Stack(
+              alignment: FractionalOffset(1.0, 0),
+              children: <Widget>[
+                new Container(
+                  width: 100.0,
+                  child: Image.file(image),
+                ),
+                new Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 0.0),
+                  child: new IconButton(icon: Icon(Icons.cancel), color: Colors.white, onPressed: (){
+                    imageList.remove(image);
+                    setState(() {
+                      _imageList = imageList;
+                    });
+                  }),
+                )
+              ],
             )
         );
       }
@@ -268,13 +293,13 @@ class _UserRepairPageState extends State<UserRepairPage> {
       _list.add(new Container());
     }
 
-    _list.add(new IconButton(icon: Icon(Icons.add_a_photo), onPressed: () {
-      getImage();
-    }));
-
-    return new Row(
-      mainAxisAlignment: MainAxisAlignment.start,
-      children: _list
+    return new GridView.count(
+        shrinkWrap: true,
+        primary: false,
+        mainAxisSpacing: 5,
+        crossAxisSpacing: 5,
+        crossAxisCount: 2,
+        children: _list
     );
   }
 
@@ -297,10 +322,9 @@ class _UserRepairPageState extends State<UserRepairPage> {
           ),
         ),
         actions: <Widget>[
-          new Icon(Icons.face),
           new Padding(
             padding: const EdgeInsets.symmetric(horizontal: 5.0, vertical: 19.0),
-            child: const Text('真田信村'),
+            child: Text(_userName),
           ),
         ],
       ),
@@ -345,14 +369,16 @@ class _UserRepairPageState extends State<UserRepairPage> {
                       padding: EdgeInsets.symmetric(horizontal: 8.0),
                       child: new Column(
                         children: <Widget>[
-                          BuildWidget.buildRow('设备系统编号', widget.equipment['OID']),
-                          BuildWidget.buildRow('名称', widget.equipment['Name']),
-                          BuildWidget.buildRow('使用科室', widget.equipment['Department']['Name']),
-                          BuildWidget.buildRow('设备厂商', widget.equipment['Manufacturer']['Name']),
-                          BuildWidget.buildRow('资产等级', widget.equipment['AssetLevel']['Name']),
-                          BuildWidget.buildRow('型号', widget.equipment['EquipmentCode']),
-                          BuildWidget.buildRow('安装地点', widget.equipment['InstalSite']),
-                          BuildWidget.buildRow('保修状况', widget.equipment['WarrantyStatus']),
+                          BuildWidget.buildRow('系统编号', widget.equipment['OID']??''),
+                          BuildWidget.buildRow('名称', widget.equipment['Name']??''),
+                          BuildWidget.buildRow('型号', widget.equipment['EquipmentCode']??''),
+                          BuildWidget.buildRow('序列号', widget.equipment['SerialCode']??''),
+                          BuildWidget.buildRow('使用科室', widget.equipment['Department']['Name']??''),
+                          BuildWidget.buildRow('安装地点', widget.equipment['InstalSite']??''),
+                          BuildWidget.buildRow('设备厂商', widget.equipment['Manufacturer']['Name']??''),
+                          BuildWidget.buildRow('资产等级', widget.equipment['AssetLevel']['Name']??''),
+                          BuildWidget.buildRow('维保状态', widget.equipment['WarrantyStatus']??''),
+                          BuildWidget.buildRow('服务范围', widget.equipment['ContractScope']['Name']??''),
                         ],
                       ),
                     ),
@@ -382,62 +408,28 @@ class _UserRepairPageState extends State<UserRepairPage> {
                         mainAxisSize: MainAxisSize.max,
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: <Widget>[
-                          buildInput('故障描述', _describe),
+                          BuildWidget.buildInput('故障描述', _describe),
+                          BuildWidget.buildDropdown('故障分类', _currentResult, _dropDownMenuItems, changedDropDownMethod),
                           new Padding(
-                            padding: EdgeInsets.symmetric(vertical: 5.0),
+                            padding: EdgeInsets.symmetric(vertical: 5.0, horizontal: 50.0),
                             child: new Row(
                               children: <Widget>[
-                                new Expanded(
-                                  flex: 4,
-                                  child: new Text(
-                                    '故障分类',
-                                    style: new TextStyle(
-                                        fontSize: 20.0,
-                                        fontWeight: FontWeight.w600
-                                    ),
+                                new Text(
+                                  '添加附件：',
+                                  style: new TextStyle(
+                                      fontSize: 20.0,
+                                      fontWeight: FontWeight.w600
                                   ),
                                 ),
-                                new Expanded(
-                                  flex: 6,
-                                  child: new DropdownButton(
-                                    value: _currentResult,
-                                    items: _dropDownMenuItems,
-                                    onChanged: changedDropDownMethod,
-                                  ),
-                                )
+                                new IconButton(
+                                    icon: Icon(Icons.add_a_photo),
+                                    onPressed: () {
+                                      getImage();
+                                    })
                               ],
                             ),
                           ),
-                          new Padding(
-                            padding: EdgeInsets.symmetric(vertical: 5.0),
-                            child: new Text('上传故障照片',
-                              style: new TextStyle(
-                                  fontSize: 16.0,
-                                  color: Colors.grey
-                              ),
-                            ),
-                          ),
                           buildImageRow(_imageList)
-                          //new Row(
-                          //  mainAxisAlignment: MainAxisAlignment.start,
-                          //  children: <Widget>[
-                          //    new ListView.builder(
-                          //        shrinkWrap: true,
-                          //        scrollDirection: Axis.horizontal,
-                          //        itemCount: _imageList.length,
-                          //        itemBuilder: (context, i) => new Container(
-                          //          width: 200.0,
-                          //          child: new Image.file(_imageList[i], width: 200.0),
-                          //        )
-                          //    ),
-                          //    new IconButton(
-                          //        icon: Icon(Icons.add_a_photo),
-                          //        onPressed: () {
-                          //          getImage();
-                          //        }
-                          //    )
-                          //  ],
-                          //),
                         ],
                       ),
                     ),
@@ -459,7 +451,7 @@ class _UserRepairPageState extends State<UserRepairPage> {
                       borderRadius: BorderRadius.circular(24),
                     ),
                     padding: EdgeInsets.all(12.0),
-                    color: Colors.indigo,
+                    color: AppConstants.AppColors['btn_main'],
                     child: Text(
                         '点击报修',
                         style: TextStyle(

@@ -36,9 +36,18 @@ class _EngineerToReportState extends State<EngineerToReport> {
     });
   }
 
+  ScrollController _scrollController = ScrollController();
+
   void initState() {
     //getTask();
     super.initState();
+    _scrollController.addListener(() {
+      if (_scrollController.position.pixels ==
+          _scrollController.position.maxScrollExtent) {
+        print('滑动到了最底部');
+      }
+    });
+    refresh();
   }
 
   Icon buttonIconJournal(status) {
@@ -92,6 +101,10 @@ class _EngineerToReportState extends State<EngineerToReport> {
     }
   }
 
+  Future<Null> refresh() async {
+    EngineerModel _model = MainModel.of(context);
+    _model.getTasksToReport();
+  }
   @override
   Widget build(BuildContext context) {
     // TODO: implement build
@@ -111,14 +124,14 @@ class _EngineerToReportState extends State<EngineerToReport> {
                 size: 40.0,
               ),
               title: Text(
-                "派工单编号$OID",
+                "派工单编号：$OID",
                 style: new TextStyle(
                     fontSize: 16.0,
                     color: Theme.of(context).primaryColor
                 ),
               ),
               subtitle: Text(
-                "开始时间$_startTime",
+                "开始时间：$_startTime",
                 style: new TextStyle(
                     color: Theme.of(context).accentColor
                 ),
@@ -131,9 +144,9 @@ class _EngineerToReportState extends State<EngineerToReport> {
                 mainAxisAlignment: MainAxisAlignment.start,
                 mainAxisSize: MainAxisSize.max,
                 children: <Widget>[
-                  BuildWidget.buildCardRow('名称', task['Request']['Equipments'].length>1?'多设备':deviceName),
-                  BuildWidget.buildCardRow('序列号', task['Request']['Equipments'].length>1?'多设备':deviceNo),
-                  BuildWidget.buildCardRow('使用科室', location),
+                  deviceName==''?new Container():BuildWidget.buildCardRow('设备名称', task['Request']['Equipments'].length>1?'多设备':deviceName),
+                  deviceNo==''?new Container():BuildWidget.buildCardRow('序列号', task['Request']['Equipments'].length>1?'多设备':deviceNo),
+                  location==''?new Container():BuildWidget.buildCardRow('使用科室', location),
                   BuildWidget.buildCardRow('请求类型', requestType),
                   BuildWidget.buildCardRow('紧急程度', urgency),
                   BuildWidget.buildCardRow('审批状态', task['Status']['Name']),
@@ -147,7 +160,7 @@ class _EngineerToReportState extends State<EngineerToReport> {
                               new MaterialPageRoute(builder: (_) {
                                 return new EngineerVoucherPage(
                                   dispatchId: dispatchId, journalId: task['DispatchJournal']['ID'], status: task['DispatchJournal']['Status']['ID'],);
-                              }));
+                              })).then((result) => refresh());
                         },
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(24),
@@ -174,7 +187,7 @@ class _EngineerToReportState extends State<EngineerToReport> {
                               new MaterialPageRoute(builder: (_) {
                                 return new EngineerReportPage(
                                     dispatchId: dispatchId, reportId: task['DispatchReport']['ID'], status: task['DispatchReport']['Status']['ID'],);
-                              }));
+                              })).then((result) => refresh());
                         },
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(24),
@@ -205,10 +218,11 @@ class _EngineerToReportState extends State<EngineerToReport> {
     return ScopedModelDescendant<MainModel>(
       builder: (context, child, model) {
         return new RefreshIndicator(
-            child: model.tasksToReport.length == 0?ListView(padding: const EdgeInsets.symmetric(vertical: 150.0), children: <Widget>[new Center(child: new Text('没有待报告工单'),)],):ListView.builder(
+            child: model.tasksToReport.length == 0?ListView(padding: const EdgeInsets.symmetric(vertical: 150.0), children: <Widget>[new Center(child: new Text('没有作业中工单'),)],):ListView.builder(
                 padding: const EdgeInsets.all(2.0),
                 itemCount: model.tasksToReport.length,
-                itemBuilder: (context, i) => buildCardItem(model.tasksToReport[i], model.tasksToReport[i]['ID'], model.tasksToReport[i]['DispatchJournal']['Status']['ID'], model.tasksToReport[i]['DispatchReport']['Status']['ID'], model.tasksToReport[i]['OID'], model.tasksToReport[i]['StartDate'], model.tasksToReport[i]['CreateDate'], model.tasksToReport[i]['Request']['Equipments'][0]['ResponseTimeLength'], model.tasksToReport[i]['Request']['Equipments'][0]['Name'], model.tasksToReport[i]['Request']['Equipments'][0]['SerialCode'], model.tasksToReport[i]['Request']['DepartmentName'], model.tasksToReport[i]['RequestType']['Name'], model.tasksToReport[i]['Urgency']['Name'], model.tasksToReport[i]['LeaderComments'])
+                controller: _scrollController,
+                itemBuilder: (context, i) => buildCardItem(model.tasksToReport[i], model.tasksToReport[i]['ID'], model.tasksToReport[i]['DispatchJournal']['Status']['ID'], model.tasksToReport[i]['DispatchReport']['Status']['ID'], model.tasksToReport[i]['OID'], model.tasksToReport[i]['StartDate'], model.tasksToReport[i]['CreateDate'], model.tasksToReport[i]['Request']['Equipments'].length>0?model.tasksToReport[i]['Request']['Equipments'][0]['ResponseTimeLength']:0, model.tasksToReport[i]['Request']['Equipments'].length>0?model.tasksToReport[i]['Request']['Equipments'][0]['Name']:'', model.tasksToReport[i]['Request']['Equipments'].length>0?model.tasksToReport[i]['Request']['Equipments'][0]['SerialCode']:'', model.tasksToReport[i]['Request']['DepartmentName'], model.tasksToReport[i]['RequestType']['Name'], model.tasksToReport[i]['Urgency']['Name'], model.tasksToReport[i]['LeaderComments'])
             ),
             onRefresh: model.getTasksToReport
         );

@@ -33,6 +33,18 @@ class _ManagerAuditVoucherPageState extends State<ManagerAuditVoucherPage> {
     '待跟进'
   ];
 
+  String _userName = '';
+  String _mobile = '';
+
+  Future<Null> getRole() async {
+    var prefs = await _prefs;
+    var userName = prefs.getString('userName');
+    var mobile = prefs.getString('mobile');
+    setState(() {
+      _userName = userName;
+      _mobile = mobile;
+    });
+  }
   List<int> imageBytes;
 
   Map<String, dynamic> _journal = {};
@@ -53,6 +65,7 @@ class _ManagerAuditVoucherPageState extends State<ManagerAuditVoucherPage> {
     if (resp['ResultCode'] == '00') {
       setState(() {
         _journal = resp['Data'];
+        _currentResult = resp['Data']['ResultStatus']['Name'];
         imageBytes = base64Decode(resp['Data']['FileContent']);
       });
     }
@@ -62,6 +75,7 @@ class _ManagerAuditVoucherPageState extends State<ManagerAuditVoucherPage> {
   String _currentResult;
 
   void initState(){
+    getRole();
     _dropDownMenuItems = getDropDownMenuItems(_serviceResults);
     _currentResult = _dropDownMenuItems[0].value;
     print('widget info:${widget.request}');
@@ -212,7 +226,8 @@ class _ManagerAuditVoucherPageState extends State<ManagerAuditVoucherPage> {
     Map<String, dynamic> _data = {
       'userID': UserId,
       'dispatchJournalID': widget.journalId,
-      'resultStatusID': AppConstants.ResultStatusID[_currentResult]
+      'resultStatusID': AppConstants.ResultStatusID[_currentResult],
+      'comments': _comment.text,
     };
     var _response = await HttpRequest.request(
       '/DispatchJournal/ApproveDispatchJournal',
@@ -245,7 +260,7 @@ class _ManagerAuditVoucherPageState extends State<ManagerAuditVoucherPage> {
     Map<String, dynamic> _data = {
       'userID': UserId,
       'dispatchJournalID': widget.journalId,
-      'comment': _comment.text
+      'comments': _comment.text
     };
     var _response = await HttpRequest.request(
         '/DispatchJournal/RejectDispatchJournal',
@@ -257,9 +272,11 @@ class _ManagerAuditVoucherPageState extends State<ManagerAuditVoucherPage> {
       showDialog(
           context: context,
           builder: (context) => AlertDialog(
-            title: new Text('拒绝凭证'),
+            title: new Text('已退回'),
           )
-      );
+      ).then((result) {
+        Navigator.of(context, rootNavigator: true).pop();
+      });
     } else {
       showDialog(context: context,
         builder: (context) => AlertDialog(
@@ -291,10 +308,9 @@ class _ManagerAuditVoucherPageState extends State<ManagerAuditVoucherPage> {
           ),
         ),
         actions: <Widget>[
-          new Icon(Icons.face),
           new Padding(
             padding: const EdgeInsets.symmetric(horizontal: 5.0, vertical: 19.0),
-            child: const Text('上杉谦信'),
+            child: Text(_userName),
           ),
         ],
       ),
@@ -326,15 +342,12 @@ class _ManagerAuditVoucherPageState extends State<ManagerAuditVoucherPage> {
                             size: 24.0,
                             color: Colors.blue,
                           ),
-                          title: new Align(
-                              child: Text('设备基本信息',
-                                style: new TextStyle(
-                                    fontSize: 22.0,
-                                    fontWeight: FontWeight.w400
-                                ),
-                              ),
-                              alignment: Alignment(-1.4, 0)
-                          )
+                          title: Text('设备基本信息',
+                            style: new TextStyle(
+                                fontSize: 22.0,
+                                fontWeight: FontWeight.w400
+                            ),
+                          ),
                       );
                     },
                     body: new Padding(
@@ -350,7 +363,7 @@ class _ManagerAuditVoucherPageState extends State<ManagerAuditVoucherPage> {
                           BuildWidget.buildRow('设备厂商', _equipment['Manufacturer']['Name']??''),
                           BuildWidget.buildRow('资产等级', _equipment['AssetLevel']['Name']??''),
                           BuildWidget.buildRow('维保状态', _equipment['WarrantyStatus']??''),
-                          BuildWidget.buildRow('服务范围', _equipment['ContractScopeComments']??''),
+                          BuildWidget.buildRow('服务范围', _equipment['ContractScope']['Name']??''),
                         ],
                       ),
                     ),
@@ -363,15 +376,12 @@ class _ManagerAuditVoucherPageState extends State<ManagerAuditVoucherPage> {
                             size: 24.0,
                             color: Colors.blue,
                           ),
-                          title: new Align(
-                              child: Text('派工内容',
-                                style: new TextStyle(
-                                    fontSize: 22.0,
-                                    fontWeight: FontWeight.w400
-                                ),
-                              ),
-                              alignment: Alignment(-1.4, 0)
-                          )
+                          title: Text('派工内容',
+                            style: new TextStyle(
+                                fontSize: 22.0,
+                                fontWeight: FontWeight.w400
+                            ),
+                          ),
                       );
                     },
                     body: new Padding(
@@ -379,6 +389,7 @@ class _ManagerAuditVoucherPageState extends State<ManagerAuditVoucherPage> {
                       child: new Column(
                         children: <Widget>[
                           BuildWidget.buildRow('派工单编号', widget.request['OID']),
+                          BuildWidget.buildRow('派工单状态', widget.request['Status']['Name']),
                           BuildWidget.buildRow('紧急程度', widget.request['Urgency']['Name']),
                           BuildWidget.buildRow('派工类型', widget.request['RequestType']['Name']),
                           BuildWidget.buildRow('机器状态', widget.request['MachineStatus']['Name']),
@@ -397,14 +408,11 @@ class _ManagerAuditVoucherPageState extends State<ManagerAuditVoucherPage> {
                             size: 24.0,
                             color: Colors.blue,
                           ),
-                          title: new Align(
-                              child: Text('服务详情信息',
-                                style: new TextStyle(
-                                    fontSize: 22.0,
-                                    fontWeight: FontWeight.w400
-                                ),
-                              ),
-                              alignment: Alignment(-1.3, 0)
+                          title: Text('服务详情信息',
+                            style: new TextStyle(
+                                fontSize: 22.0,
+                                fontWeight: FontWeight.w400
+                            ),
                           )
                       );
                     },
@@ -435,8 +443,8 @@ class _ManagerAuditVoucherPageState extends State<ManagerAuditVoucherPage> {
                               ),
                             ],
                           ),
-                          BuildWidget.buildDropdown('服务结果', _currentResult, _dropDownMenuItems, changedDropDownMethod),
-                          buildTextField('审批备注', _comment, true),
+                          widget.status==3?BuildWidget.buildRow('服务结果', _currentResult):BuildWidget.buildDropdown('服务结果', _currentResult, _dropDownMenuItems, changedDropDownMethod),
+                          widget.status==3?BuildWidget.buildRow('审批备注', _journal['FujiComments']??''):new Container()
                         ],
                       ),
                     ),
@@ -445,6 +453,7 @@ class _ManagerAuditVoucherPageState extends State<ManagerAuditVoucherPage> {
                 ],
               ),
               SizedBox(height: 24.0),
+              widget.status==3?new Container():buildTextField('审批备注', _comment, true),
               widget.status==3?new Container():new Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 mainAxisSize: MainAxisSize.max,

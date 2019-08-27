@@ -46,7 +46,7 @@ class _EquipmentRequestState extends State<EquipmentRequest> {
     'guarantee': ''
   };
 
-  Map _equipment = {};
+  var _equipment;
 
   List<DropdownMenuItem<String>> _dropDownMenuItems;
   String _currentResult;
@@ -78,11 +78,13 @@ class _EquipmentRequestState extends State<EquipmentRequest> {
   Future getImage() async {
     var image = await ImagePicker.pickImage(
         source: ImageSource.camera,
-        maxWidth: 800.0
+      imageQuality: 1
     );
-    setState(() {
-      _imageList.add(image);
-    });
+    if (image != null) {
+      setState(() {
+        _imageList.add(image);
+      });
+    }
   }
 
   Future getRole() async {
@@ -93,6 +95,14 @@ class _EquipmentRequestState extends State<EquipmentRequest> {
   }
 
   Future<Null> submit() async {
+    if (_equipment == null) {
+      showDialog(context: context,
+          builder: (context) => AlertDialog(
+            title: new Text('请选择设备'),
+          )
+      );
+      return;
+    }
     if (_fault.text == null || _fault.text.isEmpty) {
       showDialog(context: context,
         builder: (context) => AlertDialog(
@@ -146,15 +156,29 @@ class _EquipmentRequestState extends State<EquipmentRequest> {
     }
   }
 
-  Row buildImageRow(List imageList) {
+  GridView buildImageRow(List imageList) {
     List<Widget> _list = [];
 
     if (imageList.length >0 ){
       for(var image in imageList) {
         _list.add(
-            new Container(
-              width: 100.0,
-              child: Image.file(image),
+            new Stack(
+              alignment: FractionalOffset(1.0, 0),
+              children: <Widget>[
+                new Container(
+                  width: 100.0,
+                  child: Image.file(image),
+                ),
+                new Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 0.0),
+                  child: new IconButton(icon: Icon(Icons.cancel), color: Colors.white, onPressed: (){
+                    imageList.remove(image);
+                    setState(() {
+                      _imageList = imageList;
+                    });
+                  }),
+                )
+              ],
             )
         );
       }
@@ -162,12 +186,12 @@ class _EquipmentRequestState extends State<EquipmentRequest> {
       _list.add(new Container());
     }
 
-    _list.add(new IconButton(icon: Icon(Icons.add_a_photo), onPressed: () {
-      getImage();
-    }));
-
-    return new Row(
-        mainAxisAlignment: MainAxisAlignment.start,
+    return new GridView.count(
+        shrinkWrap: true,
+        primary: false,
+        mainAxisSpacing: 5,
+        crossAxisSpacing: 5,
+        crossAxisCount: 2,
         children: _list
     );
   }
@@ -300,22 +324,19 @@ class _EquipmentRequestState extends State<EquipmentRequest> {
                                   size: 24.0,
                                   color: Colors.blue,
                                 ),
-                                title: new Align(
-                                    child: Text('设备基本信息',
-                                      style: new TextStyle(
-                                          fontSize: 22.0,
-                                          fontWeight: FontWeight.w400
-                                      ),
-                                    ),
-                                    alignment: Alignment(-1.4, 0)
-                                )
+                                title: Text('设备基本信息',
+                                  style: new TextStyle(
+                                      fontSize: 22.0,
+                                      fontWeight: FontWeight.w400
+                                  ),
+                                ),
                             );
                           },
                           body: new Padding(
                             padding: EdgeInsets.symmetric(horizontal: 12.0),
-                            child: _equipment.isEmpty?new Center(child: new Text('请选择设备')):new Column(
+                            child: _equipment==null?new Center(child: new Text('请选择设备')):new Column(
                               children: <Widget>[
-                                BuildWidget.buildRow('系统编号:', _equipment['OID']??''),
+                                BuildWidget.buildRow('系统编号', _equipment['OID']??''),
                                 BuildWidget.buildRow('名称', _equipment['Name']??''),
                                 BuildWidget.buildRow('型号', _equipment['EquipmentCode']??''),
                                 BuildWidget.buildRow('序列号', _equipment['SerialCode']??''),
@@ -324,7 +345,7 @@ class _EquipmentRequestState extends State<EquipmentRequest> {
                                 BuildWidget.buildRow('设备厂商', _equipment['Manufacturer']['Name']??''),
                                 BuildWidget.buildRow('资产等级', _equipment['AssetLevel']['Name']??''),
                                 BuildWidget.buildRow('维保状态', _equipment['WarrantyStatus']??''),
-                                BuildWidget.buildRow('服务范围', _equipment['ContractScopeComments']??''),
+                                BuildWidget.buildRow('服务范围', _equipment['ContractScope']['Name']??''),
                                 new Padding(padding: EdgeInsets.symmetric(vertical: 8.0))
                               ],
                             ),
@@ -338,14 +359,11 @@ class _EquipmentRequestState extends State<EquipmentRequest> {
                                   size: 24.0,
                                   color: Colors.blue,
                                 ),
-                                title: new Align(
-                                    child: Text('请求详细信息',
-                                      style: new TextStyle(
-                                          fontSize: 22.0,
-                                          fontWeight: FontWeight.w400
-                                      ),
-                                    ),
-                                    alignment: Alignment(-1.4, 0)
+                                title: Text('请求详细信息',
+                                  style: new TextStyle(
+                                      fontSize: 22.0,
+                                      fontWeight: FontWeight.w400
+                                  ),
                                 )
                             );
                           },
@@ -355,7 +373,8 @@ class _EquipmentRequestState extends State<EquipmentRequest> {
                               children: <Widget>[
                                 BuildWidget.buildRow('类型', '设备新增'),
                                 BuildWidget.buildRow('请求人', _roleName),
-                                BuildWidget.buildRow('主题', _equipment.isEmpty?'--设备新增':'${_equipment['Name']}--设备新增'),
+                                BuildWidget.buildRow('主题', _equipment==null?'--设备新增':'${_equipment['Name']}--设备新增'),
+                                new Divider(),
                                 new Padding(
                                   padding: EdgeInsets.symmetric(vertical: 5.0),
                                   child: new Row(
@@ -363,7 +382,7 @@ class _EquipmentRequestState extends State<EquipmentRequest> {
                                       new Expanded(
                                         flex: 4,
                                         child: new Text(
-                                          '备注',
+                                          '备注：',
                                           style: new TextStyle(
                                               fontSize: 20.0,
                                               fontWeight: FontWeight.w600
@@ -384,12 +403,17 @@ class _EquipmentRequestState extends State<EquipmentRequest> {
                                   child: new Row(
                                     children: <Widget>[
                                       new Text(
-                                        '添加附件',
+                                        '添加附件：',
                                         style: new TextStyle(
                                             fontSize: 20.0,
                                             fontWeight: FontWeight.w600
                                         ),
-                                      )
+                                      ),
+                                      new IconButton(
+                                          icon: Icon(Icons.add_a_photo),
+                                          onPressed: () {
+                                            getImage();
+                                          })
                                     ],
                                   ),
                                 ),

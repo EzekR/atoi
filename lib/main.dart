@@ -30,9 +30,11 @@ import 'package:atoi/pages/lifecycle/equipment_install.dart';
 import 'package:atoi/pages/lifecycle/equipment_lending.dart';
 import 'package:atoi/pages/lifecycle/equipment_scrap.dart';
 import 'package:atoi/pages/lifecycle/equipment_transfer.dart';
-import 'package:atoi/widgets/search_bar.dart';
+import 'package:flutter/services.dart';
 
-void main() => runApp(new MyApp());
+void main() {
+  runApp(new MyApp());
+}
 
 class MyApp extends StatelessWidget {
   final routes = <String, WidgetBuilder>{
@@ -69,6 +71,10 @@ class MyApp extends StatelessWidget {
   final MainModel mainModel = MainModel();
   @override
   Widget build(BuildContext context) {
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+      DeviceOrientation.portraitDown
+    ]);
     return ScopedModel<MainModel>(
       model: mainModel,
       child: new MaterialApp(

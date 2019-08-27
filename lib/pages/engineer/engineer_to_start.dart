@@ -5,6 +5,7 @@ import 'package:atoi/pages/engineer/engineer_start_page.dart';
 import 'package:scoped_model/scoped_model.dart';
 import 'package:atoi/models/models.dart';
 import 'package:atoi/widgets/build_widget.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 
 class EngineerToStart extends StatefulWidget{
 
@@ -15,6 +16,8 @@ class _EngineerToStartState extends State<EngineerToStart> {
 
 
   List<dynamic> _tasks = [];
+  int offset = 5;
+  bool _loading = false;
 
   Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
 
@@ -36,9 +39,29 @@ class _EngineerToStartState extends State<EngineerToStart> {
     });
   }
 
+  ScrollController _scrollController = ScrollController();
+
   void initState() {
-    //getTask();
     super.initState();
+    EngineerModel model = MainModel.of(context);
+    _scrollController.addListener(() {
+      if (_scrollController.position.pixels ==
+          _scrollController.position.maxScrollExtent) {
+        setState(() {
+          _loading = true;
+        });
+        model.getMoreTasksToStart(offset).then((result) {
+          _loading = false;
+          offset = offset+5;
+        });
+      }
+    });
+    refresh();
+  }
+
+  Future<Null> refresh() async {
+    EngineerModel _model = MainModel.of(context);
+    _model.getTasksToStart();
   }
 
   @override
@@ -80,12 +103,11 @@ class _EngineerToStartState extends State<EngineerToStart> {
                 mainAxisAlignment: MainAxisAlignment.start,
                 mainAxisSize: MainAxisSize.max,
                 children: <Widget>[
-                  deviceName==null?new Container():BuildWidget.buildCardRow('名称', deviceName.length>1?'多设备':deviceName[0]['Name']),
-                  deviceNo==null?new Container():BuildWidget.buildCardRow('型号', deviceName.length>1?'多设备':deviceNo),
-                  BuildWidget.buildCardRow('使用科室', location),
+                  deviceName==null?new Container():BuildWidget.buildCardRow('设备名称', deviceName.length>1?'多设备':deviceName[0]['Name']),
+                  location==''?new Container():BuildWidget.buildCardRow('使用科室', location),
                   BuildWidget.buildCardRow('派工类型', requestType),
                   BuildWidget.buildCardRow('紧急程度', urgency),
-                  BuildWidget.buildCardRow('主管备注', remark),
+                  BuildWidget.buildCardRow('主管备注', remark.length>10?'${remark.substring(0,10)}...':remark),
                   new Row(
                     mainAxisAlignment: MainAxisAlignment.end,
                     mainAxisSize: MainAxisSize.max,
@@ -96,7 +118,7 @@ class _EngineerToStartState extends State<EngineerToStart> {
                           //todo: navigate to start page
                           Navigator.of(context).push(new MaterialPageRoute(builder: (_) {
                             return new EngineerStartPage(dispatchId: dispatchId);
-                          }));
+                          })).then((result) => refresh());
                         },
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(24),
@@ -130,10 +152,40 @@ class _EngineerToStartState extends State<EngineerToStart> {
     return ScopedModelDescendant<MainModel>(
       builder: (context, child, model) {
         return new RefreshIndicator(
-            child: model.tasksToStart.length == 0?ListView(padding: const EdgeInsets.symmetric(vertical: 150.0), children: <Widget>[new Center(child: new Text('没有待开始工单'),)],):ListView.builder(
+            child: model.tasksToStart.length == 0?ListView(padding: const EdgeInsets.symmetric(vertical: 150.0), children: <Widget>[new Center(child: new Text('没有待开始工单'),)],):
+            ListView.builder(
+                shrinkWrap: true,
                 padding: const EdgeInsets.all(2.0),
-                itemCount: model.tasksToStart.length,
-                itemBuilder: (context, i) => buildCardItem(model.tasksToStart[i]['ID'], model.tasksToStart[i]['OID'], model.tasksToStart[i]['ScheduleDate'], model.tasksToStart[i]['Request']['Equipments'].length>0?model.tasksToStart[i]['Request']['Equipments']:null, model.tasksToStart[i]['Request']['Equipments'].length>0?model.tasksToStart[i]['Request']['Equipments'][0]['EquipmentCode']:null, model.tasksToStart[i]['Request']['DepartmentName'], model.tasksToStart[i]['RequestType']['Name'], model.tasksToStart[i]['Urgency']['Name'], model.tasksToStart[i]['LeaderComments'])
+                itemCount: model.tasksToStart.length+1,
+                controller: _scrollController,
+                itemBuilder: (context, i) {
+                  if (i != model.tasksToStart.length) {
+                    return buildCardItem(
+                        model.tasksToStart[i]['ID'],
+                        model.tasksToStart[i]['OID'],
+                        model.tasksToStart[i]['ScheduleDate'],
+                        model.tasksToStart[i]['Request']['Equipments'].length >
+                            0
+                            ? model.tasksToStart[i]['Request']['Equipments']
+                            : null,
+                        model.tasksToStart[i]['Request']['Equipments'].length >
+                            0
+                            ? model
+                            .tasksToStart[i]['Request']['Equipments'][0]['EquipmentCode']
+                            : null,
+                        model.tasksToStart[i]['Request']['DepartmentName'],
+                        model.tasksToStart[i]['RequestType']['Name'],
+                        model.tasksToStart[i]['Urgency']['Name'],
+                        model.tasksToStart[i]['LeaderComments']);
+                  } else {
+                    return new Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: <Widget>[
+                        _loading?new SpinKitChasingDots(color: Colors.blue,):new Container()
+                      ],
+                    );
+                  }
+                }
             ),
             onRefresh: model.getTasksToStart
         );

@@ -17,19 +17,28 @@ class ManagerModel extends Model {
   get dispatches => _dispatches;
   get todos => _todos;
 
-  Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
+
+  Future<Null> getCount() async {
+    var resp = await HttpRequest.request(
+      '/User/GetAdminCount',
+      method: HttpRequest.GET,
+    );
+    print(resp);
+    if (resp['ResultCode'] == '00') {
+      _badgeA = resp['Data']['newCount'].toString();
+      _badgeB = resp['Data']['dispatchCount'].toString();
+      _badgeC = resp['Data']['unfinishedCount'].toString();
+    }
+    notifyListeners();
+  }
 
   Future<Null> getRequests() async {
+    Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
     var prefs = await _prefs;
-    var userID = prefs.getInt('userID');
+    var userID = await prefs.getInt('userID');
     var resp = await HttpRequest.request(
-      '/Request/GetRequests',
+      '/Request/GetRequests?userID=${userID}&statusID=1&statusID=5&statusID=6&statusID=7&typeID=0',
       method: HttpRequest.GET,
-      params: {
-        'userID': userID,
-        'statusID': 1,
-        'typeID': 0
-      }
     );
     print(resp);
     if (resp['ResultCode'] == '00') {
@@ -40,13 +49,14 @@ class ManagerModel extends Model {
   }
 
   Future<Null> getDispatches() async {
+    Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
     var prefs = await _prefs;
-    var userID = prefs.getInt('userID');
+    var userID = await prefs.getInt('userID');
     var resp = await HttpRequest.request(
       '/Dispatch/GetDispatchs',
       method: HttpRequest.GET,
       params: {
-        'userID': 31,
+        'userID': userID,
         'statusIDs': 3
       }
     );
@@ -59,6 +69,7 @@ class ManagerModel extends Model {
   }
 
   Future<Null> getTodos() async {
+    Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
     var prefs = await _prefs;
     var userID = await prefs.getInt('userID');
     Map<String, dynamic> params = {

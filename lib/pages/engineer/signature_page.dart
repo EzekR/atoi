@@ -68,7 +68,6 @@ class _SignaturePageState extends State<SignaturePage> {
               color: Colors.white,
             ),
           ),
-          _img.buffer.lengthInBytes == 0 ? Container() : LimitedBox(maxHeight: 200.0, child: Image.memory(_img.buffer.asUint8List())),
           Column(
             children: <Widget>[
               Row(
@@ -78,15 +77,15 @@ class _SignaturePageState extends State<SignaturePage> {
                       color: Colors.indigo,
                       onPressed: () async {
                         final sign = _sign.currentState;
+                        print(sign.points);
                         //retrieve image data, do whatever you want with it (send to server, save locally...)
                         final image = await sign.getData();
                         var data = await image.toByteData(format: ui.ImageByteFormat.png);
-                        sign.clear();
                         final encoded = base64.encode(data.buffer.asUint8List());
                         setState(() {
                           _img = data;
                         });
-                        if (data==null) {
+                        if (sign.points.length==0) {
                           showDialog(context: context,
                             builder: (context) => AlertDialog(
                               title: new Text('签名不可为空'),
@@ -94,6 +93,7 @@ class _SignaturePageState extends State<SignaturePage> {
                           );
                           return;
                         }
+                        sign.clear();
                         Navigator.pop(context, _img);
                       },
                       child: Text("保存",

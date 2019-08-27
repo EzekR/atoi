@@ -84,7 +84,7 @@ class AppConstants {
     '现场服务': 1,
     '电话解决': 2,
     '远程解决': 3,
-    '第三方支持': 4
+    '待第三方支持': 4
   };
 
   static Map<String, int> PriorityID = {

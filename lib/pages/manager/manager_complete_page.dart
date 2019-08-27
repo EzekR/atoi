@@ -24,6 +24,7 @@ class _ManagerCompletePageState extends State<ManagerCompletePage> {
   var _isExpandedAssign = false;
   var _isExpandedJournal = false;
   var _isExpandedReport = false;
+  var _isExpandedAcc = false;
   Map<String, dynamic> _request = {};
   var _dispatch;
   var _journal;
@@ -77,6 +78,18 @@ class _ManagerCompletePageState extends State<ManagerCompletePage> {
     '李四'
   ];
 
+  String _userName = '';
+  String _mobile = '';
+
+  Future<Null> getRole() async {
+    var prefs = await _prefs;
+    var userName = prefs.getString('userName');
+    var mobile = prefs.getString('mobile');
+    setState(() {
+      _userName = userName;
+      _mobile = mobile;
+    });
+  }
   List<DropdownMenuItem<String>> _dropDownMenuItems;
   List<DropdownMenuItem<String>> _dropDownMenuPris;
   List<DropdownMenuItem<String>> _dropDownMenuTypes;
@@ -91,8 +104,11 @@ class _ManagerCompletePageState extends State<ManagerCompletePage> {
   String _currentStatus;
   String _currentName;
   List<dynamic> imageBytes = [];
+  List<int> _imageBytes = [];
+  var _accessory;
 
   void initState() {
+    getRole();
     _dropDownMenuItems = getDropDownMenuItems(_handleMethods);
     _currentMethod = _dropDownMenuItems[0].value;
     _dropDownMenuPris = getDropDownMenuItems(_priorities);
@@ -149,11 +165,13 @@ class _ManagerCompletePageState extends State<ManagerCompletePage> {
   }
 
   Future<Null> getJournal(int journalId) async {
+    var prefs = await _prefs;
+    var userID = prefs.getInt('userID');
     var resp = await HttpRequest.request(
       '/DispatchJournal/GetDispatchJournal',
       method: HttpRequest.GET,
       params: {
-        'userID': 31,
+        'userID': userID,
         'dispatchJournalId': journalId
       }
     );
@@ -161,16 +179,19 @@ class _ManagerCompletePageState extends State<ManagerCompletePage> {
     if (resp['ResultCode'] == '00') {
       setState(() {
         _journal = resp['Data'];
+        _imageBytes = base64Decode(resp['Data']['FileContent']);
       });
     }
   }
 
   Future<Null> getReport(int reportId) async {
+    var prefs = await _prefs;
+    var userID = prefs.getInt('userID');
     var resp = await HttpRequest.request(
         '/DispatchReport/GetDispatchReport',
         method: HttpRequest.GET,
         params: {
-          'userID': 31,
+          'userID': userID,
           'dispatchReportId': reportId
         }
     );
@@ -178,6 +199,28 @@ class _ManagerCompletePageState extends State<ManagerCompletePage> {
     if (resp['ResultCode'] == '00') {
       setState(() {
         _report = resp['Data'];
+      });
+      _accessory = resp['Data']['ReportAccessories'];
+      for(var _acc in _accessory) {
+        var _imageNew = _acc['FileInfos'].firstWhere((info) => info['FileType']==1, orElse: () => null);
+        var _imageOld = _acc['FileInfos'].firstWhere((info) => info['FileType']==2, orElse: () => null);
+        if (_imageNew != null) {
+          var _fileNew = await getAccessoryFile(_imageNew['ID']);
+          _imageNew['FileContent'] = _fileNew;
+          setState(() {
+            _acc['ImageNew'] = _imageNew;
+          });
+        }
+        if (_imageOld != null) {
+          var _fileOld = await getAccessoryFile(_imageOld['ID']);
+          _imageOld['FileContent'] = _fileOld;
+          setState(() {
+            _acc['ImageOld'] = _imageOld;
+          });
+        }
+      }
+      setState(() {
+        _accessory = _accessory;
       });
     }
   }
@@ -328,13 +371,27 @@ class _ManagerCompletePageState extends State<ManagerCompletePage> {
     );
   }
 
+  Future<String> getAccessoryFile(int fileId) async {
+    String _image = '';
+    var resp = await HttpRequest.request(
+        '/DispatchReport/DownloadAccessoryFile',
+        method: HttpRequest.GET,
+        params: {
+          'ID': fileId
+        }
+    );
+    if (resp['ResultCode'] == '00') {
+      _image = resp['Data'];
+    }
+    return _image;
+  }
   List<Widget> buildEquipment() {
     if (_request.isNotEmpty) {
       var _equipments = _request['Equipments'];
       List<Widget> _equipList = [];
       for (var _equipment in _equipments) {
         var _list = [
-          BuildWidget.buildRow('系统编号:', _equipment['OID']??''),
+          BuildWidget.buildRow('系统编号', _equipment['OID']??''),
           BuildWidget.buildRow('名称', _equipment['Name']??''),
           BuildWidget.buildRow('型号', _equipment['EquipmentCode']??''),
           BuildWidget.buildRow('序列号', _equipment['SerialCode']??''),
@@ -343,7 +400,7 @@ class _ManagerCompletePageState extends State<ManagerCompletePage> {
           BuildWidget.buildRow('设备厂商', _equipment['Manufacturer']['Name']??''),
           BuildWidget.buildRow('资产等级', _equipment['AssetLevel']['Name']??''),
           BuildWidget.buildRow('维保状态', _equipment['WarrantyStatus']??''),
-          BuildWidget.buildRow('服务范围', _equipment['ContractScopeComments']??''),
+          BuildWidget.buildRow('服务范围', _equipment['ContractScope']['Name']??''),
           new Padding(padding: EdgeInsets.symmetric(vertical: 8.0))
         ];
         _equipList.addAll(_list);
@@ -354,34 +411,73 @@ class _ManagerCompletePageState extends State<ManagerCompletePage> {
     }
   }
 
+  List<Widget> buildAccessory() {
+    List<Widget> _list = [];
+    for (var _acc in _accessory) {
+      var _accList = [
+        BuildWidget.buildRow('名称', _acc['Name']),
+        BuildWidget.buildRow('来源', _acc['Source']['Name']),
+        _acc['Source']['Name'] == '外部供应商' ? BuildWidget.buildRow(
+            '外部供应商', _acc['Supplier']['Name']) : new Container(),
+        BuildWidget.buildRow('新装零件编号', _acc['NewSerialCode']),
+        BuildWidget.buildRow('附件', ''),
+        new Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            _acc['ImageNew']!=null&&_acc['ImageNew']['FileContent']!=null?new Container(width: 100.0,
+              child: new Image.memory(
+                  base64Decode(_acc['ImageNew']['FileContent'])),):new Container()
+          ],
+        ),
+        BuildWidget.buildRow('金额（元/件）', _acc['Amount'].toString()),
+        BuildWidget.buildRow('数量', _acc['Qty'].toString()),
+        BuildWidget.buildRow('拆下零件编号', _acc['OldSerialCode']),
+        BuildWidget.buildRow('附件', ''),
+        new Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            _acc['ImageOld']!=null&&_acc['ImageOld']['FileContent']!=null?new Container(width: 100.0,
+              child: new Image.memory(
+                  base64Decode(_acc['ImageOld']['FileContent'])),):new Container()
+          ],
+        ),
+        new Divider()
+      ];
+      _list.addAll(_accList);
+    }
+    return _list;
+  }
+
   List<ExpansionPanel> buildExpansion() {
-    var _list = [
-      new ExpansionPanel(
-        headerBuilder: (context, isExpanded) {
-          return ListTile(
+    List<ExpansionPanel> _list = [];
+    if (_request['RequestType']['ID'] != 14) {
+      _list.add(
+        new ExpansionPanel(
+          headerBuilder: (context, isExpanded) {
+            return ListTile(
               leading: new Icon(Icons.info,
                 size: 24.0,
                 color: Colors.blue,
               ),
-              title: new Align(
-                  child: Text('设备基本信息',
-                    style: new TextStyle(
-                        fontSize: 22.0,
-                        fontWeight: FontWeight.w400
-                    ),
-                  ),
-                  alignment: Alignment(-1.4, 0)
-              )
-          );
-        },
-        body: new Padding(
-          padding: EdgeInsets.symmetric(horizontal: 12.0),
-          child: new Column(
-            children: buildEquipment(),
+              title: Text('设备基本信息',
+                style: new TextStyle(
+                    fontSize: 22.0,
+                    fontWeight: FontWeight.w400
+                ),
+              ),
+            );
+          },
+          body: new Padding(
+            padding: EdgeInsets.symmetric(horizontal: 12.0),
+            child: new Column(
+              children: buildEquipment(),
+            ),
           ),
+          isExpanded: _isExpandedBasic,
         ),
-        isExpanded: _isExpandedBasic,
-      ),
+      );
+    }
+    _list.add(
       new ExpansionPanel(
         headerBuilder: (context, isExpanded) {
           return ListTile(
@@ -389,15 +485,12 @@ class _ManagerCompletePageState extends State<ManagerCompletePage> {
                 size: 24.0,
                 color: Colors.blue,
               ),
-              title: new Align(
-                  child: Text('请求详细信息',
-                    style: new TextStyle(
-                        fontSize: 22.0,
-                        fontWeight: FontWeight.w400
-                    ),
-                  ),
-                  alignment: Alignment(-1.3, 0)
-              )
+              title: Text('请求详细信息',
+                style: new TextStyle(
+                    fontSize: 22.0,
+                    fontWeight: FontWeight.w400
+                ),
+              ),
           );
         },
         body: new Padding(
@@ -408,12 +501,14 @@ class _ManagerCompletePageState extends State<ManagerCompletePage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
               BuildWidget.buildRow('类型', _request['SourceType']),
-              BuildWidget.buildRow('主题', _request['Subject']),
+              BuildWidget.buildRow('主题', _request['SubjectName']),
+              BuildWidget.buildRow('请求状态', _request['Status']['Name']),
               BuildWidget.buildRow(AppConstants.Remark[_request['RequestType']['ID']], _request['FaultDesc']),
-              _request['FaultType']['ID'] != 0?BuildWidget.buildRow(AppConstants.RemarkType[_request['RequestType']['ID']], _request['FaultType']['Name']):new Container(),
+              _request['RequestType']['ID'] == 1||_request['RequestType']['ID'] == 2||_request['RequestType']['ID'] == 3||_request['RequestType']['ID'] == 7?BuildWidget.buildRow(AppConstants.RemarkType[_request['RequestType']['ID']], _request['FaultType']['Name']):new Container(),
               BuildWidget.buildRow('请求人', _request['RequestUser']['Name']),
-              BuildWidget.buildRow('处理方式', _request['DealType']['Name']),
-              BuildWidget.buildRow('紧急程度', _request['Priority']['Name']),
+              _request['Status']['ID']==1?new Container():BuildWidget.buildRow('处理方式', _request['DealType']['Name']),
+              _request['Status']['ID']==1?new Container():BuildWidget.buildRow('当前状态', _request['Status']['Name']),
+              //_request['Status']['ID']==1?new Container():BuildWidget.buildRow('紧急程度', _request['Priority']['Name']),
               BuildWidget.buildRow('请求附件', ''),
               buildImageColumn()
             ],
@@ -421,7 +516,7 @@ class _ManagerCompletePageState extends State<ManagerCompletePage> {
         ),
         isExpanded: _isExpandedDetail,
       ),
-    ];
+    );
     if (_dispatch != null) {
       _list.add(
         new ExpansionPanel(
@@ -431,15 +526,12 @@ class _ManagerCompletePageState extends State<ManagerCompletePage> {
                     size: 24.0,
                     color: Colors.blue,
                   ),
-                  title: new Align(
-                      child: Text('派工内容信息',
-                        style: new TextStyle(
-                            fontSize: 22.0,
-                            fontWeight: FontWeight.w400
-                        ),
-                      ),
-                      alignment: Alignment(-1.3, 0)
-                  )
+                  title: Text('派工内容信息',
+                    style: new TextStyle(
+                        fontSize: 22.0,
+                        fontWeight: FontWeight.w400
+                    ),
+                  ),
               );
             },
             body: new Padding(
@@ -450,6 +542,7 @@ class _ManagerCompletePageState extends State<ManagerCompletePage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
                   BuildWidget.buildRow('派工单编号', _dispatch['OID']),
+                  BuildWidget.buildRow('派工单状态', _dispatch['Status']['Name']),
                   BuildWidget.buildRow('派工类型', _dispatch['RequestType']['Name']),
                   BuildWidget.buildRow('工程师姓名', _dispatch['Engineer']['Name']),
                   BuildWidget.buildRow('紧急程度', _dispatch['Urgency']['Name']),
@@ -472,14 +565,11 @@ class _ManagerCompletePageState extends State<ManagerCompletePage> {
                     size: 24.0,
                     color: Colors.blue,
                   ),
-                  title: new Align(
-                      child: Text('凭证信息',
-                        style: new TextStyle(
-                            fontSize: 22.0,
-                            fontWeight: FontWeight.w400
-                        ),
-                      ),
-                      alignment: Alignment(-1.3, 0)
+                  title: Text('凭证信息',
+                    style: new TextStyle(
+                        fontSize: 22.0,
+                        fontWeight: FontWeight.w400
+                    ),
                   )
               );
             },
@@ -491,11 +581,27 @@ class _ManagerCompletePageState extends State<ManagerCompletePage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
                   BuildWidget.buildRow('服务凭证编号', _journal['OID']),
+                  BuildWidget.buildRow('审批状态', _journal['Status']['Name']),
                   BuildWidget.buildRow('故障现象/错误代码/事由', _journal['FaultCode']),
                   BuildWidget.buildRow('工作内容', _journal['JobContent']),
                   BuildWidget.buildRow('待跟进问题', _journal['FollowProblem']),
                   BuildWidget.buildRow('待确认问题', _journal['UnconfirmedProblem']),
                   BuildWidget.buildRow('建议留言', _journal['Advice']),
+                  BuildWidget.buildRow('服务结果', _journal['ResultStatus']['Name']),
+                  BuildWidget.buildRow('客户签名', ''),
+                  new Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: <Widget>[
+                      new Padding(
+                        padding: const EdgeInsets.all(10.0),
+                        child: Image.memory(
+                          _imageBytes??[],
+                          width: 300.0,
+                          height: 300.0,
+                        ),
+                      ),
+                    ],
+                  ),
                 ],
               ),
             ),
@@ -512,15 +618,12 @@ class _ManagerCompletePageState extends State<ManagerCompletePage> {
                     size: 24.0,
                     color: Colors.blue,
                   ),
-                  title: new Align(
-                      child: Text('报告信息',
-                        style: new TextStyle(
-                            fontSize: 22.0,
-                            fontWeight: FontWeight.w400
-                        ),
-                      ),
-                      alignment: Alignment(-1.3, 0)
-                  )
+                  title: Text('报告信息',
+                    style: new TextStyle(
+                        fontSize: 22.0,
+                        fontWeight: FontWeight.w400
+                    ),
+                  ),
               );
             },
             body: new Padding(
@@ -532,18 +635,50 @@ class _ManagerCompletePageState extends State<ManagerCompletePage> {
                 children: <Widget>[
                   BuildWidget.buildRow('作业报告编号', _report['OID']),
                   BuildWidget.buildRow('作业报告类型', _report['Type']['Name']),
+                  BuildWidget.buildRow('审批状态', _report['Status']['Name']),
                   BuildWidget.buildRow('发生频率', _report['FaultFrequency']),
-                  BuildWidget.buildRow('系统状态', _report['Dispatch']['MachineStatus']['Name']??'正常'),
+                  BuildWidget.buildRow('系统状态', _report['FaultSystemStatus']??'正常'),
                   BuildWidget.buildRow('错误代码', _report['FaultCode']),
                   BuildWidget.buildRow('故障描述', _report['FaultDesc']),
                   BuildWidget.buildRow('分析原因', _report['SolutionCauseAnalysis']),
                   BuildWidget.buildRow('处理方法', _report['SolutionWay']),
                   BuildWidget.buildRow('未解决备注', _report['SolutionUnsolvedComments']),
                   BuildWidget.buildRow('误工说明', _report['DelayReason']),
+                  BuildWidget.buildRow('作业结果', _report['SolutionResultStatus']['Name']),
                 ],
               ),
             ),
             isExpanded: _isExpandedReport,
+          )
+      );
+    }
+    if (_report !=null && _report['ReportAccessories'].isNotEmpty) {
+      _list.add(
+          new ExpansionPanel(
+            headerBuilder: (context, isExpanded) {
+              return ListTile(
+                  leading: new Icon(Icons.description,
+                    size: 24.0,
+                    color: Colors.blue,
+                  ),
+                  title: Text('零件信息',
+                    style: new TextStyle(
+                        fontSize: 22.0,
+                        fontWeight: FontWeight.w400
+                    ),
+                  )
+              );
+            },
+            body: new Padding(
+              padding: EdgeInsets.symmetric(horizontal: 8.0),
+              child: new Column(
+                mainAxisAlignment: MainAxisAlignment.start,
+                mainAxisSize: MainAxisSize.max,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: buildAccessory(),
+              ),
+            ),
+            isExpanded: _isExpandedAcc,
           )
       );
     }
@@ -569,10 +704,9 @@ class _ManagerCompletePageState extends State<ManagerCompletePage> {
           ),
         ),
         actions: <Widget>[
-          new Icon(Icons.face),
           new Padding(
             padding: const EdgeInsets.symmetric(horizontal: 5.0, vertical: 19.0),
-            child: const Text('上杉谦信'),
+            child: Text(_userName),
           ),
         ],
       ),
@@ -587,27 +721,32 @@ class _ManagerCompletePageState extends State<ManagerCompletePage> {
                   switch (index) {
                     case 0:
                       setState(() {
-                        _isExpandedBasic = !_isExpandedBasic;
+                        _request['RequestType']['ID']==14?_isExpandedDetail=!_isExpandedDetail:_isExpandedBasic = !_isExpandedBasic;
                       });
                       break;
                     case 1:
                       setState(() {
-                        _isExpandedDetail = !_isExpandedDetail;
+                        _request['RequestType']['ID']==14?_isExpandedAssign=!_isExpandedAssign:_isExpandedDetail = !_isExpandedDetail;
                       });
                       break;
                     case 2:
                       setState(() {
-                        _isExpandedAssign = !_isExpandedAssign;
+                        _request['RequestType']['ID']==14?_isExpandedJournal=!_isExpandedJournal:_isExpandedAssign = !_isExpandedAssign;
                       });
                       break;
                     case 3:
                       setState(() {
-                        _isExpandedJournal = !_isExpandedJournal;
+                        _request['RequestType']['ID']==14?_isExpandedReport=!_isExpandedReport:_isExpandedJournal = !_isExpandedJournal;
                       });
                       break;
                     case 4:
                       setState(() {
                         _isExpandedReport = !_isExpandedReport;
+                      });
+                      break;
+                    case 5:
+                      setState(() {
+                        _isExpandedAcc = !_isExpandedAcc;
                       });
                   }
                 },

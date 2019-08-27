@@ -43,6 +43,7 @@ class _ManagerToAuditPageState extends State<ManagerToAuditPage> {
 
   void initState() {
     //getData();
+    refresh();
     super.initState();
   }
 
@@ -52,7 +53,7 @@ class _ManagerToAuditPageState extends State<ManagerToAuditPage> {
         return Colors.grey;
         break;
       case 1:
-        return AppConstants.AppColors['btn_main'];
+        return Colors.grey;
         break;
       case 2:
         return AppConstants.AppColors['btn_main'];
@@ -66,13 +67,17 @@ class _ManagerToAuditPageState extends State<ManagerToAuditPage> {
     }
   }
 
+  Future<Null> refresh() async {
+    ManagerModel _model = MainModel.of(context);
+    _model.getRequests();
+  }
   @override
   Widget build(BuildContext context) {
     // TODO: implement build
 
     Card buildCardItem(Map dispatch, int dispatchId, int reportId,  String dispatchOID, String date, String deviceNo, String deviceName, String dispatchType, String urgency, String requestOID, Map journalStatus, Map reportStatus) {
       var _dataVal = DateTime.parse(date);
-      var _format = '${_dataVal.year}-${_dataVal.month}-${_dataVal.day} ${_dataVal.hour}:${_dataVal.minute}:${_dataVal.second}';
+      var _format = '${_dataVal.year}-${_dataVal.month}-${_dataVal.day}';
       return new Card(
         child: Column(
           mainAxisSize: MainAxisSize.max,
@@ -84,19 +89,34 @@ class _ManagerToAuditPageState extends State<ManagerToAuditPage> {
                   color: Color(0xff14BD98),
                   size: 40.0,
               ),
-              title: Text(
-                "派工单编号：$dispatchOID",
+              title: new Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: <Widget>[
+                  Text(
+                    "派工单编号：",
+                    style: new TextStyle(
+                        fontSize: 18.0,
+                        color: Theme.of(context).primaryColor,
+                        fontWeight: FontWeight.w500
+                    ),
+                  ),
+                  Text(
+                    dispatchOID,
+                    style: new TextStyle(
+                        fontSize: 18.0,
+                        color: Colors.red,
+                        //color: new Color(0xffD25565),
+                        fontWeight: FontWeight.w400
+                    ),
+                  )
+                ],
+              ),
+              subtitle: Text(
+                "派工时间：$_format",
                 style: new TextStyle(
-                    fontSize: 16.0,
-                    color: Theme.of(context).primaryColor
+                    color: Theme.of(context).accentColor
                 ),
               ),
-              //subtitle: Text(
-              //  "结束时间$_format",
-              //  style: new TextStyle(
-              //      color: Theme.of(context).accentColor
-              //  ),
-              //),
             ),
             new Padding(
               padding: EdgeInsets.symmetric(horizontal: 8.0),
@@ -105,11 +125,11 @@ class _ManagerToAuditPageState extends State<ManagerToAuditPage> {
                 mainAxisAlignment: MainAxisAlignment.start,
                 mainAxisSize: MainAxisSize.max,
                 children: <Widget>[
-                  BuildWidget.buildCardRow('设备编号', deviceName),
-                  BuildWidget.buildCardRow('名称', deviceNo),
+                  deviceName==''?new Container():BuildWidget.buildCardRow('设备编号', deviceName),
+                  deviceNo==''?new Container():BuildWidget.buildCardRow('设备名称', deviceNo),
                   BuildWidget.buildCardRow('派工类型', dispatchType),
                   BuildWidget.buildCardRow('紧急程度', urgency),
-                  BuildWidget.buildCardRow('请求单号', requestOID),
+                  BuildWidget.buildCardRow('请求编号', requestOID),
                   BuildWidget.buildCardRow('请求状态', dispatch['Status']['Name']),
                   new Row(
                     mainAxisAlignment: MainAxisAlignment.end,
@@ -117,12 +137,12 @@ class _ManagerToAuditPageState extends State<ManagerToAuditPage> {
                     children: <Widget>[
                       new RaisedButton(
                         onPressed: (){
-                          journalStatus['ID']==0?null:
+                          journalStatus['ID']==0||journalStatus['ID']==1?null:
                           Navigator.of(context).push(
                               new MaterialPageRoute(builder: (_) {
                                 return new ManagerAuditVoucherPage(
                                   journalId: dispatchId, request: dispatch, status: dispatch['DispatchJournal']['Status']['ID'],);
-                              }));
+                              })).then((result) => refresh());
                         },
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(24),
@@ -148,9 +168,9 @@ class _ManagerToAuditPageState extends State<ManagerToAuditPage> {
                       ),
                       new RaisedButton(
                         onPressed: (){
-                          reportId == 0?null:Navigator.of(context).push(new MaterialPageRoute(builder: (_){
+                          reportStatus['ID']==0||reportStatus['ID']==1?null:Navigator.of(context).push(new MaterialPageRoute(builder: (_){
                             return new ManagerAuditReportPage(reportId: reportId, request: dispatch, status: dispatch['DispatchReport']['Status']['ID'],);
-                          }));
+                          })).then((result) => refresh());
                         },
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(24),
@@ -187,7 +207,7 @@ class _ManagerToAuditPageState extends State<ManagerToAuditPage> {
             child: model.dispatches.length == 0?ListView(padding: const EdgeInsets.symmetric(vertical: 150.0), children: <Widget>[_loading?SpinKitRotatingPlain(color: Colors.blue):new Center(child: new Text('没有待审核工单'),)],):ListView.builder(
               padding: const EdgeInsets.all(2.0),
               itemCount: model.dispatches.length,
-              itemBuilder: (context, i) => buildCardItem(model.dispatches[i], model.dispatches[i]['DispatchJournal']['ID'], model.dispatches[i]['DispatchReport']['ID'], model.dispatches[i]['OID'], model.dispatches[i]['ScheduleDate'], model.dispatches[i]['Request']['Equipments'][0]['Name'], model.dispatches[i]['Request']['Equipments'][0]['OID'], model.dispatches[i]['RequestType']['Name'], model.dispatches[i]['Urgency']['Name'], model.dispatches[i]['Request']['OID'], model.dispatches[i]['DispatchJournal']['Status'], model.dispatches[i]['DispatchReport']['Status']),
+              itemBuilder: (context, i) => buildCardItem(model.dispatches[i], model.dispatches[i]['DispatchJournal']['ID'], model.dispatches[i]['DispatchReport']['ID'], model.dispatches[i]['OID'], model.dispatches[i]['ScheduleDate'], model.dispatches[i]['Request']['Equipments'].length>0?model.dispatches[i]['Request']['Equipments'][0]['Name']:'', model.dispatches[i]['Request']['Equipments'].length>0?model.dispatches[i]['Request']['Equipments'][0]['OID']:'', model.dispatches[i]['RequestType']['Name'], model.dispatches[i]['Urgency']['Name'], model.dispatches[i]['Request']['OID'], model.dispatches[i]['DispatchJournal']['Status'], model.dispatches[i]['DispatchReport']['Status']),
             ),
             onRefresh: model.getDispatches
         );
