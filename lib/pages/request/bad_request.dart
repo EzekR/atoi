@@ -26,7 +26,7 @@ class _BadRequestState extends State<BadRequest> {
   var _isExpandedDetail = false;
   var _isExpandedAssign = false;
   Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
-  var _roleName;
+  var _roleName = '';
   var _fault = new TextEditingController();
 
   MainModel mainModel = MainModel();

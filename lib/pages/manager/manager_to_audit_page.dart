@@ -69,7 +69,7 @@ class _ManagerToAuditPageState extends State<ManagerToAuditPage> {
 
   Future<Null> refresh() async {
     ManagerModel _model = MainModel.of(context);
-    _model.getRequests();
+    _model.getDispatches();
   }
   @override
   Widget build(BuildContext context) {

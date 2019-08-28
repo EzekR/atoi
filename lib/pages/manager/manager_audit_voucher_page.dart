@@ -214,7 +214,7 @@ class _ManagerAuditVoucherPageState extends State<ManagerAuditVoucherPage> {
     print(resp);
     if (resp['ResultCode'] == '00') {
       setState(() {
-        _equipment = resp['Data']['Request']['Equipments'][0];
+        //_equipment = resp['Data']['Request']['Equipments'][0];
         _dispatch = resp['Data'];
       });
     }
@@ -286,6 +286,134 @@ class _ManagerAuditVoucherPageState extends State<ManagerAuditVoucherPage> {
     }
   }
 
+  List<ExpansionPanel> buildExpansion() {
+    List<ExpansionPanel> _list = [];
+    if (_dispatch['Request']['RequestType']['ID'] != 14) {
+      _list.add(
+        new ExpansionPanel(
+          headerBuilder: (context, isExpanded) {
+            return ListTile(
+              leading: new Icon(Icons.info,
+                size: 24.0,
+                color: Colors.blue,
+              ),
+              title: Text('设备基本信息',
+                style: new TextStyle(
+                    fontSize: 22.0,
+                    fontWeight: FontWeight.w400
+                ),
+              ),
+            );
+          },
+          body: new Padding(
+            padding: EdgeInsets.symmetric(horizontal: 8.0),
+            child: new Column(
+              children: <Widget>[
+                BuildWidget.buildRow('系统编号', _equipment['OID']??''),
+                BuildWidget.buildRow('名称', _equipment['Name']??''),
+                BuildWidget.buildRow('型号', _equipment['EquipmentCode']??''),
+                BuildWidget.buildRow('序列号', _equipment['SerialCode']??''),
+                BuildWidget.buildRow('使用科室', _equipment['Department']['Name']??''),
+                BuildWidget.buildRow('安装地点', _equipment['InstalSite']??''),
+                BuildWidget.buildRow('设备厂商', _equipment['Manufacturer']['Name']??''),
+                BuildWidget.buildRow('资产等级', _equipment['AssetLevel']['Name']??''),
+                BuildWidget.buildRow('维保状态', _equipment['WarrantyStatus']??''),
+                BuildWidget.buildRow('服务范围', _equipment['ContractScope']['Name']??''),
+              ],
+            ),
+          ),
+          isExpanded: _isExpandedBasic,
+        ),
+      );
+    }
+
+    _list.addAll([
+      new ExpansionPanel(
+        headerBuilder: (context, isExpanded) {
+          return ListTile(
+            leading: new Icon(Icons.description,
+              size: 24.0,
+              color: Colors.blue,
+            ),
+            title: Text('派工内容',
+              style: new TextStyle(
+                  fontSize: 22.0,
+                  fontWeight: FontWeight.w400
+              ),
+            ),
+          );
+        },
+        body: new Padding(
+          padding: EdgeInsets.symmetric(horizontal: 8.0),
+          child: new Column(
+            children: <Widget>[
+              BuildWidget.buildRow('派工单编号', widget.request['OID']),
+              BuildWidget.buildRow('派工单状态', widget.request['Status']['Name']),
+              BuildWidget.buildRow('紧急程度', widget.request['Urgency']['Name']),
+              BuildWidget.buildRow('派工类型', widget.request['RequestType']['Name']),
+              BuildWidget.buildRow('机器状态', widget.request['MachineStatus']['Name']),
+              BuildWidget.buildRow('工程师姓名', _dispatch['Engineer']['Name']),
+              BuildWidget.buildRow('出发时间',AppConstants.TimeForm(widget.request['ScheduleDate'], 'yyyy-mm-dd')),
+              BuildWidget.buildRow('备注', _dispatch['LeaderComments']),
+            ],
+          ),
+        ),
+        isExpanded: _isExpandedDetail,
+      ),
+      new ExpansionPanel(
+        headerBuilder: (context, isExpanded) {
+          return ListTile(
+              leading: new Icon(Icons.perm_contact_calendar,
+                size: 24.0,
+                color: Colors.blue,
+              ),
+              title: Text('服务详情信息',
+                style: new TextStyle(
+                    fontSize: 22.0,
+                    fontWeight: FontWeight.w400
+                ),
+              )
+          );
+        },
+        body: new Padding(
+          padding: EdgeInsets.symmetric(horizontal: 8.0),
+          child: new Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              BuildWidget.buildRow('服务凭证编号', _journal['OID']),
+              BuildWidget.buildRow('客户姓名', _dispatch['Request']['RequestUser']['Name']),
+              BuildWidget.buildRow('客户电话', _dispatch['Request']['RequestUser']['Mobile']),
+              BuildWidget.buildRow('故障现象/错误代码/事由', _journal['FaultCode']),
+              BuildWidget.buildRow('工作内容', _journal['JobContent']),
+              BuildWidget.buildRow('待跟进问题', _journal['FollowProblem']),
+              BuildWidget.buildRow('待确认问题', _journal['UnconfirmedProblem']),
+              BuildWidget.buildRow('建议留言', _journal['Advice']),
+              BuildWidget.buildRow('客户签名', ''),
+              new Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: <Widget>[
+                  new Padding(
+                    padding: const EdgeInsets.all(10.0),
+                    child: Image.memory(
+                      imageBytes??[],
+                      width: 300.0,
+                      height: 300.0,
+                    ),
+                  ),
+                ],
+              ),
+              widget.status==3?BuildWidget.buildRow('服务结果', _currentResult):BuildWidget.buildDropdown('服务结果', _currentResult, _dropDownMenuItems, changedDropDownMethod),
+              widget.status==3?BuildWidget.buildRow('审批备注', _journal['FujiComments']??''):new Container()
+            ],
+          ),
+        ),
+        isExpanded: _isExpandedAssign,
+      ),
+    ]);
+
+    return _list;
+  }
+
   @override
   Widget build(BuildContext context) {
     // TODO: implement build
@@ -324,133 +452,25 @@ class _ManagerAuditVoucherPageState extends State<ManagerAuditVoucherPage> {
                 expansionCallback: (index, isExpanded) {
                   setState(() {
                     if (index == 0) {
-                      _isExpandedBasic = !isExpanded;
+                      if (_dispatch['Request']['RequestType']['ID'] == 14) {
+                        _isExpandedDetail = !isExpanded;
+                      } else {
+                        _isExpandedBasic = !isExpanded;
+                      }
                     } else {
                       if (index == 1) {
-                        _isExpandedDetail = !isExpanded;
+                        if (_dispatch['Request']['RequestType']['ID'] == 14) {
+                          _isExpandedAssign = !isExpanded;
+                        } else {
+                          _isExpandedDetail = !isExpanded;
+                        }
                       } else {
                         _isExpandedAssign =!isExpanded;
                       }
                     }
                   });
                 },
-                children: [
-                  new ExpansionPanel(
-                    headerBuilder: (context, isExpanded) {
-                      return ListTile(
-                          leading: new Icon(Icons.info,
-                            size: 24.0,
-                            color: Colors.blue,
-                          ),
-                          title: Text('设备基本信息',
-                            style: new TextStyle(
-                                fontSize: 22.0,
-                                fontWeight: FontWeight.w400
-                            ),
-                          ),
-                      );
-                    },
-                    body: new Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 8.0),
-                      child: new Column(
-                        children: <Widget>[
-                          BuildWidget.buildRow('系统编号', _equipment['OID']??''),
-                          BuildWidget.buildRow('名称', _equipment['Name']??''),
-                          BuildWidget.buildRow('型号', _equipment['EquipmentCode']??''),
-                          BuildWidget.buildRow('序列号', _equipment['SerialCode']??''),
-                          BuildWidget.buildRow('使用科室', _equipment['Department']['Name']??''),
-                          BuildWidget.buildRow('安装地点', _equipment['InstalSite']??''),
-                          BuildWidget.buildRow('设备厂商', _equipment['Manufacturer']['Name']??''),
-                          BuildWidget.buildRow('资产等级', _equipment['AssetLevel']['Name']??''),
-                          BuildWidget.buildRow('维保状态', _equipment['WarrantyStatus']??''),
-                          BuildWidget.buildRow('服务范围', _equipment['ContractScope']['Name']??''),
-                        ],
-                      ),
-                    ),
-                    isExpanded: _isExpandedBasic,
-                  ),
-                  new ExpansionPanel(
-                    headerBuilder: (context, isExpanded) {
-                      return ListTile(
-                          leading: new Icon(Icons.description,
-                            size: 24.0,
-                            color: Colors.blue,
-                          ),
-                          title: Text('派工内容',
-                            style: new TextStyle(
-                                fontSize: 22.0,
-                                fontWeight: FontWeight.w400
-                            ),
-                          ),
-                      );
-                    },
-                    body: new Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 8.0),
-                      child: new Column(
-                        children: <Widget>[
-                          BuildWidget.buildRow('派工单编号', widget.request['OID']),
-                          BuildWidget.buildRow('派工单状态', widget.request['Status']['Name']),
-                          BuildWidget.buildRow('紧急程度', widget.request['Urgency']['Name']),
-                          BuildWidget.buildRow('派工类型', widget.request['RequestType']['Name']),
-                          BuildWidget.buildRow('机器状态', widget.request['MachineStatus']['Name']),
-                          BuildWidget.buildRow('工程师姓名', _dispatch['Engineer']['Name']),
-                          BuildWidget.buildRow('备注', widget.request['LeaderComments']),
-                          BuildWidget.buildRow('出发时间', AppConstants.TimeForm(widget.request['ScheduleDate'], 'yyyy-mm-dd')),
-                        ],
-                      ),
-                    ),
-                    isExpanded: _isExpandedDetail,
-                  ),
-                  new ExpansionPanel(
-                    headerBuilder: (context, isExpanded) {
-                      return ListTile(
-                          leading: new Icon(Icons.perm_contact_calendar,
-                            size: 24.0,
-                            color: Colors.blue,
-                          ),
-                          title: Text('服务详情信息',
-                            style: new TextStyle(
-                                fontSize: 22.0,
-                                fontWeight: FontWeight.w400
-                            ),
-                          )
-                      );
-                    },
-                    body: new Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 8.0),
-                      child: new Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: <Widget>[
-                          BuildWidget.buildRow('服务凭证编号', _journal['OID']),
-                          BuildWidget.buildRow('客户姓名', _dispatch['Request']['RequestUser']['Name']),
-                          BuildWidget.buildRow('客户电话', _dispatch['Request']['RequestUser']['Mobile']),
-                          BuildWidget.buildRow('故障现象/错误代码/事由', _journal['FaultCode']),
-                          BuildWidget.buildRow('工作内容', _journal['JobContent']),
-                          BuildWidget.buildRow('待跟进问题', _journal['FollowProblem']),
-                          BuildWidget.buildRow('待确认问题', _journal['UnconfirmedProblem']),
-                          BuildWidget.buildRow('建议留言', _journal['Advice']),
-                          BuildWidget.buildRow('客户签名', ''),
-                          new Row(
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            children: <Widget>[
-                              new Padding(
-                                padding: const EdgeInsets.all(10.0),
-                                child: Image.memory(
-                                  imageBytes??[],
-                                  width: 300.0,
-                                  height: 300.0,
-                                ),
-                              ),
-                            ],
-                          ),
-                          widget.status==3?BuildWidget.buildRow('服务结果', _currentResult):BuildWidget.buildDropdown('服务结果', _currentResult, _dropDownMenuItems, changedDropDownMethod),
-                          widget.status==3?BuildWidget.buildRow('审批备注', _journal['FujiComments']??''):new Container()
-                        ],
-                      ),
-                    ),
-                    isExpanded: _isExpandedAssign,
-                  ),
-                ],
+                children: buildExpansion(),
               ),
               SizedBox(height: 24.0),
               widget.status==3?new Container():buildTextField('审批备注', _comment, true),

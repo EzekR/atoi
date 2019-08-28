@@ -13,6 +13,8 @@ class _CompleteInfoState extends State<CompleteInfo> {
 
   Map userInfo = {};
   Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
+  TextEditingController _name = new TextEditingController();
+  TextEditingController _mobile = new TextEditingController();
   TextEditingController _email = new TextEditingController();
   TextEditingController _addr = new TextEditingController();
   TextEditingController _newPass = new TextEditingController();
@@ -20,6 +22,7 @@ class _CompleteInfoState extends State<CompleteInfo> {
   List<dynamic> departments = [];
   var currentDepart;
   var dropdownItems;
+  var emailReg = RegExp(r"[w!#$%&'*+/=?^_`{|}~-]+(?:.[w!#$%&'*+/=?^_`{|}~-]+)*@(?:[w](?:[w-]*[w])?.)+[w](?:[w-]*[w])?");
 
   Future<Null> getUserInfo() async {
     var prefs = await _prefs;
@@ -31,6 +34,8 @@ class _CompleteInfoState extends State<CompleteInfo> {
       _email.text = decoded['Email'];
       _addr.text = decoded['Address'];
       currentDepart = decoded['Department']['Name'];
+      _name.text = decoded['Name'];
+      _mobile.text = decoded['Mobile'];
     });
   }
   void initState() {
@@ -126,11 +131,8 @@ class _CompleteInfoState extends State<CompleteInfo> {
     var _data = {
       'info': {
         'ID': userInfo['ID'],
-        'Name': userInfo['Name'],
-        'Mobile': userInfo['Mobile'],
-        'Department': {
-          'ID': _depart['ID']
-        },
+        'Name': _name.text,
+        'Mobile': _mobile.text,
         'Email': _email.text,
         'Address': _addr.text,
       }
@@ -140,8 +142,19 @@ class _CompleteInfoState extends State<CompleteInfo> {
     userInfo['Address'] = _addr.text;
     userInfo['Department'] = _depart;
     prefs.setString('userInfo', jsonEncode(userInfo));
+    if (!emailReg.hasMatch(_email.text)) {
+      showDialog(context: context,
+          builder: (context) => AlertDialog(
+            title: new Text('请输入正确的邮箱格式'),
+          )
+      );
+      return;
+    }
     if (_newPass.text.isNotEmpty) {
       _data['info']['LoginPwd'] = _newPass.text;
+    }
+    if (userInfo['Role']['ID'] == 3) {
+      _data['info']['Department'] = _depart;
     }
     var resp = await HttpRequest.request(
       '/User/UpdateUserInfo',
@@ -162,16 +175,15 @@ class _CompleteInfoState extends State<CompleteInfo> {
   List<Widget> buildInfo() {
     List<Widget> _list = [
       new SizedBox(height: 20.0,),
-      BuildWidget.buildRow('手机号', userInfo['Mobile']),
-      BuildWidget.buildRow('姓名', userInfo['Name']),
-      BuildWidget.buildRow('用户角色', userInfo['Role']['Name']),
-      BuildWidget.buildRow('账号状态', userInfo['VerifyStatus']['Name']),
+      BuildWidget.buildRow('用户名/手机号', userInfo['LoginID']),
       new Divider(),
+      BuildWidget.buildInput('姓名', _name),
+      BuildWidget.buildInput('电话', _mobile),
       BuildWidget.buildInput('邮箱', _email),
       BuildWidget.buildInput('地址', _addr),
       BuildWidget.buildInput('新密码', _newPass),
       new Divider(),
-      buildDropdown('科室', currentDepart, dropdownItems, changedDropDownMethod),
+      userInfo['Role']['ID']==3?buildDropdown('科室', currentDepart, dropdownItems, changedDropDownMethod):new Container(),
       new SizedBox(height: 20.0,),
       new Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -203,7 +215,7 @@ class _CompleteInfoState extends State<CompleteInfo> {
   Widget build(BuildContext context) {
     return new Scaffold(
       appBar: new AppBar(
-        title: new Text('完善信息'),
+        title: new Text('个人信息'),
         elevation: 0.7,
         flexibleSpace: Container(
           decoration: BoxDecoration(

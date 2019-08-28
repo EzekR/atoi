@@ -114,7 +114,7 @@ class _EngineerVoucherPageState extends State<EngineerVoucherPage> {
   }
 
   Future<Null> uploadJournal() async {
-    if (_img.length == 0 ) {
+    if (_img == null) {
       showDialog(context: context,
           builder: (context) => AlertDialog(
           title: new Text('签名不可为空'),

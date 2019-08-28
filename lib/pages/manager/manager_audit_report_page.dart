@@ -575,10 +575,18 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
                 expansionCallback: (index, isExpanded) {
                   setState(() {
                     if (index == 0) {
-                      _isExpandedBasic = !isExpanded;
+                      if (_dispatch['Request']['RequestType']['ID']==14) {
+                        _isExpandedDetail = !isExpanded;
+                      } else {
+                        _isExpandedBasic = !isExpanded;
+                      }
                     } else {
                       if (index == 1) {
-                        _isExpandedDetail = !isExpanded;
+                        if (_dispatch['Request']['RequestType']['ID']==14) {
+                          _isExpandedAssign = !isExpanded;
+                        } else {
+                          _isExpandedDetail = !isExpanded;
+                        }
                       } else {
                         if (index == 2) {
                           _isExpandedAssign = !isExpanded;

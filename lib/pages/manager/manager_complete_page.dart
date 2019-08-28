@@ -602,6 +602,7 @@ class _ManagerCompletePageState extends State<ManagerCompletePage> {
                       ),
                     ],
                   ),
+                  _journal['FujiComments']!=''?BuildWidget.buildRow('审批备注', _journal['FujiComments']):new Container()
                 ],
               ),
             ),
@@ -643,8 +644,9 @@ class _ManagerCompletePageState extends State<ManagerCompletePage> {
                   BuildWidget.buildRow('分析原因', _report['SolutionCauseAnalysis']),
                   BuildWidget.buildRow('处理方法', _report['SolutionWay']),
                   BuildWidget.buildRow('未解决备注', _report['SolutionUnsolvedComments']),
-                  BuildWidget.buildRow('误工说明', _report['DelayReason']),
+                  _report['DelayReason']!=''?BuildWidget.buildRow('误工说明', _report['DelayReason']):new Container(),
                   BuildWidget.buildRow('作业结果', _report['SolutionResultStatus']['Name']),
+                  _report['FujiComments']!=''?BuildWidget.buildRow('审批说明', _report['FujiComments']):new Container()
                 ],
               ),
             ),

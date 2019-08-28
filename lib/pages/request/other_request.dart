@@ -258,7 +258,7 @@ class _OtherRequestState extends State<OtherRequest> {
                       animationDuration: Duration(milliseconds: 200),
                       expansionCallback: (index, isExpanded) {
                         setState(() {
-                          if (index == 1) {
+                          if (index == 0) {
                             _isExpandedDetail = !isExpanded;
                           } else {
                             _isExpandedAssign =!isExpanded;

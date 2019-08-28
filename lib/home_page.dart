@@ -52,7 +52,6 @@ class _HomePageState extends State<HomePage>
   }
 
   void deactivate() {
-    _timer.cancel();
     super.deactivate();
   }
 
@@ -198,7 +197,7 @@ class _HomePageState extends State<HomePage>
                       },
                     ),
                     ListTile(
-                      title: Text('完善信息'),
+                      title: Text('个人信息'),
                       onTap: () {
                         Navigator.of(context).push(new MaterialPageRoute(builder: (_) {
                           return new CompleteInfo();
