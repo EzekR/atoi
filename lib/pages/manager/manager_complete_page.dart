@@ -738,12 +738,12 @@ class _ManagerCompletePageState extends State<ManagerCompletePage> {
                       break;
                     case 3:
                       setState(() {
-                        _request['RequestType']['ID']==14?_isExpandedReport=!_isExpandedReport:_isExpandedJournal = !_isExpandedJournal;
+                        _request['RequestType']['ID']==14||_journal==null?_isExpandedReport=!_isExpandedReport:_isExpandedJournal = !_isExpandedJournal;
                       });
                       break;
                     case 4:
                       setState(() {
-                        _isExpandedReport = !_isExpandedReport;
+                        _journal==null||_report==null?_isExpandedAcc=!_isExpandedAcc:_isExpandedReport = !_isExpandedReport;
                       });
                       break;
                     case 5:

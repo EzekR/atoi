@@ -68,7 +68,7 @@ class _OtherRequestState extends State<OtherRequest> {
   Future getImage() async {
     var image = await ImagePicker.pickImage(
         source: ImageSource.camera,
-        maxWidth: 800.0
+        imageQuality: 1
     );
     if (image != null) {
       setState(() {

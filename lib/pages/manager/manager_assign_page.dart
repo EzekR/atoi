@@ -171,11 +171,11 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
         _currentType = _request['RequestType']['Name'];
         _desc.text = resp['Data']['FaultDesc'];
       });
-      if (resp['Data']['RequestType']['ID'] == 1) {
-        setState(() {
-          _currentFault = resp['Data']['FaultType']['Name'];
-        });
-      }
+      //if (resp['Data']['RequestType']['ID'] == 1) {
+      //  setState(() {
+      //    _currentFault = resp['Data']['FaultType']['Name'];
+      //  });
+      //}
       if (resp['Data']['RequestType']['ID'] == 2) {
         setState(() {
           _currentMaintain = resp['Data']['FaultType']['Name'];
@@ -249,6 +249,7 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
     _currentLevel = _dropDownMenuLevels[0].value;
     _currentStatus = _dropDownMenuStatuses[0].value;
     _dropDownMenuFault = getDropDownMenuItems(_faultType);
+    _currentFault = _dropDownMenuFault[0].value;
     _dropDownMenuMaintain = getDropDownMenuItems(_maintainType);
     _dropDownMenuSource = getDropDownMenuItems(_badSource);
     _dropDownMenuMandatory = getDropDownMenuItems(_mandatory);

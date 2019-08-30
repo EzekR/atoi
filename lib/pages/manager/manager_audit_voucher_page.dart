@@ -214,7 +214,7 @@ class _ManagerAuditVoucherPageState extends State<ManagerAuditVoucherPage> {
     print(resp);
     if (resp['ResultCode'] == '00') {
       setState(() {
-        //_equipment = resp['Data']['Request']['Equipments'][0];
+        _equipment = resp['Data']['Request']['Equipments'][0];
         _dispatch = resp['Data'];
       });
     }

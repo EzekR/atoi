@@ -23,6 +23,8 @@ class _CompleteInfoState extends State<CompleteInfo> {
   var currentDepart;
   var dropdownItems;
   var emailReg = RegExp(r"[w!#$%&'*+/=?^_`{|}~-]+(?:.[w!#$%&'*+/=?^_`{|}~-]+)*@(?:[w](?:[w-]*[w])?.)+[w](?:[w-]*[w])?");
+  var emailValid = RegExp(r"^[a-zA-Z0-9.]+@[a-zA-Z0-9]+\.[a-zA-Z]+");
+
 
   Future<Null> getUserInfo() async {
     var prefs = await _prefs;
@@ -58,7 +60,6 @@ class _CompleteInfoState extends State<CompleteInfo> {
         departmentNames = departmentNames;
       });
       dropdownItems = getDropDownMenuItems(departmentNames);
-      currentDepart = dropdownItems[0].value;
     }
   }
 
@@ -142,7 +143,7 @@ class _CompleteInfoState extends State<CompleteInfo> {
     userInfo['Address'] = _addr.text;
     userInfo['Department'] = _depart;
     prefs.setString('userInfo', jsonEncode(userInfo));
-    if (!emailReg.hasMatch(_email.text)) {
+    if (_email.text.isNotEmpty&&!emailValid.hasMatch(_email.text)) {
       showDialog(context: context,
           builder: (context) => AlertDialog(
             title: new Text('请输入正确的邮箱格式'),
@@ -153,7 +154,7 @@ class _CompleteInfoState extends State<CompleteInfo> {
     if (_newPass.text.isNotEmpty) {
       _data['info']['LoginPwd'] = _newPass.text;
     }
-    if (userInfo['Role']['ID'] == 3) {
+    if (userInfo['Role']['ID'] == 4) {
       _data['info']['Department'] = _depart;
     }
     var resp = await HttpRequest.request(
@@ -183,7 +184,7 @@ class _CompleteInfoState extends State<CompleteInfo> {
       BuildWidget.buildInput('地址', _addr),
       BuildWidget.buildInput('新密码', _newPass),
       new Divider(),
-      userInfo['Role']['ID']==3?buildDropdown('科室', currentDepart, dropdownItems, changedDropDownMethod):new Container(),
+      userInfo['Role']['ID']==4?buildDropdown('科室', currentDepart, dropdownItems, changedDropDownMethod):new Container(),
       new SizedBox(height: 20.0,),
       new Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,

@@ -93,6 +93,7 @@ class EngineerModel extends Model {
     print(resp);
     if (resp['ResultCode'] == '00') {
       _tasksToReport = resp['Data'];
+      _badgeEB = resp['Data'].length.toString();
     }
     notifyListeners();
   }

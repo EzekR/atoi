@@ -332,6 +332,9 @@ class _LoginPageState extends State<LoginPage> {
         contentPadding: EdgeInsets.fromLTRB(20.0, 10.0, 20.0, 10.0),
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(32.0)),
       ),
+      validator: (value) {
+        return value.length>20?'用户名过长':null;
+      },
     );
 
     var name = TextFormField(
@@ -451,7 +454,7 @@ class _LoginPageState extends State<LoginPage> {
 
     var userRegister = FlatButton(
       child: Text(
-        _stage=='login'?'报修用户注册':'返回登陆',
+        _stage=='login'?'报修用户注册':'返回登录',
         style: TextStyle(color: Colors.blue),
       ),
       onPressed: () {
