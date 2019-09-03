@@ -152,36 +152,6 @@ class _EngineerHomePageState extends State<EngineerHomePage>
                         color: Theme.of(context).accentColor,
                       ),
                     ),
-                    //ListTile(
-                    //  title: Text('姓名：${_userName}'),
-                    //  onTap: () {
-                    //    Navigator.pop(context);
-                    //  },
-                    //),
-                    //ListTile(
-                    //  title: Text('手机号：${_mobile}'),
-                    //  onTap: () {
-                    //    _scaffoldKeyManager.currentState
-                    //        .showBottomSheet((BuildContext context) {
-                    //      return new Container(
-                    //        decoration: BoxDecoration(
-                    //            border: Border(
-                    //                top: BorderSide(color: Colors.grey))),
-                    //        child: Padding(
-                    //          padding: const EdgeInsets.all(32.0),
-                    //          child: Text(
-                    //            'This is a Material persistent bottom sheet. Drag downwards to dismiss it.',
-                    //            textAlign: TextAlign.center,
-                    //            style: TextStyle(
-                    //              color: Colors.indigo,
-                    //              fontSize: 24.0,
-                    //            ),
-                    //          ),
-                    //        ),
-                    //      );
-                    //    });
-                    //  },
-                    //),
                     ListTile(
                       title: Text('个人信息',
                         style: new TextStyle(

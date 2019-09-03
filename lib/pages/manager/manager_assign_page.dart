@@ -171,11 +171,6 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
         _currentType = _request['RequestType']['Name'];
         _desc.text = resp['Data']['FaultDesc'];
       });
-      //if (resp['Data']['RequestType']['ID'] == 1) {
-      //  setState(() {
-      //    _currentFault = resp['Data']['FaultType']['Name'];
-      //  });
-      //}
       if (resp['Data']['RequestType']['ID'] == 2) {
         setState(() {
           _currentMaintain = resp['Data']['FaultType']['Name'];
@@ -647,19 +642,6 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
               BuildWidget.buildDropdown('紧急程度', _currentPriority, _dropDownMenuPris, changedDropDownPri),
               BuildWidget.buildRow('请求附件', ''),
               buildImageColumn(),
-              //new Row(
-              //  mainAxisAlignment: MainAxisAlignment.start,
-              //  children: <Widget>[
-              //    new Padding(
-              //      padding: const EdgeInsets.all(10.0),
-              //      child: new Container(
-              //        child: imageBytes.isEmpty?new Stack():new PhotoView(
-              //            imageProvider: MemoryImage(imageBytes),
-              //        ),
-              //      ),
-              //    ),
-              //  ],
-              //),
             ],
           ),
         ),

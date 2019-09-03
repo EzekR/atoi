@@ -7,7 +7,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:atoi/utils/constants.dart';
 import 'package:atoi/widgets/build_widget.dart';
-import 'package:atoi/utils/image_util.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 
 class EngineerVoucherPage extends StatefulWidget {
