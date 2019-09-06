@@ -142,6 +142,7 @@ class _UserHomePageState extends State<UserHomePage> {
                     child: new Text(_userName),
                   )
               ),
+              new SizedBox(width: 10.0,)
             ],
           ),
           body: new Column(

@@ -127,6 +127,7 @@ class _EngineerHomePageState extends State<EngineerHomePage>
                       padding: const EdgeInsets.symmetric(vertical: 19.0),
                       child: Text(_userName),
                     ),
+                    new SizedBox(width: 10.0,)
                   ],
                 ),
                 body: new TabBarView(
