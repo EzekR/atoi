@@ -33,11 +33,11 @@ class _CompleteInfoState extends State<CompleteInfo> {
     var decoded = jsonDecode(_userInfo);
     setState(() {
       userInfo = decoded;
-      _email.text = decoded['Email'];
-      _addr.text = decoded['Address'];
-      currentDepart = decoded['Department']['Name'];
       _name.text = decoded['Name'];
       _mobile.text = decoded['Mobile'];
+      _email.text = decoded['Email'];
+      _addr.text = decoded['Address'];
+      currentDepart = decoded['Department']['Name']??'';
     });
   }
   void initState() {

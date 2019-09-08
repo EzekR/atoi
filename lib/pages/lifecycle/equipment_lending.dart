@@ -371,9 +371,9 @@ class _EquipmentLendingState extends State<EquipmentLending> {
                             padding: EdgeInsets.symmetric(horizontal: 12.0),
                             child: new Column(
                               children: <Widget>[
-                                BuildWidget.buildRow('类型', '设备借用'),
+                                BuildWidget.buildRow('类型', '借用'),
                                 BuildWidget.buildRow('请求人', _roleName),
-                                BuildWidget.buildRow('主题', _equipment==null?'--设备借用':'${_equipment['Name']}--设备借用'),
+                                BuildWidget.buildRow('主题', _equipment==null?'--借用':'${_equipment['Name']}--借用'),
                                 new Divider(),
                                 new Padding(
                                   padding: EdgeInsets.symmetric(vertical: 5.0),

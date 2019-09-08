@@ -380,15 +380,12 @@ class _MandatoryRequestState extends State<MandatoryRequest> {
                                   size: 24.0,
                                   color: Colors.blue,
                                 ),
-                                title: new Align(
-                                    child: Text('请求详细信息',
-                                      style: new TextStyle(
-                                          fontSize: 22.0,
-                                          fontWeight: FontWeight.w400
-                                      ),
-                                    ),
-                                    alignment: Alignment(-1.4, 0)
-                                )
+                                title: Text('请求详细信息',
+                                  style: new TextStyle(
+                                      fontSize: 22.0,
+                                      fontWeight: FontWeight.w400
+                                  ),
+                                ),
                             );
                           },
                           body: new Padding(
