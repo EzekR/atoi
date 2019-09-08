@@ -56,7 +56,7 @@ class _LoginPageState extends State<LoginPage> {
     var connectivityResult = await (Connectivity().checkConnectivity());
     if (connectivityResult == ConnectivityResult.none) {
       showDialog(context: context,
-        builder: (context) => CupertinoAlertDialog(
+        builder: (context) => AlertDialog(
           title: new Text('请连接网络',
             style: new TextStyle(
                 fontSize: 16.0,
@@ -121,7 +121,7 @@ class _LoginPageState extends State<LoginPage> {
           break;
       }
     } else {
-      showDialog(context: context, builder: (context) => CupertinoAlertDialog(
+      showDialog(context: context, builder: (context) => AlertDialog(
         title: new Text(
             _data['ResultMessage'],
           style: new TextStyle(
@@ -137,7 +137,7 @@ class _LoginPageState extends State<LoginPage> {
   Future<Null> _userReg() async {
     if (passwordController.text.isEmpty) {
       showDialog(context: context,
-          builder: (context) => CupertinoAlertDialog(
+          builder: (context) => AlertDialog(
             title: new Text('密码不可为空',
               style: new TextStyle(
                   fontSize: 16.0,
@@ -151,7 +151,7 @@ class _LoginPageState extends State<LoginPage> {
     }
     if (regPhoneController.text.isEmpty) {
       showDialog(context: context,
-          builder: (context) => CupertinoAlertDialog(
+          builder: (context) => AlertDialog(
             title: new Text('手机号不可为空',
               style: new TextStyle(
                   fontSize: 16.0,
@@ -165,7 +165,7 @@ class _LoginPageState extends State<LoginPage> {
     }
     if (nameController.text.isEmpty) {
       showDialog(context: context,
-          builder: (context) => CupertinoAlertDialog(
+          builder: (context) => AlertDialog(
             title: new Text('姓名不可为空',
               style: new TextStyle(
                   fontSize: 16.0,
@@ -179,7 +179,7 @@ class _LoginPageState extends State<LoginPage> {
     }
     if (verificationController.text.isEmpty) {
       showDialog(context: context,
-          builder: (context) => CupertinoAlertDialog(
+          builder: (context) => AlertDialog(
             title: new Text('验证码不可为空',
               style: new TextStyle(
                   fontSize: 16.0,
@@ -209,7 +209,7 @@ class _LoginPageState extends State<LoginPage> {
     print(resp);
     if (resp['ResultCode'] == '00') {
       showDialog(context: context,
-          builder: (context) => CupertinoAlertDialog(
+          builder: (context) => AlertDialog(
             title: new Text('注册成功',
               style: new TextStyle(
                   fontSize: 16.0,
@@ -226,7 +226,7 @@ class _LoginPageState extends State<LoginPage> {
       });
     } else {
       showDialog(context: context,
-          builder: (context) => CupertinoAlertDialog(
+          builder: (context) => AlertDialog(
             title: new Text(resp['ResultMessage'],
               style: new TextStyle(
                   fontSize: 16.0,
@@ -260,7 +260,7 @@ class _LoginPageState extends State<LoginPage> {
   Future<Null> getVerificationCode() async {
     if (regPhoneController.text.isEmpty || regPhoneController.text.length!=11) {
       showDialog(context: context,
-        builder: (context) => CupertinoAlertDialog(
+        builder: (context) => AlertDialog(
           title: new Text('请输入正确的手机号',
             style: new TextStyle(
                 fontSize: 16.0,
@@ -282,7 +282,7 @@ class _LoginPageState extends State<LoginPage> {
     print(resp);
     if (resp['ResultCode'] == '00') {
       showDialog(context: context,
-          builder: (context) => CupertinoAlertDialog(
+          builder: (context) => AlertDialog(
         title: new Text('验证码已发送',
           style: new TextStyle(
               fontSize: 16.0,
@@ -298,7 +298,7 @@ class _LoginPageState extends State<LoginPage> {
       startCountdownTimer();
     } else {
       showDialog(context: context,
-          builder: (context) => CupertinoAlertDialog(
+          builder: (context) => AlertDialog(
             title: new Text(resp['ResultMessage'],
               style: new TextStyle(
                   fontSize: 16.0,
