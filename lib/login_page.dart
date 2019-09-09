@@ -241,7 +241,7 @@ class _LoginPageState extends State<LoginPage> {
 
   void initState() {
     isLogin();
-    isConnected();
+    //isConnected();
     super.initState();
   }
 
