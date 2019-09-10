@@ -373,7 +373,7 @@ class _EquipmentCheckState extends State<EquipmentCheck> {
                               children: <Widget>[
                                 BuildWidget.buildRow('类型', '盘点'),
                                 BuildWidget.buildRow('请求人', _roleName),
-                                BuildWidget.buildRow('主题', _equipment==null?'--设备盘点':'${_equipment['Name']}--设备盘点'),
+                                BuildWidget.buildRow('主题', _equipment==null?'--盘点':'${_equipment['Name']}--盘点'),
                                 new Divider(),
                                 new Padding(
                                   padding: EdgeInsets.symmetric(vertical: 5.0),

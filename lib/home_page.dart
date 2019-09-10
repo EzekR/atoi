@@ -140,6 +140,7 @@ class _HomePageState extends State<HomePage>
                       ),
                     ),
                   ),
+                  new SizedBox(width: 10.0,)
                 ],
               ),
               body: new TabBarView(

@@ -131,10 +131,39 @@ class _ManagerToCompleteState extends State<ManagerToComplete> {
     );
   }
 
+  Future<List> getDispatchesByRequestId(int requestId) async {
+    var resp = await HttpRequest.request(
+      '/Dispatch/GetDispatchesByRequestID',
+      method: HttpRequest.GET,
+      params: {
+        'id': requestId
+      }
+    );
+    if (resp['ResultCode'] == '00') {
+      return resp['Data'];
+    } else {
+      return [];
+    }
+  }
+
   Future<Null> refresh() async {
     ManagerModel _model = MainModel.of(context);
     _model.getTodos();
   }
+
+  List<Step> buildStep(List<dynamic> steps) {
+    List<Step> _steps = [];
+    for(var step in steps) {
+      _steps.add(Step(
+        title: new Text('派工单号：${step['OID']}'),
+        subtitle: new Text('派工单状态：${step['Status']['Name']}'),
+        content: new Text(''),
+        isActive: false
+      ));
+    }
+    return _steps;
+  }
+
   @override
   Widget build(BuildContext context) {
     // TODO: implement build
@@ -197,9 +226,66 @@ class _ManagerToCompleteState extends State<ManagerToComplete> {
                   BuildWidget.buildCardRow('请求状态', status),
                   BuildWidget.buildCardRow('请求详情', detail.length>10?'${detail.substring(0,10)}...':detail),
                   new Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     mainAxisSize: MainAxisSize.max,
                     children: <Widget>[
+                      new RaisedButton(
+                        onPressed: () async {
+                          var _dispatches = await getDispatchesByRequestId(requestId);
+                          if (_dispatches.length>0) {
+                            showDialog(context: context,
+                                builder: (context) => SimpleDialog(
+                                  title: new Text('派工历史'),
+                                  children: <Widget>[
+                                    new Container(
+                                      width: 300.0,
+                                      height: 600.0,
+                                      child: new Stepper(
+                                        currentStep: 0,
+                                        controlsBuilder: (BuildContext context, {VoidCallback onStepContinue, VoidCallback onStepCancel}) {
+                                          return Row(
+                                            children: <Widget>[
+//                                              FlatButton(
+//                                                onPressed: onStepContinue,
+//                                                child: const Text('CONTINUE'),
+//                                              ),
+//                                              FlatButton(
+//                                                onPressed: onStepCancel,
+//                                                child: const Text('CANCEL'),
+//                                              ),
+                                            new Container()
+                                            ],
+                                          );
+                                        },
+                                        steps: buildStep(_dispatches),
+                                      ),
+                                    ),
+                                  ],
+                                )
+                            );
+                          } else {
+                            showDialog(context: context, builder: (context) => AlertDialog(title: new Text('暂无派工历史'),));
+                          }
+                        },
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(24),
+                        ),
+                        color: AppConstants.AppColors['btn_success'],
+                        child: new Row(
+                          children: <Widget>[
+                            new Icon(
+                              Icons.history,
+                              color: Colors.white,
+                            ),
+                            new Text(
+                              '历史派工',
+                              style: new TextStyle(
+                                  color: Colors.white
+                              ),
+                            )
+                          ],
+                        ),
+                      ),
                       new RaisedButton(
                         onPressed: (){
                           //Navigator.of(context).pushNamed(ManagerAssignPage.tag);
@@ -225,9 +311,6 @@ class _ManagerToCompleteState extends State<ManagerToComplete> {
                             )
                           ],
                         ),
-                      ),
-                      new Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 5.0),
                       ),
                       new RaisedButton(
                         onPressed: (){
