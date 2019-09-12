@@ -95,7 +95,7 @@ class _LoginPageState extends State<LoginPage> {
         'LoginID': phoneController.text,
         'LoginPwd': passwordController.text,
         'DeviceToken': regId,
-        'OSName': 'iOS'
+        'OSName': 'android'
       }
     );
     setState(() {

@@ -276,11 +276,13 @@ class _ManagerToCompleteState extends State<ManagerToComplete> {
                             new Icon(
                               Icons.history,
                               color: Colors.white,
+                              size: 14.0,
                             ),
                             new Text(
                               '历史派工',
                               style: new TextStyle(
-                                  color: Colors.white
+                                  color: Colors.white,
+                                  fontSize: 12.0
                               ),
                             )
                           ],
@@ -302,11 +304,13 @@ class _ManagerToCompleteState extends State<ManagerToComplete> {
                             new Icon(
                               Icons.event_note,
                               color: Colors.white,
+                              size: 14.0,
                             ),
                             new Text(
                               '查看详情',
                               style: new TextStyle(
-                                  color: Colors.white
+                                  color: Colors.white,
+                                  fontSize: 12.0
                               ),
                             )
                           ],
@@ -371,11 +375,13 @@ class _ManagerToCompleteState extends State<ManagerToComplete> {
                             new Icon(
                               Icons.cancel,
                               color: Colors.white,
+                              size: 14.0,
                             ),
                             new Text(
                               task['Status']['ID']>1?'取消派工':'终止请求',
                               style: new TextStyle(
-                                  color: Colors.white
+                                  color: Colors.white,
+                                  fontSize: 12.0
                               ),
                             )
                           ],
