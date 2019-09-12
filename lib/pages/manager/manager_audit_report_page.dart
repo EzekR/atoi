@@ -495,7 +495,7 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
               BuildWidget.buildRow('故障描述', _report['FaultDesc']),
               BuildWidget.buildRow('分析原因', _report['SolutionCauseAnalysis']),
               BuildWidget.buildRow('处理方法', _report['SolutionWay']),
-              BuildWidget.buildRow('未解决备注', _report['SolutionUnsolvedComments']),
+              BuildWidget.buildRow('备注', _report['SolutionUnsolvedComments']),
               _report['DelayReason']!=''?BuildWidget.buildRow('误工说明', _report['DelayReason']):new Container(),
               widget.status==3?BuildWidget.buildRow('作业结果', _report['SolutionResultStatus']['Name']):BuildWidget.buildDropdown('作业结果', _currentResult, _dropDownMenuItems, changedDropDownMethod),
               BuildWidget.buildRow('附件', ''),

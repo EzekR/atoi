@@ -86,13 +86,15 @@ class _LoginPageState extends State<LoginPage> {
     setState(() {
       _loading = !_loading;
     });
+    var _prefs = await prefs;
+    var regId = _prefs.getString('regId');
     var _data = await HttpRequest.request(
       '/User/Login',
       method: HttpRequest.POST,
       data: {
         'LoginID': phoneController.text,
         'LoginPwd': passwordController.text,
-        'DeviceToken': 'test token',
+        'DeviceToken': regId,
         'OSName': 'iOS'
       }
     );
