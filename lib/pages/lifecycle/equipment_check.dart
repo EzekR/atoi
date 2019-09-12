@@ -46,7 +46,7 @@ class _EquipmentCheckState extends State<EquipmentCheck> {
     'guarantee': ''
   };
 
-  var _equipment;
+  List<Map> _equipments = [];
 
   List<DropdownMenuItem<String>> _dropDownMenuItems;
   String _currentResult;
@@ -71,7 +71,7 @@ class _EquipmentCheckState extends State<EquipmentCheck> {
     print(resp);
     if (resp['ResultCode'] == '00') {
       setState(() {
-        _equipment = resp['Data'];
+        _equipments.add(resp['Data']);
       });
     }
   }
@@ -95,7 +95,7 @@ class _EquipmentCheckState extends State<EquipmentCheck> {
   }
 
   Future<Null> submit() async {
-    if (_equipment == null) {
+    if (_equipments == null) {
       showDialog(context: context,
           builder: (context) => AlertDialog(
             title: new Text('请选择设备'),
@@ -130,11 +130,7 @@ class _EquipmentCheckState extends State<EquipmentCheck> {
           'RequestType': {
             'ID': 12
           },
-          'Equipments': [
-            {
-              'ID': _equipment['ID']
-            }
-          ],
+          'Equipments': _equipments,
           'FaultDesc': _fault.text,
           'Files': fileList
         }
@@ -223,7 +219,7 @@ class _EquipmentCheckState extends State<EquipmentCheck> {
     Map _data = jsonDecode(_searchResult);
     setState(() {
       //_result.addAll(_data);
-      _equipment = _data;
+      _equipments.add(_data);
     });
   }
 
@@ -258,6 +254,49 @@ class _EquipmentCheckState extends State<EquipmentCheck> {
     );
   }
 
+  Widget buildEquip() {
+    List<Widget> tiles = [];
+    Widget content;
+    for(var _equipment in _equipments) {
+      tiles.add(
+        new Padding(
+          padding: EdgeInsets.symmetric(horizontal: 12.0),
+          child: new Column(
+            children: <Widget>[
+              BuildWidget.buildRow('系统编号', _equipment['OID']??''),
+              BuildWidget.buildRow('名称', _equipment['Name']??''),
+              BuildWidget.buildRow('型号', _equipment['EquipmentCode']??''),
+              BuildWidget.buildRow('序列号', _equipment['SerialCode']??''),
+              BuildWidget.buildRow('使用科室', _equipment['Department']['Name']??''),
+              BuildWidget.buildRow('安装地点', _equipment['InstalSite']??''),
+              BuildWidget.buildRow('设备厂商', _equipment['Manufacturer']['Name']??''),
+              BuildWidget.buildRow('资产等级', _equipment['AssetLevel']['Name']??''),
+              BuildWidget.buildRow('维保状态', _equipment['WarrantyStatus']??''),
+              BuildWidget.buildRow('服务范围', _equipment['ContractScope']['Name']??''),
+              new Padding(padding: EdgeInsets.symmetric(vertical: 8.0),
+                child: new Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: <Widget>[
+                    new Text('删除此设备'),
+                    new IconButton(icon: new Icon(Icons.delete_forever), onPressed: (){
+                      _equipments.remove(_equipment);
+                      setState(() {
+                        _equipments = _equipments;
+                      });
+                    })
+                  ],
+                ),
+              )
+            ],
+          ),
+        ),
+      );
+    }
+    content = new Column(
+      children: tiles,
+    );
+    return content;
+  }
   Widget build(BuildContext context) {
     return ScopedModelDescendant<MainModel>(
       builder: (context, child, mainModel) {
@@ -332,24 +371,7 @@ class _EquipmentCheckState extends State<EquipmentCheck> {
                                 ),
                             );
                           },
-                          body: new Padding(
-                            padding: EdgeInsets.symmetric(horizontal: 12.0),
-                            child: _equipment==null?new Center(child: new Text('请选择设备')):new Column(
-                              children: <Widget>[
-                                BuildWidget.buildRow('系统编号', _equipment['OID']??''),
-                                BuildWidget.buildRow('名称', _equipment['Name']??''),
-                                BuildWidget.buildRow('型号', _equipment['EquipmentCode']??''),
-                                BuildWidget.buildRow('序列号', _equipment['SerialCode']??''),
-                                BuildWidget.buildRow('使用科室', _equipment['Department']['Name']??''),
-                                BuildWidget.buildRow('安装地点', _equipment['InstalSite']??''),
-                                BuildWidget.buildRow('设备厂商', _equipment['Manufacturer']['Name']??''),
-                                BuildWidget.buildRow('资产等级', _equipment['AssetLevel']['Name']??''),
-                                BuildWidget.buildRow('维保状态', _equipment['WarrantyStatus']??''),
-                                BuildWidget.buildRow('服务范围', _equipment['ContractScope']['Name']??''),
-                                new Padding(padding: EdgeInsets.symmetric(vertical: 8.0))
-                              ],
-                            ),
-                          ),
+                          body: _equipments.length==0?new Center(child: new Text('请选择设备')):buildEquip(),
                           isExpanded: _isExpandedBasic,
                         ),
                         new ExpansionPanel(
@@ -373,7 +395,7 @@ class _EquipmentCheckState extends State<EquipmentCheck> {
                               children: <Widget>[
                                 BuildWidget.buildRow('类型', '盘点'),
                                 BuildWidget.buildRow('请求人', _roleName),
-                                BuildWidget.buildRow('主题', _equipment==null?'--盘点':'${_equipment['Name']}--盘点'),
+                                BuildWidget.buildRow('主题', _equipments==null?'--盘点':'多设备--盘点'),
                                 new Divider(),
                                 new Padding(
                                   padding: EdgeInsets.symmetric(vertical: 5.0),

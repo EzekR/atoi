@@ -260,50 +260,6 @@ class _ManagerToAssignState extends State<ManagerToAssign> {
                           ],
                         ),
                       ),
-                      //new RaisedButton(
-                      //  onPressed: (){
-                      //    showDialog(context: context,
-                      //        builder: (context) => AlertDialog(
-                      //          title: new Text('是否终止请求？'),
-                      //          actions: <Widget>[
-                      //            RaisedButton(
-                      //              child: const Text('确认', style: TextStyle(color: Colors.white),),
-                      //              color: AppConstants.AppColors['btn_cancel'],
-                      //              onPressed: () {
-                      //                _cancelRequest(requestId);
-                      //                Navigator.of(context).pop();
-                      //              },
-                      //            ),
-                      //            RaisedButton(
-                      //              child: const Text('取消', style: TextStyle(color: Colors.white),),
-                      //              color: AppConstants.AppColors['btn_main'],
-                      //              onPressed: () {
-                      //                Navigator.of(context).pop();
-                      //              },
-                      //            ),
-                      //          ],
-                      //        )
-                      //    );
-                      //  },
-                      //  shape: RoundedRectangleBorder(
-                      //    borderRadius: BorderRadius.circular(24),
-                      //  ),
-                      //  color: new Color(0xffD25565),
-                      //  child: new Row(
-                      //    children: <Widget>[
-                      //      new Icon(
-                      //        Icons.cancel,
-                      //        color: Colors.white,
-                      //      ),
-                      //      new Text(
-                      //        '取消',
-                      //        style: new TextStyle(
-                      //            color: Colors.white
-                      //        ),
-                      //      )
-                      //    ],
-                      //  ),
-                      //)
                     ],
                   )
                 ],

@@ -171,11 +171,6 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
         _currentType = _request['RequestType']['Name'];
         _desc.text = resp['Data']['FaultDesc'];
       });
-      //if (resp['Data']['RequestType']['ID'] == 1) {
-      //  setState(() {
-      //    _currentFault = resp['Data']['FaultType']['Name'];
-      //  });
-      //}
       if (resp['Data']['RequestType']['ID'] == 2) {
         setState(() {
           _currentMaintain = resp['Data']['FaultType']['Name'];
@@ -515,9 +510,6 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
             'ID': AppConstants.DealType[_currentMethod]
           },
           'FaultDesc': _desc.text,
-          'FaultType': {
-            'ID': _request['FaultType']['ID']
-          },
           'IsRecall': _request['IsRecall']
         },
         'Urgency': {
@@ -536,6 +528,32 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
         }
       }
     };
+    switch (_request['RequestType']['ID']) {
+      case 1:
+        _data['dispatchInfo']['Request']['FaultType'] = {
+          'ID': AppConstants.FaultRepair[_currentFault]
+        };
+        break;
+      case 2:
+        _data['dispatchInfo']['Request']['FaultType'] = {
+          'ID': AppConstants.FaultMaintain[_currentMaintain]
+        };
+        break;
+      case 3:
+        _data['dispatchInfo']['Request']['FaultType'] = {
+          'ID': AppConstants.FaultCheck[_currentMandatory]
+        };
+        break;
+      case 7:
+        _data['dispatchInfo']['Request']['FaultType'] = {
+          'ID': AppConstants.FaultBad[_currentSource]
+        };
+        break;
+      default:
+        _data['dispatchInfo']['Request']['FaultType'] = {
+          'ID': _request['FaultType']['ID']
+        };
+    }
     var resp = await HttpRequest.request(
       '/Request/CreateDispatch',
       method: HttpRequest.POST,
@@ -647,19 +665,6 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
               BuildWidget.buildDropdown('紧急程度', _currentPriority, _dropDownMenuPris, changedDropDownPri),
               BuildWidget.buildRow('请求附件', ''),
               buildImageColumn(),
-              //new Row(
-              //  mainAxisAlignment: MainAxisAlignment.start,
-              //  children: <Widget>[
-              //    new Padding(
-              //      padding: const EdgeInsets.all(10.0),
-              //      child: new Container(
-              //        child: imageBytes.isEmpty?new Stack():new PhotoView(
-              //            imageProvider: MemoryImage(imageBytes),
-              //        ),
-              //      ),
-              //    ),
-              //  ],
-              //),
             ],
           ),
         ),

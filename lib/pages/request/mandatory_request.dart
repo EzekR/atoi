@@ -528,7 +528,6 @@ class _MandatoryRequestState extends State<MandatoryRequest> {
                       ],
                     )
                   ],
-
                 ),
               ),
             )

@@ -492,7 +492,6 @@ class _BadRequestState extends State<BadRequest> {
                       ],
                     )
                   ],
-
                 ),
               ),
             )

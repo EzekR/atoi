@@ -643,7 +643,7 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
               widget.status!=0&&widget.status!=1?BuildWidget.buildRow('错误代码', _code.text):buildField('错误代码：', _code	),
               widget.status!=0&&widget.status!=1?BuildWidget.buildRow('分析原因', _analysis.text):buildField('分析原因：', _analysis),
               widget.status!=0&&widget.status!=1?BuildWidget.buildRow('处理方法', _solution.text):buildField('处理方法：', _solution),
-              widget.status!=0&&widget.status!=1?BuildWidget.buildRow('未解决备注', _unsolved.text):buildField('未解决备注：', _unsolved),
+              widget.status!=0&&widget.status!=1?BuildWidget.buildRow('备注', _unsolved.text):buildField('备注：', _unsolved),
               (widget.status==0||widget.status==1)&&_isDelayed?buildField('误工说明：', _delay):new Container(),
               widget.status!=0&&widget.status!=1&&_isDelayed?BuildWidget.buildRow('误工说明', _delay.text):new Container(),
               new Divider(),
