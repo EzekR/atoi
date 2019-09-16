@@ -6,7 +6,7 @@
 
 - (BOOL)application:(UIApplication *)application
     didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
-  [self startupJPush:launchOptions appKey:@"3f7f5523e972c577860e6181" channel:@"developer-default" isProduction:true];
+  [self startupJPush:launchOptions appKey:@"55de4e9a04eb39338afc99db" channel:@"developer-default" isProduction:true];
   [GeneratedPluginRegistrant registerWithRegistry:self];
   // Override point for customization after application launch.
   return [super application:application didFinishLaunchingWithOptions:launchOptions];

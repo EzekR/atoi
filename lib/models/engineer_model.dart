@@ -8,7 +8,8 @@ class EngineerModel extends Model {
   List<dynamic> _tasksToReport = [];
   String _badgeEA = '0';
   String _badgeEB = '0';
-  int _offset = 5;
+  int _offset = 10;
+  int _offsetReport = 10;
 
   get badgeEA => _badgeEA;
   get badgeEB => _badgeEB;
@@ -47,7 +48,7 @@ class EngineerModel extends Model {
       params: {
         'userID': userID,
         'statusIDs': 1,
-        'PageSize': 0,
+        'PageSize': 10,
         'CurRowNum': 0
       }
     );
@@ -55,12 +56,12 @@ class EngineerModel extends Model {
     print(resp);
     if (resp['ResultCode'] == '00') {
       _tasksToStart = resp['Data'];
-      _badgeEA = resp['Data'].length.toString();
+      _offset = 10;
     }
     notifyListeners();
   }
 
-  Future<Null> getMoreTasksToStart(int offset) async {
+  Future<Null> getMoreTasksToStart() async {
     Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
     var prefs = await _prefs;
     var userID = await prefs.getInt('userID');
@@ -70,14 +71,14 @@ class EngineerModel extends Model {
         params: {
           'userID': userID,
           'statusIDs': 1,
-          'PageSize': 5,
+          'PageSize': 10,
           'CurRowNum': _offset
         }
     );
-    print('model call');
     print(resp);
     if (resp['ResultCode'] == '00') {
       _tasksToStart.addAll(resp['Data']);
+      _offset = _offset + 10;
     }
     notifyListeners();
   }
@@ -87,16 +88,30 @@ class EngineerModel extends Model {
     var prefs = await _prefs;
     var userID = await prefs.getInt('userID');
     var resp = await HttpRequest.request(
-      '/Dispatch/GetDispatchs?userID=${userID}&statusIDs=2&statusIDs=3',
+      '/Dispatch/GetDispatchs?userID=${userID}&statusIDs=2&statusIDs=3&pageSize=10&curRowNum=0}',
       method: HttpRequest.GET,
     );
     print(resp);
     if (resp['ResultCode'] == '00') {
       _tasksToReport = resp['Data'];
-      _badgeEB = resp['Data'].length.toString();
+      _offsetReport = 10;
     }
     notifyListeners();
   }
 
-
+  Future<Null> getMoreTasksToReport() async {
+    Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
+    var prefs = await _prefs;
+    var userID = await prefs.getInt('userID');
+    var resp = await HttpRequest.request(
+      '/Dispatch/GetDispatchs?userID=${userID}&statusIDs=2&statusIDs=3&pageSize=10&curRowNum=${_offsetReport}',
+      method: HttpRequest.GET,
+    );
+    print(resp);
+    if (resp['ResultCode'] == '00') {
+      _tasksToReport.addAll(resp['Data']);
+      _offsetReport = _offsetReport + 10;
+    }
+    notifyListeners();
+  }
 }

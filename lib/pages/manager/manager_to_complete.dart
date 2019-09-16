@@ -20,11 +20,31 @@ class _ManagerToCompleteState extends State<ManagerToComplete> {
   List<dynamic> _tasks = [];
   Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
   bool _loading = false;
+  bool _noMore = false;
+  ScrollController _scrollController = new ScrollController();
 
   void initState() {
     //getData();
     refresh();
     super.initState();
+    ManagerModel model = MainModel.of(context);
+    _scrollController.addListener(() {
+      if (_scrollController.position.pixels ==
+          _scrollController.position.maxScrollExtent) {
+        var _length = model.todos.length;
+        model.getMoreTodos().then((result) {
+          if (model.todos.length == _length) {
+            setState(() {
+              _noMore = true;
+            });
+          } else {
+            setState(() {
+              _noMore = false;
+            });
+          }
+        });
+      }
+    });
   }
 
   Future<Null> getData() async {
@@ -280,7 +300,8 @@ class _ManagerToCompleteState extends State<ManagerToComplete> {
                             new Text(
                               '历史派工',
                               style: new TextStyle(
-                                  color: Colors.white
+                                  color: Colors.white,
+                                  fontSize: 12.0
                               ),
                             )
                           ],
@@ -306,7 +327,8 @@ class _ManagerToCompleteState extends State<ManagerToComplete> {
                             new Text(
                               '查看详情',
                               style: new TextStyle(
-                                  color: Colors.white
+                                  color: Colors.white,
+                                  fontSize: 12.0
                               ),
                             )
                           ],
@@ -375,7 +397,8 @@ class _ManagerToCompleteState extends State<ManagerToComplete> {
                             new Text(
                               task['Status']['ID']>1?'取消派工':'终止请求',
                               style: new TextStyle(
-                                  color: Colors.white
+                                  color: Colors.white,
+                                  fontSize: 12.0
                               ),
                             )
                           ],
@@ -396,8 +419,20 @@ class _ManagerToCompleteState extends State<ManagerToComplete> {
           return new RefreshIndicator(
               child: model.todos.length == 0?ListView(padding: const EdgeInsets.symmetric(vertical: 150.0), children: <Widget>[_loading?SpinKitRotatingPlain(color: Colors.blue):new Center(child: new Text('没有待派工请求'),)],):ListView.builder(
                   padding: const EdgeInsets.all(2.0),
-                  itemCount: model.todos.length,
-                  itemBuilder: (context, i) => buildCardItem(model.todos[i], model.todos[i]['ID'], model.todos[i]['OID'], model.todos[i]['RequestDate'], model.todos[i]['EquipmentOID'], model.todos[i]['EquipmentName'], model.todos[i]['DepartmentName'], model.todos[i]['RequestUser']['Name'], model.todos[i]['RequestType']['Name'], model.todos[i]['Status']['Name'], model.todos[i]['FaultDesc'])
+                  itemCount: model.todos.length+1,
+                  controller: _scrollController,
+                  itemBuilder: (context, i) {
+                    if (i !=  model.todos.length) {
+                      return buildCardItem(model.todos[i], model.todos[i]['ID'], model.todos[i]['OID'], model.todos[i]['RequestDate'], model.todos[i]['EquipmentOID'], model.todos[i]['EquipmentName'], model.todos[i]['DepartmentName'], model.todos[i]['RequestUser']['Name'], model.todos[i]['RequestType']['Name'], model.todos[i]['Status']['Name'], model.todos[i]['FaultDesc']);
+                    } else {
+                      return new Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: <Widget>[
+                          _noMore?new Center(child: new Text('没有更多派工单需要审核'),):new SpinKitChasingDots(color: Colors.blue,)
+                        ],
+                      );
+                    }
+                  }
               ),
               onRefresh: model.getTodos
           );
