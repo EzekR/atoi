@@ -117,6 +117,7 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
   List _engineerNames = [];
 
   Map<String, int> _engineers = {};
+  List<String> _fileNames = [];
   //final String roleName = await LocalStorage().getStorage('roleName', String);
 
   List<DropdownMenuItem<String>> _dropDownMenuItems;
@@ -164,7 +165,11 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
     if (resp['ResultCode'] == '00') {
       var files = resp['Data']['Files'];
       for (var file in files) {
-        getImage(file['ID']);
+        if (file['FileName'].split('.')[1] == 'jpg' || file['FileName'].split('.')[1] == 'png') {
+          getImage(file['ID']);
+        } else {
+          _fileNames.add(file['FileName']);
+        }
       }
       setState(() {
         _request = resp['Data'];
@@ -332,6 +337,7 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
       _currentRecall= selectedMethod;
     });
   }
+
   Column buildImageColumn() {
     if (imageBytes == null) {
       return new Column();
@@ -345,6 +351,25 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
         ));
       }
       return new Column(children: _list);
+    }
+  }
+
+  Column buildFileName() {
+    if (_fileNames.length == 0) {
+      return new Column();
+    } else {
+      List<Widget> _list = [];
+      for(var _name in _fileNames) {
+        _list.add(new ListTile(
+          title: new Text(
+            _name,
+            style: new TextStyle(
+              color: Colors.blue
+            ),
+          ),
+        ));
+      }
+      return new Column(children: _list,);
     }
   }
 
@@ -665,6 +690,7 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
               BuildWidget.buildDropdown('紧急程度', _currentPriority, _dropDownMenuPris, changedDropDownPri),
               BuildWidget.buildRow('请求附件', ''),
               buildImageColumn(),
+              buildFileName()
             ],
           ),
         ),

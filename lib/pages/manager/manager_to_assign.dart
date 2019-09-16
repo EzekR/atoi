@@ -8,6 +8,7 @@ import 'package:atoi/models/models.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:atoi/widgets/build_widget.dart';
 import 'package:atoi/utils/constants.dart';
+import 'dart:io';
 
 class ManagerToAssign extends StatefulWidget {
   @override
@@ -21,11 +22,29 @@ class _ManagerToAssignState extends State<ManagerToAssign> {
   Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
 
   bool _loading = false;
+  bool _noMore = false;
+
+  ScrollController _scrollController = ScrollController();
 
   void initState() {
     //getData();
     refresh();
     super.initState();
+
+    ManagerModel model = MainModel.of(context);
+    _scrollController.addListener(() {
+      if (_scrollController.position.pixels ==
+          _scrollController.position.maxScrollExtent) {
+        var _length = model.requests.length;
+        model.getMoreRequests().then((result) {
+        });
+        if (model.requests.length == _length) {
+          setState(() {
+            _noMore = true;
+          });
+        }
+      }
+    });
   }
 
   Future<Null> getData() async {
@@ -275,8 +294,20 @@ class _ManagerToAssignState extends State<ManagerToAssign> {
         return new RefreshIndicator(
             child: model.requests.length == 0?ListView(padding: const EdgeInsets.symmetric(vertical: 150.0), children: <Widget>[new Center(child: _loading?SpinKitRotatingPlain(color: Colors.blue):new Text('没有待派工请求'),)],):ListView.builder(
                 padding: const EdgeInsets.all(2.0),
-                itemCount: model.requests.length,
-                itemBuilder: (context, i) => buildCardItem(model.requests[i], model.requests[i]['ID'], model.requests[i]['OID'], model.requests[i]['RequestDate'], model.requests[i]['EquipmentOID'], model.requests[i]['EquipmentName'], model.requests[i]['DepartmentName'], model.requests[i]['RequestUser']['Name'], model.requests[i]['RequestType']['Name'], model.requests[i]['Status']['Name'], model.requests[i]['FaultDesc'], model.requests[i]['Equipments'])
+                itemCount: model.requests.length+1,
+                controller: _scrollController,
+                itemBuilder: (context, i) {
+                  if (i != model.requests.length) {
+                     return buildCardItem(model.requests[i], model.requests[i]['ID'], model.requests[i]['OID'], model.requests[i]['RequestDate'], model.requests[i]['EquipmentOID'], model.requests[i]['EquipmentName'], model.requests[i]['DepartmentName'], model.requests[i]['RequestUser']['Name'], model.requests[i]['RequestType']['Name'], model.requests[i]['Status']['Name'], model.requests[i]['FaultDesc'], model.requests[i]['Equipments']);
+                  } else {
+                    return new Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: <Widget>[
+                        _noMore?new Center(child: new Text('没有更多任务需要派工'),):new SpinKitChasingDots(color: Colors.blue,)
+                      ],
+                    );
+                  }
+                }
             ),
             onRefresh: model.getRequests
         );

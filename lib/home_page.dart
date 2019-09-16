@@ -45,11 +45,11 @@ class _HomePageState extends State<HomePage>
     model.getDispatches();
     model.getRequests();
     model.getTodos();
-    //model.getCount();
-    //_timer = new Timer.periodic(new Duration(seconds: 10), (timer) {
-    //  print('polling');
-    //  model.getCount();
-    //});
+    model.getCount();
+    _timer = new Timer.periodic(new Duration(seconds: 10), (timer) {
+      print('polling');
+      model.getCount();
+    });
   }
 
   void deactivate() {
@@ -57,7 +57,7 @@ class _HomePageState extends State<HomePage>
   }
 
   void dispose() {
-    //_timer.cancel();
+    _timer.cancel();
     super.dispose();
   }
 
@@ -71,9 +71,9 @@ class _HomePageState extends State<HomePage>
             child: new Scaffold(
               backgroundColor: new Color(0xfffafafa),
               appBar: new AppBar(
-                leading: new Container(),
+                leading: new Container(width: 1.0,),
                 title: new Align(
-                  alignment: Alignment(-2.0, 0),
+                  alignment: Alignment(-1.0, 0),
                   child: new Text('ATOI医疗设备管理系统'),
                 ),
                 elevation: 0.7,

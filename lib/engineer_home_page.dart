@@ -48,10 +48,10 @@ class _EngineerHomePageState extends State<EngineerHomePage>
     EngineerModel model = MainModel.of(context);
     model.getTasksToStart();
     model.getTasksToReport();
-    //model.getCountEngineer();
-    //_timer = new Timer.periodic(new Duration(seconds: 10), (timer) {
-    //  model.getCountEngineer();
-    //});
+    model.getCountEngineer();
+    _timer = new Timer.periodic(new Duration(seconds: 10), (timer) {
+      model.getCountEngineer();
+    });
   }
 
   void deactivate() {
@@ -59,7 +59,7 @@ class _EngineerHomePageState extends State<EngineerHomePage>
   }
 
   void dispose() {
-    //_timer.cancel();
+    _timer.cancel();
     super.dispose();
   }
 

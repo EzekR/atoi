@@ -155,10 +155,11 @@ class _ManagerCompletePageState extends State<ManagerCompletePage> {
       });
       var journalId = resp['Data']['DispatchJournal']['ID'];
       var reportId = resp['Data']['DispatchReport']['ID'];
+      var reportStatus = resp['Data']['DispatchReport']['Status']['ID'];
       if (journalId != 0) {
         getJournal(journalId);
       }
-      if (reportId != 0) {
+      if (reportId != 0 && reportStatus > 1) {
         getReport(reportId);
       }
     }

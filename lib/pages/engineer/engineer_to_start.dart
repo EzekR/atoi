@@ -18,6 +18,7 @@ class _EngineerToStartState extends State<EngineerToStart> {
   List<dynamic> _tasks = [];
   int offset = 5;
   bool _loading = false;
+  bool _noMore = false;
 
   Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
 
@@ -47,12 +48,17 @@ class _EngineerToStartState extends State<EngineerToStart> {
     _scrollController.addListener(() {
       if (_scrollController.position.pixels ==
           _scrollController.position.maxScrollExtent) {
-        setState(() {
-          _loading = true;
-        });
-        model.getMoreTasksToStart(offset).then((result) {
-          _loading = false;
-          offset = offset+5;
+        var _length = model.tasksToStart.length;
+        model.getMoreTasksToStart().then((result) {
+          if (model.tasksToStart.length == _length) {
+            setState(() {
+              _noMore = true;
+            });
+          } else {
+            setState(() {
+              _noMore = false;
+            });
+          }
         });
       }
     });
@@ -181,7 +187,7 @@ class _EngineerToStartState extends State<EngineerToStart> {
                     return new Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: <Widget>[
-                        _loading?new SpinKitChasingDots(color: Colors.blue,):new Container()
+                        _noMore?new Center(child: new Text('没有更多待开始工单'),):new SpinKitChasingDots(color: Colors.blue,)
                       ],
                     );
                   }

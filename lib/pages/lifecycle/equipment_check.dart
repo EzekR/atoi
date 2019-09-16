@@ -216,11 +216,16 @@ class _EquipmentCheckState extends State<EquipmentCheck> {
 
   Future toSearch() async {
     final _searchResult = await showSearch(context: context, delegate: SearchBarDelegate());
-    Map _data = jsonDecode(_searchResult);
-    setState(() {
-      //_result.addAll(_data);
-      _equipments.add(_data);
-    });
+    if (_searchResult != null && _searchResult != 'null') {
+      print(_searchResult);
+      Map _data = jsonDecode(_searchResult);
+      var _result = _equipments.firstWhere((_equipment) => _equipment['OID'] == _data['OID'], orElse: ()=> null);
+      if (_result == null) {
+        setState(() {
+          _equipments.add(_data);
+        });
+      }
+    }
   }
 
   Padding buildRow(String labelText, String defaultText) {

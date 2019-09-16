@@ -7,6 +7,7 @@ import 'package:scoped_model/scoped_model.dart';
 import 'package:atoi/models/models.dart';
 import 'package:atoi/widgets/build_widget.dart';
 import 'package:atoi/utils/constants.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 
 class EngineerToReport extends StatefulWidget{
   _EngineerToReportState createState() => _EngineerToReportState();
@@ -17,6 +18,7 @@ class _EngineerToReportState extends State<EngineerToReport> {
   Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
 
   List<dynamic> _tasks = [];
+  bool _noMore = false;
 
   Future<Null> getTask() async {
     final SharedPreferences pref = await _prefs;
@@ -41,10 +43,22 @@ class _EngineerToReportState extends State<EngineerToReport> {
   void initState() {
     //getTask();
     super.initState();
+    EngineerModel model = MainModel.of(context);
     _scrollController.addListener(() {
       if (_scrollController.position.pixels ==
           _scrollController.position.maxScrollExtent) {
-        print('滑动到了最底部');
+        var _length = model.tasksToReport.length;
+        model.getMoreTasksToReport().then((result) {
+          if (model.tasksToReport.length == _length) {
+            setState(() {
+              _noMore = true;
+            });
+          } else {
+            setState(() {
+              _noMore = false;
+            });
+          }
+        });
       }
     });
     refresh();
@@ -220,9 +234,20 @@ class _EngineerToReportState extends State<EngineerToReport> {
         return new RefreshIndicator(
             child: model.tasksToReport.length == 0?ListView(padding: const EdgeInsets.symmetric(vertical: 150.0), children: <Widget>[new Center(child: new Text('没有作业中工单'),)],):ListView.builder(
                 padding: const EdgeInsets.all(2.0),
-                itemCount: model.tasksToReport.length,
+                itemCount: model.tasksToReport.length+1,
                 controller: _scrollController,
-                itemBuilder: (context, i) => buildCardItem(model.tasksToReport[i], model.tasksToReport[i]['ID'], model.tasksToReport[i]['DispatchJournal']['Status']['ID'], model.tasksToReport[i]['DispatchReport']['Status']['ID'], model.tasksToReport[i]['OID'], model.tasksToReport[i]['StartDate'], model.tasksToReport[i]['CreateDate'], model.tasksToReport[i]['Request']['Equipments'].length>0?model.tasksToReport[i]['Request']['Equipments'][0]['ResponseTimeLength']:0, model.tasksToReport[i]['Request']['Equipments'].length>0?model.tasksToReport[i]['Request']['Equipments'][0]['Name']:'', model.tasksToReport[i]['Request']['Equipments'].length>0?model.tasksToReport[i]['Request']['Equipments'][0]['SerialCode']:'', model.tasksToReport[i]['Request']['DepartmentName'], model.tasksToReport[i]['RequestType']['Name'], model.tasksToReport[i]['Urgency']['Name'], model.tasksToReport[i]['LeaderComments'])
+                itemBuilder: (context, i) {
+                  if (i != model.tasksToReport.length) {
+                    return buildCardItem(model.tasksToReport[i], model.tasksToReport[i]['ID'], model.tasksToReport[i]['DispatchJournal']['Status']['ID'], model.tasksToReport[i]['DispatchReport']['Status']['ID'], model.tasksToReport[i]['OID'], model.tasksToReport[i]['StartDate'], model.tasksToReport[i]['CreateDate'], model.tasksToReport[i]['Request']['Equipments'].length>0?model.tasksToReport[i]['Request']['Equipments'][0]['ResponseTimeLength']:0, model.tasksToReport[i]['Request']['Equipments'].length>0?model.tasksToReport[i]['Request']['Equipments'][0]['Name']:'', model.tasksToReport[i]['Request']['Equipments'].length>0?model.tasksToReport[i]['Request']['Equipments'][0]['SerialCode']:'', model.tasksToReport[i]['Request']['DepartmentName'], model.tasksToReport[i]['RequestType']['Name'], model.tasksToReport[i]['Urgency']['Name'], model.tasksToReport[i]['LeaderComments']);
+                  } else {
+                    return new Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: <Widget>[
+                        _noMore?new Center(child: new Text('没有更多待开始工单'),):new SpinKitChasingDots(color: Colors.blue,)
+                      ],
+                    );
+                  }
+                }
             ),
             onRefresh: model.getTasksToReport
         );

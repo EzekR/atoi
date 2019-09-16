@@ -79,7 +79,7 @@ class _AtoiAppState extends State<AtoiApp> {
   String _messageText = "Waiting for message...";
   String debugLable = '';
 
-  Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
+  Future<SharedPreferences> prefs = SharedPreferences.getInstance();
   final FirebaseMessaging _firebaseMessaging = FirebaseMessaging();
   //final JPush jpush = new JPush();
 
@@ -87,13 +87,17 @@ class _AtoiAppState extends State<AtoiApp> {
     print("初始化jpush");
     await FlutterJPush.startup();
     print("初始化jpush成功");
-    var prefs = await _prefs;
+    var _prefs = await prefs;
+
+    FlutterJPush.getRegistrationID().then((rid) {
+      print("get regid： ${rid}");
+      _prefs.setString('regId', rid);
+    });
 
     FlutterJPush.addnetworkDidLoginListener((String registrationId) {
       setState(() {
         /// 用于推送
         print("收到设备号:$registrationId");
-        prefs.setString('regId', registrationId);
         //this.registrationId = registrationId;
       });
     });
@@ -213,7 +217,7 @@ class _AtoiAppState extends State<AtoiApp> {
     super.initState();
     //initPlatformState();
     //firebaseInit();
-    _startupJpush();
+    //_startupJpush();
   }
 
   @override

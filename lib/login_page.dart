@@ -9,6 +9,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:connectivity/connectivity.dart';
 import 'dart:async';
 import 'dart:convert';
+import 'package:flutter_jpush/flutter_jpush.dart';
 
 class LoginPage extends StatefulWidget {
   static String tag = 'login-page';
@@ -30,6 +31,7 @@ class _LoginPageState extends State<LoginPage> {
   Timer _timer;
   int _countdownTime = 0;
   bool _validPhone = false;
+  String _regId = '';
   
   Future<Null> isLogin() async {
     var _prefs = await prefs;
@@ -50,6 +52,44 @@ class _LoginPageState extends State<LoginPage> {
           return;
       }
     }
+  }
+
+  void _startupJpush() async {
+    print("初始化jpush");
+    await FlutterJPush.startup();
+    print("初始化jpush成功");
+
+    FlutterJPush.getRegistrationID().then((rid) {
+      print("get regid： ${rid}");
+      setState(() {
+        _regId = rid;
+      });
+    });
+
+    FlutterJPush.addnetworkDidLoginListener((String registrationId) {
+      setState(() {
+        /// 用于推送
+        print("收到设备号:$registrationId");
+        //this.registrationId = registrationId;
+      });
+    });
+
+    FlutterJPush.addReceiveNotificationListener((JPushNotification notification) {
+      print("收到推送提醒: $notification");
+      setState(() {
+        /// 收到推送
+        //notificationList.add(notification);
+      });
+    });
+
+
+    FlutterJPush.addReceiveCustomMsgListener((JPushMessage msg) {
+      setState(() {
+        print("收到推送消息提醒: $msg");
+        /// 打开了推送提醒
+        //notificationList.add(msg);
+      });
+    });
   }
 
   Future<Null> isConnected() async {
@@ -86,15 +126,13 @@ class _LoginPageState extends State<LoginPage> {
     setState(() {
       _loading = !_loading;
     });
-    var _prefs = await prefs;
-    var regId = _prefs.getString('regId');
     var _data = await HttpRequest.request(
       '/User/Login',
       method: HttpRequest.POST,
       data: {
         'LoginID': phoneController.text,
         'LoginPwd': passwordController.text,
-        'DeviceToken': regId,
+        'DeviceToken': _regId,
         'OSName': 'android'
       }
     );
@@ -244,6 +282,7 @@ class _LoginPageState extends State<LoginPage> {
   void initState() {
     isLogin();
     //isConnected();
+    _startupJpush();
     super.initState();
   }
 
