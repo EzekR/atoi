@@ -82,7 +82,6 @@ class _LoginPageState extends State<LoginPage> {
       });
     });
 
-
     FlutterJPush.addReceiveCustomMsgListener((JPushMessage msg) {
       setState(() {
         print("收到推送消息提醒: $msg");
@@ -132,7 +131,7 @@ class _LoginPageState extends State<LoginPage> {
       data: {
         'LoginID': phoneController.text,
         'LoginPwd': passwordController.text,
-        'DeviceToken': _regId,
+        'RegistrationID': _regId,
         'OSName': 'android'
       }
     );

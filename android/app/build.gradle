@@ -46,7 +46,7 @@ android {
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         manifestPlaceholders = [
                 JPUSH_PKGNAME : applicationId,
-                JPUSH_APPKEY : "3f7f5523e972c577860e6181",
+                JPUSH_APPKEY : "55de4e9a04eb39338afc99db",
                 JPUSH_CHANNEL : "developer-default",
         ]
     }
