@@ -214,9 +214,13 @@ class _ManagerAuditVoucherPageState extends State<ManagerAuditVoucherPage> {
     print(resp);
     if (resp['ResultCode'] == '00') {
       setState(() {
-        _equipment = resp['Data']['Request']['Equipments'][0];
         _dispatch = resp['Data'];
       });
+      if (resp['Data']['Request']['Equipments'] != null) {
+        setState(() {
+          _equipment = resp['Data']['Request']['Equipments'][0];
+        });
+      }
     }
   }
 
@@ -288,7 +292,7 @@ class _ManagerAuditVoucherPageState extends State<ManagerAuditVoucherPage> {
 
   List<ExpansionPanel> buildExpansion() {
     List<ExpansionPanel> _list = [];
-    if (_dispatch['Request']['RequestType']['ID'] != 14) {
+    if (_dispatch.isNotEmpty&&_dispatch['Request']['RequestType']['ID'] != 14) {
       _list.add(
         new ExpansionPanel(
           headerBuilder: (context, isExpanded) {
@@ -352,7 +356,7 @@ class _ManagerAuditVoucherPageState extends State<ManagerAuditVoucherPage> {
               BuildWidget.buildRow('紧急程度', widget.request['Urgency']['Name']),
               BuildWidget.buildRow('派工类型', widget.request['RequestType']['Name']),
               BuildWidget.buildRow('机器状态', widget.request['MachineStatus']['Name']),
-              BuildWidget.buildRow('工程师姓名', _dispatch['Engineer']['Name']),
+              BuildWidget.buildRow('工程师姓名', _dispatch['Engineer']['Name']??''),
               BuildWidget.buildRow('出发时间',AppConstants.TimeForm(widget.request['ScheduleDate'], 'yyyy-mm-dd')),
               BuildWidget.buildRow('备注', _dispatch['LeaderComments']),
             ],

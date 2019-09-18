@@ -411,7 +411,7 @@ class _EngineerVoucherPageState extends State<EngineerVoucherPage> {
               BuildWidget.buildRow('工程师姓名', _dispatch['Engineer']['Name']),
               //BuildWidget.buildRow('处理方式', _dispatch['Request']['DealType']['Name']),
               BuildWidget.buildRow('紧急程度', _dispatch['Request']['Priority']['Name']),
-              BuildWidget.buildRow('机器状态', _dispatch['MachineStatus']['Name']),
+              _dispatch['Request']['RequestType']['ID']==14?new Container():BuildWidget.buildRow('机器状态', _dispatch['MachineStatus']['Name']),
               BuildWidget.buildRow('出发时间', AppConstants.TimeForm(_dispatch['ScheduleDate'], 'yyyy-mm-dd')),
               BuildWidget.buildRow('备注', _dispatch['LeaderComments']),
             ],
