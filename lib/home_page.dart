@@ -11,6 +11,8 @@ import 'package:atoi/login_page.dart';
 import 'dart:async';
 import 'package:atoi/complete_info.dart';
 import 'package:atoi/pages/equipments/equipments_list.dart';
+import 'package:atoi/pages/reports/report_chart.dart';
+import 'package:atoi/pages/reports/report_list.dart';
 
 class HomePage extends StatefulWidget {
   static String tag = 'home-page';
@@ -189,6 +191,18 @@ class _HomePageState extends State<HomePage>
                       onTap: () {
                         Navigator.of(context).push(new MaterialPageRoute(builder: (_) {
                           return new EquipmentsList();
+                        }));
+                      },
+                    ),
+                    ListTile(
+                      title: Text('报表',
+                        style: new TextStyle(
+                            color: Colors.blue
+                        ),
+                      ),
+                      onTap: () {
+                        Navigator.of(context).push(new MaterialPageRoute(builder: (_) {
+                          return new ReportList();
                         }));
                       },
                     ),

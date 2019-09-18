@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:atoi/widgets/search_bar.dart';
+import 'package:atoi/widgets/search_bar_checkbox.dart';
 import 'package:atoi/models/models.dart';
 import 'package:scoped_model/scoped_model.dart';
 import 'package:barcode_scan/barcode_scan.dart';
@@ -221,7 +221,7 @@ class _PatrolRequestState extends State<PatrolRequest> {
   }
 
   Future toSearch() async {
-    final _searchResult = await showSearch(context: context, delegate: SearchBarDelegate());
+    final _searchResult = await showSearch(context: context, delegate: SearchBarCheckBoxDelegate());
     if (_searchResult != null && _searchResult != 'null') {
       print(_searchResult);
       Map _data = jsonDecode(_searchResult);
