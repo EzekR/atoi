@@ -42,6 +42,10 @@ class _ManagerToAssignState extends State<ManagerToAssign> {
           setState(() {
             _noMore = true;
           });
+        } else {
+          setState(() {
+            _noMore = false;
+          });
         }
       }
     });
