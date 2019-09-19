@@ -483,7 +483,8 @@ class _EngineerVoucherPageState extends State<EngineerVoucherPage> {
         result.buffer.asUint8List(),
         rotate: -90,
         minHeight: 200,
-        minWidth: 150
+        minWidth: 150,
+        format: CompressFormat.png
     );
     print(compressed);
     setState(() {

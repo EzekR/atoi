@@ -90,6 +90,8 @@ PODS:
     - nanopb/encode (= 0.3.901)
   - nanopb/decode (0.3.901)
   - nanopb/encode (0.3.901)
+  - permission_handler (3.2.2):
+    - Flutter
   - printing (0.0.1):
     - Flutter
   - Protobuf (3.8.0)
@@ -106,6 +108,7 @@ DEPENDENCIES:
   - flutter_jpush (from `.symlinks/plugins/flutter_jpush/ios`)
   - flutter_picker (from `.symlinks/plugins/flutter_picker/ios`)
   - image_picker (from `.symlinks/plugins/image_picker/ios`)
+  - permission_handler (from `.symlinks/plugins/permission_handler/ios`)
   - printing (from `.symlinks/plugins/printing/ios`)
   - shared_preferences (from `.symlinks/plugins/shared_preferences/ios`)
 
@@ -144,6 +147,8 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/flutter_picker/ios"
   image_picker:
     :path: ".symlinks/plugins/image_picker/ios"
+  permission_handler:
+    :path: ".symlinks/plugins/permission_handler/ios"
   printing:
     :path: ".symlinks/plugins/printing/ios"
   shared_preferences:
@@ -171,6 +176,7 @@ SPEC CHECKSUMS:
   Mantle: 2fa750afa478cd625a94230fbf1c13462f29395b
   MTBBarcodeScanner: f453b33c4b7dfe545d8c6484ed744d55671788cb
   nanopb: 2901f78ea1b7b4015c860c2fdd1ea2fee1a18d48
+  permission_handler: d59f41439f5bc6c4d1005f3355e98f05ddc68ece
   printing: 341873b2b3771c7226e301bfa4fc608e8ac60a30
   Protobuf: 3f617b9a6e73605565086864c9bc26b2bf2dd5a3
   Reachability: 33e18b67625424e47b6cde6d202dce689ad7af96

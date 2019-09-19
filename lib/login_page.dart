@@ -10,6 +10,7 @@ import 'package:connectivity/connectivity.dart';
 import 'dart:async';
 import 'dart:convert';
 import 'package:flutter_jpush/flutter_jpush.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 class LoginPage extends StatefulWidget {
   static String tag = 'login-page';
@@ -52,6 +53,11 @@ class _LoginPageState extends State<LoginPage> {
           return;
       }
     }
+  }
+
+  Future<Null> getPermissions() async {
+    PermissionStatus permission = await PermissionHandler().checkPermissionStatus(PermissionGroup.contacts);
+    print(permission);
   }
 
   void _startupJpush() async {
@@ -283,6 +289,7 @@ class _LoginPageState extends State<LoginPage> {
     //isConnected();
     _startupJpush();
     super.initState();
+    getPermissions();
   }
 
   @override
