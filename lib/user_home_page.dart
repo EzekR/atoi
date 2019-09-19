@@ -8,6 +8,8 @@ import 'package:atoi/utils/http_request.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:atoi/login_page.dart';
 import 'package:atoi/complete_info.dart';
+import 'package:atoi/pages/request/other_request.dart';
+import 'package:atoi/pages/user/request_history.dart';
 
 class UserHomePage extends StatefulWidget{
   static String tag = 'user-home-page';
@@ -86,7 +88,9 @@ class _UserHomePageState extends State<UserHomePage> {
         new IconButton(
           icon: new Icon(icon),
           onPressed: () {
-            //Navigator.of(context).pushNamed(UserScanPage.tag);
+            Navigator.of(context).push(new MaterialPageRoute(builder: (context) {
+              return label=='其他服务'?OtherRequest():RequestHistory();
+            }));
           },
           color: color,
           iconSize: 50.0,

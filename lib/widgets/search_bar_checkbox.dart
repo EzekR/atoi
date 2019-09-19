@@ -4,19 +4,8 @@ import 'package:scoped_model/scoped_model.dart';
 import 'dart:convert';
 import 'package:atoi/utils/http_request.dart';
 
-class SearchBarCheckBox extends StatefulWidget {
-  SearchBarCheckBoxDelegate createState() => SearchBarCheckBoxDelegate();
-}
+class SearchBarCheckBoxDelegate extends SearchDelegate<String>{
 
-class SearchBarCheckBoxDelegate extends State<SearchBarCheckBox> with SearchDelegate<String>{
-
-  void initState() {
-    super.initState();
-  }
-
-  Widget build(BuildContext context) {
-
-  }
   static const searchList = [
     "ChengDu",
     "ShangHai",
@@ -100,6 +89,10 @@ class SearchBarCheckBoxDelegate extends State<SearchBarCheckBox> with SearchDele
     close(context, jsonEncode(selected));
   }
 
+  void checkIt(bool val, Map item) {
+    val?selected.add(item):selected.remove(item);
+  }
+
   @override
   Widget buildSuggestions(BuildContext context) {
     return FutureBuilder(
@@ -121,9 +114,8 @@ class SearchBarCheckBoxDelegate extends State<SearchBarCheckBox> with SearchDele
                       ])),
                 onChanged: (bool value) {
                   print(value);
-                  setState(() {
-                    value?selected.add(suggestionList[i]):selected.remove(suggestionList[i]);
-                  });
+                  print(this);
+                  checkIt(value, suggestionList[i]);
                 },
               );
             }
