@@ -237,7 +237,8 @@ class _ManagerCompletePageState extends State<ManagerCompletePage> {
     print(resp);
     if (resp['ResultCode'] == '00') {
       setState(() {
-        imageBytes.add(resp['Data']);
+        var decoded = base64Decode(resp['Data']);
+        imageBytes.add(decoded);
       });
     }
   }
@@ -274,7 +275,7 @@ class _ManagerCompletePageState extends State<ManagerCompletePage> {
       List<Widget> _list = [];
       for(var file in imageBytes) {
         _list.add(new Container(
-          child: new PhotoView(imageProvider: MemoryImage(base64Decode(file))),
+          child: new PhotoView(imageProvider: MemoryImage(file)),
           width: 400.0,
           height: 400.0,
         ));
@@ -426,8 +427,8 @@ class _ManagerCompletePageState extends State<ManagerCompletePage> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             _acc['ImageNew']!=null&&_acc['ImageNew']['FileContent']!=null?new Container(width: 100.0,
-              child: new Image.memory(
-                  base64Decode(_acc['ImageNew']['FileContent'])),):new Container()
+              child: new PhotoView(imageProvider: MemoryImage(
+                  base64Decode(_acc['ImageNew']['FileContent'])),),):new Container()
           ],
         ),
         BuildWidget.buildRow('金额（元/件）', _acc['Amount'].toString()),
@@ -438,8 +439,8 @@ class _ManagerCompletePageState extends State<ManagerCompletePage> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             _acc['ImageOld']!=null&&_acc['ImageOld']['FileContent']!=null?new Container(width: 100.0,
-              child: new Image.memory(
-                  base64Decode(_acc['ImageOld']['FileContent'])),):new Container()
+              child: new PhotoView(imageProvider: MemoryImage(
+                  base64Decode(_acc['ImageOld']['FileContent'])),),):new Container()
           ],
         ),
         new Divider()
@@ -644,10 +645,12 @@ class _ManagerCompletePageState extends State<ManagerCompletePage> {
                   BuildWidget.buildRow('故障描述', _report['FaultDesc']),
                   BuildWidget.buildRow('分析原因', _report['SolutionCauseAnalysis']),
                   BuildWidget.buildRow('处理方法', _report['SolutionWay']),
-                  BuildWidget.buildRow('未解决备注', _report['SolutionUnsolvedComments']),
+                  BuildWidget.buildRow('备注', _report['SolutionUnsolvedComments']),
                   _report['DelayReason']!=''?BuildWidget.buildRow('误工说明', _report['DelayReason']):new Container(),
                   BuildWidget.buildRow('作业结果', _report['SolutionResultStatus']['Name']),
-                  _report['FujiComments']!=''?BuildWidget.buildRow('审批说明', _report['FujiComments']):new Container()
+                  _report['FujiComments']!=''?BuildWidget.buildRow('审批说明', _report['FujiComments']):new Container(),
+                  BuildWidget.buildRow('附件', ''),
+                  buildImageColumn()
                 ],
               ),
             ),

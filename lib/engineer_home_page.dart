@@ -46,6 +46,8 @@ class _EngineerHomePageState extends State<EngineerHomePage>
     super.initState();
     _tabController = new TabController(length: 3, vsync: this, initialIndex: 0);
     EngineerModel model = MainModel.of(context);
+    ConstantsModel cModel = MainModel.of(context);
+    cModel.getConstants();
     model.getTasksToStart();
     model.getTasksToReport();
     model.getCountEngineer();
@@ -154,6 +156,7 @@ class _EngineerHomePageState extends State<EngineerHomePage>
                       ),
                     ),
                     ListTile(
+                      leading: Icon(Icons.person),
                       title: Text('个人信息',
                         style: new TextStyle(
                             color: Colors.blue
@@ -166,6 +169,7 @@ class _EngineerHomePageState extends State<EngineerHomePage>
                       },
                     ),
                     ListTile(
+                      leading: Icon(Icons.exit_to_app),
                       title: Text('登出'),
                       onTap: () async {
                         var _prefs = await prefs;

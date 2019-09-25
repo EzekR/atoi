@@ -11,6 +11,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:atoi/utils/http_request.dart';
 import 'package:atoi/utils/constants.dart';
 import 'package:atoi/widgets/build_widget.dart';
+import 'package:flutter_image_compress/flutter_image_compress.dart';
 
 class PatrolRequest extends StatefulWidget{
   static String tag = 'patrol-request';
@@ -81,16 +82,22 @@ class _PatrolRequestState extends State<PatrolRequest> {
       setState(() {
         _equipments.add(resp['Data']);
       });
+    } else {
+      showDialog(context: context, builder: (context) => AlertDialog(title: new Text(resp['ResultMessage']),));
     }
   }
   Future getImage() async {
     var image = await ImagePicker.pickImage(
         source: ImageSource.camera,
-        imageQuality: 1
     );
     if (image != null) {
+      var compressed = await FlutterImageCompress.compressAndGetFile(
+        image.absolute.path,
+        image.absolute.path,
+        minHeight: 800,
+      );
       setState(() {
-        _imageList.add(image);
+        _imageList.add(compressed);
       });
     }
   }

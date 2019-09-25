@@ -11,6 +11,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:atoi/utils/http_request.dart';
 import 'package:atoi/utils/constants.dart';
 import 'package:atoi/widgets/build_widget.dart';
+import 'package:flutter_image_compress/flutter_image_compress.dart';
+import 'package:atoi/models/models.dart';
 
 class MandatoryRequest extends StatefulWidget{
   static String tag = 'mandatory-request';
@@ -29,8 +31,7 @@ class _MandatoryRequestState extends State<MandatoryRequest> {
   var _roleName;
   var _fault = new TextEditingController();
   Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
-
-  MainModel mainModel = MainModel();
+  ConstantsModel model;
 
   List _serviceResults = [
     '政府要求',
@@ -62,11 +63,25 @@ class _MandatoryRequestState extends State<MandatoryRequest> {
   String _currentResult;
   List<dynamic> _imageList = [];
 
-  void initState(){
+  List iterateMap(Map item) {
+    var _list = [];
+    item.forEach((key, val) {
+      _list.add(key);
+    });
+    return _list;
+  }
+
+  void initDropdown() {
+    _serviceResults = iterateMap(model.FaultCheck);
     _dropDownMenuItems = getDropDownMenuItems(_serviceResults);
     _dropDownMenuStatus = getDropDownMenuItems(_recall);
     _currentResult = _dropDownMenuItems[0].value;
     _currentStatus = _dropDownMenuStatus[0].value;
+  }
+
+  void initState(){
+    model = MainModel.of(context);
+    initDropdown();
     getRole();
     super.initState();
   }
@@ -85,16 +100,22 @@ class _MandatoryRequestState extends State<MandatoryRequest> {
       setState(() {
         _equipment = resp['Data'];
       });
+    } else {
+      showDialog(context: context, builder: (context) => AlertDialog(title: new Text(resp['ResultMessage']),));
     }
   }
   Future getImage() async {
     var image = await ImagePicker.pickImage(
         source: ImageSource.camera,
-      imageQuality: 10
     );
     if (image != null) {
+      var compressed = await FlutterImageCompress.compressAndGetFile(
+        image.absolute.path,
+        image.absolute.path,
+        minHeight: 800,
+      );
       setState(() {
-        _imageList.add(image);
+        _imageList.add(compressed);
       });
     }
   }
@@ -203,7 +224,7 @@ class _MandatoryRequestState extends State<MandatoryRequest> {
             }
           ],
           'FaultType': {
-            'ID': AppConstants.FaultCheck[_currentResult],
+            'ID': model.FaultCheck[_currentResult],
           },
           'IsRecall': _currentStatus == '是' ? true : false,
           'FaultDesc': _fault.text,

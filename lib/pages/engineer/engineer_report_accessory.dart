@@ -7,6 +7,7 @@ import 'package:atoi/utils/http_request.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:atoi/widgets/search_bar_vendor.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
+import 'package:atoi/models/models.dart';
 
 class EngineerReportAccessory extends StatefulWidget {
   _EngineerReportAccessoryState createState() => _EngineerReportAccessoryState();
@@ -27,6 +28,7 @@ class _EngineerReportAccessoryState extends State<EngineerReportAccessory> {
     '外部供应商',
     '备件库'
   ];
+  ConstantsModel model;
 
   List _vendorList = [];
   var _vendors;
@@ -116,11 +118,25 @@ class _EngineerReportAccessoryState extends State<EngineerReportAccessory> {
       ],
     );
   }
+
+  List iterateMap(Map item) {
+    var _list = [];
+    item.forEach((key, val) {
+      _list.add(key);
+    });
+    return _list;
+  }
+  
+  void initDropdown() {
+    _sources = iterateMap(model.AccessorySourceType);
+    _dropDownMenuSources = getDropDownMenuItems(_sources);
+    _currentSource = _dropDownMenuSources[0].value;
+  }
   
   void initState() {
     getVendors();
-    _dropDownMenuSources = getDropDownMenuItems(_sources);
-    _currentSource = _dropDownMenuSources[0].value;
+    model = MainModel.of(context);
+    initDropdown();
     super.initState();
   }
 
@@ -253,7 +269,7 @@ class _EngineerReportAccessoryState extends State<EngineerReportAccessory> {
       'Name': _name.text,
       'Source': {
         'Name': _currentSource,
-        'ID': AppConstants.AccessorySourceType[_currentSource]
+        'ID': model.AccessorySourceType[_currentSource]
       },
       'Supplier': _currentSource=='备件库'?{'ID': 0}:_supplier,
       'NewSerialCode': _newCode.text,

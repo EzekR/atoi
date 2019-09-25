@@ -10,6 +10,7 @@ import 'package:connectivity/connectivity.dart';
 import 'dart:async';
 import 'dart:convert';
 import 'package:flutter_jpush/flutter_jpush.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 class LoginPage extends StatefulWidget {
   static String tag = 'login-page';
@@ -90,6 +91,15 @@ class _LoginPageState extends State<LoginPage> {
         //notificationList.add(msg);
       });
     });
+  }
+
+  Future<Null> permissionCheck() async {
+    var permission = await PermissionHandler().checkPermissionStatus(PermissionGroup.camera);
+    print('permission:$permission');
+    if (permission == PermissionStatus.unknown) {
+      var camera = await PermissionHandler().requestPermissions([PermissionGroup.camera]);
+      print('camera:$camera');
+    }
   }
 
   Future<Null> isConnected() async {
@@ -176,10 +186,10 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   Future<Null> _userReg() async {
-    if (passwordController.text.isEmpty) {
+    if (regPhoneController.text.isEmpty) {
       showDialog(context: context,
           builder: (context) => CupertinoAlertDialog(
-            title: new Text('密码不可为空',
+            title: new Text('手机号不可为空',
               style: new TextStyle(
                   fontSize: 16.0,
                   fontWeight: FontWeight.w400,
@@ -190,10 +200,10 @@ class _LoginPageState extends State<LoginPage> {
       );
       return;
     }
-    if (regPhoneController.text.isEmpty) {
+    if (passwordController.text.isEmpty) {
       showDialog(context: context,
           builder: (context) => CupertinoAlertDialog(
-            title: new Text('手机号不可为空',
+            title: new Text('密码不可为空',
               style: new TextStyle(
                   fontSize: 16.0,
                   fontWeight: FontWeight.w400,
@@ -264,6 +274,8 @@ class _LoginPageState extends State<LoginPage> {
         _stage = 'login';
         phoneController.text = regPhoneController.text;
         passwordController.text = '';
+        confirmPass.text = '';
+        _timer.cancel();
       });
     } else {
       showDialog(context: context,
@@ -285,6 +297,7 @@ class _LoginPageState extends State<LoginPage> {
     isConnected();
     _startupJpush();
     super.initState();
+    permissionCheck();
   }
 
   @override

@@ -1,8 +1,23 @@
 import 'package:flutter/material.dart';
+import 'dart:async';
+import 'package:atoi/utils/http_request.dart';
 
 class AppConstants {
 
-  static Map<String, int> Users = {
+  BuildContext context;
+
+  AppConstants(BuildContext context) {
+    this.context = context;
+    initMaps();
+  }
+
+  Future<Null> initMaps() async {
+    Users = {
+      'a': 1
+    };
+  }
+
+  Map<String, int> Users = {
     '超级管理员': 1,
     '管理员': 2,
     '超级用户': 3,

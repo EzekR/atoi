@@ -11,6 +11,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:atoi/utils/constants.dart';
 import 'package:atoi/utils/http_request.dart';
 import 'package:atoi/widgets/build_widget.dart';
+import 'package:flutter_image_compress/flutter_image_compress.dart';
 
 class RepairRequest extends StatefulWidget{
   static String tag = 'repair-request';
@@ -29,8 +30,8 @@ class _RepairRequestState extends State<RepairRequest> {
   var _isExpandedDetail = false;
   var _isExpandedAssign = false;
   var _fault = new TextEditingController();
+  ConstantsModel model;
 
-  MainModel mainModel = MainModel();
 
   List _serviceResults = [
     '未知',
@@ -73,6 +74,8 @@ class _RepairRequestState extends State<RepairRequest> {
       setState(() {
         _equipment = resp['Data'];
       });
+    } else {
+      showDialog(context: context, builder: (context) => AlertDialog(title: new Text(resp['ResultMessage']),));
     }
   }
 
@@ -86,11 +89,15 @@ class _RepairRequestState extends State<RepairRequest> {
   Future getImage() async {
     var image = await ImagePicker.pickImage(
         source: ImageSource.camera,
-        imageQuality: 1
     );
     if (image != null) {
+      var compressed = await FlutterImageCompress.compressAndGetFile(
+        image.absolute.path,
+        image.absolute.path,
+        minHeight: 800,
+      );
       setState(() {
-        _imageList.add(image);
+        _imageList.add(compressed);
       });
     }
   }

@@ -4,6 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:atoi/utils/constants.dart';
 import 'package:atoi/widgets/build_widget.dart';
+import 'package:atoi/models/models.dart';
 
 class EngineerStartPage extends StatefulWidget {
   static String tag = 'engineer-start-page';
@@ -21,6 +22,7 @@ class _EngineerStartPageState extends State<EngineerStartPage> {
   var _isExpandedBasic = false;
   var _isExpandedDetail = false;
   var _isExpandedAssign = true;
+  ConstantsModel model;
 
   Map<String, dynamic> _dispatch = {};
 
@@ -88,6 +90,7 @@ class _EngineerStartPageState extends State<EngineerStartPage> {
   }
 
   void initState() {
+    model = MainModel.of(context);
     getDispatch();
     getRole();
     super.initState();
@@ -229,8 +232,8 @@ class _EngineerStartPageState extends State<EngineerStartPage> {
                 BuildWidget.buildRow('类型', _dispatch['Request']['SourceType']),
                 _dispatch['Request']['RequestType']['ID']==14?BuildWidget.buildRow('主题', '${_dispatch['Request']['RequestType']['Name']}'):
                 BuildWidget.buildRow('主题', '${_dispatch['Request']['EquipmentName']}--${_dispatch['Request']['RequestType']['Name']}'),
-                BuildWidget.buildRow(AppConstants.Remark[_dispatch['Request']['RequestType']['ID']], _dispatch['Request']['FaultDesc']),
-                _dispatch['Request']['FaultType']['ID']==1||_dispatch['Request']['FaultType']['ID']==2||_dispatch['Request']['FaultType']['ID']==3||_dispatch['Request']['FaultType']['ID']==7?BuildWidget.buildRow(AppConstants.RemarkType[_dispatch['Request']['RequestType']['ID']], _dispatch['Request']['FaultType']['Name']):new Container(),
+                BuildWidget.buildRow(model.Remark[_dispatch['Request']['RequestType']['ID']], _dispatch['Request']['FaultDesc']),
+                _dispatch['Request']['FaultType']['ID']==1||_dispatch['Request']['FaultType']['ID']==2||_dispatch['Request']['FaultType']['ID']==3||_dispatch['Request']['FaultType']['ID']==7?BuildWidget.buildRow(model.RemarkType[_dispatch['Request']['RequestType']['ID']], _dispatch['Request']['FaultType']['Name']):new Container(),
                 _dispatch['Request']['RequestType']['ID']==3?BuildWidget.buildRow('是否召回', _dispatch['Request']['IsRecall']?'是':'否'):new Container(),
                 BuildWidget.buildRow('请求人', _dispatch['Request']['RequestUser']['Name']),
                 BuildWidget.buildRow('处理方式', _dispatch['Request']['DealType']['Name']),

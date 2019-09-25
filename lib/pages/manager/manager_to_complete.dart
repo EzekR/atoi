@@ -419,7 +419,7 @@ class _ManagerToCompleteState extends State<ManagerToComplete> {
           return new RefreshIndicator(
               child: model.todos.length == 0?ListView(padding: const EdgeInsets.symmetric(vertical: 150.0), children: <Widget>[_loading?SpinKitRotatingPlain(color: Colors.blue):new Center(child: new Text('没有待派工请求'),)],):ListView.builder(
                   padding: const EdgeInsets.all(2.0),
-                  itemCount: model.todos.length+1,
+                  itemCount: model.todos.length>9?model.todos.length+1:model.todos.length,
                   controller: _scrollController,
                   itemBuilder: (context, i) {
                     if (i !=  model.todos.length) {

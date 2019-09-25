@@ -6,6 +6,8 @@ import 'package:atoi/utils/constants.dart';
 import 'package:atoi/widgets/build_widget.dart';
 import 'dart:convert';
 import 'package:photo_view/photo_view.dart';
+import 'package:scoped_model/scoped_model.dart';
+import 'package:atoi/models/models.dart';
 
 class ManagerAuditReportPage extends StatefulWidget {
   static String tag = 'manager-audit-report-page';
@@ -26,6 +28,7 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
   var _isExpandedComponent = false;
   var _equipment = {};
   var _comment = new TextEditingController();
+  ConstantsModel model;
 
   List _serviceResults = [
     '待分配',
@@ -42,7 +45,7 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
   String _userName = '';
   String _mobile = '';
   var _accessory;
-  List<String> imageAttach = [];
+  List<dynamic> imageAttach = [];
 
   Future<Null> getRole() async {
     var prefs = await _prefs;
@@ -54,10 +57,24 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
     });
   }
 
-  void initState(){
-    getRole();
+  List iterateMap(Map item) {
+    var _list = [];
+    item.forEach((key, val) {
+      _list.add(key);
+    });
+    return _list;
+  }
+
+  void initDropdown() {
+    _serviceResults = iterateMap(model.SolutionStatus);
     _dropDownMenuItems = getDropDownMenuItems(_serviceResults);
     _currentResult = _dropDownMenuItems[0].value;
+  }
+
+  void initState(){
+    getRole();
+    model = MainModel.of(context);
+    initDropdown();
     getDispatch();
     getReport();
     super.initState();
@@ -211,7 +228,8 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
       var attachImage = await getAttachFile(resp['Data']['FileInfo']['ID']);
       if (attachImage.isNotEmpty) {
         setState(() {
-          imageAttach.add(attachImage);
+          var decoded = base64Decode(attachImage);
+          imageAttach.add(decoded);
         });
       }
     }
@@ -276,7 +294,7 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
     Map<String, dynamic> _data = {
       'userID': UserId,
       'reportID': widget.reportId,
-      'solutionResultID': AppConstants.SolutionStatus[_currentResult],
+      'solutionResultID': model.SolutionStatus[_currentResult],
       'comments': _comment.text
     };
     var _response = await HttpRequest.request(
@@ -345,7 +363,7 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
       List<Widget> _list = [];
       for(var file in imageAttach) {
         _list.add(new Container(
-          child: new PhotoView(imageProvider: MemoryImage(base64Decode(file))),
+          child: new PhotoView(imageProvider: MemoryImage(file)),
           width: 400.0,
           height: 400.0,
         ));

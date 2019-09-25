@@ -52,6 +52,8 @@ PODS:
     - JPush
   - flutter_picker (0.0.1):
     - Flutter
+  - fluttertoast (0.0.2):
+    - Flutter
   - GoogleAppMeasurement (6.0.2):
     - GoogleUtilities/AppDelegateSwizzler (~> 6.0)
     - GoogleUtilities/MethodSwizzler (~> 6.0)
@@ -90,6 +92,8 @@ PODS:
     - nanopb/encode (= 0.3.901)
   - nanopb/decode (0.3.901)
   - nanopb/encode (0.3.901)
+  - permission_handler (3.2.2):
+    - Flutter
   - printing (0.0.1):
     - Flutter
   - Protobuf (3.8.0)
@@ -105,7 +109,9 @@ DEPENDENCIES:
   - flutter_image_compress (from `.symlinks/plugins/flutter_image_compress/ios`)
   - flutter_jpush (from `.symlinks/plugins/flutter_jpush/ios`)
   - flutter_picker (from `.symlinks/plugins/flutter_picker/ios`)
+  - fluttertoast (from `.symlinks/plugins/fluttertoast/ios`)
   - image_picker (from `.symlinks/plugins/image_picker/ios`)
+  - permission_handler (from `.symlinks/plugins/permission_handler/ios`)
   - printing (from `.symlinks/plugins/printing/ios`)
   - shared_preferences (from `.symlinks/plugins/shared_preferences/ios`)
 
@@ -142,8 +148,12 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/flutter_jpush/ios"
   flutter_picker:
     :path: ".symlinks/plugins/flutter_picker/ios"
+  fluttertoast:
+    :path: ".symlinks/plugins/fluttertoast/ios"
   image_picker:
     :path: ".symlinks/plugins/image_picker/ios"
+  permission_handler:
+    :path: ".symlinks/plugins/permission_handler/ios"
   printing:
     :path: ".symlinks/plugins/printing/ios"
   shared_preferences:
@@ -153,7 +163,7 @@ SPEC CHECKSUMS:
   barcode_scan: 33f586d02270046fc6559135038b34b5754eaa4f
   connectivity: c72716e202a1225ec4810740d5cb56b8ae3bf4cc
   Firebase: 8432d732974498afd5987e9001a05f90f1a3d625
-  firebase_messaging: acdcd2edbe7270bae6c3a93cf6c60e86538b3064
+  firebase_messaging: 0d5c04cc40f58bd4bf7f2992c91050f9bc01bec3
   FirebaseAnalytics: 470ddab7253b21ad5a40bebd4a9903d7ae19386a
   FirebaseAnalyticsInterop: efbe45c8385ec626e29f9525e5ebd38520dfb6c1
   FirebaseCore: 68f8a7f50cdae542715d4e86afa37c4067217dcb
@@ -163,6 +173,7 @@ SPEC CHECKSUMS:
   flutter_image_compress: f69d0e0e078ce52b4810695593bc861ee319ae7d
   flutter_jpush: bb278c661136b2a2032e96ffc15bbce871d3fb02
   flutter_picker: 8ff0d7440b4e8327fcc9e6b21a39ef9369e697c7
+  fluttertoast: b644586ef3b16f67fae9a1f8754cef6b2d6b634b
   GoogleAppMeasurement: a35a645835bae31b6bdc0576396bc23908f12a22
   GoogleUtilities: c7a0b08bda3bf808be823ed151f0e28ac6866e71
   image_picker: 16e5fec1fbc87fd3b297c53e4048521eaf17cd06
@@ -171,6 +182,7 @@ SPEC CHECKSUMS:
   Mantle: 2fa750afa478cd625a94230fbf1c13462f29395b
   MTBBarcodeScanner: f453b33c4b7dfe545d8c6484ed744d55671788cb
   nanopb: 2901f78ea1b7b4015c860c2fdd1ea2fee1a18d48
+  permission_handler: d59f41439f5bc6c4d1005f3355e98f05ddc68ece
   printing: 341873b2b3771c7226e301bfa4fc608e8ac60a30
   Protobuf: 3f617b9a6e73605565086864c9bc26b2bf2dd5a3
   Reachability: 33e18b67625424e47b6cde6d202dce689ad7af96
