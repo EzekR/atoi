@@ -191,7 +191,7 @@ class _LoginPageState extends State<LoginPage> {
   Future<Null> _userReg() async {
     if (regPhoneController.text.isEmpty) {
       showDialog(context: context,
-          builder: (context) => CupertinoAlertDialog(
+          builder: (context) => AlertDialog(
             title: new Text('手机号不可为空',
               style: new TextStyle(
                   fontSize: 16.0,
@@ -205,8 +205,22 @@ class _LoginPageState extends State<LoginPage> {
     }
     if (passwordController.text.isEmpty) {
       showDialog(context: context,
-          builder: (context) => CupertinoAlertDialog(
+          builder: (context) => AlertDialog(
             title: new Text('密码不可为空',
+              style: new TextStyle(
+                  fontSize: 16.0,
+                  fontWeight: FontWeight.w400,
+                  color: Colors.black54
+              ),
+            ),
+          )
+      );
+      return;
+    }
+    if (passwordController.text != confirmPass.text) {
+      showDialog(context: context,
+          builder: (context) => AlertDialog(
+            title: new Text('密码不一致',
               style: new TextStyle(
                   fontSize: 16.0,
                   fontWeight: FontWeight.w400,

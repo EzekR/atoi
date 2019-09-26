@@ -10,6 +10,7 @@ import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:atoi/widgets/build_widget.dart';
 import 'package:atoi/models/models.dart';
+import 'package:flutter_image_compress/flutter_image_compress.dart';
 
 class UserRepairPage extends StatefulWidget {
   static String tag = 'user-repair-page';
@@ -97,11 +98,15 @@ class _UserRepairPageState extends State<UserRepairPage> {
   Future getImage() async {
     var image = await ImagePicker.pickImage(
         source: ImageSource.camera,
-        imageQuality: 1
     );
     if (image != null) {
+      var compressed = await FlutterImageCompress.compressAndGetFile(
+        image.absolute.path,
+        image.absolute.path,
+        minHeight: 800,
+      );
       setState(() {
-        _imageList.add(image);
+        _imageList.add(compressed);
       });
     }
   }
