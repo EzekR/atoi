@@ -31,31 +31,11 @@ class _EquipmentCheckState extends State<EquipmentCheck> {
 
   MainModel mainModel = MainModel();
 
-  List _serviceResults = [
-    '未知',
-    '已知'
-  ];
-
-  Map<String, dynamic> _result = {
-    'equipNo': '',
-    'equipLevel': '',
-    'name': '',
-    'model': '',
-    'department': '',
-    'location': '',
-    'manufacturer': '',
-    'guarantee': ''
-  };
-
   List<Map> _equipments = [];
 
-  List<DropdownMenuItem<String>> _dropDownMenuItems;
-  String _currentResult;
   List<dynamic> _imageList = [];
 
   void initState(){
-    _dropDownMenuItems = getDropDownMenuItems(_serviceResults);
-    _currentResult = _dropDownMenuItems[0].value;
     getRole();
     super.initState();
   }
@@ -212,13 +192,6 @@ class _EquipmentCheckState extends State<EquipmentCheck> {
       ));
     }
     return items;
-  }
-
-
-  void changedDropDownMethod(String selectedMethod) {
-    setState(() {
-      _currentResult = selectedMethod;
-    });
   }
 
   Future toSearch() async {

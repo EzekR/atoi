@@ -24,10 +24,7 @@ class _EngineerReportAccessoryState extends State<EngineerReportAccessory> {
   var _imageOld;
   String _currentSource;
   String _currentVendor;
-  List _sources = [
-    '外部供应商',
-    '备件库'
-  ];
+  List _sources = [];
   ConstantsModel model;
 
   List _vendorList = [];

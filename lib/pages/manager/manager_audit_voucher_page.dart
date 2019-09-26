@@ -91,6 +91,7 @@ class _ManagerAuditVoucherPageState extends State<ManagerAuditVoucherPage> {
   }
 
   void initState(){
+    model = MainModel.of(context);
     getRole();
     initDropdown();
     getDispatch();
@@ -244,7 +245,7 @@ class _ManagerAuditVoucherPageState extends State<ManagerAuditVoucherPage> {
     Map<String, dynamic> _data = {
       'userID': UserId,
       'dispatchJournalID': widget.journalId,
-      'resultStatusID': AppConstants.ResultStatusID[_currentResult],
+      'resultStatusID': model.ResultStatusID[_currentResult],
       'comments': _comment.text,
     };
     var _response = await HttpRequest.request(

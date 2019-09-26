@@ -29,24 +29,6 @@ class _OtherRequestState extends State<OtherRequest> {
 
   MainModel mainModel = MainModel();
 
-  List _serviceResults = [
-    '未知',
-    '已知'
-  ];
-
-  Map<String, dynamic> _result = {
-    'equipNo': '',
-    'equipLevel': '',
-    'name': '',
-    'model': '',
-    'department': '',
-    'location': '',
-    'manufacturer': '',
-    'guarantee': ''
-  };
-
-  List<DropdownMenuItem<String>> _dropDownMenuItems;
-  String _currentResult;
   List<dynamic> _imageList = [];
   var _role;
   var _roleName;
@@ -60,8 +42,6 @@ class _OtherRequestState extends State<OtherRequest> {
   }
   void initState(){
     getRole();
-    _dropDownMenuItems = getDropDownMenuItems(_serviceResults);
-    _currentResult = _dropDownMenuItems[0].value;
     super.initState();
   }
 
@@ -130,21 +110,6 @@ class _OtherRequestState extends State<OtherRequest> {
       ));
     }
     return items;
-  }
-
-
-  void changedDropDownMethod(String selectedMethod) {
-    setState(() {
-      _currentResult = selectedMethod;
-    });
-  }
-
-  Future toSearch() async {
-    final _searchResult = await showSearch(context: context, delegate: SearchBarDelegate());
-    Map _data = jsonDecode(_searchResult);
-    setState(() {
-      _result.addAll(_data);
-    });
   }
 
   Future<Null> submit() async {

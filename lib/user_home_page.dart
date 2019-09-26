@@ -39,8 +39,6 @@ class _UserHomePageState extends State<UserHomePage> {
   void initState() {
     getRole();
     super.initState();
-    var constants = AppConstants(context);
-    print(constants.Users);
   }
 
   Future scan() async {

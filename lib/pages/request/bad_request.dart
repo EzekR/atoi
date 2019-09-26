@@ -31,28 +31,7 @@ class _BadRequestState extends State<BadRequest> {
   var _fault = new TextEditingController();
   ConstantsModel model;
 
-  List _serviceResults = [
-    '政府通报',
-    '医院自检',
-    '召回事件'
-  ];
-
-  Map<String, dynamic> _result = {
-    'OID': '',
-    'Name': '',
-    'Department': {
-      'Name'
-    },
-    'Manufacturer': {
-      'Name': ''
-    },
-    'AssetLeve': {
-      'Name'
-    },
-    'location': '',
-    'manufacturer': '',
-    'guarantee': ''
-  };
+  List _serviceResults = [];
 
   var _equipment;
 

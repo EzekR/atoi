@@ -33,27 +33,12 @@ class _MandatoryRequestState extends State<MandatoryRequest> {
   Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
   ConstantsModel model;
 
-  List _serviceResults = [
-    '政府要求',
-    '医院要求',
-    '自主强检'
-  ];
+  List _serviceResults = [];
 
   List _recall = [
     '是',
     '否'
   ];
-
-  Map<String, dynamic> _result = {
-    'equipNo': '',
-    'equipLevel': '',
-    'name': '',
-    'model': '',
-    'department': '',
-    'location': '',
-    'manufacturer': '',
-    'guarantee': ''
-  };
 
   var _equipment;
 

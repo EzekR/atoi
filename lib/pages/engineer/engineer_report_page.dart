@@ -32,17 +32,8 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
   var _accessory = [];
   ConstantsModel model;
 
-  List _serviceResults = [
-    '待分配',
-    '问题升级',
-    '待第三方支持',
-    '已解决'
-  ];
-
-  List _sources = [
-    '外部供应商',
-    '备件库'
-  ];
+  List _serviceResults = [];
+  List _sources = [];
 
 
   List<DropdownMenuItem<String>> _dropDownMenuItems;

@@ -9,7 +9,6 @@ import 'dart:convert';
 import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:atoi/utils/http_request.dart';
-import 'package:atoi/utils/constants.dart';
 import 'package:atoi/widgets/build_widget.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 
@@ -32,22 +31,7 @@ class _MaintainRequestState extends State<MaintainRequest> {
   ConstantsModel model;
 
   List<dynamic> _imageList = [];
-  List _serviceResults = [
-    '原厂保养',
-    '第三方保养',
-    'FMTS保养'
-  ];
-
-  Map<String, dynamic> _result = {
-    'equipNo': '',
-    'equipLevel': '',
-    'name': '',
-    'model': '',
-    'department': '',
-    'location': '',
-    'manufacturer': '',
-    'guarantee': ''
-  };
+  List _serviceResults = [];
 
   var _equipment;
 

@@ -136,8 +136,12 @@ class ConstantsModel extends Model {
       for(var item in resp['Data']['PriorityID']) {
         _PriorityID.putIfAbsent(item['Name'], () => item['ID']);
       }
-      for(var item in resp['Data']['FaultRepair']) {
-        _FaultRepair.putIfAbsent(item['Name'], () => item['ID']);
+      if (resp['Data']['FaultRepair'] == null || resp['Data']['FaultRepair'].isEmpty) {
+        _FaultRepair[' '] = 1;
+      } else {
+        for(var item in resp['Data']['FaultRepair']) {
+          _FaultRepair.putIfAbsent(item['Name'], () => item['ID']);
+        }
       }
       for(var item in resp['Data']['FaultMaintain']) {
         _FaultMaintain.putIfAbsent(item['Name'], () => item['ID']);

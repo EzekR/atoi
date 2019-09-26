@@ -6,6 +6,7 @@ import 'package:atoi/utils/constants.dart';
 import 'package:photo_view/photo_view.dart';
 import 'dart:convert';
 import 'package:atoi/widgets/build_widget.dart';
+import 'package:atoi/models/models.dart';
 
 class ManagerCompletePage extends StatefulWidget {
   static String tag = 'mananger-complete-page';
@@ -29,98 +30,26 @@ class _ManagerCompletePageState extends State<ManagerCompletePage> {
   var _dispatch;
   var _journal;
   var _report;
-
+  ConstantsModel model;
 
   Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
 
-  List _handleMethods = [
-    '现场服务',
-    '电话解决',
-    '远程服务',
-    '第三方支持'
-  ];
-
-  List _priorities = [
-    '高','中','低'
-  ];
-
-  List _assignTypes = [
-    '维修',
-    '保养',
-    '强检',
-    '巡检',
-    '校正',
-    '设备新增',
-    '不良事件',
-    '合同档案',
-    '验收安装',
-    '调拨',
-    '借用',
-    '盘点',
-    '报废',
-    '其他服务'
-  ];
-
-  List _levels = [
-    '普通',
-    '紧急',
-    '特急'
-  ];
-
-  List _deviceStatuses = [
-    '正常',
-    '勉强使用',
-    '停机'
-  ];
-
-  List _engineerNames = [
-    '张三',
-    '李四'
-  ];
-
   String _userName = '';
-  String _mobile = '';
 
   Future<Null> getRole() async {
     var prefs = await _prefs;
     var userName = prefs.getString('userName');
-    var mobile = prefs.getString('mobile');
     setState(() {
       _userName = userName;
-      _mobile = mobile;
     });
   }
-  List<DropdownMenuItem<String>> _dropDownMenuItems;
-  List<DropdownMenuItem<String>> _dropDownMenuPris;
-  List<DropdownMenuItem<String>> _dropDownMenuTypes;
-  List<DropdownMenuItem<String>> _dropDownMenuLevels;
-  List<DropdownMenuItem<String>> _dropDownMenuStatuses;
-  List<DropdownMenuItem<String>> _dropDownMenuNames;
-
-  String _currentMethod;
-  String _currentPriority;
-  String _currentType;
-  String _currentLevel;
-  String _currentStatus;
-  String _currentName;
   List<dynamic> imageBytes = [];
   List<int> _imageBytes = [];
   var _accessory;
 
   void initState() {
+    model = MainModel.of(context);
     getRole();
-    _dropDownMenuItems = getDropDownMenuItems(_handleMethods);
-    _currentMethod = _dropDownMenuItems[0].value;
-    _dropDownMenuPris = getDropDownMenuItems(_priorities);
-    _currentPriority = _dropDownMenuPris[1].value;
-    _dropDownMenuTypes = getDropDownMenuItems(_assignTypes);
-    _dropDownMenuLevels = getDropDownMenuItems(_levels);
-    _dropDownMenuStatuses = getDropDownMenuItems(_deviceStatuses);
-    _dropDownMenuNames = getDropDownMenuItems(_engineerNames);
-    _currentType = _dropDownMenuTypes[0].value;
-    _currentLevel = _dropDownMenuLevels[0].value;
-    _currentStatus = _dropDownMenuStatuses[0].value;
-    _currentName = _dropDownMenuNames[0].value;
     getRequest();
     super.initState();
   }
@@ -282,42 +211,6 @@ class _ManagerCompletePageState extends State<ManagerCompletePage> {
       }
       return new Column(children: _list);
     }
-  }
-
-  void changedDropDownMethod(String selectedMethod) {
-    setState(() {
-      _currentMethod = selectedMethod;
-    });
-  }
-
-  void changedDropDownPri(String selectedMethod) {
-    setState(() {
-      _currentPriority = selectedMethod;
-    });
-  }
-
-  void changedDropDownType(String selectedMethod) {
-    setState(() {
-      _currentType = selectedMethod;
-    });
-  }
-
-  void changedDropDownLevel(String selectedMethod) {
-    setState(() {
-      _currentLevel = selectedMethod;
-    });
-  }
-
-  void changedDropDownStatus(String selectedMethod) {
-    setState(() {
-      _currentStatus = selectedMethod;
-    });
-  }
-
-  void changedDropDownName(String selectedMethod) {
-    setState(() {
-      _currentName = selectedMethod;
-    });
   }
 
   TextField buildTextField(String labelText, String defaultText, bool isEnabled) {
@@ -505,8 +398,8 @@ class _ManagerCompletePageState extends State<ManagerCompletePage> {
               BuildWidget.buildRow('类型', _request['SourceType']),
               BuildWidget.buildRow('主题', _request['SubjectName']),
               BuildWidget.buildRow('请求状态', _request['Status']['Name']),
-              BuildWidget.buildRow(AppConstants.Remark[_request['RequestType']['ID']], _request['FaultDesc']),
-              _request['RequestType']['ID'] == 1||_request['RequestType']['ID'] == 2||_request['RequestType']['ID'] == 3||_request['RequestType']['ID'] == 7?BuildWidget.buildRow(AppConstants.RemarkType[_request['RequestType']['ID']], _request['FaultType']['Name']):new Container(),
+              BuildWidget.buildRow(model.Remark[_request['RequestType']['ID']], _request['FaultDesc']),
+              _request['RequestType']['ID'] == 1||_request['RequestType']['ID'] == 2||_request['RequestType']['ID'] == 3||_request['RequestType']['ID'] == 7?BuildWidget.buildRow(model.RemarkType[_request['RequestType']['ID']], _request['FaultType']['Name']):new Container(),
               BuildWidget.buildRow('请求人', _request['RequestUser']['Name']),
               _request['Status']['ID']==1?new Container():BuildWidget.buildRow('处理方式', _request['DealType']['Name']),
               _request['Status']['ID']==1?new Container():BuildWidget.buildRow('当前状态', _request['Status']['Name']),

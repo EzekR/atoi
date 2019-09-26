@@ -9,6 +9,7 @@ import 'package:atoi/utils/http_request.dart';
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:atoi/widgets/build_widget.dart';
+import 'package:atoi/models/models.dart';
 
 class UserRepairPage extends StatefulWidget {
   static String tag = 'user-repair-page';
@@ -24,6 +25,7 @@ class _UserRepairPageState extends State<UserRepairPage> {
 
   var _isExpandedBasic = true;
   var _isExpandedDetail = false;
+  ConstantsModel model;
 
   List<File> _imageList = [];
 
@@ -32,20 +34,15 @@ class _UserRepairPageState extends State<UserRepairPage> {
 
   Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
 
-  List _serviceResults = [
-  '未知',
-  ];
+  List _serviceResults = [];
 
   String _userName = '';
-  String _mobile = '';
 
   Future<Null> getRole() async {
     var prefs = await _prefs;
     var userName = prefs.getString('userName');
-    var mobile = prefs.getString('mobile');
     setState(() {
       _userName = userName;
-      _mobile = mobile;
     });
   }
   List<DropdownMenuItem<String>> _dropDownMenuItems;
@@ -72,9 +69,23 @@ class _UserRepairPageState extends State<UserRepairPage> {
     });
   }
 
-  void initState() {
+  List iterateMap(Map item) {
+    var _list = [];
+    item.forEach((key, val) {
+      _list.add(key);
+    });
+    return _list;
+  }
+
+  void initDropdown() {
+    _serviceResults = iterateMap(model.FaultRepair);
     _dropDownMenuItems = getDropDownMenuItems(_serviceResults);
     _currentResult = _dropDownMenuItems[0].value;
+  }
+
+  void initState() {
+    model = MainModel.of(context);
+    initDropdown();
     super.initState();
   }
 
@@ -158,7 +169,7 @@ class _UserRepairPageState extends State<UserRepairPage> {
         },
         'FaultDesc': _describe.text,
         'FaultType': {
-          'ID': AppConstants.FaultRepair[_currentResult]
+          'ID': model.FaultRepair[_currentResult]
         },
         'Files': Files
       }
@@ -170,11 +181,9 @@ class _UserRepairPageState extends State<UserRepairPage> {
     );
     print(resp);
     if (resp['ResultCode'] == '00') {
-      print('yes');
       showDialog(context: context, builder: (context) => AlertDialog(
         title: new Text('报修成功'),
-      ),
-      ).then((result) =>
+      ),).then((result) =>
         Navigator.of(context, rootNavigator: true).pop(result)
       );
     }

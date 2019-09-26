@@ -24,38 +24,17 @@ class _EquipmentContractState extends State<EquipmentContract> {
 
   var _isExpandedBasic = true;
   var _isExpandedDetail = false;
-  var _isExpandedAssign = false;
   Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
   var _roleName;
   var _fault = new TextEditingController();
 
   MainModel mainModel = MainModel();
 
-  List _serviceResults = [
-    '未知',
-    '已知'
-  ];
-
-  Map<String, dynamic> _result = {
-    'equipNo': '',
-    'equipLevel': '',
-    'name': '',
-    'model': '',
-    'department': '',
-    'location': '',
-    'manufacturer': '',
-    'guarantee': ''
-  };
-
   var _equipment;
 
-  List<DropdownMenuItem<String>> _dropDownMenuItems;
-  String _currentResult;
   List<dynamic> _imageList = [];
 
   void initState(){
-    _dropDownMenuItems = getDropDownMenuItems(_serviceResults);
-    _currentResult = _dropDownMenuItems[0].value;
     getRole();
     super.initState();
   }
@@ -218,13 +197,6 @@ class _EquipmentContractState extends State<EquipmentContract> {
     return items;
   }
 
-
-  void changedDropDownMethod(String selectedMethod) {
-    setState(() {
-      _currentResult = selectedMethod;
-    });
-  }
-
   Future toSearch() async {
     final _searchResult = await showSearch(context: context, delegate: SearchBarDelegate());
     Map _data = jsonDecode(_searchResult);
@@ -318,7 +290,6 @@ class _EquipmentContractState extends State<EquipmentContract> {
                             if (index == 1) {
                               _isExpandedDetail = !isExpanded;
                             } else {
-                              _isExpandedAssign =!isExpanded;
                             }
                           }
                         });
