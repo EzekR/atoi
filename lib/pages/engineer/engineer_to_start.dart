@@ -162,7 +162,7 @@ class _EngineerToStartState extends State<EngineerToStart> {
             ListView.builder(
                 shrinkWrap: true,
                 padding: const EdgeInsets.all(2.0),
-                itemCount: model.tasksToStart.length+1,
+                itemCount: model.tasksToStart.length>9?model.tasksToStart.length+1:model.tasksToStart.length,
                 controller: _scrollController,
                 itemBuilder: (context, i) {
                   if (i != model.tasksToStart.length) {

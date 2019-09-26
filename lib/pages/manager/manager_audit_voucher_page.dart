@@ -5,6 +5,7 @@ import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'dart:convert';
 import 'package:atoi/utils/constants.dart';
 import 'package:atoi/widgets/build_widget.dart';
+import 'package:atoi/models/models.dart';
 
 class ManagerAuditVoucherPage extends StatefulWidget {
   static String tag = 'manager-audit-voucher-page';
@@ -25,6 +26,7 @@ class _ManagerAuditVoucherPageState extends State<ManagerAuditVoucherPage> {
   Map<String, dynamic> _dispatch = {};
   var _equipment = {};
   TextEditingController _comment = new TextEditingController();
+  ConstantsModel model;
 
   Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
 
@@ -74,11 +76,24 @@ class _ManagerAuditVoucherPageState extends State<ManagerAuditVoucherPage> {
   List<DropdownMenuItem<String>> _dropDownMenuItems;
   String _currentResult;
 
-  void initState(){
-    getRole();
+  List iterateMap(Map item) {
+    var _list = [];
+    item.forEach((key, val) {
+      _list.add(key);
+    });
+    return _list;
+  }
+
+  void initDropdown() {
+    _serviceResults = iterateMap(model.ResultStatusID);
     _dropDownMenuItems = getDropDownMenuItems(_serviceResults);
     _currentResult = _dropDownMenuItems[0].value;
-    print('widget info:${widget.request}');
+  }
+
+  void initState(){
+    model = MainModel.of(context);
+    getRole();
+    initDropdown();
     getDispatch();
     getJournal();
     super.initState();
@@ -230,7 +245,7 @@ class _ManagerAuditVoucherPageState extends State<ManagerAuditVoucherPage> {
     Map<String, dynamic> _data = {
       'userID': UserId,
       'dispatchJournalID': widget.journalId,
-      'resultStatusID': AppConstants.ResultStatusID[_currentResult],
+      'resultStatusID': model.ResultStatusID[_currentResult],
       'comments': _comment.text,
     };
     var _response = await HttpRequest.request(

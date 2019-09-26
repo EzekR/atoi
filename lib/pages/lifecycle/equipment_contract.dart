@@ -10,6 +10,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:atoi/utils/http_request.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:atoi/widgets/build_widget.dart';
+import 'package:flutter_image_compress/flutter_image_compress.dart';
 
 class EquipmentContract extends StatefulWidget{
   static String tag = 'equipment-contract';
@@ -23,38 +24,17 @@ class _EquipmentContractState extends State<EquipmentContract> {
 
   var _isExpandedBasic = true;
   var _isExpandedDetail = false;
-  var _isExpandedAssign = false;
   Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
   var _roleName;
   var _fault = new TextEditingController();
 
   MainModel mainModel = MainModel();
 
-  List _serviceResults = [
-    '未知',
-    '已知'
-  ];
-
-  Map<String, dynamic> _result = {
-    'equipNo': '',
-    'equipLevel': '',
-    'name': '',
-    'model': '',
-    'department': '',
-    'location': '',
-    'manufacturer': '',
-    'guarantee': ''
-  };
-
   var _equipment;
 
-  List<DropdownMenuItem<String>> _dropDownMenuItems;
-  String _currentResult;
   List<dynamic> _imageList = [];
 
   void initState(){
-    _dropDownMenuItems = getDropDownMenuItems(_serviceResults);
-    _currentResult = _dropDownMenuItems[0].value;
     getRole();
     super.initState();
   }
@@ -73,16 +53,22 @@ class _EquipmentContractState extends State<EquipmentContract> {
       setState(() {
         _equipment = resp['Data'];
       });
+    } else {
+      showDialog(context: context, builder: (context) => AlertDialog(title: new Text(resp['ResultMessage']),));
     }
   }
   Future getImage() async {
     var image = await ImagePicker.pickImage(
         source: ImageSource.camera,
-      imageQuality: 1
     );
     if (image != null) {
+      var compressed = await FlutterImageCompress.compressAndGetFile(
+        image.absolute.path,
+        image.absolute.path,
+        minHeight: 800,
+      );
       setState(() {
-        _imageList.add(image);
+        _imageList.add(compressed);
       });
     }
   }
@@ -211,13 +197,6 @@ class _EquipmentContractState extends State<EquipmentContract> {
     return items;
   }
 
-
-  void changedDropDownMethod(String selectedMethod) {
-    setState(() {
-      _currentResult = selectedMethod;
-    });
-  }
-
   Future toSearch() async {
     final _searchResult = await showSearch(context: context, delegate: SearchBarDelegate());
     Map _data = jsonDecode(_searchResult);
@@ -311,7 +290,6 @@ class _EquipmentContractState extends State<EquipmentContract> {
                             if (index == 1) {
                               _isExpandedDetail = !isExpanded;
                             } else {
-                              _isExpandedAssign =!isExpanded;
                             }
                           }
                         });

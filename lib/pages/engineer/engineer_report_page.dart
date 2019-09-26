@@ -9,6 +9,7 @@ import 'package:atoi/pages/engineer/engineer_report_accessory.dart';
 import 'package:atoi/widgets/build_widget.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'dart:typed_data';
+import 'package:atoi/models/models.dart';
 
 class EngineerReportPage extends StatefulWidget {
   static String tag = 'engineer-report-page';
@@ -29,18 +30,10 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
   var _isExpandedComponent = false;
   bool _isDelayed = false;
   var _accessory = [];
+  ConstantsModel model;
 
-  List _serviceResults = [
-    '待分配',
-    '问题升级',
-    '待第三方支持',
-    '已解决'
-  ];
-
-  List _sources = [
-    '外部供应商',
-    '备件库'
-  ];
+  List _serviceResults = [];
+  List _sources = [];
 
 
   List<DropdownMenuItem<String>> _dropDownMenuItems;
@@ -78,7 +71,6 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
   Future getImage() async {
     var image = await ImagePicker.pickImage(
         source: ImageSource.camera,
-        imageQuality: 1
     );
     if (image != null) {
       var bytes = await image.readAsBytes();
@@ -250,7 +242,7 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
           'SolutionCauseAnalysis': _analysis.text,
           'SolutionWay': _solution.text,
           'SolutionResultStatus': {
-            'ID': AppConstants.SolutionStatus[_currentResult],
+            'ID': model.SolutionStatus[_currentResult],
             'Name': _currentResult
           },
           'SolutionUnsolvedComments': _unsolved.text,
@@ -288,11 +280,25 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
     }
   }
 
-  void initState(){
+  List iterateMap(Map item) {
+    var _list = [];
+    item.forEach((key, val) {
+      _list.add(key);
+    });
+    return _list;
+  }
+
+  void initDropdown() {
+    _serviceResults = iterateMap(model.SolutionStatus);
+    _sources = iterateMap(model.AccessorySourceType);
     _dropDownMenuItems = getDropDownMenuItems(_serviceResults);
     _dropDownMenuSources = getDropDownMenuItems(_sources);
     _currentResult = _dropDownMenuItems[0].value;
     _currentSource = _dropDownMenuSources[0].value;
+  }
+  void initState(){
+    model = MainModel.of(context);
+    initDropdown();
     getDispatch();
     getReport();
     getRole();
@@ -605,7 +611,7 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
               BuildWidget.buildRow('工程师姓名', _dispatch['Engineer']['Name']),
               //widget.status==3||widget.status==2?new Container():BuildWidget.buildRow('处理方式', _dispatch['Request']['DealType']['Name']),
               BuildWidget.buildRow('紧急程度', _dispatch['Request']['Priority']['Name']),
-              _dispatch['RequestType']['ID']==14?new Container():BuildWidget.buildRow('机器状态', _dispatch['MachineStatus']['Name']),
+              _dispatch['Request']['RequestType']['ID']==14?new Container():BuildWidget.buildRow('机器状态', _dispatch['MachineStatus']['Name']),
               BuildWidget.buildRow('出发时间', AppConstants.TimeForm(_dispatch['ScheduleDate'], 'yyyy-mm-dd')),
               BuildWidget.buildRow('备注', _dispatch['LeaderComments']),
             ],

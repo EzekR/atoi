@@ -234,7 +234,7 @@ class _EngineerToReportState extends State<EngineerToReport> {
         return new RefreshIndicator(
             child: model.tasksToReport.length == 0?ListView(padding: const EdgeInsets.symmetric(vertical: 150.0), children: <Widget>[new Center(child: new Text('没有作业中工单'),)],):ListView.builder(
                 padding: const EdgeInsets.all(2.0),
-                itemCount: model.tasksToReport.length+1,
+                itemCount: model.tasksToReport.length>9?model.tasksToReport.length+1:model.tasksToReport.length,
                 controller: _scrollController,
                 itemBuilder: (context, i) {
                   if (i != model.tasksToReport.length) {

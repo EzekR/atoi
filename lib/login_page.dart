@@ -97,6 +97,15 @@ class _LoginPageState extends State<LoginPage> {
     });
   }
 
+  Future<Null> permissionCheck() async {
+    var permission = await PermissionHandler().checkPermissionStatus(PermissionGroup.camera);
+    print('permission:$permission');
+    if (permission == PermissionStatus.unknown) {
+      var camera = await PermissionHandler().requestPermissions([PermissionGroup.camera]);
+      print('camera:$camera');
+    }
+  }
+
   Future<Null> isConnected() async {
     var connectivityResult = await (Connectivity().checkConnectivity());
     if (connectivityResult == ConnectivityResult.none) {
@@ -180,10 +189,10 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   Future<Null> _userReg() async {
-    if (passwordController.text.isEmpty) {
+    if (regPhoneController.text.isEmpty) {
       showDialog(context: context,
-          builder: (context) => AlertDialog(
-            title: new Text('密码不可为空',
+          builder: (context) => CupertinoAlertDialog(
+            title: new Text('手机号不可为空',
               style: new TextStyle(
                   fontSize: 16.0,
                   fontWeight: FontWeight.w400,
@@ -194,10 +203,10 @@ class _LoginPageState extends State<LoginPage> {
       );
       return;
     }
-    if (regPhoneController.text.isEmpty) {
+    if (passwordController.text.isEmpty) {
       showDialog(context: context,
-          builder: (context) => AlertDialog(
-            title: new Text('手机号不可为空',
+          builder: (context) => CupertinoAlertDialog(
+            title: new Text('密码不可为空',
               style: new TextStyle(
                   fontSize: 16.0,
                   fontWeight: FontWeight.w400,
@@ -268,6 +277,8 @@ class _LoginPageState extends State<LoginPage> {
         _stage = 'login';
         phoneController.text = regPhoneController.text;
         passwordController.text = '';
+        confirmPass.text = '';
+        _timer.cancel();
       });
     } else {
       showDialog(context: context,
@@ -289,7 +300,7 @@ class _LoginPageState extends State<LoginPage> {
     //isConnected();
     _startupJpush();
     super.initState();
-    getPermissions();
+    permissionCheck();
   }
 
   @override

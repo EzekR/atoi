@@ -9,7 +9,7 @@ import 'dart:convert';
 import 'package:photo_view/photo_view.dart';
 import 'package:scoped_model/scoped_model.dart';
 import 'package:atoi/models/models.dart';
-import 'package:atoi/models/manager_model.dart';
+import 'package:atoi/models/main_model.dart';
 import 'package:atoi/widgets/build_widget.dart';
 
 class ManagerAssignPage extends StatefulWidget {
@@ -32,6 +32,7 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
   var _desc = new TextEditingController();
 
   Map<String, dynamic> _request = {};
+  ConstantsModel model;
 
   String _userName = '';
   String _mobile = '';
@@ -48,7 +49,7 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
 
   Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
 
-  List<dynamic> imageBytes = [];
+  final List<dynamic> imageBytes = [];
 
   List _handleMethods = [
     '现场服务',
@@ -205,7 +206,8 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
     print(resp);
     if (resp['ResultCode'] == '00') {
       setState(() {
-        imageBytes.add(resp['Data']);
+        var decoded = base64Decode(resp['Data']);
+        imageBytes.add(decoded);
       });
     }
   }
@@ -235,10 +237,26 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
     }
   }
 
-  void initState() {
-    getRole();
-    var time = new DateTime.now();
-    dispatchDate = '${time.year}-${time.month}-${time.day}';
+  List iterateMap(Map item) {
+    var _list = [];
+    item.forEach((key, val) {
+      _list.add(key);
+    });
+    return _list;
+  }
+
+  void initDropdown() {
+    //get key
+    _handleMethods = iterateMap(model.DealType);
+    _priorities = iterateMap(model.PriorityID);
+    _assignTypes = iterateMap(model.RequestType);
+    _levels = iterateMap(model.UrgencyID);
+    _deviceStatuses = iterateMap(model.MachineStatus);
+    _maintainType = iterateMap(model.FaultMaintain);
+    _mandatory = iterateMap(model.FaultCheck);
+    _badSource = iterateMap(model.FaultBad);
+
+    //init dropdown menu
     _dropDownMenuItems = getDropDownMenuItems(_handleMethods);
     _currentMethod = _dropDownMenuItems[0].value;
     _dropDownMenuPris = getDropDownMenuItems(_priorities);
@@ -255,9 +273,16 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
     _dropDownMenuMandatory = getDropDownMenuItems(_mandatory);
     _dropDownMenuRecall = getDropDownMenuItems(_isRecall);
     _currentRecall = _dropDownMenuRecall[0].value;
+  }
+
+  void initState() {
+    model = MainModel.of(context);
+    initDropdown();
+    getRole();
+    var time = new DateTime.now();
+    dispatchDate = '${time.year}-${time.month}-${time.day}';
     getRequest();
     getEngineers();
-    ManagerModel model = MainModel.of(context);
     super.initState();
   }
 
@@ -340,17 +365,18 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
 
   Column buildImageColumn() {
     if (imageBytes == null) {
-      return new Column();
+      return Column();
     } else {
       List<Widget> _list = [];
       for(var file in imageBytes) {
-        _list.add(new Container(
-          child: new PhotoView(imageProvider: MemoryImage(base64Decode(file))),
+        _list.add(Container(
+          child: PhotoView(imageProvider: MemoryImage(file)),
           width: 400.0,
           height: 400.0,
         ));
+        _list.add(SizedBox(height: 8.0,));
       }
-      return new Column(children: _list);
+      return Column(children: _list);
     }
   }
 
@@ -515,7 +541,7 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
       showDialog(context: context,
           builder: (context) => AlertDialog(
             title: new Text(
-              '${AppConstants.Remark[_request['RequestType']['ID']]}不可为空'
+              '${model.Remark[_request['RequestType']['ID']]}不可为空'
             ),
           )
       );
@@ -529,49 +555,50 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
         'Request': {
           'ID': _request['ID'],
           'Priority': {
-            'ID': AppConstants.PriorityID[_currentPriority],
+            'ID': model.PriorityID[_currentPriority],
           },
           'DealType': {
-            'ID': AppConstants.DealType[_currentMethod]
+            'ID': model.DealType[_currentMethod]
           },
           'FaultDesc': _desc.text,
           'IsRecall': _request['IsRecall']
         },
         'Urgency': {
-          'ID': AppConstants.UrgencyID[_currentLevel]
+          'ID': model.UrgencyID[_currentLevel]
         },
         'Engineer': {
           'ID': _engineers[_currentName]
         },
         'MachineStatus': {
-          'ID': AppConstants.MachineStatus[_currentStatus]
+          'ID': model.MachineStatus[_currentStatus]
         },
         'ScheduleDate': dispatchDate,
         'LeaderComments': _leaderComment.text,
         'RequestType': {
-          'ID': AppConstants.RequestType[_currentType]
+          'ID': model.RequestType[_currentType]
         }
       }
     };
     switch (_request['RequestType']['ID']) {
       case 1:
         _data['dispatchInfo']['Request']['FaultType'] = {
-          'ID': AppConstants.FaultRepair[_currentFault]
+          //'ID': model.FaultRepair[_currentFault]
+          'ID': 1
         };
         break;
       case 2:
         _data['dispatchInfo']['Request']['FaultType'] = {
-          'ID': AppConstants.FaultMaintain[_currentMaintain]
+          'ID': model.FaultMaintain[_currentMaintain]
         };
         break;
       case 3:
         _data['dispatchInfo']['Request']['FaultType'] = {
-          'ID': AppConstants.FaultCheck[_currentMandatory]
+          'ID': model.FaultCheck[_currentMandatory]
         };
         break;
       case 7:
         _data['dispatchInfo']['Request']['FaultType'] = {
-          'ID': AppConstants.FaultBad[_currentSource]
+          'ID': model.FaultBad[_currentSource]
         };
         break;
       default:
@@ -679,7 +706,7 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
             children: <Widget>[
               BuildWidget.buildRow('类型', _request['SourceType']),
               BuildWidget.buildRow('主题', _request['SubjectName']),
-              BuildWidget.buildInput(AppConstants.Remark[_request['RequestType']['ID']], _desc),
+              BuildWidget.buildInput(model.Remark[_request['RequestType']['ID']], _desc),
               _request['RequestType']['ID']==1?BuildWidget.buildDropdown('故障分类', _currentFault, _dropDownMenuFault, changedDropDownFault):new Container(),
               _request['RequestType']['ID']==2?BuildWidget.buildDropdown('保养类型', _currentMaintain, _dropDownMenuMaintain, changedDropDownMaintain):new Container(),
               _request['RequestType']['ID']==3?BuildWidget.buildDropdown('强检原因', _currentMandatory, _dropDownMenuMandatory, changedDropDownMandatory):new Container(),

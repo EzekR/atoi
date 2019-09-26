@@ -298,7 +298,7 @@ class _ManagerToAssignState extends State<ManagerToAssign> {
         return new RefreshIndicator(
             child: model.requests.length == 0?ListView(padding: const EdgeInsets.symmetric(vertical: 150.0), children: <Widget>[new Center(child: _loading?SpinKitRotatingPlain(color: Colors.blue):new Text('没有待派工请求'),)],):ListView.builder(
                 padding: const EdgeInsets.all(2.0),
-                itemCount: model.requests.length+1,
+                itemCount: model.requests.length>9?model.requests.length+1:model.requests.length,
                 controller: _scrollController,
                 itemBuilder: (context, i) {
                   if (i != model.requests.length) {

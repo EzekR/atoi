@@ -11,7 +11,6 @@ import 'package:atoi/login_page.dart';
 import 'dart:async';
 import 'package:atoi/complete_info.dart';
 import 'package:atoi/pages/equipments/equipments_list.dart';
-import 'package:atoi/pages/reports/report_chart.dart';
 import 'package:atoi/pages/reports/report_list.dart';
 
 class HomePage extends StatefulWidget {
@@ -44,6 +43,8 @@ class _HomePageState extends State<HomePage>
     _tabController = new TabController(length: 4, vsync: this, initialIndex: 0);
     super.initState();
     ManagerModel model = MainModel.of(context);
+    ConstantsModel cModel = MainModel.of(context);
+    cModel.getConstants();
     model.getDispatches();
     model.getRequests();
     model.getTodos();
@@ -171,6 +172,7 @@ class _HomePageState extends State<HomePage>
                       ),
                     ),
                     ListTile(
+                      leading: Icon(Icons.person),
                       title: Text('个人信息',
                         style: new TextStyle(
                           color: Colors.blue
@@ -183,6 +185,7 @@ class _HomePageState extends State<HomePage>
                       },
                     ),
                     ListTile(
+                      leading: Icon(Icons.list),
                       title: Text('设备列表',
                         style: new TextStyle(
                             color: Colors.blue
@@ -195,6 +198,7 @@ class _HomePageState extends State<HomePage>
                       },
                     ),
                     ListTile(
+                      leading: Icon(Icons.insert_chart),
                       title: Text('报表',
                         style: new TextStyle(
                             color: Colors.blue
@@ -207,6 +211,7 @@ class _HomePageState extends State<HomePage>
                       },
                     ),
                     ListTile(
+                      leading: Icon(Icons.exit_to_app),
                       title: Text('登出'),
                       onTap: () async {
                         var _prefs = await prefs;

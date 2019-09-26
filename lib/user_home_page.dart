@@ -10,6 +10,7 @@ import 'package:atoi/login_page.dart';
 import 'package:atoi/complete_info.dart';
 import 'package:atoi/pages/request/other_request.dart';
 import 'package:atoi/pages/user/request_history.dart';
+import 'package:atoi/utils/constants.dart';
 
 class UserHomePage extends StatefulWidget{
   static String tag = 'user-home-page';
@@ -39,6 +40,7 @@ class _UserHomePageState extends State<UserHomePage> {
     getRole();
     super.initState();
   }
+
   Future scan() async {
     try {
       String barcode = await BarcodeScanner.scan();
@@ -72,10 +74,14 @@ class _UserHomePageState extends State<UserHomePage> {
         method: HttpRequest.GET,
         params: params
     );
-    print(resp);
-    Navigator.of(context).push(new MaterialPageRoute(builder: (_){
-      return new UserRepairPage(equipment: resp['Data']);
-    }));
+
+    if (resp['ResultCode'] == '00') {
+      Navigator.of(context).push(new MaterialPageRoute(builder: (_){
+        return new UserRepairPage(equipment: resp['Data']);
+      }));
+    } else {
+      showDialog(context: context, builder: (context) => AlertDialog(title: new Text(resp['ResultMessage']),));
+    }
   }
 
   Column buildIconColumn(IconData icon, String label) {

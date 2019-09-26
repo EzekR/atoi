@@ -9,8 +9,9 @@ import 'dart:convert';
 import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:atoi/utils/http_request.dart';
-import 'package:atoi/utils/constants.dart';
 import 'package:atoi/widgets/build_widget.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:flutter_image_compress/flutter_image_compress.dart';
 
 class BadRequest extends StatefulWidget{
   static String tag = 'bad-request';
@@ -28,31 +29,9 @@ class _BadRequestState extends State<BadRequest> {
   Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
   var _roleName = '';
   var _fault = new TextEditingController();
+  ConstantsModel model;
 
-  MainModel mainModel = MainModel();
-
-  List _serviceResults = [
-    '政府通报',
-    '医院自检',
-    '召回事件'
-  ];
-
-  Map<String, dynamic> _result = {
-    'OID': '',
-    'Name': '',
-    'Department': {
-      'Name'
-    },
-    'Manufacturer': {
-      'Name': ''
-    },
-    'AssetLeve': {
-      'Name'
-    },
-    'location': '',
-    'manufacturer': '',
-    'guarantee': ''
-  };
+  List _serviceResults = [];
 
   var _equipment;
 
@@ -60,9 +39,23 @@ class _BadRequestState extends State<BadRequest> {
   String _currentResult;
   List<dynamic> _imageList = [];
 
-  void initState(){
+  List iterateMap(Map item) {
+    var _list = [];
+    item.forEach((key, val) {
+      _list.add(key);
+    });
+    return _list;
+  }
+  
+  void initDropdown() {
+    _serviceResults = iterateMap(model.FaultBad);
     _dropDownMenuItems = getDropDownMenuItems(_serviceResults);
     _currentResult = _dropDownMenuItems[0].value;
+  }
+
+  void initState(){
+    model = MainModel.of(context);
+    initDropdown();
     getRole();
     super.initState();
   }
@@ -81,16 +74,22 @@ class _BadRequestState extends State<BadRequest> {
       setState(() {
         _equipment = resp['Data'];
       });
+    } else {
+      showDialog(context: context, builder: (context) => AlertDialog(title: new Text(resp['ResultMessage']),));
     }
   }
   Future getImage() async {
     var image = await ImagePicker.pickImage(
         source: ImageSource.camera,
-      imageQuality: 1
     );
     if (image != null) {
+      var compressed = await FlutterImageCompress.compressAndGetFile(
+          image.absolute.path,
+          image.absolute.path,
+          minHeight: 800,
+      );
       setState(() {
-        _imageList.add(image);
+        _imageList.add(compressed);
       });
     }
   }
@@ -144,17 +143,26 @@ class _BadRequestState extends State<BadRequest> {
             }
           ],
           'FaultType': {
-            'ID': AppConstants.FaultBad[_currentResult],
+            'ID': model.FaultBad[_currentResult],
           },
           'FaultDesc': _fault.text,
           'Files': fileList
         }
       };
+      Fluttertoast.showToast(
+          msg: "正在上传...",
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.CENTER,
+          backgroundColor: Colors.black54,
+          textColor: Colors.white,
+          fontSize: 16.0
+      );
       var resp = await HttpRequest.request(
           '/Request/AddRequest',
           method: HttpRequest.POST,
           data: _data
       );
+      Fluttertoast.cancel();
       print(resp);
       if (resp['ResultCode'] == '00') {
         showDialog(context: context, builder: (buider) =>

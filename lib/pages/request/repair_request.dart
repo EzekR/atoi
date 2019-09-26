@@ -8,9 +8,9 @@ import 'package:flutter/services.dart';
 import 'dart:convert';
 import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:atoi/utils/constants.dart';
 import 'package:atoi/utils/http_request.dart';
 import 'package:atoi/widgets/build_widget.dart';
+import 'package:flutter_image_compress/flutter_image_compress.dart';
 
 class RepairRequest extends StatefulWidget{
   static String tag = 'repair-request';
@@ -29,24 +29,10 @@ class _RepairRequestState extends State<RepairRequest> {
   var _isExpandedDetail = false;
   var _isExpandedAssign = false;
   var _fault = new TextEditingController();
+  ConstantsModel model;
 
-  MainModel mainModel = MainModel();
 
-  List _serviceResults = [
-    '未知',
-    //'已知'
-  ];
-
-  Map<String, dynamic> _result = {
-    'equipNo': '',
-    'equipLevel': '',
-    'name': '',
-    'model': '',
-    'department': '',
-    'location': '',
-    'manufacturer': '',
-    'guarantee': ''
-  };
+  List _serviceResults = [];
 
   List<DropdownMenuItem<String>> _dropDownMenuItems;
   String _currentResult;
@@ -73,12 +59,28 @@ class _RepairRequestState extends State<RepairRequest> {
       setState(() {
         _equipment = resp['Data'];
       });
+    } else {
+      showDialog(context: context, builder: (context) => AlertDialog(title: new Text(resp['ResultMessage']),));
     }
   }
 
-  void initState(){
+  List iterateMap(Map item) {
+    var _list = [];
+    item.forEach((key, val) {
+      _list.add(key);
+    });
+    return _list;
+  }
+
+  void initDropdown() {
+    _serviceResults = iterateMap(model.FaultRepair);
     _dropDownMenuItems = getDropDownMenuItems(_serviceResults);
     _currentResult = _dropDownMenuItems[0].value;
+  }
+
+  void initState(){
+    model = MainModel.of(context);
+    initDropdown();
     getRole();
     super.initState();
   }
@@ -86,11 +88,15 @@ class _RepairRequestState extends State<RepairRequest> {
   Future getImage() async {
     var image = await ImagePicker.pickImage(
         source: ImageSource.camera,
-        imageQuality: 1
     );
     if (image != null) {
+      var compressed = await FlutterImageCompress.compressAndGetFile(
+        image.absolute.path,
+        image.absolute.path,
+        minHeight: 800,
+      );
       setState(() {
-        _imageList.add(image);
+        _imageList.add(compressed);
       });
     }
   }
@@ -137,7 +143,7 @@ class _RepairRequestState extends State<RepairRequest> {
             }
           ],
           'FaultType': {
-            'ID': AppConstants.FaultRepair[_currentResult],
+            'ID': model.FaultRepair[_currentResult],
           },
           'FaultDesc': _fault.text,
           'Files': fileList

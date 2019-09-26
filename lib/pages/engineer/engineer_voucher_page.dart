@@ -8,6 +8,7 @@ import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:atoi/utils/constants.dart';
 import 'package:atoi/widgets/build_widget.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
+import 'package:atoi/models/models.dart';
 
 class EngineerVoucherPage extends StatefulWidget {
   static String tag = 'engineer-voucher-page';
@@ -35,6 +36,7 @@ class _EngineerVoucherPageState extends State<EngineerVoucherPage> {
   String _journalStatus = '新建';
   List<int> _img;
   String _journalOID;
+  ConstantsModel model;
 
   List _serviceResults = [
     '完成',
@@ -140,7 +142,7 @@ class _EngineerVoucherPageState extends State<EngineerVoucherPage> {
       var userId = prefs.getInt('userID');
       var dispatchId = widget.dispatchId;
       var image = base64Encode(_img);
-      var status = AppConstants.ResultStatusID[_currentResult];
+      var status = model.ResultStatusID[_currentResult];
       var resp = await HttpRequest.request(
           '/DispatchJournal/SaveDispatchJournal',
           method: HttpRequest.POST,
@@ -176,9 +178,22 @@ class _EngineerVoucherPageState extends State<EngineerVoucherPage> {
     }
   }
 
-  void initState(){
+  List iterateMap(Map item) {
+    var _list = [];
+    item.forEach((key, val) {
+      _list.add(key);
+    });
+    return _list;
+  }
+
+  void initDropdown() {
+    _serviceResults = iterateMap(model.ResultStatusID);
     _dropDownMenuItems = getDropDownMenuItems(_serviceResults);
     _currentResult = _dropDownMenuItems[0].value;
+  }
+  void initState(){
+    model = MainModel.of(context);
+    initDropdown();
     getDispatch();
     getJournal();
     getRole();
