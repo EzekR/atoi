@@ -67,6 +67,7 @@ class _CorrectionRequestState extends State<CorrectionRequest> {
         image.absolute.path,
         image.absolute.path,
         minHeight: 800,
+        minWidth: 600,
       );
       setState(() {
         _imageList.add(compressed);

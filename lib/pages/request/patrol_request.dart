@@ -76,6 +76,7 @@ class _PatrolRequestState extends State<PatrolRequest> {
         image.absolute.path,
         image.absolute.path,
         minHeight: 800,
+        minWidth: 600,
       );
       setState(() {
         _imageList.add(compressed);

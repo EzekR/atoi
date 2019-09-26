@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:atoi/widgets/search_bar.dart';
 import 'package:atoi/models/models.dart';
 import 'package:scoped_model/scoped_model.dart';
 import 'package:barcode_scan/barcode_scan.dart';
@@ -9,8 +8,8 @@ import 'dart:convert';
 import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:atoi/utils/http_request.dart';
-import 'package:atoi/utils/constants.dart';
 import 'package:atoi/widgets/build_widget.dart';
+import 'package:flutter_image_compress/flutter_image_compress.dart';
 
 class OtherRequest extends StatefulWidget{
   static String tag = 'other-request';
@@ -48,11 +47,16 @@ class _OtherRequestState extends State<OtherRequest> {
   Future getImage() async {
     var image = await ImagePicker.pickImage(
         source: ImageSource.camera,
-        imageQuality: 1
     );
     if (image != null) {
+      var compressed = await FlutterImageCompress.compressAndGetFile(
+        image.absolute.path,
+        image.absolute.path,
+        minHeight: 800,
+        minWidth: 600,
+      );
       setState(() {
-        _imageList.add(image);
+        _imageList.add(compressed);
       });
     }
   }

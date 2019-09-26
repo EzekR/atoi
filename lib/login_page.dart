@@ -214,6 +214,20 @@ class _LoginPageState extends State<LoginPage> {
       );
       return;
     }
+    if (passwordController.text != confirmPass.text) {
+      showDialog(context: context,
+          builder: (context) => CupertinoAlertDialog(
+            title: new Text('密码不一致',
+              style: new TextStyle(
+                  fontSize: 16.0,
+                  fontWeight: FontWeight.w400,
+                  color: Colors.black54
+              ),
+            ),
+          )
+      );
+      return;
+    }
     if (nameController.text.isEmpty) {
       showDialog(context: context,
           builder: (context) => CupertinoAlertDialog(
