@@ -80,7 +80,6 @@ class _UserRepairPageState extends State<UserRepairPage> {
   void initDropdown() {
     _serviceResults = iterateMap(model.FaultRepair);
     _dropDownMenuItems = getDropDownMenuItems(_serviceResults);
-    _currentResult = _dropDownMenuItems[0].value;
   }
 
   void initState() {

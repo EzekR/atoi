@@ -12,6 +12,7 @@ import 'package:atoi/utils/http_request.dart';
 import 'package:atoi/utils/constants.dart';
 import 'package:atoi/widgets/build_widget.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
+import 'package:atoi/widgets/search_page.dart';
 
 class PatrolRequest extends StatefulWidget{
   static String tag = 'patrol-request';
@@ -314,7 +315,10 @@ class _PatrolRequestState extends State<PatrolRequest> {
                   color: Colors.white,
                   iconSize: 30.0,
                   onPressed: () {
-                    toSearch();
+                    //toSearch();
+                    Navigator.of(context).push(new MaterialPageRoute(builder: (context) {
+                      return SearchPage();
+                    }));
                   }
                   ,
                 ),

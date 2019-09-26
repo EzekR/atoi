@@ -84,9 +84,9 @@ class SearchBarCheckBoxDelegate extends SearchDelegate<String>{
 
   @override
   Widget buildSuggestions(BuildContext context) {
-    model = MainModel.of(context);
     return FutureBuilder(
       builder: (context, snapshot) {
+        model = MainModel.of(context);
         return ListView.builder(
             itemCount: suggestionList.length,
             itemBuilder: (context, i) {
