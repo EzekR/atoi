@@ -11,6 +11,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:atoi/utils/http_request.dart';
 import 'package:atoi/widgets/build_widget.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
+import 'package:atoi/widgets/search_page.dart';
 
 class EquipmentCheck extends StatefulWidget{
   static String tag = 'equipment-check';
@@ -307,8 +308,13 @@ class _EquipmentCheckState extends State<EquipmentCheck> {
                   icon: Icon(Icons.search),
                   color: Colors.white,
                   iconSize: 30.0,
-                  onPressed: () {
-                    toSearch();
+                  onPressed: () async {
+                    //toSearch();
+                    final selected = await Navigator.of(context).push(new MaterialPageRoute(builder: (context) {
+                      return SearchPage();
+                    }));
+                    print(selected);
+                    _equipments.addAll(selected);
                   }
                   ,
                 ),

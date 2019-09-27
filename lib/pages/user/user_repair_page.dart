@@ -81,6 +81,7 @@ class _UserRepairPageState extends State<UserRepairPage> {
   void initDropdown() {
     _serviceResults = iterateMap(model.FaultRepair);
     _dropDownMenuItems = getDropDownMenuItems(_serviceResults);
+    //_currentResult = _dropDownMenuItems[0].value==null?'':_dropDownMenuItems[0];
   }
 
   void initState() {
@@ -103,33 +104,6 @@ class _UserRepairPageState extends State<UserRepairPage> {
       setState(() {
         _imageList.add(compressed);
       });
-    }
-  }
-
-  Future uploadImage() async {
-    FormData _formData = new FormData.from({
-      "describe": _describe.text,
-      "category": _category.text
-    });
-    if (_imageList.length > 0) {
-      for(var i=0; i<_imageList.length; i++) {
-        var path = _imageList[i].path;
-        var name = path.substring(path.lastIndexOf("/") + 1, path.length);
-        var suffix = name.substring(name.lastIndexOf(".") + 1, name.length);
-        _formData.add("file$i", new UploadFileInfo(_imageList[i], _imageList[i].path, contentType: ContentType.parse("image/$suffix")));
-      }
-    }
-    print(_formData);
-    Dio dio = new Dio();
-    var response = await dio.post<String>("http://api.stramogroup.com/request", data: _formData);
-    if (response.statusCode == 200) {
-      var result = await showDialog(
-              context: context,
-              builder: (context) => AlertDialog(
-                title: Text('报修成功'),
-              )
-          );
-      Navigator.of(context).pop();
     }
   }
 
@@ -169,7 +143,8 @@ class _UserRepairPageState extends State<UserRepairPage> {
         },
         'FaultDesc': _describe.text,
         'FaultType': {
-          'ID': model.FaultRepair[_currentResult]
+          //'ID': model.FaultRepair[_currentResult]
+          'ID': 1
         },
         'Files': Files
       }

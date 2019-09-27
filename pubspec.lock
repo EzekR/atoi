@@ -120,6 +120,13 @@ packages:
       url: "https://pub.flutter-io.cn"
     source: hosted
     version: "2.2.2"
+  dropdownfield:
+    dependency: "direct main"
+    description:
+      name: dropdownfield
+      url: "https://pub.flutter-io.cn"
+    source: hosted
+    version: "1.0.3"
   floating_search_bar:
     dependency: "direct main"
     description:
