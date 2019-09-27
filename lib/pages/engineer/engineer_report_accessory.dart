@@ -385,7 +385,6 @@ class _EngineerReportAccessoryState extends State<EngineerReportAccessory> {
                         new IconButton(icon: Icon(Icons.add_a_photo), onPressed: () async {
                           _imageNew = await ImagePicker.pickImage(
                               source: ImageSource.camera,
-                            imageQuality: 1
                           );
                         }),
                       ],
@@ -433,7 +432,6 @@ class _EngineerReportAccessoryState extends State<EngineerReportAccessory> {
                         new IconButton(icon: Icon(Icons.add_a_photo), onPressed: () async {
                           _imageOld = await ImagePicker.pickImage(
                               source: ImageSource.camera,
-                            imageQuality: 1
                           );
                         }),
                       ],

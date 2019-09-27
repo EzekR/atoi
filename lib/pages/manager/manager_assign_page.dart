@@ -936,7 +936,7 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
                                 title: new Text('是否终止请求？'),
                                 actions: <Widget>[
                                   RaisedButton(
-                                    child: const Text('确认', style: TextStyle(color: Colors.white),),
+                                    child: Text('确认', style: TextStyle(color: Colors.white),),
                                     color: AppConstants.AppColors['btn_cancel'],
                                     onPressed: () {
                                       terminate();
@@ -944,7 +944,7 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
                                     },
                                   ),
                                   RaisedButton(
-                                    child: const Text('取消', style: TextStyle(color: Colors.white),),
+                                    child: Text('取消', style: TextStyle(color: Colors.white),),
                                     color: AppConstants.AppColors['btn_main'],
                                     onPressed: () {
                                       Navigator.of(context).pop();

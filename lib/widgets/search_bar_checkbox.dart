@@ -23,6 +23,7 @@ class SearchBarCheckBoxDelegate extends SearchDelegate<String>{
   var suggestionList = [];
   List selected = [];
   bool value = false;
+  SearchModel model;
 
   Future<Null> getDevices(String filter) async {
     var resp = await HttpRequest.request(
@@ -74,18 +75,6 @@ class SearchBarCheckBoxDelegate extends SearchDelegate<String>{
 
   @override
   void showResults(BuildContext context) {
-    Map<String, String> mutated = {
-      'equipNo': '10086',
-      'equipLevel': '重要',
-      'name': '医用磁共振设备',
-      'model': 'Philips 781-296',
-      'department': '磁共振',
-      'location': '磁共振1室',
-      'manufacturer': '飞利浦',
-      'guarantee': '保内'
-    };
-    MainModel mainModel = ScopedModel.of<MainModel>(context);
-    mainModel.setResult(mutated);
     close(context, jsonEncode(selected));
   }
 
@@ -97,11 +86,12 @@ class SearchBarCheckBoxDelegate extends SearchDelegate<String>{
   Widget buildSuggestions(BuildContext context) {
     return FutureBuilder(
       builder: (context, snapshot) {
+        model = MainModel.of(context);
         return ListView.builder(
             itemCount: suggestionList.length,
             itemBuilder: (context, i) {
               return CheckboxListTile(
-                value: selected.contains(suggestionList[i])?true:false,
+                value: model.selected.contains(suggestionList[i])?true:false,
                 title: RichText(
                   text: TextSpan(
                       text: '${suggestionList[i]['Name']}/${suggestionList[i]['EquipmentCode']}/${suggestionList[i]['SerialCode']}'.substring(0, query.length),
@@ -114,28 +104,10 @@ class SearchBarCheckBoxDelegate extends SearchDelegate<String>{
                       ])),
                 onChanged: (bool value) {
                   print(value);
-                  print(this);
-                  checkIt(value, suggestionList[i]);
+                  value?model.addToSelected(suggestionList[i]):model.removeSelected(suggestionList[i]);
                 },
               );
             }
-//                ListTile(
-//              onTap: (){
-//                query = suggestionList[i]['Name'];
-//                selected = suggestionList[i];
-//                showResults(context);
-//              },
-//              title: RichText(
-//                  text: TextSpan(
-//                      text: '${suggestionList[i]['Name']}/${suggestionList[i]['EquipmentCode']}/${suggestionList[i]['SerialCode']}'.substring(0, query.length),
-//                      style: TextStyle(
-//                          color: Colors.black, fontWeight: FontWeight.bold),
-//                      children: [
-//                        TextSpan(
-//                            text: '${suggestionList[i]['Name']}/${suggestionList[i]['EquipmentCode']}/${suggestionList[i]['SerialCode']}'.substring(query.length),
-//                            style: TextStyle(color: Colors.grey))
-//                      ])),
-//            )
         );
       },
       future: getDevices(query),

@@ -67,6 +67,7 @@ class _EquipmentLendingState extends State<EquipmentLending> {
         image.absolute.path,
         image.absolute.path,
         minHeight: 800,
+        minWidth: 600,
       );
       setState(() {
         _imageList.add(compressed);

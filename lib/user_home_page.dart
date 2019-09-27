@@ -10,7 +10,6 @@ import 'package:atoi/login_page.dart';
 import 'package:atoi/complete_info.dart';
 import 'package:atoi/pages/request/other_request.dart';
 import 'package:atoi/pages/user/request_history.dart';
-import 'package:atoi/utils/constants.dart';
 
 class UserHomePage extends StatefulWidget{
   static String tag = 'user-home-page';

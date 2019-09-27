@@ -98,6 +98,7 @@ class _MandatoryRequestState extends State<MandatoryRequest> {
         image.absolute.path,
         image.absolute.path,
         minHeight: 800,
+        minWidth: 600,
       );
       setState(() {
         _imageList.add(compressed);
