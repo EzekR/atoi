@@ -88,7 +88,7 @@ class _ManagerCompletePageState extends State<ManagerCompletePage> {
       if (journalId != 0) {
         getJournal(journalId);
       }
-      if (reportId != 0 && reportStatus > 1) {
+      if (reportId != 0) {
         getReport(reportId);
       }
     }
@@ -402,7 +402,7 @@ class _ManagerCompletePageState extends State<ManagerCompletePage> {
               _request['RequestType']['ID'] == 1||_request['RequestType']['ID'] == 2||_request['RequestType']['ID'] == 3||_request['RequestType']['ID'] == 7?BuildWidget.buildRow(model.RemarkType[_request['RequestType']['ID']], _request['FaultType']['Name']):new Container(),
               BuildWidget.buildRow('请求人', _request['RequestUser']['Name']),
               _request['Status']['ID']==1?new Container():BuildWidget.buildRow('处理方式', _request['DealType']['Name']),
-              _request['Status']['ID']==1?new Container():BuildWidget.buildRow('当前状态', _request['Status']['Name']),
+              //_request['Status']['ID']==1?new Container():BuildWidget.buildRow('当前状态', _request['Status']['Name']),
               //_request['Status']['ID']==1?new Container():BuildWidget.buildRow('紧急程度', _request['Priority']['Name']),
               BuildWidget.buildRow('请求附件', ''),
               buildImageColumn()

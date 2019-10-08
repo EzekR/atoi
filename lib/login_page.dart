@@ -289,6 +289,7 @@ class _LoginPageState extends State<LoginPage> {
         phoneController.text = regPhoneController.text;
         passwordController.text = '';
         confirmPass.text = '';
+        verificationController.text = '';
         _timer.cancel();
       });
     } else {

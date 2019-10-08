@@ -243,7 +243,7 @@ class _EngineerToReportState extends State<EngineerToReport> {
                     return new Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: <Widget>[
-                        _noMore?new Center(child: new Text('没有更多待开始工单'),):new SpinKitChasingDots(color: Colors.blue,)
+                        _noMore?new Center(child: new Text('没有更多作业中工单'),):new SpinKitChasingDots(color: Colors.blue,)
                       ],
                     );
                   }

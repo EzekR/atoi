@@ -6,6 +6,7 @@ import 'dart:convert';
 import 'package:atoi/utils/constants.dart';
 import 'package:atoi/widgets/build_widget.dart';
 import 'package:atoi/models/models.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 class ManagerAuditVoucherPage extends StatefulWidget {
   static String tag = 'manager-audit-voucher-page';
@@ -248,11 +249,20 @@ class _ManagerAuditVoucherPageState extends State<ManagerAuditVoucherPage> {
       'resultStatusID': model.ResultStatusID[_currentResult],
       'comments': _comment.text,
     };
+    Fluttertoast.showToast(
+        msg: "正在提交...",
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.CENTER,
+        backgroundColor: Colors.black54,
+        textColor: Colors.white,
+        fontSize: 16.0
+    );
     var _response = await HttpRequest.request(
       '/DispatchJournal/ApproveDispatchJournal',
       method: HttpRequest.POST,
       data: _data
     );
+    Fluttertoast.cancel();
     print(_response);
     if (_response['ResultCode'] == '00') {
       showDialog(
@@ -281,11 +291,20 @@ class _ManagerAuditVoucherPageState extends State<ManagerAuditVoucherPage> {
       'dispatchJournalID': widget.journalId,
       'comments': _comment.text
     };
+    Fluttertoast.showToast(
+        msg: "正在提交...",
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.CENTER,
+        backgroundColor: Colors.black54,
+        textColor: Colors.white,
+        fontSize: 16.0
+    );
     var _response = await HttpRequest.request(
         '/DispatchJournal/RejectDispatchJournal',
         method: HttpRequest.POST,
         data: _data
     );
+    Fluttertoast.cancel();
     print(_response);
     if (_response['ResultCode'] == '00') {
       showDialog(
