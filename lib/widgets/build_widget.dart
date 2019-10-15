@@ -214,12 +214,178 @@ class BuildWidget {
     );
   }
 
+  static Row buildDropdownWithInput(String title, TextEditingController controller, String currentItem, List dropdownItems, Function changeDropdown, {TextInputType inputType}) {
+    inputType??TextInputType.text;
+    return new Row(
+      children: <Widget>[
+        new Expanded(
+          flex: 4,
+          child: new Wrap(
+            alignment: WrapAlignment.end,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            children: <Widget>[
+              new Text(
+                title,
+                style: new TextStyle(
+                    fontSize: 20.0,
+                    fontWeight: FontWeight.w600
+                ),
+              )
+            ],
+          ),
+        ),
+        new Expanded(
+          flex: 1,
+          child: new Text(
+            '：',
+            style: new TextStyle(
+              fontSize: 20.0,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ),
+        new Expanded(
+          flex: 3,
+          child: new TextField(
+            controller: controller,
+            keyboardType: inputType,
+            decoration: InputDecoration(
+              fillColor: Color(0xfff0f0f0),
+              filled: true,
+            ),
+          ),
+        ),
+        new Expanded(
+          flex: 1,
+          child: new Text(' '),
+        ),
+        new Expanded(
+          flex: 2,
+          child: new DropdownButton(
+            value: currentItem,
+            items: dropdownItems,
+            style: new TextStyle(
+              fontSize: 12.0,
+              color: Colors.black
+            ),
+            onChanged: changeDropdown,
+          ),
+        )
+      ],
+    );
+  }
+
   static Row buildListLoading(bool loading) {
     return new Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: <Widget>[
         loading?new SpinKitChasingDots(color: Colors.blue,):new Text('没有更多')
       ],
+    );
+  }
+
+  static Padding buildSwitch(String labelText, Function switchMethod) {
+    return new Padding(
+      padding: EdgeInsets.symmetric(vertical: 5.0),
+      child: new Row(
+        children: <Widget>[
+          new Expanded(
+            flex: 4,
+            child: new Wrap(
+              alignment: WrapAlignment.end,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              children: <Widget>[
+                new Text(
+                  labelText,
+                  style: new TextStyle(
+                      fontSize: 20.0,
+                      fontWeight: FontWeight.w600
+                  ),
+                )
+              ],
+            ),
+          ),
+          new Expanded(
+            flex: 1,
+            child: new Text(
+              '：',
+              style: new TextStyle(
+                fontSize: 20.0,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+          new Expanded(
+            flex: 6,
+            child: new Switch.adaptive(
+                value: true,
+                onChanged: switchMethod
+            )
+          )
+        ],
+      ),
+    );
+  }
+
+  static Padding buildRadio(String labelText, List groupValue, String currentValue, Function changeValue) {
+    return new Padding(
+      padding: EdgeInsets.symmetric(vertical: 5.0),
+      child: new Row(
+        children: <Widget>[
+          new Expanded(
+            flex: 4,
+            child: new Wrap(
+              alignment: WrapAlignment.end,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              children: <Widget>[
+                new Text(
+                  labelText,
+                  style: new TextStyle(
+                      fontSize: 20.0,
+                      fontWeight: FontWeight.w600
+                  ),
+                )
+              ],
+            ),
+          ),
+          new Expanded(
+            flex: 1,
+            child: new Text(
+              '：',
+              style: new TextStyle(
+                fontSize: 20.0,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+          new Expanded(
+              flex: 3,
+              child: new Row(
+                children: <Widget>[
+                  new Radio(
+                    value: groupValue[0],
+                    groupValue: currentValue,
+                    onChanged: changeValue,
+                  ),
+                  new Text(groupValue[0])
+                ],
+              )
+          ),
+          new Expanded(
+              flex: 3,
+              child: new Row(
+                children: <Widget>[
+                  new Radio(
+                    value: groupValue[1],
+                    groupValue: currentValue,
+                    onChanged: changeValue,
+                  ),
+                  new Text(groupValue[1])
+                ],
+              )
+          ),
+        ],
+      ),
     );
   }
 }

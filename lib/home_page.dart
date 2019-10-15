@@ -12,6 +12,7 @@ import 'dart:async';
 import 'package:atoi/complete_info.dart';
 import 'package:atoi/pages/equipments/equipments_list.dart';
 import 'package:atoi/pages/reports/report_list.dart';
+import 'package:atoi/pages/equipments/equipment_contract.dart';
 
 class HomePage extends StatefulWidget {
   static String tag = 'home-page';
@@ -194,6 +195,19 @@ class _HomePageState extends State<HomePage>
                       onTap: () {
                         Navigator.of(context).push(new MaterialPageRoute(builder: (_) {
                           return new EquipmentsList();
+                        }));
+                      },
+                    ),
+                    ListTile(
+                      leading: Icon(Icons.event_note),
+                      title: Text('合同管理',
+                        style: new TextStyle(
+                            color: Colors.blue
+                        ),
+                      ),
+                      onTap: () {
+                        Navigator.of(context).push(new MaterialPageRoute(builder: (_) {
+                          return new EquipmentContract();
                         }));
                       },
                     ),

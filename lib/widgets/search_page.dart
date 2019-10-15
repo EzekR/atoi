@@ -25,7 +25,9 @@ class _SearchPageState extends State<SearchPage> {
         }
     );
     print(resp);
-    suggestionList = resp['Data'];
+    setState(() {
+      suggestionList = resp['Data'];
+    });
   }
 
   Widget build(BuildContext context) {

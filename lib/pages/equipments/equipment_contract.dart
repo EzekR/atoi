@@ -11,52 +11,70 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:atoi/utils/http_request.dart';
 import 'package:atoi/widgets/build_widget.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
+import 'package:atoi/widgets/search_page.dart';
+import 'package:atoi/widgets/search_bar_vendor.dart';
 
-class MaintainRequest extends StatefulWidget{
-  static String tag = 'maintain-request';
+class EquipmentContract extends StatefulWidget{
 
-  _MaintainRequestState createState() => new _MaintainRequestState();
+  _EquipmentContractState createState() => new _EquipmentContractState();
 }
 
-class _MaintainRequestState extends State<MaintainRequest> {
+class _EquipmentContractState extends State<EquipmentContract> {
 
   String barcode = "";
 
   var _isExpandedBasic = true;
   var _isExpandedDetail = false;
   var _isExpandedAssign = false;
-  var _userID;
-  var roleName;
+  Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
+  var _roleName;
   var _fault = new TextEditingController();
-  ConstantsModel model;
+  List serviceType = ['原厂服务合同', '采购服务合同'];
+  List serviceScope = ['全保', '技术保', '其他保'];
+  List<DropdownMenuItem<String>> dropdownType;
+  List<DropdownMenuItem<String>> dropdownScope;
+  String currentType;
+  String currentScope;
+  Map<String, dynamic> supplier;
+  String startDate = '起始日期';
+  String endDate = '结束日期';
+
+  MainModel mainModel = MainModel();
+
+  List<Map> _equipments = [];
 
   List<dynamic> _imageList = [];
-  List _serviceResults = [];
-
-  var _equipment;
-
-  List<DropdownMenuItem<String>> _dropDownMenuItems;
-  String _currentResult;
-
-  List iterateMap(Map item) {
-    var _list = [];
-    item.forEach((key, val) {
-      _list.add(key);
-    });
-    return _list;
-  }
-
-  void initDropdown() {
-    _serviceResults = iterateMap(model.FaultMaintain);
-    _dropDownMenuItems = getDropDownMenuItems(_serviceResults);
-    _currentResult = _dropDownMenuItems[0].value;
-  }
 
   void initState(){
     getRole();
-    model = MainModel.of(context);
-    initDropdown();
     super.initState();
+    dropdownType = getDropDownMenuItems(serviceType);
+    dropdownScope = getDropDownMenuItems(serviceScope);
+    currentScope = dropdownScope[0].value;
+    currentType = dropdownType[0].value;
+  }
+
+  void changeType(String selected) {
+    setState(() {
+      currentType = selected;
+    });
+  }
+
+  void changeScope(String selected) {
+    setState(() {
+      currentScope = selected;
+    });
+  }
+
+  Future<String> pickDate() async {
+    var val = await showDatePicker(
+        context: context,
+        initialDate: new DateTime.now(),
+        firstDate:
+        new DateTime.now().subtract(new Duration(days: 30)), // 减 30 天
+        lastDate: new DateTime.now().add(new Duration(days: 30)), // 加 30 天
+        locale: Locale('zh'));
+    return '${val.year}-${val.month}-${val.day}';
   }
 
   Future<Null> getDevice() async {
@@ -71,16 +89,15 @@ class _MaintainRequestState extends State<MaintainRequest> {
     print(resp);
     if (resp['ResultCode'] == '00') {
       setState(() {
-        _equipment = resp['Data'];
+        _equipments.add(resp['Data']);
       });
     } else {
       showDialog(context: context, builder: (context) => AlertDialog(title: new Text(resp['ResultMessage']),));
     }
   }
-
   Future getImage() async {
     var image = await ImagePicker.pickImage(
-        source: ImageSource.camera,
+      source: ImageSource.camera,
     );
     if (image != null) {
       var compressed = await FlutterImageCompress.compressAndGetFile(
@@ -95,18 +112,15 @@ class _MaintainRequestState extends State<MaintainRequest> {
     }
   }
 
-  Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
-
-  Future<Null> getRole() async {
-    var prefs = await _prefs;
+  Future getRole() async {
+    final SharedPreferences prefs = await _prefs;
     setState(() {
-      _userID = prefs.getInt('userID');
-      roleName = prefs.getString('userName');
+      _roleName = prefs.getString('userName');
     });
   }
 
   Future<Null> submit() async {
-    if (_equipment == null) {
+    if (_equipments == null) {
       showDialog(context: context,
           builder: (context) => AlertDialog(
             title: new Text('请选择设备'),
@@ -114,13 +128,15 @@ class _MaintainRequestState extends State<MaintainRequest> {
       );
       return;
     }
-    if (_fault.text == null || _fault.text.isEmpty) {
+    if (_fault.text.isEmpty || _fault.text == null) {
       showDialog(context: context,
-        builder: (context) => AlertDialog(
-          title: new Text('保养要求不可为空'),
-        )
+          builder: (context) => AlertDialog(
+            title: new Text('盘点备注不可为空'),
+          )
       );
     } else {
+      var prefs = await _prefs;
+      var userID = prefs.getInt('userID');
       var fileList = [];
       for (var image in _imageList) {
         List<int> imageBytes = await image.readAsBytes();
@@ -134,19 +150,12 @@ class _MaintainRequestState extends State<MaintainRequest> {
         fileList.add(file);
       }
       var _data = {
-        'userID': _userID,
+        'userID': userID,
         'requestInfo': {
           'RequestType': {
-            'ID': 2
+            'ID': 12
           },
-          'Equipments': [
-            {
-              'ID': _equipment['ID']
-            }
-          ],
-          'FaultType': {
-            'ID': model.FaultMaintain[_currentResult],
-          },
+          'Equipments': _equipments,
           'FaultDesc': _fault.text,
           'Files': fileList
         }
@@ -223,20 +232,18 @@ class _MaintainRequestState extends State<MaintainRequest> {
     return items;
   }
 
-
-  void changedDropDownMethod(String selectedMethod) {
-    setState(() {
-      _currentResult = selectedMethod;
-    });
-  }
-
   Future toSearch() async {
     final _searchResult = await showSearch(context: context, delegate: SearchBarDelegate());
-    Map _data = jsonDecode(_searchResult);
-    setState(() {
-      //_result.addAll(_data);
-      _equipment = _data;
-    });
+    if (_searchResult != null && _searchResult != 'null') {
+      print(_searchResult);
+      Map _data = jsonDecode(_searchResult);
+      var _result = _equipments.firstWhere((_equipment) => _equipment['OID'] == _data['OID'], orElse: ()=> null);
+      if (_result == null) {
+        setState(() {
+          _equipments.add(_data);
+        });
+      }
+    }
   }
 
   Padding buildRow(String labelText, String defaultText) {
@@ -270,12 +277,55 @@ class _MaintainRequestState extends State<MaintainRequest> {
     );
   }
 
+  Widget buildEquip() {
+    List<Widget> tiles = [];
+    Widget content;
+    for(var _equipment in _equipments) {
+      tiles.add(
+        new Padding(
+          padding: EdgeInsets.symmetric(horizontal: 12.0),
+          child: new Column(
+            children: <Widget>[
+              BuildWidget.buildRow('系统编号', _equipment['OID']??''),
+              BuildWidget.buildRow('名称', _equipment['Name']??''),
+              BuildWidget.buildRow('型号', _equipment['EquipmentCode']??''),
+              BuildWidget.buildRow('序列号', _equipment['SerialCode']??''),
+              BuildWidget.buildRow('使用科室', _equipment['Department']['Name']??''),
+              BuildWidget.buildRow('安装地点', _equipment['InstalSite']??''),
+              BuildWidget.buildRow('设备厂商', _equipment['Manufacturer']['Name']??''),
+              BuildWidget.buildRow('资产等级', _equipment['AssetLevel']['Name']??''),
+              BuildWidget.buildRow('维保状态', _equipment['WarrantyStatus']??''),
+              BuildWidget.buildRow('服务范围', _equipment['ContractScope']['Name']??''),
+              new Padding(padding: EdgeInsets.symmetric(vertical: 8.0),
+                child: new Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: <Widget>[
+                    new Text('删除此设备'),
+                    new IconButton(icon: new Icon(Icons.delete_forever), onPressed: (){
+                      _equipments.remove(_equipment);
+                      setState(() {
+                        _equipments = _equipments;
+                      });
+                    })
+                  ],
+                ),
+              )
+            ],
+          ),
+        ),
+      );
+    }
+    content = new Column(
+      children: tiles,
+    );
+    return content;
+  }
   Widget build(BuildContext context) {
     return ScopedModelDescendant<MainModel>(
       builder: (context, child, mainModel) {
         return new Scaffold(
             appBar: new AppBar(
-              title: new Text('新建请求--保养'),
+              title: new Text('新增合同'),
               elevation: 0.7,
               flexibleSpace: Container(
                 decoration: BoxDecoration(
@@ -294,8 +344,13 @@ class _MaintainRequestState extends State<MaintainRequest> {
                   icon: Icon(Icons.search),
                   color: Colors.white,
                   iconSize: 30.0,
-                  onPressed: () {
-                    toSearch();
+                  onPressed: () async {
+                    //toSearch();
+                    final selected = await Navigator.of(context).push(new MaterialPageRoute(builder: (context) {
+                      return SearchPage();
+                    }));
+                    print(selected);
+                    _equipments.addAll(selected);
                   }
                   ,
                 ),
@@ -332,113 +387,161 @@ class _MaintainRequestState extends State<MaintainRequest> {
                         new ExpansionPanel(
                           headerBuilder: (context, isExpanded) {
                             return ListTile(
-                                leading: new Icon(Icons.info,
-                                  size: 24.0,
-                                  color: Colors.blue,
+                              leading: new Icon(Icons.info,
+                                size: 24.0,
+                                color: Colors.blue,
+                              ),
+                              title: Text('设备基本信息',
+                                style: new TextStyle(
+                                    fontSize: 22.0,
+                                    fontWeight: FontWeight.w400
                                 ),
-                                title: Text('设备基本信息',
-                                  style: new TextStyle(
-                                      fontSize: 22.0,
-                                      fontWeight: FontWeight.w400
-                                  ),
-                                ),
+                              ),
                             );
                           },
-                          body: new Padding(
-                            padding: EdgeInsets.symmetric(horizontal: 12.0),
-                            child: _equipment==null?new Center(child: new Text('请选择设备')):new Column(
-                              children: <Widget>[
-                                BuildWidget.buildRow('系统编号', _equipment['OID']??''),
-                                BuildWidget.buildRow('名称', _equipment['Name']??''),
-                                BuildWidget.buildRow('型号', _equipment['EquipmentCode']??''),
-                                BuildWidget.buildRow('序列号', _equipment['SerialCode']??''),
-                                BuildWidget.buildRow('使用科室', _equipment['Department']['Name']??''),
-                                BuildWidget.buildRow('安装地点', _equipment['InstalSite']??''),
-                                BuildWidget.buildRow('设备厂商', _equipment['Manufacturer']['Name']??''),
-                                BuildWidget.buildRow('资产等级', _equipment['AssetLevel']['Name']??''),
-                                BuildWidget.buildRow('维保状态', _equipment['WarrantyStatus']??''),
-                                BuildWidget.buildRow('服务范围', _equipment['ContractScope']['Name']??''),
-                                new Padding(padding: EdgeInsets.symmetric(vertical: 8.0))
-                              ],
-                            ),
-                          ),
+                          body: _equipments.length==0?new Center(child: new Text('请选择设备')):buildEquip(),
                           isExpanded: _isExpandedBasic,
                         ),
                         new ExpansionPanel(
                           headerBuilder: (context, isExpanded) {
                             return ListTile(
-                                leading: new Icon(Icons.description,
-                                  size: 24.0,
-                                  color: Colors.blue,
+                              leading: new Icon(Icons.description,
+                                size: 24.0,
+                                color: Colors.blue,
+                              ),
+                              title: Text('合同详细信息',
+                                style: new TextStyle(
+                                    fontSize: 22.0,
+                                    fontWeight: FontWeight.w400
                                 ),
-                                title: Text('请求详细信息',
-                                  style: new TextStyle(
-                                      fontSize: 22.0,
-                                      fontWeight: FontWeight.w400
-                                  ),
-                                ),
+                              ),
                             );
                           },
                           body: new Padding(
                             padding: EdgeInsets.symmetric(horizontal: 12.0),
                             child: new Column(
                               children: <Widget>[
-                                BuildWidget.buildRow('类型', '保养'),
-                                BuildWidget.buildRow('请求人', roleName),
-                                BuildWidget.buildRow('主题', _equipment==null?'--保养':'${_equipment['Name']}--保养'),
+                                BuildWidget.buildRow('系统编号', '系统自动生成'),
+                                BuildWidget.buildInput('项目编号', new TextEditingController()),
+                                BuildWidget.buildInput('合同编号', new TextEditingController()),
+                                BuildWidget.buildInput('金额', new TextEditingController()),
+                                BuildWidget.buildInput('名称', new TextEditingController()),
+                                BuildWidget.buildDropdown('类型', currentType, dropdownType, changeType),
+                                new Padding(
+                                  padding: EdgeInsets.symmetric(vertical: 5.0),
+                                  child: new Row(
+                                    children: <Widget>[
+                                      new Expanded(
+                                        flex: 4,
+                                        child: new Wrap(
+                                          alignment: WrapAlignment.end,
+                                          crossAxisAlignment: WrapCrossAlignment.center,
+                                          children: <Widget>[
+                                            new Text(
+                                              '起止日期',
+                                              style: new TextStyle(
+                                                  fontSize: 20.0, fontWeight: FontWeight.w600),
+                                            )
+                                          ],
+                                        ),
+                                      ),
+                                      new Expanded(
+                                        flex: 1,
+                                        child: new Text(
+                                          '：',
+                                          style: new TextStyle(
+                                            fontSize: 20.0,
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                        ),
+                                      ),
+                                      new Expanded(
+                                        flex: 3,
+                                        child: new MaterialButton(
+                                          onPressed: () async {
+                                            var _date = await pickDate();
+                                            setState(() {
+                                              startDate = _date;
+                                            });
+                                          },
+                                          child: new Text(startDate),
+                                        ),
+                                      ),
+                                      new Expanded(
+                                        flex: 3,
+                                        child: new MaterialButton(
+                                          onPressed: () async {
+                                            var _date = await pickDate();
+                                            setState(() {
+                                              endDate = _date;
+                                            });
+                                          },
+                                          child: new Text(endDate),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                new Padding(
+                                  padding: EdgeInsets.symmetric(vertical: 5.0),
+                                  child: new Row(
+                                    children: <Widget>[
+                                      new Expanded(
+                                        flex: 4,
+                                        child: new Wrap(
+                                          alignment: WrapAlignment.end,
+                                          crossAxisAlignment: WrapCrossAlignment.center,
+                                          children: <Widget>[
+                                            new Text(
+                                              '供应商',
+                                              style: new TextStyle(
+                                                  fontSize: 20.0, fontWeight: FontWeight.w600),
+                                            )
+                                          ],
+                                        ),
+                                      ),
+                                      new Expanded(
+                                        flex: 1,
+                                        child: new Text(
+                                          '：',
+                                          style: new TextStyle(
+                                            fontSize: 20.0,
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                        ),
+                                      ),
+                                      new Expanded(
+                                          flex: 3,
+                                          child: new Text(
+                                            supplier == null ? '' : supplier['Name'],
+                                            style: new TextStyle(
+                                                fontSize: 20.0,
+                                                fontWeight: FontWeight.w400,
+                                                color: Colors.black54),
+                                          )),
+                                      new Expanded(
+                                          flex: 3,
+                                          child: new IconButton(
+                                              icon: Icon(Icons.search),
+                                              onPressed: () async {
+                                                final _searchResult = await showSearch(
+                                                    context: context,
+                                                    delegate: SearchBarVendor(),
+                                                    hintText: '请输厂商名称');
+                                                print(_searchResult);
+                                                if (_searchResult != null &&
+                                                    _searchResult != 'null') {
+                                                  setState(() {
+                                                    supplier = jsonDecode(_searchResult);
+                                                  });
+                                                }
+                                              })),
+                                    ],
+                                  ),
+                                ),
+                                BuildWidget.buildDropdown('服务范围', currentScope, dropdownScope, changeScope),
+                                BuildWidget.buildInput('备注', new TextEditingController()),
                                 new Divider(),
-                                new Padding(
-                                  padding: EdgeInsets.symmetric(vertical: 5.0),
-                                  child: new Row(
-                                    children: <Widget>[
-                                      new Expanded(
-                                        flex: 4,
-                                        child: new Text(
-                                          '保养类型：',
-                                          style: new TextStyle(
-                                              fontSize: 20.0,
-                                              fontWeight: FontWeight.w600
-                                          ),
-                                        ),
-                                      ),
-                                      new Expanded(
-                                        flex: 6,
-                                        child: new DropdownButton(
-                                          value: _currentResult,
-                                          items: _dropDownMenuItems,
-                                          style: new TextStyle(
-                                            fontSize: 10,
-                                            color: Colors.black
-                                          ),
-                                          onChanged: changedDropDownMethod,
-                                        ),
-                                      )
-                                    ],
-                                  ),
-                                ),
-                                new Padding(
-                                  padding: EdgeInsets.symmetric(vertical: 5.0),
-                                  child: new Row(
-                                    children: <Widget>[
-                                      new Expanded(
-                                        flex: 4,
-                                        child: new Text(
-                                          '保养要求：',
-                                          style: new TextStyle(
-                                              fontSize: 20.0,
-                                              fontWeight: FontWeight.w600
-                                          ),
-                                        ),
-                                      ),
-                                      new Expanded(
-                                        flex: 6,
-                                        child: new TextField(
-                                          controller: _fault,
-                                        )
-                                      )
-                                    ],
-                                  ),
-                                ),
                                 new Padding(
                                   padding: EdgeInsets.symmetric(vertical: 5.0),
                                   child: new Row(
@@ -498,6 +601,7 @@ class _MaintainRequestState extends State<MaintainRequest> {
                       ],
                     )
                   ],
+
                 ),
               ),
             )

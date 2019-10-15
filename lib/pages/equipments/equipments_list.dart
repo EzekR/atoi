@@ -3,6 +3,7 @@ import 'package:atoi/utils/http_request.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:atoi/pages/equipments/print_qrcode.dart';
 import 'package:atoi/widgets/build_widget.dart';
+import 'package:atoi/pages/equipments/equipment_detail.dart';
 
 class EquipmentsList extends StatefulWidget{
   _EquipmentsListState createState() => _EquipmentsListState();
@@ -180,7 +181,9 @@ class _EquipmentsListState extends State<EquipmentsList> {
         ),
         floatingActionButton: FloatingActionButton(
           onPressed: () {
-            // Add your onPressed code here!
+            Navigator.of(context).push(new MaterialPageRoute(builder: (_) {
+              return new EquipmentDetail();
+            }));
           },
           child: Icon(Icons.add_to_queue),
           backgroundColor: Colors.blue,
