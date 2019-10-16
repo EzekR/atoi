@@ -38,15 +38,6 @@ class HttpRequest {
     params ?? {};
     method = method ?? 'GET';
 
-    /// restful 请求处理
-    /// /gysw/search/hist/:user_id        user_id=27
-    /// 最终生成 url 为     /gysw/search/hist/27
-//    data.forEach((key, value) {
-//      if (url.indexOf(key) != -1) {
-//        url = url.replaceAll(':$key', value.toString());
-//      }
-//    });
-
     /// 打印请求相关信息：请求地址、请求方式、请求参数
     print('请求地址：【' + method + '  ' + url + '】');
     print('请求body：' + data.toString());

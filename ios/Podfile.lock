@@ -86,13 +86,13 @@ EXTERNAL SOURCES:
 SPEC CHECKSUMS:
   barcode_scan: 33f586d02270046fc6559135038b34b5754eaa4f
   brother_printer: 4624b35e200561146a8106f27b5cdf022c0b19b6
-  connectivity: c72716e202a1225ec4810740d5cb56b8ae3bf4cc
+  connectivity: 6e94255659cc86dcbef1d452ad3e0491bb1b3e75
   Flutter: 58dd7d1b27887414a370fcccb9e645c08ffd7a6a
   flutter_image_compress: f69d0e0e078ce52b4810695593bc861ee319ae7d
   flutter_jpush: bb278c661136b2a2032e96ffc15bbce871d3fb02
   flutter_picker: 8ff0d7440b4e8327fcc9e6b21a39ef9369e697c7
   fluttertoast: b644586ef3b16f67fae9a1f8754cef6b2d6b634b
-  image_picker: 16e5fec1fbc87fd3b297c53e4048521eaf17cd06
+  image_picker: e3eacd46b94694dde7cf2705955cece853aa1a8f
   JCore: 4072327557f0b83cc22dd4041f2f839740c0077b
   JPush: a1ff8b8ec53fa3419b414946e4db4efa313baeae
   Mantle: 2fa750afa478cd625a94230fbf1c13462f29395b

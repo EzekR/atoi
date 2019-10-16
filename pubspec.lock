@@ -48,7 +48,7 @@ packages:
     description:
       path: "."
       ref: HEAD
-      resolved-ref: "74a235dd6f70337ded6cce168e29b1442b040bf1"
+      resolved-ref: "85a02af97d4abd8bffa08344556dec85d2170658"
       url: "https://github.com/EzekR/brother_print.git"
     source: git
     version: "0.0.1"

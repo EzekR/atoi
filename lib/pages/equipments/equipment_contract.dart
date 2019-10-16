@@ -585,7 +585,7 @@ class _EquipmentContractState extends State<EquipmentContract> {
                           ),
                           padding: EdgeInsets.all(12.0),
                           color: new Color(0xff2E94B9),
-                          child: Text('提交请求', style: TextStyle(color: Colors.white)),
+                          child: Text('提交', style: TextStyle(color: Colors.white)),
                         ),
                         new RaisedButton(
                           onPressed: () {
@@ -596,7 +596,7 @@ class _EquipmentContractState extends State<EquipmentContract> {
                           ),
                           padding: EdgeInsets.all(12.0),
                           color: new Color(0xffD25565),
-                          child: Text('返回首页', style: TextStyle(color: Colors.white)),
+                          child: Text('返回', style: TextStyle(color: Colors.white)),
                         ),
                       ],
                     )
