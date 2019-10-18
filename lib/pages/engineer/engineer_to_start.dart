@@ -7,14 +7,11 @@ import 'package:atoi/models/models.dart';
 import 'package:atoi/widgets/build_widget.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 
-class EngineerToStart extends StatefulWidget{
-
+class EngineerToStart extends StatefulWidget {
   _EngineerToStartState createState() => _EngineerToStartState();
 }
 
 class _EngineerToStartState extends State<EngineerToStart> {
-
-
   List<dynamic> _tasks = [];
   int offset = 5;
   bool _loading = false;
@@ -25,15 +22,9 @@ class _EngineerToStartState extends State<EngineerToStart> {
   Future<Null> getTask() async {
     final SharedPreferences pref = await _prefs;
     var userId = await pref.getInt('userID');
-    Map<String, dynamic> params = {
-      'userID': userId,
-      'statusIDs': 1
-    };
-    var resp = await HttpRequest.request(
-      '/Dispatch/GetDispatchs',
-      method: HttpRequest.GET,
-      params: params
-    );
+    Map<String, dynamic> params = {'userID': userId, 'statusIDs': 1};
+    var resp = await HttpRequest.request('/Dispatch/GetDispatchs',
+        method: HttpRequest.GET, params: params);
     print(resp);
     setState(() {
       _tasks = resp['Data'];
@@ -74,7 +65,16 @@ class _EngineerToStartState extends State<EngineerToStart> {
   Widget build(BuildContext context) {
     // TODO: implement build
 
-    Card buildCardItem(int dispatchId, String OID, String scheduleDate, List deviceName, String deviceNo, String location, String requestType, String urgency, String remark) {
+    Card buildCardItem(
+        int dispatchId,
+        String OID,
+        String scheduleDate,
+        List deviceName,
+        String deviceNo,
+        String location,
+        String requestType,
+        String urgency,
+        String remark) {
       var _datetime = DateTime.parse(scheduleDate);
       var departDate = '${_datetime.year}-${_datetime.month}-${_datetime.day}';
       return new Card(
@@ -91,15 +91,11 @@ class _EngineerToStartState extends State<EngineerToStart> {
               title: Text(
                 "派工单编号：$OID",
                 style: new TextStyle(
-                    fontSize: 16.0,
-                    color: Theme.of(context).primaryColor
-                ),
+                    fontSize: 16.0, color: Theme.of(context).primaryColor),
               ),
               subtitle: Text(
                 "出发时间：$departDate",
-                style: new TextStyle(
-                    color: Theme.of(context).accentColor
-                ),
+                style: new TextStyle(color: Theme.of(context).accentColor),
               ),
             ),
             new Padding(
@@ -109,21 +105,35 @@ class _EngineerToStartState extends State<EngineerToStart> {
                 mainAxisAlignment: MainAxisAlignment.start,
                 mainAxisSize: MainAxisSize.max,
                 children: <Widget>[
-                  deviceName==null?new Container():BuildWidget.buildCardRow('设备名称', deviceName.length>1?'多设备':deviceName[0]['Name']),
-                  location==''?new Container():BuildWidget.buildCardRow('使用科室', location),
+                  deviceName == null
+                      ? new Container()
+                      : BuildWidget.buildCardRow(
+                          '设备名称',
+                          deviceName.length > 1
+                              ? '多设备'
+                              : deviceName[0]['Name']),
+                  location == ''
+                      ? new Container()
+                      : BuildWidget.buildCardRow('使用科室', location),
                   BuildWidget.buildCardRow('派工类型', requestType),
                   BuildWidget.buildCardRow('紧急程度', urgency),
-                  BuildWidget.buildCardRow('主管备注', remark.length>10?'${remark.substring(0,10)}...':remark),
+                  BuildWidget.buildCardRow(
+                      '主管备注',
+                      remark.length > 10
+                          ? '${remark.substring(0, 10)}...'
+                          : remark),
                   new Row(
                     mainAxisAlignment: MainAxisAlignment.end,
                     mainAxisSize: MainAxisSize.max,
                     children: <Widget>[
                       new RaisedButton(
-                        onPressed: (){
+                        onPressed: () {
                           //Navigator.of(context).pushNamed(EngineerStartPage.tag);
                           //todo: navigate to start page
-                          Navigator.of(context).push(new MaterialPageRoute(builder: (_) {
-                            return new EngineerStartPage(dispatchId: dispatchId);
+                          Navigator.of(context)
+                              .push(new MaterialPageRoute(builder: (_) {
+                            return new EngineerStartPage(
+                                dispatchId: dispatchId);
                           })).then((result) => refresh());
                         },
                         shape: RoundedRectangleBorder(
@@ -138,9 +148,7 @@ class _EngineerToStartState extends State<EngineerToStart> {
                             ),
                             new Text(
                               '开始作业',
-                              style: new TextStyle(
-                                  color: Colors.white
-                              ),
+                              style: new TextStyle(color: Colors.white),
                             )
                           ],
                         ),
@@ -158,43 +166,59 @@ class _EngineerToStartState extends State<EngineerToStart> {
     return ScopedModelDescendant<MainModel>(
       builder: (context, child, model) {
         return new RefreshIndicator(
-            child: model.tasksToStart.length == 0?ListView(padding: const EdgeInsets.symmetric(vertical: 150.0), children: <Widget>[new Center(child: new Text('没有待开始工单'),)],):
-            ListView.builder(
-                shrinkWrap: true,
-                padding: const EdgeInsets.all(2.0),
-                itemCount: model.tasksToStart.length>9?model.tasksToStart.length+1:model.tasksToStart.length,
-                controller: _scrollController,
-                itemBuilder: (context, i) {
-                  if (i != model.tasksToStart.length) {
-                    return buildCardItem(
-                        model.tasksToStart[i]['ID'],
-                        model.tasksToStart[i]['OID'],
-                        model.tasksToStart[i]['ScheduleDate'],
-                        model.tasksToStart[i]['Request']['Equipments'].length >
-                            0
-                            ? model.tasksToStart[i]['Request']['Equipments']
-                            : null,
-                        model.tasksToStart[i]['Request']['Equipments'].length >
-                            0
-                            ? model
-                            .tasksToStart[i]['Request']['Equipments'][0]['EquipmentCode']
-                            : null,
-                        model.tasksToStart[i]['Request']['DepartmentName'],
-                        model.tasksToStart[i]['RequestType']['Name'],
-                        model.tasksToStart[i]['Urgency']['Name'],
-                        model.tasksToStart[i]['LeaderComments']);
-                  } else {
-                    return new Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: <Widget>[
-                        _noMore?new Center(child: new Text('没有更多待开始工单'),):new SpinKitChasingDots(color: Colors.blue,)
-                      ],
-                    );
-                  }
-                }
-            ),
-            onRefresh: model.getTasksToStart
-        );
+            child: model.tasksToStart.length == 0
+                ? ListView(
+                    padding: const EdgeInsets.symmetric(vertical: 150.0),
+                    children: <Widget>[
+                      new Center(
+                        child: new Text('没有待开始工单'),
+                      )
+                    ],
+                  )
+                : ListView.builder(
+                    shrinkWrap: true,
+                    padding: const EdgeInsets.all(2.0),
+                    itemCount: model.tasksToStart.length > 9
+                        ? model.tasksToStart.length + 1
+                        : model.tasksToStart.length,
+                    controller: _scrollController,
+                    itemBuilder: (context, i) {
+                      if (i != model.tasksToStart.length) {
+                        return buildCardItem(
+                            model.tasksToStart[i]['ID'],
+                            model.tasksToStart[i]['OID'],
+                            model.tasksToStart[i]['ScheduleDate'],
+                            model.tasksToStart[i]['Request']['Equipments']
+                                        .length >
+                                    0
+                                ? model.tasksToStart[i]['Request']['Equipments']
+                                : null,
+                            model.tasksToStart[i]['Request']['Equipments']
+                                        .length >
+                                    0
+                                ? model.tasksToStart[i]['Request']['Equipments']
+                                    [0]['EquipmentCode']
+                                : null,
+                            model.tasksToStart[i]['Request']['DepartmentName'],
+                            model.tasksToStart[i]['RequestType']['Name'],
+                            model.tasksToStart[i]['Urgency']['Name'],
+                            model.tasksToStart[i]['LeaderComments']);
+                      } else {
+                        return new Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: <Widget>[
+                            _noMore
+                                ? new Center(
+                                    child: new Text('没有更多待开始工单'),
+                                  )
+                                : new SpinKitChasingDots(
+                                    color: Colors.blue,
+                                  )
+                          ],
+                        );
+                      }
+                    }),
+            onRefresh: model.getTasksToStart);
       },
     );
   }
