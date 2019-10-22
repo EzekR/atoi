@@ -395,21 +395,33 @@ class _UserRepairPageState extends State<UserRepairPage> {
                           BuildWidget.buildInput('故障描述', _describe),
                           BuildWidget.buildDropdown('故障分类', _currentResult, _dropDownMenuItems, changedDropDownMethod),
                           new Padding(
-                            padding: EdgeInsets.symmetric(vertical: 5.0, horizontal: 50.0),
+                            padding: EdgeInsets.symmetric(vertical: 5.0),
                             child: new Row(
                               children: <Widget>[
-                                new Text(
-                                  '添加附件：',
-                                  style: new TextStyle(
-                                      fontSize: 20.0,
-                                      fontWeight: FontWeight.w600
-                                  ),
+                                new Expanded(
+                                  flex: 4,
+                                  child: new Wrap(
+                                    alignment: WrapAlignment.end,
+                                    crossAxisAlignment: WrapCrossAlignment.center,
+                                    children: <Widget>[
+                                      new Text(
+                                        '添加附件：',
+                                        style: new TextStyle(
+                                            fontSize: 20.0,
+                                            fontWeight: FontWeight.w600
+                                        ),
+                                      ),
+                                    ],
+                                  )
                                 ),
-                                new IconButton(
-                                    icon: Icon(Icons.add_a_photo),
-                                    onPressed: () {
-                                      getImage();
-                                    })
+                                new Expanded(
+                                  flex: 7,
+                                  child: new IconButton(
+                                      icon: Icon(Icons.add_a_photo),
+                                      onPressed: () {
+                                        getImage();
+                                      }),
+                                )
                               ],
                             ),
                           ),

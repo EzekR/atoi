@@ -406,6 +406,10 @@ class _MaintainRequestState extends State<MaintainRequest> {
                                         child: new DropdownButton(
                                           value: _currentResult,
                                           items: _dropDownMenuItems,
+                                          style: new TextStyle(
+                                            fontSize: 10,
+                                            color: Colors.black
+                                          ),
                                           onChanged: changedDropDownMethod,
                                         ),
                                       )

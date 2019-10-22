@@ -12,13 +12,13 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:atoi/widgets/build_widget.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 
-class EquipmentContract extends StatefulWidget{
-  static String tag = 'equipment-contract';
+class EquipmentArchive extends StatefulWidget{
+  static String tag = 'equipment-archive';
 
-  _EquipmentContractState createState() => new _EquipmentContractState();
+  _EquipmentArchiveState createState() => new _EquipmentArchiveState();
 }
 
-class _EquipmentContractState extends State<EquipmentContract> {
+class _EquipmentArchiveState extends State<EquipmentArchive> {
 
   String barcode = "";
 

@@ -29,6 +29,7 @@ class ConstantsModel extends Model {
   Map<String, int> _PeriodType = {};
   Map<String, int> _ContractType = {};
   Map<String, int> _Departments = {};
+  List<String> _DepartmentsList = [];
   List<String> _Remark = [
     '',
     '故障描述',
@@ -93,6 +94,7 @@ class ConstantsModel extends Model {
   get Departments => _Departments;
   get Remark => _Remark;
   get RemarkType => _RemarkType;
+  get DepartmentsList => _DepartmentsList;
 
   Future<Null> getConstants() async {
     var resp = await HttpRequest.request(
@@ -184,6 +186,7 @@ class ConstantsModel extends Model {
       }
       for(var item in resp['Data']['GetDepartment']) {
         _Departments.putIfAbsent(item['Name'], () => item['ID']);
+        _DepartmentsList.add(item['Name']);
       }
     }
     notifyListeners();

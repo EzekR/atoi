@@ -227,6 +227,7 @@ class _UserHomePageState extends State<UserHomePage> {
                   ),
                 ),
                 ListTile(
+                  leading: new Icon(Icons.person),
                   title: Text('个人信息',
                     style: new TextStyle(
                         color: Colors.blue
@@ -239,6 +240,7 @@ class _UserHomePageState extends State<UserHomePage> {
                   },
                 ),
                 ListTile(
+                  leading: new Icon(Icons.exit_to_app),
                   title: Text('登出'),
                   onTap: () async {
                     var _prefs = await prefs;

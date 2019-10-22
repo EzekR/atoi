@@ -8,6 +8,7 @@ import 'dart:convert';
 import 'package:photo_view/photo_view.dart';
 import 'package:scoped_model/scoped_model.dart';
 import 'package:atoi/models/models.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 class ManagerAuditReportPage extends StatefulWidget {
   static String tag = 'manager-audit-report-page';
@@ -297,11 +298,20 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
       'solutionResultID': model.SolutionStatus[_currentResult],
       'comments': _comment.text
     };
+    Fluttertoast.showToast(
+        msg: "正在提交...",
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.CENTER,
+        backgroundColor: Colors.black54,
+        textColor: Colors.white,
+        fontSize: 16.0
+    );
     var _response = await HttpRequest.request(
         '/DispatchReport/ApproveDispatchReport',
         method: HttpRequest.POST,
         data: _data
     );
+    Fluttertoast.cancel();
     print(_response);
     if (_response['ResultCode'] == '00') {
       showDialog(
@@ -336,11 +346,20 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
         'reportID': widget.reportId,
         'comments': _comment.text
       };
+      Fluttertoast.showToast(
+          msg: "正在提交...",
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.CENTER,
+          backgroundColor: Colors.black54,
+          textColor: Colors.white,
+          fontSize: 16.0
+      );
       var _response = await HttpRequest.request(
           '/DispatchReport/RejectDispatchReport',
           method: HttpRequest.POST,
           data: _data
       );
+      Fluttertoast.cancel();
       print(_response);
       if (_response['ResultCode'] == '00') {
         showDialog(

@@ -431,7 +431,7 @@ class _ManagerToCompleteState extends State<ManagerToComplete> {
                       return new Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: <Widget>[
-                          _noMore?new Center(child: new Text('没有更多派工单需要审核'),):new SpinKitChasingDots(color: Colors.blue,)
+                          _noMore?new Center(child: new Text('没有更多未完成请求'),):new SpinKitChasingDots(color: Colors.blue,)
                         ],
                       );
                     }

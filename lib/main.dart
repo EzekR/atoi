@@ -25,7 +25,7 @@ import 'package:atoi/pages/request/mandatory_request.dart';
 import 'package:atoi/pages/request/other_request.dart';
 import 'package:atoi/pages/request/patrol_request.dart';
 import 'package:atoi/pages/lifecycle/equipment_check.dart';
-import 'package:atoi/pages/lifecycle/equipment_contract.dart';
+import 'package:atoi/pages/lifecycle/equipment_archive.dart';
 import 'package:atoi/pages/lifecycle/equipment_install.dart';
 import 'package:atoi/pages/lifecycle/equipment_lending.dart';
 import 'package:atoi/pages/lifecycle/equipment_scrap.dart';
@@ -63,7 +63,7 @@ class _AtoiAppState extends State<AtoiApp> {
     OtherRequest.tag: (context) => OtherRequest(),
     PatrolRequest.tag: (context) => PatrolRequest(),
     EquipmentCheck.tag: (context) => EquipmentCheck(),
-    EquipmentContract.tag: (context) => EquipmentContract(),
+    EquipmentArchive.tag: (context) => EquipmentArchive(),
     EquipmentInstall.tag: (context) => EquipmentInstall(),
     EquipmentLending.tag: (context) => EquipmentLending(),
     EquipmentScrap.tag: (context) => EquipmentScrap(),
