@@ -31,6 +31,7 @@ class _ManagerCompletePageState extends State<ManagerCompletePage> {
   var _journal;
   var _report;
   ConstantsModel model;
+  List _fileNames = [];
 
   Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
 
@@ -44,6 +45,7 @@ class _ManagerCompletePageState extends State<ManagerCompletePage> {
     });
   }
   List<dynamic> imageBytes = [];
+  List<dynamic> reportImages = [];
   List<int> _imageBytes = [];
   var _accessory;
 
@@ -114,6 +116,21 @@ class _ManagerCompletePageState extends State<ManagerCompletePage> {
     }
   }
 
+  Future<String> getReportFile(int fileId) async {
+    var resp = await HttpRequest.request(
+      '/DispatchReport/DownloadUploadFile',
+      method: HttpRequest.GET,
+      params: {
+        'id': fileId
+      }
+    );
+    if (resp['ResultCode'] == '00') {
+      return resp['Data'];
+    } else {
+      return '';
+    }
+  }
+
   Future<Null> getReport(int reportId) async {
     var prefs = await _prefs;
     var userID = prefs.getInt('userID');
@@ -130,20 +147,26 @@ class _ManagerCompletePageState extends State<ManagerCompletePage> {
       setState(() {
         _report = resp['Data'];
       });
+      var _reportImage = await getReportFile(resp['Data']['FileInfo']['ID']);
+      if (_reportImage != '') {
+        setState(() {
+          reportImages.add(base64Decode(_reportImage));
+        });
+      }
       _accessory = resp['Data']['ReportAccessories'];
       for(var _acc in _accessory) {
         var _imageNew = _acc['FileInfos'].firstWhere((info) => info['FileType']==1, orElse: () => null);
         var _imageOld = _acc['FileInfos'].firstWhere((info) => info['FileType']==2, orElse: () => null);
         if (_imageNew != null) {
           var _fileNew = await getAccessoryFile(_imageNew['ID']);
-          _imageNew['FileContent'] = _fileNew;
+          _imageNew['FileContent'] = base64Decode(_fileNew);
           setState(() {
             _acc['ImageNew'] = _imageNew;
           });
         }
         if (_imageOld != null) {
           var _fileOld = await getAccessoryFile(_imageOld['ID']);
-          _imageOld['FileContent'] = _fileOld;
+          _imageOld['FileContent'] = base64Decode(_fileOld);
           setState(() {
             _acc['ImageOld'] = _imageOld;
           });
@@ -188,7 +211,11 @@ class _ManagerCompletePageState extends State<ManagerCompletePage> {
     if (resp['ResultCode'] == '00') {
       var files = resp['Data']['Files'];
       for (var file in files) {
-        getImage(file['ID']);
+        if (file['FileName'].split('.')[1] == 'jpg' || file['FileName'].split('.')[1] == 'png') {
+          getImage(file['ID']);
+        } else {
+          _fileNames.add(file['FileName']);
+        }
       }
       await getDispatch();
       setState(() {
@@ -210,6 +237,41 @@ class _ManagerCompletePageState extends State<ManagerCompletePage> {
         ));
       }
       return new Column(children: _list);
+    }
+  }
+
+  Column buildReportImageColumn() {
+    if (reportImages == null) {
+      return new Column();
+    } else {
+      List<Widget> _list = [];
+      for(var file in reportImages) {
+        _list.add(new Container(
+          child: new PhotoView(imageProvider: MemoryImage(file)),
+          width: 400.0,
+          height: 400.0,
+        ));
+      }
+      return new Column(children: _list);
+    }
+  }
+
+  Column buildFileName() {
+    if (_fileNames.length == 0) {
+      return new Column();
+    } else {
+      List<Widget> _list = [];
+      for(var _name in _fileNames) {
+        _list.add(new ListTile(
+          title: new Text(
+            _name,
+            style: new TextStyle(
+                color: Colors.blue
+            ),
+          ),
+        ));
+      }
+      return new Column(children: _list,);
     }
   }
 
@@ -308,37 +370,39 @@ class _ManagerCompletePageState extends State<ManagerCompletePage> {
 
   List<Widget> buildAccessory() {
     List<Widget> _list = [];
-    for (var _acc in _accessory) {
-      var _accList = [
-        BuildWidget.buildRow('名称', _acc['Name']),
-        BuildWidget.buildRow('来源', _acc['Source']['Name']),
-        _acc['Source']['Name'] == '外部供应商' ? BuildWidget.buildRow(
-            '外部供应商', _acc['Supplier']['Name']) : new Container(),
-        BuildWidget.buildRow('新装零件编号', _acc['NewSerialCode']),
-        BuildWidget.buildRow('附件', ''),
-        new Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            _acc['ImageNew']!=null&&_acc['ImageNew']['FileContent']!=null?new Container(width: 100.0,
-              child: new PhotoView(imageProvider: MemoryImage(
-                  base64Decode(_acc['ImageNew']['FileContent'])),),):new Container()
-          ],
-        ),
-        BuildWidget.buildRow('金额（元/件）', _acc['Amount'].toString()),
-        BuildWidget.buildRow('数量', _acc['Qty'].toString()),
-        BuildWidget.buildRow('拆下零件编号', _acc['OldSerialCode']),
-        BuildWidget.buildRow('附件', ''),
-        new Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            _acc['ImageOld']!=null&&_acc['ImageOld']['FileContent']!=null?new Container(width: 100.0,
-              child: new PhotoView(imageProvider: MemoryImage(
-                  base64Decode(_acc['ImageOld']['FileContent'])),),):new Container()
-          ],
-        ),
-        new Divider()
-      ];
-      _list.addAll(_accList);
+    if (_accessory != null) {
+      for (var _acc in _accessory) {
+        var _accList = [
+          BuildWidget.buildRow('名称', _acc['Name']),
+          BuildWidget.buildRow('来源', _acc['Source']['Name']),
+          _acc['Source']['Name'] == '外部供应商' ? BuildWidget.buildRow(
+              '外部供应商', _acc['Supplier']['Name']) : new Container(),
+          BuildWidget.buildRow('新装零件编号', _acc['NewSerialCode']),
+          BuildWidget.buildRow('附件', ''),
+          new Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              _acc['ImageNew']!=null&&_acc['ImageNew']['FileContent']!=null?new Container(width: 120.0, height: 160,
+                child: new PhotoView(imageProvider: MemoryImage(
+                    _acc['ImageNew']['FileContent']),),):new Container()
+            ],
+          ),
+          BuildWidget.buildRow('金额（元/件）', _acc['Amount'].toString()),
+          BuildWidget.buildRow('数量', _acc['Qty'].toString()),
+          BuildWidget.buildRow('拆下零件编号', _acc['OldSerialCode']),
+          BuildWidget.buildRow('附件', ''),
+          new Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              _acc['ImageOld']!=null&&_acc['ImageOld']['FileContent']!=null?new Container(width: 120.0, height: 160,
+                child: new PhotoView(imageProvider: MemoryImage(
+                    _acc['ImageOld']['FileContent']),),):new Container()
+            ],
+          ),
+          new Divider()
+        ];
+        _list.addAll(_accList);
+      }
     }
     return _list;
   }
@@ -543,7 +607,8 @@ class _ManagerCompletePageState extends State<ManagerCompletePage> {
                   BuildWidget.buildRow('作业结果', _report['SolutionResultStatus']['Name']),
                   _report['FujiComments']!=''?BuildWidget.buildRow('审批说明', _report['FujiComments']):new Container(),
                   BuildWidget.buildRow('附件', ''),
-                  buildImageColumn()
+                  buildReportImageColumn(),
+                  buildFileName()
                 ],
               ),
             ),

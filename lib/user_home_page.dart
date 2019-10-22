@@ -227,7 +227,7 @@ class _UserHomePageState extends State<UserHomePage> {
                   ),
                 ),
                 ListTile(
-                  leading: new Icon(Icons.assignment_ind),
+                  leading: new Icon(Icons.person),
                   title: Text('个人信息',
                     style: new TextStyle(
                         color: Colors.blue
