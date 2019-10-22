@@ -5,7 +5,7 @@ import 'package:pdf/widgets.dart' as pdf;
 import 'package:printing/printing.dart';
 import 'package:atoi/utils/http_request.dart';
 import 'dart:convert';
-import 'package:brother_printer/brother_printer.dart';
+//import 'package:brother_printer/brother_printer.dart';
 
 class PrintQrcode extends StatefulWidget{
   _PrintQrcodeState createState() => _PrintQrcodeState();
@@ -159,14 +159,14 @@ class _PrintQrcodeState extends State<PrintQrcode> {
   }
 
   Future<Null> printQRcode() async {
-    var error = await BrotherPrinter.printImage(_qrcode);
-    print(error);
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: new Text(error=='ok'?'打印完成':'请连接打印机'),
-      )
-    );
+    //var error = await BrotherPrinter.printImage(_qrcode);
+    //print(error);
+    //showDialog(
+    //  context: context,
+    //  builder: (context) => AlertDialog(
+    //    title: new Text(error=='ok'?'打印完成':'请连接打印机'),
+    //  )
+    //);
   }
 
   void printQrcode() async {
