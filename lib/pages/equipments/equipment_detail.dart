@@ -4,6 +4,7 @@ import 'package:atoi/widgets/search_bar_vendor.dart';
 import 'dart:convert';
 import 'package:scoped_model/scoped_model.dart';
 import 'package:atoi/models/models.dart';
+import 'package:atoi/utils/http_request.dart';
 
 class EquipmentDetail extends StatefulWidget {
   EquipmentDetail({Key key, this.equipment}):super(key: key);
@@ -157,6 +158,22 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
       departments = model.DepartmentsList;
     });
     initDepart();
+    if (widget.equipment != null) {
+
+    }
+  }
+
+  Future<Null> getDevice(int deviceId) async {
+    var resp = await HttpRequest.request(
+      '/Equipment/GetDeviceById',
+      method: HttpRequest.GET,
+      params: {
+        'id': deviceId
+      }
+    );
+    if (resp['ResultCode'] == '00') {
+
+    }
   }
 
   void switchAsset(value) {
@@ -748,7 +765,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
                       child: new RaisedButton(
                         onPressed: () {},
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(24),
+                          borderRadius: BorderRadius.circular(6),
                         ),
                         padding: EdgeInsets.all(12.0),
                         color: new Color(0xff2E94B9),
@@ -763,7 +780,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
                           Navigator.of(context).pop();
                         },
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(24),
+                          borderRadius: BorderRadius.circular(6),
                         ),
                         padding: EdgeInsets.all(12.0),
                         color: new Color(0xffD25565),

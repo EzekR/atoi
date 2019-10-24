@@ -581,7 +581,7 @@ class _EquipmentContractState extends State<EquipmentContract> {
                             submit();
                           },
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(24),
+                            borderRadius: BorderRadius.circular(6),
                           ),
                           padding: EdgeInsets.all(12.0),
                           color: new Color(0xff2E94B9),
@@ -592,7 +592,7 @@ class _EquipmentContractState extends State<EquipmentContract> {
                             Navigator.of(context).pop();
                           },
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(24),
+                            borderRadius: BorderRadius.circular(6),
                           ),
                           padding: EdgeInsets.all(12.0),
                           color: new Color(0xffD25565),

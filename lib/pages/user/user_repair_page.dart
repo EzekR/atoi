@@ -444,7 +444,7 @@ class _UserRepairPageState extends State<UserRepairPage> {
                       submit();
                     },
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(24),
+                      borderRadius: BorderRadius.circular(6),
                     ),
                     padding: EdgeInsets.all(12.0),
                     color: AppConstants.AppColors['btn_main'],

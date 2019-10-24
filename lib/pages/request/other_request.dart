@@ -10,6 +10,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:atoi/utils/http_request.dart';
 import 'package:atoi/widgets/build_widget.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
+import 'package:flutter/cupertino.dart';
 
 class OtherRequest extends StatefulWidget{
   static String tag = 'other-request';
@@ -119,7 +120,7 @@ class _OtherRequestState extends State<OtherRequest> {
   Future<Null> submit() async {
     if (_fault.text == null || _fault.text.isEmpty) {
       showDialog(context: context,
-        builder: (context) => AlertDialog(
+        builder: (context) => CupertinoAlertDialog(
           title: new Text('备注不可为空'),
         )
       );
@@ -156,7 +157,7 @@ class _OtherRequestState extends State<OtherRequest> {
       print(resp);
       if (resp['ResultCode'] == '00') {
         showDialog(context: context, builder: (buider) =>
-            AlertDialog(
+            CupertinoAlertDialog(
               title: new Text('提交请求成功'),
             )).then((result) =>
             Navigator.of(context, rootNavigator: true).pop(result)
@@ -320,7 +321,7 @@ class _OtherRequestState extends State<OtherRequest> {
                             submit();
                           },
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(24),
+                            borderRadius: BorderRadius.circular(6),
                           ),
                           padding: EdgeInsets.all(12.0),
                           color: new Color(0xff2E94B9),
@@ -331,7 +332,7 @@ class _OtherRequestState extends State<OtherRequest> {
                             Navigator.of(context).pop();
                           },
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(24),
+                            borderRadius: BorderRadius.circular(6),
                           ),
                           padding: EdgeInsets.all(12.0),
                           color: new Color(0xffD25565),

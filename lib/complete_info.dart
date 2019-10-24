@@ -4,6 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 import 'package:atoi/utils/http_request.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:flutter/cupertino.dart';
 
 class CompleteInfo extends StatefulWidget {
   _CompleteInfoState createState() => new _CompleteInfoState();
@@ -145,7 +146,7 @@ class _CompleteInfoState extends State<CompleteInfo> {
     prefs.setString('userInfo', jsonEncode(userInfo));
     if (_email.text.isNotEmpty&&!emailValid.hasMatch(_email.text)) {
       showDialog(context: context,
-          builder: (context) => AlertDialog(
+          builder: (context) => CupertinoAlertDialog(
             title: new Text('请输入正确的邮箱格式'),
           )
       );
@@ -164,7 +165,7 @@ class _CompleteInfoState extends State<CompleteInfo> {
     );
     if (resp['ResultCode'] == '00') {
       showDialog(context: context,
-        builder: (context) => AlertDialog(
+        builder: (context) => CupertinoAlertDialog(
           title: new Text('更新信息成功'),
         )
       ).then((result) {
@@ -196,7 +197,7 @@ class _CompleteInfoState extends State<CompleteInfo> {
               submit();
             },
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(24),
+              borderRadius: BorderRadius.circular(6),
             ),
             padding: EdgeInsets.all(12.0),
             color: new Color(0xff2E94B9),

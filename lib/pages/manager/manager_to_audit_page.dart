@@ -166,7 +166,7 @@ class _ManagerToAuditPageState extends State<ManagerToAuditPage> {
                               })).then((result) => refresh());
                         },
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(24),
+                          borderRadius: BorderRadius.circular(6),
                         ),
                         color: iconColor(journalStatus['ID']),
                         child: new Row(
@@ -194,7 +194,7 @@ class _ManagerToAuditPageState extends State<ManagerToAuditPage> {
                           })).then((result) => refresh());
                         },
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(24),
+                          borderRadius: BorderRadius.circular(6),
                         ),
                         color: iconColor(reportStatus['ID']),
                         child: new Row(

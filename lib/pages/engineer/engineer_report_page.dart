@@ -10,6 +10,7 @@ import 'package:atoi/widgets/build_widget.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'dart:typed_data';
 import 'package:atoi/models/models.dart';
+import 'package:flutter/cupertino.dart';
 
 class EngineerReportPage extends StatefulWidget {
   static String tag = 'engineer-report-page';
@@ -200,7 +201,7 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
   Future<Null> uploadReport(int statusId) async {
     if (_isDelayed && _delay.text.isEmpty) {
       showDialog(context: context,
-          builder: (context) => AlertDialog(
+          builder: (context) => CupertinoAlertDialog(
             title: new Text('误工说明不可为空'),
           )
       );
@@ -208,7 +209,7 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
     }
     if (_frequency.text.isEmpty || _code.text.isEmpty || _status.text.isEmpty || _analysis.text.isEmpty || _solution.text.isEmpty) {
       showDialog(context: context,
-        builder: (context) => AlertDialog(
+        builder: (context) => CupertinoAlertDialog(
           title: new Text('报告不可有空字段'),
         )
       );
@@ -264,7 +265,7 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
       if (resp['ResultCode'] == '00') {
         showDialog(context: context,
             builder: (context) =>
-                AlertDialog(
+                CupertinoAlertDialog(
                     title: statusId==1?new Text('保存报告成功'):new Text('上传报告成功')
                 )
         ).then((result) =>
@@ -272,7 +273,7 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
         );
       } else {
         showDialog(context: context,
-          builder: (context) => AlertDialog(
+          builder: (context) => CupertinoAlertDialog(
             title: new Text(resp['ResultMessage']),
           )
         );
@@ -293,7 +294,7 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
     _sources = iterateMap(model.AccessorySourceType);
     _dropDownMenuItems = getDropDownMenuItems(_serviceResults);
     _dropDownMenuSources = getDropDownMenuItems(_sources);
-    _currentResult = _dropDownMenuItems[0].value;
+    _currentResult = _dropDownMenuItems[3].value;
     _currentSource = _dropDownMenuSources[0].value;
   }
   void initState(){
@@ -335,7 +336,8 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
           controller: controller,
           decoration: InputDecoration(
             fillColor: AppConstants.AppColors['app_accent_m'],
-            filled: true
+            filled: true,
+            hintText: 'N/A'
           ),
         ),
         new SizedBox(height: 5.0,)
@@ -798,7 +800,7 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
                       uploadReport(2);
                     },
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(24),
+                      borderRadius: BorderRadius.circular(6),
                     ),
                     padding: EdgeInsets.all(12.0),
                     color: new Color(0xff2E94B9),
@@ -809,7 +811,7 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
                       uploadReport(1);
                     },
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(24),
+                      borderRadius: BorderRadius.circular(6),
                     ),
                     padding: EdgeInsets.all(12.0),
                     color: new Color(0xff2E94B9),

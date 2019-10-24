@@ -11,6 +11,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:atoi/utils/http_request.dart';
 import 'package:atoi/widgets/build_widget.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
+import 'package:flutter/cupertino.dart';
 
 class MaintainRequest extends StatefulWidget{
   static String tag = 'maintain-request';
@@ -74,7 +75,7 @@ class _MaintainRequestState extends State<MaintainRequest> {
         _equipment = resp['Data'];
       });
     } else {
-      showDialog(context: context, builder: (context) => AlertDialog(title: new Text(resp['ResultMessage']),));
+      showDialog(context: context, builder: (context) => CupertinoAlertDialog(title: new Text(resp['ResultMessage']),));
     }
   }
 
@@ -108,7 +109,7 @@ class _MaintainRequestState extends State<MaintainRequest> {
   Future<Null> submit() async {
     if (_equipment == null) {
       showDialog(context: context,
-          builder: (context) => AlertDialog(
+          builder: (context) => CupertinoAlertDialog(
             title: new Text('请选择设备'),
           )
       );
@@ -116,7 +117,7 @@ class _MaintainRequestState extends State<MaintainRequest> {
     }
     if (_fault.text == null || _fault.text.isEmpty) {
       showDialog(context: context,
-        builder: (context) => AlertDialog(
+        builder: (context) => CupertinoAlertDialog(
           title: new Text('保养要求不可为空'),
         )
       );
@@ -159,7 +160,7 @@ class _MaintainRequestState extends State<MaintainRequest> {
       print(resp);
       if (resp['ResultCode'] == '00') {
         showDialog(context: context, builder: (buider) =>
-            AlertDialog(
+            CupertinoAlertDialog(
               title: new Text('提交请求成功'),
             )).then((result) =>
             Navigator.of(context, rootNavigator: true).pop(result)
@@ -478,7 +479,7 @@ class _MaintainRequestState extends State<MaintainRequest> {
                             submit();
                           },
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(24),
+                            borderRadius: BorderRadius.circular(6),
                           ),
                           padding: EdgeInsets.all(12.0),
                           color: new Color(0xff2E94B9),
@@ -489,7 +490,7 @@ class _MaintainRequestState extends State<MaintainRequest> {
                             Navigator.of(context).pop();
                           },
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(24),
+                            borderRadius: BorderRadius.circular(6),
                           ),
                           padding: EdgeInsets.all(12.0),
                           color: new Color(0xffD25565),

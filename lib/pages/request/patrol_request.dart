@@ -14,6 +14,7 @@ import 'package:atoi/utils/constants.dart';
 import 'package:atoi/widgets/build_widget.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:atoi/widgets/search_page.dart';
+import 'package:flutter/cupertino.dart';
 
 class PatrolRequest extends StatefulWidget{
   static String tag = 'patrol-request';
@@ -65,7 +66,7 @@ class _PatrolRequestState extends State<PatrolRequest> {
         _equipments.add(resp['Data']);
       });
     } else {
-      showDialog(context: context, builder: (context) => AlertDialog(title: new Text(resp['ResultMessage']),));
+      showDialog(context: context, builder: (context) => CupertinoAlertDialog(title: new Text(resp['ResultMessage']),));
     }
   }
   Future getImage() async {
@@ -128,7 +129,7 @@ class _PatrolRequestState extends State<PatrolRequest> {
   Future<Null> submit() async {
     if (_equipments.isEmpty) {
       showDialog(context: context,
-          builder: (context) => AlertDialog(
+          builder: (context) => CupertinoAlertDialog(
             title: new Text('请选择设备'),
           )
       );
@@ -136,7 +137,7 @@ class _PatrolRequestState extends State<PatrolRequest> {
     }
     if (_fault.text == null || _fault.text.isEmpty) {
       showDialog(context: context,
-        builder: (context) => AlertDialog(
+        builder: (context) => CupertinoAlertDialog(
           title: new Text('巡检要求不能为空'),
         )
       );
@@ -180,7 +181,7 @@ class _PatrolRequestState extends State<PatrolRequest> {
       print(resp);
       if (resp['ResultCode'] == '00') {
         showDialog(context: context, builder: (buider) =>
-            AlertDialog(
+            CupertinoAlertDialog(
               title: new Text('提交请求成功'),
             )).then((result) =>
             Navigator.of(context, rootNavigator: true).pop(result)
@@ -462,7 +463,7 @@ class _PatrolRequestState extends State<PatrolRequest> {
                             submit();
                           },
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(24),
+                            borderRadius: BorderRadius.circular(6),
                           ),
                           padding: EdgeInsets.all(12.0),
                           color: new Color(0xff2E94B9),
@@ -473,7 +474,7 @@ class _PatrolRequestState extends State<PatrolRequest> {
                             Navigator.of(context).pop();
                           },
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(24),
+                            borderRadius: BorderRadius.circular(6),
                           ),
                           padding: EdgeInsets.all(12.0),
                           color: new Color(0xffD25565),

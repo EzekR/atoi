@@ -8,6 +8,7 @@ import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:atoi/widgets/search_bar_vendor.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:atoi/models/models.dart';
+import 'package:flutter/cupertino.dart';
 
 class EngineerReportAccessory extends StatefulWidget {
   _EngineerReportAccessoryState createState() => _EngineerReportAccessoryState();
@@ -185,7 +186,7 @@ class _EngineerReportAccessoryState extends State<EngineerReportAccessory> {
   void saveAccessory() async {
     if (_name.text.isEmpty) {
       showDialog(context: context,
-        builder: (context) => AlertDialog(
+        builder: (context) => CupertinoAlertDialog(
           title: new Text('名称不可为空'),
         )
       );
@@ -193,7 +194,7 @@ class _EngineerReportAccessoryState extends State<EngineerReportAccessory> {
     }
     if (_newCode.text.isEmpty) {
       showDialog(context: context,
-          builder: (context) => AlertDialog(
+          builder: (context) => CupertinoAlertDialog(
             title: new Text('新装编号不可为空'),
           )
       );
@@ -201,7 +202,7 @@ class _EngineerReportAccessoryState extends State<EngineerReportAccessory> {
     }
     if (_oldCode.text.isEmpty) {
       showDialog(context: context,
-          builder: (context) => AlertDialog(
+          builder: (context) => CupertinoAlertDialog(
             title: new Text('拆下不可为空'),
           )
       );
@@ -209,7 +210,7 @@ class _EngineerReportAccessoryState extends State<EngineerReportAccessory> {
     }
     if (_amount.text.isEmpty) {
       showDialog(context: context,
-          builder: (context) => AlertDialog(
+          builder: (context) => CupertinoAlertDialog(
             title: new Text('新装部件金额不可为空'),
           )
       );
@@ -217,7 +218,7 @@ class _EngineerReportAccessoryState extends State<EngineerReportAccessory> {
     }
     if (_qty.text.isEmpty) {
       showDialog(context: context,
-          builder: (context) => AlertDialog(
+          builder: (context) => CupertinoAlertDialog(
             title: new Text('数量不可为空'),
           )
       );
@@ -225,7 +226,7 @@ class _EngineerReportAccessoryState extends State<EngineerReportAccessory> {
     }
     if (_currentSource == '外部供应商' && _vendor == null) {
       showDialog(context: context,
-        builder: (context) => AlertDialog(
+        builder: (context) => CupertinoAlertDialog(
           title: new Text('请选择供应商'),
         )
       );

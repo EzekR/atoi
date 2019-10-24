@@ -648,7 +648,7 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
                       approveReport();
                     },
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(24),
+                      borderRadius: BorderRadius.circular(6),
                     ),
                     padding: EdgeInsets.all(12.0),
                     color: new Color(0xff2E94B9),
@@ -659,7 +659,7 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
                       rejectReport();
                     },
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(24),
+                      borderRadius: BorderRadius.circular(6),
                     ),
                     padding: EdgeInsets.all(12.0),
                     color: new Color(0xffD25565),

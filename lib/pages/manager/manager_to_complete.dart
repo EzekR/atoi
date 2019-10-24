@@ -8,6 +8,7 @@ import 'package:atoi/models/models.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:atoi/widgets/build_widget.dart';
 import 'package:atoi/utils/constants.dart';
+import 'package:flutter/cupertino.dart';
 
 class ManagerToComplete extends StatefulWidget {
   @override
@@ -85,7 +86,7 @@ class _ManagerToCompleteState extends State<ManagerToComplete> {
     print(resp);
     if (resp['ResultCode'] == '00') {
       showDialog(context: context,
-          builder: (context) => AlertDialog(
+          builder: (context) => CupertinoAlertDialog(
             title: new Text('终止成功'),
           )
       );
@@ -115,7 +116,7 @@ class _ManagerToCompleteState extends State<ManagerToComplete> {
     );
     if (resp['ResultCode'] == '00') {
       showDialog(context: context,
-          builder: (context) => AlertDialog(
+          builder: (context) => CupertinoAlertDialog(
             title: new Text('取消成功'),
           )
       );
@@ -284,11 +285,11 @@ class _ManagerToCompleteState extends State<ManagerToComplete> {
                                 )
                             );
                           } else {
-                            showDialog(context: context, builder: (context) => AlertDialog(title: new Text('暂无派工历史'),));
+                            showDialog(context: context, builder: (context) => CupertinoAlertDialog(title: new Text('暂无派工历史'),));
                           }
                         },
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(24),
+                          borderRadius: BorderRadius.circular(6),
                         ),
                         color: AppConstants.AppColors['btn_success'],
                         child: new Row(
@@ -315,7 +316,7 @@ class _ManagerToCompleteState extends State<ManagerToComplete> {
                           })).then((result) => refresh());
                         },
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(24),
+                          borderRadius: BorderRadius.circular(6),
                         ),
                         color: AppConstants.AppColors['btn_success'],
                         child: new Row(
@@ -338,7 +339,7 @@ class _ManagerToCompleteState extends State<ManagerToComplete> {
                         onPressed: (){
                           if (task['Status']['ID']==1) {
                             showDialog(context: context,
-                                builder: (context) => AlertDialog(
+                                builder: (context) => CupertinoAlertDialog(
                                   title: new Text('是否终止请求？'),
                                   actions: <Widget>[
                                     RaisedButton(
@@ -361,7 +362,7 @@ class _ManagerToCompleteState extends State<ManagerToComplete> {
                             );
                           } else {
                             showDialog(context: context,
-                                builder: (context) => AlertDialog(
+                                builder: (context) => CupertinoAlertDialog(
                                   title: new Text('是否取消派工？'),
                                   actions: <Widget>[
                                     RaisedButton(
@@ -385,7 +386,7 @@ class _ManagerToCompleteState extends State<ManagerToComplete> {
                           }
                         },
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(24),
+                          borderRadius: BorderRadius.circular(6),
                         ),
                         color: AppConstants.AppColors['btn_cancel'],
                         child: new Row(

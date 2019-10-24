@@ -13,6 +13,7 @@ import 'package:atoi/utils/constants.dart';
 import 'package:atoi/widgets/build_widget.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:atoi/models/models.dart';
+import 'package:flutter/cupertino.dart';
 
 class MandatoryRequest extends StatefulWidget{
   static String tag = 'mandatory-request';
@@ -86,7 +87,7 @@ class _MandatoryRequestState extends State<MandatoryRequest> {
         _equipment = resp['Data'];
       });
     } else {
-      showDialog(context: context, builder: (context) => AlertDialog(title: new Text(resp['ResultMessage']),));
+      showDialog(context: context, builder: (context) => CupertinoAlertDialog(title: new Text(resp['ResultMessage']),));
     }
   }
   Future getImage() async {
@@ -171,7 +172,7 @@ class _MandatoryRequestState extends State<MandatoryRequest> {
   Future<Null> submit() async {
     if (_equipment == null) {
       showDialog(context: context,
-          builder: (context) => AlertDialog(
+          builder: (context) => CupertinoAlertDialog(
             title: new Text('请选择设备'),
           )
       );
@@ -179,7 +180,7 @@ class _MandatoryRequestState extends State<MandatoryRequest> {
     }
     if (_fault.text == null || _fault.text.isEmpty) {
       showDialog(context: context,
-        builder: (context) => AlertDialog(
+        builder: (context) => CupertinoAlertDialog(
           title: new Text('强检要求不可为空'),
         )
       );
@@ -225,7 +226,7 @@ class _MandatoryRequestState extends State<MandatoryRequest> {
       print(resp);
       if (resp['ResultCode'] == '00') {
         showDialog(context: context, builder: (buider) =>
-            AlertDialog(
+            CupertinoAlertDialog(
               title: new Text('提交请求成功'),
             )).then((result) =>
             Navigator.of(context, rootNavigator: true).pop(result)
@@ -515,7 +516,7 @@ class _MandatoryRequestState extends State<MandatoryRequest> {
                             submit();
                           },
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(24),
+                            borderRadius: BorderRadius.circular(6),
                           ),
                           padding: EdgeInsets.all(12.0),
                           color: new Color(0xff2E94B9),
@@ -526,7 +527,7 @@ class _MandatoryRequestState extends State<MandatoryRequest> {
                             Navigator.of(context).pop();
                           },
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(24),
+                            borderRadius: BorderRadius.circular(6),
                           ),
                           padding: EdgeInsets.all(12.0),
                           color: new Color(0xffD25565),

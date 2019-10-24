@@ -80,7 +80,7 @@ class _EquipmentsListState extends State<EquipmentsList> {
                   }));
                 },
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(24),
+                  borderRadius: BorderRadius.circular(6),
                 ),
                 color: new Color(0xff2E94B9),
                 child: new Row(
@@ -105,7 +105,7 @@ class _EquipmentsListState extends State<EquipmentsList> {
                 onPressed: (){
                 },
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(24),
+                  borderRadius: BorderRadius.circular(6),
                 ),
                 color: new Color(0xff2E94B9),
                 child: new Row(
@@ -130,7 +130,7 @@ class _EquipmentsListState extends State<EquipmentsList> {
                 onPressed: (){
                 },
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(24),
+                  borderRadius: BorderRadius.circular(6),
                 ),
                 color: new Color(0xff2E94B9),
                 child: new Row(

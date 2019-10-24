@@ -27,7 +27,9 @@ PODS:
     - Mantle/extobjc (= 2.1.0)
   - Mantle/extobjc (2.1.0)
   - MTBBarcodeScanner (5.0.11)
-  - permission_handler (3.2.2):
+  - orientation (0.0.1):
+    - Flutter
+  - permission_handler (3.3.0):
     - Flutter
   - printing (0.0.1):
     - Flutter
@@ -45,6 +47,7 @@ DEPENDENCIES:
   - flutter_picker (from `.symlinks/plugins/flutter_picker/ios`)
   - fluttertoast (from `.symlinks/plugins/fluttertoast/ios`)
   - image_picker (from `.symlinks/plugins/image_picker/ios`)
+  - orientation (from `.symlinks/plugins/orientation/ios`)
   - permission_handler (from `.symlinks/plugins/permission_handler/ios`)
   - printing (from `.symlinks/plugins/printing/ios`)
   - shared_preferences (from `.symlinks/plugins/shared_preferences/ios`)
@@ -76,6 +79,8 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/fluttertoast/ios"
   image_picker:
     :path: ".symlinks/plugins/image_picker/ios"
+  orientation:
+    :path: ".symlinks/plugins/orientation/ios"
   permission_handler:
     :path: ".symlinks/plugins/permission_handler/ios"
   printing:
@@ -97,7 +102,8 @@ SPEC CHECKSUMS:
   JPush: a1ff8b8ec53fa3419b414946e4db4efa313baeae
   Mantle: 2fa750afa478cd625a94230fbf1c13462f29395b
   MTBBarcodeScanner: f453b33c4b7dfe545d8c6484ed744d55671788cb
-  permission_handler: d59f41439f5bc6c4d1005f3355e98f05ddc68ece
+  orientation: 46fe7528896a5c3e6215366bcb462c182ebfd4e9
+  permission_handler: 67637977b227d62d46bfbf524f335f8568de5a73
   printing: 341873b2b3771c7226e301bfa4fc608e8ac60a30
   Reachability: 33e18b67625424e47b6cde6d202dce689ad7af96
   shared_preferences: 430726339841afefe5142b9c1f50cb6bd7793e01
