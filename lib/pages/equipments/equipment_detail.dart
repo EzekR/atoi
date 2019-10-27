@@ -22,6 +22,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
   String checkDate = '验收时间';
   String mandatoryDate = '强检时间';
   String recallDate = '召回时间';
+  String equipmentClassCode = '';
 
   List departments = [];
   List<DropdownMenuItem<String>> dropdownDepartments;
@@ -42,6 +43,25 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
   List period = ['无', '天/次', '月/次', '年/次'];
   List<DropdownMenuItem<String>> dropdownPeriod;
   String currentPeriod;
+
+  List equipmentClass = ['1类', '2类', '3类'];
+  List<DropdownMenuItem<String>> dropdownClass;
+  String currentClass;
+
+  List class1 = [];
+  List class1Item = [];
+  List<DropdownMenuItem<String>> dropdownClass1;
+  String currentClass1;
+
+  List class2 = [];
+  List class2Item = [];
+  List<DropdownMenuItem<String>> dropdownClass2;
+  String currentClass2;
+
+  List class3 = [];
+  List class3Item = [];
+  List<DropdownMenuItem<String>> dropdownClass3;
+  String currentClass3;
 
   List catI = [];
 
@@ -141,6 +161,102 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
     });
   }
 
+  void changeClass(String selectedMethod) {
+    setState(() {
+      currentClass = selectedMethod;
+    });
+  }
+
+  Future<Null> initClass1() async {
+    var resp = await HttpRequest.request(
+      '/Equipment/GetEquipmentClass',
+      method: HttpRequest.GET,
+      params: {
+        'level': 1
+      }
+    );
+    if (resp['ResultCode'] == '00') {
+      List _list = resp['Data'].map((item) {
+        return item['Description'];
+      }).toList();
+      setState(() {
+        class1 = _list;
+        class1Item = resp['Data'];
+      });
+      dropdownClass1 = getDropDownMenuItems(class1);
+      currentClass1 = dropdownClass1[0].value;
+    }
+  }
+
+  Future<Null> initClass(String code, int level) async {
+    var resp = await HttpRequest.request(
+      '/Equipment/GetEquipmentClass',
+      method: HttpRequest.GET,
+      params: {
+        'level': level,
+        'parentCode': code
+      }
+    );
+    if (resp['ResultCode'] == '00') {
+      List _list = resp['Data'].map((item) {
+        return item['Description'];
+      }).toList();
+      switch (level) {
+        case 2:
+          setState(() {
+            class2 = _list;
+            class2Item = resp['Data'];
+          });
+          dropdownClass2 = getDropDownMenuItems(class2);
+          currentClass2 = dropdownClass2[0].value;
+          break;
+        case 3:
+          setState(() {
+            class3 = _list;
+            class3Item = resp['Data'];
+          });
+          dropdownClass3 = getDropDownMenuItems(class3);
+          currentClass3 = dropdownClass3[0].value;
+          break;
+      }
+    }
+  }
+
+  void changeClass1(String selectedClass) {
+    var _selectedItem = class1Item.firstWhere((item) {
+      return item['Description'] == selectedClass;
+    });
+    initClass(_selectedItem['Code'], 2);
+    setState(() {
+      currentClass1 = selectedClass;
+      equipmentClassCode = _selectedItem['Code'];
+    });
+  }
+
+  void changeClass2(String selectedMethod) {
+    var _selectedItem = class2Item.firstWhere((item) {
+      return item['Description'] == selectedMethod;
+    });
+    var _code = '${_selectedItem['ParentCode']}${_selectedItem['Code']}';
+    initClass(_code, 3);
+    setState(() {
+      currentClass2 = selectedMethod;
+      equipmentClassCode += _selectedItem['Code'];
+    });
+  }
+
+  void changeClass3(String selectedMethod) {
+    setState(() {
+      currentClass3 = selectedMethod;
+    });
+    var _item = class3Item.firstWhere((item) {
+      return item['Description'] == selectedMethod;
+    });
+    setState(() {
+      equipmentClassCode += _item['Code'];
+    });
+  }
+
   void initState() {
     super.initState();
     dropdownLevel = getDropDownMenuItems(assetLevel);
@@ -153,6 +269,9 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
     currentMandatory = dropdownMandatory[0].value;
     dropdownPeriod = getDropDownMenuItems(period);
     currentPeriod = dropdownPeriod[0].value;
+    dropdownClass = getDropDownMenuItems(equipmentClass);
+    currentClass = dropdownClass[0].value;
+    initClass1();
     ConstantsModel model = MainModel.of(context);
     setState(() {
       departments = model.DepartmentsList;
@@ -274,7 +393,11 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
                 ),
               ),
               BuildWidget.buildInput('标准响应时间', new TextEditingController()),
-              BuildWidget.buildInput('分类编码', new TextEditingController()),
+              BuildWidget.buildDropdown('等级', currentClass, dropdownClass, changeClass),
+              BuildWidget.buildDropdown('设备类别(I)', currentClass1, dropdownClass1, changeClass1),
+              BuildWidget.buildDropdown('设备类别(II)', currentClass2, dropdownClass2, changeClass2),
+              BuildWidget.buildDropdown('设备类别(III)', currentClass3, dropdownClass3, changeClass3),
+              BuildWidget.buildRow('分类编码', equipmentClassCode),
             ],
           ),
         ),

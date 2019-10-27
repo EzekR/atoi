@@ -318,6 +318,7 @@ class _EngineerVoucherPageState extends State<EngineerVoucherPage> {
             filled: true,
             hintText: 'N/A'
           ),
+          maxLines: 3,
         ),
         new SizedBox(height: 5.0,)
       ],
@@ -473,8 +474,8 @@ class _EngineerVoucherPageState extends State<EngineerVoucherPage> {
               _currentResult=='完成'?new Container():widget.status!=0&&widget.status!=1?BuildWidget.buildRow('待确认问题', _unconfirmed.text):buildEditor('待确认问题', _unconfirmed),
               widget.status!=0&&widget.status!=1?BuildWidget.buildRow('建议留言', _advice.text):buildEditor('建议留言', _advice),
               new Divider(),
-              BuildWidget.buildInput('客户姓名', _customerName),
-              BuildWidget.buildInput('客户电话', _customerNumber),
+              BuildWidget.buildInput('客户姓名', _customerName, lines: 1),
+              BuildWidget.buildInput('客户电话', _customerNumber, lines: 1),
               widget.status==0||widget.status==1?new Padding(
                 padding: EdgeInsets.symmetric(vertical: 5.0),
                 child: new Text('客户签名：',

@@ -939,20 +939,41 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
                               builder: (context) => CupertinoAlertDialog(
                                 title: new Text('是否终止请求？'),
                                 actions: <Widget>[
-                                  RaisedButton(
-                                    child: Text('确认', style: TextStyle(color: Colors.white),),
-                                    color: AppConstants.AppColors['btn_cancel'],
-                                    onPressed: () {
-                                      terminate();
-                                      Navigator.of(context).pop();
-                                    },
-                                  ),
-                                  RaisedButton(
-                                    child: Text('取消', style: TextStyle(color: Colors.white),),
-                                    color: AppConstants.AppColors['btn_main'],
-                                    onPressed: () {
-                                      Navigator.of(context).pop();
-                                    },
+                                  new Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: <Widget>[
+                                      new Container(
+                                        width: 100.0,
+                                        child: RaisedButton(
+                                          //padding: EdgeInsets.symmetric(vertical: 10.0, horizontal: 20.0),
+                                          child: Text('确认', style: TextStyle(color: Colors.white),),
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.circular(6),
+                                          ),
+                                          color: AppConstants.AppColors['btn_cancel'],
+                                          onPressed: () {
+                                            terminate();
+                                            Navigator.of(context).pop();
+                                          },
+                                        ),
+                                      ),
+                                      new SizedBox(
+                                        width: 10.0,
+                                      ),
+                                      new Container(
+                                        width: 100.0,
+                                        child: RaisedButton(
+                                          child: Text('取消', style: TextStyle(color: Colors.white),),
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.circular(6),
+                                          ),
+                                          color: AppConstants.AppColors['btn_main'],
+                                          onPressed: () {
+                                            Navigator.of(context).pop();
+                                          },
+                                        ),
+                                      )
+                                    ],
                                   ),
                                 ],
                               )

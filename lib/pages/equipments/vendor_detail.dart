@@ -134,9 +134,32 @@ class _VendorDetailState extends State<VendorDetail> {
     }
   }
 
-  Future getImage() async {
+    void showSheet(context) {
+    showModalBottomSheet(context: context, builder: (context) {
+      return new ListView(
+        shrinkWrap: true,
+        children: <Widget>[
+          ListTile(
+            trailing: new Icon(Icons.collections),
+            title: new Text('从相册添加'),
+            onTap: () {
+              getImage(ImageSource.gallery);
+            },
+          ),
+          ListTile(
+            trailing: new Icon(Icons.add_a_photo),
+            title: new Text('拍照添加'),
+            onTap: () {
+              getImage(ImageSource.camera);
+            },
+          ),
+        ],
+      );
+    });
+  }
+Future getImage(ImageSource sourceType) async {
     var image = await ImagePicker.pickImage(
-      source: ImageSource.camera,
+        source: sourceType,
     );
     if (image != null) {
       var compressed = await FlutterImageCompress.compressAndGetFile(
@@ -436,7 +459,7 @@ class _VendorDetailState extends State<VendorDetail> {
                                       new IconButton(
                                           icon: Icon(Icons.add_a_photo),
                                           onPressed: () {
-                                            getImage();
+                                            showSheet(context);
                                           })
                                     ],
                                   ),
