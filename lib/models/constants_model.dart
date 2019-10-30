@@ -29,6 +29,7 @@ class ConstantsModel extends Model {
   Map<String, int> _PeriodType = {};
   Map<String, int> _ContractType = {};
   Map<String, int> _Departments = {};
+  Map<String, int> _ServiceProviders = {};
   List<String> _DepartmentsList = [];
   List<String> _Remark = [
     '',
@@ -95,6 +96,7 @@ class ConstantsModel extends Model {
   get Remark => _Remark;
   get RemarkType => _RemarkType;
   get DepartmentsList => _DepartmentsList;
+  get ServiceProviders => _ServiceProviders;
 
   Future<Null> getConstants() async {
     var resp = await HttpRequest.request(
@@ -102,91 +104,96 @@ class ConstantsModel extends Model {
       method: HttpRequest.GET
     );
     if (resp['ResultCode'] == '00') {
-      for(var item in resp['Data']['UserRole']) {
-        _UserRole.putIfAbsent(item['Name'], () => item['ID']);
+      for(var _item in resp['Data']['UserRole']) {
+        _UserRole.putIfAbsent(_item['Name'], () => _item['ID']);
       }
-      for(var item in resp['Data']['AssetsLevel']) {
-        _AssetsLevel.putIfAbsent(item['Name'], () => item['ID']);
+      for(var _item in resp['Data']['AssetsLevel']) {
+        _AssetsLevel.putIfAbsent(_item['Name'], () => _item['ID']);
       }
-      for(var item in resp['Data']['ContractScope']) {
-        _ContractScope.putIfAbsent(item['Name'], () => item['ID']);
+      for(var _item in resp['Data']['ContractScope']) {
+        _ContractScope.putIfAbsent(_item['Name'], () => _item['ID']);
       }
-      for(var item in resp['Data']['ReportType']) {
-        _ReportType.putIfAbsent(item['Name'], () => item['ID']);
+      for(var _item in resp['Data']['ReportType']) {
+        _ReportType.putIfAbsent(_item['Name'], () => _item['ID']);
       }
-      for(var item in resp['Data']['SolutionStatus']) {
-        _SolutionStatus.putIfAbsent(item['Name'], () => item['ID']);
+      for(var _item in resp['Data']['SolutionStatus']) {
+        _SolutionStatus.putIfAbsent(_item['Name'], () => _item['ID']);
       }
-      for(var item in resp['Data']['ReportStatus']) {
-        _ReportStatus.putIfAbsent(item['Name'], () => item['ID']);
+      for(var _item in resp['Data']['ReportStatus']) {
+        _ReportStatus.putIfAbsent(_item['Name'], () => _item['ID']);
       }
-      for(var item in resp['Data']['AccessorySourceType']) {
-        _AccessorySourceType.putIfAbsent(item['Name'], () => item['ID']);
+      for(var _item in resp['Data']['AccessorySourceType']) {
+        _AccessorySourceType.putIfAbsent(_item['Name'], () => _item['ID']);
       }
-      for(var item in resp['Data']['AccessoryFileType']) {
-        _AccessoryFileType.putIfAbsent(item['Name'], () => item['ID']);
+      for(var _item in resp['Data']['AccessoryFileType']) {
+        _AccessoryFileType.putIfAbsent(_item['Name'], () => _item['ID']);
       }
-      for(var item in resp['Data']['RequestType']) {
-        _RequestType.putIfAbsent(item['Name'], () => item['ID']);
+      for(var _item in resp['Data']['RequestType']) {
+        _RequestType.putIfAbsent(_item['Name'], () => _item['ID']);
       }
-      for(var item in resp['Data']['RequestStatus']) {
-        _RequestStatus.putIfAbsent(item['Name'], () => item['ID']);
+      for(var _item in resp['Data']['RequestStatus']) {
+        _RequestStatus.putIfAbsent(_item['Name'], () => _item['ID']);
       }
-      for(var item in resp['Data']['DealType']) {
-        _DealType.putIfAbsent(item['Name'], () => item['ID']);
+      for(var _item in resp['Data']['DealType']) {
+        _DealType.putIfAbsent(_item['Name'], () => _item['ID']);
       }
-      for(var item in resp['Data']['PriorityID']) {
-        _PriorityID.putIfAbsent(item['Name'], () => item['ID']);
+      for(var _item in resp['Data']['PriorityID']) {
+        _PriorityID.putIfAbsent(_item['Name'], () => _item['ID']);
       }
       if (resp['Data']['FaultRepair'] == null || resp['Data']['FaultRepair'].isEmpty) {
         _FaultRepair[' '] = 1;
       } else {
-        for(var item in resp['Data']['FaultRepair']) {
-          _FaultRepair.putIfAbsent(item['Name'], () => item['ID']);
+        for(var _item in resp['Data']['FaultRepair']) {
+          _FaultRepair.putIfAbsent(_item['Name'], () => _item['ID']);
         }
       }
-      for(var item in resp['Data']['FaultMaintain']) {
-        _FaultMaintain.putIfAbsent(item['Name'], () => item['ID']);
+      for(var _item in resp['Data']['FaultMaintain']) {
+        _FaultMaintain.putIfAbsent(_item['Name'], () => _item['ID']);
       }
-      for(var item in resp['Data']['FaultCheck']) {
-        _FaultCheck.putIfAbsent(item['Name'], () => item['ID']);
+      for(var _item in resp['Data']['FaultCheck']) {
+        _FaultCheck.putIfAbsent(_item['Name'], () => _item['ID']);
       }
-      for(var item in resp['Data']['MachineStatus']) {
-        _MachineStatus.putIfAbsent(item['Name'], () => item['ID']);
+      for(var _item in resp['Data']['MachineStatus']) {
+        _MachineStatus.putIfAbsent(_item['Name'], () => _item['ID']);
       }
-      for(var item in resp['Data']['FaultBad']) {
-        _FaultBad.putIfAbsent(item['Name'], () => item['ID']);
+      for(var _item in resp['Data']['FaultBad']) {
+        _FaultBad.putIfAbsent(_item['Name'], () => _item['ID']);
       }
-      for(var item in resp['Data']['UrgencyID']) {
-        _UrgencyID.putIfAbsent(item['Name'], () => item['ID']);
+      for(var _item in resp['Data']['UrgencyID']) {
+        _UrgencyID.putIfAbsent(_item['Name'], () => _item['ID']);
       }
-      for(var item in resp['Data']['EquipmentStatus']) {
-        _EquipmentStatus.putIfAbsent(item['Name'], () => item['ID']);
+      for(var _item in resp['Data']['EquipmentStatus']) {
+        _EquipmentStatus.putIfAbsent(_item['Name'], () => _item['ID']);
       }
-      for(var item in resp['Data']['DispatchStatus']) {
-        _DispatchStatus.putIfAbsent(item['Name'], () => item['ID']);
+      for(var _item in resp['Data']['DispatchStatus']) {
+        _DispatchStatus.putIfAbsent(_item['Name'], () => _item['ID']);
       }
-      for(var item in resp['Data']['ResultStatusID']) {
-        _ResultStatusID.putIfAbsent(item['Name'], () => item['ID']);
+      for(var _item in resp['Data']['ResultStatusID']) {
+        _ResultStatusID.putIfAbsent(_item['Name'], () => _item['ID']);
       }
-      for(var item in resp['Data']['JournalStatusID']) {
-        _JournalStatusID.putIfAbsent(item['Name'], () => item['ID']);
+      for(var _item in resp['Data']['JournalStatusID']) {
+        _JournalStatusID.putIfAbsent(_item['Name'], () => _item['ID']);
       }
-      for(var item in resp['Data']['SupplierType']) {
-        _SupplierType.putIfAbsent(item['Name'], () => item['ID']);
+      for(var _item in resp['Data']['SupplierType']) {
+        _SupplierType.putIfAbsent(_item['Name'], () => _item['ID']);
       }
-      for(var item in resp['Data']['UsageStatus']) {
-        _UsageStatus.putIfAbsent(item['Name'], () => item['ID']);
+      for(var _item in resp['Data']['UsageStatus']) {
+        _UsageStatus.putIfAbsent(_item['Name'], () => _item['ID']);
       }
-      for(var item in resp['Data']['PeriodType']) {
-        _PeriodType.putIfAbsent(item['Name'], () => item['ID']);
+      for(var _item in resp['Data']['PeriodType']) {
+        _PeriodType.putIfAbsent(_item['Name'], () => _item['ID']);
       }
-      for(var item in resp['Data']['ContractType']) {
-        _ContractType.putIfAbsent(item['Name'], () => item['ID']);
+      for(var _item in resp['Data']['ContractType']) {
+        _ContractType.putIfAbsent(_item['Name'], () => _item['ID']);
       }
-      for(var item in resp['Data']['GetDepartment']) {
-        _Departments.putIfAbsent(item['Name'], () => item['ID']);
-        _DepartmentsList.add(item['Name']);
+      for(var _item in resp['Data']['GetDepartment']) {
+        _Departments.putIfAbsent(_item['Name'], () => _item['ID']);
+        if (!_DepartmentsList.contains(_item['Name'])) {
+          _DepartmentsList.add(_item['Name']);
+        }
+      }
+      for(var _item in resp['Data']['ServiceProviders']) {
+        _ServiceProviders.putIfAbsent(_item['Name'], () => _item['ID']);
       }
     }
     notifyListeners();

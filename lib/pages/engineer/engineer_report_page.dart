@@ -35,12 +35,15 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
 
   List _serviceResults = [];
   List _sources = [];
-
+  List _providers = [];
 
   List<DropdownMenuItem<String>> _dropDownMenuItems;
   List<DropdownMenuItem<String>> _dropDownMenuSources;
+  List<DropdownMenuItem<String>> _dropDownMenuProviders;
   String _currentResult;
   String _currentSource;
+  String _currentProvider;
+
   var _dispatch = {};
   Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
   var _frequency = new TextEditingController();
@@ -59,6 +62,15 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
 
   String _userName = '';
   String _mobile = '';
+
+  List _isPrivate = ['是', '否'];
+  String _currentPrivate = '否';
+
+  void changePrivate(value) {
+    setState(() {
+      _currentPrivate = value;
+    });
+  }
 
   Future<Null> getRole() async {
     var prefs = await _prefs;
@@ -212,7 +224,6 @@ Future getImage(ImageSource sourceType) async {
       var _createTime = DateTime.parse(resp['Data']['CreateDate']);
       var _startTime = DateTime.parse(resp['Data']['StartDate']);
       var _duration = _startTime.difference(_createTime).inMinutes;
-      print("_duration:${_duration}");
       if (_duration > resp['Data']['Request']['Equipments'][0]['ResponseTimeLength']) {
         setState(() {
           _isDelayed = true;
@@ -255,10 +266,6 @@ Future getImage(ImageSource sourceType) async {
           'Dispatch': {
             'ID': widget.dispatchId
           },
-          'Type': {
-            'ID': 1,
-            'Name': '通用作业报告'
-          },
           'FaultFrequency': _frequency.text,
           'FaultCode': _code.text,
           'FaultSystemStatus': _status.text,
@@ -269,6 +276,8 @@ Future getImage(ImageSource sourceType) async {
             'ID': model.SolutionStatus[_currentResult],
             'Name': _currentResult
           },
+          'IsPrivate': _currentPrivate=='是'?1:0,
+          'ServiceProvider': model.ServiceProviders[_currentProvider],
           'SolutionUnsolvedComments': _unsolved.text,
           'DelayReason': _delay.text,
           'Status': {
@@ -279,12 +288,33 @@ Future getImage(ImageSource sourceType) async {
           'ID': widget.reportId
         }
       };
+      switch(_dispatch['Request']['RequestType']['ID']) {
+        case 2:
+          _data['Type'] = {
+            'ID': 201
+          };
+          break;
+        case 3:
+          _data['Type'] = {
+            'ID': 301
+          };
+          break;
+        case 4:
+          _data['Type'] = {
+            'ID': 401
+          };
+          break;
+        default:
+          _data['Type'] = {
+            'ID': 1
+          };
+          break;
+      }
       var resp = await HttpRequest.request(
           '/DispatchReport/SaveDispatchReport',
           method: HttpRequest.POST,
           data: _data
       );
-      print(resp);
       if (resp['ResultCode'] == '00') {
         showDialog(context: context,
             builder: (context) =>
@@ -315,10 +345,13 @@ Future getImage(ImageSource sourceType) async {
   void initDropdown() {
     _serviceResults = iterateMap(model.SolutionStatus);
     _sources = iterateMap(model.AccessorySourceType);
+    _providers = iterateMap(model.ServiceProviders);
     _dropDownMenuItems = getDropDownMenuItems(_serviceResults);
     _dropDownMenuSources = getDropDownMenuItems(_sources);
+    _dropDownMenuProviders = getDropDownMenuItems(_providers);
     _currentResult = _dropDownMenuItems[3].value;
     _currentSource = _dropDownMenuSources[0].value;
+    _currentProvider = _dropDownMenuProviders[0].value;
   }
   void initState(){
     model = MainModel.of(context);
@@ -379,6 +412,12 @@ Future getImage(ImageSource sourceType) async {
   void changedDropDownSource(String selectedMethod) {
     setState(() {
       _currentSource = selectedMethod;
+    });
+  }
+
+  void changedDropDownProvider(String selectedMethod) {
+    setState(() {
+      _currentProvider = selectedMethod;
     });
   }
 
@@ -501,6 +540,85 @@ Future getImage(ImageSource sourceType) async {
         mainAxisAlignment: MainAxisAlignment.center,
         children: _list
     );
+  }
+
+  List<Widget> buildReportList() {
+    List<Widget> _list = [];
+    _list.addAll(
+      [
+        _reportOID!=null?BuildWidget.buildRow('报告编号', _reportOID):new Container(),
+        BuildWidget.buildRow('审批状态', _reportStatus),
+        _fujiComments.isNotEmpty?BuildWidget.buildRow('审批结果', _fujiComments):new Container(),
+        new Divider(),
+      ]
+    );
+
+    switch (_dispatch['Request']['RequestType']['ID']) {
+      case 4:
+        _list.addAll([
+          widget.status!=0&&widget.status!=1?BuildWidget.buildRow('报告明细', _analysis.text):buildField('报告明细：', _analysis),
+          widget.status!=0&&widget.status!=1?BuildWidget.buildRow('结果', _solution.text):buildField('结果：', _solution),
+          widget.status!=0&&widget.status!=1?BuildWidget.buildRow('作业报告结果', _currentResult):BuildWidget.buildDropdown('作业报告结果', _currentResult, _dropDownMenuItems, changedDropDownMethod),
+          _currentResult=='问题升级'?(widget.status!=0&&widget.status!=1?BuildWidget.buildRow('问题升级', _unsolved.text):buildField('问题升级：', _unsolved)):new Container(),
+        ]);
+        break;
+      case 3:
+        _list.addAll([
+          widget.status!=0&&widget.status!=1?BuildWidget.buildRow('强检要求', _description.text):buildField('强检要求：', _description),
+          widget.status!=0&&widget.status!=1?BuildWidget.buildRow('报告明细', _analysis.text):buildField('报告明细：', _analysis),
+          widget.status!=0&&widget.status!=1?BuildWidget.buildRow('结果', _solution.text):buildField('结果：', _solution),
+          widget.status!=0&&widget.status!=1?BuildWidget.buildRow('作业报告结果', _currentResult):BuildWidget.buildDropdown('作业报告结果', _currentResult, _dropDownMenuItems, changedDropDownMethod),
+          widget.status!=0&&widget.status!=1?BuildWidget.buildRow('专用报告', _currentPrivate):BuildWidget.buildRadio('专用报告', _isPrivate, _currentPrivate, changePrivate),
+          _currentResult=='问题升级'?(widget.status!=0&&widget.status!=1?BuildWidget.buildRow('问题升级', _unsolved.text):buildField('问题升级：', _unsolved)):new Container(),
+        ]);
+        break;
+      case 2:
+        _list.addAll([
+          widget.status!=0&&widget.status!=1?BuildWidget.buildRow('报告明细', _analysis.text):buildField('报告明细：', _analysis),
+          widget.status!=0&&widget.status!=1?BuildWidget.buildRow('结果', _solution.text):buildField('结果：', _solution),
+          widget.status!=0&&widget.status!=1?BuildWidget.buildRow('服务提供方', _currentProvider):BuildWidget.buildDropdown('服务提供方', _currentProvider, _dropDownMenuProviders, changedDropDownProvider),
+          _currentResult=='问题升级'?(widget.status!=0&&widget.status!=1?BuildWidget.buildRow('问题升级', _unsolved.text):buildField('问题升级：', _unsolved)):new Container(),
+        ]);
+        break;
+      default:
+        _list.addAll([
+          widget.status!=0&&widget.status!=1?BuildWidget.buildRow('发生频率', _frequency.text):buildField('发生频率：', _frequency),
+          widget.status!=0&&widget.status!=1?BuildWidget.buildRow('故障描述', _description.text):buildField('故障描述：', _description),
+          widget.status!=0&&widget.status!=1?BuildWidget.buildRow('系统状态', _status.text):buildField('系统状态：', _status),
+          widget.status!=0&&widget.status!=1?BuildWidget.buildRow('错误代码', _code.text):buildField('错误代码：', _code	),
+          widget.status!=0&&widget.status!=1?BuildWidget.buildRow('分析原因', _analysis.text):buildField('分析原因：', _analysis),
+          widget.status!=0&&widget.status!=1?BuildWidget.buildRow('处理方法', _solution.text):buildField('处理方法：', _solution),
+          widget.status!=0&&widget.status!=1?BuildWidget.buildRow('备注', _unsolved.text):buildField('备注：', _unsolved),
+          (widget.status==0||widget.status==1)&&_isDelayed?buildField('误工说明：', _delay):new Container(),
+          widget.status!=0&&widget.status!=1&&_isDelayed?BuildWidget.buildRow('误工说明', _delay.text):new Container(),
+          widget.status!=0&&widget.status!=1?BuildWidget.buildRow('作业结果', _currentResult):BuildWidget.buildDropdown('作业结果：', _currentResult, _dropDownMenuItems, changedDropDownMethod),
+        ]);
+    }
+
+    _list.addAll([
+      widget.status==0||widget.status==1?new Padding(
+        padding: EdgeInsets.symmetric(vertical: 5.0),
+        child: new Row(
+          children: <Widget>[
+            new Text(
+              '添加附件：',
+              style: new TextStyle(
+                  fontSize: 20.0,
+                  fontWeight: FontWeight.w600
+              ),
+            ),
+            new IconButton(
+                icon: Icon(Icons.add_a_photo),
+                onPressed: () {
+                  showSheet(context);
+                })
+          ],
+        ),
+      ):BuildWidget.buildRow('附件', ''),
+      buildImageRow()
+    ]);
+
+    return _list;
   }
 
   List<Widget> buildAccessory() {
@@ -664,43 +782,7 @@ Future getImage(ImageSource sourceType) async {
           padding: EdgeInsets.symmetric(horizontal: 8.0),
           child: new Column(
             crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              _reportOID!=null?BuildWidget.buildRow('报告编号', _reportOID):new Container(),
-              BuildWidget.buildRow('审批状态', _reportStatus),
-              _fujiComments.isNotEmpty?BuildWidget.buildRow('审批结果', _fujiComments):new Container(),
-              new Divider(),
-              widget.status!=0&&widget.status!=1?BuildWidget.buildRow('发生频率', _frequency.text):buildField('发生频率：', _frequency),
-              widget.status!=0&&widget.status!=1?BuildWidget.buildRow('故障描述', _description.text):buildField('故障描述：', _description),
-              widget.status!=0&&widget.status!=1?BuildWidget.buildRow('系统状态', _status.text):buildField('系统状态：', _status),
-              widget.status!=0&&widget.status!=1?BuildWidget.buildRow('错误代码', _code.text):buildField('错误代码：', _code	),
-              widget.status!=0&&widget.status!=1?BuildWidget.buildRow('分析原因', _analysis.text):buildField('分析原因：', _analysis),
-              widget.status!=0&&widget.status!=1?BuildWidget.buildRow('处理方法', _solution.text):buildField('处理方法：', _solution),
-              widget.status!=0&&widget.status!=1?BuildWidget.buildRow('备注', _unsolved.text):buildField('备注：', _unsolved),
-              (widget.status==0||widget.status==1)&&_isDelayed?buildField('误工说明：', _delay):new Container(),
-              widget.status!=0&&widget.status!=1&&_isDelayed?BuildWidget.buildRow('误工说明', _delay.text):new Container(),
-              new Divider(),
-              widget.status!=0&&widget.status!=1?BuildWidget.buildRow('作业结果', _currentResult):BuildWidget.buildDropdownLeft('作业结果：', _currentResult, _dropDownMenuItems, changedDropDownMethod),
-              widget.status==0||widget.status==1?new Padding(
-                padding: EdgeInsets.symmetric(vertical: 5.0),
-                child: new Row(
-                  children: <Widget>[
-                    new Text(
-                      '添加附件：',
-                      style: new TextStyle(
-                          fontSize: 20.0,
-                          fontWeight: FontWeight.w600
-                      ),
-                    ),
-                    new IconButton(
-                        icon: Icon(Icons.add_a_photo),
-                        onPressed: () {
-                          showSheet(context);
-                        })
-                  ],
-                ),
-              ):BuildWidget.buildRow('附件', ''),
-              buildImageRow()
-            ],
+            children: buildReportList(),
           ),
         ),
         isExpanded: _isExpandedAssign,
@@ -738,7 +820,8 @@ Future getImage(ImageSource sourceType) async {
   }
 
   List<Widget> buildEquipments() {
-    var _equipments = _dispatch['Request']['Equipments'];
+    var _equipments;
+    _dispatch['Request']==null?_equipments=[]:_equipments=_dispatch['Request']['Equipments'];
     List<Widget> _list = [];
     for(var _equipment in _equipments) {
       var equipList = [

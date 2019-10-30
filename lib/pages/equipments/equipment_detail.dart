@@ -23,6 +23,9 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
   String mandatoryDate = '强检时间';
   String recallDate = '召回时间';
   String equipmentClassCode = '';
+  ConstantsModel model;
+
+  var name, equipmentCode, serialCode, responseTime, assetCode, depreciationYears, contractName, purchaseWay, purchaseAmount, installSite, warrantyStatus, maintainPeriod, patrolPeriod, correctionPeriod = new TextEditingController();
 
   List departments = [];
   List<DropdownMenuItem<String>> dropdownDepartments;
@@ -108,8 +111,11 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
   }
 
   void initDepart() {
+    print(model.DepartmentsList);
+    departments = model.DepartmentsList;
     dropdownDepartments = getDropDownMenuItems(departments);
     currentDepartment = dropdownDepartments[0].value;
+    print(currentDepartment);
   }
 
   List<DropdownMenuItem<String>> getDropDownMenuItems(List list) {
@@ -119,7 +125,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
           value: method,
           child: new Text(
             method,
-            style: new TextStyle(fontSize: 20.0),
+            style: new TextStyle(fontSize: 16.0),
           )));
     }
     return items;
@@ -272,10 +278,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
     dropdownClass = getDropDownMenuItems(equipmentClass);
     currentClass = dropdownClass[0].value;
     initClass1();
-    ConstantsModel model = MainModel.of(context);
-    setState(() {
-      departments = model.DepartmentsList;
-    });
+    model = MainModel.of(context);
     initDepart();
     if (widget.equipment != null) {
 
@@ -332,9 +335,9 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
           child: new Column(
             children: <Widget>[
               BuildWidget.buildRow('设备编号', '系统自动生成'),
-              BuildWidget.buildInput('设备名称', new TextEditingController()),
-              BuildWidget.buildInput('设备型号', new TextEditingController()),
-              BuildWidget.buildInput('设备序列号', new TextEditingController()),
+              BuildWidget.buildInput('设备名称', name, lines: 1),
+              BuildWidget.buildInput('设备型号', equipmentCode, lines: 1),
+              BuildWidget.buildInput('设备序列号', serialCode, lines: 1),
               new Padding(
                 padding: EdgeInsets.symmetric(vertical: 5.0),
                 child: new Row(
@@ -392,7 +395,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
                   ],
                 ),
               ),
-              BuildWidget.buildInput('标准响应时间', new TextEditingController()),
+              BuildWidget.buildInput('标准响应时间', responseTime, lines: 1),
               BuildWidget.buildDropdown('等级', currentClass, dropdownClass, changeClass),
               BuildWidget.buildDropdown('设备类别(I)', currentClass1, dropdownClass1, changeClass1),
               BuildWidget.buildDropdown('设备类别(II)', currentClass2, dropdownClass2, changeClass2),
@@ -423,11 +426,10 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
             children: <Widget>[
               BuildWidget.buildRadio(
                   '固定资产', isFixed, currentFixed, changeValue),
-              BuildWidget.buildInput('资产编号', new TextEditingController()),
-              BuildWidget.buildInput('资产等级', new TextEditingController()),
+              BuildWidget.buildInput('资产编号', assetCode, lines: 1),
               BuildWidget.buildDropdown(
                   '资产等级', currentLevel, dropdownLevel, changeLevel),
-              BuildWidget.buildInput('折旧年限', new TextEditingController()),
+              BuildWidget.buildInput('折旧年限', depreciationYears, lines: 1),
               new Padding(
                 padding: EdgeInsets.symmetric(vertical: 5.0),
                 child: new Row(
@@ -506,7 +508,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
           padding: EdgeInsets.symmetric(horizontal: 12.0),
           child: new Column(
             children: <Widget>[
-              BuildWidget.buildInput('销售合同名称', new TextEditingController()),
+              BuildWidget.buildInput('销售合同名称', contractName, lines: 1),
               new Padding(
                 padding: EdgeInsets.symmetric(vertical: 5.0),
                 child: new Row(
@@ -564,9 +566,8 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
                   ],
                 ),
               ),
-              BuildWidget.buildInput('购入方式', new TextEditingController()),
-              BuildWidget.buildInput('采购金额', new TextEditingController()),
-              BuildWidget.buildInput('采购日期', new TextEditingController()),
+              BuildWidget.buildInput('购入方式', purchaseWay, lines: 1),
+              BuildWidget.buildInput('采购金额', purchaseAmount, lines: 1),
               new Padding(
                 padding: EdgeInsets.symmetric(vertical: 5.0),
                 child: new Row(
@@ -610,7 +611,6 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
                   ],
                 ),
               ),
-              BuildWidget.buildInput('设备产地', new TextEditingController()),
               BuildWidget.buildRadio('设备产地', origin, currentOrigin, changeOrigin)
             ],
           ),
@@ -635,8 +635,8 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
           padding: EdgeInsets.symmetric(horizontal: 12.0),
           child: new Column(
             children: <Widget>[
-              BuildWidget.buildDropdown('使用科室', currentDepartment, dropdownDepartments, changeDepartment),
-              BuildWidget.buildInput('安装地点', new TextEditingController()),
+              departments==null?new Container():BuildWidget.buildDropdown('使用科室', currentDepartment, dropdownDepartments, changeDepartment),
+              BuildWidget.buildInput('安装地点', installSite, lines: 1),
               new Padding(
                 padding: EdgeInsets.symmetric(vertical: 5.0),
                 child: new Row(
@@ -782,7 +782,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
                   ],
                 ),
               ),
-              BuildWidget.buildInput('维保状态', new TextEditingController()),
+              BuildWidget.buildInput('维保状态', warrantyStatus, lines: 1),
               BuildWidget.buildRadio('召回标记', recall, currentRecall, changeRecall),
               new Padding(
                 padding: EdgeInsets.symmetric(vertical: 5.0),
@@ -827,9 +827,9 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
                   ],
                 ),
               ),
-              BuildWidget.buildDropdownWithInput('巡检周期', new TextEditingController(), currentPeriod, dropdownPeriod, changePeriod, inputType: TextInputType.number),
-              BuildWidget.buildDropdownWithInput('保养周期', new TextEditingController(), currentPeriod, dropdownPeriod, changePeriod, inputType: TextInputType.number),
-              BuildWidget.buildDropdownWithInput('校正周期', new TextEditingController(), currentPeriod, dropdownPeriod, changePeriod, inputType: TextInputType.number),
+              BuildWidget.buildDropdownWithInput('巡检周期', patrolPeriod, currentPeriod, dropdownPeriod, changePeriod, inputType: TextInputType.number),
+              BuildWidget.buildDropdownWithInput('保养周期', maintainPeriod, currentPeriod, dropdownPeriod, changePeriod, inputType: TextInputType.number),
+              BuildWidget.buildDropdownWithInput('校正周期', correctionPeriod, currentPeriod, dropdownPeriod, changePeriod, inputType: TextInputType.number),
             ],
           ),
         ),
