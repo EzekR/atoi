@@ -16,8 +16,10 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
   List assetLevel = ['重要', '一般', '特殊'];
   List<DropdownMenuItem<String>> dropdownLevel;
   String currentLevel;
-  String startDate = '起始';
-  String endDate = '结束';
+  String validationStartDate = '起始';
+  String validationEndDate = '结束';
+  String installStartDate = '起始';
+  String installEndDate = '结束';
   String purchaseDate = '采购日期';
   String checkDate = '验收时间';
   String mandatoryDate = '强检时间';
@@ -25,7 +27,20 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
   String equipmentClassCode = '';
   ConstantsModel model;
 
-  var name, equipmentCode, serialCode, responseTime, assetCode, depreciationYears, contractName, purchaseWay, purchaseAmount, installSite, warrantyStatus, maintainPeriod, patrolPeriod, correctionPeriod = new TextEditingController();
+  var name = new TextEditingController(),
+      equipmentCode = new TextEditingController(),
+      serialCode = new TextEditingController(),
+      responseTime = new TextEditingController(),
+      assetCode = new TextEditingController(),
+      depreciationYears = new TextEditingController(),
+      contractName = new TextEditingController(),
+      purchaseWay = new TextEditingController(),
+      purchaseAmount = new TextEditingController(),
+      installSite = new TextEditingController(),
+      warrantyStatus = new TextEditingController(),
+      maintainPeriod = new TextEditingController(),
+      patrolPeriod = new TextEditingController(),
+      correctionPeriod = new TextEditingController();
 
   List departments = [];
   List<DropdownMenuItem<String>> dropdownDepartments;
@@ -277,11 +292,11 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
     currentPeriod = dropdownPeriod[0].value;
     dropdownClass = getDropDownMenuItems(equipmentClass);
     currentClass = dropdownClass[0].value;
-    initClass1();
     model = MainModel.of(context);
     initDepart();
+    initClass1();
     if (widget.equipment != null) {
-
+      getDevice(widget.equipment['ID']);
     }
   }
 
@@ -294,7 +309,55 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
       }
     );
     if (resp['ResultCode'] == '00') {
+      var _data = resp['Data'];
+      await initClass1();
+      setState(() {
+        currentClass1 = _data['EquipmentClass1']['Description'];
+      });
+      await initClass(_data['EquipmentClass1']['Code'], 2);
+      setState(() {
+        currentClass2 = _data['EquipmentClass2']['Description'];
+      });
+      await initClass(_data['EquipmentClass1']['Code']+_data['EquipmentClass2']['Code'], 3);
+      setState(() {
+        currentClass3 = _data['EquipmentClass3']['Description'];
+        equipmentClassCode = _data['EquipmentClass1']['Code']+_data['EquipmentClass2']['Code']+_data['EquipmentClass3']['Code'];
+      });
+      setState(() {
+        name.text = _data['Name'];
+        equipmentCode.text = _data['EquipmentCode'];
+        serialCode.text = _data['SerialCode'];
+        responseTime.text = _data['ResponseTimeLength'].toString();
+        assetCode.text = _data['AssetCode'];
+        depreciationYears.text = _data['DepreciationYears'].toString();
+        contractName.text = _data['SaleContractName'];
+        purchaseWay.text = _data['PurchaseWay'];
+        purchaseAmount.text = _data['PurchaseAmount'].toString();
+        installSite.text = _data['InstalSite'];
+        warrantyStatus.text = _data['WarrantyStatus'];
+        maintainPeriod.text = _data['MaintenancePeriod'].toString();
+        patrolPeriod.text = _data['PatrolPeriod'].toString();
+        correctionPeriod.text = _data['CorrectionPeriod'].toString();
+        manufacturer = _data['Manufacturer'];
+        currentClass = _data['EquipmentLevel']['Name'];
+        currentFixed = _data['FixedAsset']?'是':'否';
+        currentLevel = _data['AssetLevel']['Name'];
+        validationStartDate = _data['ValidityStartDate'].toString().split('T')[0];
+        validationEndDate = _data['ValidityEndDate'].toString().split('T')[0];
+        installStartDate = _data['InstalStartDate'].toString().split('T')[0];
+        installEndDate = _data['InstalEndDate'].toString().split('T')[0];
+        purchaseDate = _data['PurchaseDate'].toString().split('T')[0];
+        currentOrigin = _data['OriginType'];
+        currentDepartment = _data['Department']['Name'];
+        currentCheck = _data['Accepted']?'已验收':'未验收';
+        checkDate = _data['AcceptanceDate'].toString().split('T')[0];
+        currentStatus = _data['UsageStatus']['Name'];
+        currentMachine = _data['EquipmentStatus']['Name'];
+        mandatoryFlag = _data['MandatoryTestStatus']['Name'];
+        mandatoryDate = _data['MandatoryTestDate'].toString().split('T')[0];
+        currentRecall = _data['RecallFlag']?'是':'否';
 
+      });
     }
   }
 
@@ -464,10 +527,10 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
                         onPressed: () async {
                           var _date = await pickDate();
                           setState(() {
-                            startDate = _date;
+                            validationStartDate = _date;
                           });
                         },
-                        child: new Text(startDate),
+                        child: new Text(validationStartDate),
                       ),
                     ),
                     new Expanded(
@@ -476,10 +539,10 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
                         onPressed: () async {
                           var _date = await pickDate();
                           setState(() {
-                            endDate = _date;
+                            validationEndDate = _date;
                           });
                         },
-                        child: new Text(endDate),
+                        child: new Text(validationEndDate),
                       ),
                     ),
                   ],
@@ -671,10 +734,10 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
                         onPressed: () async {
                           var _date = await pickDate();
                           setState(() {
-                            startDate = _date;
+                            installStartDate = _date;
                           });
                         },
-                        child: new Text(startDate),
+                        child: new Text(installStartDate),
                       ),
                     ),
                     new Expanded(
@@ -683,10 +746,10 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
                         onPressed: () async {
                           var _date = await pickDate();
                           setState(() {
-                            endDate = _date;
+                            installEndDate = _date;
                           });
                         },
-                        child: new Text(endDate),
+                        child: new Text(installEndDate),
                       ),
                     ),
                   ],

@@ -136,6 +136,7 @@ class _ManagerAuditVoucherPageState extends State<ManagerAuditVoucherPage> {
               )
           )
       ),
+      maxLines: 3,
       controller: controller,
       enabled: isEnabled,
       style: new TextStyle(
@@ -512,6 +513,7 @@ class _ManagerAuditVoucherPageState extends State<ManagerAuditVoucherPage> {
               ),
               SizedBox(height: 24.0),
               widget.status==3?new Container():buildTextField('审批备注', _comment, true),
+              SizedBox(height: 24.0),
               widget.status==3?new Container():new Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 mainAxisSize: MainAxisSize.max,
@@ -540,7 +542,8 @@ class _ManagerAuditVoucherPageState extends State<ManagerAuditVoucherPage> {
                     child: Text('退回凭证', style: TextStyle(color: Colors.white)),
                   ),
                 ],
-              )
+              ),
+              SizedBox(height: 24.0),
             ],
           ),
         ),

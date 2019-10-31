@@ -517,7 +517,8 @@ class _RepairRequestState extends State<RepairRequest> {
                           child: Text('返回首页', style: TextStyle(color: Colors.white)),
                         ),
                       ],
-                    )
+                    ),
+                    SizedBox(height: 24.0),
                   ],
 
                 ),

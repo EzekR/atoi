@@ -377,7 +377,8 @@ Future getImage(ImageSource sourceType) async {
     return items;
   }
 
-  Column buildField(String label, TextEditingController controller) {
+  Column buildField(String label, TextEditingController controller, {String hintText}) {
+    String hint = hintText??'N/A';
     return new Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
@@ -393,7 +394,7 @@ Future getImage(ImageSource sourceType) async {
           decoration: InputDecoration(
             fillColor: AppConstants.AppColors['app_accent_m'],
             filled: true,
-            hintText: 'N/A',
+            hintText: hint,
           ),
           maxLines: 3,
         ),
@@ -544,10 +545,12 @@ Future getImage(ImageSource sourceType) async {
 
   List<Widget> buildReportList() {
     List<Widget> _list = [];
+    var _date = DateTime.parse(_dispatch['StartDate']);
+    var _formatDate = '${_date.year}-${_date.month}-${_date.day} ${_date.hour}:${_date.minute}';
     _list.addAll(
       [
         _reportOID!=null?BuildWidget.buildRow('报告编号', _reportOID):new Container(),
-        BuildWidget.buildRow('审批状态', _reportStatus),
+        BuildWidget.buildRow('开始时间', _formatDate),
         _fujiComments.isNotEmpty?BuildWidget.buildRow('审批结果', _fujiComments):new Container(),
         new Divider(),
       ]
@@ -564,11 +567,11 @@ Future getImage(ImageSource sourceType) async {
         break;
       case 3:
         _list.addAll([
-          widget.status!=0&&widget.status!=1?BuildWidget.buildRow('强检要求', _description.text):buildField('强检要求：', _description),
+          widget.status!=0&&widget.status!=1?BuildWidget.buildRow('强检要求', _description.text):buildField('强检要求：', _description, hintText: 'FDA, Manufacture, Hospital, Etc..'),
           widget.status!=0&&widget.status!=1?BuildWidget.buildRow('报告明细', _analysis.text):buildField('报告明细：', _analysis),
           widget.status!=0&&widget.status!=1?BuildWidget.buildRow('结果', _solution.text):buildField('结果：', _solution),
-          widget.status!=0&&widget.status!=1?BuildWidget.buildRow('作业报告结果', _currentResult):BuildWidget.buildDropdown('作业报告结果', _currentResult, _dropDownMenuItems, changedDropDownMethod),
           widget.status!=0&&widget.status!=1?BuildWidget.buildRow('专用报告', _currentPrivate):BuildWidget.buildRadio('专用报告', _isPrivate, _currentPrivate, changePrivate),
+          widget.status!=0&&widget.status!=1?BuildWidget.buildRow('作业报告结果', _currentResult):BuildWidget.buildDropdown('作业报告结果', _currentResult, _dropDownMenuItems, changedDropDownMethod),
           _currentResult=='问题升级'?(widget.status!=0&&widget.status!=1?BuildWidget.buildRow('问题升级', _unsolved.text):buildField('问题升级：', _unsolved)):new Container(),
         ]);
         break;
@@ -577,6 +580,7 @@ Future getImage(ImageSource sourceType) async {
           widget.status!=0&&widget.status!=1?BuildWidget.buildRow('报告明细', _analysis.text):buildField('报告明细：', _analysis),
           widget.status!=0&&widget.status!=1?BuildWidget.buildRow('结果', _solution.text):buildField('结果：', _solution),
           widget.status!=0&&widget.status!=1?BuildWidget.buildRow('服务提供方', _currentProvider):BuildWidget.buildDropdown('服务提供方', _currentProvider, _dropDownMenuProviders, changedDropDownProvider),
+          widget.status!=0&&widget.status!=1?BuildWidget.buildRow('作业报告结果', _currentResult):BuildWidget.buildDropdown('作业报告结果', _currentResult, _dropDownMenuItems, changedDropDownMethod),
           _currentResult=='问题升级'?(widget.status!=0&&widget.status!=1?BuildWidget.buildRow('问题升级', _unsolved.text):buildField('问题升级：', _unsolved)):new Container(),
         ]);
         break;

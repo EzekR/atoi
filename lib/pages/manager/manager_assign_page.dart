@@ -988,7 +988,8 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
                         ),
                       ),
                     ],
-                  )
+                  ),
+                  SizedBox(height: 24.0),
                 ],
               ),
             ),

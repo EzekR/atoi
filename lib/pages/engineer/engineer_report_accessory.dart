@@ -138,6 +138,47 @@ class _EngineerReportAccessoryState extends State<EngineerReportAccessory> {
     super.initState();
   }
 
+  void showSheet(context, String type) {
+    showModalBottomSheet(context: context, builder: (context) {
+      return new ListView(
+        shrinkWrap: true,
+        children: <Widget>[
+          ListTile(
+            trailing: new Icon(Icons.collections),
+            title: new Text('从相册添加'),
+            onTap: () {
+              getImage(ImageSource.gallery, type);
+            },
+          ),
+          ListTile(
+            trailing: new Icon(Icons.add_a_photo),
+            title: new Text('拍照添加'),
+            onTap: () {
+              getImage(ImageSource.camera, type);
+            },
+          ),
+        ],
+      );
+    });
+  }
+
+  void getImage(ImageSource sourceType, String imageType) async {
+    var image = await ImagePicker.pickImage(
+      source: sourceType,
+    );
+    if (image != null) {
+      var compressed = await FlutterImageCompress.compressAndGetFile(
+        image.absolute.path,
+        image.absolute.path,
+        minHeight: 800,
+        minWidth: 600,
+      );
+      setState(() {
+        imageType=='new'?_imageNew = compressed:_imageOld = compressed;
+      });
+    }
+  }
+
   Padding buildInput(String labelText, TextEditingController controller) {
     return new Padding(
       padding: EdgeInsets.symmetric(vertical: 5.0, horizontal: 8.0),
@@ -384,9 +425,7 @@ class _EngineerReportAccessoryState extends State<EngineerReportAccessory> {
                           ),
                         ),
                         new IconButton(icon: Icon(Icons.add_a_photo), onPressed: () async {
-                          _imageNew = await ImagePicker.pickImage(
-                              source: ImageSource.camera,
-                          );
+                          showSheet(context, 'new');
                         }),
                       ],
                     )
@@ -431,9 +470,7 @@ class _EngineerReportAccessoryState extends State<EngineerReportAccessory> {
                           ),
                         ),
                         new IconButton(icon: Icon(Icons.add_a_photo), onPressed: () async {
-                          _imageOld = await ImagePicker.pickImage(
-                              source: ImageSource.camera,
-                          );
+                          showSheet(context, 'old');
                         }),
                       ],
                     )

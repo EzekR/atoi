@@ -103,6 +103,9 @@ class _EquipmentsListState extends State<EquipmentsList> {
               ),
               new RaisedButton(
                 onPressed: (){
+                  Navigator.of(context).push(new MaterialPageRoute(builder: (_) {
+                    return new EquipmentDetail(equipment: item,);
+                  }));
                 },
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(6),

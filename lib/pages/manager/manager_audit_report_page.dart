@@ -116,6 +116,7 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
               )
           )
       ),
+      maxLines: 3,
       controller: controller,
       enabled: isEnabled,
       style: new TextStyle(
@@ -638,6 +639,7 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
               ),
               SizedBox(height: 24.0),
               widget.status==3?new Container():buildTextField('审批备注', _comment, true),
+              SizedBox(height: 24.0),
               widget.status==3?new Container():new Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 mainAxisSize: MainAxisSize.max,
@@ -666,7 +668,8 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
                     child: Text('退回报告', style: TextStyle(color: Colors.white)),
                   ),
                 ],
-              )
+              ),
+              SizedBox(height: 24.0),
             ],
           ),
         ),
