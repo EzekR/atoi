@@ -11,6 +11,8 @@ import 'package:atoi/widgets/build_widget.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 
 class VendorDetail extends StatefulWidget {
+  VendorDetail({Key key, this.vendor}) : super(key: key);
+  final Map vendor;
   _VendorDetailState createState() => new _VendorDetailState();
 }
 
@@ -22,40 +24,41 @@ class _VendorDetailState extends State<VendorDetail> {
   var _fault = new TextEditingController();
   List serviceType = ['厂商', '代理商', '经销商', '其他供应商'];
   List province = [
-    "北京市",
-    "天津市",
-    "上海市",
-    "重庆市",
-    "河北省",
-    "山西省",
-    "辽宁省",
-    "吉林省",
-    "黑龙江省",
-    "江苏省",
-    "浙江省",
-    "安徽省",
-    "福建省",
-    "江西省",
-    "山东省",
-    "河南省",
-    "湖北省",
-    "湖南省",
-    "广东省",
-    "海南省",
-    "四川省",
-    "贵州省",
-    "云南省",
-    "陕西省",
-    "甘肃省",
-    "青海省",
-    "台湾省",
-    "内蒙古自治区",
-    "广西壮族自治区",
-    "西藏自治区",
-    "宁夏回族自治区",
-    "新疆维吾尔自治区",
-    "香港特别行政区",
-    "澳门特别行政区"
+    "",
+    "北京",
+    "天津",
+    "上海",
+    "重庆",
+    "河北",
+    "山西",
+    "辽宁",
+    "吉林",
+    "黑龙江",
+    "江苏",
+    "浙江",
+    "安徽",
+    "福建",
+    "江西",
+    "山东",
+    "河南",
+    "湖北",
+    "湖南",
+    "广东",
+    "海南",
+    "四川",
+    "贵州",
+    "云南",
+    "陕西",
+    "甘肃",
+    "青海",
+    "台湾",
+    "内蒙古",
+    "广西",
+    "西藏",
+    "宁夏",
+    "新疆",
+    "香港",
+    "澳门"
   ];
   List serviceScope = ['全保', '技术保', '其他保'];
   List<DropdownMenuItem<String>> dropdownType;
@@ -64,6 +67,13 @@ class _VendorDetailState extends State<VendorDetail> {
   String currentType;
   String currentScope;
   String currentProvince;
+  List _imageList = [];
+
+  var name = new TextEditingController(),
+      mobile = new TextEditingController(),
+      address = new TextEditingController(),
+      contact = new TextEditingController(),
+      contactMobile = new TextEditingController();
 
   List vendorStatus = ['启用', '停用'];
   String currentStatus = '启用';
@@ -71,18 +81,15 @@ class _VendorDetailState extends State<VendorDetail> {
   String startDate = '起始日期';
   String endDate = '结束日期';
 
-  MainModel mainModel = MainModel();
-
-  List<Map> _equipments = [];
-
-  List<dynamic> _imageList = [];
-
   void initState() {
     super.initState();
     dropdownType = getDropDownMenuItems(serviceType);
     dropdownProvince = getDropDownMenuItems(province);
     currentType = dropdownType[0].value;
     currentProvince = dropdownProvince[0].value;
+    if (widget.vendor != null) {
+      getVendor();
+    }
   }
 
   void changeType(String selected) {
@@ -103,6 +110,24 @@ class _VendorDetailState extends State<VendorDetail> {
     });
   }
 
+  Future<Null> getVendor() async {
+    var resp = await HttpRequest.request('/Supplier/GetSupplierById',
+        method: HttpRequest.GET, params: {'id': widget.vendor['ID']});
+    if (resp['ResultCode'] == '00') {
+      var _data = resp['Data'];
+      setState(() {
+        currentType = _data['SupplierType']['Name'];
+        name.text = _data['Name'];
+        currentProvince = _data['Province'];
+        mobile.text = _data['Mobile'];
+        address.text = _data['Address'];
+        contact.text = _data['Contact'];
+        contactMobile.text = _data['ContactMobile'];
+        currentStatus = _data['IsActive'] ? '启用' : '停用';
+      });
+    }
+  }
+
   Future<String> pickDate() async {
     var val = await showDatePicker(
         context: context,
@@ -114,52 +139,37 @@ class _VendorDetailState extends State<VendorDetail> {
     return '${val.year}-${val.month}-${val.day}';
   }
 
-  Future<Null> getDevice() async {
-    Map<String, dynamic> params = {
-      'codeContent': barcode,
-    };
-    var resp = await HttpRequest.request('/Equipment/GetDeviceByQRCode',
-        method: HttpRequest.GET, params: params);
-    print(resp);
-    if (resp['ResultCode'] == '00') {
-      setState(() {
-        _equipments.add(resp['Data']);
-      });
-    } else {
-      showDialog(
-          context: context,
-          builder: (context) => AlertDialog(
-                title: new Text(resp['ResultMessage']),
-              ));
-    }
+  void showSheet(context) {
+    showModalBottomSheet(
+        context: context,
+        builder: (context) {
+          return new ListView(
+            shrinkWrap: true,
+            children: <Widget>[
+              ListTile(
+                trailing: new Icon(Icons.collections),
+                title: new Text('从相册添加'),
+                onTap: () {
+                  getImage(ImageSource.gallery);
+                },
+              ),
+              ListTile(
+                trailing: new Icon(Icons.add_a_photo),
+                title: new Text('拍照添加'),
+                onTap: () {
+                  getImage(ImageSource.camera);
+                },
+              ),
+            ],
+          );
+        });
   }
 
-    void showSheet(context) {
-    showModalBottomSheet(context: context, builder: (context) {
-      return new ListView(
-        shrinkWrap: true,
-        children: <Widget>[
-          ListTile(
-            trailing: new Icon(Icons.collections),
-            title: new Text('从相册添加'),
-            onTap: () {
-              getImage(ImageSource.gallery);
-            },
-          ),
-          ListTile(
-            trailing: new Icon(Icons.add_a_photo),
-            title: new Text('拍照添加'),
-            onTap: () {
-              getImage(ImageSource.camera);
-            },
-          ),
-        ],
-      );
-    });
-  }
-Future getImage(ImageSource sourceType) async {
+  Future<Null> saveVendor() async {}
+
+  Future getImage(ImageSource sourceType) async {
     var image = await ImagePicker.pickImage(
-        source: sourceType,
+      source: sourceType,
     );
     if (image != null) {
       var compressed = await FlutterImageCompress.compressAndGetFile(
@@ -171,59 +181,6 @@ Future getImage(ImageSource sourceType) async {
       setState(() {
         _imageList.add(compressed);
       });
-    }
-  }
-
-  Future<Null> submit() async {
-    if (_equipments == null) {
-      showDialog(
-          context: context,
-          builder: (context) => AlertDialog(
-                title: new Text('请选择设备'),
-              ));
-      return;
-    }
-    if (_fault.text.isEmpty || _fault.text == null) {
-      showDialog(
-          context: context,
-          builder: (context) => AlertDialog(
-                title: new Text('盘点备注不可为空'),
-              ));
-    } else {
-      var prefs = await _prefs;
-      var userID = prefs.getInt('userID');
-      var fileList = [];
-      for (var image in _imageList) {
-        List<int> imageBytes = await image.readAsBytes();
-        var fileContent = base64Encode(imageBytes);
-        var file = {
-          'FileContent': fileContent,
-          'FileName': image.path,
-          'FiltType': 1,
-          'ID': 0
-        };
-        fileList.add(file);
-      }
-      var _data = {
-        'userID': userID,
-        'requestInfo': {
-          'RequestType': {'ID': 12},
-          'Equipments': _equipments,
-          'FaultDesc': _fault.text,
-          'Files': fileList
-        }
-      };
-      var resp = await HttpRequest.request('/Request/AddRequest',
-          method: HttpRequest.POST, data: _data);
-      print(resp);
-      if (resp['ResultCode'] == '00') {
-        showDialog(
-            context: context,
-            builder: (buider) => AlertDialog(
-                  title: new Text('提交请求成功'),
-                )).then(
-            (result) => Navigator.of(context, rootNavigator: true).pop(result));
-      }
     }
   }
 
@@ -280,23 +237,6 @@ Future getImage(ImageSource sourceType) async {
     return items;
   }
 
-  Future toSearch() async {
-    final _searchResult =
-        await showSearch(context: context, delegate: SearchBarDelegate());
-    if (_searchResult != null && _searchResult != 'null') {
-      print(_searchResult);
-      Map _data = jsonDecode(_searchResult);
-      var _result = _equipments.firstWhere(
-          (_equipment) => _equipment['OID'] == _data['OID'],
-          orElse: () => null);
-      if (_result == null) {
-        setState(() {
-          _equipments.add(_data);
-        });
-      }
-    }
-  }
-
   Padding buildRow(String labelText, String defaultText) {
     return new Padding(
       padding: EdgeInsets.symmetric(vertical: 5.0),
@@ -322,57 +262,6 @@ Future getImage(ImageSource sourceType) async {
         ],
       ),
     );
-  }
-
-  Widget buildEquip() {
-    List<Widget> tiles = [];
-    Widget content;
-    for (var _equipment in _equipments) {
-      tiles.add(
-        new Padding(
-          padding: EdgeInsets.symmetric(horizontal: 12.0),
-          child: new Column(
-            children: <Widget>[
-              BuildWidget.buildRow('系统编号', _equipment['OID'] ?? ''),
-              BuildWidget.buildRow('名称', _equipment['Name'] ?? ''),
-              BuildWidget.buildRow('型号', _equipment['EquipmentCode'] ?? ''),
-              BuildWidget.buildRow('序列号', _equipment['SerialCode'] ?? ''),
-              BuildWidget.buildRow(
-                  '使用科室', _equipment['Department']['Name'] ?? ''),
-              BuildWidget.buildRow('安装地点', _equipment['InstalSite'] ?? ''),
-              BuildWidget.buildRow(
-                  '设备厂商', _equipment['Manufacturer']['Name'] ?? ''),
-              BuildWidget.buildRow(
-                  '资产等级', _equipment['AssetLevel']['Name'] ?? ''),
-              BuildWidget.buildRow('维保状态', _equipment['WarrantyStatus'] ?? ''),
-              BuildWidget.buildRow(
-                  '服务范围', _equipment['ContractScope']['Name'] ?? ''),
-              new Padding(
-                padding: EdgeInsets.symmetric(vertical: 8.0),
-                child: new Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: <Widget>[
-                    new Text('删除此设备'),
-                    new IconButton(
-                        icon: new Icon(Icons.delete_forever),
-                        onPressed: () {
-                          _equipments.remove(_equipment);
-                          setState(() {
-                            _equipments = _equipments;
-                          });
-                        })
-                  ],
-                ),
-              )
-            ],
-          ),
-        ),
-      );
-    }
-    content = new Column(
-      children: tiles,
-    );
-    return content;
   }
 
   Widget build(BuildContext context) {
@@ -431,18 +320,15 @@ Future getImage(ImageSource sourceType) async {
                             padding: EdgeInsets.symmetric(horizontal: 12.0),
                             child: new Column(
                               children: <Widget>[
+                                BuildWidget.buildInput('名称', name),
                                 BuildWidget.buildDropdown('类型', currentType,
                                     dropdownType, changeType),
                                 BuildWidget.buildDropdown('省份', currentProvince,
                                     dropdownProvince, changeProvince),
-                                BuildWidget.buildInput(
-                                    '电话', new TextEditingController()),
-                                BuildWidget.buildInput(
-                                    '地址', new TextEditingController()),
-                                BuildWidget.buildInput(
-                                    '联系人', new TextEditingController()),
-                                BuildWidget.buildInput(
-                                    '联系人电话', new TextEditingController()),
+                                BuildWidget.buildInput('电话', mobile),
+                                BuildWidget.buildInput('地址', address),
+                                BuildWidget.buildInput('联系人', contact),
+                                BuildWidget.buildInput('联系人电话', contactMobile),
                                 BuildWidget.buildRadio('供应商经营状态', vendorStatus,
                                     currentStatus, changeStatus),
                                 new Divider(),
@@ -483,7 +369,7 @@ Future getImage(ImageSource sourceType) async {
                       children: <Widget>[
                         new RaisedButton(
                           onPressed: () {
-                            submit();
+                            saveVendor();
                           },
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(6),

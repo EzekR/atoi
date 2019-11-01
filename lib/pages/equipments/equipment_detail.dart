@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:atoi/widgets/build_widget.dart';
 import 'package:atoi/widgets/search_bar_vendor.dart';
 import 'dart:convert';
@@ -26,6 +27,22 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
   String recallDate = '召回时间';
   String equipmentClassCode = '';
   ConstantsModel model;
+  Map equipmentLevel = {
+    '1类': 1,
+    '2类': 2,
+    '3类': 3
+  };
+  Map periodType = {
+    '无': 1,
+    '天/次': 2,
+    '月/次': 3,
+    '年/次': 4
+  };
+  Map mandatoryFlagType = {
+    '无': 0,
+    '待强检': 1,
+    '已强检': 2
+  };
 
   var name = new TextEditingController(),
       equipmentCode = new TextEditingController(),
@@ -58,9 +75,17 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
   List<DropdownMenuItem<String>> dropdownMandatory;
   String currentMandatory;
 
-  List period = ['无', '天/次', '月/次', '年/次'];
-  List<DropdownMenuItem<String>> dropdownPeriod;
-  String currentPeriod;
+  List patrolPeriodList = ['无', '天/次', '月/次', '年/次'];
+  List<DropdownMenuItem<String>> dropdownPatrolPeriod;
+  String currentPatrolPeriod;
+
+  List mandatoryPeriodList = ['无', '天/次', '月/次', '年/次'];
+  List<DropdownMenuItem<String>> dropdownMandatoryPeriod;
+  String currentMaintainPeriod;
+
+  List correctionPeriodList = ['无', '天/次', '月/次', '年/次'];
+  List<DropdownMenuItem<String>> dropdownCorrectionPeriod;
+  String currentCorrectionPeriod;
 
   List equipmentClass = ['1类', '2类', '3类'];
   List<DropdownMenuItem<String>> dropdownClass;
@@ -100,6 +125,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
   String currentRecall = '否';
 
   Map<String, dynamic> manufacturer;
+  Map<String, dynamic> supplier;
 
   void changeValue(value) {
     setState(() {
@@ -176,9 +202,21 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
     });
   }
 
-  void changePeriod(String selectedMethod) {
+  void changePatrolPeriod(String selectedMethod) {
     setState(() {
-      currentPeriod = selectedMethod;
+      currentPatrolPeriod = selectedMethod;
+    });
+  }
+
+  void changeMandatoryPeriod(String selectedMethod) {
+    setState(() {
+      currentMaintainPeriod = selectedMethod;
+    });
+  }
+
+  void changeCorrectionPeriod(String selectedMethod) {
+    setState(() {
+      currentCorrectionPeriod = selectedMethod;
     });
   }
 
@@ -200,6 +238,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
       List _list = resp['Data'].map((item) {
         return item['Description'];
       }).toList();
+      print(_list);
       setState(() {
         class1 = _list;
         class1Item = resp['Data'];
@@ -224,18 +263,14 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
       }).toList();
       switch (level) {
         case 2:
-          setState(() {
-            class2 = _list;
-            class2Item = resp['Data'];
-          });
+          class2 = _list;
+          class2Item = resp['Data'];
           dropdownClass2 = getDropDownMenuItems(class2);
           currentClass2 = dropdownClass2[0].value;
           break;
         case 3:
-          setState(() {
-            class3 = _list;
-            class3Item = resp['Data'];
-          });
+          class3 = _list;
+          class3Item = resp['Data'];
           dropdownClass3 = getDropDownMenuItems(class3);
           currentClass3 = dropdownClass3[0].value;
           break;
@@ -288,8 +323,12 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
     currentMachine = dropdownMachine[0].value;
     dropdownMandatory = getDropDownMenuItems(mandatoryFlag);
     currentMandatory = dropdownMandatory[0].value;
-    dropdownPeriod = getDropDownMenuItems(period);
-    currentPeriod = dropdownPeriod[0].value;
+    dropdownPatrolPeriod = getDropDownMenuItems(patrolPeriodList);
+    currentPatrolPeriod = dropdownPatrolPeriod[0].value;
+    dropdownMandatoryPeriod = getDropDownMenuItems(patrolPeriodList);
+    currentMaintainPeriod = dropdownMandatoryPeriod[0].value;
+    dropdownCorrectionPeriod = getDropDownMenuItems(patrolPeriodList);
+    currentCorrectionPeriod = dropdownCorrectionPeriod[0].value;
     dropdownClass = getDropDownMenuItems(equipmentClass);
     currentClass = dropdownClass[0].value;
     model = MainModel.of(context);
@@ -339,6 +378,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
         patrolPeriod.text = _data['PatrolPeriod'].toString();
         correctionPeriod.text = _data['CorrectionPeriod'].toString();
         manufacturer = _data['Manufacturer'];
+        supplier = _data['Supplier'];
         currentClass = _data['EquipmentLevel']['Name'];
         currentFixed = _data['FixedAsset']?'是':'否';
         currentLevel = _data['AssetLevel']['Name'];
@@ -353,11 +393,93 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
         checkDate = _data['AcceptanceDate'].toString().split('T')[0];
         currentStatus = _data['UsageStatus']['Name'];
         currentMachine = _data['EquipmentStatus']['Name'];
-        mandatoryFlag = _data['MandatoryTestStatus']['Name'];
+        currentMandatory = _data['MandatoryTestStatus']['ID']==0?'无':_data['MandatoryTestStatus']['Name'];
         mandatoryDate = _data['MandatoryTestDate'].toString().split('T')[0];
         currentRecall = _data['RecallFlag']?'是':'否';
-
+        recallDate = _data['RecallDate'].toString().split('T')[0];
+        currentPatrolPeriod = _data['PatrolType']['Name']==''?'无':_data['PatrolType']['Name'];
+        currentMaintainPeriod = _data['MaintenanceType']['Name']==''?'无':_data['MaintenanceType']['Name'];
+        currentCorrectionPeriod = _data['CorrectionType']['Name']==''?'无':_data['CorrectionType']['Name'];
       });
+    }
+  }
+
+  Future<Null> saveEquipment() async {
+    var _data = {
+      "EquipmentLevel": {
+        "ID": equipmentLevel[currentClass],
+      },
+      "Name": name.text,
+      "EquipmentCode": equipmentCode.text,
+      "SerialCode": serialCode.text,
+      "Manufacturer": manufacturer,
+      "EquipmentClass1": class1Item.firstWhere((item) => item['Description']==currentClass1, orElse: ()=>null),
+      "EquipmentClass2": class2Item.firstWhere((item) => item['Description']==currentClass2, orElse: ()=>null),
+      "EquipmentClass3": class3Item.firstWhere((item) => item['Description']==currentClass3, orElse: ()=>null),
+      "ResponseTimeLength": responseTime.text,
+      "FixedAsset": currentFixed=='是'?true:false,
+      "AssetCode": assetCode.text,
+      "AssetLevel": {
+        'ID': model.AssetsLevel[currentLevel]
+      },
+      "DepreciationYears": depreciationYears.text,
+      "ValidityStartDate": validationStartDate,
+      "ValidityEndDate": validationEndDate,
+      "SaleContractName": contractName.text,
+      "Supplier": supplier,
+      "PurchaseWay": purchaseWay.text,
+      "PurchaseAmount": purchaseAmount.text,
+      "PurchaseDate": purchaseDate,
+      "IsImport": currentOrigin=='进口'?true:false,
+      "Department": {
+        "ID": model.Departments[currentDepartment],
+      },
+      "InstalSite": installSite.text,
+      "InstalStartDate": installStartDate,
+      "InstalEndDate": installEndDate,
+      "Accepted": currentCheck=='已验收'?true:false,
+      "AcceptanceDate": checkDate,
+      "UsageStatus": {
+        "ID": model.UsageStatus[currentStatus],
+      },
+      "EquipmentStatus": {
+        "ID": model.MachineStatus[currentMachine],
+      },
+      "ScrapDate": null,
+      "MaintenancePeriod": maintainPeriod.text,
+      "MaintenanceType": {
+        "ID": periodType[currentMaintainPeriod],
+      },
+      "PatrolPeriod": patrolPeriod.text,
+      "PatrolType": {
+        "ID": periodType[currentPatrolPeriod],
+      },
+      "CorrectionPeriod": correctionPeriod.text,
+      "CorrectionType": {
+        "ID": periodType[currentCorrectionPeriod],
+      },
+      "MandatoryTestStatus": {
+        "ID": mandatoryFlagType[currentMandatory],
+      },
+      "MandatoryTestDate": mandatoryDate,
+      "RecallFlag": currentRecall=='是'?true:false,
+      "RecallDate": recallDate,
+      "WarrantyStatus": warrantyStatus.text,
+      "EquipmentFile": [],
+      "OriginType": currentOrigin,
+    };
+    if (widget.equipment != null) {
+      _data['ID'] = widget.equipment['ID'];
+    }
+    var resp = await HttpRequest.request(
+      '/Equipment/SaveEquipment',
+      method: HttpRequest.POST,
+      data: _data
+    );
+    if (resp['ResultCode'] == '00') {
+      showDialog(context: context, builder: (context) => CupertinoAlertDialog(
+        title: new Text('保存成功'),
+      ));
     }
   }
 
@@ -603,7 +725,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
                     new Expanded(
                         flex: 3,
                         child: new Text(
-                          manufacturer == null ? '' : manufacturer['Name'],
+                          supplier == null ? '' : supplier['Name'],
                           style: new TextStyle(
                               fontSize: 20.0,
                               fontWeight: FontWeight.w400,
@@ -617,12 +739,12 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
                               final _searchResult = await showSearch(
                                   context: context,
                                   delegate: SearchBarVendor(),
-                                  hintText: '请输厂商名称');
+                                  hintText: '请输供应商名称');
                               print(_searchResult);
                               if (_searchResult != null &&
                                   _searchResult != 'null') {
                                 setState(() {
-                                  manufacturer = jsonDecode(_searchResult);
+                                  supplier = jsonDecode(_searchResult);
                                 });
                               }
                             })),
@@ -890,9 +1012,9 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
                   ],
                 ),
               ),
-              BuildWidget.buildDropdownWithInput('巡检周期', patrolPeriod, currentPeriod, dropdownPeriod, changePeriod, inputType: TextInputType.number),
-              BuildWidget.buildDropdownWithInput('保养周期', maintainPeriod, currentPeriod, dropdownPeriod, changePeriod, inputType: TextInputType.number),
-              BuildWidget.buildDropdownWithInput('校正周期', correctionPeriod, currentPeriod, dropdownPeriod, changePeriod, inputType: TextInputType.number),
+              BuildWidget.buildDropdownWithInput('巡检周期', patrolPeriod, currentPatrolPeriod, dropdownPatrolPeriod, changePatrolPeriod, inputType: TextInputType.number),
+              BuildWidget.buildDropdownWithInput('保养周期', maintainPeriod, currentMaintainPeriod, dropdownMandatoryPeriod, changeMandatoryPeriod, inputType: TextInputType.number),
+              BuildWidget.buildDropdownWithInput('校正周期', correctionPeriod, currentCorrectionPeriod, dropdownCorrectionPeriod, changeCorrectionPeriod, inputType: TextInputType.number),
             ],
           ),
         ),
@@ -904,7 +1026,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
   Widget build(BuildContext context) {
     return new Scaffold(
         appBar: new AppBar(
-          title: new Text('添加设备'),
+          title: new Text(widget.equipment==null?'添加设备':'编辑设备'),
           elevation: 0.7,
           flexibleSpace: Container(
             decoration: BoxDecoration(
@@ -949,7 +1071,9 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
                     new Padding(
                       padding: EdgeInsets.symmetric(horizontal: 5.0),
                       child: new RaisedButton(
-                        onPressed: () {},
+                        onPressed: () {
+                          saveEquipment();
+                        },
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(6),
                         ),

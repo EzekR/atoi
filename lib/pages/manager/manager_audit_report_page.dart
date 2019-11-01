@@ -431,6 +431,48 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
     return _list;
   }
 
+  List<Widget> buildReportContent() {
+    List<Widget> _list = [];
+    _list.addAll([
+      BuildWidget.buildRow('作业报告编号', _report['OID']),
+      BuildWidget.buildRow('作业报告类型', _report['Type']['Name']),
+      BuildWidget.buildRow('报告明细', _report['SolutionCauseAnalysis']),
+      BuildWidget.buildRow('结果', _report['SolutionWay']),
+    ]);
+    switch (_dispatch['Request']['RequestType']['ID']) {
+      case 2:
+        _list.addAll([
+          BuildWidget.buildRow('服务提供商', _report['ServiceProvider'])
+        ]);
+        break;
+      case 3:
+        _list.addAll([
+          BuildWidget.buildRow('强检要求', _report['FaultDesc']),
+          BuildWidget.buildRow('专用报告', _report['IsPrivate']?'是':'否')
+        ]);
+        break;
+      default:
+        _list.addAll([
+          BuildWidget.buildRow('发生频率', _report['FaultFrequency']),
+          BuildWidget.buildRow('系统状态', _report['FaultSystemStatus']),
+          BuildWidget.buildRow('错误代码', _report['FaultCode']),
+          BuildWidget.buildRow('故障描述', _report['FaultDesc']),
+          BuildWidget.buildRow('分析原因', _report['SolutionCauseAnalysis']),
+          BuildWidget.buildRow('处理方法', _report['SolutionWay']),
+          BuildWidget.buildRow('备注', _report['SolutionUnsolvedComments']),
+        ]);
+        break;
+    }
+    _list.addAll([
+      _report['DelayReason']!=''?BuildWidget.buildRow('误工说明', _report['DelayReason']):new Container(),
+      widget.status==3?BuildWidget.buildRow('作业结果', _report['SolutionResultStatus']['Name']):BuildWidget.buildDropdown('作业结果', _currentResult, _dropDownMenuItems, changedDropDownMethod),
+      BuildWidget.buildRow('附件', ''),
+      buildImageColumn(),
+      widget.status==3?BuildWidget.buildRow('审批备注', _report['FujiComments']??''):new Container()
+    ]);
+    return _list;
+  }
+
   List<ExpansionPanel> buildExpansion() {
     List<ExpansionPanel> _list = [];
     if (_dispatch['Request']['RequestType']['ID'] != 14) {
@@ -524,22 +566,7 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
           padding: EdgeInsets.symmetric(horizontal: 8.0),
           child: new Column(
             crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              BuildWidget.buildRow('作业报告编号', _report['OID']),
-              BuildWidget.buildRow('作业报告类型', _report['Type']['Name']),
-              BuildWidget.buildRow('发生频率', _report['FaultFrequency']),
-              BuildWidget.buildRow('系统状态', _report['FaultSystemStatus']),
-              BuildWidget.buildRow('错误代码', _report['FaultCode']),
-              BuildWidget.buildRow('故障描述', _report['FaultDesc']),
-              BuildWidget.buildRow('分析原因', _report['SolutionCauseAnalysis']),
-              BuildWidget.buildRow('处理方法', _report['SolutionWay']),
-              BuildWidget.buildRow('备注', _report['SolutionUnsolvedComments']),
-              _report['DelayReason']!=''?BuildWidget.buildRow('误工说明', _report['DelayReason']):new Container(),
-              widget.status==3?BuildWidget.buildRow('作业结果', _report['SolutionResultStatus']['Name']):BuildWidget.buildDropdown('作业结果', _currentResult, _dropDownMenuItems, changedDropDownMethod),
-              BuildWidget.buildRow('附件', ''),
-              buildImageColumn(),
-              widget.status==3?BuildWidget.buildRow('审批备注', _report['FujiComments']??''):new Container()
-            ],
+            children: buildReportContent()
           ),
         ),
         isExpanded: _isExpandedAssign,

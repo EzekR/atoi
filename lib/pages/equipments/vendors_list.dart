@@ -77,7 +77,7 @@ class _VendorsListState extends State<VendorsList> {
               new RaisedButton(
                 onPressed: (){
                   Navigator.of(context).push(new MaterialPageRoute(builder: (_) {
-                    return new PrintQrcode(equipmentId: item['SerialCode'],);
+                    return new VendorDetail(vendor: item,);
                   }));
                 },
                 shape: RoundedRectangleBorder(
