@@ -76,11 +76,14 @@ class _HomePageState extends State<HomePage>
             child: new Scaffold(
               backgroundColor: new Color(0xfffafafa),
               appBar: new AppBar(
-                leading: new Container(width: 1.0,),
+                leading: new Container(),
                 title: new Align(
                   alignment: Alignment(-1.0, 0),
-                  child: new Text('ATOI医疗设备管理系统'),
+                  child: new Text('ATOI医疗设备管理系统',
+                    textAlign: TextAlign.left,
+                  ),
                 ),
+                centerTitle: false,
                 elevation: 0.7,
                 flexibleSpace: Container(
                   decoration: BoxDecoration(

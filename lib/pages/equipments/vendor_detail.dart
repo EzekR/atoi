@@ -165,7 +165,11 @@ class _VendorDetailState extends State<VendorDetail> {
         });
   }
 
-  Future<Null> saveVendor() async {}
+  Future<Null> saveVendor() async {
+    var _data = {
+      
+    };
+  }
 
   Future getImage(ImageSource sourceType) async {
     var image = await ImagePicker.pickImage(
