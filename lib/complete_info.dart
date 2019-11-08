@@ -140,6 +140,8 @@ class _CompleteInfoState extends State<CompleteInfo> {
       }
     };
     var prefs = await _prefs;
+    userInfo['Name'] = _name.text;
+    userInfo['Mobile'] = _mobile.text;
     userInfo['Email'] = _email.text;
     userInfo['Address'] = _addr.text;
     userInfo['Department'] = _depart;

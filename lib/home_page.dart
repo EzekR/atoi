@@ -14,6 +14,7 @@ import 'package:atoi/pages/equipments/equipments_list.dart';
 import 'package:atoi/pages/reports/report_list.dart';
 import 'package:atoi/pages/equipments/equipment_contract.dart';
 import 'package:atoi/pages/equipments/vendors_list.dart';
+import 'package:atoi/pages/equipments/contract_list.dart';
 
 class HomePage extends StatefulWidget {
   static String tag = 'home-page';
@@ -224,7 +225,7 @@ class _HomePageState extends State<HomePage>
                       ),
                       onTap: () {
                         Navigator.of(context).push(new MaterialPageRoute(builder: (_) {
-                          return new EquipmentContract();
+                          return new ContractList();
                         }));
                       },
                     ),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:atoi/widgets/search_bar.dart';
 import 'package:atoi/models/models.dart';
 import 'package:scoped_model/scoped_model.dart';
@@ -9,6 +10,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:atoi/utils/http_request.dart';
 import 'package:atoi/widgets/build_widget.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
+import 'package:atoi/models/constants_model.dart';
 
 class VendorDetail extends StatefulWidget {
   VendorDetail({Key key, this.vendor}) : super(key: key);
@@ -18,7 +20,6 @@ class VendorDetail extends StatefulWidget {
 
 class _VendorDetailState extends State<VendorDetail> {
   String barcode = "";
-
   var _isExpandedDetail = true;
   Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
   var _fault = new TextEditingController();
@@ -80,6 +81,7 @@ class _VendorDetailState extends State<VendorDetail> {
   Map<String, dynamic> supplier;
   String startDate = '起始日期';
   String endDate = '结束日期';
+  ConstantsModel model;
 
   void initState() {
     super.initState();
@@ -90,6 +92,7 @@ class _VendorDetailState extends State<VendorDetail> {
     if (widget.vendor != null) {
       getVendor();
     }
+    model = MainModel.of(context);
   }
 
   void changeType(String selected) {
@@ -166,9 +169,38 @@ class _VendorDetailState extends State<VendorDetail> {
   }
 
   Future<Null> saveVendor() async {
-    var _data = {
-      
+    var prefs = await _prefs;
+    var _info = {
+      "SupplierType": {
+        "ID": model.SupplierType[currentType],
+      },
+      "Name": name.text,
+      "Province": currentProvince,
+      "Mobile": mobile.text,
+      "Address": address.text,
+      "Contact": contact.text,
+      "ContactMobile": contactMobile.text,
+      "IsActive": currentStatus=='启用'?true:false,
     };
+    if (widget.vendor != null) {
+      _info['ID'] = widget.vendor['ID'];
+    }
+    var _data = {
+      "userID": prefs.getInt('userID'),
+      "info": _info
+    };
+    var resp = await HttpRequest.request(
+      '/Supplier/SaveSupplier',
+      method: HttpRequest.POST,
+      data: _data
+    );
+    if (resp['ResultCode'] == '00') {
+      showDialog(context: context, builder: (context) {
+        return CupertinoAlertDialog(
+          title: new Text('保存成功'),
+        );
+      }).then((result) => Navigator.of(context).pop());
+    }
   }
 
   Future getImage(ImageSource sourceType) async {
@@ -405,3 +437,4 @@ class _VendorDetailState extends State<VendorDetail> {
     );
   }
 }
+
