@@ -27,6 +27,7 @@ class _EngineerReportAccessoryState extends State<EngineerReportAccessory> {
   String _currentVendor;
   List _sources = [];
   ConstantsModel model;
+  bool hold = false;
 
   List _vendorList = [];
   var _vendors;

@@ -224,15 +224,15 @@ class _UserHomePageState extends State<UserHomePage> {
                   children: <Widget>[
                     new Expanded(
                       flex: 4,
-                      child: buildIconColumn(Icons.crop_free, 'Repair Request'),
+                      child: buildIconColumn(Icons.crop_free, '扫码报修'),
                     ),
                     new Expanded(
                       flex: 4,
-                      child: buildIconColumn(Icons.extension, 'Other Request'),
+                      child: buildIconColumn(Icons.extension, '其他服务'),
                     ),
                     new Expanded(
                       flex: 4,
-                      child: buildIconColumn(Icons.history, 'Service Log'),
+                      child: buildIconColumn(Icons.history, '历史记录'),
                     ),
                   ],
                 ),

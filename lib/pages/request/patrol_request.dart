@@ -25,6 +25,7 @@ class PatrolRequest extends StatefulWidget{
 class _PatrolRequestState extends State<PatrolRequest> {
 
   String barcode = "";
+  bool hold = false;
 
   var _isExpandedBasic = true;
   var _isExpandedDetail = false;
@@ -197,11 +198,17 @@ class _PatrolRequestState extends State<PatrolRequest> {
           'Files': fileList
         }
       };
+      setState(() {
+        hold = true;
+      });
       var resp = await HttpRequest.request(
           '/Request/AddRequest',
           method: HttpRequest.POST,
           data: _data
       );
+      setState(() {
+        hold = false;
+      });
       print(resp);
       if (resp['ResultCode'] == '00') {
         showDialog(context: context, builder: (buider) =>
@@ -484,7 +491,7 @@ class _PatrolRequestState extends State<PatrolRequest> {
                       children: <Widget>[
                         new RaisedButton(
                           onPressed: () {
-                            submit();
+                            return hold?null:submit();
                           },
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(6),

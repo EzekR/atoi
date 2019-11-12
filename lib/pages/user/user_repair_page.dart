@@ -25,6 +25,8 @@ class _UserRepairPageState extends State<UserRepairPage> {
   var _isExpandedBasic = true;
   var _isExpandedDetail = false;
   ConstantsModel model;
+  //增加操作状态
+  bool _stunned = false;
 
   List<File> _imageList = [];
 
@@ -114,19 +116,23 @@ class _UserRepairPageState extends State<UserRepairPage> {
   }
 
   Future getImage(ImageSource sourceType) async {
-    var image = await ImagePicker.pickImage(
-      source: sourceType,
-    );
-    if (image != null) {
-      var compressed = await FlutterImageCompress.compressAndGetFile(
-        image.absolute.path,
-        image.absolute.path,
-        minHeight: 800,
-        minWidth: 600,
+    try {
+      var image = await ImagePicker.pickImage(
+        source: sourceType,
       );
-      setState(() {
-        _imageList.add(compressed);
-      });
+      if (image != null) {
+        var compressed = await FlutterImageCompress.compressAndGetFile(
+          image.absolute.path,
+          image.absolute.path,
+          minHeight: 800,
+          minWidth: 600,
+        );
+        setState(() {
+          _imageList.add(compressed);
+        });
+      }
+    } catch (e) {
+      print(e);
     }
   }
 
@@ -168,11 +174,19 @@ class _UserRepairPageState extends State<UserRepairPage> {
         'Files': Files
       }
     };
+    //改变操作状态防止按钮多次点击
+    setState(() {
+      _stunned = true;
+    });
     var resp = await HttpRequest.request(
       '/Request/AddRequest',
       method: HttpRequest.POST,
       data: _data,
     );
+    //改变操作状态释放按钮
+    setState(() {
+      _stunned = false;
+    });
     print(resp);
     if (resp['ResultCode'] == '00') {
       showDialog(
@@ -468,7 +482,8 @@ class _UserRepairPageState extends State<UserRepairPage> {
                 children: <Widget>[
                   new RaisedButton(
                     onPressed: () {
-                      submit();
+                      //根据stunned状态判断按钮是否可用
+                      return _stunned?null:submit();
                     },
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(6),

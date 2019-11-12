@@ -12,6 +12,7 @@ class UserScanPage extends StatefulWidget {
 
 class _UserScanPageState extends State<UserScanPage> {
   String barcode = "";
+bool hold = false;
 
   @override
   void initState() {

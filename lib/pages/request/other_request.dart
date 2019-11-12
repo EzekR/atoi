@@ -21,6 +21,7 @@ class OtherRequest extends StatefulWidget{
 class _OtherRequestState extends State<OtherRequest> {
 
   String barcode = "";
+  bool hold = false;
 
   var _isExpandedDetail = true;
   var _isExpandedAssign = false;
@@ -172,11 +173,17 @@ Future getImage(ImageSource sourceType) async {
           'Files': fileList
         }
       };
+      setState(() {
+        hold = true;
+      });
       var resp = await HttpRequest.request(
           '/Request/AddRequest',
           method: HttpRequest.POST,
           data: _data
       );
+      setState(() {
+        hold = false;
+      });
       print(resp);
       if (resp['ResultCode'] == '00') {
         showDialog(context: context, builder: (buider) =>
@@ -341,7 +348,7 @@ Future getImage(ImageSource sourceType) async {
                       children: <Widget>[
                         new RaisedButton(
                           onPressed: () {
-                            submit();
+                            return hold?null:submit();
                           },
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(6),

@@ -22,6 +22,7 @@ class RepairRequest extends StatefulWidget{
 class _RepairRequestState extends State<RepairRequest> {
 
   String barcode = "";
+  bool hold = false;
   int _role;
   String _roleName = "";
   var _equipment;
@@ -175,11 +176,17 @@ class _RepairRequestState extends State<RepairRequest> {
           'Files': fileList
         }
       };
+      setState(() {
+        hold = true;
+      });
       var resp = await HttpRequest.request(
           '/Request/AddRequest',
           method: HttpRequest.POST,
           data: _data
       );
+      setState(() {
+        hold = false;
+      });
       print(resp);
       if (resp['ResultCode'] == '00') {
         showDialog(context: context, builder: (buider) =>
@@ -496,7 +503,7 @@ class _RepairRequestState extends State<RepairRequest> {
                       children: <Widget>[
                         new RaisedButton(
                           onPressed: () {
-                            submit();
+                            return hold?null:submit();
                           },
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(6),

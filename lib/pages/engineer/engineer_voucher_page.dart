@@ -40,6 +40,7 @@ class _EngineerVoucherPageState extends State<EngineerVoucherPage> {
   List<int> _img;
   String _journalOID;
   ConstantsModel model;
+  bool hold = false;
 
   List _serviceResults = [
     '完成',
@@ -148,6 +149,9 @@ class _EngineerVoucherPageState extends State<EngineerVoucherPage> {
       var dispatchId = widget.dispatchId;
       var image = base64Encode(_img);
       var status = model.ResultStatusID[_currentResult];
+      setState(() {
+        hold = true;
+      });
       var resp = await HttpRequest.request(
           '/DispatchJournal/SaveDispatchJournal',
           method: HttpRequest.POST,
@@ -169,6 +173,9 @@ class _EngineerVoucherPageState extends State<EngineerVoucherPage> {
             }
           }
       );
+      setState(() {
+        hold = false;
+      });
       print(resp);
       if (resp['ResultCode'] == '00') {
         showDialog(context: context,
@@ -571,7 +578,7 @@ class _EngineerVoucherPageState extends State<EngineerVoucherPage> {
                 children: <Widget>[
                   widget.status==0||widget.status==1?new RaisedButton(
                     onPressed: () {
-                      uploadJournal();
+                      return hold?null:uploadJournal();
                     },
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(6),

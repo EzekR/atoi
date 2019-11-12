@@ -22,6 +22,7 @@ class EquipmentArchive extends StatefulWidget{
 class _EquipmentArchiveState extends State<EquipmentArchive> {
 
   String barcode = "";
+  bool hold = false;
 
   var _isExpandedBasic = true;
   var _isExpandedDetail = false;
@@ -150,11 +151,17 @@ Future getImage(ImageSource sourceType) async {
           'Files': fileList
         }
       };
+      setState(() {
+        hold = true;
+      });
       var resp = await HttpRequest.request(
           '/Request/AddRequest',
           method: HttpRequest.POST,
           data: _data
       );
+      setState(() {
+        hold = false;
+      });
       print(resp);
       if (resp['ResultCode'] == '00') {
         showDialog(context: context, builder: (buider) =>
@@ -437,7 +444,7 @@ Future getImage(ImageSource sourceType) async {
                       children: <Widget>[
                         new RaisedButton(
                           onPressed: () {
-                            submit();
+                            return hold?null:submit();
                           },
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(6),
