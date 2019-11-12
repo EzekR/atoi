@@ -11,6 +11,7 @@ import 'package:atoi/complete_info.dart';
 import 'package:atoi/pages/request/other_request.dart';
 import 'package:atoi/pages/user/request_history.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:atoi/models/models.dart';
 
 class UserHomePage extends StatefulWidget{
   static String tag = 'user-home-page';
@@ -38,6 +39,8 @@ class _UserHomePageState extends State<UserHomePage> {
 
   void initState() {
     getRole();
+    ConstantsModel model = MainModel.of(context);
+    model.getConstants();
     super.initState();
   }
 

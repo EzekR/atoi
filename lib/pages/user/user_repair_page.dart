@@ -14,16 +14,14 @@ import 'package:flutter_image_compress/flutter_image_compress.dart';
 
 class UserRepairPage extends StatefulWidget {
   static String tag = 'user-repair-page';
-  UserRepairPage({Key key, this.equipment}):super(key: key);
+  UserRepairPage({Key key, this.equipment}) : super(key: key);
   final Map<dynamic, dynamic> equipment;
 
   @override
   _UserRepairPageState createState() => new _UserRepairPageState();
-
 }
 
 class _UserRepairPageState extends State<UserRepairPage> {
-
   var _isExpandedBasic = true;
   var _isExpandedDetail = false;
   ConstantsModel model;
@@ -46,6 +44,7 @@ class _UserRepairPageState extends State<UserRepairPage> {
       _userName = userName;
     });
   }
+
   List<DropdownMenuItem<String>> _dropDownMenuItems;
   String _currentResult;
 
@@ -54,12 +53,10 @@ class _UserRepairPageState extends State<UserRepairPage> {
     for (String method in list) {
       items.add(new DropdownMenuItem(
           value: method,
-          child: new Text(method,
-            style: new TextStyle(
-                fontSize: 20.0
-            ),
-          )
-      ));
+          child: new Text(
+            method,
+            style: new TextStyle(fontSize: 20.0),
+          )));
     }
     return items;
   }
@@ -90,32 +87,35 @@ class _UserRepairPageState extends State<UserRepairPage> {
     super.initState();
   }
 
-    void showSheet(context) {
-    showModalBottomSheet(context: context, builder: (context) {
-      return new ListView(
-        shrinkWrap: true,
-        children: <Widget>[
-          ListTile(
-            trailing: new Icon(Icons.collections),
-            title: new Text('从相册添加'),
-            onTap: () {
-              getImage(ImageSource.gallery);
-            },
-          ),
-          ListTile(
-            trailing: new Icon(Icons.add_a_photo),
-            title: new Text('拍照添加'),
-            onTap: () {
-              getImage(ImageSource.camera);
-            },
-          ),
-        ],
-      );
-    });
+  void showSheet(context) {
+    showModalBottomSheet(
+        context: context,
+        builder: (context) {
+          return new ListView(
+            shrinkWrap: true,
+            children: <Widget>[
+              ListTile(
+                trailing: new Icon(Icons.collections),
+                title: new Text('从相册添加'),
+                onTap: () {
+                  getImage(ImageSource.gallery);
+                },
+              ),
+              ListTile(
+                trailing: new Icon(Icons.add_a_photo),
+                title: new Text('拍照添加'),
+                onTap: () {
+                  getImage(ImageSource.camera);
+                },
+              ),
+            ],
+          );
+        });
   }
-Future getImage(ImageSource sourceType) async {
+
+  Future getImage(ImageSource sourceType) async {
     var image = await ImagePicker.pickImage(
-        source: sourceType,
+      source: sourceType,
     );
     if (image != null) {
       var compressed = await FlutterImageCompress.compressAndGetFile(
@@ -132,15 +132,15 @@ Future getImage(ImageSource sourceType) async {
 
   Future<Null> submit() async {
     if (_describe.text.isEmpty) {
-      showDialog(context: context,
-        builder: (context) => AlertDialog(
-          title: new Text('故障描述不可为空'),
-        )
-      );
+      showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+                title: new Text('故障描述不可为空'),
+              ));
       return;
     }
     List<dynamic> Files = [];
-    for(var image in _imageList) {
+    for (var image in _imageList) {
       List<int> imageBytes = await image.readAsBytes();
       var content = base64Encode(imageBytes);
       Map _json = {
@@ -157,13 +157,9 @@ Future getImage(ImageSource sourceType) async {
       'userID': userID,
       'requestInfo': {
         'Equipments': [
-          {
-            'ID': widget.equipment['ID']
-          }
+          {'ID': widget.equipment['ID']}
         ],
-        'RequestType': {
-          'ID': 1
-        },
+        'RequestType': {'ID': 1},
         'FaultDesc': _describe.text,
         'FaultType': {
           //'ID': model.FaultRepair[_currentResult]
@@ -179,33 +175,27 @@ Future getImage(ImageSource sourceType) async {
     );
     print(resp);
     if (resp['ResultCode'] == '00') {
-      showDialog(context: context, builder: (context) => AlertDialog(
-        title: new Text('报修成功'),
-      ),).then((result) =>
-        Navigator.of(context, rootNavigator: true).pop(result)
-      );
+      showDialog(
+        context: context,
+        builder: (context) => CupertinoAlertDialog(
+          title: new Text('报修成功'),
+        ),
+      ).then(
+          (result) => Navigator.of(context, rootNavigator: true).pop(result));
     }
   }
 
-  TextField buildTextField(String labelText, String defaultText, bool isEnabled) {
+  TextField buildTextField(
+      String labelText, String defaultText, bool isEnabled) {
     return new TextField(
       decoration: InputDecoration(
           labelText: labelText,
-          labelStyle: new TextStyle(
-              fontSize: 20.0
-          ),
+          labelStyle: new TextStyle(fontSize: 20.0),
           disabledBorder: UnderlineInputBorder(
-              borderSide: BorderSide(
-                  color: Colors.grey,
-                  width: 1
-              )
-          )
-      ),
+              borderSide: BorderSide(color: Colors.grey, width: 1))),
       controller: new TextEditingController(text: defaultText),
       enabled: isEnabled,
-      style: new TextStyle(
-          fontSize: 16.0
-      ),
+      style: new TextStyle(fontSize: 16.0),
     );
   }
 
@@ -218,10 +208,7 @@ Future getImage(ImageSource sourceType) async {
             flex: 4,
             child: new Text(
               labelText,
-              style: new TextStyle(
-                  fontSize: 20.0,
-                  fontWeight: FontWeight.w600
-              ),
+              style: new TextStyle(fontSize: 20.0, fontWeight: FontWeight.w600),
             ),
           ),
           new Expanded(
@@ -231,8 +218,7 @@ Future getImage(ImageSource sourceType) async {
               style: new TextStyle(
                   fontSize: 20.0,
                   fontWeight: FontWeight.w400,
-                  color: Colors.black54
-              ),
+                  color: Colors.black54),
             ),
           )
         ],
@@ -249,10 +235,7 @@ Future getImage(ImageSource sourceType) async {
             flex: 4,
             child: new Text(
               labelText,
-              style: new TextStyle(
-                  fontSize: 20.0,
-                  fontWeight: FontWeight.w600
-              ),
+              style: new TextStyle(fontSize: 20.0, fontWeight: FontWeight.w600),
             ),
           ),
           new Expanded(
@@ -260,9 +243,7 @@ Future getImage(ImageSource sourceType) async {
             child: new TextField(
               enabled: true,
               controller: controller,
-              style: new TextStyle(
-                fontSize: 18.0
-              ),
+              style: new TextStyle(fontSize: 18.0),
             ),
           )
         ],
@@ -273,28 +254,29 @@ Future getImage(ImageSource sourceType) async {
   GridView buildImageRow(List imageList) {
     List<Widget> _list = [];
 
-    if (imageList.length >0 ){
-      for(var image in imageList) {
-        _list.add(
-            new Stack(
-              alignment: FractionalOffset(1.0, 0),
-              children: <Widget>[
-                new Container(
-                  width: 100.0,
-                  child: Image.file(image),
-                ),
-                new Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 0.0),
-                  child: new IconButton(icon: Icon(Icons.cancel), color: Colors.white, onPressed: (){
+    if (imageList.length > 0) {
+      for (var image in imageList) {
+        _list.add(new Stack(
+          alignment: FractionalOffset(1.0, 0),
+          children: <Widget>[
+            new Container(
+              width: 100.0,
+              child: Image.file(image),
+            ),
+            new Padding(
+              padding: EdgeInsets.symmetric(horizontal: 0.0),
+              child: new IconButton(
+                  icon: Icon(Icons.cancel),
+                  color: Colors.white,
+                  onPressed: () {
                     imageList.remove(image);
                     setState(() {
                       _imageList = imageList;
                     });
                   }),
-                )
-              ],
             )
-        );
+          ],
+        ));
       }
     } else {
       _list.add(new Container());
@@ -306,12 +288,11 @@ Future getImage(ImageSource sourceType) async {
         mainAxisSpacing: 5,
         crossAxisSpacing: 5,
         crossAxisCount: 2,
-        children: _list
-    );
+        children: _list);
   }
 
   @override
-  Widget build(BuildContext context){
+  Widget build(BuildContext context) {
     return new Scaffold(
       appBar: new AppBar(
         title: new Text('设备报修'),
@@ -330,7 +311,8 @@ Future getImage(ImageSource sourceType) async {
         ),
         actions: <Widget>[
           new Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 5.0, vertical: 19.0),
+            padding:
+                const EdgeInsets.symmetric(horizontal: 5.0, vertical: 19.0),
             child: Text(_userName),
           ),
         ],
@@ -349,8 +331,7 @@ Future getImage(ImageSource sourceType) async {
                     } else {
                       if (index == 1) {
                         _isExpandedDetail = !isExpanded;
-                      } else {
-                      }
+                      } else {}
                     }
                   });
                 },
@@ -366,26 +347,33 @@ Future getImage(ImageSource sourceType) async {
                           title: Text(
                             '设备基本信息',
                             style: new TextStyle(
-                                fontSize: 22.0,
-                                fontWeight: FontWeight.w400
-                            ),
-                          )
-                      );
+                                fontSize: 22.0, fontWeight: FontWeight.w400),
+                          ));
                     },
                     body: new Padding(
                       padding: EdgeInsets.symmetric(horizontal: 8.0),
                       child: new Column(
                         children: <Widget>[
-                          BuildWidget.buildRow('系统编号', widget.equipment['OID']??''),
-                          BuildWidget.buildRow('名称', widget.equipment['Name']??''),
-                          BuildWidget.buildRow('型号', widget.equipment['EquipmentCode']??''),
-                          BuildWidget.buildRow('序列号', widget.equipment['SerialCode']??''),
-                          BuildWidget.buildRow('使用科室', widget.equipment['Department']['Name']??''),
-                          BuildWidget.buildRow('安装地点', widget.equipment['InstalSite']??''),
-                          BuildWidget.buildRow('设备厂商', widget.equipment['Manufacturer']['Name']??''),
-                          BuildWidget.buildRow('资产等级', widget.equipment['AssetLevel']['Name']??''),
-                          BuildWidget.buildRow('维保状态', widget.equipment['WarrantyStatus']??''),
-                          BuildWidget.buildRow('服务范围', widget.equipment['ContractScope']['Name']??''),
+                          BuildWidget.buildRow(
+                              '系统编号', widget.equipment['OID'] ?? ''),
+                          BuildWidget.buildRow(
+                              '名称', widget.equipment['Name'] ?? ''),
+                          BuildWidget.buildRow(
+                              '型号', widget.equipment['EquipmentCode'] ?? ''),
+                          BuildWidget.buildRow(
+                              '序列号', widget.equipment['SerialCode'] ?? ''),
+                          BuildWidget.buildRow('使用科室',
+                              widget.equipment['Department']['Name'] ?? ''),
+                          BuildWidget.buildRow(
+                              '安装地点', widget.equipment['InstalSite'] ?? ''),
+                          BuildWidget.buildRow('设备厂商',
+                              widget.equipment['Manufacturer']['Name'] ?? ''),
+                          BuildWidget.buildRow('资产等级',
+                              widget.equipment['AssetLevel']['Name'] ?? ''),
+                          BuildWidget.buildRow(
+                              '维保状态', widget.equipment['WarrantyStatus'] ?? ''),
+                          BuildWidget.buildRow('服务范围',
+                              widget.equipment['ContractScope']['Name'] ?? ''),
                         ],
                       ),
                     ),
@@ -402,11 +390,8 @@ Future getImage(ImageSource sourceType) async {
                           title: new Text(
                             '报修内容',
                             style: new TextStyle(
-                                fontWeight: FontWeight.w400,
-                                fontSize: 22.0
-                            ),
-                          )
-                      );
+                                fontWeight: FontWeight.w400, fontSize: 22.0),
+                          ));
                     },
                     body: new Padding(
                       padding: EdgeInsets.symmetric(horizontal: 8.0),
@@ -416,38 +401,57 @@ Future getImage(ImageSource sourceType) async {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: <Widget>[
                           BuildWidget.buildInput('故障描述', _describe),
-                          BuildWidget.buildDropdown('故障分类', _currentResult, _dropDownMenuItems, changedDropDownMethod),
+                          BuildWidget.buildDropdown('故障分类', _currentResult,
+                              _dropDownMenuItems, changedDropDownMethod),
                           new Padding(
                             padding: EdgeInsets.symmetric(vertical: 5.0),
                             child: new Row(
                               children: <Widget>[
-                                new Expanded(
-                                  flex: 4,
-                                  child: new Wrap(
-                                    alignment: WrapAlignment.end,
-                                    crossAxisAlignment: WrapCrossAlignment.center,
-                                    children: <Widget>[
-                                      new Text(
-                                        '添加附件：',
-                                        style: new TextStyle(
-                                            fontSize: 20.0,
-                                            fontWeight: FontWeight.w600
-                                        ),
-                                      ),
-                                    ],
-                                  )
+                                new Text(
+                                  '添加附件：',
+                                  style: new TextStyle(
+                                      fontSize: 20.0,
+                                      fontWeight: FontWeight.w600),
                                 ),
-                                new Expanded(
-                                  flex: 7,
-                                  child: new IconButton(
-                                      icon: Icon(Icons.add_a_photo),
-                                      onPressed: () {
-                                        showSheet(context);
-                                      }),
-                                )
+                                new IconButton(
+                                    icon: Icon(Icons.add_a_photo),
+                                    onPressed: () {
+                                      showSheet(context);
+                                    })
                               ],
                             ),
                           ),
+                          //new Padding(
+                          //  padding: EdgeInsets.symmetric(vertical: 5.0),
+                          //  child: new Row(
+                          //    children: <Widget>[
+                          //      new Expanded(
+                          //        flex: 4,
+                          //        child: new Wrap(
+                          //          alignment: WrapAlignment.end,
+                          //          crossAxisAlignment: WrapCrossAlignment.center,
+                          //          children: <Widget>[
+                          //            new Text(
+                          //              '添加附件：',
+                          //              style: new TextStyle(
+                          //                  fontSize: 20.0,
+                          //                  fontWeight: FontWeight.w600
+                          //              ),
+                          //            ),
+                          //          ],
+                          //        )
+                          //      ),
+                          //      new Expanded(
+                          //        flex: 7,
+                          //        child: new IconButton(
+                          //            icon: Icon(Icons.add_a_photo),
+                          //            onPressed: () {
+                          //              showSheet(context);
+                          //            }),
+                          //      )
+                          //    ],
+                          //  ),
+                          //),
                           buildImageRow(_imageList)
                         ],
                       ),
@@ -471,12 +475,7 @@ Future getImage(ImageSource sourceType) async {
                     ),
                     padding: EdgeInsets.all(12.0),
                     color: AppConstants.AppColors['btn_main'],
-                    child: Text(
-                        '点击报修',
-                        style: TextStyle(
-                            color: Colors.white
-                        )
-                    ),
+                    child: Text('点击报修', style: TextStyle(color: Colors.white)),
                   )
                 ],
               )
