@@ -418,7 +418,7 @@ Future getImage(ImageSource sourceType) async {
                               children: <Widget>[
                                 BuildWidget.buildRow('类型', '盘点'),
                                 BuildWidget.buildRow('请求人', _roleName),
-                                BuildWidget.buildRow('主题', _equipments==null?'--盘点':'多设备--盘点'),
+                                BuildWidget.buildRow('主题', '${_equipments.length==1?_equipments[0]['Name']:'多设备'}--盘点'),
                                 new Divider(),
                                 new Padding(
                                   padding: EdgeInsets.symmetric(vertical: 5.0),

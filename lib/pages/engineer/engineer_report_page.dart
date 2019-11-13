@@ -311,8 +311,11 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
             builder: (context) => CupertinoAlertDialog(
                 title: statusId == 1
                     ? new Text('保存报告成功')
-                    : new Text('上传报告成功'))).then(
-            (result) => Navigator.of(context, rootNavigator: true).pop(result));
+                    : new Text('上传报告成功'))).then((result) {
+              return statusId==1?setState(() {
+                hold = false;
+              }):Navigator.of(context, rootNavigator: true).pop(result);
+            });
       } else {
         showDialog(
             context: context,

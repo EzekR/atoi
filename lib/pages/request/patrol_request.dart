@@ -427,7 +427,7 @@ class _PatrolRequestState extends State<PatrolRequest> {
                               children: <Widget>[
                                 BuildWidget.buildRow('类型', '巡检'),
                                 BuildWidget.buildRow('请求人', _roleName==null?'':_roleName),
-                                BuildWidget.buildRow('主题', '多设备--巡检'),
+                                BuildWidget.buildRow('主题', '${_equipments.length==1?_equipments[0]['Name']:'多设备'}--巡检'),
                                 new Divider(),
                                 new Padding(
                                   padding: EdgeInsets.symmetric(vertical: 5.0),

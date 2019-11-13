@@ -89,6 +89,7 @@ class _AtoiAppState extends State<AtoiApp> {
     return ScopedModel<MainModel>(
       model: mainModel,
       child: new MaterialApp(
+          builder: (context, child) => MediaQuery(data: MediaQuery.of(context).copyWith(alwaysUse24HourFormat: true), child: child),
           title: 'ATOI医疗设备管理系统',
           theme: new ThemeData(
               primaryColor: new Color(0xff3b4674),
