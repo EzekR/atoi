@@ -6,7 +6,6 @@ import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_signature_pad/flutter_signature_pad.dart';
-import 'package:orientation/orientation.dart';
 import 'package:flutter/cupertino.dart';
 
 class SignaturePage extends StatefulWidget {

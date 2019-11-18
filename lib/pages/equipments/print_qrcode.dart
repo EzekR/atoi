@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pdf;
-import 'package:printing/printing.dart';
 import 'package:atoi/utils/http_request.dart';
 import 'dart:convert';
 import 'package:brother_printer/brother_printer.dart';
@@ -169,29 +168,29 @@ class _PrintQrcodeState extends State<PrintQrcode> {
     );
   }
 
-  void printQrcode() async {
-    final doc  = pdf.Document();
-    var _image = base64Decode(_qrcode);
-    var imageProvider = MemoryImage(_image);
-    final PdfImage image = await pdfImageFromImageProvider(pdf: doc.document, image: imageProvider);
+  //void printQrcode() async {
+  //  final doc  = pdf.Document();
+  //  var _image = base64Decode(_qrcode);
+  //  var imageProvider = MemoryImage(_image);
+  //  final PdfImage image = await pdfImageFromImageProvider(pdf: doc.document, image: imageProvider);
 
-    doc.addPage(
-      pdf.Page(
-        //pageFormat: PdfPageFormat.a9,
-        build: (context) {
-          return pdf.Center(
-            child: pdf.Image(image)
-          );
-        }
-      )
-    );
+  //  doc.addPage(
+  //    pdf.Page(
+  //      //pageFormat: PdfPageFormat.a9,
+  //      build: (context) {
+  //        return pdf.Center(
+  //          child: pdf.Image(image)
+  //        );
+  //      }
+  //    )
+  //  );
 
-    await Printing.layoutPdf(
-      onLayout: (PdfPageFormat format) async {
-        return doc.save();
-      }
-    );
-  }
+  //  await Printing.layoutPdf(
+  //    onLayout: (PdfPageFormat format) async {
+  //      return doc.save();
+  //    }
+  //  );
+  //}
 
   Widget build(BuildContext context) {
     return new Scaffold(

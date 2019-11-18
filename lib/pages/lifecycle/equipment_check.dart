@@ -14,14 +14,13 @@ import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:atoi/widgets/search_page.dart';
 import 'package:flutter/cupertino.dart';
 
-class EquipmentCheck extends StatefulWidget{
+class EquipmentCheck extends StatefulWidget {
   static String tag = 'equipment-check';
 
   _EquipmentCheckState createState() => new _EquipmentCheckState();
 }
 
 class _EquipmentCheckState extends State<EquipmentCheck> {
-
   String barcode = "";
   bool hold = false;
 
@@ -38,7 +37,7 @@ class _EquipmentCheckState extends State<EquipmentCheck> {
 
   List<dynamic> _imageList = [];
 
-  void initState(){
+  void initState() {
     getRole();
     super.initState();
   }
@@ -47,46 +46,54 @@ class _EquipmentCheckState extends State<EquipmentCheck> {
     Map<String, dynamic> params = {
       'codeContent': barcode,
     };
-    var resp = await HttpRequest.request(
-        '/Equipment/GetDeviceByQRCode',
-        method: HttpRequest.GET,
-        params: params
-    );
+    var resp = await HttpRequest.request('/Equipment/GetDeviceByQRCode',
+        method: HttpRequest.GET, params: params);
     print(resp);
     if (resp['ResultCode'] == '00') {
-      setState(() {
-        _equipments.add(resp['Data']);
-      });
+      var _obj = _equipments.firstWhere((item) => (item['ID'] == resp['Data']['ID']), orElse: () => null);
+      if (_obj == null) {
+        setState(() {
+          _equipments.add(resp['Data']);
+        });
+      }
     } else {
-      showDialog(context: context, builder: (context) => CupertinoAlertDialog(title: new Text(resp['ResultMessage']),));
+      showDialog(
+          context: context,
+          builder: (context) => CupertinoAlertDialog(
+                title: new Text(resp['ResultMessage']),
+              ));
     }
   }
-    void showSheet(context) {
-    showModalBottomSheet(context: context, builder: (context) {
-      return new ListView(
-        shrinkWrap: true,
-        children: <Widget>[
-          ListTile(
-            trailing: new Icon(Icons.collections),
-            title: new Text('从相册添加'),
-            onTap: () {
-              getImage(ImageSource.gallery);
-            },
-          ),
-          ListTile(
-            trailing: new Icon(Icons.add_a_photo),
-            title: new Text('拍照添加'),
-            onTap: () {
-              getImage(ImageSource.camera);
-            },
-          ),
-        ],
-      );
-    });
+
+  void showSheet(context) {
+    showModalBottomSheet(
+        context: context,
+        builder: (context) {
+          return new ListView(
+            shrinkWrap: true,
+            children: <Widget>[
+              ListTile(
+                trailing: new Icon(Icons.collections),
+                title: new Text('从相册添加'),
+                onTap: () {
+                  getImage(ImageSource.gallery);
+                },
+              ),
+              ListTile(
+                trailing: new Icon(Icons.add_a_photo),
+                title: new Text('拍照添加'),
+                onTap: () {
+                  getImage(ImageSource.camera);
+                },
+              ),
+            ],
+          );
+        });
   }
-Future getImage(ImageSource sourceType) async {
+
+  Future getImage(ImageSource sourceType) async {
     var image = await ImagePicker.pickImage(
-        source: sourceType,
+      source: sourceType,
     );
     if (image != null) {
       var compressed = await FlutterImageCompress.compressAndGetFile(
@@ -110,19 +117,19 @@ Future getImage(ImageSource sourceType) async {
 
   Future<Null> submit() async {
     if (_equipments == null) {
-      showDialog(context: context,
+      showDialog(
+          context: context,
           builder: (context) => CupertinoAlertDialog(
-            title: new Text('请选择设备'),
-          )
-      );
+                title: new Text('请选择设备'),
+              ));
       return;
     }
     if (_fault.text.isEmpty || _fault.text == null) {
-      showDialog(context: context,
+      showDialog(
+          context: context,
           builder: (context) => CupertinoAlertDialog(
-            title: new Text('盘点备注不可为空'),
-          )
-      );
+                title: new Text('盘点备注不可为空'),
+              ));
     } else {
       var prefs = await _prefs;
       var userID = prefs.getInt('userID');
@@ -141,9 +148,7 @@ Future getImage(ImageSource sourceType) async {
       var _data = {
         'userID': userID,
         'requestInfo': {
-          'RequestType': {
-            'ID': 12
-          },
+          'RequestType': {'ID': 12},
           'Equipments': _equipments,
           'FaultDesc': _fault.text,
           'Files': fileList
@@ -152,22 +157,19 @@ Future getImage(ImageSource sourceType) async {
       setState(() {
         hold = true;
       });
-      var resp = await HttpRequest.request(
-          '/Request/AddRequest',
-          method: HttpRequest.POST,
-          data: _data
-      );
+      var resp = await HttpRequest.request('/Request/AddRequest',
+          method: HttpRequest.POST, data: _data);
       setState(() {
         hold = false;
       });
       print(resp);
       if (resp['ResultCode'] == '00') {
-        showDialog(context: context, builder: (buider) =>
-            CupertinoAlertDialog(
-              title: new Text('提交请求成功'),
-            )).then((result) =>
-            Navigator.of(context, rootNavigator: true).pop(result)
-        );
+        showDialog(
+            context: context,
+            builder: (buider) => CupertinoAlertDialog(
+                  title: new Text('提交请求成功'),
+                )).then(
+            (result) => Navigator.of(context, rootNavigator: true).pop(result));
       }
     }
   }
@@ -175,28 +177,29 @@ Future getImage(ImageSource sourceType) async {
   GridView buildImageRow(List imageList) {
     List<Widget> _list = [];
 
-    if (imageList.length >0 ){
-      for(var image in imageList) {
-        _list.add(
-            new Stack(
-              alignment: FractionalOffset(1.0, 0),
-              children: <Widget>[
-                new Container(
-                  width: 100.0,
-                  child: Image.file(image),
-                ),
-                new Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 0.0),
-                  child: new IconButton(icon: Icon(Icons.cancel), color: Colors.white, onPressed: (){
+    if (imageList.length > 0) {
+      for (var image in imageList) {
+        _list.add(new Stack(
+          alignment: FractionalOffset(1.0, 0),
+          children: <Widget>[
+            new Container(
+              width: 100.0,
+              child: Image.file(image),
+            ),
+            new Padding(
+              padding: EdgeInsets.symmetric(horizontal: 0.0),
+              child: new IconButton(
+                  icon: Icon(Icons.cancel),
+                  color: Colors.white,
+                  onPressed: () {
                     imageList.remove(image);
                     setState(() {
                       _imageList = imageList;
                     });
                   }),
-                )
-              ],
             )
-        );
+          ],
+        ));
       }
     } else {
       _list.add(new Container());
@@ -208,8 +211,7 @@ Future getImage(ImageSource sourceType) async {
         mainAxisSpacing: 5,
         crossAxisSpacing: 5,
         crossAxisCount: 2,
-        children: _list
-    );
+        children: _list);
   }
 
   List<DropdownMenuItem<String>> getDropDownMenuItems(List list) {
@@ -217,22 +219,23 @@ Future getImage(ImageSource sourceType) async {
     for (String method in list) {
       items.add(new DropdownMenuItem(
           value: method,
-          child: new Text(method,
-            style: new TextStyle(
-                fontSize: 20.0
-            ),
-          )
-      ));
+          child: new Text(
+            method,
+            style: new TextStyle(fontSize: 20.0),
+          )));
     }
     return items;
   }
 
   Future toSearch() async {
-    final _searchResult = await showSearch(context: context, delegate: SearchBarDelegate());
+    final _searchResult =
+        await showSearch(context: context, delegate: SearchBarDelegate());
     if (_searchResult != null && _searchResult != 'null') {
       print(_searchResult);
       Map _data = jsonDecode(_searchResult);
-      var _result = _equipments.firstWhere((_equipment) => _equipment['OID'] == _data['OID'], orElse: ()=> null);
+      var _result = _equipments.firstWhere(
+          (_equipment) => _equipment['OID'] == _data['OID'],
+          orElse: () => null);
       if (_result == null) {
         setState(() {
           _equipments.add(_data);
@@ -250,10 +253,7 @@ Future getImage(ImageSource sourceType) async {
             flex: 4,
             child: new Text(
               labelText,
-              style: new TextStyle(
-                  fontSize: 20.0,
-                  fontWeight: FontWeight.w600
-              ),
+              style: new TextStyle(fontSize: 20.0, fontWeight: FontWeight.w600),
             ),
           ),
           new Expanded(
@@ -263,8 +263,7 @@ Future getImage(ImageSource sourceType) async {
               style: new TextStyle(
                   fontSize: 20.0,
                   fontWeight: FontWeight.w400,
-                  color: Colors.black54
-              ),
+                  color: Colors.black54),
             ),
           )
         ],
@@ -275,33 +274,40 @@ Future getImage(ImageSource sourceType) async {
   Widget buildEquip() {
     List<Widget> tiles = [];
     Widget content;
-    for(var _equipment in _equipments) {
+    for (var _equipment in _equipments) {
       tiles.add(
         new Padding(
           padding: EdgeInsets.symmetric(horizontal: 12.0),
           child: new Column(
             children: <Widget>[
-              BuildWidget.buildRow('系统编号', _equipment['OID']??''),
-              BuildWidget.buildRow('名称', _equipment['Name']??''),
-              BuildWidget.buildRow('型号', _equipment['EquipmentCode']??''),
-              BuildWidget.buildRow('序列号', _equipment['SerialCode']??''),
-              BuildWidget.buildRow('使用科室', _equipment['Department']['Name']??''),
-              BuildWidget.buildRow('安装地点', _equipment['InstalSite']??''),
-              BuildWidget.buildRow('设备厂商', _equipment['Manufacturer']['Name']??''),
-              BuildWidget.buildRow('资产等级', _equipment['AssetLevel']['Name']??''),
-              BuildWidget.buildRow('维保状态', _equipment['WarrantyStatus']??''),
-              BuildWidget.buildRow('服务范围', _equipment['ContractScope']['Name']??''),
-              new Padding(padding: EdgeInsets.symmetric(vertical: 8.0),
+              BuildWidget.buildRow('系统编号', _equipment['OID'] ?? ''),
+              BuildWidget.buildRow('名称', _equipment['Name'] ?? ''),
+              BuildWidget.buildRow('型号', _equipment['EquipmentCode'] ?? ''),
+              BuildWidget.buildRow('序列号', _equipment['SerialCode'] ?? ''),
+              BuildWidget.buildRow(
+                  '使用科室', _equipment['Department']['Name'] ?? ''),
+              BuildWidget.buildRow('安装地点', _equipment['InstalSite'] ?? ''),
+              BuildWidget.buildRow(
+                  '设备厂商', _equipment['Manufacturer']['Name'] ?? ''),
+              BuildWidget.buildRow(
+                  '资产等级', _equipment['AssetLevel']['Name'] ?? ''),
+              BuildWidget.buildRow('维保状态', _equipment['WarrantyStatus'] ?? ''),
+              BuildWidget.buildRow(
+                  '服务范围', _equipment['ContractScope']['Name'] ?? ''),
+              new Padding(
+                padding: EdgeInsets.symmetric(vertical: 8.0),
                 child: new Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: <Widget>[
                     new Text('删除此设备'),
-                    new IconButton(icon: new Icon(Icons.delete_forever), onPressed: (){
-                      _equipments.remove(_equipment);
-                      setState(() {
-                        _equipments = _equipments;
-                      });
-                    })
+                    new IconButton(
+                        icon: new Icon(Icons.delete_forever),
+                        onPressed: () {
+                          _equipments.remove(_equipment);
+                          setState(() {
+                            _equipments = _equipments;
+                          });
+                        })
                   ],
                 ),
               )
@@ -315,6 +321,7 @@ Future getImage(ImageSource sourceType) async {
     );
     return content;
   }
+
   Widget build(BuildContext context) {
     return ScopedModelDescendant<MainModel>(
       builder: (context, child, mainModel) {
@@ -341,13 +348,19 @@ Future getImage(ImageSource sourceType) async {
                   iconSize: 30.0,
                   onPressed: () async {
                     //toSearch();
-                    final selected = await Navigator.of(context).push(new MaterialPageRoute(builder: (context) {
+                    final selected = await Navigator.of(context)
+                        .push(new MaterialPageRoute(builder: (context) {
                       return SearchPage();
                     }));
                     print(selected);
-                    _equipments.addAll(selected);
-                  }
-                  ,
+                    for (var item in selected) {
+                      var _obj = _equipments.firstWhere((element) => (element['ID']==item['ID']), orElse: () => null);
+                      if (_obj == null) {
+                        _equipments.add(item);
+                      }
+                    }
+                    //_equipments.addAll(selected);
+                  },
                 ),
                 new IconButton(
                     icon: Icon(Icons.crop_free),
@@ -373,7 +386,7 @@ Future getImage(ImageSource sourceType) async {
                             if (index == 1) {
                               _isExpandedDetail = !isExpanded;
                             } else {
-                              _isExpandedAssign =!isExpanded;
+                              _isExpandedAssign = !isExpanded;
                             }
                           }
                         });
@@ -382,34 +395,38 @@ Future getImage(ImageSource sourceType) async {
                         new ExpansionPanel(
                           headerBuilder: (context, isExpanded) {
                             return ListTile(
-                                leading: new Icon(Icons.info,
-                                  size: 24.0,
-                                  color: Colors.blue,
-                                ),
-                                title: Text('设备基本信息',
-                                  style: new TextStyle(
-                                      fontSize: 22.0,
-                                      fontWeight: FontWeight.w400
-                                  ),
-                                ),
+                              leading: new Icon(
+                                Icons.info,
+                                size: 24.0,
+                                color: Colors.blue,
+                              ),
+                              title: Text(
+                                '设备基本信息',
+                                style: new TextStyle(
+                                    fontSize: 22.0,
+                                    fontWeight: FontWeight.w400),
+                              ),
                             );
                           },
-                          body: _equipments.length==0?new Center(child: new Text('请选择设备')):buildEquip(),
+                          body: _equipments.length == 0
+                              ? new Center(child: new Text('请选择设备'))
+                              : buildEquip(),
                           isExpanded: _isExpandedBasic,
                         ),
                         new ExpansionPanel(
                           headerBuilder: (context, isExpanded) {
                             return ListTile(
-                                leading: new Icon(Icons.description,
-                                  size: 24.0,
-                                  color: Colors.blue,
-                                ),
-                                title: Text('请求详细信息',
-                                  style: new TextStyle(
-                                      fontSize: 22.0,
-                                      fontWeight: FontWeight.w400
-                                  ),
-                                ),
+                              leading: new Icon(
+                                Icons.description,
+                                size: 24.0,
+                                color: Colors.blue,
+                              ),
+                              title: Text(
+                                '请求详细信息',
+                                style: new TextStyle(
+                                    fontSize: 22.0,
+                                    fontWeight: FontWeight.w400),
+                              ),
                             );
                           },
                           body: new Padding(
@@ -418,7 +435,8 @@ Future getImage(ImageSource sourceType) async {
                               children: <Widget>[
                                 BuildWidget.buildRow('类型', '盘点'),
                                 BuildWidget.buildRow('请求人', _roleName),
-                                BuildWidget.buildRow('主题', '${_equipments.length==1?_equipments[0]['Name']:'多设备'}--盘点'),
+                                BuildWidget.buildRow('主题',
+                                    '${_equipments.length == 1 ? _equipments[0]['Name'] : '多设备'}--盘点'),
                                 new Divider(),
                                 new Padding(
                                   padding: EdgeInsets.symmetric(vertical: 5.0),
@@ -430,8 +448,7 @@ Future getImage(ImageSource sourceType) async {
                                           '盘点备注：',
                                           style: new TextStyle(
                                               fontSize: 20.0,
-                                              fontWeight: FontWeight.w600
-                                          ),
+                                              fontWeight: FontWeight.w600),
                                         ),
                                       ),
                                       new Expanded(
@@ -451,8 +468,7 @@ Future getImage(ImageSource sourceType) async {
                                         '添加附件：',
                                         style: new TextStyle(
                                             fontSize: 20.0,
-                                            fontWeight: FontWeight.w600
-                                        ),
+                                            fontWeight: FontWeight.w600),
                                       ),
                                       new IconButton(
                                           icon: Icon(Icons.add_a_photo),
@@ -463,7 +479,9 @@ Future getImage(ImageSource sourceType) async {
                                   ),
                                 ),
                                 buildImageRow(_imageList),
-                                new Padding(padding: EdgeInsets.symmetric(vertical: 8.0))
+                                new Padding(
+                                    padding:
+                                        EdgeInsets.symmetric(vertical: 8.0))
                               ],
                             ),
                           ),
@@ -479,14 +497,15 @@ Future getImage(ImageSource sourceType) async {
                       children: <Widget>[
                         new RaisedButton(
                           onPressed: () {
-                            return hold?null:submit();
+                            return hold ? null : submit();
                           },
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(6),
                           ),
                           padding: EdgeInsets.all(12.0),
                           color: new Color(0xff2E94B9),
-                          child: Text('提交请求', style: TextStyle(color: Colors.white)),
+                          child: Text('提交请求',
+                              style: TextStyle(color: Colors.white)),
                         ),
                         new RaisedButton(
                           onPressed: () {
@@ -497,17 +516,16 @@ Future getImage(ImageSource sourceType) async {
                           ),
                           padding: EdgeInsets.all(12.0),
                           color: new Color(0xffD25565),
-                          child: Text('返回首页', style: TextStyle(color: Colors.white)),
+                          child: Text('返回首页',
+                              style: TextStyle(color: Colors.white)),
                         ),
                       ],
                     ),
                     SizedBox(height: 24.0),
                   ],
-
                 ),
               ),
-            )
-        );
+            ));
       },
     );
   }
@@ -529,8 +547,9 @@ Future getImage(ImageSource sourceType) async {
           return this.barcode = 'Unknown error: $e';
         });
       }
-    } on FormatException{
-      setState(() => this.barcode = 'null (User returned using the "back"-button before scanning anything. Result)');
+    } on FormatException {
+      setState(() => this.barcode =
+          'null (User returned using the "back"-button before scanning anything. Result)');
     } catch (e) {
       setState(() => this.barcode = 'Unknown error: $e');
     }

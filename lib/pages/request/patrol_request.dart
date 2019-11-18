@@ -63,9 +63,12 @@ class _PatrolRequestState extends State<PatrolRequest> {
     );
     print(resp);
     if (resp['ResultCode'] == '00') {
-      setState(() {
-        _equipments.add(resp['Data']);
-      });
+      var _obj = _equipments.firstWhere((item) => (item['ID'] == resp['Data']['ID']), orElse: () => null);
+      if (_obj == null) {
+        setState(() {
+          _equipments.add(resp['Data']);
+        });
+      }
     } else {
       showDialog(context: context, builder: (context) => CupertinoAlertDialog(title: new Text(resp['ResultMessage']),));
     }
@@ -353,8 +356,13 @@ class _PatrolRequestState extends State<PatrolRequest> {
                     final selected = await Navigator.of(context).push(new MaterialPageRoute(builder: (context) {
                       return SearchPage();
                     }));
-                    print(selected);
-                    _equipments.addAll(selected);
+                    for(var item in selected) {
+                      var _obj = _equipments.firstWhere((element) => (element['ID']==item['ID']), orElse: () => null);
+                      if (_obj == null) {
+                        _equipments.add(item);
+                      }
+                    }
+                    //_equipments.addAll(selected);
                   }
                   ,
                 ),

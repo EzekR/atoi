@@ -33,6 +33,7 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
   var _accessory = [];
   ConstantsModel model;
   bool hold = false;
+  int _reportId;
 
   List _serviceResults = [];
   List _sources = [];
@@ -145,59 +146,57 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
     return _image;
   }
 
-  Future<Null> getReport() async {
-    if (widget.reportId != 0) {
-      var prefs = await _prefs;
-      var userID = prefs.getInt('userID');
-      var reportId = widget.reportId;
-      var resp = await HttpRequest.request('/DispatchReport/GetDispatchReport',
-          method: HttpRequest.GET,
-          params: {'userID': userID, 'dispatchReportId': reportId});
-      print(resp);
-      if (resp['ResultCode'] == '00') {
-        var data = resp['Data'];
-        setState(() {
-          _frequency.text = data['FaultFrequency'];
-          _code.text = data['FaultCode'];
-          _status.text = data['FaultSystemStatus'];
-          _description.text = data['FaultDesc'];
-          _analysis.text = data['SolutionCauseAnalysis'];
-          _solution.text = data['SolutionWay'];
-          _currentResult = data['SolutionResultStatus']['Name'] == ''
-              ? _currentResult
-              : data['SolutionResultStatus']['Name'];
-          _delay.text = data['DelayReason'];
-          _unsolved.text = data['SolutionUnsolvedComments'];
-          _accessory = data['ReportAccessories'];
-          _fujiComments = data['FujiComments'];
-          _reportStatus = data['Status']['Name'];
-          _reportOID = data['OID'];
-        });
-        await getImageFile(resp['Data']['FileInfo']['ID']);
-        for (var _acc in _accessory) {
-          var _imageNew = _acc['FileInfos']
-              .firstWhere((info) => info['FileType'] == 1, orElse: () => null);
-          var _imageOld = _acc['FileInfos']
-              .firstWhere((info) => info['FileType'] == 2, orElse: () => null);
-          if (_imageNew != null) {
-            var _fileNew = await getAccessoryFile(_imageNew['ID']);
-            _imageNew['FileContent'] = _fileNew;
-            setState(() {
-              _acc['ImageNew'] = _imageNew;
-            });
-          }
-          if (_imageOld != null) {
-            var _fileOld = await getAccessoryFile(_imageOld['ID']);
-            _imageOld['FileContent'] = _fileOld;
-            setState(() {
-              _acc['ImageOld'] = _imageOld;
-            });
-          }
+  Future<Null> getReport(int reportId) async {
+    var prefs = await _prefs;
+    var userID = prefs.getInt('userID');
+    var reportId = widget.reportId;
+    var resp = await HttpRequest.request('/DispatchReport/GetDispatchReport',
+        method: HttpRequest.GET,
+        params: {'userID': userID, 'dispatchReportId': reportId});
+    print(resp);
+    if (resp['ResultCode'] == '00') {
+      var data = resp['Data'];
+      setState(() {
+        _frequency.text = data['FaultFrequency'];
+        _code.text = data['FaultCode'];
+        _status.text = data['FaultSystemStatus'];
+        _description.text = data['FaultDesc'];
+        _analysis.text = data['SolutionCauseAnalysis'];
+        _solution.text = data['SolutionWay'];
+        _currentResult = data['SolutionResultStatus']['Name'] == ''
+            ? _currentResult
+            : data['SolutionResultStatus']['Name'];
+        _delay.text = data['DelayReason'];
+        _unsolved.text = data['SolutionUnsolvedComments'];
+        _accessory = data['ReportAccessories'];
+        _fujiComments = data['FujiComments'];
+        _reportStatus = data['Status']['Name'];
+        _reportOID = data['OID'];
+      });
+      await getImageFile(resp['Data']['FileInfo']['ID']);
+      for (var _acc in _accessory) {
+        var _imageNew = _acc['FileInfos']
+            .firstWhere((info) => info['FileType'] == 1, orElse: () => null);
+        var _imageOld = _acc['FileInfos']
+            .firstWhere((info) => info['FileType'] == 2, orElse: () => null);
+        if (_imageNew != null) {
+          var _fileNew = await getAccessoryFile(_imageNew['ID']);
+          _imageNew['FileContent'] = _fileNew;
+          setState(() {
+            _acc['ImageNew'] = _imageNew;
+          });
         }
-        setState(() {
-          _accessory = _accessory;
-        });
+        if (_imageOld != null) {
+          var _fileOld = await getAccessoryFile(_imageOld['ID']);
+          _imageOld['FileContent'] = _fileOld;
+          setState(() {
+            _acc['ImageOld'] = _imageOld;
+          });
+        }
       }
+      setState(() {
+        _accessory = _accessory;
+      });
     }
   }
 
@@ -234,17 +233,17 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
               ));
       return;
     }
-    if (_frequency.text.isEmpty ||
-        _code.text.isEmpty ||
-        _status.text.isEmpty ||
-        _analysis.text.isEmpty ||
-        _solution.text.isEmpty) {
-      showDialog(
-          context: context,
-          builder: (context) => CupertinoAlertDialog(
-                title: new Text('报告不可有空字段'),
-              ));
-    } else {
+    //if (_frequency.text.isEmpty ||
+    //    _code.text.isEmpty ||
+    //    _status.text.isEmpty ||
+    //    _analysis.text.isEmpty ||
+    //    _solution.text.isEmpty) {
+    //  showDialog(
+    //      context: context,
+    //      builder: (context) => CupertinoAlertDialog(
+    //            title: new Text('报告不可有空字段'),
+    //          ));
+    //} else {
       Map _json;
       if (_imageList != null) {
         var content = base64Encode(_imageList);
@@ -283,7 +282,7 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
           'ID': widget.reportId
         }
       };
-      switch (_dispatch['Request']['RequestType']['ID']) {
+      switch (_dispatch['RequestType']['ID']) {
         case 2:
           _data['Type'] = {'ID': 201};
           break;
@@ -306,15 +305,16 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
         hold = false;
       });
       if (resp['ResultCode'] == '00') {
+        setState(() {
+          _reportId = resp['Data'];
+        });
         showDialog(
             context: context,
             builder: (context) => CupertinoAlertDialog(
                 title: statusId == 1
                     ? new Text('保存报告成功')
                     : new Text('上传报告成功'))).then((result) {
-              return statusId==1?setState(() {
-                hold = false;
-              }):Navigator.of(context, rootNavigator: true).pop(result);
+              return statusId==1?getReport(resp['Data']):Navigator.of(context, rootNavigator: true).pop(result);
             });
       } else {
         showDialog(
@@ -323,7 +323,6 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
                   title: new Text(resp['ResultMessage']),
                 ));
       }
-    }
   }
 
   List iterateMap(Map item) {
@@ -350,8 +349,13 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
     model = MainModel.of(context);
     initDropdown();
     getDispatch();
-    getReport();
     getRole();
+    if (widget.reportId != null) {
+      setState(() {
+        _reportId = widget.reportId;
+      });
+      getReport(_reportId);
+    }
     super.initState();
   }
 
@@ -534,7 +538,7 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
       new Divider(),
     ]);
 
-    switch (_dispatch['Request']['RequestType']['ID']) {
+    switch (_dispatch['RequestType']['ID']) {
       case 4:
         _list.addAll([
           widget.status != 0 && widget.status != 1
@@ -552,6 +556,9 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
                   ? BuildWidget.buildRow('问题升级', _unsolved.text)
                   : buildField('问题升级：', _unsolved))
               : new Container(),
+          widget.status != 0 && widget.status != 1 && _isDelayed
+              ? BuildWidget.buildRow('误工说明', _delay.text)
+              : buildField('误工说明', _delay),
         ]);
         break;
       case 3:
@@ -570,6 +577,9 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
               ? BuildWidget.buildRow('专用报告', _currentPrivate)
               : BuildWidget.buildRadio(
                   '专用报告', _isPrivate, _currentPrivate, changePrivate),
+          widget.status != 0 && widget.status != 1 && _isDelayed
+              ? BuildWidget.buildRow('误工说明', _delay.text)
+              : buildField('误工说明', _delay),
           widget.status != 0 && widget.status != 1
               ? BuildWidget.buildRow('作业报告结果', _currentResult)
               : BuildWidget.buildDropdown('作业报告结果', _currentResult,
@@ -602,6 +612,9 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
                   ? BuildWidget.buildRow('问题升级', _unsolved.text)
                   : buildField('问题升级：', _unsolved))
               : new Container(),
+          widget.status != 0 && widget.status != 1 && _isDelayed
+              ? BuildWidget.buildRow('误工说明', _delay.text)
+              : buildField('误工说明', _delay),
         ]);
         break;
       default:
@@ -826,9 +839,8 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
               BuildWidget.buildRow('派工类型', _dispatch['RequestType']['Name']),
               BuildWidget.buildRow('工程师姓名', _dispatch['Engineer']['Name']),
               //widget.status==3||widget.status==2?new Container():BuildWidget.buildRow('处理方式', _dispatch['Request']['DealType']['Name']),
-              BuildWidget.buildRow(
-                  '紧急程度', _dispatch['Request']['Priority']['Name']),
-              _dispatch['Request']['RequestType']['ID'] == 14
+              BuildWidget.buildRow('紧急程度', _dispatch['Request']==null?'':_dispatch['Request']['Priority']['Name']??''),
+              _dispatch['RequestType']['ID'] == 14
                   ? new Container()
                   : BuildWidget.buildRow(
                       '机器状态', _dispatch['MachineStatus']['Name']),
