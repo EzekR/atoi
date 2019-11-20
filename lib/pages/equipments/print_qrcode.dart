@@ -1,9 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:qr_flutter/qr_flutter.dart';
-import 'package:pdf/pdf.dart';
-import 'package:pdf/widgets.dart' as pdf;
 import 'package:atoi/utils/http_request.dart';
-import 'dart:convert';
 import 'package:brother_printer/brother_printer.dart';
 
 class PrintQrcode extends StatefulWidget{

@@ -113,9 +113,9 @@ class ConstantsModel extends Model {
       for(var _item in resp['Data']['ContractScope']) {
         _ContractScope.putIfAbsent(_item['Name'], () => _item['ID']);
       }
-      for(var _item in resp['Data']['ReportType']) {
-        _ReportType.putIfAbsent(_item['Name'], () => _item['ID']);
-      }
+      //for(var _item in resp['Data']['ReportType']) {
+      //  _ReportType.putIfAbsent(_item['Name'], () => _item['ID']);
+      //}
       for(var _item in resp['Data']['SolutionStatus']) {
         _SolutionStatus.putIfAbsent(_item['Name'], () => _item['ID']);
       }
