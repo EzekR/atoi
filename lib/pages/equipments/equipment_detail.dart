@@ -6,6 +6,11 @@ import 'dart:convert';
 import 'package:scoped_model/scoped_model.dart';
 import 'package:atoi/models/models.dart';
 import 'package:atoi/utils/http_request.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:flutter_image_compress/flutter_image_compress.dart';
+import 'dart:typed_data';
+import 'dart:convert';
 
 class EquipmentDetail extends StatefulWidget {
   EquipmentDetail({Key key, this.equipment}):super(key: key);
@@ -126,6 +131,12 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
 
   Map<String, dynamic> manufacturer;
   Map<String, dynamic> supplier;
+
+  List equipmentPlaques = [];
+  List equipmentLabel = [];
+  List equipmentAppearance = [];
+
+  Future<SharedPreferences> prefs = SharedPreferences.getInstance();
 
   void changeValue(value) {
     setState(() {
@@ -339,6 +350,86 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
     }
   }
 
+  void showSheet(context, List _imageList) {
+    showModalBottomSheet(
+        context: context,
+        builder: (context) {
+          return new ListView(
+            shrinkWrap: true,
+            children: <Widget>[
+              ListTile(
+                trailing: new Icon(Icons.collections),
+                title: new Text('从相册添加'),
+                onTap: () {
+                  getImage(ImageSource.gallery, _imageList);
+                },
+              ),
+              ListTile(
+                trailing: new Icon(Icons.add_a_photo),
+                title: new Text('拍照添加'),
+                onTap: () {
+                  getImage(ImageSource.camera, _imageList);
+                },
+              ),
+            ],
+          );
+        });
+  }
+
+  Future getImage(ImageSource sourceType, List _imageList) async {
+    var image = await ImagePicker.pickImage(
+      source: sourceType,
+    );
+    if (image != null) {
+      var bytes = await image.readAsBytes();
+      var _compressed = await FlutterImageCompress.compressWithList(bytes,
+          minWidth: 480, minHeight: 600);
+      setState(() {
+        _imageList.add({
+          'fileName': image.path,
+          'content': _compressed
+        });
+      });
+    }
+  }
+
+  GridView buildImageRow(List imageList) {
+    List<Widget> _list = [];
+    if (imageList.length > 0) {
+      for (var image in imageList) {
+        _list.add(new Stack(
+          alignment: FractionalOffset(1.0, 0),
+          children: <Widget>[
+            new Container(
+              width: 100.0,
+              child: Image.memory(Uint8List.fromList(image['content'])),
+            ),
+            new Padding(
+              padding: EdgeInsets.symmetric(horizontal: 0.0),
+              child: new IconButton(
+                  icon: Icon(Icons.cancel),
+                  color: Colors.white,
+                  onPressed: () {
+                    setState(() {
+                      imageList.remove(image);
+                    });
+                  }),
+            )
+          ],
+        ));
+      }
+    } else {
+      _list.add(new Container());
+    }
+    return new GridView.count(
+        shrinkWrap: true,
+        primary: false,
+        mainAxisSpacing: 5,
+        crossAxisSpacing: 5,
+        crossAxisCount: 2,
+        children: _list);
+  }
+
   Future<Null> getDevice(int deviceId) async {
     var resp = await HttpRequest.request(
       '/Equipment/GetDeviceById',
@@ -405,6 +496,35 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
   }
 
   Future<Null> saveEquipment() async {
+    var _prefs = await prefs;
+    var _userId = _prefs.getInt('userID');
+    var _equipmentFiles = [];
+    _equipmentFiles.addAll(
+      equipmentPlaques.map((item) => {
+        'FileContent': base64Encode(item['content']),
+        'FileName': item['fileName'],
+        'FileType': 5,
+        'ID': 0
+      }).toList()
+    );
+    _equipmentFiles.addAll(
+        equipmentLabel.map((item) => {
+          'FileContent': base64Encode(item['content']),
+          'FileName': item['fileName'],
+          'FileType': 6,
+          'ID': 0
+        }).toList()
+    );
+    _equipmentFiles.addAll(
+        equipmentAppearance.map((item) => {
+          'FileContent': base64Encode(item['content']),
+          'FileName': item['fileName'],
+          'FileType': 8,
+          'FileDesc': '',
+          'ID': 0
+        }).toList()
+    );
+    print(_equipmentFiles);
     var _data = {
       "EquipmentLevel": {
         "ID": equipmentLevel[currentClass],
@@ -412,7 +532,9 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
       "Name": name.text,
       "EquipmentCode": equipmentCode.text,
       "SerialCode": serialCode.text,
-      "Manufacturer": manufacturer,
+      "Manufacturer": {
+        'ID': manufacturer==null?0:manufacturer['ID']
+      },
       "EquipmentClass1": class1Item.firstWhere((item) => item['Description']==currentClass1, orElse: ()=>null),
       "EquipmentClass2": class2Item.firstWhere((item) => item['Description']==currentClass2, orElse: ()=>null),
       "EquipmentClass3": class3Item.firstWhere((item) => item['Description']==currentClass3, orElse: ()=>null),
@@ -426,7 +548,9 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
       "ValidityStartDate": validationStartDate,
       "ValidityEndDate": validationEndDate,
       "SaleContractName": contractName.text,
-      "Supplier": supplier,
+      "Supplier": {
+        'ID': supplier==null?0:supplier['ID']
+      },
       "PurchaseWay": purchaseWay.text,
       "PurchaseAmount": purchaseAmount.text,
       "PurchaseDate": purchaseDate,
@@ -445,7 +569,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
       "EquipmentStatus": {
         "ID": model.MachineStatus[currentMachine],
       },
-      "ScrapDate": null,
+      "ScrapDate": '2020-1-1',
       "MaintenancePeriod": maintainPeriod.text,
       "MaintenanceType": {
         "ID": periodType[currentMaintainPeriod],
@@ -464,21 +588,31 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
       "MandatoryTestDate": mandatoryDate,
       "RecallFlag": currentRecall=='是'?true:false,
       "RecallDate": recallDate,
-      "WarrantyStatus": warrantyStatus.text,
-      "EquipmentFile": [],
-      "OriginType": currentOrigin,
+      "CreateUser": {
+        'ID': _userId
+      },
+      "EquipmentFile": _equipmentFiles,
     };
     if (widget.equipment != null) {
       _data['ID'] = widget.equipment['ID'];
+    } else {
+      _data['ID'] = 0;
     }
     var resp = await HttpRequest.request(
       '/Equipment/SaveEquipment',
       method: HttpRequest.POST,
-      data: _data
+      data: {
+        "userID": _userId,
+        "info": _data
+      }
     );
     if (resp['ResultCode'] == '00') {
       showDialog(context: context, builder: (context) => CupertinoAlertDialog(
         title: new Text('保存成功'),
+      )).then((result) => Navigator.of(context).pop());
+    } else {
+      showDialog(context: context, builder: (context) => CupertinoAlertDialog(
+        title: new Text(resp['Data']),
       ));
     }
   }
@@ -1019,7 +1153,87 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
           ),
         ),
         isExpanded: true));
-
+    //equipment photos
+    _list.add(ExpansionPanel(
+        headerBuilder: (context, isExpanded) {
+          return ListTile(
+              leading: new Icon(
+                Icons.network_check,
+                size: 24.0,
+                color: Colors.blue,
+              ),
+              title: Text(
+                '使用状态',
+                style:
+                new TextStyle(fontSize: 22.0, fontWeight: FontWeight.w400),
+              ));
+        },
+        body: new Padding(
+            padding: EdgeInsets.symmetric(horizontal: 12.0),
+            child: new Column(
+              children: <Widget>[
+                new Padding(
+                  padding: EdgeInsets.symmetric(vertical: 5.0),
+                  child: new Row(
+                    children: <Widget>[
+                      new Text(
+                        '设备铭牌：',
+                        style: new TextStyle(
+                            fontSize: 20.0,
+                            fontWeight: FontWeight.w600),
+                      ),
+                      new IconButton(
+                          icon: Icon(Icons.add_a_photo),
+                          onPressed: () {
+                            showSheet(context, equipmentPlaques);
+                          })
+                    ],
+                  ),
+                ),
+                buildImageRow(equipmentPlaques),
+                new Padding(
+                  padding: EdgeInsets.symmetric(vertical: 5.0),
+                  child: new Row(
+                    children: <Widget>[
+                      new Text(
+                        '设备标签：',
+                        style: new TextStyle(
+                            fontSize: 20.0,
+                            fontWeight: FontWeight.w600),
+                      ),
+                      new IconButton(
+                          icon: Icon(Icons.add_a_photo),
+                          onPressed: () {
+                            showSheet(context, equipmentLabel);
+                          })
+                    ],
+                  ),
+                ),
+                buildImageRow(equipmentLabel),
+                new Padding(
+                  padding: EdgeInsets.symmetric(vertical: 5.0),
+                  child: new Row(
+                    children: <Widget>[
+                      new Text(
+                        '设备外观：',
+                        style: new TextStyle(
+                            fontSize: 20.0,
+                            fontWeight: FontWeight.w600),
+                      ),
+                      new IconButton(
+                          icon: Icon(Icons.add_a_photo),
+                          onPressed: () {
+                            showSheet(context, equipmentAppearance);
+                          })
+                    ],
+                  ),
+                ),
+                buildImageRow(equipmentAppearance)
+              ],
+            ),
+        ),
+        isExpanded: true
+    ));
     return _list;
   }
 

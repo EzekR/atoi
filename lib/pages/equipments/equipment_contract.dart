@@ -81,9 +81,12 @@ class _EquipmentContractState extends State<EquipmentContract> {
   }
 
   Future<Null> saveContract() async {
+    var _equipList = _equipments.map((item) => {'ID': item['ID']}).toList();
     var _info = {
-      "Equipments": _equipments,
-      "Supplier": supplier,
+      "Equipments": _equipList,
+      "Supplier": {
+        'ID': supplier==null?0:supplier['ID']
+      },
       "ContractNum": contractNum.text,
       "Name": name.text,
       "Type": {
@@ -98,17 +101,12 @@ class _EquipmentContractState extends State<EquipmentContract> {
       "StartDate": startDate,
       "EndDate": endDate,
       "Comments": comments.text,
-      "ContractFile": {
-        "ObjectID": 0,
-        "FileType": 0,
-        "AddDate": null,
-        "ID": 0
-      },
-      "Status": status.text,
+      //"Status": status.text,
     };
     if (widget.contract != null) {
-      _info['OID'] = widget.contract['OID'];
       _info['ID'] = widget.contract['ID'];
+    } else {
+      _info['ID'] = 0;
     }
     var prefs = await _prefs;
     var userID = prefs.getInt('userID');
@@ -125,6 +123,10 @@ class _EquipmentContractState extends State<EquipmentContract> {
       showDialog(context: context, builder: (context) => CupertinoAlertDialog(
         title: new Text('保存成功'),
       )).then((result) => Navigator.of(context).pop());
+    } else {
+      showDialog(context: context, builder: (context) => CupertinoAlertDialog(
+        title: new Text(resp['Data']),
+      ));
     }
   }
 
