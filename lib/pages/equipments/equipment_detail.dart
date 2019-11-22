@@ -13,7 +13,7 @@ import 'dart:typed_data';
 import 'dart:convert';
 
 class EquipmentDetail extends StatefulWidget {
-  EquipmentDetail({Key key, this.equipment}):super(key: key);
+  EquipmentDetail({Key key, this.equipment}) : super(key: key);
   final Map equipment;
   _EquipmentDetailState createState() => _EquipmentDetailState();
 }
@@ -32,22 +32,9 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
   String recallDate = '召回时间';
   String equipmentClassCode = '';
   ConstantsModel model;
-  Map equipmentLevel = {
-    '1类': 1,
-    '2类': 2,
-    '3类': 3
-  };
-  Map periodType = {
-    '无': 1,
-    '天/次': 2,
-    '月/次': 3,
-    '年/次': 4
-  };
-  Map mandatoryFlagType = {
-    '无': 0,
-    '待强检': 1,
-    '已强检': 2
-  };
+  Map equipmentLevel = {'1类': 1, '2类': 2, '3类': 3};
+  Map periodType = {'无': 1, '天/次': 2, '月/次': 3, '年/次': 4};
+  Map mandatoryFlagType = {'无': 0, '待强检': 1, '已强检': 2};
 
   var name = new TextEditingController(),
       equipmentCode = new TextEditingController(),
@@ -238,13 +225,8 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
   }
 
   Future<Null> initClass1() async {
-    var resp = await HttpRequest.request(
-      '/Equipment/GetEquipmentClass',
-      method: HttpRequest.GET,
-      params: {
-        'level': 1
-      }
-    );
+    var resp = await HttpRequest.request('/Equipment/GetEquipmentClass',
+        method: HttpRequest.GET, params: {'level': 1});
     if (resp['ResultCode'] == '00') {
       List _list = resp['Data'].map((item) {
         return item['Description'];
@@ -260,14 +242,8 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
   }
 
   Future<Null> initClass(String code, int level) async {
-    var resp = await HttpRequest.request(
-      '/Equipment/GetEquipmentClass',
-      method: HttpRequest.GET,
-      params: {
-        'level': level,
-        'parentCode': code
-      }
-    );
+    var resp = await HttpRequest.request('/Equipment/GetEquipmentClass',
+        method: HttpRequest.GET, params: {'level': level, 'parentCode': code});
     if (resp['ResultCode'] == '00') {
       List _list = resp['Data'].map((item) {
         return item['Description'];
@@ -385,10 +361,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
       var _compressed = await FlutterImageCompress.compressWithList(bytes,
           minWidth: 480, minHeight: 600);
       setState(() {
-        _imageList.add({
-          'fileName': image.path,
-          'content': _compressed
-        });
+        _imageList.add({'fileName': image.path, 'content': _compressed});
       });
     }
   }
@@ -401,7 +374,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
           alignment: FractionalOffset(1.0, 0),
           children: <Widget>[
             new Container(
-              width: 100.0,
+              width: 150.0,
               child: Image.memory(Uint8List.fromList(image['content'])),
             ),
             new Padding(
@@ -412,14 +385,15 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
                   onPressed: () {
                     setState(() {
                       imageList.remove(image);
+                      if (image['id'] != null) {
+                        deleteFile(image['id']);
+                      }
                     });
                   }),
             )
           ],
         ));
       }
-    } else {
-      _list.add(new Container());
     }
     return new GridView.count(
         shrinkWrap: true,
@@ -430,14 +404,31 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
         children: _list);
   }
 
-  Future<Null> getDevice(int deviceId) async {
+  Future<String> getDeviceFile(int fileId) async {
     var resp = await HttpRequest.request(
-      '/Equipment/GetDeviceById',
-      method: HttpRequest.GET,
-      params: {
-        'id': deviceId
+      '/Equipment/DownloadUploadFile',
+      method: HttpRequest.POST,
+      data: {
+        'id': fileId
       }
     );
+    return resp['ResultCode']=='00'?resp['Data']:null;
+  }
+
+  Future<Null> deleteFile(int fileId) async {
+    var resp = await HttpRequest.request(
+      '/Equipment/DeleteEquipmentFile',
+      method: HttpRequest.POST,
+      data: {
+        'fileID': fileId
+      }
+    );
+    print(resp);
+  }
+
+  Future<Null> getDevice(int deviceId) async {
+    var resp = await HttpRequest.request('/Equipment/GetDeviceById',
+        method: HttpRequest.GET, params: {'id': deviceId});
     if (resp['ResultCode'] == '00') {
       var _data = resp['Data'];
       await initClass1();
@@ -448,10 +439,14 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
       setState(() {
         currentClass2 = _data['EquipmentClass2']['Description'];
       });
-      await initClass(_data['EquipmentClass1']['Code']+_data['EquipmentClass2']['Code'], 3);
+      await initClass(
+          _data['EquipmentClass1']['Code'] + _data['EquipmentClass2']['Code'],
+          3);
       setState(() {
         currentClass3 = _data['EquipmentClass3']['Description'];
-        equipmentClassCode = _data['EquipmentClass1']['Code']+_data['EquipmentClass2']['Code']+_data['EquipmentClass3']['Code'];
+        equipmentClassCode = _data['EquipmentClass1']['Code'] +
+            _data['EquipmentClass2']['Code'] +
+            _data['EquipmentClass3']['Code'];
       });
       setState(() {
         name.text = _data['Name'];
@@ -471,27 +466,81 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
         manufacturer = _data['Manufacturer'];
         supplier = _data['Supplier'];
         currentClass = _data['EquipmentLevel']['Name'];
-        currentFixed = _data['FixedAsset']?'是':'否';
+        currentFixed = _data['FixedAsset'] ? '是' : '否';
         currentLevel = _data['AssetLevel']['Name'];
-        validationStartDate = _data['ValidityStartDate'].toString().split('T')[0];
+        validationStartDate =
+            _data['ValidityStartDate'].toString().split('T')[0];
         validationEndDate = _data['ValidityEndDate'].toString().split('T')[0];
         installStartDate = _data['InstalStartDate'].toString().split('T')[0];
         installEndDate = _data['InstalEndDate'].toString().split('T')[0];
         purchaseDate = _data['PurchaseDate'].toString().split('T')[0];
         currentOrigin = _data['OriginType'];
         currentDepartment = _data['Department']['Name'];
-        currentCheck = _data['Accepted']?'已验收':'未验收';
+        currentCheck = _data['Accepted'] ? '已验收' : '未验收';
         checkDate = _data['AcceptanceDate'].toString().split('T')[0];
         currentStatus = _data['UsageStatus']['Name'];
         currentMachine = _data['EquipmentStatus']['Name'];
-        currentMandatory = _data['MandatoryTestStatus']['ID']==0?'无':_data['MandatoryTestStatus']['Name'];
+        currentMandatory = _data['MandatoryTestStatus']['ID'] == 0
+            ? '无'
+            : _data['MandatoryTestStatus']['Name'];
         mandatoryDate = _data['MandatoryTestDate'].toString().split('T')[0];
-        currentRecall = _data['RecallFlag']?'是':'否';
+        currentRecall = _data['RecallFlag'] ? '是' : '否';
         recallDate = _data['RecallDate'].toString().split('T')[0];
-        currentPatrolPeriod = _data['PatrolType']['Name']==''?'无':_data['PatrolType']['Name'];
-        currentMaintainPeriod = _data['MaintenanceType']['Name']==''?'无':_data['MaintenanceType']['Name'];
-        currentCorrectionPeriod = _data['CorrectionType']['Name']==''?'无':_data['CorrectionType']['Name'];
+        currentPatrolPeriod = _data['PatrolType']['Name'] == ''
+            ? '无'
+            : _data['PatrolType']['Name'];
+        currentMaintainPeriod = _data['MaintenanceType']['Name'] == ''
+            ? '无'
+            : _data['MaintenanceType']['Name'];
+        currentCorrectionPeriod = _data['CorrectionType']['Name'] == ''
+            ? '无'
+            : _data['CorrectionType']['Name'];
       });
+      //download equipment files
+      var _files = _data['EquipmentFile'];
+      for(var item in _files) {
+        var _fileExt = item['FileName'].split('.')[1];
+        if (_fileExt == 'jpg' || _fileExt == 'png' || _fileExt == 'jpeg' || _fileExt == 'bmp') {
+          switch (item['FileType']) {
+            case 5:
+              var _file = await getDeviceFile(item['ID']);
+              if (_file != null) {
+                setState(() {
+                  equipmentPlaques.add({
+                    'fileName': item['FileName'],
+                    'content': base64Decode(_file),
+                    'id': item['ID']
+                  });
+                });
+              }
+              break;
+            case 6:
+              var _file = await getDeviceFile(item['ID']);
+              if (_file != null) {
+                setState(() {
+                  equipmentLabel.add({
+                    'fileName': item['FileName'],
+                    'content': base64Decode(_file),
+                    'id': item['ID']
+                  });
+                });
+              }
+              break;
+            case 8:
+              var _file = await getDeviceFile(item['ID']);
+              if (_file != null) {
+                setState(() {
+                  equipmentAppearance.add({
+                    'fileName': item['FileName'],
+                    'content': base64Decode(_file),
+                    'id': item['ID']
+                  });
+                });
+              }
+              break;
+          }
+        }
+      }
     }
   }
 
@@ -499,31 +548,32 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
     var _prefs = await prefs;
     var _userId = _prefs.getInt('userID');
     var _equipmentFiles = [];
-    _equipmentFiles.addAll(
-      equipmentPlaques.map((item) => {
-        'FileContent': base64Encode(item['content']),
-        'FileName': item['fileName'],
-        'FileType': 5,
-        'ID': 0
-      }).toList()
-    );
-    _equipmentFiles.addAll(
-        equipmentLabel.map((item) => {
-          'FileContent': base64Encode(item['content']),
-          'FileName': item['fileName'],
-          'FileType': 6,
-          'ID': 0
-        }).toList()
-    );
-    _equipmentFiles.addAll(
-        equipmentAppearance.map((item) => {
-          'FileContent': base64Encode(item['content']),
-          'FileName': item['fileName'],
-          'FileType': 8,
-          'FileDesc': '',
-          'ID': 0
-        }).toList()
-    );
+    _equipmentFiles.addAll(equipmentPlaques
+        .map((item) => item['id']==null?{
+              'FileContent': base64Encode(item['content']),
+              'FileName': item['fileName'],
+              'FileType': 5,
+              'ID': 0
+            }:null)
+        .toList());
+    _equipmentFiles.addAll(equipmentLabel
+        .map((item) => item['id']==null?{
+              'FileContent': base64Encode(item['content']),
+              'FileName': item['fileName'],
+              'FileType': 6,
+              'ID': 0
+            }:null)
+        .toList());
+    _equipmentFiles.addAll(equipmentAppearance
+        .map((item) => item['id']==null?{
+              'FileContent': base64Encode(item['content']),
+              'FileName': item['fileName'],
+              'FileType': 8,
+              'FileDesc': '',
+              'ID': 0
+            }:null)
+        .toList());
+    _equipmentFiles.removeWhere((item) => item==null);
     print(_equipmentFiles);
     var _data = {
       "EquipmentLevel": {
@@ -532,36 +582,36 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
       "Name": name.text,
       "EquipmentCode": equipmentCode.text,
       "SerialCode": serialCode.text,
-      "Manufacturer": {
-        'ID': manufacturer==null?0:manufacturer['ID']
-      },
-      "EquipmentClass1": class1Item.firstWhere((item) => item['Description']==currentClass1, orElse: ()=>null),
-      "EquipmentClass2": class2Item.firstWhere((item) => item['Description']==currentClass2, orElse: ()=>null),
-      "EquipmentClass3": class3Item.firstWhere((item) => item['Description']==currentClass3, orElse: ()=>null),
+      "Manufacturer": {'ID': manufacturer == null ? 0 : manufacturer['ID']},
+      "EquipmentClass1": class1Item.firstWhere(
+          (item) => item['Description'] == currentClass1,
+          orElse: () => null),
+      "EquipmentClass2": class2Item.firstWhere(
+          (item) => item['Description'] == currentClass2,
+          orElse: () => null),
+      "EquipmentClass3": class3Item.firstWhere(
+          (item) => item['Description'] == currentClass3,
+          orElse: () => null),
       "ResponseTimeLength": responseTime.text,
-      "FixedAsset": currentFixed=='是'?true:false,
+      "FixedAsset": currentFixed == '是' ? true : false,
       "AssetCode": assetCode.text,
-      "AssetLevel": {
-        'ID': model.AssetsLevel[currentLevel]
-      },
+      "AssetLevel": {'ID': model.AssetsLevel[currentLevel]},
       "DepreciationYears": depreciationYears.text,
       "ValidityStartDate": validationStartDate,
       "ValidityEndDate": validationEndDate,
       "SaleContractName": contractName.text,
-      "Supplier": {
-        'ID': supplier==null?0:supplier['ID']
-      },
+      "Supplier": {'ID': supplier == null ? 0 : supplier['ID']},
       "PurchaseWay": purchaseWay.text,
       "PurchaseAmount": purchaseAmount.text,
       "PurchaseDate": purchaseDate,
-      "IsImport": currentOrigin=='进口'?true:false,
+      "IsImport": currentOrigin == '进口' ? true : false,
       "Department": {
         "ID": model.Departments[currentDepartment],
       },
       "InstalSite": installSite.text,
       "InstalStartDate": installStartDate,
       "InstalEndDate": installEndDate,
-      "Accepted": currentCheck=='已验收'?true:false,
+      "Accepted": currentCheck == '已验收' ? true : false,
       "AcceptanceDate": checkDate,
       "UsageStatus": {
         "ID": model.UsageStatus[currentStatus],
@@ -586,11 +636,9 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
         "ID": mandatoryFlagType[currentMandatory],
       },
       "MandatoryTestDate": mandatoryDate,
-      "RecallFlag": currentRecall=='是'?true:false,
+      "RecallFlag": currentRecall == '是' ? true : false,
       "RecallDate": recallDate,
-      "CreateUser": {
-        'ID': _userId
-      },
+      "CreateUser": {'ID': _userId},
       "EquipmentFile": _equipmentFiles,
     };
     if (widget.equipment != null) {
@@ -598,22 +646,20 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
     } else {
       _data['ID'] = 0;
     }
-    var resp = await HttpRequest.request(
-      '/Equipment/SaveEquipment',
-      method: HttpRequest.POST,
-      data: {
-        "userID": _userId,
-        "info": _data
-      }
-    );
+    var resp = await HttpRequest.request('/Equipment/SaveEquipment',
+        method: HttpRequest.POST, data: {"userID": _userId, "info": _data});
     if (resp['ResultCode'] == '00') {
-      showDialog(context: context, builder: (context) => CupertinoAlertDialog(
-        title: new Text('保存成功'),
-      )).then((result) => Navigator.of(context).pop());
+      showDialog(
+          context: context,
+          builder: (context) => CupertinoAlertDialog(
+                title: new Text('保存成功'),
+              )).then((result) => Navigator.of(context).pop());
     } else {
-      showDialog(context: context, builder: (context) => CupertinoAlertDialog(
-        title: new Text(resp['Data']),
-      ));
+      showDialog(
+          context: context,
+          builder: (context) => CupertinoAlertDialog(
+                title: new Text(resp['ResultMessage']),
+              ));
     }
   }
 
@@ -631,6 +677,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
         locale: Locale('zh'));
     return '${val.year}-${val.month}-${val.day}';
   }
+
 
   List<ExpansionPanel> buildExpansion() {
     List<ExpansionPanel> _list = [];
@@ -715,10 +762,14 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
                 ),
               ),
               BuildWidget.buildInput('标准响应时间', responseTime, lines: 1),
-              BuildWidget.buildDropdown('等级', currentClass, dropdownClass, changeClass),
-              BuildWidget.buildDropdown('设备类别(I)', currentClass1, dropdownClass1, changeClass1),
-              BuildWidget.buildDropdown('设备类别(II)', currentClass2, dropdownClass2, changeClass2),
-              BuildWidget.buildDropdown('设备类别(III)', currentClass3, dropdownClass3, changeClass3),
+              BuildWidget.buildDropdown(
+                  '等级', currentClass, dropdownClass, changeClass),
+              BuildWidget.buildDropdown(
+                  '设备类别(I)', currentClass1, dropdownClass1, changeClass1),
+              BuildWidget.buildDropdown(
+                  '设备类别(II)', currentClass2, dropdownClass2, changeClass2),
+              BuildWidget.buildDropdown(
+                  '设备类别(III)', currentClass3, dropdownClass3, changeClass3),
               BuildWidget.buildRow('分类编码', equipmentClassCode),
             ],
           ),
@@ -930,7 +981,8 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
                   ],
                 ),
               ),
-              BuildWidget.buildRadio('设备产地', origin, currentOrigin, changeOrigin)
+              BuildWidget.buildRadio(
+                  '设备产地', origin, currentOrigin, changeOrigin)
             ],
           ),
         ),
@@ -954,7 +1006,10 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
           padding: EdgeInsets.symmetric(horizontal: 12.0),
           child: new Column(
             children: <Widget>[
-              departments==null?new Container():BuildWidget.buildDropdown('使用科室', currentDepartment, dropdownDepartments, changeDepartment),
+              departments == null
+                  ? new Container()
+                  : BuildWidget.buildDropdown('使用科室', currentDepartment,
+                      dropdownDepartments, changeDepartment),
               BuildWidget.buildInput('安装地点', installSite, lines: 1),
               new Padding(
                 padding: EdgeInsets.symmetric(vertical: 5.0),
@@ -1011,7 +1066,8 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
                   ],
                 ),
               ),
-              BuildWidget.buildRadio('验收状态', checkStatus, currentCheck, changeCheck),
+              BuildWidget.buildRadio(
+                  '验收状态', checkStatus, currentCheck, changeCheck),
               new Padding(
                 padding: EdgeInsets.symmetric(vertical: 5.0),
                 child: new Row(
@@ -1055,9 +1111,12 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
                   ],
                 ),
               ),
-              BuildWidget.buildDropdown('使用状态', currentStatus, dropdownStatus, changeStatus),
-              BuildWidget.buildDropdown('设备状态', currentMachine, dropdownMachine, changeMachine),
-              BuildWidget.buildDropdown('强检标记', currentMandatory, dropdownMandatory, changeMandatory),
+              BuildWidget.buildDropdown(
+                  '使用状态', currentStatus, dropdownStatus, changeStatus),
+              BuildWidget.buildDropdown(
+                  '设备状态', currentMachine, dropdownMachine, changeMachine),
+              BuildWidget.buildDropdown(
+                  '强检标记', currentMandatory, dropdownMandatory, changeMandatory),
               new Padding(
                 padding: EdgeInsets.symmetric(vertical: 5.0),
                 child: new Row(
@@ -1102,7 +1161,8 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
                 ),
               ),
               BuildWidget.buildInput('维保状态', warrantyStatus, lines: 1),
-              BuildWidget.buildRadio('召回标记', recall, currentRecall, changeRecall),
+              BuildWidget.buildRadio(
+                  '召回标记', recall, currentRecall, changeRecall),
               new Padding(
                 padding: EdgeInsets.symmetric(vertical: 5.0),
                 child: new Row(
@@ -1146,9 +1206,23 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
                   ],
                 ),
               ),
-              BuildWidget.buildDropdownWithInput('巡检周期', patrolPeriod, currentPatrolPeriod, dropdownPatrolPeriod, changePatrolPeriod, inputType: TextInputType.number),
-              BuildWidget.buildDropdownWithInput('保养周期', maintainPeriod, currentMaintainPeriod, dropdownMandatoryPeriod, changeMandatoryPeriod, inputType: TextInputType.number),
-              BuildWidget.buildDropdownWithInput('校正周期', correctionPeriod, currentCorrectionPeriod, dropdownCorrectionPeriod, changeCorrectionPeriod, inputType: TextInputType.number),
+              BuildWidget.buildDropdownWithInput('巡检周期', patrolPeriod,
+                  currentPatrolPeriod, dropdownPatrolPeriod, changePatrolPeriod,
+                  inputType: TextInputType.number),
+              BuildWidget.buildDropdownWithInput(
+                  '保养周期',
+                  maintainPeriod,
+                  currentMaintainPeriod,
+                  dropdownMandatoryPeriod,
+                  changeMandatoryPeriod,
+                  inputType: TextInputType.number),
+              BuildWidget.buildDropdownWithInput(
+                  '校正周期',
+                  correctionPeriod,
+                  currentCorrectionPeriod,
+                  dropdownCorrectionPeriod,
+                  changeCorrectionPeriod,
+                  inputType: TextInputType.number),
             ],
           ),
         ),
@@ -1158,89 +1232,86 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
         headerBuilder: (context, isExpanded) {
           return ListTile(
               leading: new Icon(
-                Icons.network_check,
+                Icons.attach_file,
                 size: 24.0,
                 color: Colors.blue,
               ),
               title: Text(
-                '使用状态',
+                '设备附件',
                 style:
-                new TextStyle(fontSize: 22.0, fontWeight: FontWeight.w400),
+                    new TextStyle(fontSize: 22.0, fontWeight: FontWeight.w400),
               ));
         },
         body: new Padding(
-            padding: EdgeInsets.symmetric(horizontal: 12.0),
-            child: new Column(
-              children: <Widget>[
-                new Padding(
-                  padding: EdgeInsets.symmetric(vertical: 5.0),
-                  child: new Row(
-                    children: <Widget>[
-                      new Text(
-                        '设备铭牌：',
-                        style: new TextStyle(
-                            fontSize: 20.0,
-                            fontWeight: FontWeight.w600),
-                      ),
-                      new IconButton(
-                          icon: Icon(Icons.add_a_photo),
-                          onPressed: () {
-                            showSheet(context, equipmentPlaques);
-                          })
-                    ],
-                  ),
+          padding: EdgeInsets.symmetric(horizontal: 12.0),
+          child: new Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              new Padding(
+                padding: EdgeInsets.symmetric(vertical: 5.0),
+                child: new Row(
+                  children: <Widget>[
+                    new Text(
+                      '设备铭牌：',
+                      style: new TextStyle(
+                          fontSize: 20.0, fontWeight: FontWeight.w600),
+                    ),
+                    new IconButton(
+                        icon: Icon(Icons.add_a_photo),
+                        onPressed: () {
+                          showSheet(context, equipmentPlaques);
+                        })
+                  ],
                 ),
-                buildImageRow(equipmentPlaques),
-                new Padding(
-                  padding: EdgeInsets.symmetric(vertical: 5.0),
-                  child: new Row(
-                    children: <Widget>[
-                      new Text(
-                        '设备标签：',
-                        style: new TextStyle(
-                            fontSize: 20.0,
-                            fontWeight: FontWeight.w600),
-                      ),
-                      new IconButton(
-                          icon: Icon(Icons.add_a_photo),
-                          onPressed: () {
-                            showSheet(context, equipmentLabel);
-                          })
-                    ],
-                  ),
+              ),
+              buildImageRow(equipmentPlaques),
+              new Padding(
+                padding: EdgeInsets.symmetric(vertical: 5.0),
+                child: new Row(
+                  children: <Widget>[
+                    new Text(
+                      '设备标签：',
+                      style: new TextStyle(
+                          fontSize: 20.0, fontWeight: FontWeight.w600),
+                    ),
+                    new IconButton(
+                        icon: Icon(Icons.add_a_photo),
+                        onPressed: () {
+                          showSheet(context, equipmentLabel);
+                        })
+                  ],
                 ),
-                buildImageRow(equipmentLabel),
-                new Padding(
-                  padding: EdgeInsets.symmetric(vertical: 5.0),
-                  child: new Row(
-                    children: <Widget>[
-                      new Text(
-                        '设备外观：',
-                        style: new TextStyle(
-                            fontSize: 20.0,
-                            fontWeight: FontWeight.w600),
-                      ),
-                      new IconButton(
-                          icon: Icon(Icons.add_a_photo),
-                          onPressed: () {
-                            showSheet(context, equipmentAppearance);
-                          })
-                    ],
-                  ),
+              ),
+              buildImageRow(equipmentLabel),
+              new Padding(
+                padding: EdgeInsets.symmetric(vertical: 5.0),
+                child: new Row(
+                  children: <Widget>[
+                    new Text(
+                      '设备外观：',
+                      style: new TextStyle(
+                          fontSize: 20.0, fontWeight: FontWeight.w600),
+                    ),
+                    new IconButton(
+                        icon: Icon(Icons.add_a_photo),
+                        onPressed: () {
+                          showSheet(context, equipmentAppearance);
+                        })
+                  ],
                 ),
-                buildImageRow(equipmentAppearance)
-              ],
-            ),
+              ),
+              buildImageRow(equipmentAppearance)
+            ],
+          ),
         ),
-        isExpanded: true
-    ));
+        isExpanded: true));
     return _list;
   }
 
   Widget build(BuildContext context) {
     return new Scaffold(
         appBar: new AppBar(
-          title: new Text(widget.equipment==null?'添加设备':'编辑设备'),
+          title: new Text(widget.equipment == null ? '添加设备' : '编辑设备'),
           elevation: 0.7,
           flexibleSpace: Container(
             decoration: BoxDecoration(

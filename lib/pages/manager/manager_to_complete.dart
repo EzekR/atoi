@@ -266,14 +266,6 @@ class _ManagerToCompleteState extends State<ManagerToComplete> {
                                         controlsBuilder: (BuildContext context, {VoidCallback onStepContinue, VoidCallback onStepCancel}) {
                                           return Row(
                                             children: <Widget>[
-//                                              FlatButton(
-//                                                onPressed: onStepContinue,
-//                                                child: const Text('CONTINUE'),
-//                                              ),
-//                                              FlatButton(
-//                                                onPressed: onStepCancel,
-//                                                child: const Text('CANCEL'),
-//                                              ),
                                             new Container()
                                             ],
                                           );
