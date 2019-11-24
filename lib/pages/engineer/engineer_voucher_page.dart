@@ -9,6 +9,7 @@ import 'package:atoi/utils/constants.dart';
 import 'package:atoi/widgets/build_widget.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:atoi/models/models.dart';
+import 'package:flutter/cupertino.dart';
 
 class EngineerVoucherPage extends StatefulWidget {
   static String tag = 'engineer-voucher-page';
@@ -31,12 +32,15 @@ class _EngineerVoucherPageState extends State<EngineerVoucherPage> {
   var _followProblem = new TextEditingController();
   var _unconfirmed = new TextEditingController();
   var _advice = new TextEditingController();
+  var _customerName = new TextEditingController();
+  var _customerNumber = new TextEditingController();
   var _fujiComments = "";
   String _signature;
   String _journalStatus = '新建';
   List<int> _img;
   String _journalOID;
   ConstantsModel model;
+  bool hold = false;
 
   List _serviceResults = [
     '完成',
@@ -110,6 +114,8 @@ class _EngineerVoucherPageState extends State<EngineerVoucherPage> {
     if (resp['ResultCode'] == '00') {
       setState(() {
         _dispatch = resp['Data'];
+        _customerName.text = resp['Data']['Request']['RequestUser']['Name'];
+        _customerNumber.text = resp['Data']['Request']['RequestUser']['Mobile'];
       });
     }
   }
@@ -117,7 +123,7 @@ class _EngineerVoucherPageState extends State<EngineerVoucherPage> {
   Future<Null> uploadJournal() async {
     if (_img == null) {
       showDialog(context: context,
-          builder: (context) => AlertDialog(
+          builder: (context) => CupertinoAlertDialog(
           title: new Text('签名不可为空'),
         )
       );
@@ -125,7 +131,7 @@ class _EngineerVoucherPageState extends State<EngineerVoucherPage> {
     }
     if (_jobContent.text.isEmpty) {
       showDialog(context: context,
-          builder: (context) => AlertDialog(
+          builder: (context) => CupertinoAlertDialog(
             title: new Text('工作内容不可为空'),
           )
       );
@@ -133,7 +139,7 @@ class _EngineerVoucherPageState extends State<EngineerVoucherPage> {
     }
     if (_faultCode.text.isEmpty) {
       showDialog(context: context,
-        builder: (context) => AlertDialog(
+        builder: (context) => CupertinoAlertDialog(
           title: new Text('故障事由不可为空'),
         )
       );
@@ -143,6 +149,9 @@ class _EngineerVoucherPageState extends State<EngineerVoucherPage> {
       var dispatchId = widget.dispatchId;
       var image = base64Encode(_img);
       var status = model.ResultStatusID[_currentResult];
+      setState(() {
+        hold = true;
+      });
       var resp = await HttpRequest.request(
           '/DispatchJournal/SaveDispatchJournal',
           method: HttpRequest.POST,
@@ -164,11 +173,14 @@ class _EngineerVoucherPageState extends State<EngineerVoucherPage> {
             }
           }
       );
+      setState(() {
+        hold = false;
+      });
       print(resp);
       if (resp['ResultCode'] == '00') {
         showDialog(context: context,
             builder: (context) =>
-                AlertDialog(
+                CupertinoAlertDialog(
                     title: new Text('上传凭证成功')
                 )
         ).then((result) =>
@@ -189,7 +201,7 @@ class _EngineerVoucherPageState extends State<EngineerVoucherPage> {
   void initDropdown() {
     _serviceResults = iterateMap(model.ResultStatusID);
     _dropDownMenuItems = getDropDownMenuItems(_serviceResults);
-    _currentResult = _dropDownMenuItems[0].value;
+    _currentResult = _dropDownMenuItems[1].value;
   }
   void initState(){
     model = MainModel.of(context);
@@ -310,8 +322,10 @@ class _EngineerVoucherPageState extends State<EngineerVoucherPage> {
           controller: controller,
           decoration: InputDecoration(
             fillColor: AppConstants.AppColors['app_accent_m'],
-            filled: true
+            filled: true,
+            hintText: 'N/A'
           ),
+          maxLines: 3,
         ),
         new SizedBox(height: 5.0,)
       ],
@@ -455,20 +469,20 @@ class _EngineerVoucherPageState extends State<EngineerVoucherPage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
               _journalOID!=null?BuildWidget.buildRow('服务凭证编号', _journalOID):new Container(),
-              BuildWidget.buildRow('客户姓名', _dispatch['Request']['RequestUser']['Name']),
-              BuildWidget.buildRow('客户电话', _dispatch['Request']['RequestUser']['Mobile']),
-              BuildWidget.buildRow('审批状态', _journalStatus),
+              //BuildWidget.buildRow('审批状态', _journalStatus),
               _fujiComments.isNotEmpty?BuildWidget.buildRow('审批备注', _fujiComments):new Container(),
               new Divider(
                 color: Colors.grey,
               ),
               widget.status!=0&&widget.status!=1?BuildWidget.buildRow('故障现象/错误代码/事由', _faultCode.text):buildEditor('故障现象/\n错误代码/事由', _faultCode),
               widget.status!=0&&widget.status!=1?BuildWidget.buildRow('工作内容', _jobContent.text):buildEditor('工作内容', _jobContent),
-              widget.status!=0&&widget.status!=1?BuildWidget.buildRow('待跟进问题', _followProblem.text):buildEditor('待跟进问题', _followProblem),
-              widget.status!=0&&widget.status!=1?BuildWidget.buildRow('待确认问题', _unconfirmed.text):buildEditor('待确认问题', _unconfirmed),
+              widget.status!=0&&widget.status!=1?BuildWidget.buildRow('服务结果', _currentResult):BuildWidget.buildDropdownLeft('服务结果：', _currentResult, _dropDownMenuItems, changedDropDownMethod),
+              _currentResult=='完成'?new Container():widget.status!=0&&widget.status!=1?BuildWidget.buildRow('待跟进问题', _followProblem.text):buildEditor('待跟进问题', _followProblem),
+              //_currentResult=='完成'?new Container():widget.status!=0&&widget.status!=1?BuildWidget.buildRow('待确认问题', _unconfirmed.text):buildEditor('待确认问题', _unconfirmed),
               widget.status!=0&&widget.status!=1?BuildWidget.buildRow('建议留言', _advice.text):buildEditor('建议留言', _advice),
               new Divider(),
-              widget.status!=0&&widget.status!=1?BuildWidget.buildRow('服务结果', _currentResult):BuildWidget.buildDropdownLeft('服务结果：', _currentResult, _dropDownMenuItems, changedDropDownMethod),
+              BuildWidget.buildInput('客户姓名', _customerName, lines: 1),
+              BuildWidget.buildInput('客户电话', _customerNumber, lines: 1),
               widget.status==0||widget.status==1?new Padding(
                 padding: EdgeInsets.symmetric(vertical: 5.0),
                 child: new Text('客户签名：',
@@ -478,7 +492,7 @@ class _EngineerVoucherPageState extends State<EngineerVoucherPage> {
                   ),
                 ),
               ):BuildWidget.buildRow('客户签名', ''),
-              widget.status==0||widget.status==1?new RaisedButton(onPressed: () {toSignature(context);}, child: new Icon(Icons.add_box)):new Container(),
+              widget.status==0||widget.status==1?new RaisedButton(onPressed: () {toSignature(context);}, child: new Icon(Icons.add, color: Colors.white,)):new Container(),
               _img!=null?new Container(width: 400.0, height: 400.0, child: new Image.memory(Uint8List.fromList(_img))):new Container()
             ],
           ),
@@ -565,10 +579,10 @@ class _EngineerVoucherPageState extends State<EngineerVoucherPage> {
                 children: <Widget>[
                   widget.status==0||widget.status==1?new RaisedButton(
                     onPressed: () {
-                      uploadJournal();
+                      return hold?null:uploadJournal();
                     },
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(24),
+                      borderRadius: BorderRadius.circular(6),
                     ),
                     padding: EdgeInsets.all(12.0),
                     color: new Color(0xff2E94B9),

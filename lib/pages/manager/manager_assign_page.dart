@@ -11,6 +11,7 @@ import 'package:scoped_model/scoped_model.dart';
 import 'package:atoi/models/models.dart';
 import 'package:atoi/models/main_model.dart';
 import 'package:atoi/widgets/build_widget.dart';
+import 'package:flutter/cupertino.dart';
 
 class ManagerAssignPage extends StatefulWidget {
   static String tag = 'mananger-assign-page';
@@ -513,7 +514,7 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
     print(resp);
     if (resp['ResultCode'] == '00') {
       showDialog(context: context,
-        builder: (context) => AlertDialog(
+        builder: (context) => CupertinoAlertDialog(
           title: new Text('终止请求成功'),
         )
       ).then((result) =>
@@ -521,7 +522,7 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
       );
     } else {
       showDialog(context: context,
-        builder: (context) => AlertDialog(
+        builder: (context) => CupertinoAlertDialog(
           title: new Text(resp['ResultMessage']),
         )
       );
@@ -531,7 +532,7 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
   Future assignRequest() async {
     if (_currentName == '--请选择--') {
       showDialog(context: context,
-        builder: (context) => AlertDialog(
+        builder: (context) => CupertinoAlertDialog(
           title: new Text('请选择工程师'),
         )
       );
@@ -539,7 +540,7 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
     }
     if (_desc.text.isEmpty) {
       showDialog(context: context,
-          builder: (context) => AlertDialog(
+          builder: (context) => CupertinoAlertDialog(
             title: new Text(
               '${model.Remark[_request['RequestType']['ID']]}不可为空'
             ),
@@ -614,7 +615,7 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
     print(resp);
     if (resp['ResultCode'] == '00') {
       showDialog(context: context,
-        builder: (context) => AlertDialog(
+        builder: (context) => CupertinoAlertDialog(
           title: new Text('安排派工成功'),
         )
       ).then((result) =>
@@ -622,7 +623,7 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
       );
     } else {
       showDialog(context: context,
-        builder: (context) => AlertDialog(
+        builder: (context) => CupertinoAlertDialog(
           title: new Text(resp['ResultMessage']),
         )
       );
@@ -805,9 +806,12 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
                             locale: Locale('zh')
                         ).then((DateTime val) {
                           print(val); // 2018-07-12 00:00:00.000
-                          var date = '${val.year}-${val.month}-${val.day}';
-                          setState(() {
-                            dispatchDate = date;
+                          showTimePicker(context: (context), initialTime: new TimeOfDay.now()).then((TimeOfDay selectTime) {
+                            var date = '${val.year}-${val.month}-${val.day}';
+                            var time = '${selectTime.hour}:${selectTime.minute}';
+                            setState(() {
+                              dispatchDate = '${date} ${time}';
+                            });
                           });
                         }).catchError((err) {
                           print(err);
@@ -918,7 +922,7 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
                             model.getRequests();
                           },
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(24),
+                            borderRadius: BorderRadius.circular(6),
                           ),
                           padding: EdgeInsets.all(12.0),
                           color: new Color(0xff2E94B9),
@@ -932,30 +936,51 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
                             //terminate();
                             //model.getRequests();
                             showDialog(context: context,
-                              builder: (context) => AlertDialog(
+                              builder: (context) => CupertinoAlertDialog(
                                 title: new Text('是否终止请求？'),
                                 actions: <Widget>[
-                                  RaisedButton(
-                                    child: Text('确认', style: TextStyle(color: Colors.white),),
-                                    color: AppConstants.AppColors['btn_cancel'],
-                                    onPressed: () {
-                                      terminate();
-                                      Navigator.of(context).pop();
-                                    },
-                                  ),
-                                  RaisedButton(
-                                    child: Text('取消', style: TextStyle(color: Colors.white),),
-                                    color: AppConstants.AppColors['btn_main'],
-                                    onPressed: () {
-                                      Navigator.of(context).pop();
-                                    },
+                                  new Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: <Widget>[
+                                      new Container(
+                                        width: 100.0,
+                                        child: RaisedButton(
+                                          //padding: EdgeInsets.symmetric(vertical: 10.0, horizontal: 20.0),
+                                          child: Text('确认', style: TextStyle(color: Colors.white),),
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.circular(6),
+                                          ),
+                                          color: AppConstants.AppColors['btn_cancel'],
+                                          onPressed: () {
+                                            terminate();
+                                            Navigator.of(context).pop();
+                                          },
+                                        ),
+                                      ),
+                                      new SizedBox(
+                                        width: 10.0,
+                                      ),
+                                      new Container(
+                                        width: 100.0,
+                                        child: RaisedButton(
+                                          child: Text('取消', style: TextStyle(color: Colors.white),),
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.circular(6),
+                                          ),
+                                          color: AppConstants.AppColors['btn_main'],
+                                          onPressed: () {
+                                            Navigator.of(context).pop();
+                                          },
+                                        ),
+                                      )
+                                    ],
                                   ),
                                 ],
                               )
                             );
                           },
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(24),
+                            borderRadius: BorderRadius.circular(6),
                           ),
                           padding: EdgeInsets.all(12.0),
                           color: new Color(0xffD25565),
@@ -963,7 +988,8 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
                         ),
                       ),
                     ],
-                  )
+                  ),
+                  SizedBox(height: 24.0),
                 ],
               ),
             ),

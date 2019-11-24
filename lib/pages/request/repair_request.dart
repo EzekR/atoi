@@ -11,6 +11,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:atoi/utils/http_request.dart';
 import 'package:atoi/widgets/build_widget.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
+import 'package:flutter/cupertino.dart';
 
 class RepairRequest extends StatefulWidget{
   static String tag = 'repair-request';
@@ -21,6 +22,7 @@ class RepairRequest extends StatefulWidget{
 class _RepairRequestState extends State<RepairRequest> {
 
   String barcode = "";
+  bool hold = false;
   int _role;
   String _roleName = "";
   var _equipment;
@@ -60,7 +62,7 @@ class _RepairRequestState extends State<RepairRequest> {
         _equipment = resp['Data'];
       });
     } else {
-      showDialog(context: context, builder: (context) => AlertDialog(title: new Text(resp['ResultMessage']),));
+      showDialog(context: context, builder: (context) => CupertinoAlertDialog(title: new Text(resp['ResultMessage']),));
     }
   }
 
@@ -85,9 +87,33 @@ class _RepairRequestState extends State<RepairRequest> {
     super.initState();
   }
 
-  Future getImage() async {
+  void showSheet(context) {
+    showModalBottomSheet(context: context, builder: (context) {
+      return new ListView(
+        shrinkWrap: true,
+        children: <Widget>[
+          ListTile(
+            trailing: new Icon(Icons.collections),
+            title: new Text('从相册添加'),
+            onTap: () {
+              getImage(ImageSource.gallery);
+            },
+          ),
+          ListTile(
+            trailing: new Icon(Icons.add_a_photo),
+            title: new Text('拍照添加'),
+            onTap: () {
+              getImage(ImageSource.camera);
+            },
+          ),
+        ],
+      );
+    });
+  }
+
+  Future getImage(ImageSource sourceType) async {
     var image = await ImagePicker.pickImage(
-        source: ImageSource.camera,
+        source: sourceType,
     );
     if (image != null) {
       var compressed = await FlutterImageCompress.compressAndGetFile(
@@ -105,7 +131,7 @@ class _RepairRequestState extends State<RepairRequest> {
   Future<Null> submit() async {
     if (_equipment == null) {
       showDialog(context: context,
-        builder: (context) => AlertDialog(
+        builder: (context) => CupertinoAlertDialog(
           title: new Text('请选择设备'),
         )
       );
@@ -113,7 +139,7 @@ class _RepairRequestState extends State<RepairRequest> {
     }
     if (_fault.text == null || _fault.text.isEmpty) {
       showDialog(context: context,
-        builder: (context) => AlertDialog(
+        builder: (context) => CupertinoAlertDialog(
           title: new Text('故障描述不可为空')
         )
       );
@@ -150,15 +176,21 @@ class _RepairRequestState extends State<RepairRequest> {
           'Files': fileList
         }
       };
+      setState(() {
+        hold = true;
+      });
       var resp = await HttpRequest.request(
           '/Request/AddRequest',
           method: HttpRequest.POST,
           data: _data
       );
+      setState(() {
+        hold = false;
+      });
       print(resp);
       if (resp['ResultCode'] == '00') {
         showDialog(context: context, builder: (buider) =>
-            AlertDialog(
+            CupertinoAlertDialog(
               title: new Text('提交请求成功'),
             )).then((result) =>
             Navigator.of(context, rootNavigator: true).pop(result)
@@ -449,7 +481,7 @@ class _RepairRequestState extends State<RepairRequest> {
                                       new IconButton(
                                           icon: Icon(Icons.add_a_photo),
                                           onPressed: () {
-                                          getImage();
+                                            showSheet(context);
                                       })
                                     ],
                                   ),
@@ -471,10 +503,10 @@ class _RepairRequestState extends State<RepairRequest> {
                       children: <Widget>[
                         new RaisedButton(
                           onPressed: () {
-                            submit();
+                            return hold?null:submit();
                           },
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(24),
+                            borderRadius: BorderRadius.circular(6),
                           ),
                           padding: EdgeInsets.all(12.0),
                           color: new Color(0xff2E94B9),
@@ -485,14 +517,15 @@ class _RepairRequestState extends State<RepairRequest> {
                             Navigator.of(context).pop();
                           },
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(24),
+                            borderRadius: BorderRadius.circular(6),
                           ),
                           padding: EdgeInsets.all(12.0),
                           color: new Color(0xffD25565),
                           child: Text('返回首页', style: TextStyle(color: Colors.white)),
                         ),
                       ],
-                    )
+                    ),
+                    SizedBox(height: 24.0),
                   ],
 
                 ),

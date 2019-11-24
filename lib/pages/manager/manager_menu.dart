@@ -115,6 +115,7 @@ class ManagerMenu extends StatelessWidget {
                               context: context,
                               builder: (context) {
                                 return ListView(
+                                  shrinkWrap: true,
                                   children:<Widget>[
                                     Card(
                                       child: ListTile(

@@ -10,6 +10,8 @@ import 'package:atoi/login_page.dart';
 import 'package:atoi/complete_info.dart';
 import 'package:atoi/pages/request/other_request.dart';
 import 'package:atoi/pages/user/request_history.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:atoi/models/models.dart';
 
 class UserHomePage extends StatefulWidget{
   static String tag = 'user-home-page';
@@ -37,6 +39,8 @@ class _UserHomePageState extends State<UserHomePage> {
 
   void initState() {
     getRole();
+    ConstantsModel model = MainModel.of(context);
+    model.getConstants();
     super.initState();
   }
 
@@ -79,25 +83,39 @@ class _UserHomePageState extends State<UserHomePage> {
         return new UserRepairPage(equipment: resp['Data']);
       }));
     } else {
-      showDialog(context: context, builder: (context) => AlertDialog(title: new Text(resp['ResultMessage']),));
+      showDialog(context: context, builder: (context) => CupertinoAlertDialog(title: new Text(resp['ResultMessage']),));
     }
   }
 
   Column buildIconColumn(IconData icon, String label) {
-    Color color = Theme.of(context).primaryColor;
-
+    Color color = label=='Repair Request'?Colors.orange:Theme.of(context).primaryColor;
     return new Column(
       mainAxisSize: MainAxisSize.values[1],
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         new IconButton(
-          icon: new Icon(icon),
+          icon: new Icon(icon,),
           onPressed: () {
-            Navigator.of(context).push(new MaterialPageRoute(builder: (context) {
-              return label=='其他服务'?OtherRequest():RequestHistory();
-            }));
+            //Navigator.of(context).push(new MaterialPageRoute(builder: (context) {
+            //  return label=='其他服务'?OtherRequest():RequestHistory();
+            //}));
+            switch (label) {
+              case '扫码报修':
+                scan();
+                break;
+              case '其他服务':
+                Navigator.of(context).push(new MaterialPageRoute(builder: (context) {
+                  return OtherRequest();
+                }));
+                break;
+              default:
+                Navigator.of(context).push(new MaterialPageRoute(builder: (context) {
+                  return RequestHistory();
+                }));
+                break;
+            }
           },
-          color: color,
+          color: label=='扫码保修'?Colors.orange:color,
           iconSize: 50.0,
         ),
         new Container(
@@ -157,54 +175,64 @@ class _UserHomePageState extends State<UserHomePage> {
           body: new Column(
             mainAxisAlignment: MainAxisAlignment.start,
             children: <Widget>[
-              CarouselSlider(
-                viewportFraction: 1.0,
-                items: <Widget>[
-                  new Container(
-                    width: MediaQuery.of(context).size.width,
-                    child: Image.asset('assets/mri.jpg'),
-                  )
-                ],
-              ),
-              new Padding(
-                padding: EdgeInsets.symmetric(vertical: 30.0),
-                child: new Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: <Widget>[
-                    new IconButton(
-                        icon: new Icon(Icons.crop_free),
-                        iconSize: 100.0,
-                        color: Colors.orange,
-                        onPressed: () {
-                          scan();
-                        }
-                    ),
-                    new Container(
-                      margin: const EdgeInsets.only(top: 8.0),
-                      child: new Text(
-                        '扫码报修',
-                        style: new TextStyle(
-                          fontSize: 16.0,
-                          fontWeight: FontWeight.w400,
-                          color: new Color(0xff000000),
-                        ),
-                      ),
-                    ),
-                  ],
+              //CarouselSlider(
+              //  viewportFraction: 2.0,
+              //  items: <Widget>[
+              //    new Container(
+              //      width: MediaQuery.of(context).size.width,
+              //      height: 600.0,
+              //      child: Image.asset('assets/bg_01.jpg'),
+              //    )
+              //  ]
+              //),
+              new Center(
+                child: new Container(
+                  child: new Image.asset('assets/bg.jpg'),
                 ),
               ),
+              //new Padding(
+              //  padding: EdgeInsets.symmetric(vertical: 30.0),
+              //  child: new Column(
+              //    crossAxisAlignment: CrossAxisAlignment.center,
+              //    children: <Widget>[
+              //      new IconButton(
+              //          icon: new Icon(Icons.crop_free),
+              //          iconSize: 100.0,
+              //          color: Colors.orange,
+              //          onPressed: () {
+              //            scan();
+              //          }
+              //      ),
+              //      new Container(
+              //        margin: const EdgeInsets.only(top: 8.0),
+              //        child: new Text(
+              //          '扫码报修',
+              //          style: new TextStyle(
+              //            fontSize: 16.0,
+              //            fontWeight: FontWeight.w400,
+              //            color: new Color(0xff000000),
+              //          ),
+              //        ),
+              //      ),
+              //    ],
+              //  ),
+              //),
               new Padding(
-                padding: EdgeInsets.symmetric(vertical: 0.0),
+                padding: EdgeInsets.symmetric(vertical: 100.0),
                 child: new Row(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: <Widget>[
                     new Expanded(
-                      flex: 6,
-                      child: buildIconColumn(Icons.remove_red_eye, '其他服务'),
+                      flex: 4,
+                      child: buildIconColumn(Icons.crop_free, '扫码报修'),
                     ),
                     new Expanded(
-                      flex: 6,
-                      child: buildIconColumn(Icons.history, '服务记录'),
+                      flex: 4,
+                      child: buildIconColumn(Icons.extension, '其他服务'),
+                    ),
+                    new Expanded(
+                      flex: 4,
+                      child: buildIconColumn(Icons.history, '历史记录'),
                     ),
                   ],
                 ),

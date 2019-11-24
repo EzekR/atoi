@@ -1,33 +1,33 @@
 import 'package:flutter/material.dart';
 import 'package:atoi/utils/http_request.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
-import 'package:atoi/pages/equipments/print_qrcode.dart';
 import 'package:atoi/widgets/build_widget.dart';
 import 'package:atoi/pages/equipments/vendor_detail.dart';
+import 'package:atoi/pages/equipments/equipment_contract.dart';
 
-class VendorsList extends StatefulWidget{
-  _VendorsListState createState() => _VendorsListState();
+class ContractList extends StatefulWidget{
+  _ContractListState createState() => _ContractListState();
 }
 
-class _VendorsListState extends State<VendorsList> {
+class _ContractListState extends State<ContractList> {
 
-  List<dynamic> _vendors = [];
+  List<dynamic> _contracts = [];
 
-  Future<Null> getVendors() async {
+  Future<Null> getContracts() async {
     var resp = await HttpRequest.request(
-      '/DispatchReport/GetSuppliers?filterText=',
+      '/Contract/GetContracts',
       method: HttpRequest.GET,
     );
     if (resp['ResultCode'] == '00') {
       setState(() {
-        _vendors = resp['Data'];
+        _contracts = resp['Data'];
       });
     }
   }
 
   void initState() {
     super.initState();
-    getVendors();
+    getContracts();
   }
 
   Card buildEquipmentCard(Map item) {
@@ -38,12 +38,12 @@ class _VendorsListState extends State<VendorsList> {
         children: <Widget>[
           ListTile(
             leading: Icon(
-              Icons.store,
+              Icons.insert_drive_file,
               color: Color(0xff14BD98),
               size: 36.0,
             ),
             title: Text(
-              "供应商名称：${item['Name']}",
+              "合同名称：${item['Name']}",
               style: new TextStyle(
                   fontSize: 16.0,
                   color: Theme.of(context).primaryColor
@@ -60,13 +60,14 @@ class _VendorsListState extends State<VendorsList> {
             padding: EdgeInsets.symmetric(horizontal: 8.0),
             child: Column(
               children: <Widget>[
-                BuildWidget.buildCardRow('类型', item['SupplierType']['Name']),
-                BuildWidget.buildCardRow('省份', item['Province']),
-                BuildWidget.buildCardRow('地址', item['Address']),
-                BuildWidget.buildCardRow('联系人', item['Contact']),
-                BuildWidget.buildCardRow('联系电话', item['ContactMobile']),
-                BuildWidget.buildCardRow('添加日期', item['AddDate'].split('T')[0]),
-                BuildWidget.buildCardRow('状态', item['IsActive']?'启用':'停用'),
+                BuildWidget.buildCardRow('合同编号', item['ContractNum']),
+                BuildWidget.buildCardRow('设备编号', item['EquipmentOID']),
+                BuildWidget.buildCardRow('设备序列号', item['EquipmentSerialCode']),
+                BuildWidget.buildCardRow('合同类型', item['Type']['Name']),
+                BuildWidget.buildCardRow('供应商', item['Supplier']['Name']),
+                BuildWidget.buildCardRow('开始时间', item['StartDate'].split('T')[0]),
+                BuildWidget.buildCardRow('结束时间', item['EndDate'].split('T')[0]),
+                BuildWidget.buildCardRow('状态', item['Status']),
               ],
             ),
           ),
@@ -77,7 +78,7 @@ class _VendorsListState extends State<VendorsList> {
               new RaisedButton(
                 onPressed: (){
                   Navigator.of(context).push(new MaterialPageRoute(builder: (_) {
-                    return new VendorDetail(vendor: item,);
+                    return new EquipmentContract(contract: item,);
                   }));
                 },
                 shape: RoundedRectangleBorder(
@@ -112,7 +113,7 @@ class _VendorsListState extends State<VendorsList> {
   Widget build(BuildContext context) {
     return new Scaffold(
       appBar: new AppBar(
-        title: new Text('供应商列表'),
+        title: new Text('合同列表'),
         elevation: 0.7,
         flexibleSpace: Container(
           decoration: BoxDecoration(
@@ -127,19 +128,19 @@ class _VendorsListState extends State<VendorsList> {
           ),
         ),
       ),
-      body: _vendors.length==0?new Center(child: new SpinKitRotatingPlain(color: Colors.blue,),):new ListView.builder(
-        itemCount: _vendors.length,
+      body: _contracts.length==0?new Center(child: new SpinKitRotatingPlain(color: Colors.blue,),):new ListView.builder(
+        itemCount: _contracts.length,
         itemBuilder: (context, i) {
-          return buildEquipmentCard(_vendors[i]);
+          return buildEquipmentCard(_contracts[i]);
         },
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           Navigator.of(context).push(new MaterialPageRoute(builder: (_) {
-            return new VendorDetail();
+            return new EquipmentContract();
           }));
         },
-        child: Icon(Icons.add_shopping_cart),
+        child: Icon(Icons.note_add),
         backgroundColor: Colors.blue,
       ),
     );

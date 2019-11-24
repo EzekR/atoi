@@ -177,7 +177,7 @@ class _EngineerToReportState extends State<EngineerToReport> {
                               })).then((result) => refresh());
                         },
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(24),
+                          borderRadius: BorderRadius.circular(6),
                         ),
                         color: buttonColor(journalId),
                         child: new Row(
@@ -204,7 +204,7 @@ class _EngineerToReportState extends State<EngineerToReport> {
                               })).then((result) => refresh());
                         },
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(24),
+                          borderRadius: BorderRadius.circular(6),
                         ),
                         color: buttonColor(reportId),
                         child: new Row(

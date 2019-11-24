@@ -127,6 +127,10 @@ class BuildWidget {
             value: currentItem,
             items: dropdownItems,
             onChanged: changeDropdown,
+            style: new TextStyle(
+              color: Colors.black54,
+              fontSize: 12.0,
+            ),
             //isDense: true,
             //isExpanded: true,
           ),
@@ -135,8 +139,9 @@ class BuildWidget {
     );
   }
 
-  static Padding buildInput(String labelText, TextEditingController controller, {TextInputType inputType}) {
+  static Padding buildInput(String labelText, TextEditingController controller, {TextInputType inputType, int lines}) {
     inputType??TextInputType.text;
+    lines = lines ?? 3;
     return new Padding(
       padding: EdgeInsets.symmetric(vertical: 5.0),
       child: new Row(
@@ -171,6 +176,7 @@ class BuildWidget {
             flex: 6,
             child: new TextField(
               controller: controller,
+              maxLines: lines,
               keyboardType: inputType,
               decoration: InputDecoration(
                 fillColor: Color(0xfff0f0f0),

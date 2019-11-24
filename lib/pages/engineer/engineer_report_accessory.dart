@@ -8,6 +8,7 @@ import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:atoi/widgets/search_bar_vendor.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:atoi/models/models.dart';
+import 'package:flutter/cupertino.dart';
 
 class EngineerReportAccessory extends StatefulWidget {
   _EngineerReportAccessoryState createState() => _EngineerReportAccessoryState();
@@ -26,6 +27,7 @@ class _EngineerReportAccessoryState extends State<EngineerReportAccessory> {
   String _currentVendor;
   List _sources = [];
   ConstantsModel model;
+  bool hold = false;
 
   List _vendorList = [];
   var _vendors;
@@ -137,6 +139,47 @@ class _EngineerReportAccessoryState extends State<EngineerReportAccessory> {
     super.initState();
   }
 
+  void showSheet(context, String type) {
+    showModalBottomSheet(context: context, builder: (context) {
+      return new ListView(
+        shrinkWrap: true,
+        children: <Widget>[
+          ListTile(
+            trailing: new Icon(Icons.collections),
+            title: new Text('从相册添加'),
+            onTap: () {
+              getImage(ImageSource.gallery, type);
+            },
+          ),
+          ListTile(
+            trailing: new Icon(Icons.add_a_photo),
+            title: new Text('拍照添加'),
+            onTap: () {
+              getImage(ImageSource.camera, type);
+            },
+          ),
+        ],
+      );
+    });
+  }
+
+  void getImage(ImageSource sourceType, String imageType) async {
+    var image = await ImagePicker.pickImage(
+      source: sourceType,
+    );
+    if (image != null) {
+      var compressed = await FlutterImageCompress.compressAndGetFile(
+        image.absolute.path,
+        image.absolute.path,
+        minHeight: 800,
+        minWidth: 600,
+      );
+      setState(() {
+        imageType=='new'?_imageNew = compressed:_imageOld = compressed;
+      });
+    }
+  }
+
   Padding buildInput(String labelText, TextEditingController controller) {
     return new Padding(
       padding: EdgeInsets.symmetric(vertical: 5.0, horizontal: 8.0),
@@ -185,7 +228,7 @@ class _EngineerReportAccessoryState extends State<EngineerReportAccessory> {
   void saveAccessory() async {
     if (_name.text.isEmpty) {
       showDialog(context: context,
-        builder: (context) => AlertDialog(
+        builder: (context) => CupertinoAlertDialog(
           title: new Text('名称不可为空'),
         )
       );
@@ -193,7 +236,7 @@ class _EngineerReportAccessoryState extends State<EngineerReportAccessory> {
     }
     if (_newCode.text.isEmpty) {
       showDialog(context: context,
-          builder: (context) => AlertDialog(
+          builder: (context) => CupertinoAlertDialog(
             title: new Text('新装编号不可为空'),
           )
       );
@@ -201,7 +244,7 @@ class _EngineerReportAccessoryState extends State<EngineerReportAccessory> {
     }
     if (_oldCode.text.isEmpty) {
       showDialog(context: context,
-          builder: (context) => AlertDialog(
+          builder: (context) => CupertinoAlertDialog(
             title: new Text('拆下不可为空'),
           )
       );
@@ -209,7 +252,7 @@ class _EngineerReportAccessoryState extends State<EngineerReportAccessory> {
     }
     if (_amount.text.isEmpty) {
       showDialog(context: context,
-          builder: (context) => AlertDialog(
+          builder: (context) => CupertinoAlertDialog(
             title: new Text('新装部件金额不可为空'),
           )
       );
@@ -217,7 +260,7 @@ class _EngineerReportAccessoryState extends State<EngineerReportAccessory> {
     }
     if (_qty.text.isEmpty) {
       showDialog(context: context,
-          builder: (context) => AlertDialog(
+          builder: (context) => CupertinoAlertDialog(
             title: new Text('数量不可为空'),
           )
       );
@@ -225,7 +268,7 @@ class _EngineerReportAccessoryState extends State<EngineerReportAccessory> {
     }
     if (_currentSource == '外部供应商' && _vendor == null) {
       showDialog(context: context,
-        builder: (context) => AlertDialog(
+        builder: (context) => CupertinoAlertDialog(
           title: new Text('请选择供应商'),
         )
       );
@@ -383,9 +426,7 @@ class _EngineerReportAccessoryState extends State<EngineerReportAccessory> {
                           ),
                         ),
                         new IconButton(icon: Icon(Icons.add_a_photo), onPressed: () async {
-                          _imageNew = await ImagePicker.pickImage(
-                              source: ImageSource.camera,
-                          );
+                          showSheet(context, 'new');
                         }),
                       ],
                     )
@@ -430,9 +471,7 @@ class _EngineerReportAccessoryState extends State<EngineerReportAccessory> {
                           ),
                         ),
                         new IconButton(icon: Icon(Icons.add_a_photo), onPressed: () async {
-                          _imageOld = await ImagePicker.pickImage(
-                              source: ImageSource.camera,
-                          );
+                          showSheet(context, 'old');
                         }),
                       ],
                     )

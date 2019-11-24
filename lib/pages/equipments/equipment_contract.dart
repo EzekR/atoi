@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:atoi/widgets/search_bar.dart';
 import 'package:atoi/models/models.dart';
 import 'package:scoped_model/scoped_model.dart';
@@ -13,22 +14,20 @@ import 'package:atoi/widgets/build_widget.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:atoi/widgets/search_page.dart';
 import 'package:atoi/widgets/search_bar_vendor.dart';
+import 'package:atoi/models/main_model.dart';
 
-class EquipmentContract extends StatefulWidget{
-
+class EquipmentContract extends StatefulWidget {
+  EquipmentContract({Key key, this.contract}) : super(key: key);
+  final Map contract;
   _EquipmentContractState createState() => new _EquipmentContractState();
 }
 
 class _EquipmentContractState extends State<EquipmentContract> {
-
   String barcode = "";
 
   var _isExpandedBasic = true;
   var _isExpandedDetail = false;
-  var _isExpandedAssign = false;
   Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
-  var _roleName;
-  var _fault = new TextEditingController();
   List serviceType = ['原厂服务合同', '采购服务合同'];
   List serviceScope = ['全保', '技术保', '其他保'];
   List<DropdownMenuItem<String>> dropdownType;
@@ -38,20 +37,109 @@ class _EquipmentContractState extends State<EquipmentContract> {
   Map<String, dynamic> supplier;
   String startDate = '起始日期';
   String endDate = '结束日期';
+  String OID = '系统自动生成';
+  ConstantsModel model;
 
   MainModel mainModel = MainModel();
 
-  List<Map> _equipments = [];
+  List<dynamic> _equipments = [];
 
   List<dynamic> _imageList = [];
 
-  void initState(){
-    getRole();
+  TextEditingController projectNum = new TextEditingController(),
+                        contractNum = new TextEditingController(),
+                        amount = new TextEditingController(),
+                        name = new TextEditingController(),
+                        status = new TextEditingController(),
+                        comments = new TextEditingController();
+
+  Future<Null> getContract(int id) async {
+    var resp = await HttpRequest.request(
+      '/Contract/GetContractById',
+      method: HttpRequest.GET,
+      params: {
+        'ID': id
+      }
+    );
+    if (resp['ResultCode'] == '00') {
+      var _data = resp['Data'];
+      setState(() {
+        _equipments = _data['Equipments'];
+        OID = _data['OID'];
+        projectNum.text = _data['ProjectNum'];
+        contractNum.text = _data['ContractNum'];
+        amount.text = _data['Amount'].toString();
+        name.text = _data['Name'];
+        status.text = _data['Status'];
+        startDate = _data['StartDate'].split('T')[0];
+        endDate = _data['EndDate'].split('T')[0];
+        comments.text = _data['Comments'];
+        currentType = _data['Type']['Name'];
+        currentScope = _data['Scope']['Name'];
+      });
+    }
+  }
+
+  Future<Null> saveContract() async {
+    var _equipList = _equipments.map((item) => {'ID': item['ID']}).toList();
+    var _info = {
+      "Equipments": _equipList,
+      "Supplier": {
+        'ID': supplier==null?0:supplier['ID']
+      },
+      "ContractNum": contractNum.text,
+      "Name": name.text,
+      "Type": {
+        "ID": model.ContractType[currentType],
+      },
+      "Scope": {
+        "ID": model.ContractScope[currentScope],
+      },
+      "ScopeComments": "",
+      "Amount": amount.text,
+      "ProjectNum": projectNum.text,
+      "StartDate": startDate,
+      "EndDate": endDate,
+      "Comments": comments.text,
+      //"Status": status.text,
+    };
+    if (widget.contract != null) {
+      _info['ID'] = widget.contract['ID'];
+    } else {
+      _info['ID'] = 0;
+    }
+    var prefs = await _prefs;
+    var userID = prefs.getInt('userID');
+    var _data = {
+      'userID': userID,
+      'info': _info
+    };
+    var resp = await HttpRequest.request(
+      '/Contract/SaveContract',
+      method: HttpRequest.POST,
+      data: _data
+    );
+    if (resp['ResultCode'] == '00') {
+      showDialog(context: context, builder: (context) => CupertinoAlertDialog(
+        title: new Text('保存成功'),
+      )).then((result) => Navigator.of(context).pop());
+    } else {
+      showDialog(context: context, builder: (context) => CupertinoAlertDialog(
+        title: new Text(resp['Data']),
+      ));
+    }
+  }
+
+  void initState() {
     super.initState();
     dropdownType = getDropDownMenuItems(serviceType);
     dropdownScope = getDropDownMenuItems(serviceScope);
     currentScope = dropdownScope[0].value;
     currentType = dropdownType[0].value;
+    if (widget.contract != null) {
+      getContract(widget.contract['ID']);
+    }
+    model = MainModel.of(context);
   }
 
   void changeType(String selected) {
@@ -71,7 +159,7 @@ class _EquipmentContractState extends State<EquipmentContract> {
         context: context,
         initialDate: new DateTime.now(),
         firstDate:
-        new DateTime.now().subtract(new Duration(days: 30)), // 减 30 天
+            new DateTime.now().subtract(new Duration(days: 30)), // 减 30 天
         lastDate: new DateTime.now().add(new Duration(days: 30)), // 加 30 天
         locale: Locale('zh'));
     return '${val.year}-${val.month}-${val.day}';
@@ -81,23 +169,51 @@ class _EquipmentContractState extends State<EquipmentContract> {
     Map<String, dynamic> params = {
       'codeContent': barcode,
     };
-    var resp = await HttpRequest.request(
-        '/Equipment/GetDeviceByQRCode',
-        method: HttpRequest.GET,
-        params: params
-    );
+    var resp = await HttpRequest.request('/Equipment/GetDeviceByQRCode',
+        method: HttpRequest.GET, params: params);
     print(resp);
     if (resp['ResultCode'] == '00') {
       setState(() {
         _equipments.add(resp['Data']);
       });
     } else {
-      showDialog(context: context, builder: (context) => AlertDialog(title: new Text(resp['ResultMessage']),));
+      showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+                title: new Text(resp['ResultMessage']),
+              ));
     }
   }
-  Future getImage() async {
+
+  void showSheet(context) {
+    showModalBottomSheet(
+        context: context,
+        builder: (context) {
+          return new ListView(
+            shrinkWrap: true,
+            children: <Widget>[
+              ListTile(
+                trailing: new Icon(Icons.collections),
+                title: new Text('从相册添加'),
+                onTap: () {
+                  getImage(ImageSource.gallery);
+                },
+              ),
+              ListTile(
+                trailing: new Icon(Icons.add_a_photo),
+                title: new Text('拍照添加'),
+                onTap: () {
+                  getImage(ImageSource.camera);
+                },
+              ),
+            ],
+          );
+        });
+  }
+
+  Future getImage(ImageSource sourceType) async {
     var image = await ImagePicker.pickImage(
-      source: ImageSource.camera,
+      source: sourceType,
     );
     if (image != null) {
       var compressed = await FlutterImageCompress.compressAndGetFile(
@@ -112,96 +228,32 @@ class _EquipmentContractState extends State<EquipmentContract> {
     }
   }
 
-  Future getRole() async {
-    final SharedPreferences prefs = await _prefs;
-    setState(() {
-      _roleName = prefs.getString('userName');
-    });
-  }
-
-  Future<Null> submit() async {
-    if (_equipments == null) {
-      showDialog(context: context,
-          builder: (context) => AlertDialog(
-            title: new Text('请选择设备'),
-          )
-      );
-      return;
-    }
-    if (_fault.text.isEmpty || _fault.text == null) {
-      showDialog(context: context,
-          builder: (context) => AlertDialog(
-            title: new Text('盘点备注不可为空'),
-          )
-      );
-    } else {
-      var prefs = await _prefs;
-      var userID = prefs.getInt('userID');
-      var fileList = [];
-      for (var image in _imageList) {
-        List<int> imageBytes = await image.readAsBytes();
-        var fileContent = base64Encode(imageBytes);
-        var file = {
-          'FileContent': fileContent,
-          'FileName': image.path,
-          'FiltType': 1,
-          'ID': 0
-        };
-        fileList.add(file);
-      }
-      var _data = {
-        'userID': userID,
-        'requestInfo': {
-          'RequestType': {
-            'ID': 12
-          },
-          'Equipments': _equipments,
-          'FaultDesc': _fault.text,
-          'Files': fileList
-        }
-      };
-      var resp = await HttpRequest.request(
-          '/Request/AddRequest',
-          method: HttpRequest.POST,
-          data: _data
-      );
-      print(resp);
-      if (resp['ResultCode'] == '00') {
-        showDialog(context: context, builder: (buider) =>
-            AlertDialog(
-              title: new Text('提交请求成功'),
-            )).then((result) =>
-            Navigator.of(context, rootNavigator: true).pop(result)
-        );
-      }
-    }
-  }
-
   GridView buildImageRow(List imageList) {
     List<Widget> _list = [];
 
-    if (imageList.length >0 ){
-      for(var image in imageList) {
-        _list.add(
-            new Stack(
-              alignment: FractionalOffset(1.0, 0),
-              children: <Widget>[
-                new Container(
-                  width: 100.0,
-                  child: Image.file(image),
-                ),
-                new Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 0.0),
-                  child: new IconButton(icon: Icon(Icons.cancel), color: Colors.white, onPressed: (){
+    if (imageList.length > 0) {
+      for (var image in imageList) {
+        _list.add(new Stack(
+          alignment: FractionalOffset(1.0, 0),
+          children: <Widget>[
+            new Container(
+              width: 100.0,
+              child: Image.file(image),
+            ),
+            new Padding(
+              padding: EdgeInsets.symmetric(horizontal: 0.0),
+              child: new IconButton(
+                  icon: Icon(Icons.cancel),
+                  color: Colors.white,
+                  onPressed: () {
                     imageList.remove(image);
                     setState(() {
                       _imageList = imageList;
                     });
                   }),
-                )
-              ],
             )
-        );
+          ],
+        ));
       }
     } else {
       _list.add(new Container());
@@ -213,8 +265,7 @@ class _EquipmentContractState extends State<EquipmentContract> {
         mainAxisSpacing: 5,
         crossAxisSpacing: 5,
         crossAxisCount: 2,
-        children: _list
-    );
+        children: _list);
   }
 
   List<DropdownMenuItem<String>> getDropDownMenuItems(List list) {
@@ -222,22 +273,23 @@ class _EquipmentContractState extends State<EquipmentContract> {
     for (String method in list) {
       items.add(new DropdownMenuItem(
           value: method,
-          child: new Text(method,
-            style: new TextStyle(
-                fontSize: 20.0
-            ),
-          )
-      ));
+          child: new Text(
+            method,
+            style: new TextStyle(fontSize: 20.0),
+          )));
     }
     return items;
   }
 
   Future toSearch() async {
-    final _searchResult = await showSearch(context: context, delegate: SearchBarDelegate());
+    final _searchResult =
+        await showSearch(context: context, delegate: SearchBarDelegate());
     if (_searchResult != null && _searchResult != 'null') {
       print(_searchResult);
       Map _data = jsonDecode(_searchResult);
-      var _result = _equipments.firstWhere((_equipment) => _equipment['OID'] == _data['OID'], orElse: ()=> null);
+      var _result = _equipments.firstWhere(
+          (_equipment) => _equipment['OID'] == _data['OID'],
+          orElse: () => null);
       if (_result == null) {
         setState(() {
           _equipments.add(_data);
@@ -255,10 +307,7 @@ class _EquipmentContractState extends State<EquipmentContract> {
             flex: 4,
             child: new Text(
               labelText,
-              style: new TextStyle(
-                  fontSize: 20.0,
-                  fontWeight: FontWeight.w600
-              ),
+              style: new TextStyle(fontSize: 20.0, fontWeight: FontWeight.w600),
             ),
           ),
           new Expanded(
@@ -268,8 +317,7 @@ class _EquipmentContractState extends State<EquipmentContract> {
               style: new TextStyle(
                   fontSize: 20.0,
                   fontWeight: FontWeight.w400,
-                  color: Colors.black54
-              ),
+                  color: Colors.black54),
             ),
           )
         ],
@@ -280,33 +328,40 @@ class _EquipmentContractState extends State<EquipmentContract> {
   Widget buildEquip() {
     List<Widget> tiles = [];
     Widget content;
-    for(var _equipment in _equipments) {
+    for (var _equipment in _equipments) {
       tiles.add(
         new Padding(
           padding: EdgeInsets.symmetric(horizontal: 12.0),
           child: new Column(
             children: <Widget>[
-              BuildWidget.buildRow('系统编号', _equipment['OID']??''),
-              BuildWidget.buildRow('名称', _equipment['Name']??''),
-              BuildWidget.buildRow('型号', _equipment['EquipmentCode']??''),
-              BuildWidget.buildRow('序列号', _equipment['SerialCode']??''),
-              BuildWidget.buildRow('使用科室', _equipment['Department']['Name']??''),
-              BuildWidget.buildRow('安装地点', _equipment['InstalSite']??''),
-              BuildWidget.buildRow('设备厂商', _equipment['Manufacturer']['Name']??''),
-              BuildWidget.buildRow('资产等级', _equipment['AssetLevel']['Name']??''),
-              BuildWidget.buildRow('维保状态', _equipment['WarrantyStatus']??''),
-              BuildWidget.buildRow('服务范围', _equipment['ContractScope']['Name']??''),
-              new Padding(padding: EdgeInsets.symmetric(vertical: 8.0),
+              BuildWidget.buildRow('系统编号', _equipment['OID'] ?? ''),
+              BuildWidget.buildRow('名称', _equipment['Name'] ?? ''),
+              BuildWidget.buildRow('型号', _equipment['EquipmentCode'] ?? ''),
+              BuildWidget.buildRow('序列号', _equipment['SerialCode'] ?? ''),
+              BuildWidget.buildRow(
+                  '使用科室', _equipment['Department']['Name'] ?? ''),
+              BuildWidget.buildRow('安装地点', _equipment['InstalSite'] ?? ''),
+              BuildWidget.buildRow(
+                  '设备厂商', _equipment['Manufacturer']['Name'] ?? ''),
+              BuildWidget.buildRow(
+                  '资产等级', _equipment['AssetLevel']['Name'] ?? ''),
+              BuildWidget.buildRow('维保状态', _equipment['WarrantyStatus'] ?? ''),
+              BuildWidget.buildRow(
+                  '服务范围', _equipment['ContractScope']['Name'] ?? ''),
+              new Padding(
+                padding: EdgeInsets.symmetric(vertical: 8.0),
                 child: new Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: <Widget>[
                     new Text('删除此设备'),
-                    new IconButton(icon: new Icon(Icons.delete_forever), onPressed: (){
-                      _equipments.remove(_equipment);
-                      setState(() {
-                        _equipments = _equipments;
-                      });
-                    })
+                    new IconButton(
+                        icon: new Icon(Icons.delete_forever),
+                        onPressed: () {
+                          _equipments.remove(_equipment);
+                          setState(() {
+                            _equipments = _equipments;
+                          });
+                        })
                   ],
                 ),
               )
@@ -320,6 +375,7 @@ class _EquipmentContractState extends State<EquipmentContract> {
     );
     return content;
   }
+
   Widget build(BuildContext context) {
     return ScopedModelDescendant<MainModel>(
       builder: (context, child, mainModel) {
@@ -346,13 +402,13 @@ class _EquipmentContractState extends State<EquipmentContract> {
                   iconSize: 30.0,
                   onPressed: () async {
                     //toSearch();
-                    final selected = await Navigator.of(context).push(new MaterialPageRoute(builder: (context) {
+                    final selected = await Navigator.of(context)
+                        .push(new MaterialPageRoute(builder: (context) {
                       return SearchPage();
                     }));
                     print(selected);
                     _equipments.addAll(selected);
-                  }
-                  ,
+                  },
                 ),
                 new IconButton(
                     icon: Icon(Icons.crop_free),
@@ -378,7 +434,6 @@ class _EquipmentContractState extends State<EquipmentContract> {
                             if (index == 1) {
                               _isExpandedDetail = !isExpanded;
                             } else {
-                              _isExpandedAssign =!isExpanded;
                             }
                           }
                         });
@@ -387,33 +442,37 @@ class _EquipmentContractState extends State<EquipmentContract> {
                         new ExpansionPanel(
                           headerBuilder: (context, isExpanded) {
                             return ListTile(
-                              leading: new Icon(Icons.info,
+                              leading: new Icon(
+                                Icons.info,
                                 size: 24.0,
                                 color: Colors.blue,
                               ),
-                              title: Text('设备基本信息',
+                              title: Text(
+                                '设备基本信息',
                                 style: new TextStyle(
                                     fontSize: 22.0,
-                                    fontWeight: FontWeight.w400
-                                ),
+                                    fontWeight: FontWeight.w400),
                               ),
                             );
                           },
-                          body: _equipments.length==0?new Center(child: new Text('请选择设备')):buildEquip(),
+                          body: _equipments.length == 0
+                              ? new Center(child: new Text('请选择设备'))
+                              : buildEquip(),
                           isExpanded: _isExpandedBasic,
                         ),
                         new ExpansionPanel(
                           headerBuilder: (context, isExpanded) {
                             return ListTile(
-                              leading: new Icon(Icons.description,
+                              leading: new Icon(
+                                Icons.description,
                                 size: 24.0,
                                 color: Colors.blue,
                               ),
-                              title: Text('合同详细信息',
+                              title: Text(
+                                '合同详细信息',
                                 style: new TextStyle(
                                     fontSize: 22.0,
-                                    fontWeight: FontWeight.w400
-                                ),
+                                    fontWeight: FontWeight.w400),
                               ),
                             );
                           },
@@ -421,12 +480,17 @@ class _EquipmentContractState extends State<EquipmentContract> {
                             padding: EdgeInsets.symmetric(horizontal: 12.0),
                             child: new Column(
                               children: <Widget>[
-                                BuildWidget.buildRow('系统编号', '系统自动生成'),
-                                BuildWidget.buildInput('项目编号', new TextEditingController()),
-                                BuildWidget.buildInput('合同编号', new TextEditingController()),
-                                BuildWidget.buildInput('金额', new TextEditingController()),
-                                BuildWidget.buildInput('名称', new TextEditingController()),
-                                BuildWidget.buildDropdown('类型', currentType, dropdownType, changeType),
+                                BuildWidget.buildRow('系统编号', OID),
+                                BuildWidget.buildInput(
+                                    '项目编号', projectNum),
+                                BuildWidget.buildInput(
+                                    '合同编号', contractNum),
+                                BuildWidget.buildInput(
+                                    '金额', amount, inputType: TextInputType.numberWithOptions()),
+                                BuildWidget.buildInput(
+                                    '名称', name),
+                                BuildWidget.buildDropdown('类型', currentType,
+                                    dropdownType, changeType),
                                 new Padding(
                                   padding: EdgeInsets.symmetric(vertical: 5.0),
                                   child: new Row(
@@ -435,12 +499,14 @@ class _EquipmentContractState extends State<EquipmentContract> {
                                         flex: 4,
                                         child: new Wrap(
                                           alignment: WrapAlignment.end,
-                                          crossAxisAlignment: WrapCrossAlignment.center,
+                                          crossAxisAlignment:
+                                              WrapCrossAlignment.center,
                                           children: <Widget>[
                                             new Text(
                                               '起止日期',
                                               style: new TextStyle(
-                                                  fontSize: 20.0, fontWeight: FontWeight.w600),
+                                                  fontSize: 20.0,
+                                                  fontWeight: FontWeight.w600),
                                             )
                                           ],
                                         ),
@@ -490,12 +556,14 @@ class _EquipmentContractState extends State<EquipmentContract> {
                                         flex: 4,
                                         child: new Wrap(
                                           alignment: WrapAlignment.end,
-                                          crossAxisAlignment: WrapCrossAlignment.center,
+                                          crossAxisAlignment:
+                                              WrapCrossAlignment.center,
                                           children: <Widget>[
                                             new Text(
                                               '供应商',
                                               style: new TextStyle(
-                                                  fontSize: 20.0, fontWeight: FontWeight.w600),
+                                                  fontSize: 20.0,
+                                                  fontWeight: FontWeight.w600),
                                             )
                                           ],
                                         ),
@@ -513,7 +581,9 @@ class _EquipmentContractState extends State<EquipmentContract> {
                                       new Expanded(
                                           flex: 3,
                                           child: new Text(
-                                            supplier == null ? '' : supplier['Name'],
+                                            supplier == null
+                                                ? ''
+                                                : supplier['Name'],
                                             style: new TextStyle(
                                                 fontSize: 20.0,
                                                 fontWeight: FontWeight.w400,
@@ -524,23 +594,28 @@ class _EquipmentContractState extends State<EquipmentContract> {
                                           child: new IconButton(
                                               icon: Icon(Icons.search),
                                               onPressed: () async {
-                                                final _searchResult = await showSearch(
-                                                    context: context,
-                                                    delegate: SearchBarVendor(),
-                                                    hintText: '请输厂商名称');
+                                                final _searchResult =
+                                                    await showSearch(
+                                                        context: context,
+                                                        delegate:
+                                                            SearchBarVendor(),
+                                                        hintText: '请输厂商名称');
                                                 print(_searchResult);
                                                 if (_searchResult != null &&
                                                     _searchResult != 'null') {
                                                   setState(() {
-                                                    supplier = jsonDecode(_searchResult);
+                                                    supplier = jsonDecode(
+                                                        _searchResult);
                                                   });
                                                 }
                                               })),
                                     ],
                                   ),
                                 ),
-                                BuildWidget.buildDropdown('服务范围', currentScope, dropdownScope, changeScope),
-                                BuildWidget.buildInput('备注', new TextEditingController()),
+                                BuildWidget.buildDropdown('服务范围', currentScope,
+                                    dropdownScope, changeScope),
+                                BuildWidget.buildInput(
+                                    '备注', comments),
                                 new Divider(),
                                 new Padding(
                                   padding: EdgeInsets.symmetric(vertical: 5.0),
@@ -550,19 +625,20 @@ class _EquipmentContractState extends State<EquipmentContract> {
                                         '添加附件：',
                                         style: new TextStyle(
                                             fontSize: 20.0,
-                                            fontWeight: FontWeight.w600
-                                        ),
+                                            fontWeight: FontWeight.w600),
                                       ),
                                       new IconButton(
                                           icon: Icon(Icons.add_a_photo),
                                           onPressed: () {
-                                            getImage();
+                                            showSheet(context);
                                           })
                                     ],
                                   ),
                                 ),
                                 buildImageRow(_imageList),
-                                new Padding(padding: EdgeInsets.symmetric(vertical: 8.0))
+                                new Padding(
+                                    padding:
+                                        EdgeInsets.symmetric(vertical: 8.0))
                               ],
                             ),
                           ),
@@ -578,34 +654,34 @@ class _EquipmentContractState extends State<EquipmentContract> {
                       children: <Widget>[
                         new RaisedButton(
                           onPressed: () {
-                            submit();
+                            saveContract();
                           },
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(24),
+                            borderRadius: BorderRadius.circular(6),
                           ),
                           padding: EdgeInsets.all(12.0),
                           color: new Color(0xff2E94B9),
-                          child: Text('提交', style: TextStyle(color: Colors.white)),
+                          child:
+                              Text('提交', style: TextStyle(color: Colors.white)),
                         ),
                         new RaisedButton(
                           onPressed: () {
                             Navigator.of(context).pop();
                           },
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(24),
+                            borderRadius: BorderRadius.circular(6),
                           ),
                           padding: EdgeInsets.all(12.0),
                           color: new Color(0xffD25565),
-                          child: Text('返回', style: TextStyle(color: Colors.white)),
+                          child:
+                              Text('返回', style: TextStyle(color: Colors.white)),
                         ),
                       ],
                     )
                   ],
-
                 ),
               ),
-            )
-        );
+            ));
       },
     );
   }
@@ -627,8 +703,9 @@ class _EquipmentContractState extends State<EquipmentContract> {
           return this.barcode = 'Unknown error: $e';
         });
       }
-    } on FormatException{
-      setState(() => this.barcode = 'null (User returned using the "back"-button before scanning anything. Result)');
+    } on FormatException {
+      setState(() => this.barcode =
+          'null (User returned using the "back"-button before scanning anything. Result)');
     } catch (e) {
       setState(() => this.barcode = 'Unknown error: $e');
     }

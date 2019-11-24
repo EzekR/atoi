@@ -5,6 +5,7 @@ import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:atoi/utils/constants.dart';
 import 'package:atoi/widgets/build_widget.dart';
 import 'package:atoi/models/models.dart';
+import 'package:flutter/cupertino.dart';
 
 class EngineerStartPage extends StatefulWidget {
   static String tag = 'engineer-start-page';
@@ -56,7 +57,7 @@ class _EngineerStartPageState extends State<EngineerStartPage> {
     if (resp['ResultCode'] == '00') {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
+      builder: (context) => CupertinoAlertDialog(
       title: new Text('开始作业成功'),
       )
     ).then((result) {
@@ -64,7 +65,7 @@ class _EngineerStartPageState extends State<EngineerStartPage> {
     });
     } else {
       showDialog(context: context,
-        builder: (context) => AlertDialog(title: new Text(resp['ResultMessage']),)
+        builder: (context) => CupertinoAlertDialog(title: new Text(resp['ResultMessage']),)
       );
     }
   }
@@ -344,7 +345,7 @@ class _EngineerStartPageState extends State<EngineerStartPage> {
                       startDispatch();
                     },
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(24),
+                      borderRadius: BorderRadius.circular(6),
                     ),
                     padding: EdgeInsets.all(12.0),
                     color: new Color(0xff2E94B9),

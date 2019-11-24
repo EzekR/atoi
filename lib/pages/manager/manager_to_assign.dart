@@ -9,6 +9,7 @@ import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:atoi/widgets/build_widget.dart';
 import 'package:atoi/utils/constants.dart';
 import 'dart:io';
+import 'package:flutter/cupertino.dart';
 
 class ManagerToAssign extends StatefulWidget {
   @override
@@ -90,7 +91,7 @@ class _ManagerToAssignState extends State<ManagerToAssign> {
     print(resp);
     if (resp['ResultCode'] == '00') {
       showDialog(context: context,
-        builder: (context) => AlertDialog(
+        builder: (context) => CupertinoAlertDialog(
           title: new Text('取消成功'),
         )
       );
@@ -205,13 +206,13 @@ class _ManagerToAssignState extends State<ManagerToAssign> {
                           })).then((result) => refresh());
                         },
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(24),
+                          borderRadius: BorderRadius.circular(6),
                         ),
                         color: new Color(0xff2E94B9),
                         child: new Row(
                           children: <Widget>[
                             new Icon(
-                              Icons.event_note,
+                              Icons.assignment_ind,
                               color: Colors.white,
                             ),
                             new Text(
@@ -246,7 +247,7 @@ class _ManagerToAssignState extends State<ManagerToAssign> {
                             ).then((resp) {
                               if (resp['ResultCode'] == '00') {
                                 showDialog(context: context,
-                                  builder: (context) =>AlertDialog(
+                                  builder: (context) =>CupertinoAlertDialog(
                                     title: new Text('择期成功'),
                                   )
                                 ).then((result) {
@@ -254,7 +255,7 @@ class _ManagerToAssignState extends State<ManagerToAssign> {
                                 });
                               } else {
                                 showDialog(context: context,
-                                    builder: (context) =>AlertDialog(
+                                    builder: (context) =>CupertinoAlertDialog(
                                       title: new Text(resp['ResultMessage']),
                                     )
                                 );
@@ -265,13 +266,13 @@ class _ManagerToAssignState extends State<ManagerToAssign> {
                           });
                         },
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(24),
+                          borderRadius: BorderRadius.circular(6),
                         ),
                         color: new Color(0xff2E94B9),
                         child: new Row(
                           children: <Widget>[
                             new Icon(
-                              Icons.event_note,
+                              Icons.calendar_today,
                               color: Colors.white,
                             ),
                             new Text(

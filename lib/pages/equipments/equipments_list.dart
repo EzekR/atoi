@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:atoi/utils/http_request.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:atoi/pages/equipments/print_qrcode.dart';
@@ -12,6 +13,8 @@ class EquipmentsList extends StatefulWidget{
 class _EquipmentsListState extends State<EquipmentsList> {
 
   List<dynamic> _equipments = [];
+
+  List<Step> timeline = [];
 
   Future<Null> getEquipments() async {
     var resp = await HttpRequest.request(
@@ -28,6 +31,33 @@ class _EquipmentsListState extends State<EquipmentsList> {
   void initState() {
     super.initState();
     getEquipments();
+  }
+
+  Future<List<Step>> getTimeline(int deviceId) async {
+    var resp = await HttpRequest.request(
+      '/Equipment/GetTimeLine4App',
+      method: HttpRequest.POST,
+      data: {
+        'id': deviceId
+      }
+    );
+    if (resp['ResultCode'] == '00') {
+      print(resp['Data']['Dispatches']);
+      if (resp['Data']['Dispatches'] != null) {
+        var _dispatches = resp['Data']['Dispatches'];
+        List<Step> _list = _dispatches.map<Step>((item) => Step(
+            title: new Text('派工单号：${item['OID']}'),
+            subtitle: new Text('派工时间：${item['EndDate'].split('T')[0]}'),
+            content: new Text(item['TimelineDesc']),
+            isActive: false
+        )).toList();
+        return _list;
+      } else {
+        return [];
+      }
+    } else {
+      return [];
+    }
   }
 
   Card buildEquipmentCard(Map item) {
@@ -80,7 +110,7 @@ class _EquipmentsListState extends State<EquipmentsList> {
                   }));
                 },
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(24),
+                  borderRadius: BorderRadius.circular(6),
                 ),
                 color: new Color(0xff2E94B9),
                 child: new Row(
@@ -103,9 +133,12 @@ class _EquipmentsListState extends State<EquipmentsList> {
               ),
               new RaisedButton(
                 onPressed: (){
+                  Navigator.of(context).push(new MaterialPageRoute(builder: (_) {
+                    return new EquipmentDetail(equipment: item,);
+                  }));
                 },
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(24),
+                  borderRadius: BorderRadius.circular(6),
                 ),
                 color: new Color(0xff2E94B9),
                 child: new Row(
@@ -127,10 +160,37 @@ class _EquipmentsListState extends State<EquipmentsList> {
                 padding: EdgeInsets.symmetric(horizontal: 5.0),
               ),
               new RaisedButton(
-                onPressed: (){
+                onPressed: () async {
+                  List<Step> _steps = await getTimeline(item['ID']);
+                  if (_steps.length > 0) {
+                    showDialog(context: context,
+                        builder: (context) => SimpleDialog(
+                          title: new Text('派工历史'),
+                          children: <Widget>[
+                            new Container(
+                              width: 300.0,
+                              height: 600.0,
+                              child: new Stepper(
+                                currentStep: 0,
+                                controlsBuilder: (BuildContext context, {VoidCallback onStepContinue, VoidCallback onStepCancel}) {
+                                  return Row(
+                                    children: <Widget>[
+                                      new Container()
+                                    ],
+                                  );
+                                },
+                                steps: _steps,
+                              ),
+                            ),
+                          ],
+                        )
+                    );
+                  } else {
+                    showDialog(context: context, builder: (context) => CupertinoAlertDialog(title: new Text('暂无事件'),));
+                  }
                 },
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(24),
+                  borderRadius: BorderRadius.circular(6),
                 ),
                 color: new Color(0xff2E94B9),
                 child: new Row(

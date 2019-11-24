@@ -42,6 +42,7 @@ class _ReportListState extends State<ReportList> {
         builder: (context) {
           return new ListView(
             children: _list,
+            shrinkWrap: true,
           );
         }
     );
