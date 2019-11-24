@@ -144,7 +144,7 @@ Future getImage(ImageSource sourceType) async {
   Future<Null> submit() async {
     if (_fault.text == null || _fault.text.isEmpty) {
       showDialog(context: context,
-        builder: (context) => CupertinoAlertDialog(
+        builder: (context) => AlertDialog(
           title: new Text('备注不可为空'),
         )
       );
@@ -187,7 +187,7 @@ Future getImage(ImageSource sourceType) async {
       print(resp);
       if (resp['ResultCode'] == '00') {
         showDialog(context: context, builder: (buider) =>
-            CupertinoAlertDialog(
+            AlertDialog(
               title: new Text('提交请求成功'),
             )).then((result) =>
             Navigator.of(context, rootNavigator: true).pop(result)

@@ -57,7 +57,7 @@ class _EngineerStartPageState extends State<EngineerStartPage> {
     if (resp['ResultCode'] == '00') {
     showDialog(
       context: context,
-      builder: (context) => CupertinoAlertDialog(
+      builder: (context) => AlertDialog(
       title: new Text('开始作业成功'),
       )
     ).then((result) {
@@ -65,7 +65,7 @@ class _EngineerStartPageState extends State<EngineerStartPage> {
     });
     } else {
       showDialog(context: context,
-        builder: (context) => CupertinoAlertDialog(title: new Text(resp['ResultMessage']),)
+        builder: (context) => AlertDialog(title: new Text(resp['ResultMessage']),)
       );
     }
   }

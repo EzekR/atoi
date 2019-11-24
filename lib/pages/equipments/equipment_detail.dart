@@ -651,13 +651,13 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
     if (resp['ResultCode'] == '00') {
       showDialog(
           context: context,
-          builder: (context) => CupertinoAlertDialog(
+          builder: (context) => AlertDialog(
                 title: new Text('保存成功'),
               )).then((result) => Navigator.of(context).pop());
     } else {
       showDialog(
           context: context,
-          builder: (context) => CupertinoAlertDialog(
+          builder: (context) => AlertDialog(
                 title: new Text(resp['ResultMessage']),
               ));
     }

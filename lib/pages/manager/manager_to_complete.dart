@@ -86,7 +86,7 @@ class _ManagerToCompleteState extends State<ManagerToComplete> {
     print(resp);
     if (resp['ResultCode'] == '00') {
       showDialog(context: context,
-          builder: (context) => CupertinoAlertDialog(
+          builder: (context) => AlertDialog(
             title: new Text('终止成功'),
           )
       );
@@ -116,7 +116,7 @@ class _ManagerToCompleteState extends State<ManagerToComplete> {
     );
     if (resp['ResultCode'] == '00') {
       showDialog(context: context,
-          builder: (context) => CupertinoAlertDialog(
+          builder: (context) => AlertDialog(
             title: new Text('取消成功'),
           )
       );
@@ -277,7 +277,7 @@ class _ManagerToCompleteState extends State<ManagerToComplete> {
                                 )
                             );
                           } else {
-                            showDialog(context: context, builder: (context) => CupertinoAlertDialog(title: new Text('暂无派工历史'),));
+                            showDialog(context: context, builder: (context) => AlertDialog(title: new Text('暂无派工历史'),));
                           }
                         },
                         shape: RoundedRectangleBorder(
@@ -333,7 +333,7 @@ class _ManagerToCompleteState extends State<ManagerToComplete> {
                         onPressed: (){
                           if (task['Status']['ID']==1) {
                             showDialog(context: context,
-                                builder: (context) => CupertinoAlertDialog(
+                                builder: (context) => AlertDialog(
                                   title: new Text('是否终止请求？'),
                                   actions: <Widget>[
                                     RaisedButton(
@@ -356,7 +356,7 @@ class _ManagerToCompleteState extends State<ManagerToComplete> {
                             );
                           } else {
                             showDialog(context: context,
-                                builder: (context) => CupertinoAlertDialog(
+                                builder: (context) => AlertDialog(
                                   title: new Text('是否取消派工？'),
                                   actions: <Widget>[
                                     RaisedButton(

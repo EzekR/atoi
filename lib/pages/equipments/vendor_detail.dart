@@ -196,7 +196,7 @@ class _VendorDetailState extends State<VendorDetail> {
     );
     if (resp['ResultCode'] == '00') {
       showDialog(context: context, builder: (context) {
-        return CupertinoAlertDialog(
+        return AlertDialog(
           title: new Text('保存成功'),
         );
       }).then((result) => Navigator.of(context).pop());

@@ -62,7 +62,7 @@ class _RepairRequestState extends State<RepairRequest> {
         _equipment = resp['Data'];
       });
     } else {
-      showDialog(context: context, builder: (context) => CupertinoAlertDialog(title: new Text(resp['ResultMessage']),));
+      showDialog(context: context, builder: (context) => AlertDialog(title: new Text(resp['ResultMessage']),));
     }
   }
 
@@ -131,7 +131,7 @@ class _RepairRequestState extends State<RepairRequest> {
   Future<Null> submit() async {
     if (_equipment == null) {
       showDialog(context: context,
-        builder: (context) => CupertinoAlertDialog(
+        builder: (context) => AlertDialog(
           title: new Text('请选择设备'),
         )
       );
@@ -139,7 +139,7 @@ class _RepairRequestState extends State<RepairRequest> {
     }
     if (_fault.text == null || _fault.text.isEmpty) {
       showDialog(context: context,
-        builder: (context) => CupertinoAlertDialog(
+        builder: (context) => AlertDialog(
           title: new Text('故障描述不可为空')
         )
       );
@@ -190,7 +190,7 @@ class _RepairRequestState extends State<RepairRequest> {
       print(resp);
       if (resp['ResultCode'] == '00') {
         showDialog(context: context, builder: (buider) =>
-            CupertinoAlertDialog(
+            AlertDialog(
               title: new Text('提交请求成功'),
             )).then((result) =>
             Navigator.of(context, rootNavigator: true).pop(result)

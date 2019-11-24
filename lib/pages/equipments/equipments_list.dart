@@ -186,7 +186,7 @@ class _EquipmentsListState extends State<EquipmentsList> {
                         )
                     );
                   } else {
-                    showDialog(context: context, builder: (context) => CupertinoAlertDialog(title: new Text('暂无事件'),));
+                    showDialog(context: context, builder: (context) => AlertDialog(title: new Text('暂无事件'),));
                   }
                 },
                 shape: RoundedRectangleBorder(

@@ -9,7 +9,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:connectivity/connectivity.dart';
 import 'dart:async';
 import 'dart:convert';
-import 'package:flutter_jpush/flutter_jpush.dart';
+//import 'package:flutter_jpush/flutter_jpush.dart';
+import 'package:jpush_flutter/jpush_flutter.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 class LoginPage extends StatefulWidget {
@@ -33,7 +34,8 @@ class _LoginPageState extends State<LoginPage> {
   int _countdownTime = 0;
   bool _validPhone = false;
   String _regId = '';
-  
+  final JPush jpush = new JPush();
+
   Future<Null> isLogin() async {
     var _prefs = await prefs;
     var _isLogin = await _prefs.getBool('isLogin');
@@ -60,42 +62,76 @@ class _LoginPageState extends State<LoginPage> {
     print(permission);
   }
 
-  void _startupJpush() async {
-    print("初始化jpush");
-    await FlutterJPush.startup();
-    print("初始化jpush成功");
-
-    FlutterJPush.getRegistrationID().then((rid) {
-      print("get regid： ${rid}");
-      setState(() {
-        _regId = rid;
-      });
+  void setupJPush() async {
+    jpush.getRegistrationID().then((rid) {
     });
 
-    FlutterJPush.addnetworkDidLoginListener((String registrationId) {
-      setState(() {
-        /// 用于推送
-        print("收到设备号:$registrationId");
-        //this.registrationId = registrationId;
-      });
-    });
+    jpush.setup(
+      appKey: "a1703c14b186a68a66ef86c1",
+      channel: "theChannel",
+      production: false,
+      debug: true,
+    );
+    jpush.applyPushAuthority(new NotificationSettingsIOS(
+        sound: true,
+        alert: true,
+        badge: true));
 
-    FlutterJPush.addReceiveNotificationListener((JPushNotification notification) {
-      print("收到推送提醒: $notification");
-      setState(() {
-        /// 收到推送
-        //notificationList.add(notification);
-      });
-    });
-
-    FlutterJPush.addReceiveCustomMsgListener((JPushMessage msg) {
-      setState(() {
-        print("收到推送消息提醒: $msg");
-        /// 打开了推送提醒
-        //notificationList.add(msg);
-      });
-    });
+    jpush.addEventHandler(
+      onReceiveNotification: (Map<String, dynamic> message) async {
+        print("flutter onReceiveNotification: $message");
+        setState(() {
+        });
+      },
+      onOpenNotification: (Map<String, dynamic> message) async {
+        print("flutter onOpenNotification: $message");
+        setState(() {
+        });
+      },
+      onReceiveMessage: (Map<String, dynamic> message) async {
+        print("flutter onReceiveMessage: $message");
+        setState(() {
+        });
+      },
+    );
   }
+
+  //void _startupJpush() async {
+  //  print("初始化jpush");
+  //  await FlutterJPush.startup();
+  //  print("初始化jpush成功");
+
+  //  FlutterJPush.getRegistrationID().then((rid) {
+  //    print("get regid： ${rid}");
+  //    setState(() {
+  //      _regId = rid;
+  //    });
+  //  });
+
+  //  FlutterJPush.addnetworkDidLoginListener((String registrationId) {
+  //    setState(() {
+  //      /// 用于推送
+  //      print("收到设备号:$registrationId");
+  //      //this.registrationId = registrationId;
+  //    });
+  //  });
+
+  //  FlutterJPush.addReceiveNotificationListener((JPushNotification notification) {
+  //    print("收到推送提醒: $notification");
+  //    setState(() {
+  //      /// 收到推送
+  //      //notificationList.add(notification);
+  //    });
+  //  });
+
+  //  FlutterJPush.addReceiveCustomMsgListener((JPushMessage msg) {
+  //    setState(() {
+  //      print("收到推送消息提醒: $msg");
+  //      /// 打开了推送提醒
+  //      //notificationList.add(msg);
+  //    });
+  //  });
+  //}
 
   Future<Null> permissionCheck() async {
     var permission = await PermissionHandler().checkPermissionStatus(PermissionGroup.camera);
@@ -313,7 +349,7 @@ class _LoginPageState extends State<LoginPage> {
   void initState() {
     isLogin();
     //isConnected();
-    _startupJpush();
+    setupJPush();
     super.initState();
     permissionCheck();
   }

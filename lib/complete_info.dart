@@ -148,7 +148,7 @@ class _CompleteInfoState extends State<CompleteInfo> {
     prefs.setString('userInfo', jsonEncode(userInfo));
     if (_email.text.isNotEmpty&&!emailValid.hasMatch(_email.text)) {
       showDialog(context: context,
-          builder: (context) => CupertinoAlertDialog(
+          builder: (context) => AlertDialog(
             title: new Text('请输入正确的邮箱格式'),
           )
       );
@@ -167,7 +167,7 @@ class _CompleteInfoState extends State<CompleteInfo> {
     );
     if (resp['ResultCode'] == '00') {
       showDialog(context: context,
-        builder: (context) => CupertinoAlertDialog(
+        builder: (context) => AlertDialog(
           title: new Text('更新信息成功'),
         )
       ).then((result) {

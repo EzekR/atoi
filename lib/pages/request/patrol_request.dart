@@ -70,7 +70,7 @@ class _PatrolRequestState extends State<PatrolRequest> {
         });
       }
     } else {
-      showDialog(context: context, builder: (context) => CupertinoAlertDialog(title: new Text(resp['ResultMessage']),));
+      showDialog(context: context, builder: (context) => AlertDialog(title: new Text(resp['ResultMessage']),));
     }
   }
     void showSheet(context) {
@@ -157,7 +157,7 @@ class _PatrolRequestState extends State<PatrolRequest> {
   Future<Null> submit() async {
     if (_equipments.isEmpty) {
       showDialog(context: context,
-          builder: (context) => CupertinoAlertDialog(
+          builder: (context) => AlertDialog(
             title: new Text('请选择设备'),
           )
       );
@@ -165,7 +165,7 @@ class _PatrolRequestState extends State<PatrolRequest> {
     }
     if (_fault.text == null || _fault.text.isEmpty) {
       showDialog(context: context,
-        builder: (context) => CupertinoAlertDialog(
+        builder: (context) => AlertDialog(
           title: new Text('巡检要求不能为空'),
         )
       );
@@ -215,7 +215,7 @@ class _PatrolRequestState extends State<PatrolRequest> {
       print(resp);
       if (resp['ResultCode'] == '00') {
         showDialog(context: context, builder: (buider) =>
-            CupertinoAlertDialog(
+            AlertDialog(
               title: new Text('提交请求成功'),
             )).then((result) =>
             Navigator.of(context, rootNavigator: true).pop(result)

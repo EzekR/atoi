@@ -123,7 +123,7 @@ class _EngineerVoucherPageState extends State<EngineerVoucherPage> {
   Future<Null> uploadJournal() async {
     if (_img == null) {
       showDialog(context: context,
-          builder: (context) => CupertinoAlertDialog(
+          builder: (context) => AlertDialog(
           title: new Text('签名不可为空'),
         )
       );
@@ -131,7 +131,7 @@ class _EngineerVoucherPageState extends State<EngineerVoucherPage> {
     }
     if (_jobContent.text.isEmpty) {
       showDialog(context: context,
-          builder: (context) => CupertinoAlertDialog(
+          builder: (context) => AlertDialog(
             title: new Text('工作内容不可为空'),
           )
       );
@@ -139,7 +139,7 @@ class _EngineerVoucherPageState extends State<EngineerVoucherPage> {
     }
     if (_faultCode.text.isEmpty) {
       showDialog(context: context,
-        builder: (context) => CupertinoAlertDialog(
+        builder: (context) => AlertDialog(
           title: new Text('故障事由不可为空'),
         )
       );
@@ -180,7 +180,7 @@ class _EngineerVoucherPageState extends State<EngineerVoucherPage> {
       if (resp['ResultCode'] == '00') {
         showDialog(context: context,
             builder: (context) =>
-                CupertinoAlertDialog(
+                AlertDialog(
                     title: new Text('上传凭证成功')
                 )
         ).then((result) =>

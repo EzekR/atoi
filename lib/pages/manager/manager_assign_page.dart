@@ -514,7 +514,7 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
     print(resp);
     if (resp['ResultCode'] == '00') {
       showDialog(context: context,
-        builder: (context) => CupertinoAlertDialog(
+        builder: (context) => AlertDialog(
           title: new Text('终止请求成功'),
         )
       ).then((result) =>
@@ -522,7 +522,7 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
       );
     } else {
       showDialog(context: context,
-        builder: (context) => CupertinoAlertDialog(
+        builder: (context) => AlertDialog(
           title: new Text(resp['ResultMessage']),
         )
       );
@@ -532,7 +532,7 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
   Future assignRequest() async {
     if (_currentName == '--请选择--') {
       showDialog(context: context,
-        builder: (context) => CupertinoAlertDialog(
+        builder: (context) => AlertDialog(
           title: new Text('请选择工程师'),
         )
       );
@@ -540,7 +540,7 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
     }
     if (_desc.text.isEmpty) {
       showDialog(context: context,
-          builder: (context) => CupertinoAlertDialog(
+          builder: (context) => AlertDialog(
             title: new Text(
               '${model.Remark[_request['RequestType']['ID']]}不可为空'
             ),
@@ -615,7 +615,7 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
     print(resp);
     if (resp['ResultCode'] == '00') {
       showDialog(context: context,
-        builder: (context) => CupertinoAlertDialog(
+        builder: (context) => AlertDialog(
           title: new Text('安排派工成功'),
         )
       ).then((result) =>
@@ -623,7 +623,7 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
       );
     } else {
       showDialog(context: context,
-        builder: (context) => CupertinoAlertDialog(
+        builder: (context) => AlertDialog(
           title: new Text(resp['ResultMessage']),
         )
       );
@@ -936,7 +936,7 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
                             //terminate();
                             //model.getRequests();
                             showDialog(context: context,
-                              builder: (context) => CupertinoAlertDialog(
+                              builder: (context) => AlertDialog(
                                 title: new Text('是否终止请求？'),
                                 actions: <Widget>[
                                   new Row(

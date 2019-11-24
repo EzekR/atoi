@@ -83,7 +83,7 @@ class _UserHomePageState extends State<UserHomePage> {
         return new UserRepairPage(equipment: resp['Data']);
       }));
     } else {
-      showDialog(context: context, builder: (context) => CupertinoAlertDialog(title: new Text(resp['ResultMessage']),));
+      showDialog(context: context, builder: (context) => AlertDialog(title: new Text(resp['ResultMessage']),));
     }
   }
 

@@ -56,7 +56,7 @@ class _EquipmentArchiveState extends State<EquipmentArchive> {
         _equipment = resp['Data'];
       });
     } else {
-      showDialog(context: context, builder: (context) => CupertinoAlertDialog(title: new Text(resp['ResultMessage']),));
+      showDialog(context: context, builder: (context) => AlertDialog(title: new Text(resp['ResultMessage']),));
     }
   }
     void showSheet(context) {
@@ -109,7 +109,7 @@ Future getImage(ImageSource sourceType) async {
   Future<Null> submit() async {
     if (_equipment == null) {
       showDialog(context: context,
-          builder: (context) => CupertinoAlertDialog(
+          builder: (context) => AlertDialog(
             title: new Text('请选择设备'),
           )
       );
@@ -117,7 +117,7 @@ Future getImage(ImageSource sourceType) async {
     }
     if (_fault.text.isEmpty || _fault.text == null) {
       showDialog(context: context,
-          builder: (context) => CupertinoAlertDialog(
+          builder: (context) => AlertDialog(
             title: new Text('合同档案备注不可为空'),
           )
       );
@@ -165,7 +165,7 @@ Future getImage(ImageSource sourceType) async {
       print(resp);
       if (resp['ResultCode'] == '00') {
         showDialog(context: context, builder: (buider) =>
-            CupertinoAlertDialog(
+            AlertDialog(
               title: new Text('提交请求成功'),
             )).then((result) =>
             Navigator.of(context, rootNavigator: true).pop(result)

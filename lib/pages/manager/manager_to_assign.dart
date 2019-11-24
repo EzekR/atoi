@@ -91,7 +91,7 @@ class _ManagerToAssignState extends State<ManagerToAssign> {
     print(resp);
     if (resp['ResultCode'] == '00') {
       showDialog(context: context,
-        builder: (context) => CupertinoAlertDialog(
+        builder: (context) => AlertDialog(
           title: new Text('取消成功'),
         )
       );
@@ -247,7 +247,7 @@ class _ManagerToAssignState extends State<ManagerToAssign> {
                             ).then((resp) {
                               if (resp['ResultCode'] == '00') {
                                 showDialog(context: context,
-                                  builder: (context) =>CupertinoAlertDialog(
+                                  builder: (context) =>AlertDialog(
                                     title: new Text('择期成功'),
                                   )
                                 ).then((result) {
@@ -255,7 +255,7 @@ class _ManagerToAssignState extends State<ManagerToAssign> {
                                 });
                               } else {
                                 showDialog(context: context,
-                                    builder: (context) =>CupertinoAlertDialog(
+                                    builder: (context) =>AlertDialog(
                                       title: new Text(resp['ResultMessage']),
                                     )
                                 );

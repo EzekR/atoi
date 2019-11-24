@@ -75,7 +75,7 @@ class _BadRequestState extends State<BadRequest> {
     } else {
       showDialog(
           context: context,
-          builder: (context) => CupertinoAlertDialog(
+          builder: (context) => AlertDialog(
                 title: new Text(resp['ResultMessage']),
               ));
     }
@@ -135,7 +135,7 @@ class _BadRequestState extends State<BadRequest> {
     if (_equipment == null) {
       showDialog(
           context: context,
-          builder: (context) => CupertinoAlertDialog(
+          builder: (context) => AlertDialog(
                 title: new Text('请选择设备'),
               ));
       return;
@@ -143,7 +143,7 @@ class _BadRequestState extends State<BadRequest> {
     if (_fault.text.isEmpty || _fault.text == null) {
       showDialog(
           context: context,
-          builder: (context) => CupertinoAlertDialog(
+          builder: (context) => AlertDialog(
                 title: new Text('不良事件描述不可为空'),
               ));
     } else {
@@ -195,7 +195,7 @@ class _BadRequestState extends State<BadRequest> {
       if (resp['ResultCode'] == '00') {
         showDialog(
             context: context,
-            builder: (buider) => CupertinoAlertDialog(
+            builder: (buider) => AlertDialog(
                   title: new Text('提交请求成功'),
                 )).then(
             (result) => Navigator.of(context, rootNavigator: true).pop(result));

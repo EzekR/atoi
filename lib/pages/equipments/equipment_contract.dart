@@ -120,11 +120,11 @@ class _EquipmentContractState extends State<EquipmentContract> {
       data: _data
     );
     if (resp['ResultCode'] == '00') {
-      showDialog(context: context, builder: (context) => CupertinoAlertDialog(
+      showDialog(context: context, builder: (context) => AlertDialog(
         title: new Text('保存成功'),
       )).then((result) => Navigator.of(context).pop());
     } else {
-      showDialog(context: context, builder: (context) => CupertinoAlertDialog(
+      showDialog(context: context, builder: (context) => AlertDialog(
         title: new Text(resp['Data']),
       ));
     }

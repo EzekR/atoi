@@ -74,7 +74,7 @@ class _SignaturePageState extends State<SignaturePage> {
                       });
                       if (sign.points.length==0) {
                         showDialog(context: context,
-                            builder: (context) => CupertinoAlertDialog(
+                            builder: (context) => AlertDialog(
                               title: new Text('签名不可为空'),
                             )
                         );

@@ -37,7 +37,8 @@ dependencies:
   connectivity: ^0.4.4
   timeline_list: ^0.0.3
   qr_flutter: ^3.0.1
-  flutter_jpush: ^0.0.4
+  # flutter_jpush: ^0.0.4
+  jpush_flutter: ^0.1.0
   charts_flutter: ^0.8.0
   permission_handler: ^4.0.0
   fluttertoast: ^3.1.3

@@ -228,7 +228,7 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
     if (_isDelayed && _delay.text.isEmpty) {
       showDialog(
           context: context,
-          builder: (context) => CupertinoAlertDialog(
+          builder: (context) => AlertDialog(
                 title: new Text('误工说明不可为空'),
               ));
       return;
@@ -240,7 +240,7 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
     //    _solution.text.isEmpty) {
     //  showDialog(
     //      context: context,
-    //      builder: (context) => CupertinoAlertDialog(
+    //      builder: (context) => AlertDialog(
     //            title: new Text('报告不可有空字段'),
     //          ));
     //} else {
@@ -310,7 +310,7 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
         });
         showDialog(
             context: context,
-            builder: (context) => CupertinoAlertDialog(
+            builder: (context) => AlertDialog(
                 title: statusId == 1
                     ? new Text('保存报告成功')
                     : new Text('上传报告成功'))).then((result) {
@@ -319,7 +319,7 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
       } else {
         showDialog(
             context: context,
-            builder: (context) => CupertinoAlertDialog(
+            builder: (context) => AlertDialog(
                   title: new Text(resp['ResultMessage']),
                 ));
       }

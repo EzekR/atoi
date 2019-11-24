@@ -191,7 +191,7 @@ class _UserRepairPageState extends State<UserRepairPage> {
     if (resp['ResultCode'] == '00') {
       showDialog(
         context: context,
-        builder: (context) => CupertinoAlertDialog(
+        builder: (context) => AlertDialog(
           title: new Text('报修成功'),
         ),
       ).then(

@@ -59,7 +59,7 @@ class _EquipmentCheckState extends State<EquipmentCheck> {
     } else {
       showDialog(
           context: context,
-          builder: (context) => CupertinoAlertDialog(
+          builder: (context) => AlertDialog(
                 title: new Text(resp['ResultMessage']),
               ));
     }
@@ -119,7 +119,7 @@ class _EquipmentCheckState extends State<EquipmentCheck> {
     if (_equipments == null) {
       showDialog(
           context: context,
-          builder: (context) => CupertinoAlertDialog(
+          builder: (context) => AlertDialog(
                 title: new Text('请选择设备'),
               ));
       return;
@@ -127,7 +127,7 @@ class _EquipmentCheckState extends State<EquipmentCheck> {
     if (_fault.text.isEmpty || _fault.text == null) {
       showDialog(
           context: context,
-          builder: (context) => CupertinoAlertDialog(
+          builder: (context) => AlertDialog(
                 title: new Text('盘点备注不可为空'),
               ));
     } else {
@@ -166,7 +166,7 @@ class _EquipmentCheckState extends State<EquipmentCheck> {
       if (resp['ResultCode'] == '00') {
         showDialog(
             context: context,
-            builder: (buider) => CupertinoAlertDialog(
+            builder: (buider) => AlertDialog(
                   title: new Text('提交请求成功'),
                 )).then(
             (result) => Navigator.of(context, rootNavigator: true).pop(result));
