@@ -368,25 +368,25 @@ class _VendorDetailState extends State<VendorDetail> {
                                 BuildWidget.buildRadio('供应商经营状态', vendorStatus,
                                     currentStatus, changeStatus),
                                 new Divider(),
-                                new Padding(
-                                  padding: EdgeInsets.symmetric(vertical: 5.0),
-                                  child: new Row(
-                                    children: <Widget>[
-                                      new Text(
-                                        '添加附件：',
-                                        style: new TextStyle(
-                                            fontSize: 20.0,
-                                            fontWeight: FontWeight.w600),
-                                      ),
-                                      new IconButton(
-                                          icon: Icon(Icons.add_a_photo),
-                                          onPressed: () {
-                                            showSheet(context);
-                                          })
-                                    ],
-                                  ),
-                                ),
-                                buildImageRow(_imageList),
+                                //new Padding(
+                                //  padding: EdgeInsets.symmetric(vertical: 5.0),
+                                //  child: new Row(
+                                //    children: <Widget>[
+                                //      new Text(
+                                //        '添加附件：',
+                                //        style: new TextStyle(
+                                //            fontSize: 20.0,
+                                //            fontWeight: FontWeight.w600),
+                                //      ),
+                                //      new IconButton(
+                                //          icon: Icon(Icons.add_a_photo),
+                                //          onPressed: () {
+                                //            showSheet(context);
+                                //          })
+                                //    ],
+                                //  ),
+                                //),
+                                //buildImageRow(_imageList),
                                 new Padding(
                                     padding:
                                         EdgeInsets.symmetric(vertical: 8.0))

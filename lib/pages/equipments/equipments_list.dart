@@ -122,7 +122,8 @@ class _EquipmentsListState extends State<EquipmentsList> {
                     new Text(
                       '打印二维码',
                       style: new TextStyle(
-                          color: Colors.white
+                          color: Colors.white,
+                          fontSize: 14.0
                       ),
                     )
                   ],
@@ -150,7 +151,8 @@ class _EquipmentsListState extends State<EquipmentsList> {
                     new Text(
                       '查看',
                       style: new TextStyle(
-                          color: Colors.white
+                          color: Colors.white,
+                          fontSize: 14.0
                       ),
                     )
                   ],
@@ -202,7 +204,8 @@ class _EquipmentsListState extends State<EquipmentsList> {
                     new Text(
                       '生命周期',
                       style: new TextStyle(
-                          color: Colors.white
+                          color: Colors.white,
+                          fontSize: 14.0
                       ),
                     )
                   ],
