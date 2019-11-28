@@ -10,7 +10,6 @@ class PrintQrcode extends StatefulWidget{
 }
 
 class _PrintQrcodeState extends State<PrintQrcode> {
-  GlobalKey _globalKey = new GlobalKey();
   var _equipment;
   var _qrcode;
 

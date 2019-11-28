@@ -67,8 +67,6 @@ class _HomePageState extends State<HomePage>
     super.dispose();
   }
 
-  GlobalKey<ScaffoldState> _scaffoldKeyManager = new GlobalKey();
-
   @override
   Widget build(BuildContext context) {
     return ScopedModelDescendant<MainModel>(
@@ -142,7 +140,6 @@ class _HomePageState extends State<HomePage>
                         horizontal: 0.0, vertical: 19.0),
                     child: new GestureDetector(
                       onTap: () {
-                        _scaffoldKeyManager.currentState.openEndDrawer();
                       },
                       child: new Text(
                         _userName,

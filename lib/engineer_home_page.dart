@@ -20,7 +20,6 @@ class EngineerHomePage extends StatefulWidget {
 class _EngineerHomePageState extends State<EngineerHomePage>
     with SingleTickerProviderStateMixin{
   TabController _tabController;
-  GlobalKey<ScaffoldState> _scaffoldKeyManager = new GlobalKey();
 
   Future<SharedPreferences> prefs = SharedPreferences.getInstance();
   String _userName = '';

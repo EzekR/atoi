@@ -442,7 +442,7 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
     switch (_dispatch['Request']['RequestType']['ID']) {
       case 2:
         _list.addAll([
-          BuildWidget.buildRow('服务提供商', _report['ServiceProvider'])
+          BuildWidget.buildRow('服务提供商', _report['ServiceProvider']['Name'])
         ]);
         break;
       case 3:

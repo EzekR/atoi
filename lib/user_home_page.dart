@@ -133,13 +133,11 @@ class _UserHomePageState extends State<UserHomePage> {
     );
   }
 
-  GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey();
 
   @override
   Widget build(BuildContext context) {
     return new WillPopScope(
         child: new Scaffold(
-          key: _scaffoldKey,
           appBar: new AppBar(
             leading: new Container(),
             title: new Align(
@@ -164,7 +162,6 @@ class _UserHomePageState extends State<UserHomePage> {
                   padding: const EdgeInsets.symmetric(vertical: 19.0),
                   child: new GestureDetector(
                     onTap: () {
-                      _scaffoldKey.currentState.openEndDrawer();
                     },
                     child: new Text(_userName),
                   )

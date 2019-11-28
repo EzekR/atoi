@@ -54,6 +54,12 @@ class _ManagerToAssignState extends State<ManagerToAssign> {
     Map<String, dynamic> params = {
       'userID': userID,
       'statusID': 1,
+      'statusID': 2,
+      'statusID': 3,
+      'statusID': 4,
+      'statusID': 5,
+      'statusID': 6,
+      'statusID': 7,
       'typeID': 0
     };
     setState(() {

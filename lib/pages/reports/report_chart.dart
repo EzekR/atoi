@@ -3,6 +3,8 @@ import 'package:scoped_model/scoped_model.dart';
 import 'package:atoi/models/main_model.dart';
 import 'package:charts_flutter/flutter.dart' as charts;
 import 'package:flutter/cupertino.dart';
+import 'package:flutter_picker/flutter_picker.dart';
+import 'package:atoi/utils/http_request.dart';
 
 class ReportChart extends StatefulWidget {
   _ReportChartState createState() => _ReportChartState();
@@ -10,233 +12,131 @@ class ReportChart extends StatefulWidget {
 
 class _ReportChartState extends State<ReportChart> {
 
-  List<charts.Series> seriesList;
+  List<charts.Series<dynamic, String>> seriesList;
   bool animate;
 
-  List _mainMenu = [
-    '时间类型',
-    '设备类型',
-    '资产类型',
-    '设备年限',
-    '设备产地',
-    '设备科室',
-    '厂商分布'
-  ];
+  List _dimensionList = [];
+  List _rawList = [];
+  List _tableData = [];
+  String _tableName = '年份';
 
-  List _month = [
-    '1月',
-    '2月',
-    '3月',
-    '4月',
-    '5月',
-    '6月',
-    '7月',
-    '8月',
-    '9月',
-    '10月',
-    '11月',
-    '12月'
-  ];
-
-  List _year = [
-    '2018',
-    '2019',
-    '2020'
-  ];
-
-  List<DropdownMenuItem<String>> _dropDownMenuItems;
-  List<DropdownMenuItem<String>> _dropDownMenuMonth;
-  List<DropdownMenuItem<String>> _dropDownMenuYear;
-  String _currentMenu;
-  String _currentMonth;
-  String _currentYear;
-
-  List<DropdownMenuItem<String>> getDropDownMenuItems(List list) {
-    List<DropdownMenuItem<String>> items = new List();
-    for (String method in list) {
-      items.add(new DropdownMenuItem(
-          value: method,
-          child: new Text(method,
-            style: new TextStyle(
-                fontSize: 20.0
-            ),
-          )
-      ));
-    }
-    return items;
-  }
-
-  void changeMenu(String selected) {
-    setState(() {
-      _currentMenu = selected;
-    });
-  }
-
-  void changeMonth(String selected) {
-    setState(() {
-      _currentMonth = selected;
-    });
-  }
-
-  void changeYear(String selected) {
-    setState(() {
-      _currentYear = selected;
-    });
-  }
-
-
-  void _showCupertinoPicker(BuildContext cxt, List itemList){
-    List<Widget> _list = [];
-    for(var item in itemList) {
-      _list.add(
-        Text(
-          item,
-          style: new TextStyle(
-            color: Colors.black54,
-            fontSize: 14.0,
-            fontWeight: FontWeight.w400
-          ),
-        )
-      );
-    }
-    final picker  = CupertinoPicker(
-        itemExtent: 24,
-        backgroundColor: Colors.white,
-        onSelectedItemChanged: (position){
-          print('The position is $position');
-        },
-        children: _list
+  Future<void> initDimension() async {
+    var resp = await HttpRequest.request(
+      '/Report/GetDimensionList',
+      method: HttpRequest.GET
     );
-
-    showCupertinoModalPopup(context: cxt, builder: (cxt){
-      return Container(
-        height: 200,
-        child: picker,
-      );
-    }).then((result) {
-      print(result);
-    });
+    if (resp['ResultCode'] == '00') {
+      var _data = resp['Data'];
+      var _list = _data.map((item) => {
+        item['Name'].toString(): item['ID']==2?[2010,2011,2012,2013,2014,2015,2016,2017,2018,2019]:[' ']
+      }).toList();
+      print(_list);
+      setState(() {
+        _dimensionList = _list;
+        _rawList = _data;
+      });
+    }
   }
 
   void initState() {
     super.initState();
-    _dropDownMenuItems = getDropDownMenuItems(_mainMenu);
-    _currentMenu = _dropDownMenuItems[0].value;
-    _dropDownMenuMonth = getDropDownMenuItems(_month);
-    _currentMonth = _dropDownMenuMonth[0].value;
-    _dropDownMenuYear = getDropDownMenuItems(_year);
-    _currentYear = _dropDownMenuYear[0].value;
-    _createData();
+    initDimension();
   }
 
-  Row buildPickerRow() {
+  showPickerDialog(BuildContext context) {
+    Picker(
+        cancelText: '取消',
+        confirmText: '确认',
+        adapter: PickerDataAdapter<String>(pickerdata: _dimensionList),
+        hideHeader: true,
+        title: new Text("请选择维度"),
+        selectedTextStyle: TextStyle(color: Colors.blue),
+        onConfirm: (Picker picker, List value) {
+          var _selected = picker.getSelectedValues();
+          getChartData(_selected[0], _selected[1]);
+        }
+    ).showDialog(context);
+  }
+
+  Future<Null> getChartData(String type, String year) async {
+    var _select = _rawList.firstWhere((item) => item['Name']==type, orElse: ()=> null);
+    var resp = await HttpRequest.request(
+      '/Report/EquipmentCountReport',
+      method: HttpRequest.POST,
+      data: {
+        'type': _select['ID'],
+        'year': year==' '?0:year
+      }
+    );
+    if (resp['ResultCode'] == '00') {
+      var _data = resp['Data'];
+      var _list = _data.map<EquipmentData>((item) => new EquipmentData(item['Item1'], item['Item2'])).toList();
+      setState(() {
+        seriesList = [
+          new charts.Series<EquipmentData, String>(
+            id: 'Sales',
+            colorFn: (_, __) => charts.MaterialPalette.blue.shadeDefault,
+            domainFn: (EquipmentData data, _) => data.type,
+            measureFn: (EquipmentData data, _) => data.amount,
+            data: _list,
+          )
+        ];
+        _tableName = type;
+        _tableData = _data;
+      });
+    }
+  }
+
+  Row buildPickerRow(BuildContext context) {
     return new Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: <Widget>[
-        new DropdownButton(
-            items: _dropDownMenuItems,
-            value: _currentMenu,
-            onChanged: changeMenu
-        ),
-        new DropdownButton(
-            items: _dropDownMenuYear,
-            value: _currentYear,
-            onChanged: changeYear
-        ),
-        new DropdownButton(
-            items: _dropDownMenuMonth,
-            value: _currentMonth,
-            onChanged: changeMonth
+        new FlatButton(
+            onPressed: () {
+              showPickerDialog(context);
+            },
+            child: new Row(
+              children: <Widget>[
+                new Icon(Icons.timeline),
+                new Text('维度')
+              ],
+            )
         ),
       ],
     );
   }
 
   Column buildTable() {
-    var _dataList = [
-      {
-        'year': '2015',
-        'data': '10086'
-      },
-      {
-        'year': '2015',
-        'data': '10086'
-      },
-      {
-        'year': '2015',
-        'data': '10086'
-      },
-      {
-        'year': '2015',
-        'data': '10086'
-      },
-      {
-        'year': '2015',
-        'data': '10086'
-      },
-      {
-        'year': '2015',
-        'data': '10086'
-      },
-      {
-        'year': '2015',
-        'data': '10086'
-      },
-    ];
     List<ListTile> _list = [
       ListTile(
-        title: new Text('年份'),
-        trailing: new Text('数据'),
+        title: new Text(_tableName, style: new TextStyle(color: Colors.blue),),
+        trailing: new Text('数据', style: new TextStyle(color: Colors.blue),),
         onTap: () {
-          _showCupertinoPicker(context, _month);
         },
       )
     ];
-    for(var _data in _dataList) {
-      _list.add(
-        ListTile(
-          title: new Text(_data['year']),
-          trailing: new Text(_data['data']),
-        )
-      );
+    if (_tableData.length > 0) {
+      for(var item in _tableData) {
+        _list.add(
+            ListTile(
+              title: new Text(item['Item1']),
+              trailing: new Text(item['Item2'].toString()),
+            )
+        );
+      }
     }
     return new Column(
       children: _list,
     );
   }
 
-  void _createData() {
-    final data = [
-      new OrdinalSales('2014', 5),
-      new OrdinalSales('2015', 25),
-      new OrdinalSales('2016', 100),
-      new OrdinalSales('2017', 75),
-      new OrdinalSales('2018', 5),
-      new OrdinalSales('2019', 25),
-      new OrdinalSales('2020', 100),
-      new OrdinalSales('2021', 75),
-    ];
-
-    var _list = [
-      new charts.Series<OrdinalSales, String>(
-        id: 'Sales',
-        colorFn: (_, __) => charts.MaterialPalette.blue.shadeDefault,
-        domainFn: (OrdinalSales sales, _) => sales.year,
-        measureFn: (OrdinalSales sales, _) => sales.sales,
-        data: data,
-      )
-    ];
-    setState(() {
-      seriesList = _list;
-    });
-  }
-
   Container buildChart() {
     return new Container(
-      height: 300.0,
+      height: _tableData.length*40.toDouble(),
       child: new charts.BarChart(
         seriesList,
         animate: true,
+        vertical: false,
       ),
     );
   }
@@ -264,16 +164,8 @@ class _ReportChartState extends State<ReportChart> {
             ),
             body: new ListView(
               children: <Widget>[
-                buildPickerRow(),
-                buildChart(),
-                new Padding(
-                  padding: EdgeInsets.symmetric(vertical: 5.0, horizontal: 15.0),
-                  child: new Text('设备数据',
-                    style: new TextStyle(
-                      fontSize: 16.0
-                    ),
-                  ),
-                ),
+                buildPickerRow(context),
+                seriesList==null?new Container():buildChart(),
                 buildTable()
               ],
             )
@@ -283,9 +175,9 @@ class _ReportChartState extends State<ReportChart> {
   }
 }
 
-class OrdinalSales {
-  final String year;
-  final int sales;
+class EquipmentData {
+  final String type;
+  final double amount;
 
-  OrdinalSales(this.year, this.sales);
+  EquipmentData(this.type, this.amount);
 }
