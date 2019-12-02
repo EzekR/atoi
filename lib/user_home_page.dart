@@ -184,7 +184,7 @@ class _UserHomePageState extends State<UserHomePage> {
               //),
               new Center(
                 child: new Container(
-                  child: new Image.asset('assets/bg.jpg'),
+                  child: new Image.asset('assets/bg_01.jpg'),
                 ),
               ),
               //new Padding(

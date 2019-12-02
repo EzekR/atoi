@@ -35,6 +35,9 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
   Map equipmentLevel = {'1类': 1, '2类': 2, '3类': 3};
   Map periodType = {'无': 1, '天/次': 2, '月/次': 3, '年/次': 4};
   Map mandatoryFlagType = {'无': 0, '待强检': 1, '已强检': 2};
+  List<bool> expansionList = [
+    true, false, false, false, false
+  ];
 
   var name = new TextEditingController(),
       equipmentCode = new TextEditingController(),
@@ -774,7 +777,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
             ],
           ),
         ),
-        isExpanded: true));
+        isExpanded: expansionList[0]));
     //asset info
     _list.add(ExpansionPanel(
         headerBuilder: (context, isExpanded) {
@@ -858,7 +861,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
             ],
           ),
         ),
-        isExpanded: true));
+        isExpanded: expansionList[1]));
     //purchasing info
     _list.add(ExpansionPanel(
         headerBuilder: (context, isExpanded) {
@@ -986,7 +989,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
             ],
           ),
         ),
-        isExpanded: true));
+        isExpanded: expansionList[2]));
     //status info
     _list.add(ExpansionPanel(
         headerBuilder: (context, isExpanded) {
@@ -1226,7 +1229,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
             ],
           ),
         ),
-        isExpanded: true));
+        isExpanded: expansionList[3]));
     //equipment photos
     _list.add(ExpansionPanel(
         headerBuilder: (context, isExpanded) {
@@ -1304,7 +1307,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
             ],
           ),
         ),
-        isExpanded: true));
+        isExpanded: expansionList[4]));
     return _list;
   }
 
@@ -1325,19 +1328,6 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
               ),
             ),
           ),
-          actions: <Widget>[
-            new IconButton(
-              icon: Icon(Icons.search),
-              color: Colors.white,
-              iconSize: 30.0,
-              onPressed: () {},
-            ),
-            new IconButton(
-                icon: Icon(Icons.crop_free),
-                color: Colors.white,
-                iconSize: 30.0,
-                onPressed: () {})
-          ],
         ),
         body: new Padding(
           padding: EdgeInsets.symmetric(vertical: 8.0),
@@ -1345,6 +1335,12 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
             child: new ListView(
               children: <Widget>[
                 new ExpansionPanelList(
+                  animationDuration: Duration(milliseconds: 200),
+                  expansionCallback: (index, isExpanded) {
+                    setState(() {
+                      expansionList[index] = !isExpanded;
+                    });
+                  },
                   children: buildExpansion(),
                 ),
                 SizedBox(height: 24.0),

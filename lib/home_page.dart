@@ -201,19 +201,6 @@ class _HomePageState extends State<HomePage>
                       },
                     ),
                     ListTile(
-                      leading: Icon(Icons.store),
-                      title: Text('供应商列表',
-                        style: new TextStyle(
-                            color: Colors.blue
-                        ),
-                      ),
-                      onTap: () {
-                        Navigator.of(context).push(new MaterialPageRoute(builder: (_) {
-                          return new VendorsList();
-                        }));
-                      },
-                    ),
-                    ListTile(
                       leading: Icon(Icons.event_note),
                       title: Text('合同管理',
                         style: new TextStyle(
@@ -223,6 +210,19 @@ class _HomePageState extends State<HomePage>
                       onTap: () {
                         Navigator.of(context).push(new MaterialPageRoute(builder: (_) {
                           return new ContractList();
+                        }));
+                      },
+                    ),
+                    ListTile(
+                      leading: Icon(Icons.store),
+                      title: Text('供应商列表',
+                        style: new TextStyle(
+                            color: Colors.blue
+                        ),
+                      ),
+                      onTap: () {
+                        Navigator.of(context).push(new MaterialPageRoute(builder: (_) {
+                          return new VendorsList();
                         }));
                       },
                     ),

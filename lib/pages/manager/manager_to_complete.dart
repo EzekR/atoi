@@ -25,7 +25,6 @@ class _ManagerToCompleteState extends State<ManagerToComplete> {
   ScrollController _scrollController = new ScrollController();
 
   void initState() {
-    //getData();
     refresh();
     super.initState();
     ManagerModel model = MainModel.of(context);
@@ -94,23 +93,17 @@ class _ManagerToCompleteState extends State<ManagerToComplete> {
     refresh();
   }
 
-  Future<Null> _cancelDispatch(int requestID) async {
+
+
+  Future<Null> _cancelDispatch(int requestID, int dispatchID) async {
     var prefs = await _prefs;
     var userId = prefs.getInt('userID');
-    var respDispatch = await HttpRequest.request(
-      '/Dispatch/GetDispatchByRequestID',
-      method: HttpRequest.GET,
-      params: {
-        'ID': requestID
-      }
-    );
-    var dispatchId = respDispatch['Data']['ID'];
     var resp = await HttpRequest.request(
       '/Dispatch/EndDispatch',
       method: HttpRequest.POST,
       data: {
         'userID': userId,
-        'dispatchID': dispatchId,
+        'dispatchID': dispatchID,
         'requestID': requestID
       }
     );
@@ -328,7 +321,7 @@ class _ManagerToCompleteState extends State<ManagerToComplete> {
                         ),
                       ),
                       new RaisedButton(
-                        onPressed: (){
+                        onPressed: () async {
                           if (task['Status']['ID']==1) {
                             showDialog(context: context,
                                 builder: (context) => CupertinoAlertDialog(
@@ -353,26 +346,44 @@ class _ManagerToCompleteState extends State<ManagerToComplete> {
                                 )
                             );
                           } else {
-                            showDialog(context: context,
-                                builder: (context) => CupertinoAlertDialog(
-                                  title: new Text('是否取消派工？'),
-                                  actions: <Widget>[
-                                    RaisedButton(
-                                      child: const Text('确认', style: TextStyle(color: Colors.white),),
-                                      color: AppConstants.AppColors['btn_cancel'],
-                                      onPressed: () {
-                                        _cancelDispatch(requestId);
+                            var _dispatches = await getDispatchesByRequestId(requestId);
+                            showBottomSheet(
+                                backgroundColor: Colors.white,
+                                context: context,
+                                builder: (context) => new ListView.builder(
+                                  itemCount: _dispatches.length,
+                                  shrinkWrap: true,
+                                  itemBuilder: (context, i) {
+                                    return new ListTile(
+                                      leading: new Icon(Icons.assignment_late, color: Colors.blue,),
+                                      title: new Text(_dispatches[i]['OID']),
+                                      onTap: () {
                                         Navigator.of(context).pop();
+                                        showDialog(context: context,
+                                            builder: (context) => CupertinoAlertDialog(
+                                              title: new Text('是否取消派工？'),
+                                              actions: <Widget>[
+                                                RaisedButton(
+                                                  child: const Text('确认', style: TextStyle(color: Colors.white),),
+                                                  color: AppConstants.AppColors['btn_cancel'],
+                                                  onPressed: () {
+                                                    _cancelDispatch(requestId, _dispatches[i]['ID']);
+                                                    Navigator.of(context).pop();
+                                                  },
+                                                ),
+                                                RaisedButton(
+                                                  child: const Text('取消', style: TextStyle(color: Colors.white),),
+                                                  color: AppConstants.AppColors['btn_main'],
+                                                  onPressed: () {
+                                                    Navigator.of(context).pop();
+                                                  },
+                                                ),
+                                              ],
+                                            )
+                                        );
                                       },
-                                    ),
-                                    RaisedButton(
-                                      child: const Text('取消', style: TextStyle(color: Colors.white),),
-                                      color: AppConstants.AppColors['btn_main'],
-                                      onPressed: () {
-                                        Navigator.of(context).pop();
-                                      },
-                                    ),
-                                  ],
+                                    );
+                                  },
                                 )
                             );
                           }

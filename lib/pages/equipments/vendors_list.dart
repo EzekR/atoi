@@ -139,7 +139,7 @@ class _VendorsListState extends State<VendorsList> {
             return new VendorDetail();
           }));
         },
-        child: Icon(Icons.add_shopping_cart),
+        child: Icon(Icons.add_circle),
         backgroundColor: Colors.blue,
       ),
     );

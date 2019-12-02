@@ -34,6 +34,7 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
 
   Map<String, dynamic> _request = {};
   ConstantsModel model;
+  List dispatches = [];
 
   String _userName = '';
   String _mobile = '';
@@ -196,6 +197,21 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
     }
   }
 
+  Future<Null> getRequestDispatches() async {
+    var resp = await HttpRequest.request(
+      '/Dispatch/GetDispatchesByRequestID',
+      method: HttpRequest.GET,
+      params: {
+        'id': widget.request['ID']
+      }
+    );
+    if (resp['ResultCode'] == '00') {
+      setState(() {
+        dispatches = resp['Data'];
+      });
+    }
+  }
+
   Future<Null> getImage(int fileId) async {
     var resp = await HttpRequest.request(
       '/Request/DownloadUploadFile',
@@ -284,6 +300,7 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
     dispatchDate = '${time.year}-${time.month}-${time.day}';
     getRequest();
     getEngineers();
+    getRequestDispatches();
     super.initState();
   }
 
@@ -918,8 +935,55 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
                         padding: EdgeInsets.symmetric(horizontal: 5.0),
                         child: new RaisedButton(
                           onPressed: () {
-                            assignRequest();
-                            model.getRequests();
+                            if (dispatches.length > 0) {
+                              showDialog(context: context,
+                                  builder: (context) => CupertinoAlertDialog(
+                                    title: new Text('已有派工,是否继续派工?'),
+                                    actions: <Widget>[
+                                      new Row(
+                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        children: <Widget>[
+                                          new Container(
+                                            width: 100.0,
+                                            child: RaisedButton(
+                                              //padding: EdgeInsets.symmetric(vertical: 10.0, horizontal: 20.0),
+                                              child: Text('确认', style: TextStyle(color: Colors.white),),
+                                              shape: RoundedRectangleBorder(
+                                                borderRadius: BorderRadius.circular(6),
+                                              ),
+                                              color: AppConstants.AppColors['btn_cancel'],
+                                              onPressed: () {
+                                                Navigator.of(context).pop();
+                                                assignRequest();
+                                                model.getRequests();
+                                              },
+                                            ),
+                                          ),
+                                          new SizedBox(
+                                            width: 10.0,
+                                          ),
+                                          new Container(
+                                            width: 100.0,
+                                            child: RaisedButton(
+                                              child: Text('取消', style: TextStyle(color: Colors.white),),
+                                              shape: RoundedRectangleBorder(
+                                                borderRadius: BorderRadius.circular(6),
+                                              ),
+                                              color: AppConstants.AppColors['btn_main'],
+                                              onPressed: () {
+                                                Navigator.of(context).pop();
+                                              },
+                                            ),
+                                          )
+                                        ],
+                                      ),
+                                    ],
+                                  )
+                              );
+                            } else {
+                              assignRequest();
+                              model.getRequests();
+                            }
                           },
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(6),

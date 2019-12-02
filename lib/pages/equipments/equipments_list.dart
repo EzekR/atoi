@@ -116,11 +116,11 @@ class _EquipmentsListState extends State<EquipmentsList> {
                 child: new Row(
                   children: <Widget>[
                     new Icon(
-                      Icons.local_printshop,
+                      Icons.widgets,
                       color: Colors.white,
                     ),
                     new Text(
-                      '打印二维码',
+                      '二维码',
                       style: new TextStyle(
                           color: Colors.white
                       ),
@@ -144,11 +144,11 @@ class _EquipmentsListState extends State<EquipmentsList> {
                 child: new Row(
                   children: <Widget>[
                     new Icon(
-                      Icons.remove_red_eye,
+                      Icons.edit,
                       color: Colors.white,
                     ),
                     new Text(
-                      '查看',
+                      '编辑',
                       style: new TextStyle(
                           color: Colors.white
                       ),
@@ -245,7 +245,7 @@ class _EquipmentsListState extends State<EquipmentsList> {
               return new EquipmentDetail();
             }));
           },
-          child: Icon(Icons.add_to_queue),
+          child: Icon(Icons.add_circle),
           backgroundColor: Colors.blue,
         ),
     );

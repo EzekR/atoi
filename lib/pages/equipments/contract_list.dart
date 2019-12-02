@@ -140,7 +140,7 @@ class _ContractListState extends State<ContractList> {
             return new EquipmentContract();
           }));
         },
-        child: Icon(Icons.note_add),
+        child: Icon(Icons.add_circle),
         backgroundColor: Colors.blue,
       ),
     );
