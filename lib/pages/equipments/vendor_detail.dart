@@ -69,6 +69,7 @@ class _VendorDetailState extends State<VendorDetail> {
   String currentScope;
   String currentProvince;
   List _imageList = [];
+  String oid = '系统自动生成';
 
   var name = new TextEditingController(),
       mobile = new TextEditingController(),
@@ -127,6 +128,7 @@ class _VendorDetailState extends State<VendorDetail> {
         contact.text = _data['Contact'];
         contactMobile.text = _data['ContactMobile'];
         currentStatus = _data['IsActive'] ? '启用' : '停用';
+        oid = _data['OID'];
       });
     }
   }
@@ -169,6 +171,24 @@ class _VendorDetailState extends State<VendorDetail> {
   }
 
   Future<Null> saveVendor() async {
+    if (name.text.isEmpty) {
+      showDialog(context: context, builder: (context) => CupertinoAlertDialog(
+        title: new Text('供应商名称不可为空'),
+      ));
+      return;
+    }
+    if (province == "") {
+      showDialog(context: context, builder: (context) => CupertinoAlertDialog(
+        title: new Text('供应商省份不可为空'),
+      ));
+      return;
+    }
+    if (contact.text.isEmpty) {
+      showDialog(context: context, builder: (context) => CupertinoAlertDialog(
+        title: new Text('供应商联系人不可为空'),
+      ));
+      return;
+    }
     var prefs = await _prefs;
     var _info = {
       "SupplierType": {
@@ -305,7 +325,7 @@ class _VendorDetailState extends State<VendorDetail> {
       builder: (context, child, mainModel) {
         return new Scaffold(
             appBar: new AppBar(
-              title: new Text('新增供应商'),
+              title: new Text('更新供应商'),
               elevation: 0.7,
               flexibleSpace: Container(
                 decoration: BoxDecoration(
@@ -356,6 +376,7 @@ class _VendorDetailState extends State<VendorDetail> {
                             padding: EdgeInsets.symmetric(horizontal: 12.0),
                             child: new Column(
                               children: <Widget>[
+                                BuildWidget.buildRow('系统编号', oid),
                                 BuildWidget.buildInput('名称', name),
                                 BuildWidget.buildDropdown('类型', currentType,
                                     dropdownType, changeType),
@@ -368,25 +389,6 @@ class _VendorDetailState extends State<VendorDetail> {
                                 BuildWidget.buildRadio('供应商经营状态', vendorStatus,
                                     currentStatus, changeStatus),
                                 new Divider(),
-                                new Padding(
-                                  padding: EdgeInsets.symmetric(vertical: 5.0),
-                                  child: new Row(
-                                    children: <Widget>[
-                                      new Text(
-                                        '添加附件：',
-                                        style: new TextStyle(
-                                            fontSize: 20.0,
-                                            fontWeight: FontWeight.w600),
-                                      ),
-                                      new IconButton(
-                                          icon: Icon(Icons.add_a_photo),
-                                          onPressed: () {
-                                            showSheet(context);
-                                          })
-                                    ],
-                                  ),
-                                ),
-                                buildImageRow(_imageList),
                                 new Padding(
                                     padding:
                                         EdgeInsets.symmetric(vertical: 8.0))

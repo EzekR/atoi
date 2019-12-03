@@ -22,15 +22,19 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
   List assetLevel = ['重要', '一般', '特殊'];
   List<DropdownMenuItem<String>> dropdownLevel;
   String currentLevel;
-  String validationStartDate = '起始';
-  String validationEndDate = '结束';
-  String installStartDate = '起始';
-  String installEndDate = '结束';
-  String purchaseDate = '采购日期';
-  String checkDate = '验收时间';
-  String mandatoryDate = '强检时间';
-  String recallDate = '召回时间';
+  String oid = '系统自动生成';
+  String validationStartDate = '';
+  String validationEndDate = '';
+  String installStartDate = '';
+  String installEndDate = '';
+  String purchaseDate = '';
+  String checkDate = '';
+  String mandatoryDate = '';
+  String recallDate = '';
   String equipmentClassCode = '';
+  String classCode1 = '';
+  String classCode2 = '';
+  String classCode3 = '';
   ConstantsModel model;
   Map equipmentLevel = {'1类': 1, '2类': 2, '3类': 3};
   Map periodType = {'无': 1, '天/次': 2, '月/次': 3, '年/次': 4};
@@ -275,7 +279,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
     initClass(_selectedItem['Code'], 2);
     setState(() {
       currentClass1 = selectedClass;
-      equipmentClassCode = _selectedItem['Code'];
+      classCode1 = _selectedItem['Code'];
     });
   }
 
@@ -287,7 +291,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
     initClass(_code, 3);
     setState(() {
       currentClass2 = selectedMethod;
-      equipmentClassCode += _selectedItem['Code'];
+      classCode2 = _selectedItem['Code'];
     });
   }
 
@@ -299,7 +303,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
       return item['Description'] == selectedMethod;
     });
     setState(() {
-      equipmentClassCode += _item['Code'];
+      classCode3 = _item['Code'];
     });
   }
 
@@ -447,11 +451,12 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
           3);
       setState(() {
         currentClass3 = _data['EquipmentClass3']['Description'];
-        equipmentClassCode = _data['EquipmentClass1']['Code'] +
-            _data['EquipmentClass2']['Code'] +
-            _data['EquipmentClass3']['Code'];
+        classCode1 = _data['EquipmentClass1']['Code'];
+        classCode2 = _data['EquipmentClass2']['Code'];
+        classCode3 = _data['EquipmentClass3']['Code'];
       });
       setState(() {
+        oid = _data['OID'];
         name.text = _data['Name'];
         equipmentCode.text = _data['EquipmentCode'];
         serialCode.text = _data['SerialCode'];
@@ -548,6 +553,78 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
   }
 
   Future<Null> saveEquipment() async {
+    if (name.text.isEmpty) {
+      showDialog(
+        context: context,
+        builder: (context) => CupertinoAlertDialog(
+          title: new Text('设备名称不可为空'),
+        )
+      );
+      return;
+    }
+    if (equipmentCode.text.isEmpty) {
+      showDialog(
+          context: context,
+          builder: (context) => CupertinoAlertDialog(
+            title: new Text('设备型号不可为空'),
+          )
+      );
+      return;
+    }
+    if (serialCode.text.isEmpty) {
+      showDialog(
+          context: context,
+          builder: (context) => CupertinoAlertDialog(
+            title: new Text('设备序列号不可为空'),
+          )
+      );
+      return;
+    }
+    if (manufacturer == null) {
+      showDialog(
+          context: context,
+          builder: (context) => CupertinoAlertDialog(
+            title: new Text('设备厂商不可为空'),
+          )
+      );
+      return;
+    }
+    if (responseTime.text.isEmpty) {
+      showDialog(
+          context: context,
+          builder: (context) => CupertinoAlertDialog(
+            title: new Text('标准响应时间不可为空'),
+          )
+      );
+      return;
+    }
+    if (assetCode.text.isEmpty) {
+      showDialog(
+          context: context,
+          builder: (context) => CupertinoAlertDialog(
+            title: new Text('资产等级不可为空'),
+          )
+      );
+      return;
+    }
+    if (purchaseDate == '') {
+      showDialog(
+          context: context,
+          builder: (context) => CupertinoAlertDialog(
+            title: new Text('采购日期不可为空'),
+          )
+      );
+      return;
+    }
+    if (installStartDate == '' || installEndDate == '') {
+      showDialog(
+          context: context,
+          builder: (context) => CupertinoAlertDialog(
+            title: new Text('安装日期不可为空'),
+          )
+      );
+      return;
+    }
     var _prefs = await prefs;
     var _userId = _prefs.getInt('userID');
     var _equipmentFiles = [];
@@ -588,13 +665,13 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
       "Manufacturer": {'ID': manufacturer == null ? 0 : manufacturer['ID']},
       "EquipmentClass1": class1Item.firstWhere(
           (item) => item['Description'] == currentClass1,
-          orElse: () => null),
+          orElse: () => {}),
       "EquipmentClass2": class2Item.firstWhere(
           (item) => item['Description'] == currentClass2,
-          orElse: () => null),
+          orElse: () => {}),
       "EquipmentClass3": class3Item.firstWhere(
           (item) => item['Description'] == currentClass3,
-          orElse: () => null),
+          orElse: () => {}),
       "ResponseTimeLength": responseTime.text,
       "FixedAsset": currentFixed == '是' ? true : false,
       "AssetCode": assetCode.text,
@@ -703,7 +780,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
           padding: EdgeInsets.symmetric(horizontal: 12.0),
           child: new Column(
             children: <Widget>[
-              BuildWidget.buildRow('设备编号', '系统自动生成'),
+              BuildWidget.buildRow('系统编号', oid),
               BuildWidget.buildInput('设备名称', name, lines: 1),
               BuildWidget.buildInput('设备型号', equipmentCode, lines: 1),
               BuildWidget.buildInput('设备序列号', serialCode, lines: 1),
@@ -736,7 +813,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
                       ),
                     ),
                     new Expanded(
-                        flex: 3,
+                        flex: 4,
                         child: new Text(
                           manufacturer == null ? '' : manufacturer['Name'],
                           style: new TextStyle(
@@ -745,7 +822,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
                               color: Colors.black54),
                         )),
                     new Expanded(
-                        flex: 3,
+                        flex: 2,
                         child: new IconButton(
                             icon: Icon(Icons.search),
                             onPressed: () async {
@@ -764,7 +841,59 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
                   ],
                 ),
               ),
-              BuildWidget.buildInput('标准响应时间', responseTime, lines: 1),
+              new Padding(
+                padding: EdgeInsets.symmetric(vertical: 5.0),
+                child: new Row(
+                  children: <Widget>[
+                    new Expanded(
+                      flex: 4,
+                      child: new Wrap(
+                        alignment: WrapAlignment.end,
+                        crossAxisAlignment: WrapCrossAlignment.center,
+                        children: <Widget>[
+                          new Text(
+                            '标准响应时间',
+                            style: new TextStyle(
+                                fontSize: 20.0, fontWeight: FontWeight.w600),
+                          )
+                        ],
+                      ),
+                    ),
+                    new Expanded(
+                      flex: 1,
+                      child: new Text(
+                        '：',
+                        style: new TextStyle(
+                          fontSize: 20.0,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                    new Expanded(
+                      flex: 4,
+                      child: new TextField(
+                        controller: responseTime,
+                        maxLines: 1,
+                        keyboardType: TextInputType.numberWithOptions(),
+                        decoration: InputDecoration(
+                          fillColor: Color(0xfff0f0f0),
+                          filled: true,
+                        ),
+                      ),
+                    ),
+                    new Expanded(
+                        flex: 2,
+                        child: new Text(
+                          ' 分',
+                          style: new TextStyle(
+                              fontSize: 20.0,
+                              fontWeight: FontWeight.w600
+                          ),
+                        )
+                    ),
+                  ],
+                ),
+              ),
               BuildWidget.buildDropdown(
                   '等级', currentClass, dropdownClass, changeClass),
               BuildWidget.buildDropdown(
@@ -773,7 +902,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
                   '设备类别(II)', currentClass2, dropdownClass2, changeClass2),
               BuildWidget.buildDropdown(
                   '设备类别(III)', currentClass3, dropdownClass3, changeClass3),
-              BuildWidget.buildRow('分类编码', equipmentClassCode),
+              BuildWidget.buildRow('分类编码', classCode1+classCode2+classCode3),
             ],
           ),
         ),
@@ -802,7 +931,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
               BuildWidget.buildInput('资产编号', assetCode, lines: 1),
               BuildWidget.buildDropdown(
                   '资产等级', currentLevel, dropdownLevel, changeLevel),
-              BuildWidget.buildInput('折旧年限', depreciationYears, lines: 1),
+              BuildWidget.buildInput('折旧年限(年)', depreciationYears, lines: 1),
               new Padding(
                 padding: EdgeInsets.symmetric(vertical: 5.0),
                 child: new Row(
@@ -832,27 +961,64 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
                       ),
                     ),
                     new Expanded(
-                      flex: 3,
-                      child: new MaterialButton(
-                        onPressed: () async {
-                          var _date = await pickDate();
-                          setState(() {
-                            validationStartDate = _date;
-                          });
-                        },
-                        child: new Text(validationStartDate),
-                      ),
-                    ),
-                    new Expanded(
-                      flex: 3,
-                      child: new MaterialButton(
-                        onPressed: () async {
-                          var _date = await pickDate();
-                          setState(() {
-                            validationEndDate = _date;
-                          });
-                        },
-                        child: new Text(validationEndDate),
+                      flex: 6,
+                      child: new Column(
+                        children: <Widget>[
+                          new Row(
+                            children: <Widget>[
+                              new Expanded(
+                                flex: 4,
+                                child: new Text(
+                                  validationStartDate,
+                                  style: new TextStyle(
+                                      fontSize: 20.0,
+                                      fontWeight: FontWeight.w400,
+                                      color: Colors.black54
+                                  ),
+                                ),
+                              ),
+                              new Expanded(
+                                flex: 2,
+                                child: new IconButton(
+                                    icon: Icon(Icons.calendar_today),
+                                    onPressed: () async {
+                                      var _date = await pickDate();
+                                      setState(() {
+                                        validationStartDate = _date;
+                                      });
+                                    }
+                                ),
+                              )
+                            ],
+                          ),
+                          new Row(
+                            children: <Widget>[
+                              new Expanded(
+                                flex: 4,
+                                child: new Text(
+                                  validationEndDate,
+                                  style: new TextStyle(
+                                      fontSize: 20.0,
+                                      fontWeight: FontWeight.w400,
+                                      color: Colors.black54
+                                  ),
+                                ),
+                              ),
+                              new Expanded(
+                                flex: 2,
+                                child: new IconButton(
+                                    icon: Icon(Icons.calendar_today),
+                                    onPressed: () async {
+                                      var _date = await pickDate();
+                                      setState(() {
+                                        validationEndDate = _date;
+                                      });
+                                    }
+                                ),
+                              )
+                            ],
+                          ),
+                        ],
                       ),
                     ),
                   ],
@@ -911,7 +1077,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
                       ),
                     ),
                     new Expanded(
-                        flex: 3,
+                        flex: 4,
                         child: new Text(
                           supplier == null ? '' : supplier['Name'],
                           style: new TextStyle(
@@ -920,7 +1086,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
                               color: Colors.black54),
                         )),
                     new Expanded(
-                        flex: 3,
+                        flex: 2,
                         child: new IconButton(
                             icon: Icon(Icons.search),
                             onPressed: () async {
@@ -940,7 +1106,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
                 ),
               ),
               BuildWidget.buildInput('购入方式', purchaseWay, lines: 1),
-              BuildWidget.buildInput('采购金额', purchaseAmount, lines: 1),
+              BuildWidget.buildInput('采购金额(元)', purchaseAmount, lines: 1),
               new Padding(
                 padding: EdgeInsets.symmetric(vertical: 5.0),
                 child: new Row(
@@ -970,16 +1136,26 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
                       ),
                     ),
                     new Expanded(
-                      flex: 6,
-                      child: new MaterialButton(
-                        onPressed: () async {
-                          var _date = await pickDate();
-                          setState(() {
-                            purchaseDate = _date;
-                          });
-                        },
-                        child: new Text(purchaseDate),
+                      flex: 4,
+                      child: new Text(
+                        purchaseDate,
+                        style: new TextStyle(
+                            fontSize: 20.0,
+                            fontWeight: FontWeight.w400,
+                            color: Colors.black54
+                        ),
                       ),
+                    ),
+                    new Expanded(
+                      flex: 2,
+                      child: new IconButton(
+                          icon: Icon(Icons.calendar_today),
+                          onPressed: () async {
+                            var _date = await pickDate();
+                            setState(() {
+                              purchaseDate = _date;
+                            });
+                          }),
                     ),
                   ],
                 ),
@@ -1043,27 +1219,64 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
                       ),
                     ),
                     new Expanded(
-                      flex: 3,
-                      child: new MaterialButton(
-                        onPressed: () async {
-                          var _date = await pickDate();
-                          setState(() {
-                            installStartDate = _date;
-                          });
-                        },
-                        child: new Text(installStartDate),
-                      ),
-                    ),
-                    new Expanded(
-                      flex: 3,
-                      child: new MaterialButton(
-                        onPressed: () async {
-                          var _date = await pickDate();
-                          setState(() {
-                            installEndDate = _date;
-                          });
-                        },
-                        child: new Text(installEndDate),
+                      flex: 6,
+                      child: new Column(
+                        children: <Widget>[
+                          new Row(
+                            children: <Widget>[
+                              new Expanded(
+                                flex: 4,
+                                child: new Text(
+                                  installStartDate,
+                                  style: new TextStyle(
+                                      fontSize: 20.0,
+                                      fontWeight: FontWeight.w400,
+                                      color: Colors.black54
+                                  ),
+                                ),
+                              ),
+                              new Expanded(
+                                flex: 2,
+                                child: new IconButton(
+                                    icon: Icon(Icons.calendar_today),
+                                    onPressed: () async {
+                                      var _date = await pickDate();
+                                      setState(() {
+                                        installStartDate = _date;
+                                      });
+                                    }
+                                ),
+                              )
+                            ],
+                          ),
+                          new Row(
+                            children: <Widget>[
+                              new Expanded(
+                                flex: 4,
+                                child: new Text(
+                                  installEndDate,
+                                  style: new TextStyle(
+                                      fontSize: 20.0,
+                                      fontWeight: FontWeight.w400,
+                                      color: Colors.black54
+                                  ),
+                                ),
+                              ),
+                              new Expanded(
+                                flex: 2,
+                                child: new IconButton(
+                                    icon: Icon(Icons.calendar_today),
+                                    onPressed: () async {
+                                      var _date = await pickDate();
+                                      setState(() {
+                                        installEndDate = _date;
+                                      });
+                                    }
+                                ),
+                              )
+                            ],
+                          ),
+                        ],
                       ),
                     ),
                   ],
@@ -1100,16 +1313,26 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
                       ),
                     ),
                     new Expanded(
-                      flex: 6,
-                      child: new MaterialButton(
-                        onPressed: () async {
-                          var _date = await pickDate();
-                          setState(() {
-                            checkDate = _date;
-                          });
-                        },
-                        child: new Text(checkDate),
+                      flex: 4,
+                      child: new Text(
+                        checkDate,
+                        style: new TextStyle(
+                            fontSize: 20.0,
+                            fontWeight: FontWeight.w400,
+                            color: Colors.black54
+                        ),
                       ),
+                    ),
+                    new Expanded(
+                      flex: 2,
+                      child: new IconButton(
+                          icon: Icon(Icons.calendar_today),
+                          onPressed: () async {
+                            var _date = await pickDate();
+                            setState(() {
+                              checkDate = _date;
+                            });
+                          }),
                     ),
                   ],
                 ),
@@ -1149,21 +1372,31 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
                       ),
                     ),
                     new Expanded(
-                      flex: 6,
-                      child: new MaterialButton(
-                        onPressed: () async {
-                          var _date = await pickDate();
-                          setState(() {
-                            mandatoryDate = _date;
-                          });
-                        },
-                        child: new Text(mandatoryDate),
+                      flex: 4,
+                      child: new Text(
+                        mandatoryDate,
+                        style: new TextStyle(
+                            fontSize: 20.0,
+                            fontWeight: FontWeight.w400,
+                            color: Colors.black54
+                        ),
                       ),
+                    ),
+                    new Expanded(
+                      flex: 2,
+                      child: new IconButton(
+                          icon: Icon(Icons.calendar_today),
+                          onPressed: () async {
+                            var _date = await pickDate();
+                            setState(() {
+                              mandatoryDate = _date;
+                            });
+                          }),
                     ),
                   ],
                 ),
               ),
-              BuildWidget.buildInput('维保状态', warrantyStatus, lines: 1),
+              BuildWidget.buildRow('维保状态', warrantyStatus.text),
               BuildWidget.buildRadio(
                   '召回标记', recall, currentRecall, changeRecall),
               new Padding(
@@ -1195,16 +1428,26 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
                       ),
                     ),
                     new Expanded(
-                      flex: 6,
-                      child: new MaterialButton(
-                        onPressed: () async {
-                          var _date = await pickDate();
-                          setState(() {
-                            recallDate = _date;
-                          });
-                        },
-                        child: new Text(recallDate),
+                      flex: 4,
+                      child: new Text(
+                        recallDate,
+                        style: new TextStyle(
+                            fontSize: 20.0,
+                            fontWeight: FontWeight.w400,
+                            color: Colors.black54
+                        ),
                       ),
+                    ),
+                    new Expanded(
+                      flex: 2,
+                      child: new IconButton(
+                          icon: Icon(Icons.calendar_today),
+                          onPressed: () async {
+                            var _date = await pickDate();
+                            setState(() {
+                              recallDate = _date;
+                            });
+                          }),
                     ),
                   ],
                 ),

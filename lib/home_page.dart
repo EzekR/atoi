@@ -202,7 +202,7 @@ class _HomePageState extends State<HomePage>
                     ),
                     ListTile(
                       leading: Icon(Icons.event_note),
-                      title: Text('合同管理',
+                      title: Text('合同列表',
                         style: new TextStyle(
                             color: Colors.blue
                         ),

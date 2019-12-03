@@ -29,7 +29,7 @@ class _EquipmentContractState extends State<EquipmentContract> {
   var _isExpandedDetail = false;
   Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
   List serviceType = ['原厂服务合同', '采购服务合同'];
-  List serviceScope = ['全保', '技术保', '其他保'];
+  List serviceScope = ['全保', '技术保', '其他'];
   List<DropdownMenuItem<String>> dropdownType;
   List<DropdownMenuItem<String>> dropdownScope;
   String currentType;
@@ -38,6 +38,8 @@ class _EquipmentContractState extends State<EquipmentContract> {
   String startDate = '起始日期';
   String endDate = '结束日期';
   String OID = '系统自动生成';
+  String _contractStatus = '生效';
+
   ConstantsModel model;
 
   MainModel mainModel = MainModel();
@@ -51,7 +53,8 @@ class _EquipmentContractState extends State<EquipmentContract> {
                         amount = new TextEditingController(),
                         name = new TextEditingController(),
                         status = new TextEditingController(),
-                        comments = new TextEditingController();
+                        comments = new TextEditingController(),
+                        scopeComments = new TextEditingController();
 
   Future<Null> getContract(int id) async {
     var resp = await HttpRequest.request(
@@ -74,13 +77,59 @@ class _EquipmentContractState extends State<EquipmentContract> {
         startDate = _data['StartDate'].split('T')[0];
         endDate = _data['EndDate'].split('T')[0];
         comments.text = _data['Comments'];
+        scopeComments.text = _data['ScopeComments'];
         currentType = _data['Type']['Name'];
         currentScope = _data['Scope']['Name'];
       });
+      var today = new DateTime.now();
+      var _start = DateTime.parse(_data['StartDate']);
+      var _end = DateTime.parse(_data['EndDate']);
+      if (today.isBefore(_start) || today.isAfter(_end)) {
+        setState(() {
+          _contractStatus = '未生效';
+        });
+      }
     }
   }
 
   Future<Null> saveContract() async {
+    if (_equipments.length == 0) {
+      showDialog(context: context, builder: (context) => CupertinoAlertDialog(
+        title: new Text('请选择设备'),
+      ));
+      return;
+    }
+
+    if (contractNum.text.isEmpty) {
+      showDialog(context: context, builder: (context) => CupertinoAlertDialog(
+        title: new Text('合同编号不可为空'),
+      ));
+      return;
+    }
+    if (amount.text.isEmpty) {
+      showDialog(context: context, builder: (context) => CupertinoAlertDialog(
+        title: new Text('金额不可为空'),
+      ));
+      return;
+    }
+    if (name.text.isEmpty) {
+      showDialog(context: context, builder: (context) => CupertinoAlertDialog(
+        title: new Text('名称不可为空'),
+      ));
+      return;
+    }
+    if (startDate == '起始日期' || endDate == '结束日期') {
+      showDialog(context: context, builder: (context) => CupertinoAlertDialog(
+        title: new Text('起始日期不可为空'),
+      ));
+      return;
+    }
+    if (supplier == null) {
+      showDialog(context: context, builder: (context) => CupertinoAlertDialog(
+        title: new Text('供应商不可为空'),
+      ));
+      return;
+    }
     var _equipList = _equipments.map((item) => {'ID': item['ID']}).toList();
     var _info = {
       "Equipments": _equipList,
@@ -154,7 +203,7 @@ class _EquipmentContractState extends State<EquipmentContract> {
     });
   }
 
-  Future<String> pickDate() async {
+  Future<String> pickDate(String dateType) async {
     var val = await showDatePicker(
         context: context,
         initialDate: new DateTime.now(),
@@ -162,6 +211,22 @@ class _EquipmentContractState extends State<EquipmentContract> {
             new DateTime.now().subtract(new Duration(days: 30)), // 减 30 天
         lastDate: new DateTime.now().add(new Duration(days: 30)), // 加 30 天
         locale: Locale('zh'));
+    var _today = new DateTime.now();
+    switch (dateType) {
+      case 'start':
+        if (_today.isBefore(val)) {
+          setState(() {
+            _contractStatus = '未生效';
+          });
+        }
+        break;
+      case 'end':
+        if (_today.isAfter(val)) {
+          setState(() {
+            _contractStatus = '未生效';
+          });
+        }
+    }
     return '${val.year}-${val.month}-${val.day}';
   }
 
@@ -345,9 +410,6 @@ class _EquipmentContractState extends State<EquipmentContract> {
                   '设备厂商', _equipment['Manufacturer']['Name'] ?? ''),
               BuildWidget.buildRow(
                   '资产等级', _equipment['AssetLevel']['Name'] ?? ''),
-              BuildWidget.buildRow('维保状态', _equipment['WarrantyStatus'] ?? ''),
-              BuildWidget.buildRow(
-                  '服务范围', _equipment['ContractScope']['Name'] ?? ''),
               new Padding(
                 padding: EdgeInsets.symmetric(vertical: 8.0),
                 child: new Row(
@@ -381,7 +443,7 @@ class _EquipmentContractState extends State<EquipmentContract> {
       builder: (context, child, mainModel) {
         return new Scaffold(
             appBar: new AppBar(
-              title: new Text('新增合同'),
+              title: new Text('更新合同'),
               elevation: 0.7,
               flexibleSpace: Container(
                 decoration: BoxDecoration(
@@ -525,7 +587,7 @@ class _EquipmentContractState extends State<EquipmentContract> {
                                         flex: 3,
                                         child: new MaterialButton(
                                           onPressed: () async {
-                                            var _date = await pickDate();
+                                            var _date = await pickDate('start');
                                             setState(() {
                                               startDate = _date;
                                             });
@@ -537,7 +599,7 @@ class _EquipmentContractState extends State<EquipmentContract> {
                                         flex: 3,
                                         child: new MaterialButton(
                                           onPressed: () async {
-                                            var _date = await pickDate();
+                                            var _date = await pickDate('end');
                                             setState(() {
                                               endDate = _date;
                                             });
@@ -548,6 +610,7 @@ class _EquipmentContractState extends State<EquipmentContract> {
                                     ],
                                   ),
                                 ),
+                                BuildWidget.buildRow('状态', _contractStatus),
                                 new Padding(
                                   padding: EdgeInsets.symmetric(vertical: 5.0),
                                   child: new Row(
@@ -614,28 +677,10 @@ class _EquipmentContractState extends State<EquipmentContract> {
                                 ),
                                 BuildWidget.buildDropdown('服务范围', currentScope,
                                     dropdownScope, changeScope),
+                                currentScope=='其他'?BuildWidget.buildInput('其他范围', scopeComments):new Container(),
                                 BuildWidget.buildInput(
                                     '备注', comments),
                                 new Divider(),
-                                new Padding(
-                                  padding: EdgeInsets.symmetric(vertical: 5.0),
-                                  child: new Row(
-                                    children: <Widget>[
-                                      new Text(
-                                        '添加附件：',
-                                        style: new TextStyle(
-                                            fontSize: 20.0,
-                                            fontWeight: FontWeight.w600),
-                                      ),
-                                      new IconButton(
-                                          icon: Icon(Icons.add_a_photo),
-                                          onPressed: () {
-                                            showSheet(context);
-                                          })
-                                    ],
-                                  ),
-                                ),
-                                buildImageRow(_imageList),
                                 new Padding(
                                     padding:
                                         EdgeInsets.symmetric(vertical: 8.0))
