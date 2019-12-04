@@ -544,13 +544,13 @@ class _EquipmentContractState extends State<EquipmentContract> {
                               children: <Widget>[
                                 BuildWidget.buildRow('系统编号', OID),
                                 BuildWidget.buildInput(
-                                    '项目编号', projectNum),
+                                    '项目编号', projectNum, maxLength: 20),
                                 BuildWidget.buildInput(
-                                    '合同编号', contractNum),
+                                    '合同编号', contractNum, maxLength: 20),
                                 BuildWidget.buildInput(
                                     '金额', amount, inputType: TextInputType.numberWithOptions()),
                                 BuildWidget.buildInput(
-                                    '名称', name),
+                                    '名称', name, maxLength: 50),
                                 BuildWidget.buildDropdown('类型', currentType,
                                     dropdownType, changeType),
                                 new Padding(
@@ -677,9 +677,9 @@ class _EquipmentContractState extends State<EquipmentContract> {
                                 ),
                                 BuildWidget.buildDropdown('服务范围', currentScope,
                                     dropdownScope, changeScope),
-                                currentScope=='其他'?BuildWidget.buildInput('其他范围', scopeComments):new Container(),
+                                currentScope=='其他'?BuildWidget.buildInput('其他范围', scopeComments, maxLength: 50):new Container(),
                                 BuildWidget.buildInput(
-                                    '备注', comments),
+                                    '备注', comments, maxLength: 500),
                                 new Divider(),
                                 new Padding(
                                     padding:

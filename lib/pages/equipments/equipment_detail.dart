@@ -697,7 +697,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
         "ID": model.UsageStatus[currentStatus],
       },
       "EquipmentStatus": {
-        "ID": model.MachineStatus[currentMachine],
+        "ID": model.EquipmentStatus[currentMachine],
       },
       "ScrapDate": '2020-1-1',
       "MaintenancePeriod": maintainPeriod.text,

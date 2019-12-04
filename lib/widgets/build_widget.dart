@@ -139,9 +139,10 @@ class BuildWidget {
     );
   }
 
-  static Padding buildInput(String labelText, TextEditingController controller, {TextInputType inputType, int lines}) {
+  static Padding buildInput(String labelText, TextEditingController controller, {TextInputType inputType, int lines, int maxLength}) {
     inputType??TextInputType.text;
     lines = lines ?? 3;
+    maxLength = maxLength ?? 30;
     return new Padding(
       padding: EdgeInsets.symmetric(vertical: 5.0),
       child: new Row(
@@ -177,6 +178,7 @@ class BuildWidget {
             child: new TextField(
               controller: controller,
               maxLines: lines,
+              maxLength: maxLength,
               keyboardType: inputType,
               decoration: InputDecoration(
                 fillColor: Color(0xfff0f0f0),
