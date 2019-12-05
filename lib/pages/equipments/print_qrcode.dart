@@ -1,7 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:atoi/utils/http_request.dart';
+import 'dart:async';
+import 'package:flutter/services.dart';
 import 'dart:convert';
+import 'dart:io';
+import 'package:path/path.dart';
+import 'package:path_provider/path_provider.dart';
 //import 'package:brother_printer/brother_printer.dart';
 
 class PrintQrcode extends StatefulWidget{
@@ -13,7 +18,20 @@ class PrintQrcode extends StatefulWidget{
 class _PrintQrcodeState extends State<PrintQrcode> {
   GlobalKey _globalKey = new GlobalKey();
   var _equipment;
-  var _qrcode;
+  String _qrcode;
+
+  static const androidChannel = const MethodChannel('brotherPrinter');
+
+  Future<Null> printImageAndroid(String base64Image) async {
+    try {
+      final String result = await androidChannel.invokeMethod('printImage', {'image': base64Image});
+      //final String result = await androidChannel.invokeMethod('printImage', {'image': base64Image});
+      //androidChannel.invokeMethod('getBattery');
+      //print(result);
+    } on PlatformException catch(e) {
+      print(e);
+    }
+  }
 
   void initState() {
     super.initState();
@@ -45,6 +63,12 @@ class _PrintQrcodeState extends State<PrintQrcode> {
       }
     );
     if (resp['ResultCode'] == '00') {
+      var documentDirectory = await getApplicationDocumentsDirectory();
+      File file = new File(
+          join(documentDirectory.path, 'qrcode.jpg')
+      );
+      var bytes = base64Decode(resp['Data']);
+      file.writeAsBytesSync(bytes);
       setState(() {
         _qrcode = resp['Data'];
       });
@@ -213,8 +237,8 @@ class _PrintQrcodeState extends State<PrintQrcode> {
           _equipment==null?new Container():buildPrintCard(),
           new SizedBox(height: 20.0,),
           new RaisedButton(
-              onPressed: () async {
-                printQRcode();
+              onPressed: () {
+                printImageAndroid(_qrcode);
               },
               child: new Text(
                 '打印',
