@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:atoi/utils/http_request.dart';
 import 'package:brother_printer/brother_printer.dart';
+import 'dart:convert';
 
 class PrintQrcode extends StatefulWidget{
   _PrintQrcodeState createState() => _PrintQrcodeState();
@@ -12,6 +13,7 @@ class PrintQrcode extends StatefulWidget{
 class _PrintQrcodeState extends State<PrintQrcode> {
   var _equipment;
   var _qrcode;
+  List _image;
 
   void initState() {
     super.initState();
@@ -45,6 +47,7 @@ class _PrintQrcodeState extends State<PrintQrcode> {
     if (resp['ResultCode'] == '00') {
       setState(() {
         _qrcode = resp['Data'];
+        _image = base64Decode(resp['Data']);
       });
     }
   }
@@ -101,54 +104,58 @@ class _PrintQrcodeState extends State<PrintQrcode> {
         width: 390,
         height: 270,
         child: new Padding(
-          padding: EdgeInsets.symmetric(vertical: 10.0, horizontal: 10.0),
-          child: new Row(
-            children: <Widget>[
-              new Expanded(
-                flex: 6,
-                child: new Column(
-                  children: <Widget>[
-                    buildCardRowLeft('医院', '龙山县人民医院'),
-                    new SizedBox(height: 5.0,),
-                    buildCardRowLeft('科室', _equipment['Department']['Name']),
-                    new SizedBox(height: 5.0,),
-                    buildCardRowLeft('放置地点', _equipment['InstalSite']),
-                    new SizedBox(height: 5.0,),
-                    buildCardRowLeft('名称', _equipment['Name']),
-                    new SizedBox(height: 5.0,),
-                    buildCardRowLeft('型号', _equipment['EquipmentCode']),
-                    new SizedBox(height: 5.0,),
-                    buildCardRowLeft('序列号', _equipment['SerialCode']),
-                    new SizedBox(height: 5.0,),
-                    buildCardRowLeft('资产编号', _equipment['OID']),
-                    new SizedBox(height: 5.0,),
-                  ],
-                ),
-              ),
-              new Expanded(
-                flex: 4,
-                child: new Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: <Widget>[
-                    new Container(
-                      child: Image.asset('assets/atoi.png'),
-                    ),
-                    new SizedBox(height: 20.0,),
-                    new QrImage(
-                      data: "www.baidu.com",
-                      version: QrVersions.auto,
-                      size: 150.0,
-                    ),
-                    new Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 20.0),
-                      child: new Text('微信扫一扫报修'),
-                    )
-                  ],
-                ),
-              )
-            ],
-          ),
-        )
+          padding: EdgeInsets.symmetric(horizontal: 10.0),
+          child: new Image.memory(_image),
+        ),
+//        child: new Padding(
+//          padding: EdgeInsets.symmetric(vertical: 10.0, horizontal: 10.0),
+//          child: new Row(
+//            children: <Widget>[
+//              new Expanded(
+//                flex: 6,
+//                child: new Column(
+//                  children: <Widget>[
+//                    buildCardRowLeft('医院', '龙山县人民医院'),
+//                    new SizedBox(height: 5.0,),
+//                    buildCardRowLeft('科室', _equipment['Department']['Name']),
+//                    new SizedBox(height: 5.0,),
+//                    buildCardRowLeft('放置地点', _equipment['InstalSite']),
+//                    new SizedBox(height: 5.0,),
+//                    buildCardRowLeft('名称', _equipment['Name']),
+//                    new SizedBox(height: 5.0,),
+//                    buildCardRowLeft('型号', _equipment['EquipmentCode']),
+//                    new SizedBox(height: 5.0,),
+//                    buildCardRowLeft('序列号', _equipment['SerialCode']),
+//                    new SizedBox(height: 5.0,),
+//                    buildCardRowLeft('资产编号', _equipment['OID']),
+//                    new SizedBox(height: 5.0,),
+//                  ],
+//                ),
+//              ),
+//              new Expanded(
+//                flex: 4,
+//                child: new Column(
+//                  crossAxisAlignment: CrossAxisAlignment.end,
+//                  children: <Widget>[
+//                    new Container(
+//                      child: Image.asset('assets/atoi.png'),
+//                    ),
+//                    new SizedBox(height: 20.0,),
+//                    new QrImage(
+//                      data: "www.baidu.com",
+//                      version: QrVersions.auto,
+//                      size: 150.0,
+//                    ),
+//                    new Padding(
+//                      padding: EdgeInsets.symmetric(horizontal: 20.0),
+//                      child: new Text('微信扫一扫报修'),
+//                    )
+//                  ],
+//                ),
+//              )
+//            ],
+//          ),
+//        )
       ),
     );
   }
@@ -208,7 +215,7 @@ class _PrintQrcodeState extends State<PrintQrcode> {
       ),
       body: new Column(
         children: <Widget>[
-          _equipment==null?new Container():buildPrintCard(),
+          _image==null?new Container():buildPrintCard(),
           new SizedBox(height: 20.0,),
           new RaisedButton(
               onPressed: () async {
