@@ -325,7 +325,7 @@ class _VendorDetailState extends State<VendorDetail> {
       builder: (context, child, mainModel) {
         return new Scaffold(
             appBar: new AppBar(
-              title: new Text('更新供应商'),
+              title: new Text(widget.vendor==null?'新增供应商':'更新供应商'),
               elevation: 0.7,
               flexibleSpace: Container(
                 decoration: BoxDecoration(

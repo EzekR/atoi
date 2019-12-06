@@ -31,6 +31,9 @@ class ConstantsModel extends Model {
   Map<String, int> _Departments = {};
   Map<String, int> _ServiceProviders = {};
   List<String> _DepartmentsList = [];
+  List<String> _ContractTypeList = [];
+  List<String> _ContractScopeList = [];
+  List<String> _PeriodTypeList = [];
   List<String> _Remark = [
     '',
     '故障描述',
@@ -97,6 +100,9 @@ class ConstantsModel extends Model {
   get RemarkType => _RemarkType;
   get DepartmentsList => _DepartmentsList;
   get ServiceProviders => _ServiceProviders;
+  get ContractTypeList => _ContractTypeList;
+  get ContractScopeList => _ContractScopeList;
+  get PeriodTypeList => _PeriodTypeList;
 
   Future<Null> getConstants() async {
     var resp = await HttpRequest.request(
@@ -112,6 +118,9 @@ class ConstantsModel extends Model {
       }
       for(var _item in resp['Data']['ContractScope']) {
         _ContractScope.putIfAbsent(_item['Name'], () => _item['ID']);
+        if (!_ContractScopeList.contains(_item['Name'])) {
+          _ContractScopeList.add(_item['Name']);
+        }
       }
       //for(var _item in resp['Data']['ReportType']) {
       //  _ReportType.putIfAbsent(_item['Name'], () => _item['ID']);
@@ -182,9 +191,15 @@ class ConstantsModel extends Model {
       }
       for(var _item in resp['Data']['PeriodType']) {
         _PeriodType.putIfAbsent(_item['Name'], () => _item['ID']);
+        if (!_PeriodTypeList.contains(_item['Name'])) {
+          _PeriodTypeList.add(_item['Name']);
+        }
       }
       for(var _item in resp['Data']['ContractType']) {
         _ContractType.putIfAbsent(_item['Name'], () => _item['ID']);
+        if (!_ContractTypeList.contains(_item['Name'])) {
+          _ContractTypeList.add(_item['Name']);
+        }
       }
       for(var _item in resp['Data']['GetDepartment']) {
         _Departments.putIfAbsent(_item['Name'], () => _item['ID']);

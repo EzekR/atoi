@@ -100,7 +100,7 @@ class _VendorsListState extends State<VendorsList> {
                 ),
               ),
               new Padding(
-                padding: EdgeInsets.symmetric(horizontal: 5.0),
+                padding: EdgeInsets.symmetric(horizontal: 15.0),
               ),
             ],
           )

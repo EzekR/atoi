@@ -80,7 +80,7 @@ class _EquipmentsListState extends State<EquipmentsList> {
               ),
             ),
             subtitle: Text(
-              "序列号：${item['SerialCode']}",
+              "系统编号：${item['OID']}",
               style: new TextStyle(
                   color: Theme.of(context).accentColor
               ),
@@ -92,6 +92,7 @@ class _EquipmentsListState extends State<EquipmentsList> {
               children: <Widget>[
                 BuildWidget.buildCardRow('资产编号', item['AssetCode']),
                 BuildWidget.buildCardRow('设备型号', item['EquipmentCode']),
+                BuildWidget.buildCardRow('序列号', item['SerialCode']),
                 BuildWidget.buildCardRow('厂商', item['Manufacturer']['Name']),
                 BuildWidget.buildCardRow('资产等级', item['AssetLevel']['Name']),
                 BuildWidget.buildCardRow('使用科室', item['Department']['Name']),

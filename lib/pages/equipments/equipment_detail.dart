@@ -11,6 +11,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'dart:typed_data';
 import 'dart:convert';
+import 'package:atoi/utils/constants.dart';
 
 class EquipmentDetail extends StatefulWidget {
   EquipmentDetail({Key key, this.equipment}) : super(key: key);
@@ -23,18 +24,20 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
   List<DropdownMenuItem<String>> dropdownLevel;
   String currentLevel;
   String oid = '系统自动生成';
-  String validationStartDate = '';
-  String validationEndDate = '';
-  String installStartDate = '';
-  String installEndDate = '';
-  String purchaseDate = '';
-  String checkDate = '';
-  String mandatoryDate = '';
-  String recallDate = '';
+  String validationStartDate = 'YY-MM-DD';
+  String validationEndDate = 'YY-MM-DD';
+  String installStartDate = 'YY-MM-DD';
+  String installEndDate = 'YY-MM-DD';
+  String purchaseDate = 'YY-MM-DD';
+  String checkDate = 'YY-MM-DD';
+  String mandatoryDate = 'YY-MM-DD';
+  String recallDate = 'YY-MM-DD';
+  String scrapDate = 'YY-MM-DD';
   String equipmentClassCode = '';
   String classCode1 = '';
   String classCode2 = '';
   String classCode3 = '';
+  String warrantyStatus = '保外';
   ConstantsModel model;
   Map equipmentLevel = {'1类': 1, '2类': 2, '3类': 3};
   Map periodType = {'无': 1, '天/次': 2, '月/次': 3, '年/次': 4};
@@ -53,7 +56,6 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
       purchaseWay = new TextEditingController(),
       purchaseAmount = new TextEditingController(),
       installSite = new TextEditingController(),
-      warrantyStatus = new TextEditingController(),
       maintainPeriod = new TextEditingController(),
       patrolPeriod = new TextEditingController(),
       correctionPeriod = new TextEditingController();
@@ -123,6 +125,9 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
   List recall = ['是', '否'];
   String currentRecall = '否';
 
+  List serviceScope = ['是', '否'];
+  String currentServiceScope = '是';
+
   Map<String, dynamic> manufacturer;
   Map<String, dynamic> supplier;
 
@@ -135,6 +140,12 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
   void changeValue(value) {
     setState(() {
       currentFixed = value;
+    });
+  }
+
+  void changeServiceScope(value) {
+    setState(() {
+      currentServiceScope = value;
     });
   }
 
@@ -171,7 +182,9 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
           value: method,
           child: new Text(
             method,
-            style: new TextStyle(fontSize: 16.0),
+            style: new TextStyle(
+                fontSize: 16.0,
+            ),
           )));
     }
     return items;
@@ -235,16 +248,14 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
     var resp = await HttpRequest.request('/Equipment/GetEquipmentClass',
         method: HttpRequest.GET, params: {'level': 1});
     if (resp['ResultCode'] == '00') {
-      List _list = resp['Data'].map((item) {
+      List _listData = resp['Data'].map((item) {
         return item['Description'];
       }).toList();
-      print(_list);
       setState(() {
-        class1 = _list;
+        class1 = _listData;
         class1Item = resp['Data'];
       });
       dropdownClass1 = getDropDownMenuItems(class1);
-      currentClass1 = dropdownClass1[0].value;
     }
   }
 
@@ -259,14 +270,22 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
         case 2:
           class2 = _list;
           class2Item = resp['Data'];
-          dropdownClass2 = getDropDownMenuItems(class2);
-          currentClass2 = dropdownClass2[0].value;
+          setState(() {
+            dropdownClass2 = getDropDownMenuItems(class2);
+            if (dropdownClass2.length>0) {
+              currentClass2 = dropdownClass2[0].value;
+            }
+          });
           break;
         case 3:
           class3 = _list;
           class3Item = resp['Data'];
-          dropdownClass3 = getDropDownMenuItems(class3);
-          currentClass3 = dropdownClass3[0].value;
+          setState(() {
+            dropdownClass3 = getDropDownMenuItems(class3);
+            if (dropdownClass3.length>0) {
+              currentClass3 = dropdownClass3[0].value;
+            }
+          });
           break;
       }
     }
@@ -276,6 +295,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
     var _selectedItem = class1Item.firstWhere((item) {
       return item['Description'] == selectedClass;
     });
+    print(_selectedItem);
     initClass(_selectedItem['Code'], 2);
     setState(() {
       currentClass1 = selectedClass;
@@ -287,6 +307,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
     var _selectedItem = class2Item.firstWhere((item) {
       return item['Description'] == selectedMethod;
     });
+    print(_selectedItem);
     var _code = '${_selectedItem['ParentCode']}${_selectedItem['Code']}';
     initClass(_code, 3);
     setState(() {
@@ -309,6 +330,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
 
   void initState() {
     super.initState();
+    model = MainModel.of(context);
     dropdownLevel = getDropDownMenuItems(assetLevel);
     currentLevel = dropdownLevel[0].value;
     dropdownStatus = getDropDownMenuItems(runningStatus);
@@ -317,15 +339,14 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
     currentMachine = dropdownMachine[0].value;
     dropdownMandatory = getDropDownMenuItems(mandatoryFlag);
     currentMandatory = dropdownMandatory[0].value;
-    dropdownPatrolPeriod = getDropDownMenuItems(patrolPeriodList);
+    dropdownPatrolPeriod = getDropDownMenuItems(model.PeriodTypeList);
     currentPatrolPeriod = dropdownPatrolPeriod[0].value;
-    dropdownMandatoryPeriod = getDropDownMenuItems(patrolPeriodList);
+    dropdownMandatoryPeriod = getDropDownMenuItems(model.PeriodTypeList);
     currentMaintainPeriod = dropdownMandatoryPeriod[0].value;
-    dropdownCorrectionPeriod = getDropDownMenuItems(patrolPeriodList);
+    dropdownCorrectionPeriod = getDropDownMenuItems(model.PeriodTypeList);
     currentCorrectionPeriod = dropdownCorrectionPeriod[0].value;
     dropdownClass = getDropDownMenuItems(equipmentClass);
     currentClass = dropdownClass[0].value;
-    model = MainModel.of(context);
     initDepart();
     initClass1();
     if (widget.equipment != null) {
@@ -440,21 +461,23 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
       var _data = resp['Data'];
       await initClass1();
       setState(() {
-        currentClass1 = _data['EquipmentClass1']['Description'];
+        currentClass1 = _data['EquipmentClass1']['Description']==''?currentClass1:_data['EquipmentClass1']['Description'];
       });
       await initClass(_data['EquipmentClass1']['Code'], 2);
-      setState(() {
-        currentClass2 = _data['EquipmentClass2']['Description'];
-      });
-      await initClass(
-          _data['EquipmentClass1']['Code'] + _data['EquipmentClass2']['Code'],
-          3);
-      setState(() {
-        currentClass3 = _data['EquipmentClass3']['Description'];
-        classCode1 = _data['EquipmentClass1']['Code'];
-        classCode2 = _data['EquipmentClass2']['Code'];
-        classCode3 = _data['EquipmentClass3']['Code'];
-      });
+      if (_data['EquipmentClass2']['Description'] != '') {
+        setState(() {
+          currentClass2 = _data['EquipmentClass2']['Description'];
+        });
+        await initClass(_data['EquipmentClass1']['Code'] + _data['EquipmentClass2']['Code'], 3);
+        if (_data['EquipmentClass3']['Description'] != '') {
+          setState(() {
+            currentClass3 = _data['EquipmentClass3']['Description'];
+            classCode1 = _data['EquipmentClass1']['Code'];
+            classCode2 = _data['EquipmentClass2']['Code'];
+            classCode3 = _data['EquipmentClass3']['Code'];
+          });
+        }
+      }
       setState(() {
         oid = _data['OID'];
         name.text = _data['Name'];
@@ -467,7 +490,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
         purchaseWay.text = _data['PurchaseWay'];
         purchaseAmount.text = _data['PurchaseAmount'].toString();
         installSite.text = _data['InstalSite'];
-        warrantyStatus.text = _data['WarrantyStatus'];
+        warrantyStatus = _data['WarrantyStatus'];
         maintainPeriod.text = _data['MaintenancePeriod'].toString();
         patrolPeriod.text = _data['PatrolPeriod'].toString();
         correctionPeriod.text = _data['CorrectionPeriod'].toString();
@@ -482,6 +505,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
         installStartDate = _data['InstalStartDate'].toString().split('T')[0];
         installEndDate = _data['InstalEndDate'].toString().split('T')[0];
         purchaseDate = _data['PurchaseDate'].toString().split('T')[0];
+        scrapDate = _data['ScrapDate'].toString().split('T')[0];
         currentOrigin = _data['OriginType'];
         currentDepartment = _data['Department']['Name'];
         currentCheck = _data['Accepted'] ? '已验收' : '未验收';
@@ -493,6 +517,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
             : _data['MandatoryTestStatus']['Name'];
         mandatoryDate = _data['MandatoryTestDate'].toString().split('T')[0];
         currentRecall = _data['RecallFlag'] ? '是' : '否';
+        currentServiceScope = _data['ServiceScope']?"是":"否";
         recallDate = _data['RecallDate'].toString().split('T')[0];
         currentPatrolPeriod = _data['PatrolType']['Name'] == ''
             ? '无'
@@ -589,7 +614,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
       );
       return;
     }
-    if (responseTime.text.isEmpty) {
+    if (responseTime.text.isEmpty || responseTime.text == "0" || responseTime.text == "") {
       showDialog(
           context: context,
           builder: (context) => CupertinoAlertDialog(
@@ -602,12 +627,12 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
       showDialog(
           context: context,
           builder: (context) => CupertinoAlertDialog(
-            title: new Text('资产等级不可为空'),
+            title: new Text('资产编号不可为空'),
           )
       );
       return;
     }
-    if (purchaseDate == '') {
+    if (purchaseDate == 'YY-MM-DD') {
       showDialog(
           context: context,
           builder: (context) => CupertinoAlertDialog(
@@ -616,7 +641,43 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
       );
       return;
     }
-    if (installStartDate == '' || installEndDate == '') {
+    if (double.parse(purchaseAmount.text) > 99999999.99) {
+      showDialog(
+          context: context,
+          builder: (context) => CupertinoAlertDialog(
+            title: new Text('采购金额需小于1亿'),
+          )
+      );
+      return;
+    }
+    if (int.parse(patrolPeriod.text) <= 0) {
+      showDialog(
+          context: context,
+          builder: (context) => CupertinoAlertDialog(
+            title: new Text('巡检周期需大于0'),
+          )
+      );
+      return;
+    }
+    if (int.parse(maintainPeriod.text) <= 0) {
+      showDialog(
+          context: context,
+          builder: (context) => CupertinoAlertDialog(
+            title: new Text('保养周期需大于0'),
+          )
+      );
+      return;
+    }
+    if (int.parse(correctionPeriod.text) <= 0) {
+      showDialog(
+          context: context,
+          builder: (context) => CupertinoAlertDialog(
+            title: new Text('校正周期需大于0'),
+          )
+      );
+      return;
+    }
+    if (installStartDate == 'YY-MM-DD' || installEndDate == 'YY-MM-DD') {
       showDialog(
           context: context,
           builder: (context) => CupertinoAlertDialog(
@@ -674,6 +735,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
           orElse: () => {}),
       "ResponseTimeLength": responseTime.text,
       "FixedAsset": currentFixed == '是' ? true : false,
+      "ServiceScope": currentServiceScope == '是'?true:false,
       "AssetCode": assetCode.text,
       "AssetLevel": {'ID': model.AssetsLevel[currentLevel]},
       "DepreciationYears": depreciationYears.text,
@@ -699,7 +761,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
       "EquipmentStatus": {
         "ID": model.EquipmentStatus[currentMachine],
       },
-      "ScrapDate": '2020-1-1',
+      "ScrapDate": scrapDate=='YY-MM-DD'?null:scrapDate,
       "MaintenancePeriod": maintainPeriod.text,
       "MaintenanceType": {
         "ID": periodType[currentMaintainPeriod],
@@ -747,13 +809,14 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
     print(value);
   }
 
-  Future<String> pickDate() async {
+  Future<String> pickDate({DateTime initialTime}) async {
+    initialTime = initialTime??DateTime.now();
     var val = await showDatePicker(
         context: context,
-        initialDate: new DateTime.now(),
+        initialDate: initialTime,
         firstDate:
-            new DateTime.now().subtract(new Duration(days: 30)), // 减 30 天
-        lastDate: new DateTime.now().add(new Duration(days: 30)), // 加 30 天
+            new DateTime.now().subtract(new Duration(days: 3650)), // 减 30 天
+        lastDate: new DateTime.now().add(new Duration(days: 3650)), // 加 30 天
         locale: Locale('zh'));
     return '${val.year}-${val.month}-${val.day}';
   }
@@ -874,6 +937,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
                       child: new TextField(
                         controller: responseTime,
                         maxLines: 1,
+                        maxLength: 3,
                         keyboardType: TextInputType.numberWithOptions(),
                         decoration: InputDecoration(
                           fillColor: Color(0xfff0f0f0),
@@ -903,6 +967,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
               BuildWidget.buildDropdown(
                   '设备类别(III)', currentClass3, dropdownClass3, changeClass3),
               BuildWidget.buildRow('分类编码', classCode1+classCode2+classCode3),
+              BuildWidget.buildRadio('整包范围', serviceScope, currentServiceScope, changeServiceScope)
             ],
           ),
         ),
@@ -931,7 +996,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
               BuildWidget.buildInput('资产编号', assetCode, lines: 1),
               BuildWidget.buildDropdown(
                   '资产等级', currentLevel, dropdownLevel, changeLevel),
-              BuildWidget.buildInput('折旧年限(年)', depreciationYears, lines: 1),
+              BuildWidget.buildInput('折旧年限(年)', depreciationYears, lines: 1, maxLength: 3, inputType: TextInputType.number),
               new Padding(
                 padding: EdgeInsets.symmetric(vertical: 5.0),
                 child: new Row(
@@ -980,9 +1045,9 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
                               new Expanded(
                                 flex: 2,
                                 child: new IconButton(
-                                    icon: Icon(Icons.calendar_today),
+                                    icon: Icon(Icons.calendar_today, color: AppConstants.AppColors['btn_main'],),
                                     onPressed: () async {
-                                      var _date = await pickDate();
+                                      var _date = await pickDate(initialTime: validationStartDate!='YY-MM-DD'?DateTime.parse(validationStartDate):DateTime.now());
                                       setState(() {
                                         validationStartDate = _date;
                                       });
@@ -1007,9 +1072,9 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
                               new Expanded(
                                 flex: 2,
                                 child: new IconButton(
-                                    icon: Icon(Icons.calendar_today),
+                                    icon: Icon(Icons.calendar_today, color: AppConstants.AppColors['btn_main'],),
                                     onPressed: () async {
-                                      var _date = await pickDate();
+                                      var _date = await pickDate(initialTime: validationEndDate!='YY-MM-DD'?DateTime.parse(validationEndDate):DateTime.now());
                                       setState(() {
                                         validationEndDate = _date;
                                       });
@@ -1106,7 +1171,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
                 ),
               ),
               BuildWidget.buildInput('购入方式', purchaseWay, lines: 1),
-              BuildWidget.buildInput('采购金额(元)', purchaseAmount, lines: 1),
+              BuildWidget.buildInput('采购金额(元)', purchaseAmount, lines: 1, maxLength: 11),
               new Padding(
                 padding: EdgeInsets.symmetric(vertical: 5.0),
                 child: new Row(
@@ -1149,9 +1214,9 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
                     new Expanded(
                       flex: 2,
                       child: new IconButton(
-                          icon: Icon(Icons.calendar_today),
+                          icon: Icon(Icons.calendar_today, color: AppConstants.AppColors['btn_main'],),
                           onPressed: () async {
-                            var _date = await pickDate();
+                            var _date = await pickDate(initialTime: purchaseDate!='YY-MM-DD'?DateTime.parse(purchaseDate):DateTime.now());
                             setState(() {
                               purchaseDate = _date;
                             });
@@ -1238,9 +1303,9 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
                               new Expanded(
                                 flex: 2,
                                 child: new IconButton(
-                                    icon: Icon(Icons.calendar_today),
+                                    icon: Icon(Icons.calendar_today, color: AppConstants.AppColors['btn_main'],),
                                     onPressed: () async {
-                                      var _date = await pickDate();
+                                      var _date = await pickDate(initialTime: installStartDate!='YY-MM-DD'?DateTime.parse(installStartDate):DateTime.now());
                                       setState(() {
                                         installStartDate = _date;
                                       });
@@ -1265,9 +1330,9 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
                               new Expanded(
                                 flex: 2,
                                 child: new IconButton(
-                                    icon: Icon(Icons.calendar_today),
+                                    icon: Icon(Icons.calendar_today, color: AppConstants.AppColors['btn_main'],),
                                     onPressed: () async {
-                                      var _date = await pickDate();
+                                      var _date = await pickDate(initialTime: installEndDate!='YY-MM-DD'?DateTime.parse(installEndDate):DateTime.now());
                                       setState(() {
                                         installEndDate = _date;
                                       });
@@ -1326,7 +1391,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
                     new Expanded(
                       flex: 2,
                       child: new IconButton(
-                          icon: Icon(Icons.calendar_today),
+                          icon: Icon(Icons.calendar_today, color: AppConstants.AppColors['btn_main'],),
                           onPressed: () async {
                             var _date = await pickDate();
                             setState(() {
@@ -1341,6 +1406,60 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
                   '使用状态', currentStatus, dropdownStatus, changeStatus),
               BuildWidget.buildDropdown(
                   '设备状态', currentMachine, dropdownMachine, changeMachine),
+              currentMachine=='已报废'?
+              new Padding(
+                padding: EdgeInsets.symmetric(vertical: 5.0),
+                child: new Row(
+                  children: <Widget>[
+                    new Expanded(
+                      flex: 4,
+                      child: new Wrap(
+                        alignment: WrapAlignment.end,
+                        crossAxisAlignment: WrapCrossAlignment.center,
+                        children: <Widget>[
+                          new Text(
+                            '报废时间',
+                            style: new TextStyle(
+                                fontSize: 20.0, fontWeight: FontWeight.w600),
+                          )
+                        ],
+                      ),
+                    ),
+                    new Expanded(
+                      flex: 1,
+                      child: new Text(
+                        '：',
+                        style: new TextStyle(
+                          fontSize: 20.0,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                    new Expanded(
+                      flex: 4,
+                      child: new Text(
+                        scrapDate,
+                        style: new TextStyle(
+                            fontSize: 20.0,
+                            fontWeight: FontWeight.w400,
+                            color: Colors.black54
+                        ),
+                      ),
+                    ),
+                    new Expanded(
+                      flex: 2,
+                      child: new IconButton(
+                          icon: Icon(Icons.calendar_today, color: AppConstants.AppColors['btn_main'],),
+                          onPressed: () async {
+                            var _date = await pickDate();
+                            setState(() {
+                              scrapDate = _date;
+                            });
+                          }),
+                    ),
+                  ],
+                ),
+              ):new Container(),
               BuildWidget.buildDropdown(
                   '强检标记', currentMandatory, dropdownMandatory, changeMandatory),
               new Padding(
@@ -1385,7 +1504,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
                     new Expanded(
                       flex: 2,
                       child: new IconButton(
-                          icon: Icon(Icons.calendar_today),
+                          icon: Icon(Icons.calendar_today, color: AppConstants.AppColors['btn_main'],),
                           onPressed: () async {
                             var _date = await pickDate();
                             setState(() {
@@ -1396,7 +1515,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
                   ],
                 ),
               ),
-              BuildWidget.buildRow('维保状态', warrantyStatus.text),
+              BuildWidget.buildRow('维保状态', warrantyStatus),
               BuildWidget.buildRadio(
                   '召回标记', recall, currentRecall, changeRecall),
               new Padding(
@@ -1441,7 +1560,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
                     new Expanded(
                       flex: 2,
                       child: new IconButton(
-                          icon: Icon(Icons.calendar_today),
+                          icon: Icon(Icons.calendar_today, color: AppConstants.AppColors['btn_main'],),
                           onPressed: () async {
                             var _date = await pickDate();
                             setState(() {

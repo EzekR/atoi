@@ -101,7 +101,7 @@ class _ContractListState extends State<ContractList> {
                 ),
               ),
               new Padding(
-                padding: EdgeInsets.symmetric(horizontal: 5.0),
+                padding: EdgeInsets.symmetric(horizontal: 15.0),
               ),
             ],
           )

@@ -375,7 +375,10 @@ class BuildWidget {
                     groupValue: currentValue,
                     onChanged: changeValue,
                   ),
-                  new Text(groupValue[0])
+                  new Align(
+                    alignment: Alignment(-10.0, 0),
+                    child: new Text(groupValue[0])
+                  ),
                 ],
               )
           ),

@@ -28,8 +28,8 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
   var _isExpandedBasic = true;
   var _isExpandedDetail = false;
   var _isExpandedAssign = false;
-  String departureDate = '';
-  String dispatchDate;
+  String departureDate = 'YY-MM-DD';
+  String dispatchDate = 'YY-MM-DD';
   var _desc = new TextEditingController();
 
   Map<String, dynamic> _request = {};

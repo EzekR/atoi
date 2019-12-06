@@ -15,6 +15,7 @@ import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:atoi/widgets/search_page.dart';
 import 'package:atoi/widgets/search_bar_vendor.dart';
 import 'package:atoi/models/main_model.dart';
+import 'package:atoi/utils/constants.dart';
 
 class EquipmentContract extends StatefulWidget {
   EquipmentContract({Key key, this.contract}) : super(key: key);
@@ -35,8 +36,8 @@ class _EquipmentContractState extends State<EquipmentContract> {
   String currentType;
   String currentScope;
   Map<String, dynamic> supplier;
-  String startDate = '起始日期';
-  String endDate = '结束日期';
+  String startDate = 'YY-MM-DD';
+  String endDate = 'YY-MM-DD';
   String OID = '系统自动生成';
   String _contractStatus = '生效';
 
@@ -80,6 +81,7 @@ class _EquipmentContractState extends State<EquipmentContract> {
         scopeComments.text = _data['ScopeComments'];
         currentType = _data['Type']['Name'];
         currentScope = _data['Scope']['Name'];
+        supplier = _data['Supplier'];
       });
       var today = new DateTime.now();
       var _start = DateTime.parse(_data['StartDate']);
@@ -106,9 +108,9 @@ class _EquipmentContractState extends State<EquipmentContract> {
       ));
       return;
     }
-    if (amount.text.isEmpty) {
+    if (amount.text.isEmpty || double.parse(amount.text) > 99999999.99) {
       showDialog(context: context, builder: (context) => CupertinoAlertDialog(
-        title: new Text('金额不可为空'),
+        title: new Text('金额不可为空且金额不可大于1亿'),
       ));
       return;
     }
@@ -144,7 +146,7 @@ class _EquipmentContractState extends State<EquipmentContract> {
       "Scope": {
         "ID": model.ContractScope[currentScope],
       },
-      "ScopeComments": "",
+      "ScopeComments": scopeComments.text,
       "Amount": amount.text,
       "ProjectNum": projectNum.text,
       "StartDate": startDate,
@@ -181,14 +183,14 @@ class _EquipmentContractState extends State<EquipmentContract> {
 
   void initState() {
     super.initState();
-    dropdownType = getDropDownMenuItems(serviceType);
-    dropdownScope = getDropDownMenuItems(serviceScope);
+    model = MainModel.of(context);
+    dropdownType = getDropDownMenuItems(model.ContractTypeList);
+    dropdownScope = getDropDownMenuItems(model.ContractScopeList);
     currentScope = dropdownScope[0].value;
     currentType = dropdownType[0].value;
     if (widget.contract != null) {
       getContract(widget.contract['ID']);
     }
-    model = MainModel.of(context);
   }
 
   void changeType(String selected) {
@@ -207,9 +209,8 @@ class _EquipmentContractState extends State<EquipmentContract> {
     var val = await showDatePicker(
         context: context,
         initialDate: new DateTime.now(),
-        firstDate:
-            new DateTime.now().subtract(new Duration(days: 30)), // 减 30 天
-        lastDate: new DateTime.now().add(new Duration(days: 30)), // 加 30 天
+        firstDate: new DateTime.now().subtract(new Duration(days: 3650)), // 减 30 天
+        lastDate: new DateTime.now().add(new Duration(days: 3650)), // 加 30 天
         locale: Locale('zh'));
     var _today = new DateTime.now();
     switch (dateType) {
@@ -223,7 +224,12 @@ class _EquipmentContractState extends State<EquipmentContract> {
       case 'end':
         if (_today.isAfter(val)) {
           setState(() {
-            _contractStatus = '未生效';
+            _contractStatus = '失效';
+          });
+        }
+        if (_today.add(new Duration(days: 30)).isAfter(val) && _today.isBefore(val)) {
+          setState(() {
+            _contractStatus = '即将失效';
           });
         }
     }
@@ -443,7 +449,7 @@ class _EquipmentContractState extends State<EquipmentContract> {
       builder: (context, child, mainModel) {
         return new Scaffold(
             appBar: new AppBar(
-              title: new Text('更新合同'),
+              title: new Text(widget.contract==null?'添加合同':'更新合同'),
               elevation: 0.7,
               flexibleSpace: Container(
                 decoration: BoxDecoration(
@@ -548,7 +554,7 @@ class _EquipmentContractState extends State<EquipmentContract> {
                                 BuildWidget.buildInput(
                                     '合同编号', contractNum, maxLength: 20),
                                 BuildWidget.buildInput(
-                                    '金额', amount, inputType: TextInputType.numberWithOptions()),
+                                    '金额', amount, inputType: TextInputType.numberWithOptions(), maxLength: 11),
                                 BuildWidget.buildInput(
                                     '名称', name, maxLength: 50),
                                 BuildWidget.buildDropdown('类型', currentType,
@@ -561,14 +567,12 @@ class _EquipmentContractState extends State<EquipmentContract> {
                                         flex: 4,
                                         child: new Wrap(
                                           alignment: WrapAlignment.end,
-                                          crossAxisAlignment:
-                                              WrapCrossAlignment.center,
+                                          crossAxisAlignment: WrapCrossAlignment.center,
                                           children: <Widget>[
                                             new Text(
                                               '起止日期',
                                               style: new TextStyle(
-                                                  fontSize: 20.0,
-                                                  fontWeight: FontWeight.w600),
+                                                  fontSize: 20.0, fontWeight: FontWeight.w600),
                                             )
                                           ],
                                         ),
@@ -584,27 +588,64 @@ class _EquipmentContractState extends State<EquipmentContract> {
                                         ),
                                       ),
                                       new Expanded(
-                                        flex: 3,
-                                        child: new MaterialButton(
-                                          onPressed: () async {
-                                            var _date = await pickDate('start');
-                                            setState(() {
-                                              startDate = _date;
-                                            });
-                                          },
-                                          child: new Text(startDate),
-                                        ),
-                                      ),
-                                      new Expanded(
-                                        flex: 3,
-                                        child: new MaterialButton(
-                                          onPressed: () async {
-                                            var _date = await pickDate('end');
-                                            setState(() {
-                                              endDate = _date;
-                                            });
-                                          },
-                                          child: new Text(endDate),
+                                        flex: 6,
+                                        child: new Column(
+                                          children: <Widget>[
+                                            new Row(
+                                              children: <Widget>[
+                                                new Expanded(
+                                                  flex: 4,
+                                                  child: new Text(
+                                                    startDate,
+                                                    style: new TextStyle(
+                                                        fontSize: 20.0,
+                                                        fontWeight: FontWeight.w400,
+                                                        color: Colors.black54
+                                                    ),
+                                                  ),
+                                                ),
+                                                new Expanded(
+                                                  flex: 2,
+                                                  child: new IconButton(
+                                                      icon: Icon(Icons.calendar_today, color: AppConstants.AppColors['btn_main'],),
+                                                      onPressed: () async {
+                                                        var _date = await pickDate('start');
+                                                        setState(() {
+                                                          startDate = _date;
+                                                        });
+                                                      }
+                                                  ),
+                                                )
+                                              ],
+                                            ),
+                                            new Row(
+                                              children: <Widget>[
+                                                new Expanded(
+                                                  flex: 4,
+                                                  child: new Text(
+                                                    endDate,
+                                                    style: new TextStyle(
+                                                        fontSize: 20.0,
+                                                        fontWeight: FontWeight.w400,
+                                                        color: Colors.black54
+                                                    ),
+                                                  ),
+                                                ),
+                                                new Expanded(
+                                                  flex: 2,
+                                                  child: new IconButton(
+                                                      icon: Icon(Icons.calendar_today, color: AppConstants.AppColors['btn_main'],),
+                                                      onPressed: () async {
+                                                        var _date = await pickDate('end');
+                                                        setState(() {
+                                                          endDate = _date;
+                                                        });
+                                                      }
+                                                  ),
+                                                )
+                                              ],
+                                            ),
+                                          ],
                                         ),
                                       ),
                                     ],
