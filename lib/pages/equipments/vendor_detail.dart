@@ -25,7 +25,6 @@ class _VendorDetailState extends State<VendorDetail> {
   var _fault = new TextEditingController();
   List serviceType = ['厂商', '代理商', '经销商', '其他供应商'];
   List province = [
-    "",
     "北京",
     "天津",
     "上海",
@@ -133,10 +132,11 @@ class _VendorDetailState extends State<VendorDetail> {
     }
   }
 
-  Future<String> pickDate() async {
+  Future<String> pickDate({String initialTime}) async {
+    DateTime _time = DateTime.tryParse(initialTime)??DateTime.now();
     var val = await showDatePicker(
         context: context,
-        initialDate: new DateTime.now(),
+        initialDate: _time,
         firstDate:
             new DateTime.now().subtract(new Duration(days: 30)), // 减 30 天
         lastDate: new DateTime.now().add(new Duration(days: 30)), // 加 30 天

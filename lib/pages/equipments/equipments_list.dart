@@ -16,10 +16,18 @@ class _EquipmentsListState extends State<EquipmentsList> {
 
   List<Step> timeline = [];
 
-  Future<Null> getEquipments() async {
+  bool isSearchState = false;
+
+  TextEditingController _keywords = new TextEditingController();
+
+  Future<Null> getEquipments({String filterText}) async {
+    filterText = filterText??'';
     var resp = await HttpRequest.request(
       '/Equipment/Getdevices',
       method: HttpRequest.GET,
+      params: {
+        'filterText': filterText
+      }
     );
     if (resp['ResultCode'] == '00') {
       setState(() {
@@ -219,8 +227,35 @@ class _EquipmentsListState extends State<EquipmentsList> {
   Widget build(BuildContext context) {
     return new Scaffold(
         appBar: new AppBar(
-          title: new Text('设备列表'),
+          title: isSearchState?TextField(
+            controller: _keywords,
+            style: new TextStyle(
+              color: Colors.white
+            ),
+            decoration: new InputDecoration(
+              prefixIcon: Icon(Icons.search, color: Colors.white,),
+              hintText: '搜索设备',
+              hintStyle: new TextStyle(color: Colors.white)
+            ),
+            onChanged: (val) {
+              getEquipments(filterText: val);
+            },
+          ):Text('设备列表'),
           elevation: 0.7,
+          actions: <Widget>[
+            isSearchState?IconButton(
+              icon: Icon(Icons.cancel),
+              onPressed: () {
+                setState(() {
+                  isSearchState = false;
+                });
+              },
+            ):IconButton(icon: Icon(Icons.search), onPressed: () {
+              setState(() {
+                isSearchState = true;
+              });
+            })
+          ],
           flexibleSpace: Container(
             decoration: BoxDecoration(
               gradient: LinearGradient(

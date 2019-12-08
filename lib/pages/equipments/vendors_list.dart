@@ -13,10 +13,18 @@ class _VendorsListState extends State<VendorsList> {
 
   List<dynamic> _vendors = [];
 
-  Future<Null> getVendors() async {
+  bool isSearchState = false;
+
+  TextEditingController _keywords = new TextEditingController();
+
+  Future<Null> getVendors({String filterText}) async {
+    filterText = filterText??'';
     var resp = await HttpRequest.request(
-      '/DispatchReport/GetSuppliers?filterText=',
+      '/DispatchReport/GetSuppliers',
       method: HttpRequest.GET,
+      params: {
+        'filterText': filterText
+      }
     );
     if (resp['ResultCode'] == '00') {
       setState(() {
@@ -99,9 +107,9 @@ class _VendorsListState extends State<VendorsList> {
                   ],
                 ),
               ),
-              new Padding(
-                padding: EdgeInsets.symmetric(horizontal: 15.0),
-              ),
+              new SizedBox(
+                width: 60,
+              )
             ],
           )
         ],
@@ -112,8 +120,35 @@ class _VendorsListState extends State<VendorsList> {
   Widget build(BuildContext context) {
     return new Scaffold(
       appBar: new AppBar(
-        title: new Text('供应商列表'),
+        title: isSearchState?TextField(
+          controller: _keywords,
+          style: new TextStyle(
+              color: Colors.white
+          ),
+          decoration: new InputDecoration(
+              prefixIcon: Icon(Icons.search, color: Colors.white,),
+              hintText: '搜索供应商',
+              hintStyle: new TextStyle(color: Colors.white)
+          ),
+          onChanged: (val) {
+            getVendors(filterText: val);
+          },
+        ):Text('供应商列表'),
         elevation: 0.7,
+        actions: <Widget>[
+          isSearchState?IconButton(
+            icon: Icon(Icons.cancel),
+            onPressed: () {
+              setState(() {
+                isSearchState = false;
+              });
+            },
+          ):IconButton(icon: Icon(Icons.search), onPressed: () {
+            setState(() {
+              isSearchState = true;
+            });
+          })
+        ],
         flexibleSpace: Container(
           decoration: BoxDecoration(
             gradient: LinearGradient(

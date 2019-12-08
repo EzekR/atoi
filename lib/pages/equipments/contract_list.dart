@@ -13,10 +13,18 @@ class _ContractListState extends State<ContractList> {
 
   List<dynamic> _contracts = [];
 
-  Future<Null> getContracts() async {
+  bool isSearchState = false;
+
+  TextEditingController _keywords = new TextEditingController();
+
+  Future<Null> getContracts({String filterText}) async {
+    filterText = filterText??'';
     var resp = await HttpRequest.request(
       '/Contract/GetContracts',
       method: HttpRequest.GET,
+      params: {
+        'filterText': filterText
+      }
     );
     if (resp['ResultCode'] == '00') {
       setState(() {
@@ -100,9 +108,9 @@ class _ContractListState extends State<ContractList> {
                   ],
                 ),
               ),
-              new Padding(
-                padding: EdgeInsets.symmetric(horizontal: 15.0),
-              ),
+              new SizedBox(
+                width: 60,
+              )
             ],
           )
         ],
@@ -113,7 +121,34 @@ class _ContractListState extends State<ContractList> {
   Widget build(BuildContext context) {
     return new Scaffold(
       appBar: new AppBar(
-        title: new Text('合同列表'),
+        title: isSearchState?TextField(
+          controller: _keywords,
+          style: new TextStyle(
+              color: Colors.white
+          ),
+          decoration: new InputDecoration(
+              prefixIcon: Icon(Icons.search, color: Colors.white,),
+              hintText: '搜索供合同',
+              hintStyle: new TextStyle(color: Colors.white)
+          ),
+          onChanged: (val) {
+            getContracts(filterText: val);
+          },
+        ):Text('合同列表'),
+        actions: <Widget>[
+          isSearchState?IconButton(
+            icon: Icon(Icons.cancel),
+            onPressed: () {
+              setState(() {
+                isSearchState = false;
+              });
+            },
+          ):IconButton(icon: Icon(Icons.search), onPressed: () {
+            setState(() {
+              isSearchState = true;
+            });
+          })
+        ],
         elevation: 0.7,
         flexibleSpace: Container(
           decoration: BoxDecoration(

@@ -205,10 +205,11 @@ class _EquipmentContractState extends State<EquipmentContract> {
     });
   }
 
-  Future<String> pickDate(String dateType) async {
+  Future<String> pickDate(String dateType, {String initialTime}) async {
+    DateTime _time = DateTime.tryParse(initialTime)??DateTime.now();
     var val = await showDatePicker(
         context: context,
-        initialDate: new DateTime.now(),
+        initialDate: _time,
         firstDate: new DateTime.now().subtract(new Duration(days: 3650)), // 减 30 天
         lastDate: new DateTime.now().add(new Duration(days: 3650)), // 加 30 天
         locale: Locale('zh'));
@@ -233,7 +234,7 @@ class _EquipmentContractState extends State<EquipmentContract> {
           });
         }
     }
-    return '${val.year}-${val.month}-${val.day}';
+    return val.toString().split(' ')[0];
   }
 
   Future<Null> getDevice() async {
@@ -449,7 +450,7 @@ class _EquipmentContractState extends State<EquipmentContract> {
       builder: (context, child, mainModel) {
         return new Scaffold(
             appBar: new AppBar(
-              title: new Text(widget.contract==null?'添加合同':'更新合同'),
+              title: new Text(widget.contract==null?'新增合同':'更新合同'),
               elevation: 0.7,
               flexibleSpace: Container(
                 decoration: BoxDecoration(
@@ -478,13 +479,13 @@ class _EquipmentContractState extends State<EquipmentContract> {
                     _equipments.addAll(selected);
                   },
                 ),
-                new IconButton(
-                    icon: Icon(Icons.crop_free),
-                    color: Colors.white,
-                    iconSize: 30.0,
-                    onPressed: () {
-                      scan();
-                    })
+                //new IconButton(
+                //    icon: Icon(Icons.crop_free),
+                //    color: Colors.white,
+                //    iconSize: 30.0,
+                //    onPressed: () {
+                //      scan();
+                //    })
               ],
             ),
             body: new Padding(
@@ -554,7 +555,7 @@ class _EquipmentContractState extends State<EquipmentContract> {
                                 BuildWidget.buildInput(
                                     '合同编号', contractNum, maxLength: 20),
                                 BuildWidget.buildInput(
-                                    '金额', amount, inputType: TextInputType.numberWithOptions(), maxLength: 11),
+                                    '金额', amount, inputType: TextInputType.numberWithOptions(decimal: true), maxLength: 11),
                                 BuildWidget.buildInput(
                                     '名称', name, maxLength: 50),
                                 BuildWidget.buildDropdown('类型', currentType,
@@ -609,7 +610,7 @@ class _EquipmentContractState extends State<EquipmentContract> {
                                                   child: new IconButton(
                                                       icon: Icon(Icons.calendar_today, color: AppConstants.AppColors['btn_main'],),
                                                       onPressed: () async {
-                                                        var _date = await pickDate('start');
+                                                        var _date = await pickDate('start', initialTime: startDate);
                                                         setState(() {
                                                           startDate = _date;
                                                         });
@@ -636,7 +637,7 @@ class _EquipmentContractState extends State<EquipmentContract> {
                                                   child: new IconButton(
                                                       icon: Icon(Icons.calendar_today, color: AppConstants.AppColors['btn_main'],),
                                                       onPressed: () async {
-                                                        var _date = await pickDate('end');
+                                                        var _date = await pickDate('end', initialTime: endDate);
                                                         setState(() {
                                                           endDate = _date;
                                                         });

@@ -46,6 +46,8 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
     true, false, false, false, false
   ];
 
+  bool isSearchState = false;
+
   var name = new TextEditingController(),
       equipmentCode = new TextEditingController(),
       serialCode = new TextEditingController(),
@@ -443,6 +445,14 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
     return resp['ResultCode']=='00'?resp['Data']:null;
   }
 
+  String formatDate(String date) {
+    if (date == 'null') {
+      return 'YY-MM-DD';
+    } else {
+      return date.split('T')[0];
+    }
+  }
+
   Future<Null> deleteFile(int fileId) async {
     var resp = await HttpRequest.request(
       '/Equipment/DeleteEquipmentFile',
@@ -499,26 +509,25 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
         currentClass = _data['EquipmentLevel']['Name'];
         currentFixed = _data['FixedAsset'] ? '是' : '否';
         currentLevel = _data['AssetLevel']['Name'];
-        validationStartDate =
-            _data['ValidityStartDate'].toString().split('T')[0];
-        validationEndDate = _data['ValidityEndDate'].toString().split('T')[0];
-        installStartDate = _data['InstalStartDate'].toString().split('T')[0];
-        installEndDate = _data['InstalEndDate'].toString().split('T')[0];
-        purchaseDate = _data['PurchaseDate'].toString().split('T')[0];
-        scrapDate = _data['ScrapDate'].toString().split('T')[0];
+        validationStartDate = formatDate(_data['ValidityStartDate'].toString());
+        validationEndDate = formatDate(_data['ValidityEndDate'].toString());
+        installStartDate = formatDate(_data['InstalStartDate'].toString());
+        installEndDate = formatDate(_data['InstalEndDate'].toString());
+        purchaseDate = formatDate(_data['PurchaseDate'].toString());
+        scrapDate = formatDate(_data['ScrapDate'].toString());
         currentOrigin = _data['OriginType'];
         currentDepartment = _data['Department']['Name'];
         currentCheck = _data['Accepted'] ? '已验收' : '未验收';
-        checkDate = _data['AcceptanceDate'].toString().split('T')[0];
+        checkDate = formatDate(_data['AcceptanceDate'].toString());
         currentStatus = _data['UsageStatus']['Name'];
         currentMachine = _data['EquipmentStatus']['Name'];
         currentMandatory = _data['MandatoryTestStatus']['ID'] == 0
             ? '无'
             : _data['MandatoryTestStatus']['Name'];
-        mandatoryDate = _data['MandatoryTestDate'].toString().split('T')[0];
+        mandatoryDate = formatDate(_data['MandatoryTestDate'].toString());
         currentRecall = _data['RecallFlag'] ? '是' : '否';
         currentServiceScope = _data['ServiceScope']?"是":"否";
-        recallDate = _data['RecallDate'].toString().split('T')[0];
+        recallDate = formatDate(_data['RecallDate'].toString());
         currentPatrolPeriod = _data['PatrolType']['Name'] == ''
             ? '无'
             : _data['PatrolType']['Name'];
@@ -641,7 +650,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
       );
       return;
     }
-    if (double.parse(purchaseAmount.text) > 99999999.99) {
+    if (double.tryParse(purchaseAmount.text) > 99999999.99) {
       showDialog(
           context: context,
           builder: (context) => CupertinoAlertDialog(
@@ -650,7 +659,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
       );
       return;
     }
-    if (int.parse(patrolPeriod.text) <= 0) {
+    if (int.tryParse(patrolPeriod.text) <= 0) {
       showDialog(
           context: context,
           builder: (context) => CupertinoAlertDialog(
@@ -659,7 +668,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
       );
       return;
     }
-    if (int.parse(maintainPeriod.text) <= 0) {
+    if (int.tryParse(maintainPeriod.text) <= 0) {
       showDialog(
           context: context,
           builder: (context) => CupertinoAlertDialog(
@@ -668,7 +677,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
       );
       return;
     }
-    if (int.parse(correctionPeriod.text) <= 0) {
+    if (int.tryParse(correctionPeriod.text) <= 0) {
       showDialog(
           context: context,
           builder: (context) => CupertinoAlertDialog(
@@ -764,15 +773,15 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
       "ScrapDate": scrapDate=='YY-MM-DD'?null:scrapDate,
       "MaintenancePeriod": maintainPeriod.text,
       "MaintenanceType": {
-        "ID": periodType[currentMaintainPeriod],
+        "ID": model.PeriodType[currentMaintainPeriod],
       },
       "PatrolPeriod": patrolPeriod.text,
       "PatrolType": {
-        "ID": periodType[currentPatrolPeriod],
+        "ID": model.PeriodType[currentPatrolPeriod],
       },
       "CorrectionPeriod": correctionPeriod.text,
       "CorrectionType": {
-        "ID": periodType[currentCorrectionPeriod],
+        "ID": model.PeriodType[currentCorrectionPeriod],
       },
       "MandatoryTestStatus": {
         "ID": mandatoryFlagType[currentMandatory],
@@ -809,16 +818,17 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
     print(value);
   }
 
-  Future<String> pickDate({DateTime initialTime}) async {
-    initialTime = initialTime??DateTime.now();
+  Future<String> pickDate({String initialTime}) async {
+    DateTime _time;
+    _time = DateTime.tryParse(initialTime)??DateTime.now();
     var val = await showDatePicker(
         context: context,
-        initialDate: initialTime,
+        initialDate: _time,
         firstDate:
             new DateTime.now().subtract(new Duration(days: 3650)), // 减 30 天
         lastDate: new DateTime.now().add(new Duration(days: 3650)), // 加 30 天
         locale: Locale('zh'));
-    return '${val.year}-${val.month}-${val.day}';
+    return val.toString().split(' ')[0];
   }
 
 
@@ -1047,7 +1057,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
                                 child: new IconButton(
                                     icon: Icon(Icons.calendar_today, color: AppConstants.AppColors['btn_main'],),
                                     onPressed: () async {
-                                      var _date = await pickDate(initialTime: validationStartDate!='YY-MM-DD'?DateTime.parse(validationStartDate):DateTime.now());
+                                      var _date = await pickDate(initialTime: validationStartDate);
                                       setState(() {
                                         validationStartDate = _date;
                                       });
@@ -1074,7 +1084,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
                                 child: new IconButton(
                                     icon: Icon(Icons.calendar_today, color: AppConstants.AppColors['btn_main'],),
                                     onPressed: () async {
-                                      var _date = await pickDate(initialTime: validationEndDate!='YY-MM-DD'?DateTime.parse(validationEndDate):DateTime.now());
+                                      var _date = await pickDate(initialTime: validationEndDate);
                                       setState(() {
                                         validationEndDate = _date;
                                       });
@@ -1171,7 +1181,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
                 ),
               ),
               BuildWidget.buildInput('购入方式', purchaseWay, lines: 1),
-              BuildWidget.buildInput('采购金额(元)', purchaseAmount, lines: 1, maxLength: 11),
+              BuildWidget.buildInput('采购金额(元)', purchaseAmount, lines: 1, maxLength: 11, inputType: TextInputType.numberWithOptions(decimal: true)),
               new Padding(
                 padding: EdgeInsets.symmetric(vertical: 5.0),
                 child: new Row(
@@ -1216,7 +1226,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
                       child: new IconButton(
                           icon: Icon(Icons.calendar_today, color: AppConstants.AppColors['btn_main'],),
                           onPressed: () async {
-                            var _date = await pickDate(initialTime: purchaseDate!='YY-MM-DD'?DateTime.parse(purchaseDate):DateTime.now());
+                            var _date = await pickDate(initialTime: purchaseDate);
                             setState(() {
                               purchaseDate = _date;
                             });
@@ -1305,7 +1315,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
                                 child: new IconButton(
                                     icon: Icon(Icons.calendar_today, color: AppConstants.AppColors['btn_main'],),
                                     onPressed: () async {
-                                      var _date = await pickDate(initialTime: installStartDate!='YY-MM-DD'?DateTime.parse(installStartDate):DateTime.now());
+                                      var _date = await pickDate(initialTime: installStartDate);
                                       setState(() {
                                         installStartDate = _date;
                                       });
@@ -1332,7 +1342,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
                                 child: new IconButton(
                                     icon: Icon(Icons.calendar_today, color: AppConstants.AppColors['btn_main'],),
                                     onPressed: () async {
-                                      var _date = await pickDate(initialTime: installEndDate!='YY-MM-DD'?DateTime.parse(installEndDate):DateTime.now());
+                                      var _date = await pickDate(initialTime: installEndDate);
                                       setState(() {
                                         installEndDate = _date;
                                       });
