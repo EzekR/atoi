@@ -75,8 +75,8 @@ class _EquipmentContractState extends State<EquipmentContract> {
         amount.text = _data['Amount'].toString();
         name.text = _data['Name'];
         status.text = _data['Status'];
-        startDate = _data['StartDate'].split('T')[0];
-        endDate = _data['EndDate'].split('T')[0];
+        startDate = _data['StartDate'].split('T')[0]=='null'?'YY-MM-DD':_data['StartDate'].split('T')[0];
+        endDate = _data['EndDate'].split('T')[0]=='null'?'YY-MM-DD':_data['EndDate'].split('T')[0];
         comments.text = _data['Comments'];
         scopeComments.text = _data['ScopeComments'];
         currentType = _data['Type']['Name'];
@@ -120,9 +120,17 @@ class _EquipmentContractState extends State<EquipmentContract> {
       ));
       return;
     }
-    if (startDate == '起始日期' || endDate == '结束日期') {
+    if (startDate == 'YY-MM-DD' || endDate == 'YY-MM-DD') {
       showDialog(context: context, builder: (context) => CupertinoAlertDialog(
         title: new Text('起始日期不可为空'),
+      ));
+      return;
+    }
+    var _start = DateTime.parse(startDate);
+    var _end = DateTime.parse(endDate);
+    if (_end.isBefore(_start)) {
+      showDialog(context: context, builder: (context) => CupertinoAlertDialog(
+        title: new Text('起止日期格式有误'),
       ));
       return;
     }
@@ -220,18 +228,31 @@ class _EquipmentContractState extends State<EquipmentContract> {
           setState(() {
             _contractStatus = '未生效';
           });
+        } else {
+          setState(() {
+            _contractStatus = '生效';
+          });
         }
         break;
       case 'end':
-        if (_today.isAfter(val)) {
-          setState(() {
-            _contractStatus = '失效';
-          });
-        }
-        if (_today.add(new Duration(days: 30)).isAfter(val) && _today.isBefore(val)) {
-          setState(() {
-            _contractStatus = '即将失效';
-          });
+        if (_today.isAfter(DateTime.parse(startDate))) {
+          _contractStatus = '未生效';
+        } else {
+          if (_today.isAfter(val)) {
+            setState(() {
+              _contractStatus = '失效';
+            });
+          } else {
+            if (_today.add(new Duration(days: 30)).isAfter(val) && _today.isBefore(val)) {
+              setState(() {
+                _contractStatus = '即将失效';
+              });
+            } else {
+              setState(() {
+                _contractStatus = '生效';
+              });
+            }
+          }
         }
     }
     return val.toString().split(' ')[0];

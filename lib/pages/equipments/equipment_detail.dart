@@ -632,6 +632,17 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
       );
       return;
     }
+    var _vStart = DateTime.tryParse(validationStartDate);
+    var _vEnd = DateTime.tryParse(validationEndDate);
+    if (_vStart!=null&&_vEnd!=null&&_vEnd.isBefore(_vStart)) {
+      showDialog(
+          context: context,
+          builder: (context) => CupertinoAlertDialog(
+            title: new Text('有效日期格式有误'),
+          )
+      );
+      return;
+    }
     if (assetCode.text.isEmpty) {
       showDialog(
           context: context,
@@ -691,6 +702,17 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
           context: context,
           builder: (context) => CupertinoAlertDialog(
             title: new Text('安装日期不可为空'),
+          )
+      );
+      return;
+    }
+    var _iStart = DateTime.parse(installStartDate);
+    var _iEnd = DateTime.parse(installEndDate);
+    if (_iEnd.isBefore(_iStart)) {
+      showDialog(
+          context: context,
+          builder: (context) => CupertinoAlertDialog(
+            title: new Text('安装日期格式有误'),
           )
       );
       return;

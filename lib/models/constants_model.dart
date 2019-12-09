@@ -189,6 +189,8 @@ class ConstantsModel extends Model {
       for(var _item in resp['Data']['UsageStatus']) {
         _UsageStatus.putIfAbsent(_item['Name'], () => _item['ID']);
       }
+      _PeriodType.putIfAbsent('无', () => 0);
+      _PeriodTypeList.add('无');
       for(var _item in resp['Data']['PeriodType']) {
         _PeriodType.putIfAbsent(_item['Name'], () => _item['ID']);
         if (!_PeriodTypeList.contains(_item['Name'])) {

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:qr_flutter/qr_flutter.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:atoi/utils/http_request.dart';
 import 'package:brother_printer/brother_printer.dart';
 import 'dart:convert';
@@ -165,7 +165,7 @@ class _PrintQrcodeState extends State<PrintQrcode> {
     print(error);
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
+      builder: (context) => CupertinoAlertDialog(
         title: new Text(error=='ok'?'打印完成':'请连接打印机'),
       )
     );

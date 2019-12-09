@@ -220,6 +220,12 @@ class _VendorDetailState extends State<VendorDetail> {
           title: new Text('保存成功'),
         );
       }).then((result) => Navigator.of(context).pop());
+    } else {
+      showDialog(context: context, builder: (context) {
+        return CupertinoAlertDialog(
+          title: new Text(resp['ResultMessage']),
+        );
+      });
     }
   }
 

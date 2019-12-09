@@ -71,11 +71,11 @@ class _EngineerHomePageState extends State<EngineerHomePage>
         return new WillPopScope(
             child: new Scaffold(
                 appBar: new AppBar(
-                  leading: new Container(),
                   title: new Align(
-                    alignment: Alignment(-2.0, 0),
+                    alignment: Alignment(-1.0, 0),
                     child: new Text('ATOI医疗设备管理系统'),
                   ),
+                  automaticallyImplyLeading: false,
                   elevation: 0.7,
                   flexibleSpace: Container(
                     decoration: BoxDecoration(

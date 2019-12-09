@@ -35,7 +35,7 @@ dependencies:
   photo_view: ^0.5.0
   flutter_image_compress: ^0.6.3
   connectivity: ^0.4.4
-  timeline_list: ^0.0.3
+  timeline_list: ^0.0.5
   qr_flutter: ^3.0.1
   flutter_jpush: ^0.0.4
   charts_flutter: ^0.8.0

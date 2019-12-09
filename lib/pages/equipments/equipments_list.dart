@@ -5,6 +5,8 @@ import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:atoi/pages/equipments/print_qrcode.dart';
 import 'package:atoi/widgets/build_widget.dart';
 import 'package:atoi/pages/equipments/equipment_detail.dart';
+import 'package:timeline_list/timeline.dart';
+import 'package:timeline_list/timeline_model.dart';
 
 class EquipmentsList extends StatefulWidget{
   _EquipmentsListState createState() => _EquipmentsListState();
@@ -41,7 +43,7 @@ class _EquipmentsListState extends State<EquipmentsList> {
     getEquipments();
   }
 
-  Future<List<Step>> getTimeline(int deviceId) async {
+  Future<List<TimelineModel>> getTimeline(int deviceId) async {
     var resp = await HttpRequest.request(
       '/Equipment/GetTimeLine4App',
       method: HttpRequest.POST,
@@ -53,13 +55,89 @@ class _EquipmentsListState extends State<EquipmentsList> {
       print(resp['Data']['Dispatches']);
       if (resp['Data']['Dispatches'] != null) {
         var _dispatches = resp['Data']['Dispatches'];
-        List<Step> _list = _dispatches.map<Step>((item) => Step(
-            title: new Text('派工单号：${item['OID']}'),
-            subtitle: new Text('派工时间：${item['EndDate'].split('T')[0]}'),
-            content: new Text(item['TimelineDesc']),
-            isActive: false
-        )).toList();
-        return _list;
+        List<TimelineModel> _timeline = [];
+        for(var _item in _dispatches) {
+          switch (_item['RequestType']['ID']) {
+            case 1:
+              _timeline.add(
+                TimelineModel(
+                  ListTile(
+                    title: new Text(_item['TimelineDesc']),
+                    subtitle: new Text(_item['EndDate'].split('T')[0]),
+                  ),
+                  icon: Icon(Icons.build, color: Colors.white,),
+                  iconBackground: Colors.redAccent,
+                  position: TimelineItemPosition.right
+                )
+              );
+              break;
+            case 3:
+              _timeline.add(
+                  TimelineModel(
+                      ListTile(
+                        title: new Text(_item['TimelineDesc']),
+                        subtitle: new Text(_item['EndDate'].split('T')[0]),
+                      ),
+                      icon: Icon(Icons.store, color: Colors.white,),
+                      iconBackground: Colors.redAccent,
+                      position: TimelineItemPosition.right
+                  )
+              );
+              break;
+            case 4:
+              _timeline.add(
+                  TimelineModel(
+                      ListTile(
+                        title: new Text(_item['TimelineDesc']),
+                        subtitle: new Text(_item['EndDate'].split('T')[0]),
+                      ),
+                      icon: Icon(Icons.people, color: Colors.white,),
+                      iconBackground: Colors.green,
+                      position: TimelineItemPosition.right
+                  )
+              );
+              break;
+            case 5:
+              _timeline.add(
+                  TimelineModel(
+                      ListTile(
+                        title: new Text(_item['TimelineDesc']),
+                        subtitle: new Text(_item['EndDate'].split('T')[0]),
+                      ),
+                      icon: Icon(Icons.remove_red_eye, color: Colors.white,),
+                      iconBackground: Colors.green,
+                      position: TimelineItemPosition.right
+                  )
+              );
+              break;
+            case 2:
+              _timeline.add(
+                  TimelineModel(
+                      ListTile(
+                        title: new Text(_item['TimelineDesc']),
+                        subtitle: new Text(_item['EndDate'].split('T')[0]),
+                      ),
+                      icon: Icon(Icons.assignment_turned_in, color: Colors.white,),
+                      iconBackground: Colors.green,
+                      position: TimelineItemPosition.right
+                  )
+              );
+              break;
+            default:
+              _timeline.add(
+                  TimelineModel(
+                      ListTile(
+                        title: new Text(_item['TimelineDesc']),
+                        subtitle: new Text(_item['EndDate'].split('T')[0]),
+                      ),
+                      icon: Icon(Icons.check, color: Colors.white,),
+                      iconBackground: Colors.grey,
+                      position: TimelineItemPosition.right
+                  )
+              );
+          }
+        }
+        return _timeline;
       } else {
         return [];
       }
@@ -170,26 +248,19 @@ class _EquipmentsListState extends State<EquipmentsList> {
               ),
               new RaisedButton(
                 onPressed: () async {
-                  List<Step> _steps = await getTimeline(item['ID']);
+                  List<TimelineModel> _steps = await getTimeline(item['ID']);
                   if (_steps.length > 0) {
                     showDialog(context: context,
                         builder: (context) => SimpleDialog(
-                          title: new Text('派工历史'),
+                          title: new Text('生命周期'),
                           children: <Widget>[
                             new Container(
                               width: 300.0,
                               height: 600.0,
-                              child: new Stepper(
-                                currentStep: 0,
-                                controlsBuilder: (BuildContext context, {VoidCallback onStepContinue, VoidCallback onStepCancel}) {
-                                  return Row(
-                                    children: <Widget>[
-                                      new Container()
-                                    ],
-                                  );
-                                },
-                                steps: _steps,
-                              ),
+                              child: Timeline(
+                                children: _steps,
+                                position: TimelinePosition.Left,
+                              )
                             ),
                           ],
                         )
