@@ -650,7 +650,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
       );
       return;
     }
-    if (double.tryParse(purchaseAmount.text) > 99999999.99) {
+    if (double.tryParse(purchaseAmount.text.toString()) !=null && double.tryParse(purchaseAmount.text.toString()) > 99999999.99) {
       showDialog(
           context: context,
           builder: (context) => CupertinoAlertDialog(
@@ -659,7 +659,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
       );
       return;
     }
-    if (int.tryParse(patrolPeriod.text) <= 0) {
+    if (int.tryParse(patrolPeriod.text.toString()) != null && int.tryParse(patrolPeriod.text.toString()) <= 0) {
       showDialog(
           context: context,
           builder: (context) => CupertinoAlertDialog(
@@ -668,7 +668,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
       );
       return;
     }
-    if (int.tryParse(maintainPeriod.text) <= 0) {
+    if (int.tryParse(maintainPeriod.text.toString()) !=null && int.tryParse(maintainPeriod.text.toString()) <= 0) {
       showDialog(
           context: context,
           builder: (context) => CupertinoAlertDialog(
@@ -677,7 +677,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
       );
       return;
     }
-    if (int.tryParse(correctionPeriod.text) <= 0) {
+    if (int.tryParse(correctionPeriod.text.toString()) != null && int.tryParse(correctionPeriod.text.toString()) <= 0) {
       showDialog(
           context: context,
           builder: (context) => CupertinoAlertDialog(
@@ -828,7 +828,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
             new DateTime.now().subtract(new Duration(days: 3650)), // 减 30 天
         lastDate: new DateTime.now().add(new Duration(days: 3650)), // 加 30 天
         locale: Locale('zh'));
-    return val.toString().split(' ')[0];
+    return val==null?initialTime:val.toString().split(' ')[0];
   }
 
 
@@ -1085,9 +1085,17 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
                                     icon: Icon(Icons.calendar_today, color: AppConstants.AppColors['btn_main'],),
                                     onPressed: () async {
                                       var _date = await pickDate(initialTime: validationEndDate);
-                                      setState(() {
-                                        validationEndDate = _date;
-                                      });
+                                      var _start = DateTime.tryParse(validationStartDate);
+                                      var _end = DateTime.tryParse(_date);
+                                      if (_start!=null && _end!=null && _end.isBefore(_start)) {
+                                        showDialog(context: context, builder: (context) => CupertinoAlertDialog(
+                                          title: new Text('有效日期格式有误'),
+                                        ));
+                                      } else {
+                                        setState(() {
+                                          validationEndDate = _date;
+                                        });
+                                      }
                                     }
                                 ),
                               )
@@ -1343,9 +1351,17 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
                                     icon: Icon(Icons.calendar_today, color: AppConstants.AppColors['btn_main'],),
                                     onPressed: () async {
                                       var _date = await pickDate(initialTime: installEndDate);
-                                      setState(() {
-                                        installEndDate = _date;
-                                      });
+                                      var _start = DateTime.tryParse(installStartDate);
+                                      var _end = DateTime.tryParse(_date);
+                                      if (_start!=null && _end!=null && _end.isBefore(_start)) {
+                                        showDialog(context: context, builder: (context) => CupertinoAlertDialog(
+                                          title: new Text('安装日期格式有误'),
+                                        ));
+                                      } else {
+                                        setState(() {
+                                          installEndDate = _date;
+                                        });
+                                      }
                                     }
                                 ),
                               )
@@ -1403,7 +1419,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
                       child: new IconButton(
                           icon: Icon(Icons.calendar_today, color: AppConstants.AppColors['btn_main'],),
                           onPressed: () async {
-                            var _date = await pickDate();
+                            var _date = await pickDate(initialTime: checkDate);
                             setState(() {
                               checkDate = _date;
                             });
@@ -1461,7 +1477,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
                       child: new IconButton(
                           icon: Icon(Icons.calendar_today, color: AppConstants.AppColors['btn_main'],),
                           onPressed: () async {
-                            var _date = await pickDate();
+                            var _date = await pickDate(initialTime: scrapDate);
                             setState(() {
                               scrapDate = _date;
                             });
@@ -1516,7 +1532,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
                       child: new IconButton(
                           icon: Icon(Icons.calendar_today, color: AppConstants.AppColors['btn_main'],),
                           onPressed: () async {
-                            var _date = await pickDate();
+                            var _date = await pickDate(initialTime: mandatoryDate);
                             setState(() {
                               mandatoryDate = _date;
                             });
@@ -1572,7 +1588,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
                       child: new IconButton(
                           icon: Icon(Icons.calendar_today, color: AppConstants.AppColors['btn_main'],),
                           onPressed: () async {
-                            var _date = await pickDate();
+                            var _date = await pickDate(initialTime: recallDate);
                             setState(() {
                               recallDate = _date;
                             });

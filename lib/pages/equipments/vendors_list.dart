@@ -127,7 +127,7 @@ class _VendorsListState extends State<VendorsList> {
           ),
           decoration: new InputDecoration(
               prefixIcon: Icon(Icons.search, color: Colors.white,),
-              hintText: '搜索供应商',
+              hintText: '请输入供应商名称',
               hintStyle: new TextStyle(color: Colors.white)
           ),
           onChanged: (val) {
@@ -172,7 +172,7 @@ class _VendorsListState extends State<VendorsList> {
         onPressed: () {
           Navigator.of(context).push(new MaterialPageRoute(builder: (_) {
             return new VendorDetail();
-          }));
+          })).then((result) => getVendors());
         },
         child: Icon(Icons.add_circle),
         backgroundColor: Colors.blue,

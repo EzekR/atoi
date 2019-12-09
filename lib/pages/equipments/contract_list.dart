@@ -128,7 +128,7 @@ class _ContractListState extends State<ContractList> {
           ),
           decoration: new InputDecoration(
               prefixIcon: Icon(Icons.search, color: Colors.white,),
-              hintText: '搜索供合同',
+              hintText: '请输入系统编号',
               hintStyle: new TextStyle(color: Colors.white)
           ),
           onChanged: (val) {
@@ -173,7 +173,7 @@ class _ContractListState extends State<ContractList> {
         onPressed: () {
           Navigator.of(context).push(new MaterialPageRoute(builder: (_) {
             return new EquipmentContract();
-          }));
+          })).then((result) => getContracts());
         },
         child: Icon(Icons.add_circle),
         backgroundColor: Colors.blue,

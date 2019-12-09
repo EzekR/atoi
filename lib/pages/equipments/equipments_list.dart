@@ -144,7 +144,7 @@ class _EquipmentsListState extends State<EquipmentsList> {
                 onPressed: (){
                   Navigator.of(context).push(new MaterialPageRoute(builder: (_) {
                     return new EquipmentDetail(equipment: item,);
-                  }));
+                  })).then((result) => getEquipments());
                 },
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(6),
@@ -234,7 +234,7 @@ class _EquipmentsListState extends State<EquipmentsList> {
             ),
             decoration: new InputDecoration(
               prefixIcon: Icon(Icons.search, color: Colors.white,),
-              hintText: '搜索设备',
+              hintText: '请输入设备名称/型号/序列号',
               hintStyle: new TextStyle(color: Colors.white)
             ),
             onChanged: (val) {
@@ -279,7 +279,7 @@ class _EquipmentsListState extends State<EquipmentsList> {
           onPressed: () {
             Navigator.of(context).push(new MaterialPageRoute(builder: (_) {
               return new EquipmentDetail();
-            }));
+            })).then((result) => getEquipments());
           },
           child: Icon(Icons.add_circle),
           backgroundColor: Colors.blue,
