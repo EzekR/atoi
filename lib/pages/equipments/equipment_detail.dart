@@ -670,6 +670,15 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
       );
       return;
     }
+    if (patrolPeriod.text.isEmpty) {
+      showDialog(
+          context: context,
+          builder: (context) => CupertinoAlertDialog(
+            title: new Text('巡检周期不可为空'),
+          )
+      );
+      return;
+    }
     if (int.tryParse(patrolPeriod.text.toString()) != null && int.tryParse(patrolPeriod.text.toString()) <= 0) {
       showDialog(
           context: context,
@@ -679,11 +688,29 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
       );
       return;
     }
+    if (maintainPeriod.text.isEmpty) {
+      showDialog(
+          context: context,
+          builder: (context) => CupertinoAlertDialog(
+            title: new Text('保养周期不可为空'),
+          )
+      );
+      return;
+    }
     if (int.tryParse(maintainPeriod.text.toString()) !=null && int.tryParse(maintainPeriod.text.toString()) <= 0) {
       showDialog(
           context: context,
           builder: (context) => CupertinoAlertDialog(
             title: new Text('保养周期需大于0'),
+          )
+      );
+      return;
+    }
+    if (correctionPeriod.text.isEmpty) {
+      showDialog(
+          context: context,
+          builder: (context) => CupertinoAlertDialog(
+            title: new Text('校正周期不可为空'),
           )
       );
       return;

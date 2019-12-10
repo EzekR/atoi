@@ -257,6 +257,7 @@ class BuildWidget {
           child: new TextField(
             controller: controller,
             keyboardType: inputType,
+            enabled: currentItem=='无'?false:true,
             decoration: InputDecoration(
               fillColor: Color(0xfff0f0f0),
               filled: true,

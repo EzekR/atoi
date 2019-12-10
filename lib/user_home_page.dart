@@ -88,7 +88,7 @@ class _UserHomePageState extends State<UserHomePage> {
   }
 
   Column buildIconColumn(IconData icon, String label) {
-    Color color = label=='Repair Request'?Colors.orange:Theme.of(context).primaryColor;
+    Color color = label=='扫码报修'?Colors.orange:Theme.of(context).primaryColor;
     return new Column(
       mainAxisSize: MainAxisSize.values[1],
       mainAxisAlignment: MainAxisAlignment.center,
@@ -275,7 +275,7 @@ class _UserHomePageState extends State<UserHomePage> {
                     }
                     ));
                   },
-                )
+                ),
               ],
             ),
           ),

@@ -19,11 +19,15 @@ class _EquipmentsListState extends State<EquipmentsList> {
   List<Step> timeline = [];
 
   bool isSearchState = false;
+  bool _loading = false;
 
   TextEditingController _keywords = new TextEditingController();
 
   Future<Null> getEquipments({String filterText}) async {
     filterText = filterText??'';
+    setState(() {
+      _loading = true;
+    });
     var resp = await HttpRequest.request(
       '/Equipment/Getdevices',
       method: HttpRequest.GET,
@@ -31,6 +35,9 @@ class _EquipmentsListState extends State<EquipmentsList> {
         'filterText': filterText
       }
     );
+    setState(() {
+      _loading = false;
+    });
     if (resp['ResultCode'] == '00') {
       setState(() {
         _equipments = resp['Data'];
@@ -222,7 +229,7 @@ class _EquipmentsListState extends State<EquipmentsList> {
                 onPressed: (){
                   Navigator.of(context).push(new MaterialPageRoute(builder: (_) {
                     return new EquipmentDetail(equipment: item,);
-                  })).then((result) => getEquipments());
+                  }));
                 },
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(6),
@@ -256,7 +263,7 @@ class _EquipmentsListState extends State<EquipmentsList> {
                           children: <Widget>[
                             new Container(
                               width: 300.0,
-                              height: 600.0,
+                              height: _steps.length*80.0,
                               child: Timeline(
                                 children: _steps,
                                 position: TimelinePosition.Left,
@@ -340,7 +347,7 @@ class _EquipmentsListState extends State<EquipmentsList> {
             ),
           ),
         ),
-        body: _equipments.length==0?new Center(child: new SpinKitRotatingPlain(color: Colors.blue,),):new ListView.builder(
+        body: _loading?new Center(child: new SpinKitRotatingPlain(color: Colors.blue,),):new ListView.builder(
           itemCount: _equipments.length,
           itemBuilder: (context, i) {
             return buildEquipmentCard(_equipments[i]);

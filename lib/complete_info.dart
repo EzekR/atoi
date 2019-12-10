@@ -211,6 +211,10 @@ class _CompleteInfoState extends State<CompleteInfo> {
             ),
           )
         ],
+      ),
+      new SizedBox(height: 40,),
+      new ListTile(
+        title: new Text('服务器：${HttpRequest.API_PREFIX}'),
       )
     ];
     return _list;

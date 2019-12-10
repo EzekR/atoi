@@ -673,7 +673,7 @@ class _EquipmentContractState extends State<EquipmentContract> {
                                     ],
                                   ),
                                 ),
-                                BuildWidget.buildRow('状态', _contractStatus),
+                                //BuildWidget.buildRow('状态', _contractStatus),
                                 new Padding(
                                   padding: EdgeInsets.symmetric(vertical: 5.0),
                                   child: new Row(
