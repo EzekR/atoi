@@ -444,7 +444,7 @@ class _EngineerReportAccessoryState extends State<EngineerReportAccessory> {
                           ),
                           new Padding(
                             padding: EdgeInsets.symmetric(horizontal: 0.0),
-                            child: new IconButton(icon: Icon(Icons.cancel), color: Colors.white, onPressed: (){
+                            child: new IconButton(icon: Icon(Icons.cancel), color: Colors.blue,  onPressed: (){
                               setState(() {
                                 _imageNew = null;
                               });
@@ -489,7 +489,7 @@ class _EngineerReportAccessoryState extends State<EngineerReportAccessory> {
                           ),
                           new Padding(
                             padding: EdgeInsets.symmetric(horizontal: 0.0),
-                            child: new IconButton(icon: Icon(Icons.cancel), color: Colors.white, onPressed: (){
+                            child: new IconButton(icon: Icon(Icons.cancel), color: Colors.blue,  onPressed: (){
                               setState(() {
                                 _imageOld = null;
                               });

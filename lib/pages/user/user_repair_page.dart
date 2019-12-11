@@ -78,9 +78,9 @@ class _UserRepairPageState extends State<UserRepairPage> {
   }
 
   void initDropdown() {
-    _serviceResults = iterateMap(model.FaultRepair);
+    _serviceResults = iterateMap(model.MachineStatus);
     _dropDownMenuItems = getDropDownMenuItems(_serviceResults);
-    //_currentResult = _dropDownMenuItems[0].value==null?'':_dropDownMenuItems[0];
+    _currentResult = _dropDownMenuItems[0].value;
   }
 
   void initState() {
@@ -167,9 +167,9 @@ class _UserRepairPageState extends State<UserRepairPage> {
         ],
         'RequestType': {'ID': 1},
         'FaultDesc': _describe.text,
-        'FaultType': {
+        'MachineStatus': {
           //'ID': model.FaultRepair[_currentResult]
-          'ID': 1
+          'ID': model.MachineStatus[_currentResult]
         },
         'Files': Files
       }
@@ -414,8 +414,8 @@ class _UserRepairPageState extends State<UserRepairPage> {
                         mainAxisSize: MainAxisSize.max,
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: <Widget>[
-                          BuildWidget.buildInput('故障描述', _describe),
-                          BuildWidget.buildDropdown('故障分类', _currentResult,
+                          BuildWidget.buildInputLeft('故障描述', _describe),
+                          BuildWidget.buildDropdownLeft('机器状态', _currentResult,
                               _dropDownMenuItems, changedDropDownMethod),
                           new Padding(
                             padding: EdgeInsets.symmetric(vertical: 5.0),

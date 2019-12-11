@@ -191,6 +191,48 @@ class BuildWidget {
     );
   }
 
+  static Padding buildInputLeft(String labelText, TextEditingController controller, {TextInputType inputType, int lines, int maxLength}) {
+    inputType??TextInputType.text;
+    lines = lines ?? 3;
+    maxLength = maxLength ?? 30;
+    return new Padding(
+      padding: EdgeInsets.symmetric(vertical: 5.0),
+      child: new Row(
+        children: <Widget>[
+          new Expanded(
+            flex: 4,
+            child: new Wrap(
+              alignment: WrapAlignment.start,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              children: <Widget>[
+                new Text(
+                  labelText,
+                  style: new TextStyle(
+                      fontSize: 20.0,
+                      fontWeight: FontWeight.w600
+                  ),
+                )
+              ],
+            ),
+          ),
+          new Expanded(
+            flex: 7,
+            child: new TextField(
+              controller: controller,
+              maxLines: lines,
+              maxLength: maxLength,
+              keyboardType: inputType,
+              decoration: InputDecoration(
+                fillColor: Color(0xfff0f0f0),
+                filled: true,
+              ),
+            ),
+          )
+        ],
+      ),
+    );
+  }
+
   static Row buildDropdownLeft(String title, String currentItem, List dropdownItems, Function changeDropdown) {
     return new Row(
       children: <Widget>[
@@ -379,6 +421,61 @@ class BuildWidget {
                   new Align(
                     alignment: Alignment(-10.0, 0),
                     child: new Text(groupValue[0])
+                  ),
+                ],
+              )
+          ),
+          new Expanded(
+              flex: 3,
+              child: new Row(
+                children: <Widget>[
+                  new Radio(
+                    value: groupValue[1],
+                    groupValue: currentValue,
+                    onChanged: changeValue,
+                  ),
+                  new Text(groupValue[1])
+                ],
+              )
+          ),
+        ],
+      ),
+    );
+  }
+
+  static Padding buildRadioLeft(String labelText, List groupValue, String currentValue, Function changeValue) {
+    return new Padding(
+      padding: EdgeInsets.symmetric(vertical: 5.0),
+      child: new Row(
+        children: <Widget>[
+          new Expanded(
+            flex: 4,
+            child: new Wrap(
+              alignment: WrapAlignment.start,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              children: <Widget>[
+                new Text(
+                  labelText,
+                  style: new TextStyle(
+                      fontSize: 20.0,
+                      fontWeight: FontWeight.w600
+                  ),
+                )
+              ],
+            ),
+          ),
+          new Expanded(
+              flex: 4,
+              child: new Row(
+                children: <Widget>[
+                  new Radio(
+                    value: groupValue[0],
+                    groupValue: currentValue,
+                    onChanged: changeValue,
+                  ),
+                  new Align(
+                      alignment: Alignment(-10.0, 0),
+                      child: new Text(groupValue[0])
                   ),
                 ],
               )

@@ -178,6 +178,7 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
         _request = resp['Data'];
         _currentType = _request['RequestType']['Name'];
         _desc.text = resp['Data']['FaultDesc'];
+        _currentStatus = _request['MachineStatus']['Name'];
       });
       if (resp['Data']['RequestType']['ID'] == 2) {
         setState(() {
@@ -405,12 +406,23 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
       List<Widget> _list = [];
       for(var _name in _fileNames) {
         _list.add(new ListTile(
-          title: new Text(
-            _name,
-            style: new TextStyle(
-              color: Colors.blue
-            ),
-          ),
+          title: new Row(
+            children: <Widget>[
+              new Expanded(
+                  flex: 4,
+                  child: new Container()
+              ),
+              new Expanded(
+                  flex: 6,
+                  child: new Text(
+                    _name,
+                    style: new TextStyle(
+                        color: Colors.blue
+                    ),
+                  ),
+              ),
+            ],
+          )
         ));
       }
       return new Column(children: _list,);
@@ -732,7 +744,7 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
               _request['RequestType']['ID']==3?BuildWidget.buildRow('是否召回', _request['IsRecall']?'是':'否'):new Container(),
               BuildWidget.buildRow('请求人', _request['RequestUser']['Name']),
               BuildWidget.buildDropdown('处理方式', _currentMethod, _dropDownMenuItems, changedDropDownMethod),
-              BuildWidget.buildDropdown('紧急程度', _currentPriority, _dropDownMenuPris, changedDropDownPri),
+              //BuildWidget.buildDropdown('紧急程度', _currentPriority, _dropDownMenuPris, changedDropDownPri),
               BuildWidget.buildRow('请求附件', ''),
               buildImageColumn(),
               buildFileName()
@@ -803,7 +815,7 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
                     child: new Text(
                       dispatchDate,
                       style: new TextStyle(
-                          fontSize: 20.0,
+                          fontSize: 16.0,
                           fontWeight: FontWeight.w400,
                           color: Colors.black54
                       ),
@@ -824,10 +836,9 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
                         ).then((DateTime val) {
                           print(val); // 2018-07-12 00:00:00.000
                           showTimePicker(context: (context), initialTime: new TimeOfDay.now()).then((TimeOfDay selectTime) {
-                            var date = '${val.year}-${val.month}-${val.day}';
-                            var time = '${selectTime.hour}:${selectTime.minute}';
+                            var _time = selectTime.format(context);
                             setState(() {
-                              dispatchDate = '${date} ${time}';
+                              dispatchDate = '${val.toString().split(' ')[0]} ${_time}';
                             });
                           });
                         }).catchError((err) {

@@ -3,6 +3,11 @@ import 'package:floating_search_bar/floating_search_bar.dart';
 import 'package:atoi/utils/http_request.dart';
 
 class SearchPage extends StatefulWidget {
+
+  SearchPage({Key key, this.equipments}):super(key: key);
+
+  final List<Map> equipments;
+
   _SearchPageState createState() => _SearchPageState();
 }
 
@@ -28,6 +33,12 @@ class _SearchPageState extends State<SearchPage> {
     setState(() {
       suggestionList = resp['Data'];
     });
+    print('equips:${widget.equipments}');
+    if (widget.equipments != null) {
+      setState(() {
+        selected = widget.equipments;
+      });
+    }
   }
 
   Widget build(BuildContext context) {
@@ -35,12 +46,12 @@ class _SearchPageState extends State<SearchPage> {
       itemCount: suggestionList.length,
       itemBuilder: (BuildContext context, int i) {
         return CheckboxListTile(
-          value: selected.contains(suggestionList[i])?true:false,
+          value: selected.firstWhere((item) => item['Name'] == suggestionList[i]['Name'], orElse: ()=>null)!=null?true:false,
           title: RichText(
               text: TextSpan(
                   text: '${suggestionList[i]['Name']}/${suggestionList[i]['EquipmentCode']}/${suggestionList[i]['SerialCode']}'.substring(0, query.length),
                   style: TextStyle(
-                      color: Colors.black, fontWeight: FontWeight.bold),
+                      color: Colors.grey ),
                   children: [
                     TextSpan(
                         text: '${suggestionList[i]['Name']}/${suggestionList[i]['EquipmentCode']}/${suggestionList[i]['SerialCode']}'.substring(query.length),
@@ -54,9 +65,11 @@ class _SearchPageState extends State<SearchPage> {
         );
       },
       leading: new IconButton(icon: new Icon(Icons.arrow_back), onPressed: () {
-        Navigator.of(context).pop(selected);
+        Navigator.of(context).pop();
       },),
-      trailing: FlatButton(onPressed: () {}, child: new Text('搜索')),
+      trailing: FlatButton(onPressed: () {
+        Navigator.of(context).pop(selected);
+      }, child: new Text('确认')),
       onChanged: (String value) {
         setState(() {
           query = value;
@@ -65,7 +78,10 @@ class _SearchPageState extends State<SearchPage> {
       },
       onTap: () {},
       decoration: InputDecoration.collapsed(
-        hintText: "",
+        hintText: "请输入设备名称/型号/序列号",
+        hintStyle: new TextStyle(
+          fontSize: 14.0
+        )
       ),
     );
   }

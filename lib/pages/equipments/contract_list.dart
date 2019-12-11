@@ -128,7 +128,7 @@ class _ContractListState extends State<ContractList> {
           ),
           decoration: new InputDecoration(
               prefixIcon: Icon(Icons.search, color: Colors.white,),
-              hintText: '请输入系统编号',
+              hintText: '请输入系统编号/合同编号/名称',
               hintStyle: new TextStyle(color: Colors.white)
           ),
           onChanged: (val) {

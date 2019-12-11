@@ -114,8 +114,8 @@ class _EngineerVoucherPageState extends State<EngineerVoucherPage> {
     if (resp['ResultCode'] == '00') {
       setState(() {
         _dispatch = resp['Data'];
-        _customerName.text = resp['Data']['Request']['RequestUser']['Name'];
-        _customerNumber.text = resp['Data']['Request']['RequestUser']['Mobile'];
+        //_customerName.text = resp['Data']['Request']['RequestUser']['Name'];
+        //_customerNumber.text = resp['Data']['Request']['RequestUser']['Mobile'];
       });
     }
   }
@@ -441,7 +441,7 @@ class _EngineerVoucherPageState extends State<EngineerVoucherPage> {
               //BuildWidget.buildRow('处理方式', _dispatch['Request']['DealType']['Name']),
               BuildWidget.buildRow('紧急程度', _dispatch['Request']['Priority']['Name']),
               _dispatch['Request']['RequestType']['ID']==14?new Container():BuildWidget.buildRow('机器状态', _dispatch['MachineStatus']['Name']),
-              BuildWidget.buildRow('出发时间', AppConstants.TimeForm(_dispatch['ScheduleDate'], 'yyyy-mm-dd')),
+              BuildWidget.buildRow('出发时间', DateTime.tryParse(_dispatch['ScheduleDate']).toString().split(':00.000')[0]),
               BuildWidget.buildRow('备注', _dispatch['LeaderComments']),
             ],
           ),
@@ -481,8 +481,8 @@ class _EngineerVoucherPageState extends State<EngineerVoucherPage> {
               //_currentResult=='完成'?new Container():widget.status!=0&&widget.status!=1?BuildWidget.buildRow('待确认问题', _unconfirmed.text):buildEditor('待确认问题', _unconfirmed),
               widget.status!=0&&widget.status!=1?BuildWidget.buildRow('建议留言', _advice.text):buildEditor('建议留言', _advice),
               new Divider(),
-              BuildWidget.buildInput('客户姓名', _customerName, lines: 1),
-              BuildWidget.buildInput('客户电话', _customerNumber, lines: 1),
+              widget.status!=0&&widget.status!=1?BuildWidget.buildRow('客户姓名', _customerName.text):BuildWidget.buildInput('客户姓名', _customerName, lines: 1),
+              widget.status!=0&&widget.status!=1?BuildWidget.buildRow('客户电话', _customerNumber.text):BuildWidget.buildInput('客户电话', _customerNumber, lines: 1),
               widget.status==0||widget.status==1?new Padding(
                 padding: EdgeInsets.symmetric(vertical: 5.0),
                 child: new Text('客户签名：',

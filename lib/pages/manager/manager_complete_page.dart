@@ -205,6 +205,7 @@ class _ManagerCompletePageState extends State<ManagerCompletePage> {
           width: 400.0,
           height: 400.0,
         ));
+        _list.add(new SizedBox(height: 8.0,));
       }
       return new Column(children: _list);
     }
@@ -436,9 +437,8 @@ class _ManagerCompletePageState extends State<ManagerCompletePage> {
               BuildWidget.buildRow('类型', _request['SourceType']),
               BuildWidget.buildRow('主题', _request['SubjectName']),
               BuildWidget.buildRow('请求状态', _request['Status']['Name']),
-              BuildWidget.buildRow(model.Remark[_request['RequestType']['ID']],
-                  _request['FaultDesc']),
-              _request['RequestType']['ID'] == 1 ||
+              BuildWidget.buildRow(model.Remark[_request['RequestType']['ID']], _request['FaultDesc']),
+              _request['RequestType']['ID'] == 1?BuildWidget.buildRow('机器状态', _request['MachineStatus']['Name']):new Container(),
                       _request['RequestType']['ID'] == 2 ||
                       _request['RequestType']['ID'] == 3 ||
                       _request['RequestType']['ID'] == 7

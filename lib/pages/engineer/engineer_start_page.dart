@@ -234,7 +234,7 @@ class _EngineerStartPageState extends State<EngineerStartPage> {
                 _dispatch['Request']['RequestType']['ID']==14?BuildWidget.buildRow('主题', '${_dispatch['Request']['RequestType']['Name']}'):
                 BuildWidget.buildRow('主题', '${_dispatch['Request']['EquipmentName']}--${_dispatch['Request']['RequestType']['Name']}'),
                 BuildWidget.buildRow(model.Remark[_dispatch['Request']['RequestType']['ID']], _dispatch['Request']['FaultDesc']),
-                _dispatch['Request']['FaultType']['ID']==1||_dispatch['Request']['FaultType']['ID']==2||_dispatch['Request']['FaultType']['ID']==3||_dispatch['Request']['FaultType']['ID']==7?BuildWidget.buildRow(model.RemarkType[_dispatch['Request']['RequestType']['ID']], _dispatch['Request']['FaultType']['Name']):new Container(),
+                _dispatch['Request']['RequestType']['ID']==1||_dispatch['Request']['RequestType']['ID']==2||_dispatch['Request']['RequestType']['ID']==3||_dispatch['Request']['RequestType']['ID']==7?BuildWidget.buildRow(model.RemarkType[_dispatch['Request']['RequestType']['ID']], _dispatch['Request']['FaultType']['Name']):new Container(),
                 _dispatch['Request']['RequestType']['ID']==3?BuildWidget.buildRow('是否召回', _dispatch['Request']['IsRecall']?'是':'否'):new Container(),
                 BuildWidget.buildRow('请求人', _dispatch['Request']['RequestUser']['Name']),
                 BuildWidget.buildRow('处理方式', _dispatch['Request']['DealType']['Name']),
@@ -276,7 +276,7 @@ class _EngineerStartPageState extends State<EngineerStartPage> {
                 BuildWidget.buildRow('机器状态', _dispatch['MachineStatus']['Name']),
                 BuildWidget.buildRow('工程师姓名', _dispatch['Engineer']['Name']),
                 BuildWidget.buildRow('主管备注', _dispatch['LeaderComments']),
-                BuildWidget.buildRow('出发时间', AppConstants.TimeForm(_dispatch['ScheduleDate'], 'yyyy-mm-dd')),
+                BuildWidget.buildRow('出发时间', DateTime.tryParse(_dispatch['ScheduleDate']).toString().split(':00.000')[0]),
               ],
             ),
           ),

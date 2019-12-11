@@ -373,8 +373,9 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
   }
 
   Column buildField(String label, TextEditingController controller,
-      {String hintText}) {
+      {String hintText, int maxLength}) {
     String hint = hintText ?? 'N/A';
+    maxLength = maxLength??500;
     return new Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
@@ -390,6 +391,7 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
             hintText: hint,
           ),
           maxLines: 3,
+          maxLength: maxLength,
         ),
         new SizedBox(
           height: 5.0,
@@ -621,16 +623,16 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
         _list.addAll([
           widget.status != 0 && widget.status != 1
               ? BuildWidget.buildRow('发生频率', _frequency.text)
-              : buildField('发生频率：', _frequency),
+              : buildField('发生频率：', _frequency, maxLength: 20),
           widget.status != 0 && widget.status != 1
               ? BuildWidget.buildRow('故障描述', _description.text)
               : buildField('故障描述：', _description),
           widget.status != 0 && widget.status != 1
               ? BuildWidget.buildRow('系统状态', _status.text)
-              : buildField('系统状态：', _status),
+              : buildField('系统状态：', _status, maxLength: 20),
           widget.status != 0 && widget.status != 1
               ? BuildWidget.buildRow('错误代码', _code.text)
-              : buildField('错误代码：', _code),
+              : buildField('错误代码：', _code, maxLength: 20),
           widget.status != 0 && widget.status != 1
               ? BuildWidget.buildRow('分析原因', _analysis.text)
               : buildField('分析原因：', _analysis),

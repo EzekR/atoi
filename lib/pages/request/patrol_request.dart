@@ -129,7 +129,7 @@ class _PatrolRequestState extends State<PatrolRequest> {
                 ),
                 new Padding(
                   padding: EdgeInsets.symmetric(horizontal: 0.0),
-                  child: new IconButton(icon: Icon(Icons.cancel), color: Colors.white, onPressed: (){
+                  child: new IconButton(icon: Icon(Icons.cancel), color: Colors.blue,  onPressed: (){
                     imageList.remove(image);
                     setState(() {
                       _imageList = imageList;
@@ -354,7 +354,7 @@ class _PatrolRequestState extends State<PatrolRequest> {
                   onPressed: () async {
                     //toSearch();
                     final selected = await Navigator.of(context).push(new MaterialPageRoute(builder: (context) {
-                      return SearchPage();
+                      return SearchPage(equipments: _equipments);
                     }));
                     for(var item in selected) {
                       var _obj = _equipments.firstWhere((element) => (element['ID']==item['ID']), orElse: () => null);

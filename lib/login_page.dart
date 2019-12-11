@@ -506,6 +506,9 @@ class _LoginPageState extends State<LoginPage> {
         ),
         onPressed: () {
           _stage=='login'?_doLogin():_userReg();
+          setState(() {
+            _countdownTime = 0;
+          });
         },
         padding: EdgeInsets.all(12),
         color: new Color(0xff183dca),
@@ -535,6 +538,7 @@ class _LoginPageState extends State<LoginPage> {
           passwordController.text = '';
           verificationController.text = '';
           nameController.text = '';
+          _countdownTime = 0;
         });
       },
     );

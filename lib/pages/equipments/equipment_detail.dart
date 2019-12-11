@@ -670,7 +670,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
       );
       return;
     }
-    if (patrolPeriod.text.isEmpty) {
+    if (currentPatrolPeriod != '无' && patrolPeriod.text.isEmpty) {
       showDialog(
           context: context,
           builder: (context) => CupertinoAlertDialog(
@@ -688,7 +688,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
       );
       return;
     }
-    if (maintainPeriod.text.isEmpty) {
+    if (currentMaintainPeriod != '无' && maintainPeriod.text.isEmpty) {
       showDialog(
           context: context,
           builder: (context) => CupertinoAlertDialog(
@@ -706,7 +706,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
       );
       return;
     }
-    if (correctionPeriod.text.isEmpty) {
+    if (currentCorrectionPeriod != '无' && correctionPeriod.text.isEmpty) {
       showDialog(
           context: context,
           builder: (context) => CupertinoAlertDialog(

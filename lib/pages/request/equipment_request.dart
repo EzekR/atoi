@@ -190,7 +190,7 @@ Future getImage(ImageSource sourceType) async {
                 ),
                 new Padding(
                   padding: EdgeInsets.symmetric(horizontal: 0.0),
-                  child: new IconButton(icon: Icon(Icons.cancel), color: Colors.white, onPressed: (){
+                  child: new IconButton(icon: Icon(Icons.cancel), color: Colors.blue,  onPressed: (){
                     imageList.remove(image);
                     setState(() {
                       _imageList = imageList;

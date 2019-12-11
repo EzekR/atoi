@@ -41,6 +41,7 @@ class _MandatoryRequestState extends State<MandatoryRequest> {
     '是',
     '否'
   ];
+  String currentRecall = '是';
 
   var _equipment;
 
@@ -56,6 +57,12 @@ class _MandatoryRequestState extends State<MandatoryRequest> {
       _list.add(key);
     });
     return _list;
+  }
+
+  void changeValue(value) {
+    setState(() {
+      currentRecall = value;
+    });
   }
 
   void initDropdown() {
@@ -146,7 +153,7 @@ Future getImage(ImageSource sourceType) async {
                 ),
                 new Padding(
                   padding: EdgeInsets.symmetric(horizontal: 0.0),
-                  child: new IconButton(icon: Icon(Icons.cancel), color: Colors.white, onPressed: (){
+                  child: new IconButton(icon: Icon(Icons.cancel), color: Colors.blue,  onPressed: (){
                     imageList.remove(image);
                     setState(() {
                       _imageList = imageList;
@@ -237,7 +244,7 @@ Future getImage(ImageSource sourceType) async {
           'FaultType': {
             'ID': model.FaultCheck[_currentResult],
           },
-          'IsRecall': _currentStatus == '是' ? true : false,
+          'IsRecall': currentRecall == '是' ? true : false,
           'FaultDesc': _fault.text,
           'Files': fileList
         }
@@ -459,31 +466,7 @@ Future getImage(ImageSource sourceType) async {
                                     ],
                                   ),
                                 ),
-                                new Padding(
-                                  padding: EdgeInsets.symmetric(vertical: 5.0),
-                                  child: new Row(
-                                    children: <Widget>[
-                                      new Expanded(
-                                        flex: 4,
-                                        child: new Text(
-                                          '是否召回：',
-                                          style: new TextStyle(
-                                              fontSize: 20.0,
-                                              fontWeight: FontWeight.w600
-                                          ),
-                                        ),
-                                      ),
-                                      new Expanded(
-                                        flex: 6,
-                                        child: new DropdownButton(
-                                          value: _currentStatus,
-                                          items: _dropDownMenuStatus,
-                                          onChanged: changedDropDownStatus,
-                                        ),
-                                      )
-                                    ],
-                                  ),
-                                ),
+                                BuildWidget.buildRadioLeft('是否召回：', _recall, currentRecall, changeValue),
                                 new Padding(
                                   padding: EdgeInsets.symmetric(vertical: 5.0),
                                   child: new Row(

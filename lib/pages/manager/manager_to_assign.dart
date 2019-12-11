@@ -231,9 +231,10 @@ class _ManagerToAssignState extends State<ManagerToAssign> {
                       ),
                       new RaisedButton(
                         onPressed: (){
+                          var _date = DateTime.tryParse(task['SelectiveDate'])??new DateTime.now();
                           showDatePicker(
                               context: context,
-                              initialDate: new DateTime.now(),
+                              initialDate: _date,
                               firstDate: new DateTime.now().subtract(new Duration(days: 1)), // 减 30 天
                               lastDate: new DateTime.now().add(new Duration(days: 30)),       // 加 30 天
                               locale: Locale('zh')

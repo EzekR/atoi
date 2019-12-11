@@ -255,7 +255,7 @@ class _EquipmentContractState extends State<EquipmentContract> {
           }
         }
     }
-    return val.toString().split(' ')[0];
+    return val==null?initialTime:val.toString().split(' ')[0];
   }
 
   Future<Null> getDevice() async {

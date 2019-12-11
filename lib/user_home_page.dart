@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:barcode_scan/barcode_scan.dart';
 import 'dart:async';
+import 'dart:convert';
 import 'package:flutter/services.dart';
 import 'package:atoi/pages/user/user_repair_page.dart';
 import 'package:atoi/utils/http_request.dart';
@@ -31,8 +32,10 @@ class _UserHomePageState extends State<UserHomePage> {
     var _prefs = await prefs;
     var userName = _prefs.getString('userName');
     var mobile = _prefs.getString('mobile');
+    var userInfo = _prefs.getString('userInfo');
+    var decoded = jsonDecode(userInfo);
     setState(() {
-      _userName = userName;
+      _userName = decoded['Name'];
       _mobile = mobile;
     });
   }
@@ -172,48 +175,11 @@ class _UserHomePageState extends State<UserHomePage> {
           body: new Column(
             mainAxisAlignment: MainAxisAlignment.start,
             children: <Widget>[
-              //CarouselSlider(
-              //  viewportFraction: 2.0,
-              //  items: <Widget>[
-              //    new Container(
-              //      width: MediaQuery.of(context).size.width,
-              //      height: 600.0,
-              //      child: Image.asset('assets/bg_01.jpg'),
-              //    )
-              //  ]
-              //),
               new Center(
                 child: new Container(
                   child: new Image.asset('assets/bg_01.jpg'),
                 ),
               ),
-              //new Padding(
-              //  padding: EdgeInsets.symmetric(vertical: 30.0),
-              //  child: new Column(
-              //    crossAxisAlignment: CrossAxisAlignment.center,
-              //    children: <Widget>[
-              //      new IconButton(
-              //          icon: new Icon(Icons.crop_free),
-              //          iconSize: 100.0,
-              //          color: Colors.orange,
-              //          onPressed: () {
-              //            scan();
-              //          }
-              //      ),
-              //      new Container(
-              //        margin: const EdgeInsets.only(top: 8.0),
-              //        child: new Text(
-              //          '扫码报修',
-              //          style: new TextStyle(
-              //            fontSize: 16.0,
-              //            fontWeight: FontWeight.w400,
-              //            color: new Color(0xff000000),
-              //          ),
-              //        ),
-              //      ),
-              //    ],
-              //  ),
-              //),
               new Padding(
                 padding: EdgeInsets.symmetric(vertical: 100.0),
                 child: new Row(
@@ -242,11 +208,6 @@ class _UserHomePageState extends State<UserHomePage> {
               padding: EdgeInsets.zero,
               children: <Widget>[
                 DrawerHeader(
-//              child: CircleAvatar(
-//                backgroundColor: Colors.transparent,
-//                radius: 48.0,
-//                child: Image.asset('assets/alucard.jpg'),
-//              ),
                   decoration: BoxDecoration(
                     color: Theme.of(context).accentColor,
                   ),
@@ -261,7 +222,7 @@ class _UserHomePageState extends State<UserHomePage> {
                   onTap: () {
                     Navigator.of(context).push(new MaterialPageRoute(builder: (_) {
                       return new CompleteInfo();
-                    }));
+                    })).then((result) => getRole());
                   },
                 ),
                 ListTile(

@@ -75,7 +75,7 @@ class _RepairRequestState extends State<RepairRequest> {
   }
 
   void initDropdown() {
-    _serviceResults = iterateMap(model.FaultRepair);
+    _serviceResults = iterateMap(model.MachineStatus);
     _dropDownMenuItems = getDropDownMenuItems(_serviceResults);
     _currentResult = _dropDownMenuItems[0].value;
   }
@@ -169,8 +169,8 @@ class _RepairRequestState extends State<RepairRequest> {
               'ID': _equipment['ID']
             }
           ],
-          'FaultType': {
-            'ID': model.FaultRepair[_currentResult],
+          'MachineStatus': {
+            'ID': model.MachineStatus[_currentResult],
           },
           'FaultDesc': _fault.text,
           'Files': fileList
@@ -214,7 +214,7 @@ class _RepairRequestState extends State<RepairRequest> {
                 ),
                 new Padding(
                   padding: EdgeInsets.symmetric(horizontal: 0.0),
-                  child: new IconButton(icon: Icon(Icons.cancel), color: Colors.white, onPressed: (){
+                  child: new IconButton(icon: Icon(Icons.cancel), color: Colors.blue,  onPressed: (){
                     imageList.remove(image);
                     setState(() {
                       _imageList = imageList;
@@ -426,7 +426,7 @@ class _RepairRequestState extends State<RepairRequest> {
                                       new Expanded(
                                         flex: 4,
                                         child: new Text(
-                                          '故障分类：',
+                                          '机器状态：',
                                           style: new TextStyle(
                                               fontSize: 20.0,
                                               fontWeight: FontWeight.w600

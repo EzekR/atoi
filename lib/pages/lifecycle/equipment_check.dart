@@ -350,7 +350,7 @@ class _EquipmentCheckState extends State<EquipmentCheck> {
                     //toSearch();
                     final selected = await Navigator.of(context)
                         .push(new MaterialPageRoute(builder: (context) {
-                      return SearchPage();
+                      return SearchPage(equipments: _equipments,);
                     }));
                     print(selected);
                     for (var item in selected) {
