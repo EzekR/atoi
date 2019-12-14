@@ -130,7 +130,7 @@ class EngineerMenu extends StatelessWidget {
                                             ),
                                           ),
                                           onTap: () {
-                                            Navigator.of(context).pushNamed('equipment-contract');
+                                            Navigator.of(context).pushNamed('equipment-archive');
                                           },
                                         ),
                                       ),

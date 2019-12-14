@@ -258,10 +258,26 @@ class _EngineerReportAccessoryState extends State<EngineerReportAccessory> {
       );
       return;
     }
+    if (double.tryParse(_amount.text) > 99999999.99) {
+      showDialog(context: context,
+          builder: (context) => CupertinoAlertDialog(
+            title: new Text('新装部件金额过大'),
+          )
+      );
+      return;
+    }
     if (_qty.text.isEmpty) {
       showDialog(context: context,
           builder: (context) => CupertinoAlertDialog(
             title: new Text('数量不可为空'),
+          )
+      );
+      return;
+    }
+    if (int.tryParse(_qty.text) > 999999999) {
+      showDialog(context: context,
+          builder: (context) => CupertinoAlertDialog(
+            title: new Text('数量过大'),
           )
       );
       return;

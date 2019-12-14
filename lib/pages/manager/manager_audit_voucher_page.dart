@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:atoi/utils/http_request.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
@@ -137,6 +138,7 @@ class _ManagerAuditVoucherPageState extends State<ManagerAuditVoucherPage> {
           )
       ),
       maxLines: 3,
+      maxLength: 200,
       controller: controller,
       enabled: isEnabled,
       style: new TextStyle(
@@ -268,7 +270,7 @@ class _ManagerAuditVoucherPageState extends State<ManagerAuditVoucherPage> {
     if (_response['ResultCode'] == '00') {
       showDialog(
           context: context,
-          builder: (context) => AlertDialog(
+          builder: (context) => CupertinoAlertDialog(
             title: new Text('通过凭证'),
           )
       ).then((result) {
@@ -276,7 +278,7 @@ class _ManagerAuditVoucherPageState extends State<ManagerAuditVoucherPage> {
       });
     } else {
       showDialog(context: context,
-        builder: (context) => AlertDialog(
+        builder: (context) => CupertinoAlertDialog(
           title: new Text(_response['ResultMessage'])
         )
       );
@@ -287,9 +289,18 @@ class _ManagerAuditVoucherPageState extends State<ManagerAuditVoucherPage> {
     final SharedPreferences prefs = await _prefs;
     var UserId = await prefs.getInt('userID');
     print(widget.journalId);
+    if (_comment.text.isEmpty) {
+      showDialog(context: context,
+          builder: (context) => CupertinoAlertDialog(
+              title: new Text('审批备注不可为空')
+          )
+      );
+    }
     Map<String, dynamic> _data = {
       'userID': UserId,
       'dispatchJournalID': widget.journalId,
+      'resultStatusID': model.ResultStatusID[_currentResult],
+      'followProblem': _journal['FollowProblem'],
       'comments': _comment.text
     };
     Fluttertoast.showToast(
@@ -310,7 +321,7 @@ class _ManagerAuditVoucherPageState extends State<ManagerAuditVoucherPage> {
     if (_response['ResultCode'] == '00') {
       showDialog(
           context: context,
-          builder: (context) => AlertDialog(
+          builder: (context) => CupertinoAlertDialog(
             title: new Text('已退回'),
           )
       ).then((result) {
@@ -318,7 +329,7 @@ class _ManagerAuditVoucherPageState extends State<ManagerAuditVoucherPage> {
       });
     } else {
       showDialog(context: context,
-        builder: (context) => AlertDialog(
+        builder: (context) => CupertinoAlertDialog(
           title: new Text(_response['ResultMessage']),
         )
       );

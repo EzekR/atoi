@@ -820,15 +820,15 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
         "ID": model.EquipmentStatus[currentMachine],
       },
       "ScrapDate": scrapDate=='YY-MM-DD'?null:scrapDate,
-      "MaintenancePeriod": maintainPeriod.text,
+      "MaintenancePeriod": maintainPeriod.text.isEmpty?null:maintainPeriod.text,
       "MaintenanceType": {
         "ID": model.PeriodType[currentMaintainPeriod],
       },
-      "PatrolPeriod": patrolPeriod.text,
+      "PatrolPeriod": patrolPeriod.text.isEmpty?null:patrolPeriod.text,
       "PatrolType": {
         "ID": model.PeriodType[currentPatrolPeriod],
       },
-      "CorrectionPeriod": correctionPeriod.text,
+      "CorrectionPeriod": correctionPeriod.text.isEmpty?null:correctionPeriod.text,
       "CorrectionType": {
         "ID": model.PeriodType[currentCorrectionPeriod],
       },

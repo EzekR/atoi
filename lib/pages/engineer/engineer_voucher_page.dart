@@ -41,6 +41,7 @@ class _EngineerVoucherPageState extends State<EngineerVoucherPage> {
   String _journalOID;
   ConstantsModel model;
   bool hold = false;
+  Map test;
 
   List _serviceResults = [
     '完成',

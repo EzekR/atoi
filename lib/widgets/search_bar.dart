@@ -105,7 +105,7 @@ class SearchBarDelegate extends SearchDelegate<String>{
                   text: TextSpan(
                       text: '${suggestionList[i]['Name']}/${suggestionList[i]['EquipmentCode']}/${suggestionList[i]['SerialCode']}'.substring(0, query.length),
                       style: TextStyle(
-                          color: Colors.black, fontWeight: FontWeight.bold),
+                          color: Colors.grey),
                       children: [
                         TextSpan(
                             text: '${suggestionList[i]['Name']}/${suggestionList[i]['EquipmentCode']}/${suggestionList[i]['SerialCode']}'.substring(query.length),

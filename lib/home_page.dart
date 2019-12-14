@@ -15,6 +15,7 @@ import 'package:atoi/pages/reports/report_list.dart';
 import 'package:atoi/pages/equipments/equipment_contract.dart';
 import 'package:atoi/pages/equipments/vendors_list.dart';
 import 'package:atoi/pages/equipments/contract_list.dart';
+import 'dart:convert';
 
 class HomePage extends StatefulWidget {
   static String tag = 'home-page';
@@ -34,8 +35,10 @@ class _HomePageState extends State<HomePage>
     var _prefs = await prefs;
     var userName = _prefs.getString('userName');
     var mobile = _prefs.getString('mobile');
+    var userInfo = _prefs.getString('userInfo');
+    var decoded = jsonDecode(userInfo);
     setState(() {
-      _userName = userName;
+      _userName = decoded['Name'];
       _mobile = mobile;
     });
   }
@@ -184,7 +187,7 @@ class _HomePageState extends State<HomePage>
                       onTap: () {
                         Navigator.of(context).push(new MaterialPageRoute(builder: (_) {
                           return new CompleteInfo();
-                        }));
+                        })).then((result) => getRole());
                       },
                     ),
                     ListTile(

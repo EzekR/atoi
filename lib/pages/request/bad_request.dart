@@ -482,7 +482,7 @@ class _BadRequestState extends State<BadRequest> {
                                       new Expanded(
                                         flex: 6,
                                         child: new TextField(
-                                          controller: _fault,
+                                          controller: _fault, maxLength: 200
                                         ),
                                       )
                                     ],

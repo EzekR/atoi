@@ -33,6 +33,8 @@ import 'package:atoi/pages/lifecycle/equipment_transfer.dart';
 import 'package:flutter/services.dart';
 import 'dart:async';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:atoi/pages/reports/equipment/equipment_amount.dart';
+import 'package:atoi/pages/reports/equipment/equipment_growth.dart';
 
 class AtoiApp extends StatefulWidget{
   _AtoiAppState createState() => _AtoiAppState();
@@ -67,7 +69,9 @@ class _AtoiAppState extends State<AtoiApp> {
     EquipmentInstall.tag: (context) => EquipmentInstall(),
     EquipmentLending.tag: (context) => EquipmentLending(),
     EquipmentScrap.tag: (context) => EquipmentScrap(),
-    EquipmentTransfer.tag: (context) => EquipmentTransfer()
+    EquipmentTransfer.tag: (context) => EquipmentTransfer(),
+    EquipmentAmount.tag: (context) => EquipmentAmount(),
+    EquipmentGrowth.tag: (context) => EquipmentGrowth()
   };
 
   final MainModel mainModel = MainModel();

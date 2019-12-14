@@ -128,6 +128,7 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
   List<DropdownMenuItem<String>> _dropDownMenuTypes;
   List<DropdownMenuItem<String>> _dropDownMenuLevels;
   List<DropdownMenuItem<String>> _dropDownMenuStatuses;
+  List<DropdownMenuItem<String>> _dropDownMenuStatusesReq;
   List<DropdownMenuItem<String>> _dropDownMenuNames;
   List<DropdownMenuItem<String>> _dropDownMenuMaintain;
   List<DropdownMenuItem<String>> _dropDownMenuFault;
@@ -143,6 +144,7 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
   String _currentType;
   String _currentLevel;
   String _currentStatus;
+  String _currentStatusReq;
   String _currentName;
   String _currentMaintain;
   String _currentFault;
@@ -178,7 +180,10 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
         _request = resp['Data'];
         _currentType = _request['RequestType']['Name'];
         _desc.text = resp['Data']['FaultDesc'];
-        _currentStatus = _request['MachineStatus']['Name'];
+        if (resp['Data']['MachineStatus']['ID'] != 0) {
+          _currentStatusReq = _request['MachineStatus']['Name'];
+          _currentStatus = _request['MachineStatus']['Name'];
+        }
       });
       if (resp['Data']['RequestType']['ID'] == 2) {
         setState(() {
@@ -236,7 +241,7 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
     ];
     Map<String, int> _listID = {};
     var resp = await HttpRequest.request(
-      '/User/GetAdmins',
+      '/User/GetUsers4Dispatch',
       method: HttpRequest.GET
     );
     print(resp);
@@ -245,11 +250,10 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
         _listName.add(item['Name']);
         _listID[item['Name']] = item['ID'];
       }
-      print(_listID);
       setState(() {
         _engineerNames = _listName;
         _engineers = _listID;
-        _dropDownMenuNames = getDropDownMenuItems(_engineerNames);
+        _dropDownMenuNames = getDropDownMenuEngineer(resp['Data']);
         _currentName = _dropDownMenuNames[0].value;
       });
     }
@@ -282,8 +286,10 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
     _dropDownMenuTypes = getDropDownMenuItems(_assignTypes);
     _dropDownMenuLevels = getDropDownMenuItems(_levels);
     _dropDownMenuStatuses = getDropDownMenuItems(_deviceStatuses);
+    _dropDownMenuStatusesReq = getDropDownMenuItems(_deviceStatuses);
     _currentLevel = _dropDownMenuLevels[0].value;
     _currentStatus = _dropDownMenuStatuses[0].value;
+    _currentStatusReq = _dropDownMenuStatuses[0].value;
     _dropDownMenuFault = getDropDownMenuItems(_faultType);
     _currentFault = _dropDownMenuFault[0].value;
     _dropDownMenuMaintain = getDropDownMenuItems(_maintainType);
@@ -305,6 +311,21 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
     super.initState();
   }
 
+  List<DropdownMenuItem<String>> getDropDownMenuEngineer(List list) {
+    List<DropdownMenuItem<String>> items = new List();
+    for (var method in list) {
+      items.add(new DropdownMenuItem(
+          value: method['Name'],
+          child: new Text(method['Name'],
+            style: new TextStyle(
+                fontSize: 20.0,
+                color: method['HasOpenDispatch']?Colors.redAccent:Colors.grey
+            ),
+          )
+      ));
+    }
+    return items;
+  }
   List<DropdownMenuItem<String>> getDropDownMenuItems(List list) {
     List<DropdownMenuItem<String>> items = new List();
     for (String method in list) {
@@ -345,6 +366,12 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
   }
 
   void changedDropDownStatus(String selectedMethod) {
+    setState(() {
+      _currentStatus = selectedMethod;
+    });
+  }
+
+  void changedDropDownStatusReq(String selectedMethod) {
     setState(() {
       _currentStatus = selectedMethod;
     });
@@ -590,6 +617,9 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
           'DealType': {
             'ID': model.DealType[_currentMethod]
           },
+          'MachineStatus': {
+            'ID': model.MachineStatus[_currentStatusReq]
+          },
           'FaultDesc': _desc.text,
           'IsRecall': _request['IsRecall']
         },
@@ -737,7 +767,7 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
               BuildWidget.buildRow('类型', _request['SourceType']),
               BuildWidget.buildRow('主题', _request['SubjectName']),
               BuildWidget.buildInput(model.Remark[_request['RequestType']['ID']], _desc),
-              _request['RequestType']['ID']==1?BuildWidget.buildDropdown('故障分类', _currentFault, _dropDownMenuFault, changedDropDownFault):new Container(),
+              _request['RequestType']['ID']!=14?BuildWidget.buildDropdown('机器状态', _currentStatusReq, _dropDownMenuStatusesReq, changedDropDownStatusReq):new Container(),
               _request['RequestType']['ID']==2?BuildWidget.buildDropdown('保养类型', _currentMaintain, _dropDownMenuMaintain, changedDropDownMaintain):new Container(),
               _request['RequestType']['ID']==3?BuildWidget.buildDropdown('强检原因', _currentMandatory, _dropDownMenuMandatory, changedDropDownMandatory):new Container(),
               _request['RequestType']['ID']==7?BuildWidget.buildDropdown('来源', _currentSource, _dropDownMenuSource, changedDropDownSource):new Container(),
@@ -778,7 +808,7 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
           children: <Widget>[
             BuildWidget.buildDropdown('派工类型', _currentType, _dropDownMenuTypes, changedDropDownType),
             BuildWidget.buildDropdown('紧急程度', _currentLevel, _dropDownMenuLevels, changedDropDownLevel),
-            _currentType!='其他服务'?BuildWidget.buildDropdown('机器状态', _currentStatus, _dropDownMenuStatuses, changedDropDownStatus):new Container(),
+            _request['RequestType']['ID']!=14?BuildWidget.buildDropdown('机器状态', _currentStatus, _dropDownMenuStatuses, changedDropDownStatus):new Container(),
             _engineerNames.isEmpty?new Container():BuildWidget.buildDropdown('工程师姓名', _currentName, _dropDownMenuNames, changedDropDownName),
             new Padding(
               padding: EdgeInsets.symmetric(vertical: 5.0),
@@ -815,7 +845,7 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
                     child: new Text(
                       dispatchDate,
                       style: new TextStyle(
-                          fontSize: 16.0,
+                          fontSize: 14.0,
                           fontWeight: FontWeight.w400,
                           color: Colors.black54
                       ),
@@ -867,6 +897,7 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
                   ),
                   new TextField(
                     controller: _leaderComment,
+                    maxLength: 200,
                   )
                 ],
               ),

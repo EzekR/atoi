@@ -238,20 +238,6 @@ class _PatrolRequestState extends State<PatrolRequest> {
     return items;
   }
 
-  Future toSearch() async {
-    final _searchResult = await showSearch(context: context, delegate: SearchBarDelegate());
-    if (_searchResult != null && _searchResult != 'null') {
-      print(_searchResult);
-      Map _data = jsonDecode(_searchResult);
-      var _result = _equipments.firstWhere((_equipment) => _equipment['OID'] == _data['OID'], orElse: ()=> null);
-      if (_result == null) {
-        setState(() {
-          _equipments.add(_data);
-        });
-      }
-    }
-  }
-
   Padding buildRow(String labelText, String defaultText) {
     return new Padding(
       padding: EdgeInsets.symmetric(vertical: 5.0),
@@ -352,17 +338,18 @@ class _PatrolRequestState extends State<PatrolRequest> {
                   color: Colors.white,
                   iconSize: 30.0,
                   onPressed: () async {
-                    //toSearch();
-                    final selected = await Navigator.of(context).push(new MaterialPageRoute(builder: (context) {
-                      return SearchPage(equipments: _equipments);
-                    }));
-                    for(var item in selected) {
-                      var _obj = _equipments.firstWhere((element) => (element['ID']==item['ID']), orElse: () => null);
-                      if (_obj == null) {
-                        _equipments.add(item);
+                    Navigator.of(context).push(new MaterialPageRoute(builder: (context) {
+                      return SearchPage(equipments: _equipments,);
+                    })).then((selected) {
+                      if (selected != null) {
+                        for(var item in selected) {
+                          var _obj = _equipments.firstWhere((element) => (element['ID']==item['ID']), orElse: () => null);
+                          if (_obj == null) {
+                            _equipments.add(item);
+                          }
+                        }
                       }
-                    }
-                    //_equipments.addAll(selected);
+                    });
                   }
                   ,
                 ),
@@ -454,7 +441,7 @@ class _PatrolRequestState extends State<PatrolRequest> {
                                       new Expanded(
                                         flex: 6,
                                         child: new TextField(
-                                          controller: _fault,
+                                          controller: _fault, maxLength: 200
                                         ),
                                       )
                                     ],

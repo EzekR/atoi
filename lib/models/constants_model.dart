@@ -2,6 +2,8 @@ import 'package:scoped_model/scoped_model.dart';
 import 'package:atoi/utils/http_request.dart';
 
 class ConstantsModel extends Model {
+  Map<String, dynamic> _Constants = {};
+  List<Map<String, dynamic>> _ReportDimensions = [];
   Map<String, int> _UserRole = {};
   Map<String, int> _AssetsLevel = {};
   Map<String, int> _ContractScope = {};
@@ -69,6 +71,7 @@ class ConstantsModel extends Model {
     ''
   ];
 
+  get Constants => _Constants;
   get UserRole => _UserRole;
   get AssetsLevel => _AssetsLevel;
   get ContractScope => _ContractScope;
@@ -103,13 +106,22 @@ class ConstantsModel extends Model {
   get ContractTypeList => _ContractTypeList;
   get ContractScopeList => _ContractScopeList;
   get PeriodTypeList => _PeriodTypeList;
+  get ReportDimensions => _ReportDimensions;
 
   Future<Null> getConstants() async {
+    //var dResp = await HttpRequest.request(
+    //  '/Report/GetDimensionList',
+    //  method: HttpRequest.GET
+    //);
+    //if (dResp['ResultCode'] == '00') {
+    //  _ReportDimensions = dResp['Data'];
+    //}
     var resp = await HttpRequest.request(
       '/User/GetConstants',
       method: HttpRequest.GET
     );
     if (resp['ResultCode'] == '00') {
+      _Constants = resp['Data'];
       for(var _item in resp['Data']['UserRole']) {
         _UserRole.putIfAbsent(_item['Name'], () => _item['ID']);
       }

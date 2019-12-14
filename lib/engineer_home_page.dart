@@ -9,6 +9,7 @@ import 'package:scoped_model/scoped_model.dart';
 import 'package:atoi/login_page.dart';
 import 'dart:async';
 import 'package:atoi/complete_info.dart';
+import 'dart:convert';
 
 
 class EngineerHomePage extends StatefulWidget {
@@ -30,8 +31,10 @@ class _EngineerHomePageState extends State<EngineerHomePage>
     var _prefs = await prefs;
     var userName = _prefs.getString('userName');
     var mobile = _prefs.getString('mobile');
+    var userInfo = _prefs.getString('userInfo');
+    var decoded = jsonDecode(userInfo);
     setState(() {
-      _userName = userName;
+      _userName = decoded['Name'];
       _mobile = mobile;
     });
   }
@@ -164,7 +167,7 @@ class _EngineerHomePageState extends State<EngineerHomePage>
                       onTap: () {
                         Navigator.of(context).push(new MaterialPageRoute(builder: (_) {
                           return new CompleteInfo();
-                        }));
+                        })).then((result) => getRole());
                       },
                     ),
                     ListTile(

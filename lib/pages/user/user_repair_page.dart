@@ -422,7 +422,7 @@ class _UserRepairPageState extends State<UserRepairPage> {
                             child: new Row(
                               children: <Widget>[
                                 new Text(
-                                  '添加附件：',
+                                  '添加附件:',
                                   style: new TextStyle(
                                       fontSize: 20.0,
                                       fontWeight: FontWeight.w600),

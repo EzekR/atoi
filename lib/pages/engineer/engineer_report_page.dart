@@ -650,7 +650,7 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
               : new Container(),
           widget.status != 0 && widget.status != 1
               ? BuildWidget.buildRow('作业结果', _currentResult)
-              : BuildWidget.buildDropdown('作业结果：', _currentResult,
+              : BuildWidget.buildDropdownLeft('作业结果：', _currentResult,
                   _dropDownMenuItems, changedDropDownMethod),
         ]);
     }

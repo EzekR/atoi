@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:atoi/utils/http_request.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
@@ -117,6 +118,7 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
           )
       ),
       maxLines: 3,
+      maxLength: 200,
       controller: controller,
       enabled: isEnabled,
       style: new TextStyle(
@@ -297,6 +299,7 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
       'userID': UserId,
       'reportID': widget.reportId,
       'solutionResultID': model.SolutionStatus[_currentResult],
+      'solutionUnresolvedComments': _report['SolutionUnresolvedComments'],
       'comments': _comment.text
     };
     Fluttertoast.showToast(
@@ -317,7 +320,7 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
     if (_response['ResultCode'] == '00') {
       showDialog(
           context: context,
-          builder: (context) => AlertDialog(
+          builder: (context) => CupertinoAlertDialog(
             title: new Text('通过报告'),
           )
       ).then((result) {
@@ -325,7 +328,7 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
       });
     } else {
       showDialog(context: context,
-        builder: (context) => AlertDialog(
+        builder: (context) => CupertinoAlertDialog(
           title: new Text(_response['ResultMessage']),
         )
       );
@@ -335,7 +338,7 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
   Future<Null> rejectReport() async {
     if (_comment.text.isEmpty) {
       showDialog(context: context,
-        builder: (context) => AlertDialog(
+        builder: (context) => CupertinoAlertDialog(
           title: new Text('备注不可为空'),
         )
       );
@@ -345,6 +348,8 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
       Map<String, dynamic> _data = {
         'userID': UserId,
         'reportID': widget.reportId,
+        'solutionResultID': model.SolutionStatus[_currentResult],
+        'solutionUnresolvedComments': _report['SolutionUnresolvedComments'],
         'comments': _comment.text
       };
       Fluttertoast.showToast(
@@ -366,7 +371,7 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
         showDialog(
             context: context,
             builder: (context) =>
-                AlertDialog(
+                CupertinoAlertDialog(
                   title: new Text('已退回'),
                 )
         ).then((result) =>
@@ -468,7 +473,7 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
       widget.status==3?BuildWidget.buildRow('作业结果', _report['SolutionResultStatus']['Name']):BuildWidget.buildDropdown('作业结果', _currentResult, _dropDownMenuItems, changedDropDownMethod),
       BuildWidget.buildRow('附件', ''),
       buildImageColumn(),
-      widget.status==3?BuildWidget.buildRow('审批备注', _report['FujiComments']??''):new Container()
+      widget.status==3?BuildWidget.buildRow('审批备注', _report['Comments']??''):new Container()
     ]);
     return _list;
   }

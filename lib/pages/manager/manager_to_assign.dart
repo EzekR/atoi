@@ -231,7 +231,7 @@ class _ManagerToAssignState extends State<ManagerToAssign> {
                       ),
                       new RaisedButton(
                         onPressed: (){
-                          var _date = DateTime.tryParse(task['SelectiveDate'])??new DateTime.now();
+                          var _date = DateTime.tryParse(task['SelectiveDate'].toString())??new DateTime.now();
                           showDatePicker(
                               context: context,
                               initialDate: _date,

@@ -36,7 +36,9 @@ class _SearchPageState extends State<SearchPage> {
     print('equips:${widget.equipments}');
     if (widget.equipments != null) {
       setState(() {
-        selected = widget.equipments;
+        for(var item in widget.equipments) {
+          selected.add(item);
+        }
       });
     }
   }
@@ -46,7 +48,7 @@ class _SearchPageState extends State<SearchPage> {
       itemCount: suggestionList.length,
       itemBuilder: (BuildContext context, int i) {
         return CheckboxListTile(
-          value: selected.firstWhere((item) => item['Name'] == suggestionList[i]['Name'], orElse: ()=>null)!=null?true:false,
+          value: selected.firstWhere((item) => item['SerialCode'] == suggestionList[i]['SerialCode'], orElse: ()=>null)!=null?true:false,
           title: RichText(
               text: TextSpan(
                   text: '${suggestionList[i]['Name']}/${suggestionList[i]['EquipmentCode']}/${suggestionList[i]['SerialCode']}'.substring(0, query.length),
@@ -59,12 +61,15 @@ class _SearchPageState extends State<SearchPage> {
                   ])),
           onChanged: (bool value) {
             setState(() {
-              value?selected.add(suggestionList[i]):selected.remove(suggestionList[i]);
+              value?selected.add(suggestionList[i]):selected.removeWhere((item) => item['SerialCode']==suggestionList[i]['SerialCode']);
             });
           },
         );
       },
       leading: new IconButton(icon: new Icon(Icons.arrow_back), onPressed: () {
+        setState(() {
+          selected = [];
+        });
         Navigator.of(context).pop();
       },),
       trailing: FlatButton(onPressed: () {
@@ -80,7 +85,9 @@ class _SearchPageState extends State<SearchPage> {
       decoration: InputDecoration.collapsed(
         hintText: "请输入设备名称/型号/序列号",
         hintStyle: new TextStyle(
-          fontSize: 14.0
+          fontSize: 14.0,
+          color: Colors.grey,
+          fontWeight: FontWeight.w600
         )
       ),
     );

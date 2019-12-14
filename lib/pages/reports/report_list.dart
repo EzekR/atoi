@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:atoi/pages/reports/report_chart.dart';
 
 class ReportList extends StatefulWidget {
   _ReportListState createState() => _ReportListState();
@@ -28,9 +27,7 @@ class _ReportListState extends State<ReportList> {
                 ),
               ),
               onTap: () {
-                Navigator.of(context).push(new MaterialPageRoute(builder: (_) {
-                  return new ReportChart();
-                }));
+                Navigator.of(context).pushNamed(item);
               },
             ),
           ),
@@ -91,8 +88,8 @@ class _ReportListState extends State<ReportList> {
               title: new Text('设备数量报表'),
               onTap: () {
                 var _list = [
-                  '设备数量统计',
-                  '设备数量增长率'
+                  '设备数量',
+                  '设备增长率'
                 ];
                 showBottomModal(_list);
               },
@@ -101,36 +98,85 @@ class _ReportListState extends State<ReportList> {
             new ListTile(
               leading: Icon(Icons.assignment_late, color: Color(0xff2F5C85),),
               title: new Text('设备故障报表'),
+              onTap: () {
+                var _list = [
+                  '设备数量',
+                  '设备增长率'
+                ];
+                showBottomModal(_list);
+              },
             ),
             new Divider(color: Color(0xffEBEEF5),),
             new ListTile(
               leading: Icon(Icons.settings_power, color: Color(0xff2F5C85),),
               title: new Text('设备开机报表'),
+              onTap: () {
+                var _list = [
+                  '设备数量',
+                  '设备增长率'
+                ];
+                showBottomModal(_list);
+              },
             ),
             new Divider(color: Color(0xffEBEEF5),),
             new ListTile(
               leading: Icon(Icons.account_balance, color: Color(0xff2F5C85),),
               title: new Text('设备资产报表'),
+              onTap: () {
+                var _list = [
+                  '设备数量',
+                  '设备增长率'
+                ];
+                showBottomModal(_list);
+              },
             ),
             new Divider(color: Color(0xffEBEEF5),),
             new ListTile(
               leading: Icon(Icons.pageview, color: Color(0xff2F5C85),),
               title: new Text('设备检查报表'),
+              onTap: () {
+                var _list = [
+                  '设备数量',
+                  '设备增长率'
+                ];
+                showBottomModal(_list);
+              },
             ),
             new Divider(color: Color(0xffEBEEF5),),
             new ListTile(
-              leading: Icon(Icons.open_in_browser, color: Color(0xff2F5C85),),
+              leading: Icon(Icons.arrow_upward, color: Color(0xff2F5C85),),
               title: new Text('支出报表'),
+              onTap: () {
+                var _list = [
+                  '设备数量',
+                  '设备增长率'
+                ];
+                showBottomModal(_list);
+              },
             ),
             new Divider(color: Color(0xffEBEEF5),),
             new ListTile(
-              leading: Icon(Icons.open_in_browser, color: Color(0xff2F5C85),),
+              leading: Icon(Icons.arrow_downward, color: Color(0xff2F5C85), textDirection: TextDirection.ltr,),
               title: new Text('收入报表'),
+              onTap: () {
+                var _list = [
+                  '设备数量',
+                  '设备增长率'
+                ];
+                showBottomModal(_list);
+              },
             ),
             new Divider(color: Color(0xffEBEEF5),),
             new ListTile(
               leading: Icon(Icons.swap_vert, color: Color(0xff2F5C85),),
               title: new Text('收支报表'),
+              onTap: () {
+                var _list = [
+                  '设备数量',
+                  '设备增长率'
+                ];
+                showBottomModal(_list);
+              },
             ),
             new Divider(color: Color(0xffEBEEF5),),
             new Container(
@@ -153,41 +199,97 @@ class _ReportListState extends State<ReportList> {
             new ListTile(
               leading: Icon(Icons.receipt, color: Color(0xff2F5C85),),
               title: new Text('客户请求报表'),
+              onTap: () {
+                var _list = [
+                  '设备数量',
+                  '设备增长率'
+                ];
+                showBottomModal(_list);
+              },
             ),
             new Divider(color: Color(0xffEBEEF5), height: 2.0,),
             new ListTile(
               leading: Icon(Icons.speaker_phone, color: Color(0xff2F5C85),),
               title: new Text('维修请求报表'),
+              onTap: () {
+                var _list = [
+                  '设备数量',
+                  '设备增长率'
+                ];
+                showBottomModal(_list);
+              },
             ),
             new Divider(color: Color(0xffEBEEF5),),
             new ListTile(
               leading: Icon(Icons.build, color: Color(0xff2F5C85),),
               title: new Text('设备维修方式报表'),
+              onTap: () {
+                var _list = [
+                  '设备数量',
+                  '设备增长率'
+                ];
+                showBottomModal(_list);
+              },
             ),
             new Divider(color: Color(0xffEBEEF5),),
             new ListTile(
               leading: Icon(Icons.assignment_turned_in, color: Color(0xff2F5C85),),
               title: new Text('保养请求报表'),
+              onTap: () {
+                var _list = [
+                  '设备数量',
+                  '设备增长率'
+                ];
+                showBottomModal(_list);
+              },
             ),
             new Divider(color: Color(0xffEBEEF5),),
             new ListTile(
               leading: Icon(Icons.group, color: Color(0xff2F5C85),),
               title: new Text('巡检请求报表'),
+              onTap: () {
+                var _list = [
+                  '设备数量',
+                  '设备增长率'
+                ];
+                showBottomModal(_list);
+              },
             ),
             new Divider(color: Color(0xffEBEEF5),),
             new ListTile(
               leading: Icon(Icons.store_mall_directory, color: Color(0xff2F5C85),),
               title: new Text('强检请求报表'),
+              onTap: () {
+                var _list = [
+                  '设备数量',
+                  '设备增长率'
+                ];
+                showBottomModal(_list);
+              },
             ),
             new Divider(color: Color(0xffEBEEF5),),
             new ListTile(
               leading: Icon(Icons.visibility, color: Color(0xff2F5C85),),
               title: new Text('校正请求报表'),
+              onTap: () {
+                var _list = [
+                  '设备数量',
+                  '设备增长率'
+                ];
+                showBottomModal(_list);
+              },
             ),
             new Divider(color: Color(0xffEBEEF5),),
             new ListTile(
               leading: Icon(Icons.phonelink_ring, color: Color(0xff2F5C85),),
               title: new Text('调拨请求报表'),
+              onTap: () {
+                var _list = [
+                  '设备数量',
+                  '设备增长率'
+                ];
+                showBottomModal(_list);
+              },
             ),
             new Divider(color: Color(0xffEBEEF5),),
           ],
