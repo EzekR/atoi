@@ -1,4 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:atoi/pages/reports/equipment/equipment_assets.dart';
+import 'package:atoi/pages/reports/equipment/equipment_barchart.dart';
+import 'package:atoi/pages/reports/equipment/equipment_linechart.dart';
+import 'package:atoi/pages/reports/equipment/equipment_linechart_a.dart';
+import 'package:atoi/pages/reports/service/service_barchart.dart';
+import 'package:atoi/pages/reports/service/service_barchart_a.dart';
+import 'package:atoi/pages/reports/service/service_barchart_line.dart';
+import 'package:atoi/pages/reports/service/service_linechart.dart';
+import 'package:atoi/pages/reports/service/service_linechart_a.dart';
+import 'package:atoi/pages/reports/service/service_linechart_b.dart';
 
 class ReportList extends StatefulWidget {
   _ReportListState createState() => _ReportListState();
@@ -10,27 +20,58 @@ class _ReportListState extends State<ReportList> {
     super.initState();
   }
 
-  void showBottomModal(List items) {
+  void showBottomAll(List items) {
     List<Widget> _list = [];
 
     for(var item in items) {
       _list.add(
-          Card(
-            child: ListTile(
-              title: new Center(
-                child: Text(item,
-                  style: new TextStyle(
-                      fontWeight: FontWeight.w600,
-                      fontSize: 20.0,
-                      color: Colors.blue
-                  ),
+        Card(
+          child: ListTile(
+            title: new Center(
+              child: Text(item['name'],
+                style: new TextStyle(
+                    fontWeight: FontWeight.w600,
+                    fontSize: 20.0,
+                    color: Colors.blue
                 ),
               ),
-              onTap: () {
-                Navigator.of(context).pushNamed(item);
-              },
             ),
+            onTap: () {
+              switch (item['type']) {
+                case 'barchart_1':
+                  Navigator.of(context).push(new MaterialPageRoute(builder: (context) => new EquipmentBarchart(chartName: item['name'], endpoint: item['endpoint'],)));
+                  break;
+                case 'barchart_2':
+                  Navigator.of(context).push(new MaterialPageRoute(builder: (context) => new EquipmentAssets(chartName: item['name'], endpoint: item['endpoint'],)));
+                  break;
+                case 'linechart_1':
+                  Navigator.of(context).push(new MaterialPageRoute(builder: (context) => new EquipmentLinechart(chartName: item['name'], endpoint: item['endpoint'],)));
+                  break;
+                case 'linechart_2':
+                  Navigator.of(context).push(new MaterialPageRoute(builder: (context) => new EquipmentLinechartA(chartName: item['name'], endpoint: item['endpoint'],)));
+                  break;
+                case 's_barchart_1':
+                  Navigator.of(context).push(new MaterialPageRoute(builder: (context) => new ServiceBarchart(chartName: item['name'], endpoint: item['endpoint'],)));
+                  break;
+                case 's_barchart_2':
+                  Navigator.of(context).push(new MaterialPageRoute(builder: (context) => new ServiceAssets(chartName: item['name'], endpoint: item['endpoint'],)));
+                  break;
+                case 's_barchart_line':
+                  Navigator.of(context).push(new MaterialPageRoute(builder: (context) => new ServiceBarchart(chartName: item['name'], endpoint: item['endpoint'],)));
+                  break;
+                case 's_linechart_1':
+                  Navigator.of(context).push(new MaterialPageRoute(builder: (context) => new ServiceLinechart(chartName: item['name'], endpoint: item['endpoint'],)));
+                  break;
+                case 's_linechart_2':
+                  Navigator.of(context).push(new MaterialPageRoute(builder: (context) => new ServiceLinechartA(chartName: item['name'], endpoint: item['endpoint'],)));
+                  break;
+                case 's_linechart_3':
+                  Navigator.of(context).push(new MaterialPageRoute(builder: (context) => new ServiceLinechartB(chartName: item['name'], endpoint: item['endpoint'],)));
+                  break;
+              }
+            },
           ),
+        ),
       );
     }
 
@@ -88,10 +129,18 @@ class _ReportListState extends State<ReportList> {
               title: new Text('设备数量报表'),
               onTap: () {
                 var _list = [
-                  '设备数量',
-                  '设备增长率'
+                  {
+                    'name': '设备数量',
+                    'type': 'barchart_1',
+                    'endpoint': 'EquipmentCountReport'
+                  },
+                  {
+                    'name': '设备增长率',
+                    'type': 'linechart_2',
+                    'endpoint': 'EquipmentRatioReport'
+                  },
                 ];
-                showBottomModal(_list);
+                showBottomAll(_list);
               },
             ),
             new Divider(color: Color(0xffEBEEF5), height: 2.0,),
@@ -100,10 +149,28 @@ class _ReportListState extends State<ReportList> {
               title: new Text('设备故障报表'),
               onTap: () {
                 var _list = [
-                  '设备数量',
-                  '设备增长率'
+                  {
+                    'name': '设备故障时间(天)',
+                    'type': 'barchart_2',
+                    'endpoint': 'EquipmentRepairTimeDayReport'
+                  },
+                  {
+                    'name': '设备故障时间(小时)',
+                    'type': 'barchart_2',
+                    'endpoint': 'EquipmentRepairTimeHourReport'
+                  },
+                  {
+                    'name': '设备故障率',
+                    'type': 'linechart_1',
+                    'endpoint': 'EquipmentRapirRatioReport'
+                  },
+                  {
+                    'name': '设备故障率同比',
+                    'type': 'linechart_2',
+                    'endpoint': 'FailureRatioReport'
+                  },
                 ];
-                showBottomModal(_list);
+                showBottomAll(_list);
               },
             ),
             new Divider(color: Color(0xffEBEEF5),),
@@ -112,10 +179,18 @@ class _ReportListState extends State<ReportList> {
               title: new Text('设备开机报表'),
               onTap: () {
                 var _list = [
-                  '设备数量',
-                  '设备增长率'
+                  {
+                    'name': '设备开机率',
+                    'type': 'linechart_1',
+                    'endpoint': 'EquipmentBootRatioReport'
+                  },
+                  {
+                    'name': '设备开机率同比',
+                    'type': 'linechart_2',
+                    'endpoint': 'BootRatioReport'
+                  },
                 ];
-                showBottomModal(_list);
+                showBottomAll(_list);
               },
             ),
             new Divider(color: Color(0xffEBEEF5),),
@@ -124,10 +199,39 @@ class _ReportListState extends State<ReportList> {
               title: new Text('设备资产报表'),
               onTap: () {
                 var _list = [
-                  '设备数量',
-                  '设备增长率'
+                  {
+                    'name': '设备采购价格',
+                    'type': 'barchart_2',
+                    'endpoint': 'EquipmentPurchase'
+                  },
+                  {
+                    'name': '服务合同金额',
+                    'type': 'barchart_2',
+                    'endpoint': 'ContractAmount'
+                  },
+                  {
+                    'name': '服务合同年限',
+                    'type': 'barchart_2',
+                    'endpoint': 'ContractYears'
+                  },
+                  {
+                    'name': '设备折旧剩余年限',
+                    'type': 'barchart_2',
+                    'endpoint': 'DepreciationYears'
+                  },
+                  {
+                    'name': '设备折旧率',
+                    'type': 'barchart_2',
+                    'endpoint': 'DepreciationRate'
+                  },
+                  {
+                    'name': '设备折旧费用',
+                  },
+                  {
+                    'name': '设备资产价值',
+                  },
                 ];
-                showBottomModal(_list);
+                showBottomAll(_list);
               },
             ),
             new Divider(color: Color(0xffEBEEF5),),
@@ -136,10 +240,22 @@ class _ReportListState extends State<ReportList> {
               title: new Text('设备检查报表'),
               onTap: () {
                 var _list = [
-                  '设备数量',
-                  '设备增长率'
+                  {
+                    'name': '设备检查人次',
+                    'type': 'barchart_1',
+                    'endpoint': 'ServiceCountReport'
+                  },
+                  {
+                    'name': '设备检查费用',
+                    'type': 'depreciation_rate'
+                  },
+                  {
+                    'name': '设备检查收入',
+                    'type': 'barchart_2',
+                    'endpoint': 'EquipmentSumIncome'
+                  },
                 ];
-                showBottomModal(_list);
+                showBottomAll(_list);
               },
             ),
             new Divider(color: Color(0xffEBEEF5),),
@@ -148,10 +264,30 @@ class _ReportListState extends State<ReportList> {
               title: new Text('支出报表'),
               onTap: () {
                 var _list = [
-                  '设备数量',
-                  '设备增长率'
+                  {
+                    'name': '设备零配件花费总额',
+                    'type': 'barchart_1',
+                    'endpoint': 'PartExpenditureReport'
+                  },
+                  {
+                    'name': '设备备件花费总额',
+                    'type': ''
+                  },
+                  {
+                    'name': '设备服务人工费用总额',
+                    'type': ''
+                  },
+                  {
+                    'name': '设备总支出',
+                    'type': ''
+                  },
+                  {
+                    'name': '设备总支出同比',
+                    'type': 'linechart_2',
+                    'endpoint': 'ExpenditureRatioReport'
+                  },
                 ];
-                showBottomModal(_list);
+                showBottomAll(_list);
               },
             ),
             new Divider(color: Color(0xffEBEEF5),),
@@ -160,10 +296,18 @@ class _ReportListState extends State<ReportList> {
               title: new Text('收入报表'),
               onTap: () {
                 var _list = [
-                  '设备数量',
-                  '设备增长率'
+                  {
+                    'name': '设备总收入',
+                    'type': 'barchart_1',
+                    'endpoint': 'EquipmentIncomeReport'
+                  },
+                  {
+                    'name': '设备总收入同比',
+                    'type': 'linechart_2',
+                    'endpoint': 'EquipmentIncomeReport'
+                  },
                 ];
-                showBottomModal(_list);
+                showBottomAll(_list);
               },
             ),
             new Divider(color: Color(0xffEBEEF5),),
@@ -172,11 +316,14 @@ class _ReportListState extends State<ReportList> {
               title: new Text('收支报表'),
               onTap: () {
                 var _list = [
-                  '设备数量',
-                  '设备增长率'
+                  {
+                    'name': '设备总收支比',
+                    'type': 'linechart_2',
+                    'endpoint': 'IncomeRatioExpenditureReport'
+                  },
                 ];
-                showBottomModal(_list);
-              },
+                showBottomAll(_list);
+              }
             ),
             new Divider(color: Color(0xffEBEEF5),),
             new Container(
@@ -201,10 +348,28 @@ class _ReportListState extends State<ReportList> {
               title: new Text('客户请求报表'),
               onTap: () {
                 var _list = [
-                  '设备数量',
-                  '设备增长率'
+                  {
+                    'name': '派工响应时间',
+                    'type': 's_barchart_2',
+                    'endpoint': 'ResponseDispatchTime'
+                  },
+                  {
+                    'name': '派工执行率',
+                    'type': 's_linechart_1',
+                    'endpoint': 'DispatchRatio?status=4'
+                  },
+                  {
+                    'name': '服务合格率',
+                    'type': 's_barchart_line',
+                    'endpoint': 'RequestFinishedRateReport'
+                  },
+                  {
+                    'name': '服务时间达标率',
+                    'type': 's_linechart_2',
+                    'endpoint': 'PassServiceRatioReport'
+                  },
                 ];
-                showBottomModal(_list);
+                showBottomAll(_list);
               },
             ),
             new Divider(color: Color(0xffEBEEF5), height: 2.0,),
@@ -213,10 +378,43 @@ class _ReportListState extends State<ReportList> {
               title: new Text('维修请求报表'),
               onTap: () {
                 var _list = [
-                  '设备数量',
-                  '设备增长率'
+                  {
+                    'name': '维修请求数量统计',
+                    'type': 's_barchart_1',
+                    'endpoint': 'ReportRequestCount?requestType=1&status=0'
+                  },
+                  {
+                    'name': '维修请求未关闭数量',
+                    'type': 's_barchart_1',
+                    'endpoint': 'ReportRequestCount?requestType=1&status=1'
+                  },
+                  {
+                    'name': '维修请求未响应数量',
+                    'type': 'barchart_1',
+                    'endpoint': 'ReportRequestCount?requestType=1&status=2'
+                  },
+                  {
+                    'name': '维修请求已关闭数量',
+                    'type': 'barchart_1',
+                    'endpoint': 'ReportRequestCount?requestType=1&status=3'
+                  },
+                  {
+                    'name': '维修请求增长率',
+                    'type': 'linechart_2',
+                    'endpoint': 'RepairRequestGrowthRatioReport'
+                  },
+                  {
+                    'name': '维修请求响应率',
+                    'type': 'linechart_1',
+                    'endpoint': 'RequestRatioReport?requestType=1&byYear=true'
+                  },
+                  {
+                    'name': '维修请求响应时间',
+                    'type': 'barchart_2',
+                    'endpoint': 'RepairResponseTimeReport?requestType=1'
+                  },
                 ];
-                showBottomModal(_list);
+                showBottomAll(_list);
               },
             ),
             new Divider(color: Color(0xffEBEEF5),),
@@ -228,7 +426,6 @@ class _ReportListState extends State<ReportList> {
                   '设备数量',
                   '设备增长率'
                 ];
-                showBottomModal(_list);
               },
             ),
             new Divider(color: Color(0xffEBEEF5),),
@@ -240,7 +437,6 @@ class _ReportListState extends State<ReportList> {
                   '设备数量',
                   '设备增长率'
                 ];
-                showBottomModal(_list);
               },
             ),
             new Divider(color: Color(0xffEBEEF5),),
@@ -252,7 +448,6 @@ class _ReportListState extends State<ReportList> {
                   '设备数量',
                   '设备增长率'
                 ];
-                showBottomModal(_list);
               },
             ),
             new Divider(color: Color(0xffEBEEF5),),
@@ -264,7 +459,6 @@ class _ReportListState extends State<ReportList> {
                   '设备数量',
                   '设备增长率'
                 ];
-                showBottomModal(_list);
               },
             ),
             new Divider(color: Color(0xffEBEEF5),),
@@ -276,7 +470,6 @@ class _ReportListState extends State<ReportList> {
                   '设备数量',
                   '设备增长率'
                 ];
-                showBottomModal(_list);
               },
             ),
             new Divider(color: Color(0xffEBEEF5),),
@@ -288,7 +481,6 @@ class _ReportListState extends State<ReportList> {
                   '设备数量',
                   '设备增长率'
                 ];
-                showBottomModal(_list);
               },
             ),
             new Divider(color: Color(0xffEBEEF5),),

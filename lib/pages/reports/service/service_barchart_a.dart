@@ -5,13 +5,20 @@ import 'package:charts_flutter/flutter.dart' as charts;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_picker/flutter_picker.dart';
 import 'package:atoi/utils/http_request.dart';
+import 'package:atoi/utils/report_dimensions.dart';
 
-class EquipmentAmount extends StatefulWidget {
+class ServiceAssets extends StatefulWidget {
   static String tag = '设备数量';
-  _EquipmentAmountState createState() => _EquipmentAmountState();
+  ServiceAssets({Key key, this.assetType, this.endpoint, this.chartName, this.requestType, this.status}):super(key: key);
+  final String assetType;
+  final String endpoint;
+  final String chartName;
+  final String requestType;
+  final String status;
+  _ServiceAssetsState createState() => _ServiceAssetsState();
 }
 
-class _EquipmentAmountState extends State<EquipmentAmount> {
+class _ServiceAssetsState extends State<ServiceAssets> {
 
   List<charts.Series<dynamic, String>> seriesList;
   bool animate;
@@ -23,21 +30,12 @@ class _EquipmentAmountState extends State<EquipmentAmount> {
   String _currentDimension = '';
 
   Future<void> initDimension() async {
-    var resp = await HttpRequest.request(
-        '/Report/GetDimensionList',
-        method: HttpRequest.GET
-    );
-    if (resp['ResultCode'] == '00') {
-      var _data = resp['Data'];
-      var _list = _data.map((item) => {
-        item['Name'].toString(): item['ID']==2?[2010,2011,2012,2013,2014,2015,2016,2017,2018,2019]:[' ']
-      }).toList();
-      print(_list);
-      setState(() {
-        _dimensionList = _list;
-        _rawList = _data;
-      });
-    }
+    var _list = ReportDimensions.YEARS.map((_year) => {
+      _year.toString(): ReportDimensions.MONTHS.map((_month) => _month.toString()).toList()
+    }).toList();
+    setState(() {
+      _dimensionList = _list;
+    });
   }
 
   void initState() {
@@ -63,30 +61,28 @@ class _EquipmentAmountState extends State<EquipmentAmount> {
     ).showDialog(context);
   }
 
-  Future<Null> getChartData(String type, String year) async {
-    var _select = _rawList.firstWhere((item) => item['Name']==type, orElse: ()=> null);
+  Future<Null> getChartData(String year, String month) async {
     var resp = await HttpRequest.request(
-        '/Report/EquipmentCountReport',
+        '/Report/${widget.endpoint}',
         method: HttpRequest.POST,
         data: {
-          'type': _select['ID'],
-          'year': year==' '?0:year
+          'year': year,
+          'month': month,
         }
     );
     if (resp['ResultCode'] == '00') {
       var _data = resp['Data'];
-      var _list = _data.map<EquipmentData>((item) => new EquipmentData(item['Item1'], item['Item2'])).toList();
+      var _list = _data.map<ServiceData>((item) => new ServiceData(item['Item1'], item['Item2'])).toList();
       setState(() {
         seriesList = [
-          new charts.Series<EquipmentData, String>(
+          new charts.Series<ServiceData, String>(
             id: 'Sales',
             colorFn: (_, __) => charts.MaterialPalette.blue.shadeDefault,
-            domainFn: (EquipmentData data, _) => data.type,
-            measureFn: (EquipmentData data, _) => data.amount,
+            domainFn: (ServiceData data, _) => data.type,
+            measureFn: (ServiceData data, _) => data.amount,
             data: _list,
           )
         ];
-        _tableName = type;
         _tableData = _data;
       });
     }
@@ -112,35 +108,17 @@ class _EquipmentAmountState extends State<EquipmentAmount> {
   }
 
   Card buildTable() {
-    //List<ListTile> _list = [
-    //  ListTile(
-    //    title: new Text(_tableName, style: new TextStyle(color: Colors.blue),),
-    //    trailing: new Text('数据', style: new TextStyle(color: Colors.blue),),
-    //    onTap: () {
-    //    },
-    //  )
-    //];
-    //if (_tableData.length > 0) {
-    //  for(var item in _tableData) {
-    //    _list.add(
-    //        ListTile(
-    //          title: new Text(item['Item1']),
-    //          trailing: new Text(item['Item2'].toString()),
-    //        )
-    //    );
-    //  }
-    //}
     var _dataTable = new DataTable(
         columns: [
-          DataColumn(label: Text(_currentDimension, textAlign: TextAlign.center, style: new TextStyle(color: Colors.blue, fontSize: 14.0),)),
-          DataColumn(label: Text('设备数量', textAlign: TextAlign.center, style: new TextStyle(color: Colors.blue, fontSize: 14.0),)),
+          DataColumn(label: Text('阶段', textAlign: TextAlign.center, style: new TextStyle(color: Colors.blue, fontSize: 14.0),)),
+          DataColumn(label: Text(widget.assetType=='contract_amount'||widget.assetType=='contract_years'?'合同条数':'设备数量', textAlign: TextAlign.center, style: new TextStyle(color: Colors.blue, fontSize: 14.0),)),
         ],
         rows: _tableData.map((item) => DataRow(
             cells: [
               DataCell(Text(item['Item1'])),
               DataCell(Text(item['Item2'].toString()))
             ]
-          )).toList()
+        )).toList()
     );
     return new Card(
       child: _dataTable,
@@ -163,7 +141,7 @@ class _EquipmentAmountState extends State<EquipmentAmount> {
       builder: (context, child, mainModel) {
         return new Scaffold(
             appBar: new AppBar(
-              title: new Text('报表详情'),
+              title: new Text(widget.chartName),
               elevation: 0.7,
               flexibleSpace: Container(
                 decoration: BoxDecoration(
@@ -191,9 +169,9 @@ class _EquipmentAmountState extends State<EquipmentAmount> {
   }
 }
 
-class EquipmentData {
+class ServiceData {
   final String type;
   final double amount;
 
-  EquipmentData(this.type, this.amount);
+  ServiceData(this.type, this.amount);
 }

@@ -45,13 +45,4 @@ class ReportDimensions {
     1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12
   ];
 
-  static List<Map> buildPickers(int typeStart, int typeEnd, bool years, bool months) {
-    List typeSlice = DIMS.sublist(typeStart, typeEnd);
-    if (years && months) {
-      var _list = [];
-      typeSlice.map((item) => {
-        item['Name']:
-      })
-    }
-  }
 }

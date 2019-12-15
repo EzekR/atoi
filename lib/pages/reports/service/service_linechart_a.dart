@@ -5,17 +5,24 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter_picker/flutter_picker.dart';
 import 'package:atoi/utils/http_request.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
+import 'package:atoi/utils/report_dimensions.dart';
 
-class EquipmentGrowth extends StatefulWidget {
-  static String tag = '设备增长率';
-  _EquipmentGrowthState createState() => _EquipmentGrowthState();
+class ServiceLinechartA extends StatefulWidget {
+
+  ServiceLinechartA({Key key, this.chartName, this.endpoint, this.requestType, this.status}):super(key: key);
+  final String endpoint;
+  final String chartName;
+  final String requestType;
+  final String status;
+  _ServiceLinechartAState createState() => _ServiceLinechartAState();
 }
 
-class _EquipmentGrowthState extends State<EquipmentGrowth> {
+class _ServiceLinechartAState extends State<ServiceLinechartA> {
 
   bool animate;
 
   List _dimensionList = [];
+  List _dimSlice = [];
   List _rawList = [];
   List _tableData = [];
   String _tableName = '年份';
@@ -23,42 +30,20 @@ class _EquipmentGrowthState extends State<EquipmentGrowth> {
   ScrollController _scrollController;
 
   Future<void> initDimension() async {
-    var resp = await HttpRequest.request(
-        '/Report/GetDimensionList',
-        method: HttpRequest.GET
-    );
-    if (resp['ResultCode'] == '00') {
-      var _data = resp['Data'];
-      List _list = [];
-      List _years = [];
-      List _months = [];
-      for(var i=1969; i<2020; i++) {
-        _years.add({
-          i.toString(): [' ']
-        });
-        _months.add({
-          i.toString(): [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
-        });
+    _dimSlice = ReportDimensions.DIMS.sublist(2, 7);
+    print(_dimSlice);
+    List _list = _dimSlice.map((_dim) => {_dim['Name'].toString(): [
+      {
+        '年': ReportDimensions.YEARS.map((_year) => {_year.toString(): [' ']}).toList()
+      },
+      {
+        '月': ReportDimensions.YEARS.map((_year) => {_year.toString(): ReportDimensions.MONTHS.map((month) => month.toString()).toList()}).toList()
       }
-      for(var i=2; i<_data.length; i++) {
-        _list.add(
-          {
-            _data[i]['Name'].toString(): [
-              {
-                '年': _years
-              },
-              {
-                '月': _months
-              }
-            ]
-          }
-        );
-      }
-      setState(() {
-        _dimensionList = _list;
-        _rawList = _data;
-      });
-    }
+    ]
+    }).toList();
+    setState(() {
+      _dimensionList = _list;
+    });
   }
 
   void initState() {
@@ -76,7 +61,7 @@ class _EquipmentGrowthState extends State<EquipmentGrowth> {
         selectedTextStyle: TextStyle(color: Colors.blue),
         onConfirm: (Picker picker, List value) {
           var _selected = picker.getSelectedValues();
-          getChartData(_selected[0], _selected[2], _selected[3]);
+          getChartData(_selected[0], _selected[2].toString(), _selected[3].toString());
           setState(() {
             _currentDimension = _selected[0];
           });
@@ -85,14 +70,16 @@ class _EquipmentGrowthState extends State<EquipmentGrowth> {
   }
 
   Future<Null> getChartData(String type, String year, String month) async {
-    var _select = _rawList.firstWhere((item) => item['Name']==type, orElse: ()=> null);
+    var _select = ReportDimensions.DIMS.firstWhere((item) => item['Name']==type, orElse: ()=> null);
     var resp = await HttpRequest.request(
-        '/Report/EquipmentRatioReport',
+        '/Report/${widget.endpoint}',
         method: HttpRequest.POST,
         data: {
           'type': _select['ID'],
           'year': year,
-          'month': month==' '?0:month
+          'month': month==' '?0:month,
+          'status': widget.status,
+          'requestType': widget.requestType
         }
     );
     if (resp['ResultCode'] == '00') {
@@ -126,10 +113,10 @@ class _EquipmentGrowthState extends State<EquipmentGrowth> {
   Card buildTable() {
     var _dataTable = new DataTable(
         columns: [
-          DataColumn(label: Text('类型', textAlign: TextAlign.center, style: new TextStyle(color: Colors.blue, fontSize: 14.0),)),
-          DataColumn(label: Text('当年', textAlign: TextAlign.center, style: new TextStyle(color: Colors.blue, fontSize: 14.0),)),
-          DataColumn(label: Text('去年', textAlign: TextAlign.center, style: new TextStyle(color: Colors.blue, fontSize: 14.0),)),
-          DataColumn(label: Text('增长率（%）', textAlign: TextAlign.center, style: new TextStyle(color: Colors.blue, fontSize: 14.0),)),
+          DataColumn(label: Text(_currentDimension, textAlign: TextAlign.center, style: new TextStyle(color: Colors.blue, fontSize: 14.0),)),
+          DataColumn(label: Text('当年故障率', textAlign: TextAlign.center, style: new TextStyle(color: Colors.blue, fontSize: 14.0),)),
+          DataColumn(label: Text('去年故障率', textAlign: TextAlign.center, style: new TextStyle(color: Colors.blue, fontSize: 14.0),)),
+          DataColumn(label: Text('同比（%）', textAlign: TextAlign.center, style: new TextStyle(color: Colors.blue, fontSize: 14.0),)),
         ],
         rows: _tableData.map((item) => DataRow(
             cells: [
@@ -141,17 +128,17 @@ class _EquipmentGrowthState extends State<EquipmentGrowth> {
         )).toList()
     );
     return new Card(
-      child: new Container(
-        height: _tableData.length*50.0,
-        child: new ListView(
-          scrollDirection: Axis.horizontal,
-          controller: _scrollController,
-          shrinkWrap: true,
-          children: <Widget>[
-            _dataTable
-          ],
-        ),
-      )
+        child: new Container(
+          height: _tableData.length*50.0,
+          child: new ListView(
+            scrollDirection: Axis.horizontal,
+            controller: _scrollController,
+            shrinkWrap: true,
+            children: <Widget>[
+              _dataTable
+            ],
+          ),
+        )
     );
   }
 
@@ -160,12 +147,12 @@ class _EquipmentGrowthState extends State<EquipmentGrowth> {
       child: SfCartesianChart(
         // Initialize category axis
           primaryXAxis: CategoryAxis(),
-          series: <LineSeries<EquipmentData, String>>[
-            LineSeries<EquipmentData, String>(
+          series: <LineSeries<ServiceData, String>>[
+            LineSeries<ServiceData, String>(
               // Bind data source
-                dataSource: _tableData.map<EquipmentData>((item) => EquipmentData(item['type'], item['ratio'])).toList(),
-                xValueMapper: (EquipmentData data, _) => data.type,
-                yValueMapper: (EquipmentData data, _) => data.Growth
+                dataSource: _tableData.map<ServiceData>((item) => ServiceData(item['type'], item['ratio'])).toList(),
+                xValueMapper: (ServiceData data, _) => data.type,
+                yValueMapper: (ServiceData data, _) => data.Growth
             )
           ]
       ),
@@ -177,7 +164,7 @@ class _EquipmentGrowthState extends State<EquipmentGrowth> {
       builder: (context, child, mainModel) {
         return new Scaffold(
             appBar: new AppBar(
-              title: new Text('报表详情'),
+              title: new Text(widget.chartName),
               elevation: 0.7,
               flexibleSpace: Container(
                 decoration: BoxDecoration(
@@ -207,9 +194,9 @@ class _EquipmentGrowthState extends State<EquipmentGrowth> {
   }
 }
 
-class EquipmentData {
+class ServiceData {
   final String type;
   final double Growth;
 
-  EquipmentData(this.type, this.Growth);
+  ServiceData(this.type, this.Growth);
 }

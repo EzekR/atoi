@@ -5,13 +5,17 @@ import 'package:charts_flutter/flutter.dart' as charts;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_picker/flutter_picker.dart';
 import 'package:atoi/utils/http_request.dart';
+import 'package:atoi/utils/report_dimensions.dart';
 
-class EquipmentAmount extends StatefulWidget {
-  static String tag = '设备数量';
-  _EquipmentAmountState createState() => _EquipmentAmountState();
+class EquipmentBarchart extends StatefulWidget {
+
+  EquipmentBarchart({Key key, this.endpoint, this.chartName}):super(key: key);
+  final String endpoint;
+  final String chartName;
+  _EquipmentBarchartState createState() => _EquipmentBarchartState();
 }
 
-class _EquipmentAmountState extends State<EquipmentAmount> {
+class _EquipmentBarchartState extends State<EquipmentBarchart> {
 
   List<charts.Series<dynamic, String>> seriesList;
   bool animate;
@@ -23,21 +27,12 @@ class _EquipmentAmountState extends State<EquipmentAmount> {
   String _currentDimension = '';
 
   Future<void> initDimension() async {
-    var resp = await HttpRequest.request(
-        '/Report/GetDimensionList',
-        method: HttpRequest.GET
-    );
-    if (resp['ResultCode'] == '00') {
-      var _data = resp['Data'];
-      var _list = _data.map((item) => {
-        item['Name'].toString(): item['ID']==2?[2010,2011,2012,2013,2014,2015,2016,2017,2018,2019]:[' ']
-      }).toList();
-      print(_list);
-      setState(() {
-        _dimensionList = _list;
-        _rawList = _data;
-      });
-    }
+    var _list = ReportDimensions.DIMS.map((_dim) => {
+      _dim['Name'].toString(): _dim['ID'] == 2?ReportDimensions.YEARS.map((_year) => _year.toString()).toList():[' ']
+    }).toList();
+    setState(() {
+      _dimensionList = _list;
+    });
   }
 
   void initState() {
@@ -64,9 +59,9 @@ class _EquipmentAmountState extends State<EquipmentAmount> {
   }
 
   Future<Null> getChartData(String type, String year) async {
-    var _select = _rawList.firstWhere((item) => item['Name']==type, orElse: ()=> null);
+    var _select = ReportDimensions.DIMS.firstWhere((item) => item['Name']==type, orElse: ()=> null);
     var resp = await HttpRequest.request(
-        '/Report/EquipmentCountReport',
+        '/Report/${widget.endpoint}',
         method: HttpRequest.POST,
         data: {
           'type': _select['ID'],
@@ -112,24 +107,6 @@ class _EquipmentAmountState extends State<EquipmentAmount> {
   }
 
   Card buildTable() {
-    //List<ListTile> _list = [
-    //  ListTile(
-    //    title: new Text(_tableName, style: new TextStyle(color: Colors.blue),),
-    //    trailing: new Text('数据', style: new TextStyle(color: Colors.blue),),
-    //    onTap: () {
-    //    },
-    //  )
-    //];
-    //if (_tableData.length > 0) {
-    //  for(var item in _tableData) {
-    //    _list.add(
-    //        ListTile(
-    //          title: new Text(item['Item1']),
-    //          trailing: new Text(item['Item2'].toString()),
-    //        )
-    //    );
-    //  }
-    //}
     var _dataTable = new DataTable(
         columns: [
           DataColumn(label: Text(_currentDimension, textAlign: TextAlign.center, style: new TextStyle(color: Colors.blue, fontSize: 14.0),)),
@@ -163,7 +140,7 @@ class _EquipmentAmountState extends State<EquipmentAmount> {
       builder: (context, child, mainModel) {
         return new Scaffold(
             appBar: new AppBar(
-              title: new Text('报表详情'),
+              title: new Text(widget.chartName),
               elevation: 0.7,
               flexibleSpace: Container(
                 decoration: BoxDecoration(
