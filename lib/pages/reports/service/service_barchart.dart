@@ -68,8 +68,6 @@ class _ServiceBarchartState extends State<ServiceBarchart> {
         data: {
           'type': _select['ID'],
           'year': year==' '?0:year,
-          'requestType': widget.requestType,
-          'status': widget.status
         }
     );
     if (resp['ResultCode'] == '00') {

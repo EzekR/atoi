@@ -57,7 +57,7 @@ class _ReportListState extends State<ReportList> {
                   Navigator.of(context).push(new MaterialPageRoute(builder: (context) => new ServiceAssets(chartName: item['name'], endpoint: item['endpoint'],)));
                   break;
                 case 's_barchart_line':
-                  Navigator.of(context).push(new MaterialPageRoute(builder: (context) => new ServiceBarchart(chartName: item['name'], endpoint: item['endpoint'],)));
+                  Navigator.of(context).push(new MaterialPageRoute(builder: (context) => new ServiceBarchartLine(chartName: item['name'], endpoint: item['endpoint'],)));
                   break;
                 case 's_linechart_1':
                   Navigator.of(context).push(new MaterialPageRoute(builder: (context) => new ServiceLinechart(chartName: item['name'], endpoint: item['endpoint'],)));
@@ -390,27 +390,27 @@ class _ReportListState extends State<ReportList> {
                   },
                   {
                     'name': '维修请求未响应数量',
-                    'type': 'barchart_1',
+                    'type': 's_barchart_1',
                     'endpoint': 'ReportRequestCount?requestType=1&status=2'
                   },
                   {
                     'name': '维修请求已关闭数量',
-                    'type': 'barchart_1',
+                    'type': 's_barchart_1',
                     'endpoint': 'ReportRequestCount?requestType=1&status=3'
                   },
                   {
                     'name': '维修请求增长率',
-                    'type': 'linechart_2',
+                    'type': 's_linechart_2',
                     'endpoint': 'RepairRequestGrowthRatioReport'
                   },
                   {
                     'name': '维修请求响应率',
-                    'type': 'linechart_1',
-                    'endpoint': 'RequestRatioReport?requestType=1&byYear=true'
+                    'type': 's_linechart_1',
+                    'endpoint': 'RequestRatioReport?requestType=1&status=4'
                   },
                   {
                     'name': '维修请求响应时间',
-                    'type': 'barchart_2',
+                    'type': 's_barchart_2',
                     'endpoint': 'RepairResponseTimeReport?requestType=1'
                   },
                 ];
@@ -423,9 +423,18 @@ class _ReportListState extends State<ReportList> {
               title: new Text('设备维修方式报表'),
               onTap: () {
                 var _list = [
-                  '设备数量',
-                  '设备增长率'
+                  {
+                    'name': '设备自修率',
+                    'type': 's_linechart_2',
+                    'endpoint': 'RepairRatioReport?requestType=1&status=3'
+                  },
+                  {
+                    'name': '设备供应商维修率',
+                    'type': 's_linechart_2',
+                    'endpoint': 'Supplier_RepairRatioReport?requestType=1&status=3'
+                  },
                 ];
+                showBottomAll(_list);
               },
             ),
             new Divider(color: Color(0xffEBEEF5),),
@@ -434,9 +443,33 @@ class _ReportListState extends State<ReportList> {
               title: new Text('保养请求报表'),
               onTap: () {
                 var _list = [
-                  '设备数量',
-                  '设备增长率'
+                  {
+                    'name': '设备实际保养数量',
+                    'type': 's_barchart_1',
+                    'endpoint': 'ReportRequestCount?requestType=2&status=3'
+                  },
+                  {
+                    'name': '设备计划保养数量',
+                    'type': 's_barchart_1',
+                    'endpoint': 'ReportRequestCount?requestType=2&status=0'
+                  },
+                  {
+                    'name': '设备保养率',
+                    'type': 's_linechart_1',
+                    'endpoint': 'RequestRatioReport?requestType=2&status=3'
+                  },
+                  {
+                    'name': '设备供应商保养数',
+                    'type': 's_barchart_1',
+                    'endpoint': 'ResultCount_supplierReport?requestType=2&status=3'
+                  },
+                  {
+                    'name': '设备内部保养数',
+                    'type': 's_barchart_1',
+                    'endpoint': 'ResultCount_self?requestType=2&status=3'
+                  },
                 ];
+                showBottomAll(_list);
               },
             ),
             new Divider(color: Color(0xffEBEEF5),),
@@ -445,9 +478,23 @@ class _ReportListState extends State<ReportList> {
               title: new Text('巡检请求报表'),
               onTap: () {
                 var _list = [
-                  '设备数量',
-                  '设备增长率'
+                  {
+                    'name': '设备实际巡检数量',
+                    'type': 's_barchart_1',
+                    'endpoint': 'ReportRequestCount?requestType=4&status=3'
+                  },
+                  {
+                    'name': '设备计划巡检数量',
+                    'type': 's_barchart_1',
+                    'endpoint': 'ReportRequestCount?requestType=4&status=0'
+                  },
+                  {
+                    'name': '设备巡检率',
+                    'type': 's_linechart_1',
+                    'endpoint': 'RequestRatioReport?requestType=4&status=3'
+                  },
                 ];
+                showBottomAll(_list);
               },
             ),
             new Divider(color: Color(0xffEBEEF5),),
@@ -456,9 +503,33 @@ class _ReportListState extends State<ReportList> {
               title: new Text('强检请求报表'),
               onTap: () {
                 var _list = [
-                  '设备数量',
-                  '设备增长率'
+                  {
+                    'name': '设备实际强检数量',
+                    'type': 's_barchart_1',
+                    'endpoint': 'ReportRequestCount?requestType=3&status=3'
+                  },
+                  {
+                    'name': '设备未完成强检数量',
+                    'type': 's_barchart_1',
+                    'endpoint': 'ReportRequestCount?requestType=3&status=1'
+                  },
+                  {
+                    'name': '设备待召回请求数量',
+                    'type': 's_barchart_1',
+                    'endpoint': 'ReportRequestCount?requestType=-1&status=1'
+                  },
+                  {
+                    'name': '设备计划强检数量',
+                    'type': 's_barchart_1',
+                    'endpoint': 'ReportRequestCount?requestType=3&status=0'
+                  },
+                  {
+                    'name': '设备强检率',
+                    'type': 's_linechart_1',
+                    'endpoint': 'RequestRatioReport?requestType=3&status=3'
+                  },
                 ];
+                showBottomAll(_list);
               },
             ),
             new Divider(color: Color(0xffEBEEF5),),
@@ -467,9 +538,23 @@ class _ReportListState extends State<ReportList> {
               title: new Text('校正请求报表'),
               onTap: () {
                 var _list = [
-                  '设备数量',
-                  '设备增长率'
+                  {
+                    'name': '设备实际校正数量',
+                    'type': 's_barchart_1',
+                    'endpoint': 'ReportRequestCount?requestType=5&status=3'
+                  },
+                  {
+                    'name': '设备计划校正数量',
+                    'type': 's_barchart_1',
+                    'endpoint': 'ReportRequestCount?requestType=5&status=0'
+                  },
+                  {
+                    'name': '设备校正率',
+                    'type': 's_linechart_1',
+                    'endpoint': 'RequestRatioReport?requestType=5&status=3'
+                  },
                 ];
+                showBottomAll(_list);
               },
             ),
             new Divider(color: Color(0xffEBEEF5),),
@@ -478,9 +563,28 @@ class _ReportListState extends State<ReportList> {
               title: new Text('调拨请求报表'),
               onTap: () {
                 var _list = [
-                  '设备数量',
-                  '设备增长率'
+                  {
+                    'name': '设备调拨数量',
+                    'type': 's_barchart_1',
+                    'endpoint': 'ReportRequestCount?requestType=10&status=0'
+                  },
+                  {
+                    'name': '设备调拨响应率',
+                    'type': 's_linechart_1',
+                    'endpoint': 'RequestRatioReport?requestType=10&status=4'
+                  },
+                  {
+                    'name': '设备调拨响应时间',
+                    'type': 's_barchart_2',
+                    'endpoint': 'RepairResponseTimeReport?requestType=10'
+                  },
+                  {
+                    'name': '设备调拨完成率',
+                    'type': 's_linechart_1',
+                    'endpoint': 'RequestRatioReport?requestType=10&status=3'
+                  },
                 ];
+                showBottomAll(_list);
               },
             ),
             new Divider(color: Color(0xffEBEEF5),),

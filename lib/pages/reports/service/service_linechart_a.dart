@@ -78,8 +78,6 @@ class _ServiceLinechartAState extends State<ServiceLinechartA> {
           'type': _select['ID'],
           'year': year,
           'month': month==' '?0:month,
-          'status': widget.status,
-          'requestType': widget.requestType
         }
     );
     if (resp['ResultCode'] == '00') {
