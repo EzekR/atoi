@@ -45,7 +45,7 @@ class _EquipmentContractState extends State<EquipmentContract> {
 
   MainModel mainModel = MainModel();
 
-  List<dynamic> _equipments = [];
+  List<Map<dynamic, dynamic>> _equipments = [];
 
   List<dynamic> _imageList = [];
 
@@ -492,12 +492,15 @@ class _EquipmentContractState extends State<EquipmentContract> {
                   iconSize: 30.0,
                   onPressed: () async {
                     //toSearch();
-                    final selected = await Navigator.of(context)
-                        .push(new MaterialPageRoute(builder: (context) {
-                      return SearchPage();
-                    }));
-                    print(selected);
-                    _equipments.addAll(selected);
+                    Navigator.of(context).push(new MaterialPageRoute(builder: (context) {
+                      return SearchPage(equipments: _equipments,);
+                    })).then((selected) {
+                      if (selected != null) {
+                        setState(() {
+                          _equipments = selected;
+                        });
+                      }
+                    });
                   },
                 ),
                 //new IconButton(

@@ -484,7 +484,7 @@ Future getImage(ImageSource sourceType) async {
                                       new Expanded(
                                         flex: 6,
                                         child: new TextField(
-                                          controller: _fault, maxLength: 200
+                                          controller: _fault, maxLength: 200, maxLines: 3
                                         ),
                                       )
                                     ],

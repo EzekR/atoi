@@ -353,13 +353,18 @@ class _EquipmentCheckState extends State<EquipmentCheck> {
                       return SearchPage(equipments: _equipments,);
                     }));
                     if (selected != null) {
-                      for (var item in selected) {
-                        var _obj = _equipments.firstWhere((element) => (element['ID']==item['ID']), orElse: () => null);
-                        if (_obj == null) {
-                          _equipments.add(item);
-                        }
-                      }
+                      setState(() {
+                        _equipments = selected??[];
+                      });
                     }
+                    //if (selected != null) {
+                    //  for (var item in selected) {
+                    //    var _obj = _equipments.firstWhere((element) => (element['ID']==item['ID']), orElse: () => null);
+                    //    if (_obj == null) {
+                    //      _equipments.add(item);
+                    //    }
+                    //  }
+                    //}
                     //_equipments.addAll(selected);
                   },
                 ),
@@ -455,7 +460,7 @@ class _EquipmentCheckState extends State<EquipmentCheck> {
                                       new Expanded(
                                         flex: 6,
                                         child: new TextField(
-                                          controller: _fault, maxLength: 200
+                                          controller: _fault, maxLength: 200, maxLines: 3
                                         ),
                                       )
                                     ],

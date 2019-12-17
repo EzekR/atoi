@@ -414,8 +414,8 @@ class _UserRepairPageState extends State<UserRepairPage> {
                         mainAxisSize: MainAxisSize.max,
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: <Widget>[
-                          BuildWidget.buildInputLeft('故障描述', _describe),
-                          BuildWidget.buildDropdownLeft('机器状态', _currentResult,
+                          BuildWidget.buildInputLeft('故障描述:', _describe),
+                          BuildWidget.buildDropdownLeft('机器状态:', _currentResult,
                               _dropDownMenuItems, changedDropDownMethod),
                           new Padding(
                             padding: EdgeInsets.symmetric(vertical: 5.0),
@@ -435,37 +435,6 @@ class _UserRepairPageState extends State<UserRepairPage> {
                               ],
                             ),
                           ),
-                          //new Padding(
-                          //  padding: EdgeInsets.symmetric(vertical: 5.0),
-                          //  child: new Row(
-                          //    children: <Widget>[
-                          //      new Expanded(
-                          //        flex: 4,
-                          //        child: new Wrap(
-                          //          alignment: WrapAlignment.end,
-                          //          crossAxisAlignment: WrapCrossAlignment.center,
-                          //          children: <Widget>[
-                          //            new Text(
-                          //              '添加附件：',
-                          //              style: new TextStyle(
-                          //                  fontSize: 20.0,
-                          //                  fontWeight: FontWeight.w600
-                          //              ),
-                          //            ),
-                          //          ],
-                          //        )
-                          //      ),
-                          //      new Expanded(
-                          //        flex: 7,
-                          //        child: new IconButton(
-                          //            icon: Icon(Icons.add_a_photo),
-                          //            onPressed: () {
-                          //              showSheet(context);
-                          //            }),
-                          //      )
-                          //    ],
-                          //  ),
-                          //),
                           buildImageRow(_imageList)
                         ],
                       ),

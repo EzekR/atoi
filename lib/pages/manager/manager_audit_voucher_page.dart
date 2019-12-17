@@ -486,10 +486,6 @@ class _ManagerAuditVoucherPageState extends State<ManagerAuditVoucherPage> {
           ),
         ),
         actions: <Widget>[
-          new Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 5.0, vertical: 19.0),
-            child: Text(_userName),
-          ),
         ],
       ),
       body: _journal.isEmpty?new Center(child: SpinKitRotatingPlain(color: Colors.blue,),):new Padding(

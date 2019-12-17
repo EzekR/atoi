@@ -651,11 +651,6 @@ class _ManagerCompletePageState extends State<ManagerCompletePage> {
           ),
         ),
         actions: <Widget>[
-          new Padding(
-            padding:
-                const EdgeInsets.symmetric(horizontal: 5.0, vertical: 19.0),
-            child: Text(_userName),
-          ),
         ],
       ),
       body: _request.isEmpty

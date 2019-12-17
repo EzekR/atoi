@@ -223,18 +223,27 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
   }
 
   void changePatrolPeriod(String selectedMethod) {
+    if (selectedMethod == '无') {
+      patrolPeriod.clear();
+    }
     setState(() {
       currentPatrolPeriod = selectedMethod;
     });
   }
 
   void changeMandatoryPeriod(String selectedMethod) {
+    if (selectedMethod == '无') {
+      maintainPeriod.clear();
+    }
     setState(() {
       currentMaintainPeriod = selectedMethod;
     });
   }
 
   void changeCorrectionPeriod(String selectedMethod) {
+    if (selectedMethod == '无') {
+      correctionPeriod.clear();
+    }
     setState(() {
       currentCorrectionPeriod = selectedMethod;
     });

@@ -461,7 +461,7 @@ class _RepairRequestState extends State<RepairRequest> {
                                       new Expanded(
                                         flex: 6,
                                         child: new TextField(
-                                          controller: _fault, maxLength: 200
+                                          controller: _fault, maxLength: 200, maxLines: 3
                                         ),
                                       )
                                     ],

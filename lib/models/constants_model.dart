@@ -109,13 +109,6 @@ class ConstantsModel extends Model {
   get ReportDimensions => _ReportDimensions;
 
   Future<Null> getConstants() async {
-    //var dResp = await HttpRequest.request(
-    //  '/Report/GetDimensionList',
-    //  method: HttpRequest.GET
-    //);
-    //if (dResp['ResultCode'] == '00') {
-    //  _ReportDimensions = dResp['Data'];
-    //}
     var resp = await HttpRequest.request(
       '/User/GetConstants',
       method: HttpRequest.GET
@@ -201,7 +194,8 @@ class ConstantsModel extends Model {
       for(var _item in resp['Data']['UsageStatus']) {
         _UsageStatus.putIfAbsent(_item['Name'], () => _item['ID']);
       }
-      _PeriodType.putIfAbsent('无', () => 0);
+      _PeriodType['无'] = 0;
+      _PeriodTypeList = [];
       _PeriodTypeList.add('无');
       for(var _item in resp['Data']['PeriodType']) {
         _PeriodType.putIfAbsent(_item['Name'], () => _item['ID']);

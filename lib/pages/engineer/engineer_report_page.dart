@@ -956,11 +956,6 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
           ),
         ),
         actions: <Widget>[
-          new Padding(
-            padding:
-                const EdgeInsets.symmetric(horizontal: 5.0, vertical: 19.0),
-            child: Text(_userName),
-          ),
         ],
       ),
       body: _dispatch.isEmpty

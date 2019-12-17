@@ -306,10 +306,6 @@ class _EngineerStartPageState extends State<EngineerStartPage> {
           ),
         ),
         actions: <Widget>[
-          new Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 5.0, vertical: 19.0),
-            child: Text(_userName),
-          ),
         ],
       ),
       body: _dispatch.isEmpty?new Center(child: new SpinKitRotatingPlain(color: Colors.blue),):new Padding(

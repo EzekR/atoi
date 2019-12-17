@@ -14,11 +14,15 @@ class _VendorsListState extends State<VendorsList> {
   List<dynamic> _vendors = [];
 
   bool isSearchState = false;
+  bool _loading = false;
 
   TextEditingController _keywords = new TextEditingController();
 
   Future<Null> getVendors({String filterText}) async {
     filterText = filterText??'';
+    setState(() {
+      _loading = true;
+    });
     var resp = await HttpRequest.request(
       '/DispatchReport/GetSuppliers',
       method: HttpRequest.GET,
@@ -26,6 +30,9 @@ class _VendorsListState extends State<VendorsList> {
         'filterText': filterText
       }
     );
+    setState(() {
+      _loading = false;
+    });
     if (resp['ResultCode'] == '00') {
       setState(() {
         _vendors = resp['Data'];
@@ -162,7 +169,7 @@ class _VendorsListState extends State<VendorsList> {
           ),
         ),
       ),
-      body: _vendors.length==0?new Center(child: new SpinKitRotatingPlain(color: Colors.blue,),):new ListView.builder(
+      body: _loading?new Center(child: new SpinKitRotatingPlain(color: Colors.blue,),):new ListView.builder(
         itemCount: _vendors.length,
         itemBuilder: (context, i) {
           return buildEquipmentCard(_vendors[i]);

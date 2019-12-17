@@ -473,8 +473,8 @@ class _EngineerReportAccessoryState extends State<EngineerReportAccessory> {
                   BuildWidget.buildInput('新装部件金额（元/件）', _amount, inputType: TextInputType.numberWithOptions(
                     decimal: true,
                     signed: false
-                  )),
-                  BuildWidget.buildInput('数量', _qty, inputType: TextInputType.number),
+                  ), maxLength: 11),
+                  BuildWidget.buildInput('数量', _qty, inputType: TextInputType.number, maxLength: 9),
                   BuildWidget.buildInput('拆下编号', _oldCode),
                   new Padding(
                     padding: EdgeInsets.symmetric(horizontal: 95.0),

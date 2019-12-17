@@ -14,11 +14,15 @@ class _ContractListState extends State<ContractList> {
   List<dynamic> _contracts = [];
 
   bool isSearchState = false;
+  bool _loading = false;
 
   TextEditingController _keywords = new TextEditingController();
 
   Future<Null> getContracts({String filterText}) async {
     filterText = filterText??'';
+    setState(() {
+      _loading = true;
+    });
     var resp = await HttpRequest.request(
       '/Contract/GetContracts',
       method: HttpRequest.GET,
@@ -26,6 +30,9 @@ class _ContractListState extends State<ContractList> {
         'filterText': filterText
       }
     );
+    setState(() {
+      _loading = false;
+    });
     if (resp['ResultCode'] == '00') {
       setState(() {
         _contracts = resp['Data'];
@@ -163,7 +170,7 @@ class _ContractListState extends State<ContractList> {
           ),
         ),
       ),
-      body: _contracts.length==0?new Center(child: new SpinKitRotatingPlain(color: Colors.blue,),):new ListView.builder(
+      body: _loading?new Center(child: new SpinKitRotatingPlain(color: Colors.blue,),):new ListView.builder(
         itemCount: _contracts.length,
         itemBuilder: (context, i) {
           return buildEquipmentCard(_contracts[i]);

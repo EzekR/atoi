@@ -324,7 +324,6 @@ class _EngineerVoucherPageState extends State<EngineerVoucherPage> {
           decoration: InputDecoration(
             fillColor: AppConstants.AppColors['app_accent_m'],
             filled: true,
-            hintText: 'N/A'
           ),
           maxLines: 3,
         ),
@@ -482,8 +481,8 @@ class _EngineerVoucherPageState extends State<EngineerVoucherPage> {
               //_currentResult=='完成'?new Container():widget.status!=0&&widget.status!=1?BuildWidget.buildRow('待确认问题', _unconfirmed.text):buildEditor('待确认问题', _unconfirmed),
               widget.status!=0&&widget.status!=1?BuildWidget.buildRow('建议留言', _advice.text):buildEditor('建议留言', _advice),
               new Divider(),
-              widget.status!=0&&widget.status!=1?BuildWidget.buildRow('客户姓名', _customerName.text):BuildWidget.buildInput('客户姓名', _customerName, lines: 1),
-              widget.status!=0&&widget.status!=1?BuildWidget.buildRow('客户电话', _customerNumber.text):BuildWidget.buildInput('客户电话', _customerNumber, lines: 1),
+              widget.status!=0&&widget.status!=1?BuildWidget.buildRow('客户姓名', _customerName.text):BuildWidget.buildInputLeft('客户姓名:', _customerName, lines: 1),
+              widget.status!=0&&widget.status!=1?BuildWidget.buildRow('客户电话', _customerNumber.text):BuildWidget.buildInputLeft('客户电话:', _customerNumber, lines: 1),
               widget.status==0||widget.status==1?new Padding(
                 padding: EdgeInsets.symmetric(vertical: 5.0),
                 child: new Text('客户签名：',
@@ -543,10 +542,6 @@ class _EngineerVoucherPageState extends State<EngineerVoucherPage> {
           ),
         ),
         actions: <Widget>[
-          new Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 5.0, vertical: 19.0),
-            child: Text(_userName),
-          ),
         ],
       ),
       body: _dispatch.isEmpty?new Center(child: new SpinKitRotatingPlain(color: Colors.blue)):new Padding(

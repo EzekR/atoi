@@ -766,7 +766,7 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
             children: <Widget>[
               BuildWidget.buildRow('类型', _request['SourceType']),
               BuildWidget.buildRow('主题', _request['SubjectName']),
-              BuildWidget.buildInput(model.Remark[_request['RequestType']['ID']], _desc),
+              BuildWidget.buildInput(model.Remark[_request['RequestType']['ID']], _desc, maxLength: 200),
               _request['RequestType']['ID']!=14?BuildWidget.buildDropdown('机器状态', _currentStatusReq, _dropDownMenuStatusesReq, changedDropDownStatusReq):new Container(),
               _request['RequestType']['ID']==2?BuildWidget.buildDropdown('保养类型', _currentMaintain, _dropDownMenuMaintain, changedDropDownMaintain):new Container(),
               _request['RequestType']['ID']==3?BuildWidget.buildDropdown('强检原因', _currentMandatory, _dropDownMenuMandatory, changedDropDownMandatory):new Container(),
@@ -931,10 +931,6 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
               ),
             ),
             actions: <Widget>[
-              new Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 5.0, vertical: 19.0),
-                child: Text(_userName),
-              ),
             ],
           ),
           body: _request.isEmpty?new Center(child: SpinKitRotatingPlain(color: Colors.blue),):new Padding(

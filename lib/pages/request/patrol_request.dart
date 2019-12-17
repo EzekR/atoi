@@ -342,12 +342,9 @@ class _PatrolRequestState extends State<PatrolRequest> {
                       return SearchPage(equipments: _equipments,);
                     })).then((selected) {
                       if (selected != null) {
-                        for(var item in selected) {
-                          var _obj = _equipments.firstWhere((element) => (element['ID']==item['ID']), orElse: () => null);
-                          if (_obj == null) {
-                            _equipments.add(item);
-                          }
-                        }
+                        setState(() {
+                          _equipments = selected;
+                        });
                       }
                     });
                   }
@@ -441,7 +438,7 @@ class _PatrolRequestState extends State<PatrolRequest> {
                                       new Expanded(
                                         flex: 6,
                                         child: new TextField(
-                                          controller: _fault, maxLength: 200
+                                          controller: _fault, maxLength: 200, maxLines: 3
                                         ),
                                       )
                                     ],
