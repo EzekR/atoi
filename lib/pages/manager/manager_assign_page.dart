@@ -373,7 +373,7 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
 
   void changedDropDownStatusReq(String selectedMethod) {
     setState(() {
-      _currentStatus = selectedMethod;
+      _currentStatusReq = selectedMethod;
     });
   }
 

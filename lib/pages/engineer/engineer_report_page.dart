@@ -34,17 +34,47 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
   ConstantsModel model;
   bool hold = false;
   int _reportId;
+  var _report;
+  bool _edit = true;
+  String _acceptDate = 'YY-MM-DD';
 
   List _serviceResults = [];
   List _sources = [];
   List _providers = [];
 
+  List _reportType = [
+    '是',
+    '否'
+  ];
+
+  List _serviceScope = [
+    '是',
+    '否'
+  ];
+
+  String _currentType = '是';
+  String _currentScope = '是';
+
+  void changeType(value) {
+    setState(() {
+      _currentType = value;
+    });
+  }
+
+  void changeScope(value) {
+    setState(() {
+      _currentScope = value;
+    });
+  }
+
   List<DropdownMenuItem<String>> _dropDownMenuItems;
   List<DropdownMenuItem<String>> _dropDownMenuSources;
   List<DropdownMenuItem<String>> _dropDownMenuProviders;
+  List<DropdownMenuItem<String>> _dropDownMenuStatus;
   String _currentResult;
   String _currentSource;
   String _currentProvider;
+  String _currentStatus;
 
   var _dispatch = {};
   Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
@@ -56,6 +86,8 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
   var _solution = new TextEditingController();
   var _delay = new TextEditingController();
   var _unsolved = new TextEditingController();
+  var _result = new TextEditingController();
+  var _purchaseAmount = new TextEditingController();
   //List<dynamic> _imageList = [];
   var _imageList;
   var _fujiComments = "";
@@ -68,12 +100,20 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
   List _isPrivate = ['是', '否'];
   String _currentPrivate = '否';
 
+  List _isRecall = ['是', '否'];
+  String _currentRecall = '否';
+
   void changePrivate(value) {
     setState(() {
       _currentPrivate = value;
     });
   }
 
+  void changeRecall(value) {
+    setState(() {
+      _currentRecall = value;
+    });
+  }
   Future<Null> getRole() async {
     var prefs = await _prefs;
     var userName = prefs.getString('userName');
@@ -172,6 +212,15 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
         _fujiComments = data['FujiComments'];
         _reportStatus = data['Status']['Name'];
         _reportOID = data['OID'];
+        if (data['EquipmentStatus']['ID'] != 0) {
+          _currentStatus = data['EquipmentStatus']['Name'];
+        }
+        _purchaseAmount.text = data['PurchaseAmount'].toString();
+        _currentScope = data['ServiceScope']?'是':'否';
+        _result.text = data['Result'];
+        _currentRecall = data['IsRecall']?'是':'否';
+        _acceptDate = data['AcceptanceDate'];
+        _currentType = data['Type']['ID']==1?'是':'否';
       });
       await getImageFile(resp['Data']['FileInfo']['ID']);
       for (var _acc in _accessory) {
@@ -225,104 +274,145 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
   }
 
   Future<Null> uploadReport(int statusId) async {
-    if (_isDelayed && _delay.text.isEmpty) {
-      showDialog(
-          context: context,
-          builder: (context) => CupertinoAlertDialog(
-                title: new Text('误工说明不可为空'),
-              ));
-      return;
-    }
-    //if (_frequency.text.isEmpty ||
-    //    _code.text.isEmpty ||
-    //    _status.text.isEmpty ||
-    //    _analysis.text.isEmpty ||
-    //    _solution.text.isEmpty) {
+    //if (_isDelayed && _delay.text.isEmpty) {
     //  showDialog(
     //      context: context,
     //      builder: (context) => CupertinoAlertDialog(
-    //            title: new Text('报告不可有空字段'),
+    //            title: new Text('误工说明不可为空'),
     //          ));
-    //} else {
-      Map _json;
-      if (_imageList != null) {
-        var content = base64Encode(_imageList);
-        _json = {
-          'FileContent': content,
-          'FileName': 'dispatch_${widget.dispatchId}_report_attachment.jpg',
-          'ID': 0,
-          'FileType': 1
-        };
-      }
-      var prefs = await _prefs;
-      var userID = prefs.getInt('userID');
-      var _data = {
-        'userID': userID,
-        'DispatchReport': {
-          'Dispatch': {'ID': widget.dispatchId},
-          'FaultFrequency': _frequency.text,
-          'FaultCode': _code.text,
-          'FaultSystemStatus': _status.text,
-          'FaultDesc': _description.text,
-          'SolutionCauseAnalysis': _analysis.text,
-          'SolutionWay': _solution.text,
-          'SolutionResultStatus': {
-            'ID': model.SolutionStatus[_currentResult],
-            'Name': _currentResult
-          },
-          'IsPrivate': _currentPrivate == '是' ? 1 : 0,
-          'ServiceProvider': model.ServiceProviders[_currentProvider],
-          'SolutionUnsolvedComments': _unsolved.text,
-          'DelayReason': _delay.text,
-          'Status': {
-            'ID': statusId,
-          },
-          'FileInfo': _json,
-          'ReportAccessories': _accessory,
-          'ID': widget.reportId
-        }
+    //  return;
+    //}
+    if ((_dispatch['RequestType']['ID'] == 3 && _currentPrivate == '是' && _imageList == null) || (_dispatch['RequestType']['ID'] == 2 && _currentProvider != '管理方' && _imageList == null)) {
+      showDialog(
+          context: context,
+          builder: (context) => CupertinoAlertDialog(
+                title: new Text('附件不可为空'),
+              ));
+      return;
+    }
+    Map _json;
+    if (_imageList != null) {
+      var content = base64Encode(_imageList);
+      _json = {
+        'FileContent': content,
+        'FileName': 'dispatch_${widget.dispatchId}_report_attachment.jpg',
+        'ID': 0,
+        'FileType': 1
       };
-      switch (_dispatch['RequestType']['ID']) {
-        case 2:
-          _data['Type'] = {'ID': 201};
-          break;
-        case 3:
-          _data['Type'] = {'ID': 301};
-          break;
-        case 4:
-          _data['Type'] = {'ID': 401};
-          break;
-        default:
-          _data['Type'] = {'ID': 1};
-          break;
-      }
+    }
+    var prefs = await _prefs;
+    var userID = prefs.getInt('userID');
+    var _data = {
+      'Dispatch': {'ID': widget.dispatchId},
+      'FaultCode': _code.text,
+      'FaultDesc': _description.text,
+      'SolutionCauseAnalysis': _analysis.text,
+      'SolutionWay': _solution.text,
+      'SolutionResultStatus': {
+        'ID': model.SolutionStatus[_currentResult],
+        'Name': _currentResult
+      },
+      'EquipmentStatus': {
+        'ID': model.MachineStatus[_currentStatus]
+      },
+      'PurchaseAmount': _purchaseAmount.text,
+      'ServiceScope': _currentScope=='是'?true:false,
+      'Result': _result.text,
+      'IsRecall': _currentRecall =='是'?true:false,
+      'AcceptanceDate': _acceptDate,
+      'IsPrivate': _currentPrivate == '是' ?true:false,
+      'ServiceProvider': {
+        'ID': model.ServiceProviders[_currentProvider]
+      },
+      'SolutionUnsolvedComments': _unsolved.text,
+      'DelayReason': _delay.text,
+      'Status': {
+        'ID': statusId,
+      },
+      'FileInfo': _json,
+      'ReportAccessories': _accessory,
+      'ID': widget.reportId
+    };
+    switch (_dispatch['RequestType']['ID']) {
+      case 1:
+        _data['Type'] = {'ID': 101};
+        break;
+      case 2:
+        _data['Type'] = {
+          'ID': 201
+        };
+        break;
+      case 3:
+        _data['Type'] = {'ID': 301};
+        break;
+      case 4:
+        _data['Type'] = {'ID': 401};
+        break;
+      case 5:
+        _data['Type'] = {'ID': 501};
+        break;
+      case 6:
+        _data['Type'] = {'ID': 601};
+        break;
+      case 7:
+        _data['Type'] = {'ID': 701};
+        break;
+      case 9:
+        _data['Type'] = {'ID': 901};
+        break;
+      default:
+        _data['Type'] = {'ID': 1};
+        break;
+    }
+    if (_currentType == '是') {
+      _data['Type'] = {
+        'ID': 1
+      };
+    }
+    var _body = {
+      'userID': userID,
+      'DispatchReport': _data
+    };
+    setState(() {
+      hold = true;
+    });
+    var resp = await HttpRequest.request('/DispatchReport/SaveDispatchReport',
+        method: HttpRequest.POST, data: _body);
+    setState(() {
+      hold = false;
+    });
+    if (resp['ResultCode'] == '00') {
       setState(() {
-        hold = true;
+        _reportId = resp['Data'];
       });
-      var resp = await HttpRequest.request('/DispatchReport/SaveDispatchReport',
-          method: HttpRequest.POST, data: _data);
-      setState(() {
-        hold = false;
-      });
-      if (resp['ResultCode'] == '00') {
-        setState(() {
-          _reportId = resp['Data'];
-        });
-        showDialog(
-            context: context,
-            builder: (context) => CupertinoAlertDialog(
-                title: statusId == 1
-                    ? new Text('保存报告成功')
-                    : new Text('上传报告成功'))).then((result) {
-              return statusId==1?getReport(resp['Data']):Navigator.of(context, rootNavigator: true).pop(result);
-            });
-      } else {
-        showDialog(
-            context: context,
-            builder: (context) => CupertinoAlertDialog(
-                  title: new Text(resp['ResultMessage']),
-                ));
-      }
+      showDialog(
+          context: context,
+          builder: (context) => CupertinoAlertDialog(
+              title: statusId == 1
+                  ? new Text('保存报告成功')
+                  : new Text('上传报告成功'))).then((result) {
+            return statusId==1?getReport(resp['Data']):Navigator.of(context, rootNavigator: true).pop(result);
+          });
+    } else {
+      showDialog(
+          context: context,
+          builder: (context) => CupertinoAlertDialog(
+                title: new Text(resp['ResultMessage']),
+              ));
+    }
+  }
+
+  Future<String> pickDate({String initialTime}) async {
+    DateTime _time;
+    _time = DateTime.tryParse(initialTime)??DateTime.now();
+    var val = await showDatePicker(
+        context: context,
+        initialDate: _time,
+        firstDate:
+        new DateTime.now().subtract(new Duration(days: 3650)), // 减 30 天
+        lastDate: new DateTime.now().add(new Duration(days: 3650)), // 加 30 天
+        locale: Locale('zh'));
+    return val==null?initialTime:val.toString().split(' ')[0];
   }
 
   List iterateMap(Map item) {
@@ -334,12 +424,14 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
   }
 
   void initDropdown() {
+    model = MainModel.of(context);
     _serviceResults = iterateMap(model.SolutionStatus);
     _sources = iterateMap(model.AccessorySourceType);
     _providers = iterateMap(model.ServiceProviders);
     _dropDownMenuItems = getDropDownMenuItems(_serviceResults);
     _dropDownMenuSources = getDropDownMenuItems(_sources);
     _dropDownMenuProviders = getDropDownMenuItems(_providers);
+    _dropDownMenuStatus = getDropDownMenuItems(iterateMap(model.MachineStatus));
     _currentResult = _dropDownMenuItems[3].value;
     _currentSource = _dropDownMenuSources[0].value;
     _currentProvider = _dropDownMenuProviders[0].value;
@@ -355,6 +447,13 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
         _reportId = widget.reportId;
       });
       getReport(_reportId);
+    }
+    if (widget.status != 0 && widget.status != 1) {
+      setState(() {
+        _edit = false;
+      });
+    } else {
+      _edit = true;
     }
     super.initState();
   }
@@ -374,7 +473,7 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
 
   Column buildField(String label, TextEditingController controller,
       {String hintText, int maxLength}) {
-    String hint = hintText ?? 'N/A';
+    String hint = hintText ?? '';
     maxLength = maxLength??500;
     return new Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -415,6 +514,12 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
   void changedDropDownProvider(String selectedMethod) {
     setState(() {
       _currentProvider = selectedMethod;
+    });
+  }
+
+  void changedStatus(String selectedMethod) {
+    setState(() {
+      _currentStatus = selectedMethod;
     });
   }
 
@@ -537,127 +642,161 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
       _fujiComments.isNotEmpty
           ? BuildWidget.buildRow('审批结果', _fujiComments)
           : new Container(),
+      BuildWidget.buildRadio('是否通用报告', _reportType, _currentType, changeType),
       new Divider(),
     ]);
 
-    switch (_dispatch['RequestType']['ID']) {
-      case 4:
-        _list.addAll([
-          widget.status != 0 && widget.status != 1
-              ? BuildWidget.buildRow('报告明细', _analysis.text)
-              : buildField('报告明细：', _analysis),
-          widget.status != 0 && widget.status != 1
-              ? BuildWidget.buildRow('结果', _solution.text)
-              : buildField('结果：', _solution),
-          widget.status != 0 && widget.status != 1
-              ? BuildWidget.buildRow('作业报告结果', _currentResult)
-              : BuildWidget.buildDropdown('作业报告结果', _currentResult,
-                  _dropDownMenuItems, changedDropDownMethod),
-          _currentResult == '问题升级'
-              ? (widget.status != 0 && widget.status != 1
-                  ? BuildWidget.buildRow('问题升级', _unsolved.text)
-                  : buildField('问题升级：', _unsolved))
-              : new Container(),
-          widget.status != 0 && widget.status != 1 && _isDelayed
-              ? BuildWidget.buildRow('误工说明', _delay.text)
-              : buildField('误工说明', _delay),
-        ]);
-        break;
-      case 3:
-        _list.addAll([
-          widget.status != 0 && widget.status != 1
-              ? BuildWidget.buildRow('强检要求', _description.text)
-              : buildField('强检要求：', _description,
-                  hintText: 'FDA, Manufacture, Hospital, Etc..'),
-          widget.status != 0 && widget.status != 1
-              ? BuildWidget.buildRow('报告明细', _analysis.text)
-              : buildField('报告明细：', _analysis),
-          widget.status != 0 && widget.status != 1
-              ? BuildWidget.buildRow('结果', _solution.text)
-              : buildField('结果：', _solution),
-          widget.status != 0 && widget.status != 1
-              ? BuildWidget.buildRow('专用报告', _currentPrivate)
-              : BuildWidget.buildRadio(
-                  '专用报告', _isPrivate, _currentPrivate, changePrivate),
-          widget.status != 0 && widget.status != 1 && _isDelayed
-              ? BuildWidget.buildRow('误工说明', _delay.text)
-              : buildField('误工说明', _delay),
-          widget.status != 0 && widget.status != 1
-              ? BuildWidget.buildRow('作业报告结果', _currentResult)
-              : BuildWidget.buildDropdown('作业报告结果', _currentResult,
-                  _dropDownMenuItems, changedDropDownMethod),
-          _currentResult == '问题升级'
-              ? (widget.status != 0 && widget.status != 1
-                  ? BuildWidget.buildRow('问题升级', _unsolved.text)
-                  : buildField('问题升级：', _unsolved))
-              : new Container(),
-        ]);
-        break;
-      case 2:
-        _list.addAll([
-          widget.status != 0 && widget.status != 1
-              ? BuildWidget.buildRow('报告明细', _analysis.text)
-              : buildField('报告明细：', _analysis),
-          widget.status != 0 && widget.status != 1
-              ? BuildWidget.buildRow('结果', _solution.text)
-              : buildField('结果：', _solution),
-          widget.status != 0 && widget.status != 1
-              ? BuildWidget.buildRow('服务提供方', _currentProvider)
-              : BuildWidget.buildDropdown('服务提供方', _currentProvider,
-                  _dropDownMenuProviders, changedDropDownProvider),
-          widget.status != 0 && widget.status != 1
-              ? BuildWidget.buildRow('作业报告结果', _currentResult)
-              : BuildWidget.buildDropdown('作业报告结果', _currentResult,
-                  _dropDownMenuItems, changedDropDownMethod),
-          _currentResult == '问题升级'
-              ? (widget.status != 0 && widget.status != 1
-                  ? BuildWidget.buildRow('问题升级', _unsolved.text)
-                  : buildField('问题升级：', _unsolved))
-              : new Container(),
-          widget.status != 0 && widget.status != 1 && _isDelayed
-              ? BuildWidget.buildRow('误工说明', _delay.text)
-              : buildField('误工说明', _delay),
-        ]);
-        break;
-      default:
-        _list.addAll([
-          widget.status != 0 && widget.status != 1
-              ? BuildWidget.buildRow('发生频率', _frequency.text)
-              : buildField('发生频率：', _frequency, maxLength: 20),
-          widget.status != 0 && widget.status != 1
-              ? BuildWidget.buildRow('故障描述', _description.text)
-              : buildField('故障描述：', _description),
-          widget.status != 0 && widget.status != 1
-              ? BuildWidget.buildRow('系统状态', _status.text)
-              : buildField('系统状态：', _status, maxLength: 20),
-          widget.status != 0 && widget.status != 1
-              ? BuildWidget.buildRow('错误代码', _code.text)
-              : buildField('错误代码：', _code, maxLength: 20),
-          widget.status != 0 && widget.status != 1
-              ? BuildWidget.buildRow('分析原因', _analysis.text)
-              : buildField('分析原因：', _analysis),
-          widget.status != 0 && widget.status != 1
-              ? BuildWidget.buildRow('处理方法', _solution.text)
-              : buildField('处理方法：', _solution),
-          widget.status != 0 && widget.status != 1
-              ? BuildWidget.buildRow('备注', _unsolved.text)
-              : buildField('备注：', _unsolved),
-          (widget.status == 0 || widget.status == 1) && _isDelayed
-              ? buildField('误工说明：', _delay)
-              : new Container(),
-          widget.status != 0 && widget.status != 1 && _isDelayed
-              ? BuildWidget.buildRow('误工说明', _delay.text)
-              : new Container(),
-          widget.status != 0 && widget.status != 1
-              ? BuildWidget.buildRow('作业结果', _currentResult)
-              : BuildWidget.buildDropdownLeft('作业结果：', _currentResult,
-                  _dropDownMenuItems, changedDropDownMethod),
-        ]);
+    if (_currentType == '是') {
+      _list.addAll(
+        [
+          _edit?buildField('报告明细:', _analysis):BuildWidget.buildRow('报告明细', _analysis.text),
+          _edit?buildField('结果:', _result):BuildWidget.buildRow('结果', _result.text),
+        ]
+      );
+    } else {
+      switch (_dispatch['RequestType']['ID']) {
+        case 1:
+          _list.addAll(
+            [
+              _edit?buildField('错误代码:', _code):BuildWidget.buildRow('错误代码', _code.text),
+              BuildWidget.buildRow('设备状态（报修）', _dispatch['MachineStatus']['Name']),
+              _edit?BuildWidget.buildDropdownLeft('设备状态（离场）:', _currentStatus, _dropDownMenuStatus, changedStatus):BuildWidget.buildRow('设备状态（离场）', _report['EquipmentStatus']['Name']),
+              _edit?buildField('详细故障描述:', _description):BuildWidget.buildRow('详细故障描述', _description.text),
+              _edit?buildField('分析原因:', _analysis):BuildWidget.buildRow('详细故障描述', _analysis.text),
+              _edit?buildField('详细处理方法:', _solution):BuildWidget.buildRow('详细处理方法', _solution.text),
+              _edit?buildField('结果:', _result):BuildWidget.buildRow('结果', _result.text),
+            ]
+          );
+          break;
+        case 4:
+          _list.addAll(
+              [
+                _edit?buildField('报告明细:', _analysis):BuildWidget.buildRow('报告明细', _analysis.text),
+                _edit?buildField('结果:', _result):BuildWidget.buildRow('结果', _result.text),
+              ]
+          );
+          break;
+        case 3:
+          _list.addAll(
+            [
+              _edit?buildField('强检要求:', _description):BuildWidget.buildRow('强检要求', _description.text),
+              _edit?buildField('报告明细:', _analysis):BuildWidget.buildRow('报告明细', _analysis.text),
+              _edit?buildField('结果:', _result):BuildWidget.buildRow('结果', _result.text),
+              _edit?BuildWidget.buildRadio('专用报告', _isPrivate, _currentPrivate, changePrivate):BuildWidget.buildRow('专用报告', _currentPrivate),
+              _edit?BuildWidget.buildRadio('待召回', _isRecall, _currentRecall, changeRecall):BuildWidget.buildRow('待召回', _currentRecall),
+            ]
+          );
+          break;
+        case 2:
+          _list.addAll(
+            [
+              _edit?buildField('报告明细:', _analysis):BuildWidget.buildRow('报告明细', _analysis.text),
+              _edit?buildField('结果:', _result):BuildWidget.buildRow('结果', _result.text),
+            ]
+          );
+          break;
+        case 5:
+          _list.addAll(
+              [
+                _edit?buildField('报告明细:', _analysis):BuildWidget.buildRow('报告明细', _analysis.text),
+                _edit?buildField('结果:', _result):BuildWidget.buildRow('结果', _result.text),
+              ]
+          );
+          break;
+        case 7:
+          _list.addAll(
+              [
+                _edit?buildField('报告明细:', _analysis):BuildWidget.buildRow('报告明细', _analysis.text),
+                _edit?buildField('结果:', _result):BuildWidget.buildRow('结果', _result.text),
+              ]
+          );
+          break;
+        case 9:
+          _list.addAll(
+              [
+                _edit?buildField('报告明细:', _analysis):BuildWidget.buildRow('报告明细', _analysis.text),
+                _edit?buildField('结果:', _result):BuildWidget.buildRow('结果', _result.text),
+                _edit?
+                new Padding(
+                  padding: EdgeInsets.symmetric(vertical: 5.0),
+                  child: new Row(
+                    children: <Widget>[
+                      new Expanded(
+                        flex: 4,
+                        child: new Wrap(
+                          alignment: WrapAlignment.end,
+                          crossAxisAlignment: WrapCrossAlignment.center,
+                          children: <Widget>[
+                            new Text(
+                              '报废时间',
+                              style: new TextStyle(
+                                  fontSize: 20.0, fontWeight: FontWeight.w600),
+                            )
+                          ],
+                        ),
+                      ),
+                      new Expanded(
+                        flex: 1,
+                        child: new Text(
+                          '：',
+                          style: new TextStyle(
+                            fontSize: 20.0,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                      new Expanded(
+                        flex: 4,
+                        child: new Text(
+                          _acceptDate,
+                          style: new TextStyle(
+                              fontSize: 20.0,
+                              fontWeight: FontWeight.w400,
+                              color: Colors.black54
+                          ),
+                        ),
+                      ),
+                      new Expanded(
+                        flex: 2,
+                        child: new IconButton(
+                            icon: Icon(Icons.calendar_today, color: AppConstants.AppColors['btn_main'],),
+                            onPressed: () async {
+                              var _date = await pickDate(initialTime: _acceptDate);
+                              setState(() {
+                                _acceptDate = _date;
+                              });
+                            }),
+                      ),
+                    ],
+                  ),
+                ):BuildWidget.buildRow('验收日期', _acceptDate)
+              ]
+          );
+          break;
+        case 6:
+          _list.addAll(
+              [
+                _edit?BuildWidget.buildInputLeft('资产金额', _purchaseAmount):BuildWidget.buildRow('资产金额', _dispatch['Request']['Equipments'][0]['PurchaseAmount'].toString()),
+                _edit?BuildWidget.buildRadio('整包范围', _serviceScope, _currentScope, changeScope):BuildWidget.buildRow('整包范围', _dispatch['Request']['Equipments'][0]['ServiceScope']?'是':'否'),
+                _edit?buildField('报告明细:', _analysis):BuildWidget.buildRow('报告明细', _analysis.text),
+                _edit?buildField('结果:', _result):BuildWidget.buildRow('结果', _result.text),
+              ]
+          );
+          break;
+      }
+
+      _list.addAll(
+        [
+          _edit?BuildWidget.buildDropdownLeft('作业报告结果:', _currentResult, _dropDownMenuItems, changedDropDownMethod):BuildWidget.buildRow('作业报告结果', _currentResult),
+          _currentResult=='问题升级'?buildField('问题升级', _unsolved):new Container(),
+          _currentResult=='待第三方支持'?BuildWidget.buildDropdownLeft('服务提供方', _currentProvider, _dropDownMenuProviders, changedDropDownProvider):new Container()
+        ]
+      );
+
     }
 
     _list.addAll([
-      widget.status == 0 || widget.status == 1
-          ? new Padding(
+          _edit?new Padding(
               padding: EdgeInsets.symmetric(vertical: 5.0),
               child: new Row(
                 children: <Widget>[
