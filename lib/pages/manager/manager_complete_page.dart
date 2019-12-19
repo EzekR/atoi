@@ -299,6 +299,96 @@ class _ManagerCompletePageState extends State<ManagerCompletePage> {
     return _image;
   }
 
+  List<Widget> buildReportContent() {
+    List<Widget> _list = [];
+    _list.addAll([
+      BuildWidget.buildRow('作业报告编号', _report['OID']),
+      BuildWidget.buildRow('作业报告类型', _report['Type']['Name']),
+      BuildWidget.buildRow('开始时间', _report['Dispatch']['StartDate'].split('T')[0]),
+      new Divider(),
+    ]);
+    switch (_report['Type']['ID']) {
+      case 1:
+        _list.addAll([
+          BuildWidget.buildRow('报告明细', _report['SolutionCauseAnalysis']),
+          BuildWidget.buildRow('结果', _report['Result']),
+        ]);
+        break;
+      case 101:
+        _list.addAll([
+          BuildWidget.buildRow('错误代码', _report['FaultCode']),
+          BuildWidget.buildRow('设备状态(报修)', _report['Dispatch']['MachineStatus']['Name']),
+          BuildWidget.buildRow('设备状态(离场)', _report['EquipmentStatus']['Name']),
+          BuildWidget.buildRow('详细故障描述', _report['FaultDesc']),
+          BuildWidget.buildRow('分析原因', _report['SolutionCauseAnalysis']),
+          BuildWidget.buildRow('详细处理方法', _report['SolutionWay']),
+          BuildWidget.buildRow('结果', _report['Result']),
+          _report['DelayReason']!=''?BuildWidget.buildRow('误工说明', _report['DelayReason']):new Container(),
+        ]);
+        break;
+      case 201:
+        _list.addAll([
+          BuildWidget.buildRow('报告明细', _report['SolutionCauseAnalysis']),
+          BuildWidget.buildRow('结果', _report['Result']),
+        ]);
+        break;
+      case 301:
+        _list.addAll([
+          BuildWidget.buildRow('强检要求', _report['FaultDesc']),
+          BuildWidget.buildRow('报告明细', _report['SolutionCauseAnalysis']),
+          BuildWidget.buildRow('结果', _report['Result']),
+          BuildWidget.buildRow('专用报告', _report['IsPrivate']?'是':'否'),
+          BuildWidget.buildRow('待召回', _report['IsRecall']?'是':'否'),
+        ]);
+        break;
+      case 401:
+        _list.addAll([
+          BuildWidget.buildRow('报告明细', _report['SolutionCauseAnalysis']),
+          BuildWidget.buildRow('结果', _report['Result']),
+        ]);
+        break;
+      case 501:
+        _list.addAll([
+          BuildWidget.buildRow('报告明细', _report['SolutionCauseAnalysis']),
+          BuildWidget.buildRow('结果', _report['Result']),
+        ]);
+        break;
+      case 601:
+        _list.addAll([
+          BuildWidget.buildRow('资产金额', _report['PurchaseAmount']),
+          BuildWidget.buildRow('整包范围', _report['ServiceScope']?'是':'否'),
+          BuildWidget.buildRow('报告明细', _report['SolutionCauseAnalysis']),
+          BuildWidget.buildRow('结果', _report['Result']),
+        ]);
+        break;
+      case 701:
+        _list.addAll([
+          BuildWidget.buildRow('报告明细', _report['SolutionCauseAnalysis']),
+          BuildWidget.buildRow('结果', _report['Result']),
+        ]);
+        break;
+      case 901:
+        _list.addAll([
+          BuildWidget.buildRow('报告明细', _report['SolutionCauseAnalysis']),
+          BuildWidget.buildRow('结果', _report['Result']),
+          BuildWidget.buildRow('验收日期', _report['AcceptanceDate'].split('T')[0]),
+        ]);
+        break;
+      default:
+        _list.addAll([
+          BuildWidget.buildRow('报告明细', _report['SolutionCauseAnalysis']),
+          BuildWidget.buildRow('结果', _report['Result']),
+        ]);
+        break;
+    }
+    _list.addAll([
+      BuildWidget.buildRow('作业结果', _report['SolutionResultStatus']['Name']),
+      BuildWidget.buildRow('附件', ''),
+      buildImageColumn(),
+      BuildWidget.buildRow('审批备注', _report['FujiComments']??'')
+    ]);
+    return _list;
+  }
   List<Widget> buildEquipment() {
     if (_request.isNotEmpty) {
       var _equipments = _request['Equipments'];
@@ -453,7 +543,8 @@ class _ManagerCompletePageState extends State<ManagerCompletePage> {
               //_request['Status']['ID']==1?new Container():BuildWidget.buildRow('当前状态', _request['Status']['Name']),
               //_request['Status']['ID']==1?new Container():BuildWidget.buildRow('紧急程度', _request['Priority']['Name']),
               BuildWidget.buildRow('请求附件', ''),
-              buildImageColumn()
+              buildImageColumn(),
+              buildFileName()
             ],
           ),
         ),
@@ -573,30 +664,7 @@ class _ManagerCompletePageState extends State<ManagerCompletePage> {
             mainAxisAlignment: MainAxisAlignment.start,
             mainAxisSize: MainAxisSize.max,
             crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              BuildWidget.buildRow('作业报告编号', _report['OID']),
-              BuildWidget.buildRow('作业报告类型', _report['Type']['Name']),
-              BuildWidget.buildRow('审批状态', _report['Status']['Name']),
-              BuildWidget.buildRow('发生频率', _report['FaultFrequency']),
-              BuildWidget.buildRow(
-                  '系统状态', _report['FaultSystemStatus'] ?? '正常'),
-              BuildWidget.buildRow('错误代码', _report['FaultCode']),
-              BuildWidget.buildRow('故障描述', _report['FaultDesc']),
-              BuildWidget.buildRow('分析原因', _report['SolutionCauseAnalysis']),
-              BuildWidget.buildRow('处理方法', _report['SolutionWay']),
-              BuildWidget.buildRow('备注', _report['SolutionUnsolvedComments']),
-              _report['DelayReason'] != ''
-                  ? BuildWidget.buildRow('误工说明', _report['DelayReason'])
-                  : new Container(),
-              BuildWidget.buildRow(
-                  '作业结果', _report['SolutionResultStatus']['Name']),
-              _report['FujiComments'] != ''
-                  ? BuildWidget.buildRow('审批说明', _report['FujiComments'])
-                  : new Container(),
-              BuildWidget.buildRow('附件', ''),
-              buildReportImageColumn(),
-              buildFileName()
-            ],
+            children: buildReportContent(),
           ),
         ),
         isExpanded: _isExpandedReport,

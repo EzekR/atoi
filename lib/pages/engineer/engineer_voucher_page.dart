@@ -94,6 +94,8 @@ class _EngineerVoucherPageState extends State<EngineerVoucherPage> {
           _journalStatus = _data['Status']['Name'];
           _journalOID = _data['OID'];
           _currentResult = _data['ResultStatus']['Name'];
+          _customerName.text = _data['UserName'];
+          _customerNumber.text = _data['UserMobile'];
         });
       }
     }
@@ -167,9 +169,12 @@ class _EngineerVoucherPageState extends State<EngineerVoucherPage> {
               'JobContent': _jobContent.text,
               'FollowProblem': _followProblem.text,
               'UnconfirmedProblem': _unconfirmed.text,
+              'UserName': _customerName.text,
+              'UserMobile': _customerNumber.text,
               'ResultStatus': {
                 'ID': status
               },
+              'Advice': _advice.text,
               'FileContent': image
             }
           }

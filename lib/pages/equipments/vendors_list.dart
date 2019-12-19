@@ -93,7 +93,7 @@ class _VendorsListState extends State<VendorsList> {
                 onPressed: (){
                   Navigator.of(context).push(new MaterialPageRoute(builder: (_) {
                     return new VendorDetail(vendor: item,);
-                  }));
+                  })).then((result) => getVendors());
                 },
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(6),

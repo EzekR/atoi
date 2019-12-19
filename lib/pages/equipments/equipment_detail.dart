@@ -776,7 +776,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
         .map((item) => item['id']==null?{
               'FileContent': base64Encode(item['content']),
               'FileName': item['fileName'],
-              'FileType': 8,
+              'FileType': 4,
               'FileDesc': '',
               'ID': 0
             }:null)

@@ -308,12 +308,21 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
   Future<Null> approveReport() async {
     final SharedPreferences prefs = await _prefs;
     var UserId = await prefs.getInt('userID');
+    var _body = _report;
+    _body['Dispatch'] = {
+      'ID': _dispatch['ID']
+    };
+    _body['SolutionUnsolvedComments'] = _unsolved.text;
+    _body['SolutionResultStatus'] = {
+      'ID': model.SolutionStatus[_currentResult]
+    };
+    _body['ServiceProvider'] = {
+      'ID': _currentResult!='待第三方支持'?0:model.ServiceProviders[_currentProvider]
+    };
+    _body['FujiComments'] = _comment.text;
     Map<String, dynamic> _data = {
       'userID': UserId,
-      'reportID': widget.reportId,
-      'solutionResultID': model.SolutionStatus[_currentResult],
-      'solutionUnresolvedComments': _report['SolutionUnresolvedComments'],
-      'comments': _comment.text
+      'info': _body
     };
     Fluttertoast.showToast(
         msg: "正在提交...",
@@ -352,45 +361,66 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
     if (_comment.text.isEmpty) {
       showDialog(context: context,
         builder: (context) => CupertinoAlertDialog(
-          title: new Text('备注不可为空'),
+          title: new Text('审批备注不可为空'),
         )
       );
-    } else {
-      final SharedPreferences prefs = await _prefs;
-      var UserId = await prefs.getInt('userID');
-      Map<String, dynamic> _data = {
-        'userID': UserId,
-        'reportID': widget.reportId,
-        'solutionResultID': model.SolutionStatus[_currentResult],
-        'solutionUnresolvedComments': _report['SolutionUnresolvedComments'],
-        'comments': _comment.text
-      };
-      Fluttertoast.showToast(
-          msg: "正在提交...",
-          toastLength: Toast.LENGTH_SHORT,
-          gravity: ToastGravity.CENTER,
-          backgroundColor: Colors.black54,
-          textColor: Colors.white,
-          fontSize: 16.0
+      return;
+    }
+    if (_currentResult == '问题升级' && _unsolved.text.isEmpty) {
+      showDialog(context: context,
+          builder: (context) => CupertinoAlertDialog(
+            title: new Text('问题升级不可为空'),
+          )
       );
-      var _response = await HttpRequest.request(
-          '/DispatchReport/RejectDispatchReport',
-          method: HttpRequest.POST,
-          data: _data
-      );
-      Fluttertoast.cancel();
-      print(_response);
-      if (_response['ResultCode'] == '00') {
-        showDialog(
-            context: context,
-            builder: (context) =>
-                CupertinoAlertDialog(
-                  title: new Text('已退回'),
-                )
-        ).then((result) =>
+      return;
+    }
+    final SharedPreferences prefs = await _prefs;
+    var UserId = await prefs.getInt('userID');
+    var _body = _report;
+    _body['Dispatch'] = {
+      'ID': _dispatch['ID']
+    };
+    _body['SolutionUnsolvedComments'] = _unsolved.text;
+    _body['SolutionResultStatus'] = {
+      'ID': model.SolutionStatus[_currentResult]
+    };
+    _body['ServiceProvider'] = {
+      'ID': _currentResult!='待第三方支持'?0:model.ServiceProviders[_currentProvider]
+    };
+    _body['FujiComments'] = _comment.text;
+    Map<String, dynamic> _data = {
+      'userID': UserId,
+      'info': _body
+    };
+    Fluttertoast.showToast(
+        msg: "正在提交...",
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.CENTER,
+        backgroundColor: Colors.black54,
+        textColor: Colors.white,
+        fontSize: 16.0
+    );
+    var _response = await HttpRequest.request(
+        '/DispatchReport/RejectDispatchReport',
+        method: HttpRequest.POST,
+        data: _data
+    );
+    Fluttertoast.cancel();
+    print(_response);
+    if (_response['ResultCode'] == '00') {
+      showDialog(
+          context: context,
+          builder: (context) =>
+              CupertinoAlertDialog(
+                title: new Text('已退回'),
+              )
+      ).then((result) =>
           Navigator.of(context, rootNavigator: true).pop(result)
-        );
-      }
+      );
+    } else {
+      showDialog(context: context, builder: (context) => CupertinoAlertDialog(
+        title: new Text(_response['ResultMessage']),
+      ));
     }
   }
 
@@ -454,7 +484,8 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
     _list.addAll([
       BuildWidget.buildRow('作业报告编号', _report['OID']),
       BuildWidget.buildRow('作业报告类型', _report['Type']['Name']),
-      BuildWidget.buildRow('开始时间', _report['Dispatch']['StartDate'].split('T')[0]),
+      BuildWidget.buildRow('开始时间', _report['Dispatch']['StartDate'].toString().split('T')[0]),
+      widget.status==3?BuildWidget.buildRow('审批备注', _report['FujiComments']):new Container(),
       new Divider(),
     ]);
     switch (_report['Type']['ID']) {
@@ -521,7 +552,7 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
         _list.addAll([
           BuildWidget.buildRow('报告明细', _report['SolutionCauseAnalysis']),
           BuildWidget.buildRow('结果', _report['Result']),
-          BuildWidget.buildRow('验收日期', _report['AcceptanceDate'].split('T')[0]),
+          BuildWidget.buildRow('验收日期', _report['AcceptanceDate'].toString().split('T')[0]),
         ]);
         break;
       default:
@@ -532,7 +563,7 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
         break;
     }
     _list.addAll([
-      BuildWidget.buildDropdown('作业结果', _currentResult, _dropDownMenuItems, changedDropDownMethod),
+      widget.status==3?BuildWidget.buildRow('作业结果', _currentResult):BuildWidget.buildDropdown('作业结果', _currentResult, _dropDownMenuItems, changedDropDownMethod),
       _currentResult=='问题升级'?BuildWidget.buildInput('问题升级', _unsolved):new Container(),
       _currentResult=='待第三方支持'?BuildWidget.buildDropdown('服务提供方', _currentProvider, _dropDownMenuProviders, changeProvider):new Container(),
       BuildWidget.buildRow('附件', ''),
@@ -642,7 +673,7 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
       ),
     ]);
 
-    if (_dispatch['Request']['RequestType']['ID'] == 1) {
+    if (_dispatch['Request']['RequestType']['ID'] != 14 && _dispatch['Request']['RequestType']['ID'] != 12 && _dispatch['Request']['RequestType']['ID'] != 4) {
       _list.add(
         new ExpansionPanel(
           headerBuilder: (context, isExpanded) {
@@ -671,6 +702,7 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
     }
     return _list;
   }
+
   @override
   Widget build(BuildContext context) {
     // TODO: implement build

@@ -431,8 +431,8 @@ class _ManagerAuditVoucherPageState extends State<ManagerAuditVoucherPage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
               BuildWidget.buildRow('服务凭证编号', _journal['OID']),
-              BuildWidget.buildRow('客户姓名', _dispatch['Request']['RequestUser']['Name']),
-              BuildWidget.buildRow('客户电话', _dispatch['Request']['RequestUser']['Mobile']),
+              BuildWidget.buildRow('客户姓名', _journal['UserName']??''),
+              BuildWidget.buildRow('客户电话', _journal['UserMobile']??''),
               BuildWidget.buildRow('故障现象/错误代码/事由', _journal['FaultCode']),
               BuildWidget.buildRow('工作内容', _journal['JobContent']),
               BuildWidget.buildRow('待跟进问题', _journal['FollowProblem']),

@@ -250,6 +250,10 @@ class _HomePageState extends State<HomePage>
                         await _prefs.clear();
                         Navigator.of(context).pushNamed(LoginPage.tag);
                       },
+                    ),
+                    new ListTile(
+                      leading: Icon(Icons.info),
+                      title: Text('版本信息：v0.0.1'),
                     )
                   ],
                 ),

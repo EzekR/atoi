@@ -178,6 +178,10 @@ class _EngineerHomePageState extends State<EngineerHomePage>
                         await _prefs.clear();
                         Navigator.of(context).pushNamed(LoginPage.tag);
                       },
+                    ),
+                    new ListTile(
+                      leading: Icon(Icons.info),
+                      title: Text('版本信息：v0.0.1'),
                     )
                   ],
                 ),

@@ -429,7 +429,7 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
       'Comments': _comments.text,
       'FileInfo': _json,
       'ReportAccessories': _accessory,
-      'ID': widget.reportId
+      'ID': _reportId
     };
     switch (_dispatch['RequestType']['ID']) {
       case 1:
@@ -737,10 +737,8 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
           ? BuildWidget.buildRow('报告编号', _reportOID)
           : new Container(),
       BuildWidget.buildRow('开始时间', _formatDate),
-      _fujiComments.isNotEmpty
-          ? BuildWidget.buildRow('审批结果', _fujiComments)
-          : new Container(),
       _edit?BuildWidget.buildRadio('是否通用报告', _reportType, _currentType, changeType):BuildWidget.buildRow('是否通用报告', _currentType),
+      _fujiComments==""?new Container():BuildWidget.buildRow('审批备注', _fujiComments),
       new Divider(),
     ]);
 
@@ -758,7 +756,7 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
             [
               _edit?buildField('错误代码:', _code):BuildWidget.buildRow('错误代码', _code.text),
               BuildWidget.buildRow('设备状态（报修）', _dispatch['MachineStatus']['Name']),
-              _edit?BuildWidget.buildDropdownLeft('设备状态（离场）:', _currentStatus, _dropDownMenuStatus, changedStatus):BuildWidget.buildRow('设备状态（离场）', _currentStatus),
+              _edit?BuildWidget.buildDropdownLeft('设备状态（离场）:', _currentStatus, _dropDownMenuStatus, changedStatus):BuildWidget.buildRow('设备状态（离场）', _currentStatus??''),
               _edit?buildField('详细故障描述:', _description):BuildWidget.buildRow('详细故障描述', _description.text),
               _edit?buildField('分析原因:', _analysis):BuildWidget.buildRow('详细故障描述', _analysis.text),
               _edit?buildField('详细处理方法:', _solution):BuildWidget.buildRow('详细处理方法', _solution.text),
@@ -886,7 +884,7 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
       _list.addAll(
         [
           _edit?BuildWidget.buildDropdownLeft('作业报告结果:', _currentResult, _dropDownMenuItems, changedDropDownMethod):BuildWidget.buildRow('作业报告结果', _currentResult),
-          _currentResult=='问题升级'?buildField('问题升级', _unsolved):new Container(),
+          _currentResult=='问题升级'?buildField('问题升级:', _unsolved):new Container(),
           _currentResult=='待第三方支持'?BuildWidget.buildDropdownLeft('服务提供方', _currentProvider, _dropDownMenuProviders, changedDropDownProvider):new Container(),
           _edit?buildField('备注:', _comments):BuildWidget.buildRow('备注', _comments.text),
 
@@ -903,12 +901,6 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
           BuildWidget.buildRow('误工说明', _delay.text)
         );
       }
-      if (widget.status == 3) {
-        _list.add(
-          BuildWidget.buildRow('审批备注', _fujiComments)
-        );
-      }
-
     }
 
     _list.addAll([
@@ -1103,10 +1095,7 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
                   ? new Container()
                   : BuildWidget.buildRow(
                       '机器状态', _dispatch['MachineStatus']['Name']),
-              BuildWidget.buildRow(
-                  '出发时间',
-                  AppConstants.TimeForm(
-                      _dispatch['ScheduleDate'], 'yyyy-mm-dd')),
+              BuildWidget.buildRow('出发时间', DateTime.tryParse(_dispatch['ScheduleDate']).toString().split(':00.000')[0]),
               BuildWidget.buildRow('备注', _dispatch['LeaderComments']),
             ],
           ),

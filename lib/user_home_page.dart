@@ -237,6 +237,10 @@ class _UserHomePageState extends State<UserHomePage> {
                     ));
                   },
                 ),
+                new ListTile(
+                  leading: Icon(Icons.info),
+                  title: Text('版本信息：v0.0.1'),
+                )
               ],
             ),
           ),
