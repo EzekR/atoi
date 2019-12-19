@@ -45,7 +45,7 @@ class _EquipmentContractState extends State<EquipmentContract> {
 
   MainModel mainModel = MainModel();
 
-  List<Map<dynamic, dynamic>> _equipments = [];
+  List _equipments;
 
   List<dynamic> _imageList = [];
 
@@ -548,7 +548,7 @@ class _EquipmentContractState extends State<EquipmentContract> {
                               ),
                             );
                           },
-                          body: _equipments.length == 0
+                          body: _equipments ==null
                               ? new Center(child: new Text('请选择设备'))
                               : buildEquip(),
                           isExpanded: _isExpandedBasic,

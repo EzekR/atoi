@@ -33,7 +33,7 @@ class _EquipmentCheckState extends State<EquipmentCheck> {
 
   MainModel mainModel = MainModel();
 
-  List<Map> _equipments = [];
+  List _equipments = [];
 
   List<dynamic> _imageList = [];
 

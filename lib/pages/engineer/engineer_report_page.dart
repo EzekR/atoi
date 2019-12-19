@@ -52,7 +52,7 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
     '否'
   ];
 
-  String _currentType = '是';
+  String _currentType = '否';
   String _currentScope = '是';
 
   void changeType(value) {
@@ -88,6 +88,7 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
   var _unsolved = new TextEditingController();
   var _result = new TextEditingController();
   var _purchaseAmount = new TextEditingController();
+  var _comments = new TextEditingController();
   //List<dynamic> _imageList = [];
   var _imageList;
   var _fujiComments = "";
@@ -190,62 +191,66 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
     var prefs = await _prefs;
     var userID = prefs.getInt('userID');
     var reportId = widget.reportId;
-    var resp = await HttpRequest.request('/DispatchReport/GetDispatchReport',
-        method: HttpRequest.GET,
-        params: {'userID': userID, 'dispatchReportId': reportId});
-    print(resp);
-    if (resp['ResultCode'] == '00') {
-      var data = resp['Data'];
-      setState(() {
-        _frequency.text = data['FaultFrequency'];
-        _code.text = data['FaultCode'];
-        _status.text = data['FaultSystemStatus'];
-        _description.text = data['FaultDesc'];
-        _analysis.text = data['SolutionCauseAnalysis'];
-        _solution.text = data['SolutionWay'];
-        _currentResult = data['SolutionResultStatus']['Name'] == ''
-            ? _currentResult
-            : data['SolutionResultStatus']['Name'];
-        _delay.text = data['DelayReason'];
-        _unsolved.text = data['SolutionUnsolvedComments'];
-        _accessory = data['ReportAccessories'];
-        _fujiComments = data['FujiComments'];
-        _reportStatus = data['Status']['Name'];
-        _reportOID = data['OID'];
-        if (data['EquipmentStatus']['ID'] != 0) {
-          _currentStatus = data['EquipmentStatus']['Name'];
+    if (reportId != 0) {
+      var resp = await HttpRequest.request('/DispatchReport/GetDispatchReport',
+          method: HttpRequest.GET,
+          params: {'userID': userID, 'dispatchReportId': reportId});
+      print(resp);
+      if (resp['ResultCode'] == '00') {
+        var data = resp['Data'];
+        setState(() {
+          _report = data;
+          _frequency.text = data['FaultFrequency'];
+          _code.text = data['FaultCode'];
+          _status.text = data['FaultSystemStatus'];
+          _description.text = data['FaultDesc'];
+          _analysis.text = data['SolutionCauseAnalysis'];
+          _solution.text = data['SolutionWay'];
+          _currentResult = data['SolutionResultStatus']['Name'] == ''
+              ? _currentResult
+              : data['SolutionResultStatus']['Name'];
+          _delay.text = data['DelayReason'];
+          _unsolved.text = data['SolutionUnsolvedComments'];
+          _accessory = data['ReportAccessories'];
+          _fujiComments = data['FujiComments'];
+          _reportStatus = data['Status']['Name'];
+          _reportOID = data['OID'];
+          if (data['EquipmentStatus']['ID'] != 0) {
+            _currentStatus = data['EquipmentStatus']['Name'];
+          }
+          _purchaseAmount.text = data['PurchaseAmount'].toString();
+          _currentScope = data['ServiceScope']?'是':'否';
+          _result.text = data['Result'];
+          _currentRecall = data['IsRecall']?'是':'否';
+          _acceptDate = data['AcceptanceDate'];
+          _currentType = data['Type']['ID']==1?'是':'否';
+          _comments.text = data['Comments'];
+        });
+        await getImageFile(resp['Data']['FileInfo']['ID']);
+        for (var _acc in _accessory) {
+          var _imageNew = _acc['FileInfos']
+              .firstWhere((info) => info['FileType'] == 1, orElse: () => null);
+          var _imageOld = _acc['FileInfos']
+              .firstWhere((info) => info['FileType'] == 2, orElse: () => null);
+          if (_imageNew != null) {
+            var _fileNew = await getAccessoryFile(_imageNew['ID']);
+            _imageNew['FileContent'] = _fileNew;
+            setState(() {
+              _acc['ImageNew'] = _imageNew;
+            });
+          }
+          if (_imageOld != null) {
+            var _fileOld = await getAccessoryFile(_imageOld['ID']);
+            _imageOld['FileContent'] = _fileOld;
+            setState(() {
+              _acc['ImageOld'] = _imageOld;
+            });
+          }
         }
-        _purchaseAmount.text = data['PurchaseAmount'].toString();
-        _currentScope = data['ServiceScope']?'是':'否';
-        _result.text = data['Result'];
-        _currentRecall = data['IsRecall']?'是':'否';
-        _acceptDate = data['AcceptanceDate'];
-        _currentType = data['Type']['ID']==1?'是':'否';
-      });
-      await getImageFile(resp['Data']['FileInfo']['ID']);
-      for (var _acc in _accessory) {
-        var _imageNew = _acc['FileInfos']
-            .firstWhere((info) => info['FileType'] == 1, orElse: () => null);
-        var _imageOld = _acc['FileInfos']
-            .firstWhere((info) => info['FileType'] == 2, orElse: () => null);
-        if (_imageNew != null) {
-          var _fileNew = await getAccessoryFile(_imageNew['ID']);
-          _imageNew['FileContent'] = _fileNew;
-          setState(() {
-            _acc['ImageNew'] = _imageNew;
-          });
-        }
-        if (_imageOld != null) {
-          var _fileOld = await getAccessoryFile(_imageOld['ID']);
-          _imageOld['FileContent'] = _fileOld;
-          setState(() {
-            _acc['ImageOld'] = _imageOld;
-          });
-        }
+        setState(() {
+          _accessory = _accessory;
+        });
       }
-      setState(() {
-        _accessory = _accessory;
-      });
     }
   }
 
@@ -260,35 +265,127 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
     if (resp['ResultCode'] == '00') {
       setState(() {
         _dispatch = resp['Data'];
+        _isDelayed = resp['Data']['Request']['IsDelay'];
       });
-      var _createTime = DateTime.parse(resp['Data']['CreateDate']);
-      var _startTime = DateTime.parse(resp['Data']['StartDate']);
-      var _duration = _startTime.difference(_createTime).inMinutes;
-      if (_duration >
-          resp['Data']['Request']['Equipments'][0]['ResponseTimeLength']) {
-        setState(() {
-          _isDelayed = true;
-        });
-      }
     }
   }
 
   Future<Null> uploadReport(int statusId) async {
-    //if (_isDelayed && _delay.text.isEmpty) {
-    //  showDialog(
-    //      context: context,
-    //      builder: (context) => CupertinoAlertDialog(
-    //            title: new Text('误工说明不可为空'),
-    //          ));
-    //  return;
-    //}
-    if ((_dispatch['RequestType']['ID'] == 3 && _currentPrivate == '是' && _imageList == null) || (_dispatch['RequestType']['ID'] == 2 && _currentProvider != '管理方' && _imageList == null)) {
-      showDialog(
-          context: context,
-          builder: (context) => CupertinoAlertDialog(
-                title: new Text('附件不可为空'),
-              ));
-      return;
+    if (statusId == 2 && _currentType == '否') {
+      if (_isDelayed && _delay.text.isEmpty) {
+        showDialog(
+            context: context,
+            builder: (context) => CupertinoAlertDialog(
+              title: new Text('误工说明不可为空'),
+            ));
+        return;
+      }
+      if ((_dispatch['RequestType']['ID'] == 3 && _currentPrivate == '是' && _imageList == null) || (_dispatch['RequestType']['ID'] == 2 && _currentProvider != '管理方' && _imageList == null)) {
+        showDialog(
+            context: context,
+            builder: (context) => CupertinoAlertDialog(
+              title: new Text('附件不可为空'),
+            ));
+        return;
+      }
+      if (_dispatch['RequestType']['ID'] == 1 && _code.text.isEmpty) {
+        showDialog(
+            context: context,
+            builder: (context) => CupertinoAlertDialog(
+              title: new Text('错误代码不可为空'),
+            ));
+        return;
+      }
+      if (_dispatch['RequestType']['ID'] == 1 && _currentStatus == null) {
+        showDialog(
+            context: context,
+            builder: (context) => CupertinoAlertDialog(
+              title: new Text('设备状态（离场）不可为空'),
+            ));
+        return;
+      }
+      if (_dispatch['RequestType']['ID'] == 3 && _description.text.isEmpty) {
+        showDialog(
+            context: context,
+            builder: (context) => CupertinoAlertDialog(
+              title: new Text('强检要求不可为空'),
+            ));
+        return;
+      }
+      if (_dispatch['RequestType']['ID'] == 6 && _purchaseAmount.text.isEmpty) {
+        showDialog(
+            context: context,
+            builder: (context) => CupertinoAlertDialog(
+              title: new Text('资产金额不可为空'),
+            ));
+        return;
+      }
+      if (_dispatch['RequestType']['ID'] == 9 && _acceptDate == 'YY-MM-DD') {
+        showDialog(
+            context: context,
+            builder: (context) => CupertinoAlertDialog(
+              title: new Text('验收日期不可为空'),
+            ));
+        return;
+      }
+      if (_analysis.text.isEmpty) {
+        showDialog(
+            context: context,
+            builder: (context) => CupertinoAlertDialog(
+              title: new Text('报告明细不可为空'),
+            ));
+        return;
+      }
+      if (_result.text.isEmpty) {
+        showDialog(
+            context: context,
+            builder: (context) => CupertinoAlertDialog(
+              title: new Text('结果不可为空'),
+            ));
+        return;
+      }
+      if (_currentResult == '问题升级' && _unsolved.text.isEmpty) {
+        showDialog(
+            context: context,
+            builder: (context) => CupertinoAlertDialog(
+              title: new Text('问题升级说明不可为空'),
+            ));
+        return;
+      }
+    }
+    if (statusId == 2 && _currentType == '是') {
+      if (_analysis.text.isEmpty) {
+        showDialog(
+            context: context,
+            builder: (context) => CupertinoAlertDialog(
+              title: new Text('报告明细不可为空'),
+            ));
+        return;
+      }
+      if (_result.text.isEmpty) {
+        showDialog(
+            context: context,
+            builder: (context) => CupertinoAlertDialog(
+              title: new Text('结果不可为空'),
+            ));
+        return;
+      }
+      if (_currentResult == '问题升级' && _unsolved.text.isEmpty) {
+        showDialog(
+            context: context,
+            builder: (context) => CupertinoAlertDialog(
+              title: new Text('问题升级说明不可为空'),
+            ));
+        return;
+      }
+      if (_isDelayed && _delay.text.isEmpty) {
+        showDialog(
+            context: context,
+            builder: (context) => CupertinoAlertDialog(
+              title: new Text('误工说明不可为空'),
+            ));
+        return;
+      }
     }
     Map _json;
     if (_imageList != null) {
@@ -329,6 +426,7 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
       'Status': {
         'ID': statusId,
       },
+      'Comments': _comments.text,
       'FileInfo': _json,
       'ReportAccessories': _accessory,
       'ID': widget.reportId
@@ -642,7 +740,7 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
       _fujiComments.isNotEmpty
           ? BuildWidget.buildRow('审批结果', _fujiComments)
           : new Container(),
-      BuildWidget.buildRadio('是否通用报告', _reportType, _currentType, changeType),
+      _edit?BuildWidget.buildRadio('是否通用报告', _reportType, _currentType, changeType):BuildWidget.buildRow('是否通用报告', _currentType),
       new Divider(),
     ]);
 
@@ -660,7 +758,7 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
             [
               _edit?buildField('错误代码:', _code):BuildWidget.buildRow('错误代码', _code.text),
               BuildWidget.buildRow('设备状态（报修）', _dispatch['MachineStatus']['Name']),
-              _edit?BuildWidget.buildDropdownLeft('设备状态（离场）:', _currentStatus, _dropDownMenuStatus, changedStatus):BuildWidget.buildRow('设备状态（离场）', _report['EquipmentStatus']['Name']),
+              _edit?BuildWidget.buildDropdownLeft('设备状态（离场）:', _currentStatus, _dropDownMenuStatus, changedStatus):BuildWidget.buildRow('设备状态（离场）', _currentStatus),
               _edit?buildField('详细故障描述:', _description):BuildWidget.buildRow('详细故障描述', _description.text),
               _edit?buildField('分析原因:', _analysis):BuildWidget.buildRow('详细故障描述', _analysis.text),
               _edit?buildField('详细处理方法:', _solution):BuildWidget.buildRow('详细处理方法', _solution.text),
@@ -679,7 +777,7 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
         case 3:
           _list.addAll(
             [
-              _edit?buildField('强检要求:', _description):BuildWidget.buildRow('强检要求', _description.text),
+              _edit?buildField('强检要求:', _description, hintText: 'FDA, Manufacture, Hospital, Etc...'):BuildWidget.buildRow('强检要求', _description.text),
               _edit?buildField('报告明细:', _analysis):BuildWidget.buildRow('报告明细', _analysis.text),
               _edit?buildField('结果:', _result):BuildWidget.buildRow('结果', _result.text),
               _edit?BuildWidget.buildRadio('专用报告', _isPrivate, _currentPrivate, changePrivate):BuildWidget.buildRow('专用报告', _currentPrivate),
@@ -789,9 +887,27 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
         [
           _edit?BuildWidget.buildDropdownLeft('作业报告结果:', _currentResult, _dropDownMenuItems, changedDropDownMethod):BuildWidget.buildRow('作业报告结果', _currentResult),
           _currentResult=='问题升级'?buildField('问题升级', _unsolved):new Container(),
-          _currentResult=='待第三方支持'?BuildWidget.buildDropdownLeft('服务提供方', _currentProvider, _dropDownMenuProviders, changedDropDownProvider):new Container()
+          _currentResult=='待第三方支持'?BuildWidget.buildDropdownLeft('服务提供方', _currentProvider, _dropDownMenuProviders, changedDropDownProvider):new Container(),
+          _edit?buildField('备注:', _comments):BuildWidget.buildRow('备注', _comments.text),
+
         ]
       );
+      
+      if (_edit && _isDelayed && _dispatch['RequestType']['ID'] == 1 && _dispatch['Request']['LastStatus']['ID'] == 1) {
+        _list.add(
+          buildField('误工说明:', _delay)
+        );
+      }
+      if (!_edit && _isDelayed && _dispatch['RequestType']['ID'] == 1 && _delay.text.isNotEmpty) {
+        _list.add(
+          BuildWidget.buildRow('误工说明', _delay.text)
+        );
+      }
+      if (widget.status == 3) {
+        _list.add(
+          BuildWidget.buildRow('审批备注', _fujiComments)
+        );
+      }
 
     }
 
@@ -816,6 +932,8 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
           : BuildWidget.buildRow('附件', ''),
       buildImageRow()
     ]);
+
+
 
     return _list;
   }
@@ -1019,7 +1137,7 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
         isExpanded: _isExpandedAssign,
       ),
     ]);
-    if (_dispatch['RequestType']['ID'] == 1) {
+    if (_dispatch['RequestType']['ID'] != 4 && _dispatch['RequestType']['ID'] != 12 && _dispatch['RequestType']['ID'] != 14) {
       _list.add(
         new ExpansionPanel(
           headerBuilder: (context, isExpanded) {

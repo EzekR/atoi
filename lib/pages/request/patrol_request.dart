@@ -35,7 +35,7 @@ class _PatrolRequestState extends State<PatrolRequest> {
   Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
   MainModel mainModel = MainModel();
 
-  List<Map> _equipments = [];
+  List _equipments = [];
 
   List<dynamic> _imageList = [];
 

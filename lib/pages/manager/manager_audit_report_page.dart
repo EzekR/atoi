@@ -31,6 +31,7 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
   var _equipment = {};
   var _comment = new TextEditingController();
   ConstantsModel model;
+  var _unsolved = new TextEditingController();
 
   List _serviceResults = [
     '待分配',
@@ -39,8 +40,12 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
     '已解决'
   ];
 
+  List _provider = [];
+
   List<DropdownMenuItem<String>> _dropDownMenuItems;
+  List<DropdownMenuItem<String>> _dropDownMenuProviders;
   String _currentResult;
+  String _currentProvider;
   Map<String, dynamic> _report = {};
   Map<String, dynamic> _dispatch = {};
 
@@ -69,8 +74,11 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
 
   void initDropdown() {
     _serviceResults = iterateMap(model.SolutionStatus);
+    _provider = iterateMap(model.ServiceProviders);
     _dropDownMenuItems = getDropDownMenuItems(_serviceResults);
+    _dropDownMenuProviders = getDropDownMenuItems(_provider);
     _currentResult = _dropDownMenuItems[0].value;
+    _currentProvider = _dropDownMenuProviders[0].value;
   }
 
   void initState(){
@@ -103,6 +111,11 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
     });
   }
 
+  void changeProvider(String selectedMethod) {
+    setState(() {
+      _currentProvider = selectedMethod;
+    });
+  }
   TextField buildTextField(String labelText, TextEditingController controller, bool isEnabled) {
     return new TextField(
       decoration: InputDecoration(
@@ -441,36 +454,87 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
     _list.addAll([
       BuildWidget.buildRow('作业报告编号', _report['OID']),
       BuildWidget.buildRow('作业报告类型', _report['Type']['Name']),
-      BuildWidget.buildRow('报告明细', _report['SolutionCauseAnalysis']),
-      BuildWidget.buildRow('结果', _report['SolutionWay']),
+      BuildWidget.buildRow('开始时间', _report['Dispatch']['StartDate'].split('T')[0]),
+      new Divider(),
     ]);
-    switch (_dispatch['Request']['RequestType']['ID']) {
-      case 2:
+    switch (_report['Type']['ID']) {
+      case 1:
         _list.addAll([
-          BuildWidget.buildRow('服务提供商', _report['ServiceProvider']['Name'])
+          BuildWidget.buildRow('报告明细', _report['SolutionCauseAnalysis']),
+          BuildWidget.buildRow('结果', _report['Result']),
         ]);
         break;
-      case 3:
+      case 101:
+        _list.addAll([
+          BuildWidget.buildRow('错误代码', _report['FaultCode']),
+          BuildWidget.buildRow('设备状态(报修)', _report['Dispatch']['MachineStatus']['Name']),
+          BuildWidget.buildRow('设备状态(离场)', _report['EquipmentStatus']['Name']),
+          BuildWidget.buildRow('详细故障描述', _report['FaultDesc']),
+          BuildWidget.buildRow('分析原因', _report['SolutionCauseAnalysis']),
+          BuildWidget.buildRow('详细处理方法', _report['SolutionWay']),
+          BuildWidget.buildRow('结果', _report['Result']),
+          _report['DelayReason']!=''?BuildWidget.buildRow('误工说明', _report['DelayReason']):new Container(),
+        ]);
+        break;
+      case 201:
+        _list.addAll([
+          BuildWidget.buildRow('报告明细', _report['SolutionCauseAnalysis']),
+          BuildWidget.buildRow('结果', _report['Result']),
+        ]);
+        break;
+      case 301:
         _list.addAll([
           BuildWidget.buildRow('强检要求', _report['FaultDesc']),
-          BuildWidget.buildRow('专用报告', _report['IsPrivate']?'是':'否')
+          BuildWidget.buildRow('报告明细', _report['SolutionCauseAnalysis']),
+          BuildWidget.buildRow('结果', _report['Result']),
+          BuildWidget.buildRow('专用报告', _report['IsPrivate']?'是':'否'),
+          BuildWidget.buildRow('待召回', _report['IsRecall']?'是':'否'),
+        ]);
+        break;
+      case 401:
+        _list.addAll([
+          BuildWidget.buildRow('报告明细', _report['SolutionCauseAnalysis']),
+          BuildWidget.buildRow('结果', _report['Result']),
+        ]);
+        break;
+      case 501:
+        _list.addAll([
+          BuildWidget.buildRow('报告明细', _report['SolutionCauseAnalysis']),
+          BuildWidget.buildRow('结果', _report['Result']),
+        ]);
+        break;
+      case 601:
+        _list.addAll([
+          BuildWidget.buildRow('资产金额', _report['PurchaseAmount']),
+          BuildWidget.buildRow('整包范围', _report['ServiceScope']?'是':'否'),
+          BuildWidget.buildRow('报告明细', _report['SolutionCauseAnalysis']),
+          BuildWidget.buildRow('结果', _report['Result']),
+        ]);
+        break;
+      case 701:
+        _list.addAll([
+          BuildWidget.buildRow('报告明细', _report['SolutionCauseAnalysis']),
+          BuildWidget.buildRow('结果', _report['Result']),
+        ]);
+        break;
+      case 901:
+        _list.addAll([
+          BuildWidget.buildRow('报告明细', _report['SolutionCauseAnalysis']),
+          BuildWidget.buildRow('结果', _report['Result']),
+          BuildWidget.buildRow('验收日期', _report['AcceptanceDate'].split('T')[0]),
         ]);
         break;
       default:
         _list.addAll([
-          BuildWidget.buildRow('发生频率', _report['FaultFrequency']),
-          BuildWidget.buildRow('系统状态', _report['FaultSystemStatus']),
-          BuildWidget.buildRow('错误代码', _report['FaultCode']),
-          BuildWidget.buildRow('故障描述', _report['FaultDesc']),
-          BuildWidget.buildRow('分析原因', _report['SolutionCauseAnalysis']),
-          BuildWidget.buildRow('处理方法', _report['SolutionWay']),
-          BuildWidget.buildRow('备注', _report['SolutionUnsolvedComments']),
+          BuildWidget.buildRow('报告明细', _report['SolutionCauseAnalysis']),
+          BuildWidget.buildRow('结果', _report['Result']),
         ]);
         break;
     }
     _list.addAll([
-      _report['DelayReason']!=''?BuildWidget.buildRow('误工说明', _report['DelayReason']):new Container(),
-      widget.status==3?BuildWidget.buildRow('作业结果', _report['SolutionResultStatus']['Name']):BuildWidget.buildDropdown('作业结果', _currentResult, _dropDownMenuItems, changedDropDownMethod),
+      BuildWidget.buildDropdown('作业结果', _currentResult, _dropDownMenuItems, changedDropDownMethod),
+      _currentResult=='问题升级'?BuildWidget.buildInput('问题升级', _unsolved):new Container(),
+      _currentResult=='待第三方支持'?BuildWidget.buildDropdown('服务提供方', _currentProvider, _dropDownMenuProviders, changeProvider):new Container(),
       BuildWidget.buildRow('附件', ''),
       buildImageColumn(),
       widget.status==3?BuildWidget.buildRow('审批备注', _report['Comments']??''):new Container()

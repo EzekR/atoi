@@ -688,7 +688,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
       );
       return;
     }
-    if (int.tryParse(patrolPeriod.text.toString()) != null && int.tryParse(patrolPeriod.text.toString()) <= 0) {
+    if (int.tryParse(patrolPeriod.text.toString()) != null && int.tryParse(patrolPeriod.text.toString()) <= 0 && currentPatrolPeriod != '无') {
       showDialog(
           context: context,
           builder: (context) => CupertinoAlertDialog(
@@ -706,7 +706,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
       );
       return;
     }
-    if (int.tryParse(maintainPeriod.text.toString()) !=null && int.tryParse(maintainPeriod.text.toString()) <= 0) {
+    if (int.tryParse(maintainPeriod.text.toString()) !=null && int.tryParse(maintainPeriod.text.toString()) <= 0 && currentMaintainPeriod !='无') {
       showDialog(
           context: context,
           builder: (context) => CupertinoAlertDialog(
@@ -724,7 +724,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
       );
       return;
     }
-    if (int.tryParse(correctionPeriod.text.toString()) != null && int.tryParse(correctionPeriod.text.toString()) <= 0) {
+    if (int.tryParse(correctionPeriod.text.toString()) != null && int.tryParse(correctionPeriod.text.toString()) <= 0 && currentCorrectionPeriod != '无') {
       showDialog(
           context: context,
           builder: (context) => CupertinoAlertDialog(

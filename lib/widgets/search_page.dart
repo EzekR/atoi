@@ -6,14 +6,14 @@ class SearchPage extends StatefulWidget {
 
   SearchPage({Key key, this.equipments}):super(key: key);
 
-  final List<Map> equipments;
+  final List equipments;
 
   _SearchPageState createState() => _SearchPageState();
 }
 
 class _SearchPageState extends State<SearchPage> {
   var suggestionList = [];
-  List<Map> selected = [];
+  List selected = [];
   String query = '';
 
   void initState() {
