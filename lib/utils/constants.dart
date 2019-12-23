@@ -207,7 +207,7 @@ class AppConstants {
     if (format == 'yyyy-mm-dd') {
       return '${_date.year}-${_date.month}-${_date.day}';
     } else {
-      return '${_date.year}-${_date.month}-${_date.day} ${_date.hour}:${_date.minute}:${_date.second}';
+      return '${_date.year}-${_date.month}-${_date.day} ${_date.hour}:${_date.minute}';
     }
   }
 

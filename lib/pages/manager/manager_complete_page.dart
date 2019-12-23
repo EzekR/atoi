@@ -232,17 +232,28 @@ class _ManagerCompletePageState extends State<ManagerCompletePage> {
       return new Column();
     } else {
       List<Widget> _list = [];
-      for (var _name in _fileNames) {
+      for(var _name in _fileNames) {
         _list.add(new ListTile(
-          title: new Text(
-            _name,
-            style: new TextStyle(color: Colors.blue),
-          ),
+            title: new Row(
+              children: <Widget>[
+                new Expanded(
+                    flex: 4,
+                    child: new Container()
+                ),
+                new Expanded(
+                  flex: 6,
+                  child: new Text(
+                    _name,
+                    style: new TextStyle(
+                        color: Colors.blue
+                    ),
+                  ),
+                ),
+              ],
+            )
         ));
       }
-      return new Column(
-        children: _list,
-      );
+      return new Column(children: _list,);
     }
   }
 
@@ -579,10 +590,7 @@ class _ManagerCompletePageState extends State<ManagerCompletePage> {
               BuildWidget.buildRow('工程师姓名', _dispatch['Engineer']['Name']),
               BuildWidget.buildRow('紧急程度', _dispatch['Urgency']['Name']),
               BuildWidget.buildRow('机器状态', _dispatch['MachineStatus']['Name']),
-              BuildWidget.buildRow(
-                  '出发时间',
-                  AppConstants.TimeForm(
-                      _dispatch['ScheduleDate'], 'yyyy-mm-dd')),
+              BuildWidget.buildRow('出发时间', _dispatch['ScheduleDate'].toString()),
               BuildWidget.buildRow('备注', _dispatch['LeaderComments']),
             ],
           ),

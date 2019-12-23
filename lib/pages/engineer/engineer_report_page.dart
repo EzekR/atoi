@@ -320,6 +320,14 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
             ));
         return;
       }
+      if (_dispatch['RequestType']['ID'] == 1 && _solution.text.isEmpty) {
+        showDialog(
+            context: context,
+            builder: (context) => CupertinoAlertDialog(
+              title: new Text('详细处理方法不可为空'),
+            ));
+        return;
+      }
       if (_dispatch['RequestType']['ID'] == 9 && _acceptDate == 'YY-MM-DD') {
         showDialog(
             context: context,
@@ -332,7 +340,7 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
         showDialog(
             context: context,
             builder: (context) => CupertinoAlertDialog(
-              title: new Text('报告明细不可为空'),
+              title: new Text(_dispatch['RequestType']['ID']==1?'分析原因不可为空':'报告明细不可为空'),
             ));
         return;
       }
@@ -530,6 +538,7 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
     _dropDownMenuSources = getDropDownMenuItems(_sources);
     _dropDownMenuProviders = getDropDownMenuItems(_providers);
     _dropDownMenuStatus = getDropDownMenuItems(iterateMap(model.MachineStatus));
+    _currentStatus = _dropDownMenuStatus[0].value;
     _currentResult = _dropDownMenuItems[3].value;
     _currentSource = _dropDownMenuSources[0].value;
     _currentProvider = _dropDownMenuProviders[0].value;
@@ -754,11 +763,11 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
         case 1:
           _list.addAll(
             [
-              _edit?buildField('错误代码:', _code):BuildWidget.buildRow('错误代码', _code.text),
+              _edit?buildField('错误代码:', _code, maxLength: 20):BuildWidget.buildRow('错误代码', _code.text),
               BuildWidget.buildRow('设备状态（报修）', _dispatch['MachineStatus']['Name']),
               _edit?BuildWidget.buildDropdownLeft('设备状态（离场）:', _currentStatus, _dropDownMenuStatus, changedStatus):BuildWidget.buildRow('设备状态（离场）', _currentStatus??''),
               _edit?buildField('详细故障描述:', _description):BuildWidget.buildRow('详细故障描述', _description.text),
-              _edit?buildField('分析原因:', _analysis):BuildWidget.buildRow('详细故障描述', _analysis.text),
+              _edit?buildField('分析原因:', _analysis):BuildWidget.buildRow('分析原因', _analysis.text),
               _edit?buildField('详细处理方法:', _solution):BuildWidget.buildRow('详细处理方法', _solution.text),
               _edit?buildField('结果:', _result):BuildWidget.buildRow('结果', _result.text),
             ]

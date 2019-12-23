@@ -142,11 +142,12 @@ class _UserHomePageState extends State<UserHomePage> {
     return new WillPopScope(
         child: new Scaffold(
           appBar: new AppBar(
-            leading: new Container(),
             title: new Align(
-              alignment: Alignment(-0.0, 0),
+              alignment: Alignment(-1.0, 0),
               child: new Text('ATOI医疗设备管理系统'),
             ),
+            automaticallyImplyLeading: false,
+            centerTitle: false,
             elevation: 0.7,
             flexibleSpace: Container(
               decoration: BoxDecoration(
@@ -237,10 +238,6 @@ class _UserHomePageState extends State<UserHomePage> {
                     ));
                   },
                 ),
-                new ListTile(
-                  leading: Icon(Icons.info),
-                  title: Text('版本信息：v0.0.1'),
-                )
               ],
             ),
           ),

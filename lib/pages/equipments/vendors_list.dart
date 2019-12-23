@@ -134,7 +134,7 @@ class _VendorsListState extends State<VendorsList> {
           ),
           decoration: new InputDecoration(
               prefixIcon: Icon(Icons.search, color: Colors.white,),
-              hintText: '请输入供应商名称',
+              hintText: '请输入供应商名称/系统编号',
               hintStyle: new TextStyle(color: Colors.white)
           ),
           onChanged: (val) {

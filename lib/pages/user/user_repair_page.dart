@@ -414,7 +414,7 @@ class _UserRepairPageState extends State<UserRepairPage> {
                         mainAxisSize: MainAxisSize.max,
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: <Widget>[
-                          BuildWidget.buildInputLeft('故障描述:', _describe),
+                          BuildWidget.buildInputLeft('故障描述:', _describe, maxLength: 200),
                           BuildWidget.buildDropdownLeft('机器状态:', _currentResult,
                               _dropDownMenuItems, changedDropDownMethod),
                           new Padding(

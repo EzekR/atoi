@@ -295,6 +295,7 @@ class _ManagerAuditVoucherPageState extends State<ManagerAuditVoucherPage> {
               title: new Text('审批备注不可为空')
           )
       );
+      return;
     }
     Map<String, dynamic> _data = {
       'userID': UserId,
@@ -403,7 +404,7 @@ class _ManagerAuditVoucherPageState extends State<ManagerAuditVoucherPage> {
               BuildWidget.buildRow('派工类型', widget.request['RequestType']['Name']),
               BuildWidget.buildRow('机器状态', widget.request['MachineStatus']['Name']),
               BuildWidget.buildRow('工程师姓名', _dispatch['Engineer']['Name']??''),
-              BuildWidget.buildRow('出发时间',AppConstants.TimeForm(widget.request['ScheduleDate'], 'yyyy-mm-dd')),
+              BuildWidget.buildRow('出发时间',AppConstants.TimeForm(widget.request['ScheduleDate'], 'hh:mm')),
               BuildWidget.buildRow('备注', _dispatch['LeaderComments']),
             ],
           ),

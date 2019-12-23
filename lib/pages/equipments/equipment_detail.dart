@@ -399,6 +399,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
       var bytes = await image.readAsBytes();
       var _compressed = await FlutterImageCompress.compressWithList(bytes,
           minWidth: 480, minHeight: 600);
+      _imageList.clear();
       setState(() {
         _imageList.add({'fileName': image.path, 'content': _compressed});
       });
@@ -577,7 +578,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
                 });
               }
               break;
-            case 8:
+            case 4:
               var _file = await getDeviceFile(item['ID']);
               if (_file != null) {
                 setState(() {

@@ -124,6 +124,22 @@ class _EngineerVoucherPageState extends State<EngineerVoucherPage> {
   }
 
   Future<Null> uploadJournal() async {
+    if (_customerNumber.text.isEmpty) {
+      showDialog(context: context,
+          builder: (context) => CupertinoAlertDialog(
+            title: new Text('客户电话不可为空'),
+          )
+      );
+      return;
+    }
+    if (_customerName.text.isEmpty) {
+      showDialog(context: context,
+          builder: (context) => CupertinoAlertDialog(
+            title: new Text('客户姓名不可为空'),
+          )
+      );
+      return;
+    }
     if (_img == null) {
       showDialog(context: context,
           builder: (context) => CupertinoAlertDialog(

@@ -75,8 +75,9 @@ class _EngineerToStartState extends State<EngineerToStart> {
         String requestType,
         String urgency,
         String remark) {
-      var _datetime = DateTime.parse(scheduleDate);
-      var departDate = '${_datetime.year}-${_datetime.month}-${_datetime.day}';
+      var _time = DateTime.tryParse(scheduleDate).toString().split(':');
+      _time.removeLast();
+      var departDate = _time.join(':');
       return new Card(
         child: Column(
           mainAxisSize: MainAxisSize.max,

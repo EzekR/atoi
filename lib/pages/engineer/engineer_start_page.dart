@@ -234,11 +234,10 @@ class _EngineerStartPageState extends State<EngineerStartPage> {
                 _dispatch['Request']['RequestType']['ID']==14?BuildWidget.buildRow('主题', '${_dispatch['Request']['RequestType']['Name']}'):
                 BuildWidget.buildRow('主题', '${_dispatch['Request']['EquipmentName']}--${_dispatch['Request']['RequestType']['Name']}'),
                 BuildWidget.buildRow(model.Remark[_dispatch['Request']['RequestType']['ID']], _dispatch['Request']['FaultDesc']),
-                _dispatch['Request']['RequestType']['ID']==1||_dispatch['Request']['RequestType']['ID']==2||_dispatch['Request']['RequestType']['ID']==3||_dispatch['Request']['RequestType']['ID']==7?BuildWidget.buildRow(model.RemarkType[_dispatch['Request']['RequestType']['ID']], _dispatch['Request']['FaultType']['Name']):new Container(),
+                _dispatch['Request']['RequestType']['ID']==2||_dispatch['Request']['RequestType']['ID']==3||_dispatch['Request']['RequestType']['ID']==7?BuildWidget.buildRow(model.RemarkType[_dispatch['Request']['RequestType']['ID']], _dispatch['Request']['FaultType']['Name']):new Container(),
                 _dispatch['Request']['RequestType']['ID']==3?BuildWidget.buildRow('是否召回', _dispatch['Request']['IsRecall']?'是':'否'):new Container(),
+                _dispatch['RequestType']['ID']==1?BuildWidget.buildRow('机器状态', _dispatch['MachineStatus']['Name']):new Container(),
                 BuildWidget.buildRow('请求人', _dispatch['Request']['RequestUser']['Name']),
-                BuildWidget.buildRow('处理方式', _dispatch['Request']['DealType']['Name']),
-                BuildWidget.buildRow('紧急程度', _dispatch['Request']['Priority']['Name']),
                 BuildWidget.buildRow('当前状态', _dispatch['Request']['Status']['Name']),
                 BuildWidget.buildRow('请求来源', _dispatch['Request']['Source']['Name']),
               ],
@@ -272,6 +271,7 @@ class _EngineerStartPageState extends State<EngineerStartPage> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
                 BuildWidget.buildRow('派工类型', _dispatch['RequestType']['Name']),
+                BuildWidget.buildRow('派工单状态', _dispatch['Status']['Name']),
                 BuildWidget.buildRow('紧急程度', _dispatch['Urgency']['Name']),
                 BuildWidget.buildRow('机器状态', _dispatch['MachineStatus']['Name']),
                 BuildWidget.buildRow('工程师姓名', _dispatch['Engineer']['Name']),

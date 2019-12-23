@@ -116,6 +116,16 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
       _currentProvider = selectedMethod;
     });
   }
+
+  String formatTime(String time) {
+    var _time = DateTime.tryParse(time);
+    if (_time != null) {
+      return '${_time.year}-${_time.month}-${_time.day} ${_time.hour}:${_time.minute}';
+    } else {
+      return 'YY-MM-DD';
+    }
+  }
+
   TextField buildTextField(String labelText, TextEditingController controller, bool isEnabled) {
     return new TextField(
       decoration: InputDecoration(
@@ -484,7 +494,7 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
     _list.addAll([
       BuildWidget.buildRow('作业报告编号', _report['OID']),
       BuildWidget.buildRow('作业报告类型', _report['Type']['Name']),
-      BuildWidget.buildRow('开始时间', _report['Dispatch']['StartDate'].toString().split('T')[0]),
+      BuildWidget.buildRow('开始时间', formatTime(_report['Dispatch']['StartDate'].toString())),
       widget.status==3?BuildWidget.buildRow('审批备注', _report['FujiComments']):new Container(),
       new Divider(),
     ]);
@@ -640,7 +650,7 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
               BuildWidget.buildRow('派工类型', widget.request['RequestType']['Name']),
               BuildWidget.buildRow('机器状态', widget.request['MachineStatus']['Name']),
               BuildWidget.buildRow('工程师姓名', _dispatch['Engineer']['Name']),
-              BuildWidget.buildRow('出发时间',AppConstants.TimeForm(widget.request['ScheduleDate'], 'yyyy-mm-dd')),
+              BuildWidget.buildRow('出发时间', formatTime(_dispatch['ScheduleDate'].toString())),
               BuildWidget.buildRow('备注', _dispatch['LeaderComments']),
             ],
           ),

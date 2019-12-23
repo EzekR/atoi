@@ -327,62 +327,155 @@ class _ManagerToCompleteState extends State<ManagerToComplete> {
                                 builder: (context) => CupertinoAlertDialog(
                                   title: new Text('是否终止请求？'),
                                   actions: <Widget>[
-                                    FlatButton(
-                                      child: Text('确认', style: TextStyle(color: AppConstants.AppColors['btn_cancel']),),
-                                      onPressed: () {
-                                        _cancelRequest(requestId);
-                                        Navigator.of(context).pop();
-                                      },
-                                    ),
-                                    FlatButton(
-                                      child: Text('取消', style: TextStyle(color: AppConstants.AppColors['btn_main'],)),
-                                      onPressed: () {
-                                        Navigator.of(context).pop();
-                                      },
+                                    new Row(
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      children: <Widget>[
+                                        new Container(
+                                          width: 100.0,
+                                          child: RaisedButton(
+                                            //padding: EdgeInsets.symmetric(vertical: 10.0, horizontal: 20.0),
+                                            child: Text('确认', style: TextStyle(color: Colors.white),),
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius: BorderRadius.circular(6),
+                                            ),
+                                            color: AppConstants.AppColors['btn_cancel'],
+                                            onPressed: () {
+                                              _cancelRequest(requestId);
+                                              Navigator.of(context).pop();
+                                            },
+                                          ),
+                                        ),
+                                        new SizedBox(
+                                          width: 10.0,
+                                        ),
+                                        new Container(
+                                          width: 100.0,
+                                          child: RaisedButton(
+                                            child: Text('取消', style: TextStyle(color: Colors.white),),
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius: BorderRadius.circular(6),
+                                            ),
+                                            color: AppConstants.AppColors['btn_main'],
+                                            onPressed: () {
+                                              Navigator.of(context).pop();
+                                            },
+                                          ),
+                                        )
+                                      ],
                                     ),
                                   ],
                                 )
                             );
                           } else {
                             var _dispatches = await getDispatchesByRequestId(requestId);
-                            showModalBottomSheet(
-                                context: context,
-                                builder: (context) => new ListView.builder(
-                                  itemCount: _dispatches.length,
-                                  shrinkWrap: true,
-                                  itemBuilder: (context, i) {
-                                    return new ListTile(
-                                      leading: new Icon(Icons.assignment_late, color: Colors.blue,),
-                                      title: new Text(_dispatches[i]['OID']),
-                                      trailing: new Text(_dispatches[i]['Engineer']['Name']),
-                                      onTap: () {
-                                        Navigator.of(context).pop();
-                                        showDialog(context: context,
-                                            builder: (context) => CupertinoAlertDialog(
-                                              title: new Text('是否取消派工？'),
-                                              content: new Text('${_dispatches[i]['OID']} ${_dispatches[i]['Engineer']['Name']}'),
-                                              actions: <Widget>[
-                                                FlatButton(
-                                                  child: Text('确认', style: TextStyle(color: AppConstants.AppColors['btn_cancel']),),
-                                                  onPressed: () {
-                                                    _cancelDispatch(requestId, _dispatches[i]['ID']);
-                                                    Navigator.of(context).pop();
-                                                  },
-                                                ),
-                                                FlatButton(
-                                                  child: Text('取消', style: TextStyle(color: AppConstants.AppColors['btn_main'],)),
-                                                  onPressed: () {
-                                                    Navigator.of(context).pop();
-                                                  },
-                                                ),
-                                              ],
-                                            )
-                                        );
-                                      },
-                                    );
-                                  },
-                                )
-                            );
+                            if (_dispatches.length == 1) {
+                              showDialog(context: context,
+                                  builder: (context) => CupertinoAlertDialog(
+                                    title: new Text('是否取消派工？'),
+                                    content: new Text('${_dispatches[0]['OID']} ${_dispatches[0]['Engineer']['Name']}'),
+                                    actions: <Widget>[
+                                      new Row(
+                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        children: <Widget>[
+                                          new Container(
+                                            width: 100.0,
+                                            child: RaisedButton(
+                                              //padding: EdgeInsets.symmetric(vertical: 10.0, horizontal: 20.0),
+                                              child: Text('确认', style: TextStyle(color: Colors.white),),
+                                              shape: RoundedRectangleBorder(
+                                                borderRadius: BorderRadius.circular(6),
+                                              ),
+                                              color: AppConstants.AppColors['btn_cancel'],
+                                              onPressed: () {
+                                                _cancelDispatch(requestId, _dispatches[0]['ID']);
+                                                Navigator.of(context).pop();
+                                              },
+                                            ),
+                                          ),
+                                          new SizedBox(
+                                            width: 10.0,
+                                          ),
+                                          new Container(
+                                            width: 100.0,
+                                            child: RaisedButton(
+                                              child: Text('取消', style: TextStyle(color: Colors.white),),
+                                              shape: RoundedRectangleBorder(
+                                                borderRadius: BorderRadius.circular(6),
+                                              ),
+                                              color: AppConstants.AppColors['btn_main'],
+                                              onPressed: () {
+                                                Navigator.of(context).pop();
+                                              },
+                                            ),
+                                          )
+                                        ],
+                                      ),
+                                    ],
+                                  )
+                              );
+                            } else {
+                              showModalBottomSheet(
+                                  context: context,
+                                  builder: (context) => new ListView.builder(
+                                    itemCount: _dispatches.length,
+                                    shrinkWrap: true,
+                                    itemBuilder: (context, i) {
+                                      return new ListTile(
+                                        leading: new Icon(Icons.assignment_late, color: Colors.blue,),
+                                        title: new Text(_dispatches[i]['OID']),
+                                        trailing: new Text(_dispatches[i]['Engineer']['Name']),
+                                        onTap: () {
+                                          Navigator.of(context).pop();
+                                          showDialog(context: context,
+                                              builder: (context) => CupertinoAlertDialog(
+                                                title: new Text('是否取消派工？'),
+                                                content: new Text('${_dispatches[i]['OID']} ${_dispatches[i]['Engineer']['Name']}'),
+                                                actions: <Widget>[
+                                                  new Row(
+                                                    mainAxisAlignment: MainAxisAlignment.center,
+                                                    children: <Widget>[
+                                                      new Container(
+                                                        width: 100.0,
+                                                        child: RaisedButton(
+                                                          //padding: EdgeInsets.symmetric(vertical: 10.0, horizontal: 20.0),
+                                                          child: Text('确认', style: TextStyle(color: Colors.white),),
+                                                          shape: RoundedRectangleBorder(
+                                                            borderRadius: BorderRadius.circular(6),
+                                                          ),
+                                                          color: AppConstants.AppColors['btn_cancel'],
+                                                          onPressed: () {
+                                                            _cancelDispatch(requestId, _dispatches[i]['ID']);
+                                                            Navigator.of(context).pop();
+                                                          },
+                                                        ),
+                                                      ),
+                                                      new SizedBox(
+                                                        width: 10.0,
+                                                      ),
+                                                      new Container(
+                                                        width: 100.0,
+                                                        child: RaisedButton(
+                                                          child: Text('取消', style: TextStyle(color: Colors.white),),
+                                                          shape: RoundedRectangleBorder(
+                                                            borderRadius: BorderRadius.circular(6),
+                                                          ),
+                                                          color: AppConstants.AppColors['btn_main'],
+                                                          onPressed: () {
+                                                            Navigator.of(context).pop();
+                                                          },
+                                                        ),
+                                                      )
+                                                    ],
+                                                  ),
+                                                ],
+                                              )
+                                          );
+                                        },
+                                      );
+                                    },
+                                  )
+                              );
+                            }
                           }
                         },
                         shape: RoundedRectangleBorder(

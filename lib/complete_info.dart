@@ -213,9 +213,20 @@ class _CompleteInfoState extends State<CompleteInfo> {
         ],
       ),
       new SizedBox(height: 40,),
-      new ListTile(
-        title: new Text('服务器：${HttpRequest.API_PREFIX}'),
-      )
+      new Column(
+        children: <Widget>[
+          new Row(
+            children: <Widget>[
+              new Text('版本号: v0.0.1', style: TextStyle(fontSize: 14.0),),
+            ],
+          ),
+          new Row(
+            children: <Widget>[
+              new Text('服务器：${HttpRequest.API_PREFIX}', style: TextStyle(fontSize: 14.0),),
+            ],
+          ),
+        ],
+      ),
     ];
     return _list;
   }

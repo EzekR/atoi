@@ -250,10 +250,15 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
         _listName.add(item['Name']);
         _listID[item['Name']] = item['ID'];
       }
+      List<dynamic> _list = [{
+        'Name': '--请选择--',
+        'HasOpenDispatch': false
+      }];
+      _list.addAll(resp['Data']);
       setState(() {
         _engineerNames = _listName;
         _engineers = _listID;
-        _dropDownMenuNames = getDropDownMenuEngineer(resp['Data']);
+        _dropDownMenuNames = getDropDownMenuEngineer(_list);
         _currentName = _dropDownMenuNames[0].value;
       });
     }
@@ -303,8 +308,9 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
     model = MainModel.of(context);
     initDropdown();
     getRole();
-    var time = new DateTime.now();
-    dispatchDate = '${time.year}-${time.month}-${time.day}';
+    List time = new DateTime.now().toString().split('.')[0].split(':');
+    time.removeLast();
+    dispatchDate = time.join(':');
     getRequest();
     getEngineers();
     getRequestDispatches();
@@ -767,7 +773,7 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
               BuildWidget.buildRow('类型', _request['SourceType']),
               BuildWidget.buildRow('主题', _request['SubjectName']),
               BuildWidget.buildInput(model.Remark[_request['RequestType']['ID']], _desc, maxLength: 200),
-              _request['RequestType']['ID']!=14?BuildWidget.buildDropdown('机器状态', _currentStatusReq, _dropDownMenuStatusesReq, changedDropDownStatusReq):new Container(),
+              _request['RequestType']['ID']==1?BuildWidget.buildDropdown('机器状态', _currentStatusReq, _dropDownMenuStatusesReq, changedDropDownStatusReq):new Container(),
               _request['RequestType']['ID']==2?BuildWidget.buildDropdown('保养类型', _currentMaintain, _dropDownMenuMaintain, changedDropDownMaintain):new Container(),
               _request['RequestType']['ID']==3?BuildWidget.buildDropdown('强检原因', _currentMandatory, _dropDownMenuMandatory, changedDropDownMandatory):new Container(),
               _request['RequestType']['ID']==7?BuildWidget.buildDropdown('来源', _currentSource, _dropDownMenuSource, changedDropDownSource):new Container(),
@@ -808,7 +814,7 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
           children: <Widget>[
             BuildWidget.buildDropdown('派工类型', _currentType, _dropDownMenuTypes, changedDropDownType),
             BuildWidget.buildDropdown('紧急程度', _currentLevel, _dropDownMenuLevels, changedDropDownLevel),
-            _request['RequestType']['ID']!=14?BuildWidget.buildDropdown('机器状态', _currentStatus, _dropDownMenuStatuses, changedDropDownStatus):new Container(),
+            _currentType!='其他服务'?BuildWidget.buildDropdown('机器状态', _currentStatus, _dropDownMenuStatuses, changedDropDownStatus):new Container(),
             _engineerNames.isEmpty?new Container():BuildWidget.buildDropdown('工程师姓名', _currentName, _dropDownMenuNames, changedDropDownName),
             new Padding(
               padding: EdgeInsets.symmetric(vertical: 5.0),
@@ -857,15 +863,15 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
                       color: AppConstants.AppColors['btn_main'],
                       icon: Icon(Icons.calendar_today),
                       onPressed: () {
+                        var _initTime = DateTime.tryParse(dispatchDate);
                         showDatePicker(
                             context: context,
-                            initialDate: new DateTime.now(),
+                            initialDate: _initTime??DateTime.now(),
                             firstDate: new DateTime.now().subtract(new Duration(days: 30)), // 减 30 天
                             lastDate: new DateTime.now().add(new Duration(days: 30)),       // 加 30 天
                             locale: Locale('zh')
                         ).then((DateTime val) {
-                          print(val); // 2018-07-12 00:00:00.000
-                          showTimePicker(context: (context), initialTime: new TimeOfDay.now()).then((TimeOfDay selectTime) {
+                          showTimePicker(context: (context), initialTime: TimeOfDay.fromDateTime(_initTime)??TimeOfDay.now()).then((TimeOfDay selectTime) {
                             var _time = selectTime.format(context);
                             setState(() {
                               dispatchDate = '${val.toString().split(' ')[0]} ${_time}';
