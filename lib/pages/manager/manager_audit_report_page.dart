@@ -6,10 +6,13 @@ import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:atoi/utils/constants.dart';
 import 'package:atoi/widgets/build_widget.dart';
 import 'dart:convert';
+import 'dart:typed_data';
 import 'package:photo_view/photo_view.dart';
 import 'package:scoped_model/scoped_model.dart';
 import 'package:atoi/models/models.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:flutter_image_compress/flutter_image_compress.dart';
+import 'package:image_picker/image_picker.dart';
 
 class ManagerAuditReportPage extends StatefulWidget {
   static String tag = 'manager-audit-report-page';
@@ -32,6 +35,7 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
   var _comment = new TextEditingController();
   ConstantsModel model;
   var _unsolved = new TextEditingController();
+  int _attachId;
 
   List _serviceResults = [
     '待分配',
@@ -46,6 +50,7 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
   List<DropdownMenuItem<String>> _dropDownMenuProviders;
   String _currentResult;
   String _currentProvider;
+  String _currentScope;
   Map<String, dynamic> _report = {};
   Map<String, dynamic> _dispatch = {};
 
@@ -53,6 +58,14 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
   String _mobile = '';
   var _accessory;
   List<dynamic> imageAttach = [];
+
+  List _serviceScope = ['是', '否'];
+
+  void changeScope(value) {
+    setState(() {
+      _currentScope = value;
+    });
+  }
 
   Future<Null> getRole() async {
     var prefs = await _prefs;
@@ -229,6 +242,8 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
       setState(() {
         _currentResult = resp['Data']['SolutionResultStatus']['Name'];
         _report = resp['Data'];
+        _unsolved.text = resp['Data']['SolutionUnsolvedComments'];
+        _currentProvider = resp['Data']['ServiceProvider']['Name'];
       });
       _accessory = resp['Data']['ReportAccessories'];
       for(var _acc in _accessory) {
@@ -301,6 +316,9 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
   }
 
   Future<String> getAttachFile(int fileId) async {
+    setState(() {
+      _attachId = fileId;
+    });
     String _image = '';
     var resp = await HttpRequest.request(
       '/DispatchReport/DownloadUploadfile',
@@ -316,9 +334,27 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
   }
 
   Future<Null> approveReport() async {
+    if (_currentResult == '问题升级' && _unsolved.text.isEmpty) {
+      showDialog(context: context,
+          builder: (context) => CupertinoAlertDialog(
+            title: new Text('问题升级不可为空'),
+          )
+      );
+      return;
+    }
     final SharedPreferences prefs = await _prefs;
     var UserId = await prefs.getInt('userID');
     var _body = _report;
+    if (imageAttach.isNotEmpty) {
+      var content = base64Encode(imageAttach[0]);
+      var _json = {
+        'FileContent': content,
+        'FileName': 'report_${_report['ID']}_report_attachment.jpg',
+        'ID': 0,
+        'FileType': 1
+      };
+      _body['FileInfo'] = _json;
+    }
     _body['Dispatch'] = {
       'ID': _dispatch['ID']
     };
@@ -327,9 +363,10 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
       'ID': model.SolutionStatus[_currentResult]
     };
     _body['ServiceProvider'] = {
-      'ID': _currentResult!='待第三方支持'?0:model.ServiceProviders[_currentProvider]
+      'ID': model.ServiceProviders[_currentProvider]
     };
     _body['FujiComments'] = _comment.text;
+    _body['ServiceScope'] = _currentScope=='是'?true:false;
     Map<String, dynamic> _data = {
       'userID': UserId,
       'info': _body
@@ -368,14 +405,6 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
   }
 
   Future<Null> rejectReport() async {
-    if (_comment.text.isEmpty) {
-      showDialog(context: context,
-        builder: (context) => CupertinoAlertDialog(
-          title: new Text('审批备注不可为空'),
-        )
-      );
-      return;
-    }
     if (_currentResult == '问题升级' && _unsolved.text.isEmpty) {
       showDialog(context: context,
           builder: (context) => CupertinoAlertDialog(
@@ -384,9 +413,24 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
       );
       return;
     }
+    if (_comment.text.isEmpty) {
+      showDialog(context: context,
+        builder: (context) => CupertinoAlertDialog(
+          title: new Text('审批备注不可为空'),
+        )
+      );
+      return;
+    }
     final SharedPreferences prefs = await _prefs;
     var UserId = await prefs.getInt('userID');
     var _body = _report;
+    var content = base64Encode(imageAttach[0]);
+    var _json = {
+      'FileContent': content,
+      'FileName': 'report_${_report['ID']}_report_attachment.jpg',
+      'ID': 0,
+      'FileType': 1
+    };
     _body['Dispatch'] = {
       'ID': _dispatch['ID']
     };
@@ -398,6 +442,7 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
       'ID': _currentResult!='待第三方支持'?0:model.ServiceProviders[_currentProvider]
     };
     _body['FujiComments'] = _comment.text;
+    _body['FileInfo'] = _json;
     Map<String, dynamic> _data = {
       'userID': UserId,
       'info': _body
@@ -434,16 +479,66 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
     }
   }
 
+  void showSheet(context) {
+    showModalBottomSheet(
+        context: context,
+        builder: (context) {
+          return new ListView(
+            shrinkWrap: true,
+            children: <Widget>[
+              ListTile(
+                trailing: new Icon(Icons.collections),
+                title: new Text('从相册添加'),
+                onTap: () {
+                  getImage(ImageSource.gallery);
+                },
+              ),
+              ListTile(
+                trailing: new Icon(Icons.add_a_photo),
+                title: new Text('拍照添加'),
+                onTap: () {
+                  getImage(ImageSource.camera);
+                },
+              ),
+            ],
+          );
+        });
+  }
+
+  Future getImage(ImageSource sourceType) async {
+    var image = await ImagePicker.pickImage(
+      source: sourceType,
+    );
+    if (image != null) {
+      var bytes = await image.readAsBytes();
+      var _compressed = await FlutterImageCompress.compressWithList(bytes,
+          minWidth: 480, minHeight: 600);
+      setState(() {
+        imageAttach.clear();
+        imageAttach.add(_compressed);
+      });
+    }
+  }
   Column buildImageColumn() {
     if (imageAttach == null) {
       return new Column();
     } else {
       List<Widget> _list = [];
       for(var file in imageAttach) {
-        _list.add(new Container(
-          child: new PhotoView(imageProvider: MemoryImage(file)),
-          width: 400.0,
-          height: 400.0,
+        _list.add(new Stack(
+          alignment: FractionalOffset(1.0, 0.0),
+          children: <Widget>[
+            new Container(
+              child: new PhotoView(imageProvider: MemoryImage(Uint8List.fromList(file))),
+              width: 400.0,
+              height: 400.0,
+            ),
+            widget.status!=3?new IconButton(icon: Icon(Icons.cancel, color: Colors.white,), onPressed: () {
+              setState(() {
+                imageAttach.clear();
+              });
+            }):new Container(),
+          ],
         ));
       }
       return new Column(children: _list);
@@ -546,8 +641,9 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
         break;
       case 601:
         _list.addAll([
-          BuildWidget.buildRow('资产金额', _report['PurchaseAmount']),
-          BuildWidget.buildRow('整包范围', _report['ServiceScope']?'是':'否'),
+          BuildWidget.buildRow('资产金额', _report['PurchaseAmount'].toString()),
+          //BuildWidget.buildRow('整包范围', _report['ServiceScope']?'是':'否'),
+          widget.status!=3?BuildWidget.buildRadio('整包范围', _serviceScope, _currentScope, changeScope):BuildWidget.buildRow('整包范围', _report['ServiceScope']?'是':'否'),
           BuildWidget.buildRow('报告明细', _report['SolutionCauseAnalysis']),
           BuildWidget.buildRow('结果', _report['Result']),
         ]);
@@ -573,12 +669,58 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
         break;
     }
     _list.addAll([
-      widget.status==3?BuildWidget.buildRow('作业结果', _currentResult):BuildWidget.buildDropdown('作业结果', _currentResult, _dropDownMenuItems, changedDropDownMethod),
-      _currentResult=='问题升级'?BuildWidget.buildInput('问题升级', _unsolved):new Container(),
-      _currentResult=='待第三方支持'?BuildWidget.buildDropdown('服务提供方', _currentProvider, _dropDownMenuProviders, changeProvider):new Container(),
-      BuildWidget.buildRow('附件', ''),
+      widget.status==3?BuildWidget.buildRow('作业报告结果', _currentResult):BuildWidget.buildDropdown('作业报告结果', _currentResult, _dropDownMenuItems, changedDropDownMethod),
+      widget.status!=3&&_currentResult=='问题升级'?BuildWidget.buildInput('问题升级', _unsolved, maxLength: 500):new Container(),
+      widget.status==3&&_currentResult=='问题升级'?BuildWidget.buildRow('问题升级', _unsolved.text):new Container(),
+      widget.status!=3&&_currentResult=='待第三方支持'?BuildWidget.buildDropdown('服务提供方', _currentProvider, _dropDownMenuProviders, changeProvider):new Container(),
+      widget.status==3&&_currentResult=='待第三方支持'?BuildWidget.buildRow('服务提供方', _currentProvider):new Container(),
+      BuildWidget.buildRow('备注', _report['Comments']),
+      new Padding(
+        padding: EdgeInsets.symmetric(vertical: 5.0),
+        child: new Row(
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: <Widget>[
+            new Expanded(
+              flex: 4,
+              child: new Wrap(
+                alignment: WrapAlignment.end,
+                crossAxisAlignment: WrapCrossAlignment.center,
+                children: <Widget>[
+                  new Text(
+                    '附件',
+                    style: new TextStyle(
+                        fontSize: 20.0,
+                        fontWeight: FontWeight.w600
+                    ),
+                  )
+                ],
+              ),
+            ),
+            new Expanded(
+              flex: 1,
+              child: new Text(
+                '：',
+                style: new TextStyle(
+                  fontSize: 20.0,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+            new Expanded(
+              flex: 6,
+              child: new Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: <Widget>[
+                  widget.status!=3?IconButton(icon: Icon(Icons.add_a_photo), onPressed: () {
+                    showSheet(context);
+                  }):new Container()
+                ],
+              )
+            )
+          ],
+        ),
+      ),
       buildImageColumn(),
-      widget.status==3?BuildWidget.buildRow('审批备注', _report['Comments']??''):new Container()
     ]);
     return _list;
   }

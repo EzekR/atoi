@@ -154,7 +154,9 @@ class _ManagerToCompleteState extends State<ManagerToComplete> {
       }
     );
     if (resp['ResultCode'] == '00') {
-      return resp['Data'];
+      List _list = resp['Data'];
+      _list.removeWhere((item) => (item['Status']['ID']==-1 || item['Status']['ID']==4));
+      return _list;
     } else {
       return [];
     }

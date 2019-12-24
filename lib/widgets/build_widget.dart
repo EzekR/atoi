@@ -443,6 +443,72 @@ class BuildWidget {
     );
   }
 
+  static Padding buildRadioVert(String labelText, List groupValue, String currentValue, Function changeValue) {
+    return new Padding(
+      padding: EdgeInsets.symmetric(vertical: 5.0),
+      child: new Row(
+        children: <Widget>[
+          new Expanded(
+            flex: 4,
+            child: new Wrap(
+              alignment: WrapAlignment.end,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              children: <Widget>[
+                new Text(
+                  labelText,
+                  style: new TextStyle(
+                      fontSize: 20.0,
+                      fontWeight: FontWeight.w600
+                  ),
+                )
+              ],
+            ),
+          ),
+          new Expanded(
+            flex: 1,
+            child: new Text(
+              '：',
+              style: new TextStyle(
+                fontSize: 20.0,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+          new Expanded(
+              flex: 6,
+              child: new Column(
+                children: <Widget>[
+                  new Row(
+                    children: <Widget>[
+                      new Radio(
+                        value: groupValue[0],
+                        groupValue: currentValue,
+                        onChanged: changeValue,
+                      ),
+                      new Align(
+                          alignment: Alignment(-10.0, 0),
+                          child: new Text(groupValue[0])
+                      ),
+                    ],
+                  ),
+                  groupValue.length==2?new Row(
+                    children: <Widget>[
+                      new Radio(
+                        value: groupValue[1],
+                        groupValue: currentValue,
+                        onChanged: changeValue,
+                      ),
+                      new Text(groupValue[1])
+                    ],
+                  ):new Container()
+                ],
+              )
+          ),
+        ],
+      ),
+    );
+  }
+
   static Padding buildRadioLeft(String labelText, List groupValue, String currentValue, Function changeValue) {
     return new Padding(
       padding: EdgeInsets.symmetric(vertical: 5.0),

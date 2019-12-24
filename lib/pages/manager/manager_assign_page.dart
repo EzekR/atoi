@@ -867,8 +867,8 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
                         showDatePicker(
                             context: context,
                             initialDate: _initTime??DateTime.now(),
-                            firstDate: new DateTime.now().subtract(new Duration(days: 30)), // 减 30 天
-                            lastDate: new DateTime.now().add(new Duration(days: 30)),       // 加 30 天
+                            firstDate: _initTime??DateTime.now(),
+                            lastDate: new DateTime.now().add(new Duration(days: 30)),
                             locale: Locale('zh')
                         ).then((DateTime val) {
                           showTimePicker(context: (context), initialTime: TimeOfDay.fromDateTime(_initTime)??TimeOfDay.now()).then((TimeOfDay selectTime) {

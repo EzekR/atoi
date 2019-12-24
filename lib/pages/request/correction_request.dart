@@ -410,7 +410,11 @@ class _CorrectionRequestState extends State<CorrectionRequest> {
                                       new Expanded(
                                         flex: 6,
                                         child: new TextField(
-                                          controller: _fault, maxLength: 200, maxLines: 3
+                                          controller: _fault, maxLength: 200, maxLines: 3,
+                                          decoration: InputDecoration(
+                                            fillColor: Color(0xfff0f0f0),
+                                            filled: true,
+                                          ),
                                         ),
                                       )
                                     ],

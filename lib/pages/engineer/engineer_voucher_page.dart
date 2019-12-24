@@ -329,7 +329,8 @@ class _EngineerVoucherPageState extends State<EngineerVoucherPage> {
     );
   }
 
-  Column buildEditor(String label, TextEditingController controller) {
+  Column buildEditor(String label, TextEditingController controller, {int maxLength}) {
+    maxLength = maxLength??200;
     return new Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
@@ -347,6 +348,7 @@ class _EngineerVoucherPageState extends State<EngineerVoucherPage> {
             filled: true,
           ),
           maxLines: 3,
+          maxLength: 200,
         ),
         new SizedBox(height: 5.0,)
       ],
