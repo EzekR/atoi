@@ -123,14 +123,19 @@ class _EquipmentAssetsState extends State<EquipmentAssets> {
     );
   }
 
-  Container buildChart() {
-    return new Container(
-      height: _tableData.length*40.toDouble(),
-      child: new charts.BarChart(
-        seriesList,
-        animate: true,
-        vertical: false,
-      ),
+  Column buildChart() {
+    return new Column(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: <Widget>[
+        new Container(
+          height: _tableData.length*40.toDouble(),
+          child: new charts.BarChart(
+            seriesList,
+            animate: true,
+            vertical: false,
+          ),
+        ),
+      ],
     );
   }
 

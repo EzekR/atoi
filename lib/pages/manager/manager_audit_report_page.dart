@@ -424,13 +424,16 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
     final SharedPreferences prefs = await _prefs;
     var UserId = await prefs.getInt('userID');
     var _body = _report;
-    var content = base64Encode(imageAttach[0]);
-    var _json = {
-      'FileContent': content,
-      'FileName': 'report_${_report['ID']}_report_attachment.jpg',
-      'ID': 0,
-      'FileType': 1
-    };
+    if (imageAttach.isNotEmpty) {
+      var content = base64Encode(imageAttach[0]);
+      var _json = {
+        'FileContent': content,
+        'FileName': 'report_${_report['ID']}_report_attachment.jpg',
+        'ID': 0,
+        'FileType': 1
+      };
+      _body['FileInfo'] = _json;
+    }
     _body['Dispatch'] = {
       'ID': _dispatch['ID']
     };
@@ -442,7 +445,6 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
       'ID': _currentResult!='待第三方支持'?0:model.ServiceProviders[_currentProvider]
     };
     _body['FujiComments'] = _comment.text;
-    _body['FileInfo'] = _json;
     Map<String, dynamic> _data = {
       'userID': UserId,
       'info': _body

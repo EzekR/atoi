@@ -30,7 +30,7 @@ class _ServiceLinechartAState extends State<ServiceLinechartA> {
   ScrollController _scrollController;
 
   Future<void> initDimension() async {
-    _dimSlice = ReportDimensions.DIMS.sublist(2, 7);
+    _dimSlice = ReportDimensions.DIMS.sublist(2, 8);
     print(_dimSlice);
     List _list = _dimSlice.map((_dim) => {_dim['Name'].toString(): [
       {

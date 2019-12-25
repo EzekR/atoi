@@ -212,8 +212,10 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
       }
     );
     if (resp['ResultCode'] == '00') {
+      List _list = resp['Data'];
+      _list.removeWhere((item) => (item['Status']['ID'] == -1 || item['Status']['ID'] ==4));
       setState(() {
-        dispatches = resp['Data'];
+        dispatches = _list;
       });
     }
   }
@@ -592,24 +594,6 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
   }
 
   Future assignRequest() async {
-    if (_currentName == '--请选择--') {
-      showDialog(context: context,
-        builder: (context) => CupertinoAlertDialog(
-          title: new Text('请选择工程师'),
-        )
-      );
-      return;
-    }
-    if (_desc.text.isEmpty) {
-      showDialog(context: context,
-          builder: (context) => CupertinoAlertDialog(
-            title: new Text(
-              '${model.Remark[_request['RequestType']['ID']]}不可为空'
-            ),
-          )
-      );
-      return;
-    }
     var prefs = await _prefs;
     var userID = prefs.getInt('userID');
     Map<String, dynamic> _data = {
@@ -979,6 +963,24 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
                         padding: EdgeInsets.symmetric(horizontal: 5.0),
                         child: new RaisedButton(
                           onPressed: () {
+                            if (_currentName == '--请选择--') {
+                              showDialog(context: context,
+                                  builder: (context) => CupertinoAlertDialog(
+                                    title: new Text('请选择工程师'),
+                                  )
+                              );
+                              return;
+                            }
+                            if (_desc.text.isEmpty) {
+                              showDialog(context: context,
+                                  builder: (context) => CupertinoAlertDialog(
+                                    title: new Text(
+                                        '${model.Remark[_request['RequestType']['ID']]}不可为空'
+                                    ),
+                                  )
+                              );
+                              return;
+                            }
                             if (dispatches.length > 0) {
                               showDialog(context: context,
                                   builder: (context) => CupertinoAlertDialog(

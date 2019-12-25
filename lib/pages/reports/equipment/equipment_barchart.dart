@@ -25,6 +25,8 @@ class _EquipmentBarchartState extends State<EquipmentBarchart> {
   List _tableData = [];
   String _tableName = '年份';
   String _currentDimension = '';
+  String _dim1 = '';
+  String _dim2 = '';
 
   Future<void> initDimension() async {
     var _list = ReportDimensions.DIMS.map((_dim) => {
@@ -53,6 +55,8 @@ class _EquipmentBarchartState extends State<EquipmentBarchart> {
           getChartData(_selected[0], _selected[1]);
           setState(() {
             _currentDimension = _selected[0];
+            _dim1 = _selected[0];
+            _dim2 = _selected[1];
           });
         }
     ).showDialog(context);
@@ -79,6 +83,8 @@ class _EquipmentBarchartState extends State<EquipmentBarchart> {
             domainFn: (EquipmentData data, _) => data.type,
             measureFn: (EquipmentData data, _) => data.amount,
             data: _list,
+            labelAccessorFn: (EquipmentData data, _) =>
+                '${data.amount.toString()}'
           )
         ];
         _tableName = type;
@@ -91,17 +97,19 @@ class _EquipmentBarchartState extends State<EquipmentBarchart> {
     return new Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: <Widget>[
-        new FlatButton(
+        new RaisedButton(
             onPressed: () {
               showPickerDialog(context);
             },
             child: new Row(
               children: <Widget>[
-                new Icon(Icons.timeline),
-                new Text('维度')
+                new Icon(Icons.timeline, color: Colors.white,),
+                new Text('选择维度', style: new TextStyle(color: Colors.white),)
               ],
             )
         ),
+        new Text(_dim1??''),
+        new Text(_dim1=='时间类型-月'?'年份：${_dim2}':''),
       ],
     );
   }
@@ -124,14 +132,31 @@ class _EquipmentBarchartState extends State<EquipmentBarchart> {
     );
   }
 
-  Container buildChart() {
-    return new Container(
-      height: _tableData.length*40.toDouble(),
-      child: new charts.BarChart(
-        seriesList,
-        animate: true,
-        vertical: false,
-      ),
+  Column buildChart() {
+    return new Column(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: <Widget>[
+        new Container(
+          height: _tableData.length*40.toDouble(),
+          child: new charts.BarChart(
+            seriesList,
+            animate: true,
+            vertical: false,
+            barRendererDecorator: new charts.BarLabelDecorator<String>(),
+          ),
+        ),
+        new Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            new Text(
+              '设备数量（台）',
+              style: new TextStyle(
+                color: Colors.blueAccent
+              ),
+            )
+          ],
+        )
+      ],
     );
   }
 
