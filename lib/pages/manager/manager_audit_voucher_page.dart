@@ -28,6 +28,7 @@ class _ManagerAuditVoucherPageState extends State<ManagerAuditVoucherPage> {
   Map<String, dynamic> _dispatch = {};
   var _equipment = {};
   TextEditingController _comment = new TextEditingController();
+  TextEditingController _follow = new TextEditingController();
   ConstantsModel model;
 
   Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
@@ -70,6 +71,7 @@ class _ManagerAuditVoucherPageState extends State<ManagerAuditVoucherPage> {
       setState(() {
         _journal = resp['Data'];
         _currentResult = resp['Data']['ResultStatus']['Name'];
+        _follow.text = resp['Data']['FollowProblem'];
         imageBytes = base64Decode(resp['Data']['FileContent']);
       });
     }
@@ -246,10 +248,19 @@ class _ManagerAuditVoucherPageState extends State<ManagerAuditVoucherPage> {
   Future<Null> approveJournal() async {
     final SharedPreferences prefs = await _prefs;
     var UserId = await prefs.getInt('userID');
+    if (_currentResult == '待跟进' && _follow.text.isEmpty) {
+      showDialog(context: context,
+          builder: (context) => CupertinoAlertDialog(
+              title: new Text('待跟进问题不可为空')
+          )
+      );
+      return;
+    }
     Map<String, dynamic> _data = {
       'userID': UserId,
       'dispatchJournalID': widget.journalId,
       'resultStatusID': model.ResultStatusID[_currentResult],
+      'followProblem': _follow.text.toString(),
       'comments': _comment.text,
     };
     Fluttertoast.showToast(
@@ -297,11 +308,19 @@ class _ManagerAuditVoucherPageState extends State<ManagerAuditVoucherPage> {
       );
       return;
     }
+    if (_currentResult =='待跟进' && _follow.text.isEmpty) {
+      showDialog(context: context,
+          builder: (context) => CupertinoAlertDialog(
+              title: new Text('待跟进问题不可为空')
+          )
+      );
+      return;
+    }
     Map<String, dynamic> _data = {
       'userID': UserId,
       'dispatchJournalID': widget.journalId,
       'resultStatusID': model.ResultStatusID[_currentResult],
-      'followProblem': _journal['FollowProblem'],
+      'followProblem': _follow.text.toString(),
       'comments': _comment.text
     };
     Fluttertoast.showToast(
@@ -432,13 +451,14 @@ class _ManagerAuditVoucherPageState extends State<ManagerAuditVoucherPage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
               BuildWidget.buildRow('服务凭证编号', _journal['OID']),
-              BuildWidget.buildRow('客户姓名', _journal['UserName']??''),
-              BuildWidget.buildRow('客户电话', _journal['UserMobile']??''),
               BuildWidget.buildRow('故障现象/错误代码/事由', _journal['FaultCode']),
               BuildWidget.buildRow('工作内容', _journal['JobContent']),
-              BuildWidget.buildRow('待跟进问题', _journal['FollowProblem']),
-              BuildWidget.buildRow('待确认问题', _journal['UnconfirmedProblem']),
+              widget.status==3?BuildWidget.buildRow('服务结果', _currentResult):BuildWidget.buildDropdown('服务结果', _currentResult, _dropDownMenuItems, changedDropDownMethod),
+              widget.status!=3&&_currentResult=='待跟进'?BuildWidget.buildInput('待跟进问题', _follow):new Container(),
+              widget.status==3&&_currentResult=='待跟进'?BuildWidget.buildRow('待跟进问题', _follow.text):new Container(),
               BuildWidget.buildRow('建议留言', _journal['Advice']),
+              BuildWidget.buildRow('客户姓名', _journal['UserName']??''),
+              BuildWidget.buildRow('客户电话', _journal['UserMobile']??''),
               BuildWidget.buildRow('客户签名', ''),
               new Row(
                 mainAxisAlignment: MainAxisAlignment.start,
@@ -453,7 +473,6 @@ class _ManagerAuditVoucherPageState extends State<ManagerAuditVoucherPage> {
                   ),
                 ],
               ),
-              widget.status==3?BuildWidget.buildRow('服务结果', _currentResult):BuildWidget.buildDropdown('服务结果', _currentResult, _dropDownMenuItems, changedDropDownMethod),
               widget.status==3?BuildWidget.buildRow('审批备注', _journal['FujiComments']??''):new Container()
             ],
           ),

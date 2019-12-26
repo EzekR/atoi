@@ -156,6 +156,14 @@ class _EngineerVoucherPageState extends State<EngineerVoucherPage> {
       );
       return;
     }
+    if (_currentResult == '待跟进' && _followProblem.text.isEmpty) {
+      showDialog(context: context,
+          builder: (context) => CupertinoAlertDialog(
+            title: new Text('待跟进问题不可为空'),
+          )
+      );
+      return;
+    }
     if (_faultCode.text.isEmpty) {
       showDialog(context: context,
         builder: (context) => CupertinoAlertDialog(

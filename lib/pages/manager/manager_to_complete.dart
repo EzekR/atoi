@@ -324,7 +324,7 @@ class _ManagerToCompleteState extends State<ManagerToComplete> {
                       ),
                       new RaisedButton(
                         onPressed: () async {
-                          if (task['Status']['ID']==1) {
+                          if (!task['HasOpenDispatch']) {
                             showDialog(context: context,
                                 builder: (context) => CupertinoAlertDialog(
                                   title: new Text('是否终止请求？'),
@@ -491,7 +491,7 @@ class _ManagerToCompleteState extends State<ManagerToComplete> {
                               color: Colors.white,
                             ),
                             new Text(
-                              task['Status']['ID']>1?'取消派工':'终止请求',
+                              task['HasOpenDispatch']?'取消派工':'终止请求',
                               style: new TextStyle(
                                   color: Colors.white,
                                   fontSize: 12.0

@@ -213,7 +213,7 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
     );
     if (resp['ResultCode'] == '00') {
       List _list = resp['Data'];
-      _list.removeWhere((item) => (item['Status']['ID'] == -1 || item['Status']['ID'] ==4));
+      _list.removeWhere((item) => (item['Status']['ID'] == -1 || item['Status']['ID'] == 4));
       setState(() {
         dispatches = _list;
       });
@@ -847,20 +847,22 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
                       color: AppConstants.AppColors['btn_main'],
                       icon: Icon(Icons.calendar_today),
                       onPressed: () {
-                        var _initTime = DateTime.tryParse(dispatchDate);
+                        var _initTime = DateTime.tryParse(dispatchDate)??DateTime.now();
                         showDatePicker(
                             context: context,
-                            initialDate: _initTime??DateTime.now(),
-                            firstDate: _initTime??DateTime.now(),
+                            initialDate: _initTime!=null&&_initTime.isBefore(DateTime.now())?DateTime.now():_initTime,
+                            firstDate: DateTime.now(),
                             lastDate: new DateTime.now().add(new Duration(days: 30)),
                             locale: Locale('zh')
                         ).then((DateTime val) {
-                          showTimePicker(context: (context), initialTime: TimeOfDay.fromDateTime(_initTime)??TimeOfDay.now()).then((TimeOfDay selectTime) {
-                            var _time = selectTime.format(context);
-                            setState(() {
-                              dispatchDate = '${val.toString().split(' ')[0]} ${_time}';
+                          if (val != null) {
+                            showTimePicker(context: (context), initialTime: TimeOfDay.fromDateTime(_initTime)??TimeOfDay.now()).then((TimeOfDay selectTime) {
+                              var _time = selectTime.format(context);
+                              setState(() {
+                                dispatchDate = '${val.toString().split(' ')[0]} ${_time}';
+                              });
                             });
-                          });
+                          }
                         }).catchError((err) {
                           print(err);
                         });

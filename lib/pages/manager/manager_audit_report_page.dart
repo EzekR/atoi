@@ -342,6 +342,24 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
       );
       return;
     }
+    if ((_dispatch['RequestType']['ID'] == 2 && _currentProvider != '管理方') || (_dispatch['RequestType']['ID'] == 3)) {
+      if (imageAttach.isEmpty) {
+        showDialog(context: context,
+            builder: (context) => CupertinoAlertDialog(
+              title: new Text('附件不可为空'),
+            )
+        );
+        return;
+      }
+    }
+    if (_dispatch['RequestType']['ID'] == 6 && _currentScope == null) {
+      showDialog(context: context,
+          builder: (context) => CupertinoAlertDialog(
+            title: new Text('整包范围不可为空'),
+          )
+      );
+      return;
+    }
     final SharedPreferences prefs = await _prefs;
     var UserId = await prefs.getInt('userID');
     var _body = _report;
@@ -354,6 +372,8 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
         'FileType': 1
       };
       _body['FileInfo'] = _json;
+    } else {
+      _body['FileInfo'] = null;
     }
     _body['Dispatch'] = {
       'ID': _dispatch['ID']
@@ -433,6 +453,8 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
         'FileType': 1
       };
       _body['FileInfo'] = _json;
+    } else {
+      _body['FileInfo'] = null;
     }
     _body['Dispatch'] = {
       'ID': _dispatch['ID']
@@ -535,7 +557,7 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
               width: 400.0,
               height: 400.0,
             ),
-            widget.status!=3?new IconButton(icon: Icon(Icons.cancel, color: Colors.white,), onPressed: () {
+            widget.status!=3?new IconButton(icon: Icon(Icons.cancel, color: Colors.blue,), onPressed: () {
               setState(() {
                 imageAttach.clear();
               });

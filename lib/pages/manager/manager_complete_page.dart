@@ -314,6 +314,7 @@ class _ManagerCompletePageState extends State<ManagerCompletePage> {
     List<Widget> _list = [];
     _list.addAll([
       BuildWidget.buildRow('作业报告编号', _report['OID']),
+      BuildWidget.buildRow('审批状态', _report['Status']['Name']),
       BuildWidget.buildRow('作业报告类型', _report['Type']['Name']),
       BuildWidget.buildRow('开始时间', _report['Dispatch']['StartDate'].split('T')[0]),
       new Divider(),
@@ -590,7 +591,7 @@ class _ManagerCompletePageState extends State<ManagerCompletePage> {
               BuildWidget.buildRow('工程师姓名', _dispatch['Engineer']['Name']),
               BuildWidget.buildRow('紧急程度', _dispatch['Urgency']['Name']),
               BuildWidget.buildRow('机器状态', _dispatch['MachineStatus']['Name']),
-              BuildWidget.buildRow('出发时间', _dispatch['ScheduleDate'].toString()),
+              BuildWidget.buildRow('出发时间', AppConstants.TimeForm(_dispatch['ScheduleDate'].toString(), 'mm:ss')),
               BuildWidget.buildRow('备注', _dispatch['LeaderComments']),
             ],
           ),
@@ -625,7 +626,6 @@ class _ManagerCompletePageState extends State<ManagerCompletePage> {
               BuildWidget.buildRow('故障现象/错误代码/事由', _journal['FaultCode']),
               BuildWidget.buildRow('工作内容', _journal['JobContent']),
               BuildWidget.buildRow('待跟进问题', _journal['FollowProblem']),
-              BuildWidget.buildRow('待确认问题', _journal['UnconfirmedProblem']),
               BuildWidget.buildRow('建议留言', _journal['Advice']),
               BuildWidget.buildRow('服务结果', _journal['ResultStatus']['Name']),
               BuildWidget.buildRow('客户签名', ''),

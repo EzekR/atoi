@@ -59,6 +59,8 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
       _result.clear();
       _unsolved.clear();
       _comments.clear();
+      _description.clear();
+      _purchaseAmount.clear();
       _currentType = value;
     });
   }
@@ -202,6 +204,7 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
         var data = resp['Data'];
         setState(() {
           _report = data;
+          _currentType = data['Type']['Name'];
           _frequency.text = data['FaultFrequency'];
           _code.text = data['FaultCode'];
           _status.text = data['FaultSystemStatus'];
@@ -228,7 +231,7 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
           _acceptDate = data['AcceptanceDate'].toString().split('T')[0];
           _currentType = data['Type']['Name'];
           _comments.text = data['Comments'];
-          _currentProvider = data['ServiceProvider']['Name'];
+          _currentProvider = data['ServiceProvider']['ID']==0?_currentProvider:data['ServiceProvider']['Name'];
         });
         await getImageFile(resp['Data']['FileInfo']['ID']);
         for (var _acc in _accessory) {
@@ -292,6 +295,14 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
   }
 
   Future<Null> uploadReport(int statusId) async {
+    if (_dispatch['RequestType']['ID'] == 9 && _acceptDate == 'YY-MM-DD' && _currentType != '通用作业报告') {
+      showDialog(
+          context: context,
+          builder: (context) => CupertinoAlertDialog(
+            title: new Text('验收日期不可为空'),
+          ));
+      return;
+    }
     if (statusId == 2 && _currentType != '通用作业报告') {
       if (_isDelayed && _delay.text.isEmpty) {
         showDialog(
@@ -349,14 +360,6 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
             ));
         return;
       }
-      if (_dispatch['RequestType']['ID'] == 9 && _acceptDate == 'YY-MM-DD') {
-        showDialog(
-            context: context,
-            builder: (context) => CupertinoAlertDialog(
-              title: new Text('验收日期不可为空'),
-            ));
-        return;
-      }
       if (_analysis.text.isEmpty) {
         showDialog(
             context: context,
@@ -403,7 +406,7 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
         showDialog(
             context: context,
             builder: (context) => CupertinoAlertDialog(
-              title: new Text('问题升级说明不可为空'),
+              title: new Text('问题升级不可为空'),
             ));
         return;
       }
@@ -464,37 +467,6 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
     _data['Type'] = {
       'ID': _id['ID']??1
     };
-    //switch (_dispatch['RequestType']['ID']) {
-    //  case 1:
-    //    _data['Type'] = {'ID': 101};
-    //    break;
-    //  case 2:
-    //    _data['Type'] = {
-    //      'ID': 201
-    //    };
-    //    break;
-    //  case 3:
-    //    _data['Type'] = {'ID': 301};
-    //    break;
-    //  case 4:
-    //    _data['Type'] = {'ID': 401};
-    //    break;
-    //  case 5:
-    //    _data['Type'] = {'ID': 501};
-    //    break;
-    //  case 6:
-    //    _data['Type'] = {'ID': 601};
-    //    break;
-    //  case 7:
-    //    _data['Type'] = {'ID': 701};
-    //    break;
-    //  case 9:
-    //    _data['Type'] = {'ID': 901};
-    //    break;
-    //  default:
-    //    _data['Type'] = {'ID': 1};
-    //    break;
-    //}
     var _body = {
       'userID': userID,
       'DispatchReport': _data
@@ -735,7 +707,7 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
                   padding: EdgeInsets.symmetric(horizontal: 0.0),
                   child: new IconButton(
                       icon: Icon(Icons.cancel),
-                      color: Colors.white,
+                      color: Colors.blue,
                       onPressed: () {
                         setState(() {
                           _imageList = null;
@@ -763,10 +735,10 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
         '${_date.year}-${_date.month}-${_date.day} ${_date.hour}:${_date.minute}';
     _list.addAll([
       _reportOID != null
-          ? BuildWidget.buildRow('报告编号', _reportOID)
+          ? BuildWidget.buildRow('作业报告编号', _reportOID)
           : new Container(),
       BuildWidget.buildRow('开始时间', _formatDate),
-      _edit?BuildWidget.buildRadioVert('报告类型', _reportType, _currentType, changeType):BuildWidget.buildRow('报告类型', _currentType),
+      _edit?BuildWidget.buildRadioVert('作业报告类型', _reportType, _currentType, changeType):BuildWidget.buildRow('报告类型', _currentType),
       _fujiComments==""?new Container():BuildWidget.buildRow('审批备注', _fujiComments),
       new Divider(),
     ]);
@@ -782,7 +754,7 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
           [
             _edit?BuildWidget.buildDropdownLeft('作业报告结果:', _currentResult, _dropDownMenuItems, changedDropDownMethod):BuildWidget.buildRow('作业报告结果', _currentResult),
             !_edit&&_currentResult=='问题升级'?BuildWidget.buildRow('问题升级', _unsolved.text):new Container(),
-            _currentResult=='问题升级'?buildField('问题升级:', _unsolved):new Container(),
+            _edit&&_currentResult=='问题升级'?buildField('问题升级:', _unsolved):new Container(),
             _edit&&_currentResult=='待第三方支持'?BuildWidget.buildDropdownLeft('服务提供方:', _currentProvider, _dropDownMenuProviders, changedDropDownProvider):new Container(),
             !_edit&&_currentResult=='待第三方支持'?BuildWidget.buildRow('服务提供方', _currentProvider):new Container(),
             _edit?buildField('备注:', _comments):BuildWidget.buildRow('备注', _comments.text),
@@ -902,7 +874,7 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
         case 6:
           _list.addAll(
               [
-                _edit?BuildWidget.buildInputLeft('资产金额:', _purchaseAmount, inputType: TextInputType.numberWithOptions(decimal: true)):BuildWidget.buildRow('资产金额', _purchaseAmount.text),
+                _edit?BuildWidget.buildInputLeft('资产金额:', _purchaseAmount, inputType: TextInputType.numberWithOptions(decimal: true), maxLength: 11):BuildWidget.buildRow('资产金额', _purchaseAmount.text),
                 _edit?buildField('报告明细:', _analysis):BuildWidget.buildRow('报告明细', _analysis.text),
                 _edit?buildField('结果:', _result):BuildWidget.buildRow('结果', _result.text),
               ]

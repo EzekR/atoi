@@ -140,7 +140,7 @@ class _UserRepairPageState extends State<UserRepairPage> {
     if (_describe.text.isEmpty) {
       showDialog(
           context: context,
-          builder: (context) => AlertDialog(
+          builder: (context) => CupertinoAlertDialog(
                 title: new Text('故障描述不可为空'),
               ));
       return;
