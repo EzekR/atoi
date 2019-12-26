@@ -286,8 +286,8 @@ Future getImage(ImageSource sourceType) async {
                             child: new Column(
                               children: <Widget>[
                                 BuildWidget.buildRow('类型', '其他服务'),
-                                BuildWidget.buildRow('请求人', _roleName==null?'':_roleName),
                                 BuildWidget.buildRow('主题', '其他服务'),
+                                BuildWidget.buildRow('请求人', _roleName==null?'':_roleName),
                                 new Divider(),
                                 new Padding(
                                   padding: EdgeInsets.symmetric(vertical: 5.0),

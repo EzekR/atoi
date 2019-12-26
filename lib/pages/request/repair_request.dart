@@ -384,10 +384,10 @@ class _RepairRequestState extends State<RepairRequest> {
                                 BuildWidget.buildRow('名称', _equipment['Name']??''),
                                 BuildWidget.buildRow('型号', _equipment['EquipmentCode']??''),
                                 BuildWidget.buildRow('序列号', _equipment['SerialCode']??''),
-                                BuildWidget.buildRow('使用科室', _equipment['Department']['Name']??''),
-                                BuildWidget.buildRow('安装地点', _equipment['InstalSite']??''),
                                 BuildWidget.buildRow('设备厂商', _equipment['Manufacturer']['Name']??''),
                                 BuildWidget.buildRow('资产等级', _equipment['AssetLevel']['Name']??''),
+                                BuildWidget.buildRow('使用科室', _equipment['Department']['Name']??''),
+                                BuildWidget.buildRow('安装地点', _equipment['InstalSite']??''),
                                 BuildWidget.buildRow('维保状态', _equipment['WarrantyStatus']??''),
                                 BuildWidget.buildRow('服务范围', _equipment['ContractScope']['Name']??''),
                                 new Padding(padding: EdgeInsets.symmetric(vertical: 8.0)??'')
@@ -416,8 +416,8 @@ class _RepairRequestState extends State<RepairRequest> {
                             child: new Column(
                               children: <Widget>[
                                 BuildWidget.buildRow('类型', '维修'),
-                                BuildWidget.buildRow('请求人', _roleName),
                                 BuildWidget.buildRow('主题', _equipment==null?'--维修':'${_equipment['Name']}--维修'),
+                                BuildWidget.buildRow('请求人', _roleName),
                                 new Divider(),
                                 new Padding(
                                   padding: EdgeInsets.symmetric(vertical: 5.0),

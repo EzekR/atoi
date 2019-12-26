@@ -12,7 +12,6 @@ import 'dart:async';
 import 'package:atoi/complete_info.dart';
 import 'package:atoi/pages/equipments/equipments_list.dart';
 import 'package:atoi/pages/reports/report_list.dart';
-import 'package:atoi/pages/equipments/equipment_contract.dart';
 import 'package:atoi/pages/equipments/vendors_list.dart';
 import 'package:atoi/pages/equipments/contract_list.dart';
 import 'dart:convert';

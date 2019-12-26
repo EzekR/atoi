@@ -39,7 +39,7 @@ class _ReportListState extends State<ReportList> {
             onTap: () {
               switch (item['type']) {
                 case 'barchart_1':
-                  Navigator.of(context).push(new MaterialPageRoute(builder: (context) => new EquipmentBarchart(chartName: item['name'], endpoint: item['endpoint'],)));
+                  Navigator.of(context).push(new MaterialPageRoute(builder: (context) => new EquipmentBarchart(chartName: item['name'], endpoint: item['endpoint'], labelY: item['label-y'],)));
                   break;
                 case 'barchart_2':
                   Navigator.of(context).push(new MaterialPageRoute(builder: (context) => new EquipmentAssets(chartName: item['name'], endpoint: item['endpoint'],)));
@@ -132,7 +132,8 @@ class _ReportListState extends State<ReportList> {
                   {
                     'name': '设备数量',
                     'type': 'barchart_1',
-                    'endpoint': 'EquipmentCountReport'
+                    'endpoint': 'EquipmentCountReport',
+                    'label-y': '设备数量（台）',
                   },
                   {
                     'name': '设备增长率',
@@ -243,7 +244,8 @@ class _ReportListState extends State<ReportList> {
                   {
                     'name': '设备检查人次',
                     'type': 'barchart_1',
-                    'endpoint': 'ServiceCountReport'
+                    'endpoint': 'ServiceCountReport',
+                    'label-y': '检查人次'
                   },
                   {
                     'name': '设备检查费用',
@@ -267,7 +269,8 @@ class _ReportListState extends State<ReportList> {
                   {
                     'name': '设备零配件花费总额',
                     'type': 'barchart_1',
-                    'endpoint': 'PartExpenditureReport'
+                    'endpoint': 'PartExpenditureReport',
+                    'label-y': '金额（元）'
                   },
                   {
                     'name': '设备备件花费总额',
@@ -299,7 +302,8 @@ class _ReportListState extends State<ReportList> {
                   {
                     'name': '设备总收入',
                     'type': 'barchart_1',
-                    'endpoint': 'EquipmentIncomeReport'
+                    'endpoint': 'EquipmentIncomeReport',
+                    'label-y': '金额（元）'
                   },
                   {
                     'name': '设备总收入同比',

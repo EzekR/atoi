@@ -388,12 +388,6 @@ class _BadRequestState extends State<BadRequest> {
                                       BuildWidget.buildRow('序列号',
                                           _equipment['SerialCode'] ?? ''),
                                       BuildWidget.buildRow(
-                                          '使用科室',
-                                          _equipment['Department']['Name'] ??
-                                              ''),
-                                      BuildWidget.buildRow('安装地点',
-                                          _equipment['InstalSite'] ?? ''),
-                                      BuildWidget.buildRow(
                                           '设备厂商',
                                           _equipment['Manufacturer']['Name'] ??
                                               ''),
@@ -401,6 +395,12 @@ class _BadRequestState extends State<BadRequest> {
                                           '资产等级',
                                           _equipment['AssetLevel']['Name'] ??
                                               ''),
+                                      BuildWidget.buildRow(
+                                          '使用科室',
+                                          _equipment['Department']['Name'] ??
+                                              ''),
+                                      BuildWidget.buildRow('安装地点',
+                                          _equipment['InstalSite'] ?? ''),
                                       BuildWidget.buildRow('维保状态',
                                           _equipment['WarrantyStatus'] ?? ''),
                                       BuildWidget.buildRow(
@@ -435,12 +435,12 @@ class _BadRequestState extends State<BadRequest> {
                             child: new Column(
                               children: <Widget>[
                                 BuildWidget.buildRow('类型', '不良事件'),
-                                BuildWidget.buildRow('请求人', _roleName),
                                 BuildWidget.buildRow(
                                     '主题',
                                     _equipment == null
                                         ? '--不良事件'
                                         : '${_equipment['Name']}--不良事件'),
+                                BuildWidget.buildRow('请求人', _roleName),
                                 new Divider(),
                                 new Padding(
                                   padding: EdgeInsets.symmetric(vertical: 5.0),

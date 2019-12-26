@@ -18,8 +18,9 @@ import 'package:atoi/models/main_model.dart';
 import 'package:atoi/utils/constants.dart';
 
 class EquipmentContract extends StatefulWidget {
-  EquipmentContract({Key key, this.contract}) : super(key: key);
+  EquipmentContract({Key key, this.contract, this.editable}) : super(key: key);
   final Map contract;
+  final bool editable;
   _EquipmentContractState createState() => new _EquipmentContractState();
 }
 
@@ -431,14 +432,12 @@ class _EquipmentContractState extends State<EquipmentContract> {
               BuildWidget.buildRow('名称', _equipment['Name'] ?? ''),
               BuildWidget.buildRow('型号', _equipment['EquipmentCode'] ?? ''),
               BuildWidget.buildRow('序列号', _equipment['SerialCode'] ?? ''),
+              BuildWidget.buildRow('设备厂商', _equipment['Manufacturer']['Name'] ?? ''),
+              BuildWidget.buildRow('资产等级', _equipment['AssetLevel']['Name'] ?? ''),
               BuildWidget.buildRow(
                   '使用科室', _equipment['Department']['Name'] ?? ''),
               BuildWidget.buildRow('安装地点', _equipment['InstalSite'] ?? ''),
-              BuildWidget.buildRow(
-                  '设备厂商', _equipment['Manufacturer']['Name'] ?? ''),
-              BuildWidget.buildRow(
-                  '资产等级', _equipment['AssetLevel']['Name'] ?? ''),
-              new Padding(
+              widget.editable?new Padding(
                 padding: EdgeInsets.symmetric(vertical: 8.0),
                 child: new Row(
                   mainAxisAlignment: MainAxisAlignment.end,
@@ -454,7 +453,7 @@ class _EquipmentContractState extends State<EquipmentContract> {
                         })
                   ],
                 ),
-              )
+              ):new Container()
             ],
           ),
         ),
@@ -471,7 +470,7 @@ class _EquipmentContractState extends State<EquipmentContract> {
       builder: (context, child, mainModel) {
         return new Scaffold(
             appBar: new AppBar(
-              title: new Text(widget.contract==null?'新增合同':'更新合同'),
+              title: widget.editable?Text(widget.contract==null?'新增合同':'更新合同'):Text('查看合同'),
               elevation: 0.7,
               flexibleSpace: Container(
                 decoration: BoxDecoration(
@@ -485,7 +484,7 @@ class _EquipmentContractState extends State<EquipmentContract> {
                   ),
                 ),
               ),
-              actions: <Widget>[
+              actions: widget.editable?<Widget>[
                 new IconButton(
                   icon: Icon(Icons.search),
                   color: Colors.white,
@@ -510,7 +509,7 @@ class _EquipmentContractState extends State<EquipmentContract> {
                 //    onPressed: () {
                 //      scan();
                 //    })
-              ],
+              ]:[],
             ),
             body: new Padding(
               padding: EdgeInsets.symmetric(vertical: 5.0),
@@ -574,17 +573,76 @@ class _EquipmentContractState extends State<EquipmentContract> {
                             child: new Column(
                               children: <Widget>[
                                 BuildWidget.buildRow('系统编号', OID),
-                                BuildWidget.buildInput(
-                                    '项目编号', projectNum, maxLength: 20),
-                                BuildWidget.buildInput(
-                                    '合同编号', contractNum, maxLength: 20),
-                                BuildWidget.buildInput(
-                                    '金额', amount, inputType: TextInputType.numberWithOptions(decimal: true), maxLength: 11),
-                                BuildWidget.buildInput(
-                                    '名称', name, maxLength: 50),
-                                BuildWidget.buildDropdown('类型', currentType,
-                                    dropdownType, changeType),
-                                new Padding(
+                                widget.editable?BuildWidget.buildInput('合同编号', contractNum, maxLength: 20):BuildWidget.buildRow('合同编号', contractNum.text),
+                                widget.editable?BuildWidget.buildInput('项目编号', projectNum, maxLength: 20):BuildWidget.buildRow('项目编号', projectNum.text),
+                                widget.editable?BuildWidget.buildInput('金额', amount, inputType: TextInputType.numberWithOptions(decimal: true), maxLength: 11):BuildWidget.buildRow('金额', amount.text),
+                                widget.editable?BuildWidget.buildInput('名称', name, maxLength: 50):BuildWidget.buildRow('名称', name.text),
+                                widget.editable?BuildWidget.buildDropdown('类型', currentType, dropdownType, changeType):BuildWidget.buildRow('类型', currentType),
+                                widget.editable?new Padding(
+                                  padding: EdgeInsets.symmetric(vertical: 5.0),
+                                  child: new Row(
+                                    children: <Widget>[
+                                      new Expanded(
+                                        flex: 4,
+                                        child: new Wrap(
+                                          alignment: WrapAlignment.end,
+                                          crossAxisAlignment:
+                                          WrapCrossAlignment.center,
+                                          children: <Widget>[
+                                            new Text(
+                                              '供应商',
+                                              style: new TextStyle(
+                                                  fontSize: 20.0,
+                                                  fontWeight: FontWeight.w600),
+                                            )
+                                          ],
+                                        ),
+                                      ),
+                                      new Expanded(
+                                        flex: 1,
+                                        child: new Text(
+                                          '：',
+                                          style: new TextStyle(
+                                            fontSize: 20.0,
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                        ),
+                                      ),
+                                      new Expanded(
+                                          flex: 3,
+                                          child: new Text(
+                                            supplier == null
+                                                ? ''
+                                                : supplier['Name'],
+                                            style: new TextStyle(
+                                                fontSize: 20.0,
+                                                fontWeight: FontWeight.w400,
+                                                color: Colors.black54),
+                                          )),
+                                      new Expanded(
+                                          flex: 3,
+                                          child: new IconButton(
+                                              icon: Icon(Icons.search),
+                                              onPressed: () async {
+                                                final _searchResult =
+                                                await showSearch(
+                                                    context: context,
+                                                    delegate:
+                                                    SearchBarVendor(),
+                                                    hintText: '请输厂商名称');
+                                                print(_searchResult);
+                                                if (_searchResult != null &&
+                                                    _searchResult != 'null') {
+                                                  setState(() {
+                                                    supplier = jsonDecode(
+                                                        _searchResult);
+                                                  });
+                                                }
+                                              })),
+                                    ],
+                                  ),
+                                ):BuildWidget.buildRow('供应商', supplier==null?'':supplier['Name']),
+                                widget.editable?new Padding(
                                   padding: EdgeInsets.symmetric(vertical: 5.0),
                                   child: new Row(
                                     children: <Widget>[
@@ -675,77 +733,12 @@ class _EquipmentContractState extends State<EquipmentContract> {
                                       ),
                                     ],
                                   ),
-                                ),
+                                ):BuildWidget.buildRow('起止日期', '$startDate\n$endDate'),
                                 //BuildWidget.buildRow('状态', _contractStatus),
-                                new Padding(
-                                  padding: EdgeInsets.symmetric(vertical: 5.0),
-                                  child: new Row(
-                                    children: <Widget>[
-                                      new Expanded(
-                                        flex: 4,
-                                        child: new Wrap(
-                                          alignment: WrapAlignment.end,
-                                          crossAxisAlignment:
-                                              WrapCrossAlignment.center,
-                                          children: <Widget>[
-                                            new Text(
-                                              '供应商',
-                                              style: new TextStyle(
-                                                  fontSize: 20.0,
-                                                  fontWeight: FontWeight.w600),
-                                            )
-                                          ],
-                                        ),
-                                      ),
-                                      new Expanded(
-                                        flex: 1,
-                                        child: new Text(
-                                          '：',
-                                          style: new TextStyle(
-                                            fontSize: 20.0,
-                                            fontWeight: FontWeight.w600,
-                                          ),
-                                        ),
-                                      ),
-                                      new Expanded(
-                                          flex: 3,
-                                          child: new Text(
-                                            supplier == null
-                                                ? ''
-                                                : supplier['Name'],
-                                            style: new TextStyle(
-                                                fontSize: 20.0,
-                                                fontWeight: FontWeight.w400,
-                                                color: Colors.black54),
-                                          )),
-                                      new Expanded(
-                                          flex: 3,
-                                          child: new IconButton(
-                                              icon: Icon(Icons.search),
-                                              onPressed: () async {
-                                                final _searchResult =
-                                                    await showSearch(
-                                                        context: context,
-                                                        delegate:
-                                                            SearchBarVendor(),
-                                                        hintText: '请输厂商名称');
-                                                print(_searchResult);
-                                                if (_searchResult != null &&
-                                                    _searchResult != 'null') {
-                                                  setState(() {
-                                                    supplier = jsonDecode(
-                                                        _searchResult);
-                                                  });
-                                                }
-                                              })),
-                                    ],
-                                  ),
-                                ),
-                                BuildWidget.buildDropdown('服务范围', currentScope,
-                                    dropdownScope, changeScope),
-                                currentScope=='其他'?BuildWidget.buildInput('其他范围', scopeComments, maxLength: 50):new Container(),
-                                BuildWidget.buildInput(
-                                    '备注', comments, maxLength: 500),
+                                widget.editable?BuildWidget.buildDropdown('服务范围', currentScope, dropdownScope, changeScope):BuildWidget.buildRow('服务范围', currentScope),
+                                widget.editable&&currentScope=='其他'?BuildWidget.buildInput('其他范围', scopeComments, maxLength: 50):new Container(),
+                                !widget.editable&&currentScope=='其他'?BuildWidget.buildRow('其他范围', scopeComments.text):new Container(),
+                                widget.editable?BuildWidget.buildInput('备注', comments, maxLength: 500):BuildWidget.buildRow('备注', comments.text),
                                 new Divider(),
                                 new Padding(
                                     padding:
@@ -763,7 +756,7 @@ class _EquipmentContractState extends State<EquipmentContract> {
                       mainAxisSize: MainAxisSize.max,
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: <Widget>[
-                        new RaisedButton(
+                        widget.editable?new RaisedButton(
                           onPressed: () {
                             saveContract();
                           },
@@ -774,7 +767,7 @@ class _EquipmentContractState extends State<EquipmentContract> {
                           color: new Color(0xff2E94B9),
                           child:
                               Text('提交', style: TextStyle(color: Colors.white)),
-                        ),
+                        ):new Container(),
                         new RaisedButton(
                           onPressed: () {
                             Navigator.of(context).pop();

@@ -13,8 +13,9 @@ import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:atoi/models/constants_model.dart';
 
 class VendorDetail extends StatefulWidget {
-  VendorDetail({Key key, this.vendor}) : super(key: key);
+  VendorDetail({Key key, this.vendor, this.editable}) : super(key: key);
   final Map vendor;
+  final bool editable;
   _VendorDetailState createState() => new _VendorDetailState();
 }
 
@@ -331,7 +332,7 @@ class _VendorDetailState extends State<VendorDetail> {
       builder: (context, child, mainModel) {
         return new Scaffold(
             appBar: new AppBar(
-              title: new Text(widget.vendor==null?'新增供应商':'更新供应商'),
+              title: widget.editable?Text(widget.vendor==null?'新增供应商':'更新供应商'):Text('查看供应商'),
               elevation: 0.7,
               flexibleSpace: Container(
                 decoration: BoxDecoration(
@@ -383,17 +384,15 @@ class _VendorDetailState extends State<VendorDetail> {
                             child: new Column(
                               children: <Widget>[
                                 BuildWidget.buildRow('系统编号', oid),
-                                BuildWidget.buildInput('名称', name, maxLength: 50),
-                                BuildWidget.buildDropdown('类型', currentType,
-                                    dropdownType, changeType),
-                                BuildWidget.buildDropdown('省份', currentProvince,
-                                    dropdownProvince, changeProvince),
-                                BuildWidget.buildInput('电话', mobile, maxLength: 20),
-                                BuildWidget.buildInput('地址', address, maxLength: 255),
-                                BuildWidget.buildInput('联系人', contact),
-                                BuildWidget.buildInput('联系人电话', contactMobile, maxLength: 20),
-                                BuildWidget.buildRadio('供应商经营状态', vendorStatus,
-                                    currentStatus, changeStatus),
+                                widget.editable?BuildWidget.buildInput('名称', name, maxLength: 50):BuildWidget.buildRow('名称', name.text),
+                                widget.editable?BuildWidget.buildDropdown('类型', currentType, dropdownType, changeType):BuildWidget.buildRow('类型', currentType),
+                                widget.editable?BuildWidget.buildDropdown('省份', currentProvince, dropdownProvince, changeProvince):BuildWidget.buildRow('省份', currentProvince),
+                                widget.editable?BuildWidget.buildInput('电话', mobile, maxLength: 20):BuildWidget.buildRow('电话', mobile.text),
+                                widget.editable?BuildWidget.buildInput('地址', address, maxLength: 255):BuildWidget.buildRow('地址', address.text),
+                                widget.editable?BuildWidget.buildInput('联系人', contact):BuildWidget.buildRow('联系人', contact.text),
+                                widget.editable?BuildWidget.buildInput('联系人电话', contactMobile, maxLength: 20):BuildWidget.buildRow('联系人电话', contactMobile.text),
+                                widget.editable?BuildWidget.buildRadio('供应商经营状态', vendorStatus,
+                                    currentStatus, changeStatus):BuildWidget.buildRow('供应商经营状态', currentStatus),
                                 new Divider(),
                                 new Padding(
                                     padding:
@@ -411,7 +410,7 @@ class _VendorDetailState extends State<VendorDetail> {
                       mainAxisSize: MainAxisSize.max,
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: <Widget>[
-                        new RaisedButton(
+                        widget.editable?new RaisedButton(
                           onPressed: () {
                             saveVendor();
                           },
@@ -422,7 +421,7 @@ class _VendorDetailState extends State<VendorDetail> {
                           color: new Color(0xff2E94B9),
                           child:
                               Text('提交', style: TextStyle(color: Colors.white)),
-                        ),
+                        ):new Container(),
                         new RaisedButton(
                           onPressed: () {
                             Navigator.of(context).pop();

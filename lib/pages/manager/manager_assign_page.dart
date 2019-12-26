@@ -756,18 +756,20 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
             children: <Widget>[
               BuildWidget.buildRow('类型', _request['SourceType']),
               BuildWidget.buildRow('主题', _request['SubjectName']),
-              BuildWidget.buildInput(model.Remark[_request['RequestType']['ID']], _desc, maxLength: 200),
+              BuildWidget.buildRow('请求人', _request['RequestUser']['Name']),
+              BuildWidget.buildRow('请求状态', _request['Status']['Name']),
               _request['RequestType']['ID']==1?BuildWidget.buildDropdown('机器状态', _currentStatusReq, _dropDownMenuStatusesReq, changedDropDownStatusReq):new Container(),
+              BuildWidget.buildInput(model.Remark[_request['RequestType']['ID']], _desc, maxLength: 200),
               _request['RequestType']['ID']==2?BuildWidget.buildDropdown('保养类型', _currentMaintain, _dropDownMenuMaintain, changedDropDownMaintain):new Container(),
               _request['RequestType']['ID']==3?BuildWidget.buildDropdown('强检原因', _currentMandatory, _dropDownMenuMandatory, changedDropDownMandatory):new Container(),
               _request['RequestType']['ID']==7?BuildWidget.buildDropdown('来源', _currentSource, _dropDownMenuSource, changedDropDownSource):new Container(),
               _request['RequestType']['ID']==3?BuildWidget.buildRow('是否召回', _request['IsRecall']?'是':'否'):new Container(),
-              BuildWidget.buildRow('请求人', _request['RequestUser']['Name']),
-              BuildWidget.buildDropdown('处理方式', _currentMethod, _dropDownMenuItems, changedDropDownMethod),
-              //BuildWidget.buildDropdown('紧急程度', _currentPriority, _dropDownMenuPris, changedDropDownPri),
               BuildWidget.buildRow('请求附件', ''),
               buildImageColumn(),
-              buildFileName()
+              buildFileName(),
+              new Divider(),
+              BuildWidget.buildDropdown('处理方式', _currentMethod, _dropDownMenuItems, changedDropDownMethod),
+              //BuildWidget.buildDropdown('紧急程度', _currentPriority, _dropDownMenuPris, changedDropDownPri),
             ],
           ),
         ),
@@ -797,9 +799,8 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
             BuildWidget.buildDropdown('派工类型', _currentType, _dropDownMenuTypes, changedDropDownType),
-            BuildWidget.buildDropdown('紧急程度', _currentLevel, _dropDownMenuLevels, changedDropDownLevel),
             _currentType!='其他服务'?BuildWidget.buildDropdown('机器状态', _currentStatus, _dropDownMenuStatuses, changedDropDownStatus):new Container(),
-            _engineerNames.isEmpty?new Container():BuildWidget.buildDropdown('工程师姓名', _currentName, _dropDownMenuNames, changedDropDownName),
+            BuildWidget.buildDropdown('紧急程度', _currentLevel, _dropDownMenuLevels, changedDropDownLevel),
             new Padding(
               padding: EdgeInsets.symmetric(vertical: 5.0),
               child: new Row(
@@ -850,8 +851,8 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
                         var _initTime = DateTime.tryParse(dispatchDate)??DateTime.now();
                         showDatePicker(
                             context: context,
-                            initialDate: _initTime!=null&&_initTime.isBefore(DateTime.now())?DateTime.now():_initTime,
-                            firstDate: DateTime.now(),
+                            initialDate: _initTime.isBefore(DateTime.now())?DateTime.now():_initTime,
+                            firstDate: DateTime.now().add(new Duration(days: -1)),
                             lastDate: new DateTime.now().add(new Duration(days: 30)),
                             locale: Locale('zh')
                         ).then((DateTime val) {
@@ -872,6 +873,7 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
                 ],
               ),
             ),
+            _engineerNames.isEmpty?new Container():BuildWidget.buildDropdown('工程师姓名', _currentName, _dropDownMenuNames, changedDropDownName),
             new Padding(
               padding: EdgeInsets.symmetric(vertical: 5.0),
               child: new Column(

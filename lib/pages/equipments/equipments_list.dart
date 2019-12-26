@@ -7,6 +7,7 @@ import 'package:atoi/widgets/build_widget.dart';
 import 'package:atoi/pages/equipments/equipment_detail.dart';
 import 'package:timeline_list/timeline.dart';
 import 'package:timeline_list/timeline_model.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class EquipmentsList extends StatefulWidget{
   _EquipmentsListState createState() => _EquipmentsListState();
@@ -20,8 +21,16 @@ class _EquipmentsListState extends State<EquipmentsList> {
 
   bool isSearchState = false;
   bool _loading = false;
+  bool _editable = true;
 
   TextEditingController _keywords = new TextEditingController();
+  Future<SharedPreferences> prefs = SharedPreferences.getInstance();
+
+  Future<Null> getRole() async {
+    var _prefs = await prefs;
+    var _role = _prefs.getInt('role');
+    _editable = _role==1?true:false;
+  }
 
   Future<Null> getEquipments({String filterText}) async {
     filterText = filterText??'';
@@ -48,6 +57,7 @@ class _EquipmentsListState extends State<EquipmentsList> {
   void initState() {
     super.initState();
     getEquipments();
+    getRole();
   }
 
   Future<List<TimelineModel>> getTimeline(int deviceId) async {
@@ -228,7 +238,7 @@ class _EquipmentsListState extends State<EquipmentsList> {
               new RaisedButton(
                 onPressed: (){
                   Navigator.of(context).push(new MaterialPageRoute(builder: (_) {
-                    return new EquipmentDetail(equipment: item,);
+                    return new EquipmentDetail(equipment: item, editable: _editable,);
                   })).then((result) => getEquipments());
                 },
                 shape: RoundedRectangleBorder(
@@ -238,11 +248,11 @@ class _EquipmentsListState extends State<EquipmentsList> {
                 child: new Row(
                   children: <Widget>[
                     new Icon(
-                      Icons.edit,
+                      _editable?Icons.edit:Icons.remove_red_eye,
                       color: Colors.white,
                     ),
                     new Text(
-                      '编辑',
+                      _editable?'编辑':'查看',
                       style: new TextStyle(
                           color: Colors.white
                       ),
@@ -356,7 +366,7 @@ class _EquipmentsListState extends State<EquipmentsList> {
         floatingActionButton: FloatingActionButton(
           onPressed: () {
             Navigator.of(context).push(new MaterialPageRoute(builder: (_) {
-              return new EquipmentDetail();
+              return new EquipmentDetail(editable: true,);
             })).then((result) => getEquipments());
           },
           child: Icon(Icons.add_circle),

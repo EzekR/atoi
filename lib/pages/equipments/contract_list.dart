@@ -4,6 +4,7 @@ import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:atoi/widgets/build_widget.dart';
 import 'package:atoi/pages/equipments/vendor_detail.dart';
 import 'package:atoi/pages/equipments/equipment_contract.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class ContractList extends StatefulWidget{
   _ContractListState createState() => _ContractListState();
@@ -15,8 +16,17 @@ class _ContractListState extends State<ContractList> {
 
   bool isSearchState = false;
   bool _loading = false;
+  bool _editable = true;
 
   TextEditingController _keywords = new TextEditingController();
+
+  Future<SharedPreferences> prefs = SharedPreferences.getInstance();
+
+  Future<Null> getRole() async {
+    var _prefs = await prefs;
+    var _role = _prefs.getInt('role');
+    _editable = _role==1?true:false;
+  }
 
   Future<Null> getContracts({String filterText}) async {
     filterText = filterText??'';
@@ -43,6 +53,7 @@ class _ContractListState extends State<ContractList> {
   void initState() {
     super.initState();
     getContracts();
+    getRole();
   }
 
   Card buildEquipmentCard(Map item) {
@@ -93,7 +104,7 @@ class _ContractListState extends State<ContractList> {
               new RaisedButton(
                 onPressed: (){
                   Navigator.of(context).push(new MaterialPageRoute(builder: (_) {
-                    return new EquipmentContract(contract: item,);
+                    return new EquipmentContract(contract: item, editable: _editable,);
                   })).then((result) => getContracts());
                 },
                 shape: RoundedRectangleBorder(
@@ -103,11 +114,11 @@ class _ContractListState extends State<ContractList> {
                 child: new Row(
                   children: <Widget>[
                     new Icon(
-                      Icons.mode_edit,
+                      _editable?Icons.mode_edit:Icons.remove_red_eye,
                       color: Colors.white,
                     ),
                     new Text(
-                      '编辑',
+                      _editable?'编辑':'查看',
                       style: new TextStyle(
                           color: Colors.white
                       ),
@@ -179,7 +190,7 @@ class _ContractListState extends State<ContractList> {
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           Navigator.of(context).push(new MaterialPageRoute(builder: (_) {
-            return new EquipmentContract();
+            return new EquipmentContract(editable: true,);
           })).then((result) => getContracts());
         },
         child: Icon(Icons.add_circle),

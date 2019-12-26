@@ -314,8 +314,8 @@ class _ManagerCompletePageState extends State<ManagerCompletePage> {
     List<Widget> _list = [];
     _list.addAll([
       BuildWidget.buildRow('作业报告编号', _report['OID']),
-      BuildWidget.buildRow('审批状态', _report['Status']['Name']),
       BuildWidget.buildRow('作业报告类型', _report['Type']['Name']),
+      BuildWidget.buildRow('审批状态', _report['Status']['Name']),
       BuildWidget.buildRow('开始时间', _report['Dispatch']['StartDate'].split('T')[0]),
       new Divider(),
     ]);
@@ -367,7 +367,7 @@ class _ManagerCompletePageState extends State<ManagerCompletePage> {
         break;
       case 601:
         _list.addAll([
-          BuildWidget.buildRow('资产金额', _report['PurchaseAmount']),
+          BuildWidget.buildRow('资产金额', _report['PurchaseAmount'].toString()),
           BuildWidget.buildRow('整包范围', _report['ServiceScope']?'是':'否'),
           BuildWidget.buildRow('报告明细', _report['SolutionCauseAnalysis']),
           BuildWidget.buildRow('结果', _report['Result']),
@@ -394,9 +394,9 @@ class _ManagerCompletePageState extends State<ManagerCompletePage> {
         break;
     }
     _list.addAll([
-      BuildWidget.buildRow('作业结果', _report['SolutionResultStatus']['Name']),
+      BuildWidget.buildRow('作业报告结果', _report['SolutionResultStatus']['Name']),
       BuildWidget.buildRow('附件', ''),
-      buildImageColumn(),
+      buildReportImageColumn(),
       BuildWidget.buildRow('审批备注', _report['FujiComments']??'')
     ]);
     return _list;
@@ -411,11 +411,10 @@ class _ManagerCompletePageState extends State<ManagerCompletePage> {
           BuildWidget.buildRow('名称', _equipment['Name'] ?? ''),
           BuildWidget.buildRow('型号', _equipment['EquipmentCode'] ?? ''),
           BuildWidget.buildRow('序列号', _equipment['SerialCode'] ?? ''),
+          BuildWidget.buildRow('设备厂商', _equipment['Manufacturer']['Name'] ?? ''),
+          BuildWidget.buildRow('资产等级', _equipment['AssetLevel']['Name'] ?? ''),
           BuildWidget.buildRow('使用科室', _equipment['Department']['Name'] ?? ''),
           BuildWidget.buildRow('安装地点', _equipment['InstalSite'] ?? ''),
-          BuildWidget.buildRow(
-              '设备厂商', _equipment['Manufacturer']['Name'] ?? ''),
-          BuildWidget.buildRow('资产等级', _equipment['AssetLevel']['Name'] ?? ''),
           BuildWidget.buildRow('维保状态', _equipment['WarrantyStatus'] ?? ''),
           BuildWidget.buildRow(
               '服务范围', _equipment['ContractScope']['Name'] ?? ''),
@@ -538,9 +537,10 @@ class _ManagerCompletePageState extends State<ManagerCompletePage> {
             children: <Widget>[
               BuildWidget.buildRow('类型', _request['SourceType']),
               BuildWidget.buildRow('主题', _request['SubjectName']),
+              BuildWidget.buildRow('请求人', _request['RequestUser']['Name']),
               BuildWidget.buildRow('请求状态', _request['Status']['Name']),
-              BuildWidget.buildRow(model.Remark[_request['RequestType']['ID']], _request['FaultDesc']),
               _request['RequestType']['ID'] == 1?BuildWidget.buildRow('机器状态', _request['MachineStatus']['Name']):new Container(),
+              BuildWidget.buildRow(model.Remark[_request['RequestType']['ID']], _request['FaultDesc']),
                       _request['RequestType']['ID'] == 2 ||
                       _request['RequestType']['ID'] == 3 ||
                       _request['RequestType']['ID'] == 7
@@ -548,15 +548,14 @@ class _ManagerCompletePageState extends State<ManagerCompletePage> {
                       model.RemarkType[_request['RequestType']['ID']],
                       _request['FaultType']['Name'])
                   : new Container(),
-              BuildWidget.buildRow('请求人', _request['RequestUser']['Name']),
+              BuildWidget.buildRow('请求附件', ''),
+              buildImageColumn(),
+              buildFileName(),
               _request['Status']['ID'] == 1
                   ? new Container()
                   : BuildWidget.buildRow('处理方式', _request['DealType']['Name']),
               //_request['Status']['ID']==1?new Container():BuildWidget.buildRow('当前状态', _request['Status']['Name']),
               //_request['Status']['ID']==1?new Container():BuildWidget.buildRow('紧急程度', _request['Priority']['Name']),
-              BuildWidget.buildRow('请求附件', ''),
-              buildImageColumn(),
-              buildFileName()
             ],
           ),
         ),
@@ -588,11 +587,11 @@ class _ManagerCompletePageState extends State<ManagerCompletePage> {
               BuildWidget.buildRow('派工单编号', _dispatch['OID']),
               BuildWidget.buildRow('派工单状态', _dispatch['Status']['Name']),
               BuildWidget.buildRow('派工类型', _dispatch['RequestType']['Name']),
-              BuildWidget.buildRow('工程师姓名', _dispatch['Engineer']['Name']),
-              BuildWidget.buildRow('紧急程度', _dispatch['Urgency']['Name']),
               BuildWidget.buildRow('机器状态', _dispatch['MachineStatus']['Name']),
+              BuildWidget.buildRow('紧急程度', _dispatch['Urgency']['Name']),
               BuildWidget.buildRow('出发时间', AppConstants.TimeForm(_dispatch['ScheduleDate'].toString(), 'mm:ss')),
-              BuildWidget.buildRow('备注', _dispatch['LeaderComments']),
+              BuildWidget.buildRow('工程师姓名', _dispatch['Engineer']['Name']),
+              BuildWidget.buildRow('主管备注', _dispatch['LeaderComments']),
             ],
           ),
         ),
@@ -625,9 +624,11 @@ class _ManagerCompletePageState extends State<ManagerCompletePage> {
               BuildWidget.buildRow('审批状态', _journal['Status']['Name']),
               BuildWidget.buildRow('故障现象/错误代码/事由', _journal['FaultCode']),
               BuildWidget.buildRow('工作内容', _journal['JobContent']),
-              BuildWidget.buildRow('待跟进问题', _journal['FollowProblem']),
-              BuildWidget.buildRow('建议留言', _journal['Advice']),
               BuildWidget.buildRow('服务结果', _journal['ResultStatus']['Name']),
+              _journal['ResultStatus']['Name']=='待跟进'?BuildWidget.buildRow('待跟进问题', _journal['FollowProblem']):new Container(),
+              BuildWidget.buildRow('建议留言', _journal['Advice']),
+              BuildWidget.buildRow('建议留言', _journal['UserName']),
+              BuildWidget.buildRow('建议留言', _journal['UserMobile']),
               BuildWidget.buildRow('客户签名', ''),
               new Row(
                 mainAxisAlignment: MainAxisAlignment.start,

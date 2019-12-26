@@ -9,9 +9,11 @@ import 'package:atoi/utils/report_dimensions.dart';
 
 class EquipmentBarchart extends StatefulWidget {
 
-  EquipmentBarchart({Key key, this.endpoint, this.chartName}):super(key: key);
+  EquipmentBarchart({Key key, this.endpoint, this.chartName, this.labelX, this.labelY}):super(key: key);
   final String endpoint;
   final String chartName;
+  final String labelX;
+  final String labelY;
   _EquipmentBarchartState createState() => _EquipmentBarchartState();
 }
 
@@ -118,7 +120,7 @@ class _EquipmentBarchartState extends State<EquipmentBarchart> {
     var _dataTable = new DataTable(
         columns: [
           DataColumn(label: Text(_currentDimension, textAlign: TextAlign.center, style: new TextStyle(color: Colors.blue, fontSize: 14.0),)),
-          DataColumn(label: Text('设备数量', textAlign: TextAlign.center, style: new TextStyle(color: Colors.blue, fontSize: 14.0),)),
+          DataColumn(label: Text(widget.labelY, textAlign: TextAlign.center, style: new TextStyle(color: Colors.blue, fontSize: 14.0),)),
         ],
         rows: _tableData.map((item) => DataRow(
             cells: [
@@ -145,13 +147,15 @@ class _EquipmentBarchartState extends State<EquipmentBarchart> {
             barRendererDecorator: new charts.BarLabelDecorator<String>(),
           ),
         ),
+        new SizedBox(height: 20.0,),
         new Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             new Text(
-              '设备数量（台）',
+              widget.labelY,
               style: new TextStyle(
-                color: Colors.blueAccent
+                color: Colors.blue,
+                fontWeight: FontWeight.w600
               ),
             )
           ],

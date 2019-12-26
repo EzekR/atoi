@@ -4,6 +4,7 @@ import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:atoi/pages/equipments/print_qrcode.dart';
 import 'package:atoi/widgets/build_widget.dart';
 import 'package:atoi/pages/equipments/vendor_detail.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class VendorsList extends StatefulWidget{
   _VendorsListState createState() => _VendorsListState();
@@ -15,8 +16,16 @@ class _VendorsListState extends State<VendorsList> {
 
   bool isSearchState = false;
   bool _loading = false;
+  bool _editable = true;
 
   TextEditingController _keywords = new TextEditingController();
+  Future<SharedPreferences> prefs = SharedPreferences.getInstance();
+
+  Future<Null> getRole() async {
+    var _prefs = await prefs;
+    var _role = _prefs.getInt('role');
+    _editable = _role==1?true:false;
+  }
 
   Future<Null> getVendors({String filterText}) async {
     filterText = filterText??'';
@@ -43,6 +52,7 @@ class _VendorsListState extends State<VendorsList> {
   void initState() {
     super.initState();
     getVendors();
+    getRole();
   }
 
   Card buildEquipmentCard(Map item) {
@@ -92,7 +102,7 @@ class _VendorsListState extends State<VendorsList> {
               new RaisedButton(
                 onPressed: (){
                   Navigator.of(context).push(new MaterialPageRoute(builder: (_) {
-                    return new VendorDetail(vendor: item,);
+                    return new VendorDetail(vendor: item, editable: _editable,);
                   })).then((result) => getVendors());
                 },
                 shape: RoundedRectangleBorder(
@@ -102,11 +112,11 @@ class _VendorsListState extends State<VendorsList> {
                 child: new Row(
                   children: <Widget>[
                     new Icon(
-                      Icons.mode_edit,
+                      _editable?Icons.mode_edit:Icons.remove_red_eye,
                       color: Colors.white,
                     ),
                     new Text(
-                      '编辑',
+                      _editable?'编辑':'查看',
                       style: new TextStyle(
                           color: Colors.white
                       ),
@@ -178,7 +188,7 @@ class _VendorsListState extends State<VendorsList> {
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           Navigator.of(context).push(new MaterialPageRoute(builder: (_) {
-            return new VendorDetail();
+            return new VendorDetail(editable: true,);
           })).then((result) => getVendors());
         },
         child: Icon(Icons.add_circle),

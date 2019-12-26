@@ -10,7 +10,10 @@ import 'package:atoi/login_page.dart';
 import 'dart:async';
 import 'package:atoi/complete_info.dart';
 import 'dart:convert';
-
+import 'package:atoi/pages/equipments/equipments_list.dart';
+import 'package:atoi/pages/reports/report_list.dart';
+import 'package:atoi/pages/equipments/vendors_list.dart';
+import 'package:atoi/pages/equipments/contract_list.dart';
 
 class EngineerHomePage extends StatefulWidget {
   static String tag = 'engineer-home-page';
@@ -168,6 +171,58 @@ class _EngineerHomePageState extends State<EngineerHomePage>
                         Navigator.of(context).push(new MaterialPageRoute(builder: (_) {
                           return new CompleteInfo();
                         })).then((result) => getRole());
+                      },
+                    ),
+                    ListTile(
+                      leading: Icon(Icons.list),
+                      title: Text('设备列表',
+                        style: new TextStyle(
+                            color: Colors.blue
+                        ),
+                      ),
+                      onTap: () {
+                        Navigator.of(context).push(new MaterialPageRoute(builder: (_) {
+                          return new EquipmentsList();
+                        }));
+                      },
+                    ),
+                    ListTile(
+                      leading: Icon(Icons.event_note),
+                      title: Text('合同列表',
+                        style: new TextStyle(
+                            color: Colors.blue
+                        ),
+                      ),
+                      onTap: () {
+                        Navigator.of(context).push(new MaterialPageRoute(builder: (_) {
+                          return new ContractList();
+                        }));
+                      },
+                    ),
+                    ListTile(
+                      leading: Icon(Icons.store),
+                      title: Text('供应商列表',
+                        style: new TextStyle(
+                            color: Colors.blue
+                        ),
+                      ),
+                      onTap: () {
+                        Navigator.of(context).push(new MaterialPageRoute(builder: (_) {
+                          return new VendorsList();
+                        }));
+                      },
+                    ),
+                    ListTile(
+                      leading: Icon(Icons.insert_chart),
+                      title: Text('报表',
+                        style: new TextStyle(
+                            color: Colors.blue
+                        ),
+                      ),
+                      onTap: () {
+                        Navigator.of(context).push(new MaterialPageRoute(builder: (_) {
+                          return new ReportList();
+                        }));
                       },
                     ),
                     ListTile(

@@ -155,7 +155,7 @@ class _ManagerToCompleteState extends State<ManagerToComplete> {
     );
     if (resp['ResultCode'] == '00') {
       List _list = resp['Data'];
-      _list.removeWhere((item) => (item['Status']['ID']==-1 || item['Status']['ID']==4));
+      //_list.removeWhere((item) => (item['Status']['ID']==-1 || item['Status']['ID']==4));
       return _list;
     } else {
       return [];
@@ -370,6 +370,7 @@ class _ManagerToCompleteState extends State<ManagerToComplete> {
                             );
                           } else {
                             var _dispatches = await getDispatchesByRequestId(requestId);
+                            _dispatches.removeWhere((item) => (item['Status']['ID'] == -1 || item['Status']['ID'] ==4));
                             if (_dispatches.length == 1) {
                               showDialog(context: context,
                                   builder: (context) => CupertinoAlertDialog(

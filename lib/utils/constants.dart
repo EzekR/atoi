@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:date_format/date_format.dart';
 import 'dart:async';
 import 'package:atoi/utils/http_request.dart';
 
@@ -203,11 +204,15 @@ class AppConstants {
   //];
 
   static String TimeForm(String time, String format) {
-    var _date = DateTime.parse(time);
-    if (format == 'yyyy-mm-dd') {
-      return '${_date.year}-${_date.month}-${_date.day}';
+    var _date = DateTime.tryParse(time);
+    if (_date != null) {
+      if (format == 'yyyy-mm-dd') {
+        return '${_date.year}-${_date.month}-${_date.day}';
+      } else {
+        return formatDate(_date, [yyyy,'-',mm,'-',dd,' ',HH,':',nn]);
+      }
     } else {
-      return '${_date.year}-${_date.month}-${_date.day} ${_date.hour}:${_date.minute}';
+      return '';
     }
   }
 

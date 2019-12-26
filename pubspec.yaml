@@ -45,6 +45,7 @@ dependencies:
   dropdownfield: ^1.0.3
   json_table: ^1.3.2
   syncfusion_flutter_charts: ^17.3.26
+  date_format: ^1.0.8
   brother_printer:
       git: https://github.com/EzekR/brother_print.git
 
