@@ -316,7 +316,7 @@ class _ManagerCompletePageState extends State<ManagerCompletePage> {
       BuildWidget.buildRow('作业报告编号', _report['OID']),
       BuildWidget.buildRow('作业报告类型', _report['Type']['Name']),
       BuildWidget.buildRow('审批状态', _report['Status']['Name']),
-      BuildWidget.buildRow('开始时间', _report['Dispatch']['StartDate'].split('T')[0]),
+      BuildWidget.buildRow('开始时间', AppConstants.TimeForm(_report['Dispatch']['StartDate'].toString(), 'hh:mm')),
       new Divider(),
     ]);
     switch (_report['Type']['ID']) {
@@ -418,7 +418,7 @@ class _ManagerCompletePageState extends State<ManagerCompletePage> {
           BuildWidget.buildRow('维保状态', _equipment['WarrantyStatus'] ?? ''),
           BuildWidget.buildRow(
               '服务范围', _equipment['ContractScope']['Name'] ?? ''),
-          new Padding(padding: EdgeInsets.symmetric(vertical: 8.0))
+          new Divider(),
         ];
         _equipList.addAll(_list);
       }

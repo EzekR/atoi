@@ -453,7 +453,7 @@ class _EquipmentContractState extends State<EquipmentContract> {
                         })
                   ],
                 ),
-              ):new Container()
+              ):new Divider()
             ],
           ),
         ),

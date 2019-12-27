@@ -31,7 +31,7 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
   var _isExpandedDetail = false;
   var _isExpandedAssign = true;
   var _isExpandedComponent = false;
-  var _equipment = {};
+  List _equipments = [];
   var _comment = new TextEditingController();
   ConstantsModel model;
   var _unsolved = new TextEditingController();
@@ -293,8 +293,11 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
     if (resp['ResultCode'] == '00') {
       print(widget.request);
       setState(() {
-        //resp['Data']['Request']['Equipments'].length>0?_equipment = resp['Data']['Request']['Equipments'][0]:null;
-        resp['Data']['Request']['RequestType']['ID'] != 14?_equipment = resp['Data']['Request']['Equipments'][0]:_equipment = {};
+        if (resp['Data']['Request']['Equipments'] != null) {
+          setState(() {
+            _equipments = resp['Data']['Request']['Equipments'];
+          });
+        }
         _dispatch = resp['Data'];
       });
     }
@@ -781,7 +784,7 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
           body: new Padding(
             padding: EdgeInsets.symmetric(horizontal: 8.0),
             child: new Column(
-              children: <Widget>[
+              children: _equipments.map((_equipment) => [
                 BuildWidget.buildRow('系统编号', _equipment['OID']??''),
                 BuildWidget.buildRow('名称', _equipment['Name']??''),
                 BuildWidget.buildRow('型号', _equipment['EquipmentCode']??''),
@@ -792,7 +795,11 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
                 BuildWidget.buildRow('安装地点', _equipment['InstalSite']??''),
                 BuildWidget.buildRow('维保状态', _equipment['WarrantyStatus']??''),
                 BuildWidget.buildRow('服务范围', _equipment['ContractScope']['Name']??''),
-              ],
+                new Divider(),
+              ]).toList().reduce((_listA, _listB) {
+                _listA.addAll(_listB);
+                return _listA;
+              }),
             ),
           ),
           isExpanded: _isExpandedBasic,

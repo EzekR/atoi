@@ -26,7 +26,7 @@ class _ManagerAuditVoucherPageState extends State<ManagerAuditVoucherPage> {
   var _isExpandedDetail = false;
   var _isExpandedAssign = false;
   Map<String, dynamic> _dispatch = {};
-  var _equipment = {};
+  List _equipments = [];
   TextEditingController _comment = new TextEditingController();
   TextEditingController _follow = new TextEditingController();
   ConstantsModel model;
@@ -239,7 +239,7 @@ class _ManagerAuditVoucherPageState extends State<ManagerAuditVoucherPage> {
       });
       if (resp['Data']['Request']['Equipments'] != null) {
         setState(() {
-          _equipment = resp['Data']['Request']['Equipments'][0];
+          _equipments = resp['Data']['Request']['Equipments'];
         });
       }
     }
@@ -378,7 +378,7 @@ class _ManagerAuditVoucherPageState extends State<ManagerAuditVoucherPage> {
           body: new Padding(
             padding: EdgeInsets.symmetric(horizontal: 8.0),
             child: new Column(
-              children: <Widget>[
+              children: _equipments.map((_equipment) => [
                 BuildWidget.buildRow('系统编号', _equipment['OID']??''),
                 BuildWidget.buildRow('名称', _equipment['Name']??''),
                 BuildWidget.buildRow('型号', _equipment['EquipmentCode']??''),
@@ -389,7 +389,11 @@ class _ManagerAuditVoucherPageState extends State<ManagerAuditVoucherPage> {
                 BuildWidget.buildRow('资产等级', _equipment['AssetLevel']['Name']??''),
                 BuildWidget.buildRow('维保状态', _equipment['WarrantyStatus']??''),
                 BuildWidget.buildRow('服务范围', _equipment['ContractScope']['Name']??''),
-              ],
+                new Divider(),
+              ]).toList().reduce((_listA, _listB) {
+                _listA.addAll(_listB);
+                return _listA;
+              }),
             ),
           ),
           isExpanded: _isExpandedBasic,

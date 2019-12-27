@@ -96,9 +96,7 @@ class _ManagerToAuditPageState extends State<ManagerToAuditPage> {
   Widget build(BuildContext context) {
     // TODO: implement build
 
-    Card buildCardItem(Map dispatch, int dispatchId, int reportId,  String dispatchOID, String date, String deviceNo, String deviceName, String dispatchType, String urgency, String requestOID, Map journalStatus, Map reportStatus) {
-      var _dataVal = DateTime.parse(date);
-      var _format = '${_dataVal.year}-${_dataVal.month}-${_dataVal.day}';
+    Card buildCardItem(Map dispatch) {
       return new Card(
         child: Column(
           mainAxisSize: MainAxisSize.max,
@@ -122,7 +120,7 @@ class _ManagerToAuditPageState extends State<ManagerToAuditPage> {
                     ),
                   ),
                   Text(
-                    dispatchOID,
+                    dispatch['OID'],
                     style: new TextStyle(
                         fontSize: 18.0,
                         color: Colors.red,
@@ -133,7 +131,7 @@ class _ManagerToAuditPageState extends State<ManagerToAuditPage> {
                 ],
               ),
               subtitle: Text(
-                "派工时间：$_format",
+                "派工时间：${AppConstants.TimeForm(dispatch['ScheduleDate'].toString(), 'hh:mm')}",
                 style: new TextStyle(
                     color: Theme.of(context).accentColor
                 ),
@@ -146,11 +144,11 @@ class _ManagerToAuditPageState extends State<ManagerToAuditPage> {
                 mainAxisAlignment: MainAxisAlignment.start,
                 mainAxisSize: MainAxisSize.max,
                 children: <Widget>[
-                  deviceName==''?new Container():BuildWidget.buildCardRow('设备编号', deviceName),
-                  deviceNo==''?new Container():BuildWidget.buildCardRow('设备名称', deviceNo),
-                  BuildWidget.buildCardRow('派工类型', dispatchType),
-                  BuildWidget.buildCardRow('紧急程度', urgency),
-                  BuildWidget.buildCardRow('请求编号', requestOID),
+                  dispatch['Request']['Equipments'].length>0?BuildWidget.buildCardRow('设备编号', dispatch['Request']['EquipmentOID']):new Container(),
+                  dispatch['Request']['Equipments'].length>0?BuildWidget.buildCardRow('设备名称', dispatch['Request']['EquipmentName']):new Container(),
+                  BuildWidget.buildCardRow('派工类型', dispatch['RequestType']['Name']),
+                  BuildWidget.buildCardRow('紧急程度', dispatch['Urgency']['Name']),
+                  BuildWidget.buildCardRow('请求编号', dispatch['Request']['OID']),
                   BuildWidget.buildCardRow('请求状态', dispatch['Status']['Name']),
                   new Row(
                     mainAxisAlignment: MainAxisAlignment.end,
@@ -158,21 +156,21 @@ class _ManagerToAuditPageState extends State<ManagerToAuditPage> {
                     children: <Widget>[
                       new RaisedButton(
                         onPressed: (){
-                          journalStatus['ID']==0||journalStatus['ID']==1?null:
+                          dispatch['DispatchJournal']['Status']['ID']==0||dispatch['DispatchJournal']['Status']['ID']==1?null:
                           Navigator.of(context).push(
                               new MaterialPageRoute(builder: (_) {
                                 return new ManagerAuditVoucherPage(
-                                  journalId: dispatchId, request: dispatch, status: dispatch['DispatchJournal']['Status']['ID'],);
+                                  journalId: dispatch['DispatchJournal']['ID'], request: dispatch, status: dispatch['DispatchJournal']['Status']['ID'],);
                               })).then((result) => refresh());
                         },
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(6),
                         ),
-                        color: iconColor(journalStatus['ID']),
+                        color: iconColor(dispatch['DispatchJournal']['Status']['ID']),
                         child: new Row(
                           children: <Widget>[
                             new Icon(
-                              journalStatus['ID'] == 3?Icons.check:Icons.fingerprint,
+                              dispatch['DispatchJournal']['Status']['ID'] == 3?Icons.check:Icons.fingerprint,
                               color: Colors.white,
                             ),
                             new Text(
@@ -189,18 +187,18 @@ class _ManagerToAuditPageState extends State<ManagerToAuditPage> {
                       ),
                       new RaisedButton(
                         onPressed: (){
-                          reportStatus['ID']==0||reportStatus['ID']==1?null:Navigator.of(context).push(new MaterialPageRoute(builder: (_){
-                            return new ManagerAuditReportPage(reportId: reportId, request: dispatch, status: dispatch['DispatchReport']['Status']['ID'],);
+                          dispatch['DispatchReport']['Status']['ID']==0||dispatch['DispatchReport']['Status']['ID']==1?null:Navigator.of(context).push(new MaterialPageRoute(builder: (_){
+                            return new ManagerAuditReportPage(reportId: dispatch['DispatchReport']['ID'], request: dispatch, status: dispatch['DispatchReport']['Status']['ID'],);
                           })).then((result) => refresh());
                         },
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(6),
                         ),
-                        color: iconColor(reportStatus['ID']),
+                        color: iconColor(dispatch['DispatchReport']['Status']['ID']),
                         child: new Row(
                           children: <Widget>[
                             new Icon(
-                              reportStatus['ID'] == 3?Icons.check:Icons.work,
+                              dispatch['DispatchReport']['Status']['ID'] == 3?Icons.check:Icons.work,
                               color: Colors.white,
                             ),
                             new Text(
@@ -231,7 +229,7 @@ class _ManagerToAuditPageState extends State<ManagerToAuditPage> {
               controller: _scrollController,
               itemBuilder: (context, i) {
                 if (i != model.dispatches.length) {
-                  return buildCardItem(model.dispatches[i], model.dispatches[i]['DispatchJournal']['ID'], model.dispatches[i]['DispatchReport']['ID'], model.dispatches[i]['OID'], model.dispatches[i]['ScheduleDate'], model.dispatches[i]['Request']['Equipments'].length>0?model.dispatches[i]['Request']['Equipments'][0]['Name']:'', model.dispatches[i]['Request']['Equipments'].length>0?model.dispatches[i]['Request']['Equipments'][0]['OID']:'', model.dispatches[i]['RequestType']['Name'], model.dispatches[i]['Urgency']['Name'], model.dispatches[i]['Request']['OID'], model.dispatches[i]['DispatchJournal']['Status'], model.dispatches[i]['DispatchReport']['Status']);
+                  return buildCardItem(model.dispatches[i]);
                 } else {
                   return new Row(
                     mainAxisAlignment: MainAxisAlignment.center,

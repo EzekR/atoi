@@ -695,7 +695,7 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
           BuildWidget.buildRow('安装地点', _equipment['InstalSite']??''),
           BuildWidget.buildRow('维保状态', _equipment['WarrantyStatus']??''),
           BuildWidget.buildRow('服务范围', _equipment['ContractScope']['Name']??''),
-          new Padding(padding: EdgeInsets.symmetric(vertical: 8.0))
+          new Divider(),
         ];
         _equipList.addAll(_list);
       }
