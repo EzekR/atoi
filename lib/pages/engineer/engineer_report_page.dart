@@ -731,15 +731,12 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
 
   List<Widget> buildReportList() {
     List<Widget> _list = [];
-    var _date = DateTime.parse(_dispatch['StartDate']);
-    var _formatDate =
-        '${_date.year}-${_date.month}-${_date.day} ${_date.hour}:${_date.minute}';
     _list.addAll([
       _reportOID != null
           ? BuildWidget.buildRow('作业报告编号', _reportOID)
           : new Container(),
-      BuildWidget.buildRow('开始时间', _formatDate),
       _edit?BuildWidget.buildRadioVert('作业报告类型', _reportType, _currentType, changeType):BuildWidget.buildRow('作业报告类型', _currentType),
+      BuildWidget.buildRow('开始时间', AppConstants.TimeForm(_dispatch['StartDate'].toString(), 'hh:mm')),
       _fujiComments==""?new Container():BuildWidget.buildRow('审批备注', _fujiComments),
       new Divider(),
     ]);

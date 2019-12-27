@@ -441,6 +441,16 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
       );
       return;
     }
+    if ((_dispatch['RequestType']['ID'] == 2 && _currentProvider != '管理方') || (_dispatch['RequestType']['ID'] == 3)) {
+      if (imageAttach.isEmpty) {
+        showDialog(context: context,
+            builder: (context) => CupertinoAlertDialog(
+              title: new Text('附件不可为空'),
+            )
+        );
+        return;
+      }
+    }
     final SharedPreferences prefs = await _prefs;
     var UserId = await prefs.getInt('userID');
     var _body = _report;
@@ -613,7 +623,7 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
     _list.addAll([
       BuildWidget.buildRow('作业报告编号', _report['OID']),
       BuildWidget.buildRow('作业报告类型', _report['Type']['Name']),
-      BuildWidget.buildRow('开始时间', formatTime(_report['Dispatch']['StartDate'].toString())),
+      BuildWidget.buildRow('开始时间', AppConstants.TimeForm(_report['Dispatch']['StartDate'].toString(), 'hh:mm')),
       widget.status==3?BuildWidget.buildRow('审批备注', _report['FujiComments']):new Container(),
       new Divider(),
     ]);
@@ -815,7 +825,7 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
               BuildWidget.buildRow('派工类型', widget.request['RequestType']['Name']),
               BuildWidget.buildRow('机器状态', widget.request['MachineStatus']['Name']),
               BuildWidget.buildRow('紧急程度', widget.request['Urgency']['Name']),
-              BuildWidget.buildRow('出发时间', formatTime(_dispatch['ScheduleDate'].toString())),
+              BuildWidget.buildRow('出发时间', AppConstants.TimeForm(_dispatch['ScheduleDate'].toString(), 'hh:mm')),
               BuildWidget.buildRow('工程师姓名', _dispatch['Engineer']['Name']),
               BuildWidget.buildRow('主管备注', _dispatch['LeaderComments']),
             ],

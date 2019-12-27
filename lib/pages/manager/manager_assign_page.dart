@@ -689,10 +689,10 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
           BuildWidget.buildRow('名称', _equipment['Name']??''),
           BuildWidget.buildRow('型号', _equipment['EquipmentCode']??''),
           BuildWidget.buildRow('序列号', _equipment['SerialCode']??''),
-          BuildWidget.buildRow('使用科室', _equipment['Department']['Name']??''),
-          BuildWidget.buildRow('安装地点', _equipment['InstalSite']??''),
           BuildWidget.buildRow('设备厂商', _equipment['Manufacturer']['Name']??''),
           BuildWidget.buildRow('资产等级', _equipment['AssetLevel']['Name']??''),
+          BuildWidget.buildRow('使用科室', _equipment['Department']['Name']??''),
+          BuildWidget.buildRow('安装地点', _equipment['InstalSite']??''),
           BuildWidget.buildRow('维保状态', _equipment['WarrantyStatus']??''),
           BuildWidget.buildRow('服务范围', _equipment['ContractScope']['Name']??''),
           new Padding(padding: EdgeInsets.symmetric(vertical: 8.0))
@@ -1051,8 +1051,8 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
                             //model.getRequests();
                             showDialog(context: context,
                               builder: (context) => CupertinoAlertDialog(
-                                title: new Text('是否终止请求？'),
-                                actions: <Widget>[
+                                title: new Text(_request['HasOpenDispatch']?'有未完成的派工单,无法终止':'是否终止请求？'),
+                                actions: _request['HasOpenDispatch']?[]:[
                                   new Row(
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     children: <Widget>[

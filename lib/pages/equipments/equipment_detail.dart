@@ -472,6 +472,10 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
     }
   }
 
+  String displayDate(String date) {
+    return date=='YY-MM-DD'?'':date;
+  }
+
   Future<Null> deleteFile(int fileId) async {
     var resp = await HttpRequest.request(
       '/Equipment/DeleteEquipmentFile',
@@ -1168,7 +1172,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
                     ),
                   ],
                 ),
-              ):BuildWidget.buildRow('注册证有效日期', '$validationStartDate\n$validationEndDate'),
+              ):BuildWidget.buildRow('注册证有效日期', '${displayDate(validationStartDate)}\n${displayDate(validationEndDate)}'),
             ],
           ),
         ),
@@ -1246,7 +1250,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
                     ),
                   ],
                 ),
-              ):BuildWidget.buildRow('采购日期', purchaseDate),
+              ):BuildWidget.buildRow('采购日期', displayDate(purchaseDate)),
               widget.editable?new Padding(
                 padding: EdgeInsets.symmetric(vertical: 5.0),
                 child: new Row(
@@ -1431,7 +1435,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
                     ),
                   ],
                 ),
-              ):BuildWidget.buildRow('安装日期', '$installStartDate\n$installEndDate'),
+              ):BuildWidget.buildRow('安装日期', '${displayDate(installStartDate)}\n${displayDate(installEndDate)}'),
               widget.editable?BuildWidget.buildRadio('验收状态', checkStatus, currentCheck, changeCheck):BuildWidget.buildRow('验收状态', currentCheck),
               widget.editable?new Padding(
                 padding: EdgeInsets.symmetric(vertical: 5.0),
@@ -1485,7 +1489,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
                     ),
                   ],
                 ),
-              ):BuildWidget.buildRow('验收日期', checkDate),
+              ):BuildWidget.buildRow('验收日期', displayDate(checkDate)),
               widget.editable?BuildWidget.buildDropdown('使用状态', currentStatus, dropdownStatus, changeStatus):BuildWidget.buildRow('使用状态', currentStatus),
               BuildWidget.buildRow('维保状态', warrantyStatus),
               widget.editable?BuildWidget.buildDropdown('设备状态', currentMachine, dropdownMachine, changeMachine):BuildWidget.buildRow('设备状态', currentMachine),
@@ -1543,7 +1547,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
                   ],
                 ),
               ):new Container(),
-              !widget.editable&&currentMachine=='已报废'?BuildWidget.buildRow('报废时间', scrapDate):new Container(),
+              !widget.editable&&currentMachine=='已报废'?BuildWidget.buildRow('报废时间', displayDate(scrapDate)):new Container(),
               widget.editable?BuildWidget.buildDropdown('强检标记', currentMandatory, dropdownMandatory, changeMandatory):BuildWidget.buildRow('强检标记', currentMandatory),
               widget.editable?new Padding(
                 padding: EdgeInsets.symmetric(vertical: 5.0),
@@ -1597,7 +1601,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
                     ),
                   ],
                 ),
-              ):BuildWidget.buildRow('强检时间', mandatoryDate),
+              ):BuildWidget.buildRow('强检时间', displayDate(mandatoryDate)),
               widget.editable?BuildWidget.buildRadio('召回标记', recall, currentRecall, changeRecall):BuildWidget.buildRow('召回标记', currentRecall),
               widget.editable?new Padding(
                 padding: EdgeInsets.symmetric(vertical: 5.0),
@@ -1651,22 +1655,22 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
                     ),
                   ],
                 ),
-              ):BuildWidget.buildRow('召回时间', recallDate),
-              widget.editable?BuildWidget.buildDropdownWithInput('巡检周期', patrolPeriod, currentPatrolPeriod, dropdownPatrolPeriod, changePatrolPeriod, inputType: TextInputType.number):BuildWidget.buildRow('巡检周期', '${patrolPeriod.text} $currentPatrolPeriod'),
+              ):BuildWidget.buildRow('召回时间', displayDate(recallDate)),
+              widget.editable?BuildWidget.buildDropdownWithInput('巡检周期', patrolPeriod, currentPatrolPeriod, dropdownPatrolPeriod, changePatrolPeriod, inputType: TextInputType.number):BuildWidget.buildRow('巡检周期', currentPatrolPeriod=='无'?'无巡检':'${patrolPeriod.text} $currentPatrolPeriod'),
               widget.editable?BuildWidget.buildDropdownWithInput(
                   '保养周期',
                   maintainPeriod,
                   currentMaintainPeriod,
                   dropdownMandatoryPeriod,
                   changeMandatoryPeriod,
-                  inputType: TextInputType.number):BuildWidget.buildRow('保养周期', '${maintainPeriod.text} $currentMaintainPeriod'),
+                  inputType: TextInputType.number):BuildWidget.buildRow('保养周期', currentMaintainPeriod=='无'?'无保养':'${maintainPeriod.text} $currentMaintainPeriod'),
               widget.editable?BuildWidget.buildDropdownWithInput(
                   '校正周期',
                   correctionPeriod,
                   currentCorrectionPeriod,
                   dropdownCorrectionPeriod,
                   changeCorrectionPeriod,
-                  inputType: TextInputType.number):BuildWidget.buildRow('校正周期', '${correctionPeriod.text} $currentCorrectionPeriod'),
+                  inputType: TextInputType.number):BuildWidget.buildRow('校正周期', currentCorrectionPeriod=='无'?'无校正':'${correctionPeriod.text} $currentCorrectionPeriod'),
             ],
           ),
         ),

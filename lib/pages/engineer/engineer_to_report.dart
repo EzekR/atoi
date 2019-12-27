@@ -124,8 +124,6 @@ class _EngineerToReportState extends State<EngineerToReport> {
     // TODO: implement build
 
     Card buildCardItem(Map task, int dispatchId, int journalId, int reportId, String OID, String scheduleDate, String createDate, int responseTime, String deviceName, String deviceNo, String location, String requestType, String urgency, String remark) {
-      var _dateParse = DateTime.parse(scheduleDate);
-      var _startTime = '${_dateParse.year}-${_dateParse.month}-${_dateParse.day} ${_dateParse.hour}:${_dateParse.minute}';
       return new Card(
         child: Column(
           mainAxisSize: MainAxisSize.max,
@@ -145,7 +143,7 @@ class _EngineerToReportState extends State<EngineerToReport> {
                 ),
               ),
               subtitle: Text(
-                "开始时间：$_startTime",
+                "开始时间：${AppConstants.TimeForm(scheduleDate, 'hh:mm')}",
                 style: new TextStyle(
                     color: Theme.of(context).accentColor
                 ),

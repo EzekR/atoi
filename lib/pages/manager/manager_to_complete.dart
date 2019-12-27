@@ -185,8 +185,6 @@ class _ManagerToCompleteState extends State<ManagerToComplete> {
     // TODO: implement build
 
     Card buildCardItem(Map task, int requestId, String taskNo, String time, String equipmentName, String equipmentNo, String departmentName, String requestPerson, String requestType, String status, String detail) {
-      var _dataVal = DateTime.parse(time);
-      var _format = '${_dataVal.year}-${_dataVal.month}-${_dataVal.day} ${_dataVal.hour}:${_dataVal.minute}:${_dataVal.second}';
       return new Card(
         child: Column(
           mainAxisSize: MainAxisSize.max,
@@ -221,7 +219,7 @@ class _ManagerToCompleteState extends State<ManagerToComplete> {
                 ],
               ),
               subtitle: Text(
-                "请求时间：$_format",
+                "请求时间：${AppConstants.TimeForm(time, 'hh:mm')}",
                 style: new TextStyle(
                     color: Theme.of(context).accentColor
                 ),
@@ -257,13 +255,9 @@ class _ManagerToCompleteState extends State<ManagerToComplete> {
                                       width: 300.0,
                                       height: 600.0,
                                       child: new Stepper(
-                                        currentStep: 0,
+                                        currentStep: _dispatches.length-1,
                                         controlsBuilder: (BuildContext context, {VoidCallback onStepContinue, VoidCallback onStepCancel}) {
-                                          return Row(
-                                            children: <Widget>[
-                                            new Container()
-                                            ],
-                                          );
+                                          return new Container();
                                         },
                                         steps: buildStep(_dispatches),
                                       ),

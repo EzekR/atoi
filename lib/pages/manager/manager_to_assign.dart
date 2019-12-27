@@ -139,8 +139,6 @@ class _ManagerToAssignState extends State<ManagerToAssign> {
     // TODO: implement build
 
     Card buildCardItem(Map task, int requestId, String taskNo, String time, String equipmentNo, String equipmentName, String departmentName, String requestPerson, String requestType, String status, String detail, List _equipments) {
-      var _dataVal = DateTime.parse(time);
-      var _format = '${_dataVal.year}-${_dataVal.month}-${_dataVal.day} ${_dataVal.hour}:${_dataVal.minute}:${_dataVal.second}';
       return new Card(
         child: Column(
           mainAxisSize: MainAxisSize.max,
@@ -175,7 +173,7 @@ class _ManagerToAssignState extends State<ManagerToAssign> {
                 ],
               ),
               subtitle: Text(
-                "请求时间：$_format",
+                "请求时间：${AppConstants.TimeForm(time, 'hh:mm')}",
                 style: new TextStyle(
                   color: Theme.of(context).accentColor
                 ),

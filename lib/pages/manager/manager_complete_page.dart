@@ -627,8 +627,8 @@ class _ManagerCompletePageState extends State<ManagerCompletePage> {
               BuildWidget.buildRow('服务结果', _journal['ResultStatus']['Name']),
               _journal['ResultStatus']['Name']=='待跟进'?BuildWidget.buildRow('待跟进问题', _journal['FollowProblem']):new Container(),
               BuildWidget.buildRow('建议留言', _journal['Advice']),
-              BuildWidget.buildRow('建议留言', _journal['UserName']),
-              BuildWidget.buildRow('建议留言', _journal['UserMobile']),
+              BuildWidget.buildRow('客户姓名', _journal['UserName']),
+              BuildWidget.buildRow('客户电话', _journal['UserMobile']),
               BuildWidget.buildRow('客户签名', ''),
               new Row(
                 mainAxisAlignment: MainAxisAlignment.start,

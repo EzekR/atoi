@@ -207,7 +207,7 @@ class AppConstants {
     var _date = DateTime.tryParse(time);
     if (_date != null) {
       if (format == 'yyyy-mm-dd') {
-        return '${_date.year}-${_date.month}-${_date.day}';
+        return formatDate(_date, [yyyy,'-',mm,'-',dd]);
       } else {
         return formatDate(_date, [yyyy,'-',mm,'-',dd,' ',HH,':',nn]);
       }
