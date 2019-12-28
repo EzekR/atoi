@@ -8,6 +8,7 @@ import 'package:atoi/models/models.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:atoi/widgets/build_widget.dart';
 import 'package:atoi/utils/constants.dart';
+import 'package:flutter/cupertino.dart';
 
 class ManagerToComplete extends StatefulWidget {
   @override
@@ -20,11 +21,31 @@ class _ManagerToCompleteState extends State<ManagerToComplete> {
   List<dynamic> _tasks = [];
   Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
   bool _loading = false;
+  bool _noMore = false;
+  ScrollController _scrollController = new ScrollController();
 
   void initState() {
     //getData();
     refresh();
     super.initState();
+    ManagerModel model = MainModel.of(context);
+    _scrollController.addListener(() {
+      if (_scrollController.position.pixels ==
+          _scrollController.position.maxScrollExtent) {
+        var _length = model.todos.length;
+        model.getMoreTodos().then((result) {
+          if (model.todos.length == _length) {
+            setState(() {
+              _noMore = true;
+            });
+          } else {
+            setState(() {
+              _noMore = false;
+            });
+          }
+        });
+      }
+    });
   }
 
   Future<Null> getData() async {
@@ -245,14 +266,6 @@ class _ManagerToCompleteState extends State<ManagerToComplete> {
                                         controlsBuilder: (BuildContext context, {VoidCallback onStepContinue, VoidCallback onStepCancel}) {
                                           return Row(
                                             children: <Widget>[
-//                                              FlatButton(
-//                                                onPressed: onStepContinue,
-//                                                child: const Text('CONTINUE'),
-//                                              ),
-//                                              FlatButton(
-//                                                onPressed: onStepCancel,
-//                                                child: const Text('CANCEL'),
-//                                              ),
                                             new Container()
                                             ],
                                           );
@@ -268,7 +281,7 @@ class _ManagerToCompleteState extends State<ManagerToComplete> {
                           }
                         },
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(24),
+                          borderRadius: BorderRadius.circular(6),
                         ),
                         color: AppConstants.AppColors['btn_success'],
                         child: new Row(
@@ -276,11 +289,13 @@ class _ManagerToCompleteState extends State<ManagerToComplete> {
                             new Icon(
                               Icons.history,
                               color: Colors.white,
+                              size: 14.0,
                             ),
                             new Text(
                               '历史派工',
                               style: new TextStyle(
-                                  color: Colors.white
+                                  color: Colors.white,
+                                  fontSize: 12.0
                               ),
                             )
                           ],
@@ -294,7 +309,7 @@ class _ManagerToCompleteState extends State<ManagerToComplete> {
                           })).then((result) => refresh());
                         },
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(24),
+                          borderRadius: BorderRadius.circular(6),
                         ),
                         color: AppConstants.AppColors['btn_success'],
                         child: new Row(
@@ -302,11 +317,13 @@ class _ManagerToCompleteState extends State<ManagerToComplete> {
                             new Icon(
                               Icons.event_note,
                               color: Colors.white,
+                              size: 14.0,
                             ),
                             new Text(
                               '查看详情',
                               style: new TextStyle(
-                                  color: Colors.white
+                                  color: Colors.white,
+                                  fontSize: 12.0
                               ),
                             )
                           ],
@@ -363,7 +380,7 @@ class _ManagerToCompleteState extends State<ManagerToComplete> {
                           }
                         },
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(24),
+                          borderRadius: BorderRadius.circular(6),
                         ),
                         color: AppConstants.AppColors['btn_cancel'],
                         child: new Row(
@@ -371,11 +388,13 @@ class _ManagerToCompleteState extends State<ManagerToComplete> {
                             new Icon(
                               Icons.cancel,
                               color: Colors.white,
+                              size: 14.0,
                             ),
                             new Text(
                               task['Status']['ID']>1?'取消派工':'终止请求',
                               style: new TextStyle(
-                                  color: Colors.white
+                                  color: Colors.white,
+                                  fontSize: 12.0
                               ),
                             )
                           ],
@@ -396,8 +415,20 @@ class _ManagerToCompleteState extends State<ManagerToComplete> {
           return new RefreshIndicator(
               child: model.todos.length == 0?ListView(padding: const EdgeInsets.symmetric(vertical: 150.0), children: <Widget>[_loading?SpinKitRotatingPlain(color: Colors.blue):new Center(child: new Text('没有待派工请求'),)],):ListView.builder(
                   padding: const EdgeInsets.all(2.0),
-                  itemCount: model.todos.length,
-                  itemBuilder: (context, i) => buildCardItem(model.todos[i], model.todos[i]['ID'], model.todos[i]['OID'], model.todos[i]['RequestDate'], model.todos[i]['EquipmentOID'], model.todos[i]['EquipmentName'], model.todos[i]['DepartmentName'], model.todos[i]['RequestUser']['Name'], model.todos[i]['RequestType']['Name'], model.todos[i]['Status']['Name'], model.todos[i]['FaultDesc'])
+                  itemCount: model.todos.length>9?model.todos.length+1:model.todos.length,
+                  controller: _scrollController,
+                  itemBuilder: (context, i) {
+                    if (i !=  model.todos.length) {
+                      return buildCardItem(model.todos[i], model.todos[i]['ID'], model.todos[i]['OID'], model.todos[i]['RequestDate'], model.todos[i]['EquipmentOID'], model.todos[i]['EquipmentName'], model.todos[i]['DepartmentName'], model.todos[i]['RequestUser']['Name'], model.todos[i]['RequestType']['Name'], model.todos[i]['Status']['Name'], model.todos[i]['FaultDesc']);
+                    } else {
+                      return new Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: <Widget>[
+                          _noMore?new Center(child: new Text('没有更多未完成请求'),):new SpinKitChasingDots(color: Colors.blue,)
+                        ],
+                      );
+                    }
+                  }
               ),
               onRefresh: model.getTodos
           );

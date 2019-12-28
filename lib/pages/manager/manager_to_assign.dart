@@ -8,6 +8,8 @@ import 'package:atoi/models/models.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:atoi/widgets/build_widget.dart';
 import 'package:atoi/utils/constants.dart';
+import 'dart:io';
+import 'package:flutter/cupertino.dart';
 
 class ManagerToAssign extends StatefulWidget {
   @override
@@ -21,11 +23,33 @@ class _ManagerToAssignState extends State<ManagerToAssign> {
   Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
 
   bool _loading = false;
+  bool _noMore = false;
+
+  ScrollController _scrollController = ScrollController();
 
   void initState() {
     //getData();
     refresh();
     super.initState();
+
+    ManagerModel model = MainModel.of(context);
+    _scrollController.addListener(() {
+      if (_scrollController.position.pixels ==
+          _scrollController.position.maxScrollExtent) {
+        var _length = model.requests.length;
+        model.getMoreRequests().then((result) {
+        });
+        if (model.requests.length == _length) {
+          setState(() {
+            _noMore = true;
+          });
+        } else {
+          setState(() {
+            _noMore = false;
+          });
+        }
+      }
+    });
   }
 
   Future<Null> getData() async {
@@ -182,13 +206,13 @@ class _ManagerToAssignState extends State<ManagerToAssign> {
                           })).then((result) => refresh());
                         },
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(24),
+                          borderRadius: BorderRadius.circular(6),
                         ),
                         color: new Color(0xff2E94B9),
                         child: new Row(
                           children: <Widget>[
                             new Icon(
-                              Icons.event_note,
+                              Icons.assignment_ind,
                               color: Colors.white,
                             ),
                             new Text(
@@ -242,13 +266,13 @@ class _ManagerToAssignState extends State<ManagerToAssign> {
                           });
                         },
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(24),
+                          borderRadius: BorderRadius.circular(6),
                         ),
                         color: new Color(0xff2E94B9),
                         child: new Row(
                           children: <Widget>[
                             new Icon(
-                              Icons.event_note,
+                              Icons.calendar_today,
                               color: Colors.white,
                             ),
                             new Text(
@@ -260,50 +284,6 @@ class _ManagerToAssignState extends State<ManagerToAssign> {
                           ],
                         ),
                       ),
-                      //new RaisedButton(
-                      //  onPressed: (){
-                      //    showDialog(context: context,
-                      //        builder: (context) => AlertDialog(
-                      //          title: new Text('是否终止请求？'),
-                      //          actions: <Widget>[
-                      //            RaisedButton(
-                      //              child: const Text('确认', style: TextStyle(color: Colors.white),),
-                      //              color: AppConstants.AppColors['btn_cancel'],
-                      //              onPressed: () {
-                      //                _cancelRequest(requestId);
-                      //                Navigator.of(context).pop();
-                      //              },
-                      //            ),
-                      //            RaisedButton(
-                      //              child: const Text('取消', style: TextStyle(color: Colors.white),),
-                      //              color: AppConstants.AppColors['btn_main'],
-                      //              onPressed: () {
-                      //                Navigator.of(context).pop();
-                      //              },
-                      //            ),
-                      //          ],
-                      //        )
-                      //    );
-                      //  },
-                      //  shape: RoundedRectangleBorder(
-                      //    borderRadius: BorderRadius.circular(24),
-                      //  ),
-                      //  color: new Color(0xffD25565),
-                      //  child: new Row(
-                      //    children: <Widget>[
-                      //      new Icon(
-                      //        Icons.cancel,
-                      //        color: Colors.white,
-                      //      ),
-                      //      new Text(
-                      //        '取消',
-                      //        style: new TextStyle(
-                      //            color: Colors.white
-                      //        ),
-                      //      )
-                      //    ],
-                      //  ),
-                      //)
                     ],
                   )
                 ],
@@ -319,8 +299,20 @@ class _ManagerToAssignState extends State<ManagerToAssign> {
         return new RefreshIndicator(
             child: model.requests.length == 0?ListView(padding: const EdgeInsets.symmetric(vertical: 150.0), children: <Widget>[new Center(child: _loading?SpinKitRotatingPlain(color: Colors.blue):new Text('没有待派工请求'),)],):ListView.builder(
                 padding: const EdgeInsets.all(2.0),
-                itemCount: model.requests.length,
-                itemBuilder: (context, i) => buildCardItem(model.requests[i], model.requests[i]['ID'], model.requests[i]['OID'], model.requests[i]['RequestDate'], model.requests[i]['EquipmentOID'], model.requests[i]['EquipmentName'], model.requests[i]['DepartmentName'], model.requests[i]['RequestUser']['Name'], model.requests[i]['RequestType']['Name'], model.requests[i]['Status']['Name'], model.requests[i]['FaultDesc'], model.requests[i]['Equipments'])
+                itemCount: model.requests.length>9?model.requests.length+1:model.requests.length,
+                controller: _scrollController,
+                itemBuilder: (context, i) {
+                  if (i != model.requests.length) {
+                     return buildCardItem(model.requests[i], model.requests[i]['ID'], model.requests[i]['OID'], model.requests[i]['RequestDate'], model.requests[i]['EquipmentOID'], model.requests[i]['EquipmentName'], model.requests[i]['DepartmentName'], model.requests[i]['RequestUser']['Name'], model.requests[i]['RequestType']['Name'], model.requests[i]['Status']['Name'], model.requests[i]['FaultDesc'], model.requests[i]['Equipments']);
+                  } else {
+                    return new Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: <Widget>[
+                        _noMore?new Center(child: new Text('没有更多任务需要派工'),):new SpinKitChasingDots(color: Colors.blue,)
+                      ],
+                    );
+                  }
+                }
             ),
             onRefresh: model.getRequests
         );

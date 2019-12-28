@@ -9,6 +9,9 @@ import 'package:flutter/cupertino.dart';
 import 'package:connectivity/connectivity.dart';
 import 'dart:async';
 import 'dart:convert';
+//import 'package:flutter_jpush/flutter_jpush.dart';
+import 'package:jpush_flutter/jpush_flutter.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 class LoginPage extends StatefulWidget {
   static String tag = 'login-page';
@@ -30,7 +33,9 @@ class _LoginPageState extends State<LoginPage> {
   Timer _timer;
   int _countdownTime = 0;
   bool _validPhone = false;
-  
+  String _regId = '';
+  final JPush jpush = new JPush();
+
   Future<Null> isLogin() async {
     var _prefs = await prefs;
     var _isLogin = await _prefs.getBool('isLogin');
@@ -52,11 +57,96 @@ class _LoginPageState extends State<LoginPage> {
     }
   }
 
+  Future<Null> getPermissions() async {
+    PermissionStatus permission = await PermissionHandler().checkPermissionStatus(PermissionGroup.contacts);
+    print(permission);
+  }
+
+  void setupJPush() async {
+    jpush.getRegistrationID().then((rid) {
+    });
+
+    jpush.setup(
+      appKey: "a1703c14b186a68a66ef86c1",
+      channel: "theChannel",
+      production: false,
+      debug: true,
+    );
+    jpush.applyPushAuthority(new NotificationSettingsIOS(
+        sound: true,
+        alert: true,
+        badge: true));
+
+    jpush.addEventHandler(
+      onReceiveNotification: (Map<String, dynamic> message) async {
+        print("flutter onReceiveNotification: $message");
+        setState(() {
+        });
+      },
+      onOpenNotification: (Map<String, dynamic> message) async {
+        print("flutter onOpenNotification: $message");
+        setState(() {
+        });
+      },
+      onReceiveMessage: (Map<String, dynamic> message) async {
+        print("flutter onReceiveMessage: $message");
+        setState(() {
+        });
+      },
+    );
+  }
+
+  //void _startupJpush() async {
+  //  print("初始化jpush");
+  //  await FlutterJPush.startup();
+  //  print("初始化jpush成功");
+
+  //  FlutterJPush.getRegistrationID().then((rid) {
+  //    print("get regid： ${rid}");
+  //    setState(() {
+  //      _regId = rid;
+  //    });
+  //  });
+
+  //  FlutterJPush.addnetworkDidLoginListener((String registrationId) {
+  //    setState(() {
+  //      /// 用于推送
+  //      print("收到设备号:$registrationId");
+  //      //this.registrationId = registrationId;
+  //    });
+  //  });
+
+  //  FlutterJPush.addReceiveNotificationListener((JPushNotification notification) {
+  //    print("收到推送提醒: $notification");
+  //    setState(() {
+  //      /// 收到推送
+  //      //notificationList.add(notification);
+  //    });
+  //  });
+
+  //  FlutterJPush.addReceiveCustomMsgListener((JPushMessage msg) {
+  //    setState(() {
+  //      print("收到推送消息提醒: $msg");
+  //      /// 打开了推送提醒
+  //      //notificationList.add(msg);
+  //    });
+  //  });
+  //}
+
+  Future<Null> permissionCheck() async {
+    var permission = await PermissionHandler().checkPermissionStatus(PermissionGroup.camera);
+    print('permission:$permission');
+    if (permission == PermissionStatus.unknown) {
+      var camera = await PermissionHandler().requestPermissions([PermissionGroup.camera]);
+      print('camera:$camera');
+    }
+  }
+
   Future<Null> isConnected() async {
     var connectivityResult = await (Connectivity().checkConnectivity());
     if (connectivityResult == ConnectivityResult.none) {
       showDialog(context: context,
-        builder: (context) => CupertinoAlertDialog(
+        builder: (context) => AlertDialog(
           title: new Text('请连接网络',
             style: new TextStyle(
                 fontSize: 16.0,
@@ -92,8 +182,8 @@ class _LoginPageState extends State<LoginPage> {
       data: {
         'LoginID': phoneController.text,
         'LoginPwd': passwordController.text,
-        'DeviceToken': 'test token',
-        'OSName': 'iOS'
+        'RegistrationID': _regId,
+        'OSName': 'android'
       }
     );
     setState(() {
@@ -121,7 +211,7 @@ class _LoginPageState extends State<LoginPage> {
           break;
       }
     } else {
-      showDialog(context: context, builder: (context) => CupertinoAlertDialog(
+      showDialog(context: context, builder: (context) => AlertDialog(
         title: new Text(
             _data['ResultMessage'],
           style: new TextStyle(
@@ -135,9 +225,23 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   Future<Null> _userReg() async {
+    if (regPhoneController.text.isEmpty) {
+      showDialog(context: context,
+          builder: (context) => AlertDialog(
+            title: new Text('手机号不可为空',
+              style: new TextStyle(
+                  fontSize: 16.0,
+                  fontWeight: FontWeight.w400,
+                  color: Colors.black54
+              ),
+            ),
+          )
+      );
+      return;
+    }
     if (passwordController.text.isEmpty) {
       showDialog(context: context,
-          builder: (context) => CupertinoAlertDialog(
+          builder: (context) => AlertDialog(
             title: new Text('密码不可为空',
               style: new TextStyle(
                   fontSize: 16.0,
@@ -149,10 +253,10 @@ class _LoginPageState extends State<LoginPage> {
       );
       return;
     }
-    if (regPhoneController.text.isEmpty) {
+    if (passwordController.text != confirmPass.text) {
       showDialog(context: context,
-          builder: (context) => CupertinoAlertDialog(
-            title: new Text('手机号不可为空',
+          builder: (context) => AlertDialog(
+            title: new Text('密码不一致',
               style: new TextStyle(
                   fontSize: 16.0,
                   fontWeight: FontWeight.w400,
@@ -165,7 +269,7 @@ class _LoginPageState extends State<LoginPage> {
     }
     if (nameController.text.isEmpty) {
       showDialog(context: context,
-          builder: (context) => CupertinoAlertDialog(
+          builder: (context) => AlertDialog(
             title: new Text('姓名不可为空',
               style: new TextStyle(
                   fontSize: 16.0,
@@ -179,7 +283,7 @@ class _LoginPageState extends State<LoginPage> {
     }
     if (verificationController.text.isEmpty) {
       showDialog(context: context,
-          builder: (context) => CupertinoAlertDialog(
+          builder: (context) => AlertDialog(
             title: new Text('验证码不可为空',
               style: new TextStyle(
                   fontSize: 16.0,
@@ -209,7 +313,7 @@ class _LoginPageState extends State<LoginPage> {
     print(resp);
     if (resp['ResultCode'] == '00') {
       showDialog(context: context,
-          builder: (context) => CupertinoAlertDialog(
+          builder: (context) => AlertDialog(
             title: new Text('注册成功',
               style: new TextStyle(
                   fontSize: 16.0,
@@ -223,10 +327,13 @@ class _LoginPageState extends State<LoginPage> {
         _stage = 'login';
         phoneController.text = regPhoneController.text;
         passwordController.text = '';
+        confirmPass.text = '';
+        verificationController.text = '';
+        _timer.cancel();
       });
     } else {
       showDialog(context: context,
-          builder: (context) => CupertinoAlertDialog(
+          builder: (context) => AlertDialog(
             title: new Text(resp['ResultMessage'],
               style: new TextStyle(
                   fontSize: 16.0,
@@ -241,8 +348,10 @@ class _LoginPageState extends State<LoginPage> {
 
   void initState() {
     isLogin();
-    isConnected();
+    //isConnected();
+    setupJPush();
     super.initState();
+    permissionCheck();
   }
 
   @override
@@ -260,7 +369,7 @@ class _LoginPageState extends State<LoginPage> {
   Future<Null> getVerificationCode() async {
     if (regPhoneController.text.isEmpty || regPhoneController.text.length!=11) {
       showDialog(context: context,
-        builder: (context) => CupertinoAlertDialog(
+        builder: (context) => AlertDialog(
           title: new Text('请输入正确的手机号',
             style: new TextStyle(
                 fontSize: 16.0,
@@ -282,7 +391,7 @@ class _LoginPageState extends State<LoginPage> {
     print(resp);
     if (resp['ResultCode'] == '00') {
       showDialog(context: context,
-          builder: (context) => CupertinoAlertDialog(
+          builder: (context) => AlertDialog(
         title: new Text('验证码已发送',
           style: new TextStyle(
               fontSize: 16.0,
@@ -298,7 +407,7 @@ class _LoginPageState extends State<LoginPage> {
       startCountdownTimer();
     } else {
       showDialog(context: context,
-          builder: (context) => CupertinoAlertDialog(
+          builder: (context) => AlertDialog(
             title: new Text(resp['ResultMessage'],
               style: new TextStyle(
                   fontSize: 16.0,

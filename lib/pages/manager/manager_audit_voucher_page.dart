@@ -5,6 +5,8 @@ import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'dart:convert';
 import 'package:atoi/utils/constants.dart';
 import 'package:atoi/widgets/build_widget.dart';
+import 'package:atoi/models/models.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 class ManagerAuditVoucherPage extends StatefulWidget {
   static String tag = 'manager-audit-voucher-page';
@@ -25,6 +27,7 @@ class _ManagerAuditVoucherPageState extends State<ManagerAuditVoucherPage> {
   Map<String, dynamic> _dispatch = {};
   var _equipment = {};
   TextEditingController _comment = new TextEditingController();
+  ConstantsModel model;
 
   Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
 
@@ -74,11 +77,24 @@ class _ManagerAuditVoucherPageState extends State<ManagerAuditVoucherPage> {
   List<DropdownMenuItem<String>> _dropDownMenuItems;
   String _currentResult;
 
-  void initState(){
-    getRole();
+  List iterateMap(Map item) {
+    var _list = [];
+    item.forEach((key, val) {
+      _list.add(key);
+    });
+    return _list;
+  }
+
+  void initDropdown() {
+    _serviceResults = iterateMap(model.ResultStatusID);
     _dropDownMenuItems = getDropDownMenuItems(_serviceResults);
     _currentResult = _dropDownMenuItems[0].value;
-    print('widget info:${widget.request}');
+  }
+
+  void initState(){
+    model = MainModel.of(context);
+    getRole();
+    initDropdown();
     getDispatch();
     getJournal();
     super.initState();
@@ -120,6 +136,7 @@ class _ManagerAuditVoucherPageState extends State<ManagerAuditVoucherPage> {
               )
           )
       ),
+      maxLines: 3,
       controller: controller,
       enabled: isEnabled,
       style: new TextStyle(
@@ -214,9 +231,13 @@ class _ManagerAuditVoucherPageState extends State<ManagerAuditVoucherPage> {
     print(resp);
     if (resp['ResultCode'] == '00') {
       setState(() {
-        _equipment = resp['Data']['Request']['Equipments'][0];
         _dispatch = resp['Data'];
       });
+      if (resp['Data']['Request']['Equipments'] != null) {
+        setState(() {
+          _equipment = resp['Data']['Request']['Equipments'][0];
+        });
+      }
     }
   }
 
@@ -226,14 +247,23 @@ class _ManagerAuditVoucherPageState extends State<ManagerAuditVoucherPage> {
     Map<String, dynamic> _data = {
       'userID': UserId,
       'dispatchJournalID': widget.journalId,
-      'resultStatusID': AppConstants.ResultStatusID[_currentResult],
+      'resultStatusID': model.ResultStatusID[_currentResult],
       'comments': _comment.text,
     };
+    Fluttertoast.showToast(
+        msg: "正在提交...",
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.CENTER,
+        backgroundColor: Colors.black54,
+        textColor: Colors.white,
+        fontSize: 16.0
+    );
     var _response = await HttpRequest.request(
       '/DispatchJournal/ApproveDispatchJournal',
       method: HttpRequest.POST,
       data: _data
     );
+    Fluttertoast.cancel();
     print(_response);
     if (_response['ResultCode'] == '00') {
       showDialog(
@@ -262,11 +292,20 @@ class _ManagerAuditVoucherPageState extends State<ManagerAuditVoucherPage> {
       'dispatchJournalID': widget.journalId,
       'comments': _comment.text
     };
+    Fluttertoast.showToast(
+        msg: "正在提交...",
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.CENTER,
+        backgroundColor: Colors.black54,
+        textColor: Colors.white,
+        fontSize: 16.0
+    );
     var _response = await HttpRequest.request(
         '/DispatchJournal/RejectDispatchJournal',
         method: HttpRequest.POST,
         data: _data
     );
+    Fluttertoast.cancel();
     print(_response);
     if (_response['ResultCode'] == '00') {
       showDialog(
@@ -288,7 +327,7 @@ class _ManagerAuditVoucherPageState extends State<ManagerAuditVoucherPage> {
 
   List<ExpansionPanel> buildExpansion() {
     List<ExpansionPanel> _list = [];
-    if (_dispatch['Request']['RequestType']['ID'] != 14) {
+    if (_dispatch.isNotEmpty&&_dispatch['Request']['RequestType']['ID'] != 14) {
       _list.add(
         new ExpansionPanel(
           headerBuilder: (context, isExpanded) {
@@ -352,7 +391,7 @@ class _ManagerAuditVoucherPageState extends State<ManagerAuditVoucherPage> {
               BuildWidget.buildRow('紧急程度', widget.request['Urgency']['Name']),
               BuildWidget.buildRow('派工类型', widget.request['RequestType']['Name']),
               BuildWidget.buildRow('机器状态', widget.request['MachineStatus']['Name']),
-              BuildWidget.buildRow('工程师姓名', _dispatch['Engineer']['Name']),
+              BuildWidget.buildRow('工程师姓名', _dispatch['Engineer']['Name']??''),
               BuildWidget.buildRow('出发时间',AppConstants.TimeForm(widget.request['ScheduleDate'], 'yyyy-mm-dd')),
               BuildWidget.buildRow('备注', _dispatch['LeaderComments']),
             ],
@@ -474,6 +513,7 @@ class _ManagerAuditVoucherPageState extends State<ManagerAuditVoucherPage> {
               ),
               SizedBox(height: 24.0),
               widget.status==3?new Container():buildTextField('审批备注', _comment, true),
+              SizedBox(height: 24.0),
               widget.status==3?new Container():new Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 mainAxisSize: MainAxisSize.max,
@@ -484,7 +524,7 @@ class _ManagerAuditVoucherPageState extends State<ManagerAuditVoucherPage> {
                       approveJournal();
                     },
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(24),
+                      borderRadius: BorderRadius.circular(6),
                     ),
                     padding: EdgeInsets.all(12.0),
                     color: new Color(0xff2E94B9),
@@ -495,14 +535,15 @@ class _ManagerAuditVoucherPageState extends State<ManagerAuditVoucherPage> {
                       rejectJournal();
                     },
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(24),
+                      borderRadius: BorderRadius.circular(6),
                     ),
                     padding: EdgeInsets.all(12.0),
                     color: new Color(0xffD25565),
                     child: Text('退回凭证', style: TextStyle(color: Colors.white)),
                   ),
                 ],
-              )
+              ),
+              SizedBox(height: 24.0),
             ],
           ),
         ),

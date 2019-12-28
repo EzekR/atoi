@@ -9,6 +9,9 @@ class ManagerModel extends Model {
   List<dynamic> _requests = [];
   List<dynamic> _dispatches = [];
   List<dynamic> _todos = [];
+  int _offset = 10;
+  int _offsetDispatch = 10;
+  int _offsetTodo = 10;
 
   get badgeA => _badgeA;
   get badgeB => _badgeB;
@@ -37,13 +40,31 @@ class ManagerModel extends Model {
     var prefs = await _prefs;
     var userID = await prefs.getInt('userID');
     var resp = await HttpRequest.request(
-      '/Request/GetRequests?userID=${userID}&statusID=1&statusID=5&statusID=6&statusID=7&typeID=0',
+      '/Request/GetRequests?userID=${userID}&statusID=1&statusID=5&statusID=6&statusID=7&typeID=0&PageSize=10&CurRowNum=0',
       method: HttpRequest.GET,
     );
     print(resp);
     if (resp['ResultCode'] == '00') {
       _requests = resp['Data'];
-      _badgeA = _requests.length.toString();
+      _offset = 10;
+      //_badgeA = _requests.length.toString();
+    }
+    notifyListeners();
+  }
+
+  Future<Null> getMoreRequests() async {
+    Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
+    var prefs = await _prefs;
+    var userID = await prefs.getInt('userID');
+    var resp = await HttpRequest.request(
+      '/Request/GetRequests?userID=${userID}&statusID=1&statusID=5&statusID=6&statusID=7&typeID=0&PageSize=10&CurRowNum=${_offset}',
+      method: HttpRequest.GET,
+    );
+    print(resp);
+    if (resp['ResultCode'] == '00') {
+      _requests.addAll(resp['Data']);
+      _offset = _offset + 10;
+      //_badgeA = _requests.length.toString();
     }
     notifyListeners();
   }
@@ -57,13 +78,37 @@ class ManagerModel extends Model {
       method: HttpRequest.GET,
       params: {
         'userID': userID,
-        'statusIDs': 3
+        'statusIDs': 3,
+        'pageSize': 10,
+        'curRowNum': 0
       }
     );
     print(resp);
     if (resp['ResultCode'] == '00') {
       _dispatches = resp['Data'];
-      _badgeB = _dispatches.length.toString();
+      _offsetDispatch = 10;
+    }
+    notifyListeners();
+  }
+
+  Future<Null> getMoreDispatches() async {
+    Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
+    var prefs = await _prefs;
+    var userID = await prefs.getInt('userID');
+    var resp = await HttpRequest.request(
+        '/Dispatch/GetDispatchs',
+        method: HttpRequest.GET,
+        params: {
+          'userID': userID,
+          'statusIDs': 3,
+          'pageSize': 10,
+          'curRowNum': _offsetDispatch
+        }
+    );
+    print(resp);
+    if (resp['ResultCode'] == '00') {
+      _dispatches.addAll(resp['Data']);
+      _offsetDispatch = _offsetDispatch + 10;
     }
     notifyListeners();
   }
@@ -75,7 +120,9 @@ class ManagerModel extends Model {
     Map<String, dynamic> params = {
       'userID': userID,
       'statusID': 98,
-      'typeID': 0
+      'typeID': 0,
+      'pageSize': 10,
+      'curRowNum': 0
     };
     var resp = await HttpRequest.request(
         '/Request/GetRequests',
@@ -85,7 +132,31 @@ class ManagerModel extends Model {
     print(resp);
     if (resp['ResultCode'] == '00') {
       _todos = resp['Data'];
-      _badgeC = _todos.length.toString();
+      _offsetTodo = 10;
+    }
+    notifyListeners();
+  }
+
+  Future<Null> getMoreTodos() async {
+    Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
+    var prefs = await _prefs;
+    var userID = await prefs.getInt('userID');
+    Map<String, dynamic> params = {
+      'userID': userID,
+      'statusID': 98,
+      'typeID': 0,
+      'pageSize': 10,
+      'curRowNum': _offsetTodo
+    };
+    var resp = await HttpRequest.request(
+        '/Request/GetRequests',
+        method: HttpRequest.GET,
+        params: params
+    );
+    print(resp);
+    if (resp['ResultCode'] == '00') {
+      _todos.addAll(resp['Data']);
+      _offsetTodo = _offsetTodo + 10;
     }
     notifyListeners();
   }

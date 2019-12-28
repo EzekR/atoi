@@ -9,21 +9,24 @@ import 'package:atoi/utils/http_request.dart';
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:atoi/widgets/build_widget.dart';
+import 'package:atoi/models/models.dart';
+import 'package:flutter_image_compress/flutter_image_compress.dart';
 
 class UserRepairPage extends StatefulWidget {
   static String tag = 'user-repair-page';
-  UserRepairPage({Key key, this.equipment}):super(key: key);
+  UserRepairPage({Key key, this.equipment}) : super(key: key);
   final Map<dynamic, dynamic> equipment;
 
   @override
   _UserRepairPageState createState() => new _UserRepairPageState();
-
 }
 
 class _UserRepairPageState extends State<UserRepairPage> {
-
   var _isExpandedBasic = true;
   var _isExpandedDetail = false;
+  ConstantsModel model;
+  //增加操作状态
+  bool _stunned = false;
 
   List<File> _imageList = [];
 
@@ -32,22 +35,18 @@ class _UserRepairPageState extends State<UserRepairPage> {
 
   Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
 
-  List _serviceResults = [
-  '未知',
-  ];
+  List _serviceResults = [];
 
   String _userName = '';
-  String _mobile = '';
 
   Future<Null> getRole() async {
     var prefs = await _prefs;
     var userName = prefs.getString('userName');
-    var mobile = prefs.getString('mobile');
     setState(() {
       _userName = userName;
-      _mobile = mobile;
     });
   }
+
   List<DropdownMenuItem<String>> _dropDownMenuItems;
   String _currentResult;
 
@@ -56,12 +55,10 @@ class _UserRepairPageState extends State<UserRepairPage> {
     for (String method in list) {
       items.add(new DropdownMenuItem(
           value: method,
-          child: new Text(method,
-            style: new TextStyle(
-                fontSize: 20.0
-            ),
-          )
-      ));
+          child: new Text(
+            method,
+            style: new TextStyle(fontSize: 20.0),
+          )));
     }
     return items;
   }
@@ -72,67 +69,84 @@ class _UserRepairPageState extends State<UserRepairPage> {
     });
   }
 
-  void initState() {
+  List iterateMap(Map item) {
+    var _list = [];
+    item.forEach((key, val) {
+      _list.add(key);
+    });
+    return _list;
+  }
+
+  void initDropdown() {
+    _serviceResults = iterateMap(model.FaultRepair);
     _dropDownMenuItems = getDropDownMenuItems(_serviceResults);
-    _currentResult = _dropDownMenuItems[0].value;
+    //_currentResult = _dropDownMenuItems[0].value==null?'':_dropDownMenuItems[0];
+  }
+
+  void initState() {
+    model = MainModel.of(context);
+    initDropdown();
     super.initState();
   }
 
-  Map<String, String> _reqBody = {
-    'name': '真田新村',
-    'phone': ''
-  };
-
-  Future getImage() async {
-    var image = await ImagePicker.pickImage(
-        source: ImageSource.camera,
-        imageQuality: 1
-    );
-    if (image != null) {
-      setState(() {
-        _imageList.add(image);
-      });
-    }
+  void showSheet(context) {
+    showModalBottomSheet(
+        context: context,
+        builder: (context) {
+          return new ListView(
+            shrinkWrap: true,
+            children: <Widget>[
+              ListTile(
+                trailing: new Icon(Icons.collections),
+                title: new Text('从相册添加'),
+                onTap: () {
+                  getImage(ImageSource.gallery);
+                },
+              ),
+              ListTile(
+                trailing: new Icon(Icons.add_a_photo),
+                title: new Text('拍照添加'),
+                onTap: () {
+                  getImage(ImageSource.camera);
+                },
+              ),
+            ],
+          );
+        });
   }
 
-  Future uploadImage() async {
-    FormData _formData = new FormData.from({
-      "describe": _describe.text,
-      "category": _category.text
-    });
-    if (_imageList.length > 0) {
-      for(var i=0; i<_imageList.length; i++) {
-        var path = _imageList[i].path;
-        var name = path.substring(path.lastIndexOf("/") + 1, path.length);
-        var suffix = name.substring(name.lastIndexOf(".") + 1, name.length);
-        _formData.add("file$i", new UploadFileInfo(_imageList[i], _imageList[i].path, contentType: ContentType.parse("image/$suffix")));
+  Future getImage(ImageSource sourceType) async {
+    try {
+      var image = await ImagePicker.pickImage(
+        source: sourceType,
+      );
+      if (image != null) {
+        var compressed = await FlutterImageCompress.compressAndGetFile(
+          image.absolute.path,
+          image.absolute.path,
+          minHeight: 800,
+          minWidth: 600,
+        );
+        setState(() {
+          _imageList.add(compressed);
+        });
       }
-    }
-    print(_formData);
-    Dio dio = new Dio();
-    var response = await dio.post<String>("http://api.stramogroup.com/request", data: _formData);
-    if (response.statusCode == 200) {
-      var result = await showDialog(
-              context: context,
-              builder: (context) => AlertDialog(
-                title: Text('报修成功'),
-              )
-          );
-      Navigator.of(context).pop();
+    } catch (e) {
+      print(e);
     }
   }
 
   Future<Null> submit() async {
     if (_describe.text.isEmpty) {
-      showDialog(context: context,
-        builder: (context) => AlertDialog(
-          title: new Text('故障描述不可为空'),
-        )
-      );
+      showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+                title: new Text('故障描述不可为空'),
+              ));
       return;
     }
     List<dynamic> Files = [];
-    for(var image in _imageList) {
+    for (var image in _imageList) {
       List<int> imageBytes = await image.readAsBytes();
       var content = base64Encode(imageBytes);
       Map _json = {
@@ -149,56 +163,53 @@ class _UserRepairPageState extends State<UserRepairPage> {
       'userID': userID,
       'requestInfo': {
         'Equipments': [
-          {
-            'ID': widget.equipment['ID']
-          }
+          {'ID': widget.equipment['ID']}
         ],
-        'RequestType': {
-          'ID': 1
-        },
+        'RequestType': {'ID': 1},
         'FaultDesc': _describe.text,
         'FaultType': {
-          'ID': AppConstants.FaultRepair[_currentResult]
+          //'ID': model.FaultRepair[_currentResult]
+          'ID': 1
         },
         'Files': Files
       }
     };
+    //改变操作状态防止按钮多次点击
+    setState(() {
+      _stunned = true;
+    });
     var resp = await HttpRequest.request(
       '/Request/AddRequest',
       method: HttpRequest.POST,
       data: _data,
     );
+    //改变操作状态释放按钮
+    setState(() {
+      _stunned = false;
+    });
     print(resp);
     if (resp['ResultCode'] == '00') {
-      print('yes');
-      showDialog(context: context, builder: (context) => AlertDialog(
-        title: new Text('报修成功'),
-      ),
-      ).then((result) =>
-        Navigator.of(context, rootNavigator: true).pop(result)
-      );
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: new Text('报修成功'),
+        ),
+      ).then(
+          (result) => Navigator.of(context, rootNavigator: true).pop(result));
     }
   }
 
-  TextField buildTextField(String labelText, String defaultText, bool isEnabled) {
+  TextField buildTextField(
+      String labelText, String defaultText, bool isEnabled) {
     return new TextField(
       decoration: InputDecoration(
           labelText: labelText,
-          labelStyle: new TextStyle(
-              fontSize: 20.0
-          ),
+          labelStyle: new TextStyle(fontSize: 20.0),
           disabledBorder: UnderlineInputBorder(
-              borderSide: BorderSide(
-                  color: Colors.grey,
-                  width: 1
-              )
-          )
-      ),
+              borderSide: BorderSide(color: Colors.grey, width: 1))),
       controller: new TextEditingController(text: defaultText),
       enabled: isEnabled,
-      style: new TextStyle(
-          fontSize: 16.0
-      ),
+      style: new TextStyle(fontSize: 16.0),
     );
   }
 
@@ -211,10 +222,7 @@ class _UserRepairPageState extends State<UserRepairPage> {
             flex: 4,
             child: new Text(
               labelText,
-              style: new TextStyle(
-                  fontSize: 20.0,
-                  fontWeight: FontWeight.w600
-              ),
+              style: new TextStyle(fontSize: 20.0, fontWeight: FontWeight.w600),
             ),
           ),
           new Expanded(
@@ -224,8 +232,7 @@ class _UserRepairPageState extends State<UserRepairPage> {
               style: new TextStyle(
                   fontSize: 20.0,
                   fontWeight: FontWeight.w400,
-                  color: Colors.black54
-              ),
+                  color: Colors.black54),
             ),
           )
         ],
@@ -242,10 +249,7 @@ class _UserRepairPageState extends State<UserRepairPage> {
             flex: 4,
             child: new Text(
               labelText,
-              style: new TextStyle(
-                  fontSize: 20.0,
-                  fontWeight: FontWeight.w600
-              ),
+              style: new TextStyle(fontSize: 20.0, fontWeight: FontWeight.w600),
             ),
           ),
           new Expanded(
@@ -253,9 +257,7 @@ class _UserRepairPageState extends State<UserRepairPage> {
             child: new TextField(
               enabled: true,
               controller: controller,
-              style: new TextStyle(
-                fontSize: 18.0
-              ),
+              style: new TextStyle(fontSize: 18.0),
             ),
           )
         ],
@@ -266,28 +268,29 @@ class _UserRepairPageState extends State<UserRepairPage> {
   GridView buildImageRow(List imageList) {
     List<Widget> _list = [];
 
-    if (imageList.length >0 ){
-      for(var image in imageList) {
-        _list.add(
-            new Stack(
-              alignment: FractionalOffset(1.0, 0),
-              children: <Widget>[
-                new Container(
-                  width: 100.0,
-                  child: Image.file(image),
-                ),
-                new Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 0.0),
-                  child: new IconButton(icon: Icon(Icons.cancel), color: Colors.white, onPressed: (){
+    if (imageList.length > 0) {
+      for (var image in imageList) {
+        _list.add(new Stack(
+          alignment: FractionalOffset(1.0, 0),
+          children: <Widget>[
+            new Container(
+              width: 100.0,
+              child: Image.file(image),
+            ),
+            new Padding(
+              padding: EdgeInsets.symmetric(horizontal: 0.0),
+              child: new IconButton(
+                  icon: Icon(Icons.cancel),
+                  color: Colors.white,
+                  onPressed: () {
                     imageList.remove(image);
                     setState(() {
                       _imageList = imageList;
                     });
                   }),
-                )
-              ],
             )
-        );
+          ],
+        ));
       }
     } else {
       _list.add(new Container());
@@ -299,12 +302,11 @@ class _UserRepairPageState extends State<UserRepairPage> {
         mainAxisSpacing: 5,
         crossAxisSpacing: 5,
         crossAxisCount: 2,
-        children: _list
-    );
+        children: _list);
   }
 
   @override
-  Widget build(BuildContext context){
+  Widget build(BuildContext context) {
     return new Scaffold(
       appBar: new AppBar(
         title: new Text('设备报修'),
@@ -323,7 +325,8 @@ class _UserRepairPageState extends State<UserRepairPage> {
         ),
         actions: <Widget>[
           new Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 5.0, vertical: 19.0),
+            padding:
+                const EdgeInsets.symmetric(horizontal: 5.0, vertical: 19.0),
             child: Text(_userName),
           ),
         ],
@@ -342,8 +345,7 @@ class _UserRepairPageState extends State<UserRepairPage> {
                     } else {
                       if (index == 1) {
                         _isExpandedDetail = !isExpanded;
-                      } else {
-                      }
+                      } else {}
                     }
                   });
                 },
@@ -359,26 +361,33 @@ class _UserRepairPageState extends State<UserRepairPage> {
                           title: Text(
                             '设备基本信息',
                             style: new TextStyle(
-                                fontSize: 22.0,
-                                fontWeight: FontWeight.w400
-                            ),
-                          )
-                      );
+                                fontSize: 22.0, fontWeight: FontWeight.w400),
+                          ));
                     },
                     body: new Padding(
                       padding: EdgeInsets.symmetric(horizontal: 8.0),
                       child: new Column(
                         children: <Widget>[
-                          BuildWidget.buildRow('系统编号', widget.equipment['OID']??''),
-                          BuildWidget.buildRow('名称', widget.equipment['Name']??''),
-                          BuildWidget.buildRow('型号', widget.equipment['EquipmentCode']??''),
-                          BuildWidget.buildRow('序列号', widget.equipment['SerialCode']??''),
-                          BuildWidget.buildRow('使用科室', widget.equipment['Department']['Name']??''),
-                          BuildWidget.buildRow('安装地点', widget.equipment['InstalSite']??''),
-                          BuildWidget.buildRow('设备厂商', widget.equipment['Manufacturer']['Name']??''),
-                          BuildWidget.buildRow('资产等级', widget.equipment['AssetLevel']['Name']??''),
-                          BuildWidget.buildRow('维保状态', widget.equipment['WarrantyStatus']??''),
-                          BuildWidget.buildRow('服务范围', widget.equipment['ContractScope']['Name']??''),
+                          BuildWidget.buildRow(
+                              '系统编号', widget.equipment['OID'] ?? ''),
+                          BuildWidget.buildRow(
+                              '名称', widget.equipment['Name'] ?? ''),
+                          BuildWidget.buildRow(
+                              '型号', widget.equipment['EquipmentCode'] ?? ''),
+                          BuildWidget.buildRow(
+                              '序列号', widget.equipment['SerialCode'] ?? ''),
+                          BuildWidget.buildRow('使用科室',
+                              widget.equipment['Department']['Name'] ?? ''),
+                          BuildWidget.buildRow(
+                              '安装地点', widget.equipment['InstalSite'] ?? ''),
+                          BuildWidget.buildRow('设备厂商',
+                              widget.equipment['Manufacturer']['Name'] ?? ''),
+                          BuildWidget.buildRow('资产等级',
+                              widget.equipment['AssetLevel']['Name'] ?? ''),
+                          BuildWidget.buildRow(
+                              '维保状态', widget.equipment['WarrantyStatus'] ?? ''),
+                          BuildWidget.buildRow('服务范围',
+                              widget.equipment['ContractScope']['Name'] ?? ''),
                         ],
                       ),
                     ),
@@ -395,11 +404,8 @@ class _UserRepairPageState extends State<UserRepairPage> {
                           title: new Text(
                             '报修内容',
                             style: new TextStyle(
-                                fontWeight: FontWeight.w400,
-                                fontSize: 22.0
-                            ),
-                          )
-                      );
+                                fontWeight: FontWeight.w400, fontSize: 22.0),
+                          ));
                     },
                     body: new Padding(
                       padding: EdgeInsets.symmetric(horizontal: 8.0),
@@ -409,26 +415,57 @@ class _UserRepairPageState extends State<UserRepairPage> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: <Widget>[
                           BuildWidget.buildInput('故障描述', _describe),
-                          BuildWidget.buildDropdown('故障分类', _currentResult, _dropDownMenuItems, changedDropDownMethod),
+                          BuildWidget.buildDropdown('故障分类', _currentResult,
+                              _dropDownMenuItems, changedDropDownMethod),
                           new Padding(
-                            padding: EdgeInsets.symmetric(vertical: 5.0, horizontal: 50.0),
+                            padding: EdgeInsets.symmetric(vertical: 5.0),
                             child: new Row(
                               children: <Widget>[
                                 new Text(
                                   '添加附件：',
                                   style: new TextStyle(
                                       fontSize: 20.0,
-                                      fontWeight: FontWeight.w600
-                                  ),
+                                      fontWeight: FontWeight.w600),
                                 ),
                                 new IconButton(
                                     icon: Icon(Icons.add_a_photo),
                                     onPressed: () {
-                                      getImage();
+                                      showSheet(context);
                                     })
                               ],
                             ),
                           ),
+                          //new Padding(
+                          //  padding: EdgeInsets.symmetric(vertical: 5.0),
+                          //  child: new Row(
+                          //    children: <Widget>[
+                          //      new Expanded(
+                          //        flex: 4,
+                          //        child: new Wrap(
+                          //          alignment: WrapAlignment.end,
+                          //          crossAxisAlignment: WrapCrossAlignment.center,
+                          //          children: <Widget>[
+                          //            new Text(
+                          //              '添加附件：',
+                          //              style: new TextStyle(
+                          //                  fontSize: 20.0,
+                          //                  fontWeight: FontWeight.w600
+                          //              ),
+                          //            ),
+                          //          ],
+                          //        )
+                          //      ),
+                          //      new Expanded(
+                          //        flex: 7,
+                          //        child: new IconButton(
+                          //            icon: Icon(Icons.add_a_photo),
+                          //            onPressed: () {
+                          //              showSheet(context);
+                          //            }),
+                          //      )
+                          //    ],
+                          //  ),
+                          //),
                           buildImageRow(_imageList)
                         ],
                       ),
@@ -445,19 +482,15 @@ class _UserRepairPageState extends State<UserRepairPage> {
                 children: <Widget>[
                   new RaisedButton(
                     onPressed: () {
-                      submit();
+                      //根据stunned状态判断按钮是否可用
+                      return _stunned?null:submit();
                     },
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(24),
+                      borderRadius: BorderRadius.circular(6),
                     ),
                     padding: EdgeInsets.all(12.0),
                     color: AppConstants.AppColors['btn_main'],
-                    child: Text(
-                        '点击报修',
-                        style: TextStyle(
-                            color: Colors.white
-                        )
-                    ),
+                    child: Text('点击报修', style: TextStyle(color: Colors.white)),
                   )
                 ],
               )

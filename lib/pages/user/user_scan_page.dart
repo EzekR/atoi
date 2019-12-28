@@ -3,16 +3,6 @@ import 'package:barcode_scan/barcode_scan.dart';
 import 'dart:async';
 import 'package:flutter/services.dart';
 
-// class scanqr extends StatelessWidget {
-//   @override
-//   Widget build(BuildContext context) {
-//     // TODO: implement build
-//     return MaterialApp(
-//       home: sacnBody(),
-//     );
-//   }
-// }
-
 class UserScanPage extends StatefulWidget {
 
   static String tag = 'user-scan-page';
@@ -22,6 +12,7 @@ class UserScanPage extends StatefulWidget {
 
 class _UserScanPageState extends State<UserScanPage> {
   String barcode = "";
+bool hold = false;
 
   @override
   void initState() {

@@ -25,18 +25,20 @@ import 'package:atoi/pages/request/mandatory_request.dart';
 import 'package:atoi/pages/request/other_request.dart';
 import 'package:atoi/pages/request/patrol_request.dart';
 import 'package:atoi/pages/lifecycle/equipment_check.dart';
-import 'package:atoi/pages/lifecycle/equipment_contract.dart';
+import 'package:atoi/pages/lifecycle/equipment_archive.dart';
 import 'package:atoi/pages/lifecycle/equipment_install.dart';
 import 'package:atoi/pages/lifecycle/equipment_lending.dart';
 import 'package:atoi/pages/lifecycle/equipment_scrap.dart';
 import 'package:atoi/pages/lifecycle/equipment_transfer.dart';
 import 'package:flutter/services.dart';
+import 'dart:async';
+import 'package:shared_preferences/shared_preferences.dart';
 
-void main() {
-  runApp(new MyApp());
+class AtoiApp extends StatefulWidget{
+  _AtoiAppState createState() => _AtoiAppState();
 }
 
-class MyApp extends StatelessWidget {
+class _AtoiAppState extends State<AtoiApp> {
   final routes = <String, WidgetBuilder>{
     LoginPage.tag: (context) => LoginPage(),
     HomePage.tag: (context) => HomePage(),
@@ -61,7 +63,7 @@ class MyApp extends StatelessWidget {
     OtherRequest.tag: (context) => OtherRequest(),
     PatrolRequest.tag: (context) => PatrolRequest(),
     EquipmentCheck.tag: (context) => EquipmentCheck(),
-    EquipmentContract.tag: (context) => EquipmentContract(),
+    EquipmentArchive.tag: (context) => EquipmentArchive(),
     EquipmentInstall.tag: (context) => EquipmentInstall(),
     EquipmentLending.tag: (context) => EquipmentLending(),
     EquipmentScrap.tag: (context) => EquipmentScrap(),
@@ -69,6 +71,15 @@ class MyApp extends StatelessWidget {
   };
 
   final MainModel mainModel = MainModel();
+  String debugLable = '';
+
+  Future<SharedPreferences> prefs = SharedPreferences.getInstance();
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     SystemChrome.setPreferredOrientations([
@@ -78,6 +89,7 @@ class MyApp extends StatelessWidget {
     return ScopedModel<MainModel>(
       model: mainModel,
       child: new MaterialApp(
+          builder: (context, child) => MediaQuery(data: MediaQuery.of(context).copyWith(alwaysUse24HourFormat: true), child: child),
           title: 'ATOI医疗设备管理系统',
           theme: new ThemeData(
               primaryColor: new Color(0xff3b4674),
@@ -97,4 +109,9 @@ class MyApp extends StatelessWidget {
       )
     );
   }
+
+}
+
+void main() {
+  runApp(new AtoiApp());
 }

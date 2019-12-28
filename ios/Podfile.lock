@@ -2,6 +2,8 @@ PODS:
   - barcode_scan (0.0.1):
     - Flutter
     - MTBBarcodeScanner
+  - brother_printer (0.0.1):
+    - Flutter
   - connectivity (0.0.1):
     - Flutter
     - Reachability
@@ -9,29 +11,56 @@ PODS:
   - flutter_image_compress (0.0.1):
     - Flutter
     - Mantle
-  - flutter_picker (0.0.1):
+  - flutter_jpush (0.0.1):
+    - Flutter
+    - JPush
+  - fluttertoast (0.0.2):
     - Flutter
   - image_picker (0.0.1):
     - Flutter
+  - JCore (2.1.4)
+  - JPush (3.2.6):
+    - JCore (< 3.0.0, >= 2.0.0)
   - Mantle (2.1.0):
     - Mantle/extobjc (= 2.1.0)
   - Mantle/extobjc (2.1.0)
   - MTBBarcodeScanner (5.0.11)
+<<<<<<< HEAD
+<<<<<<< HEAD
+  - nanopb (0.3.901):
+    - nanopb/decode (= 0.3.901)
+    - nanopb/encode (= 0.3.901)
+  - nanopb/decode (0.3.901)
+  - nanopb/encode (0.3.901)
+=======
+>>>>>>> 503d60a59aa74756f24275c46d4fcb6a9fb4b2a9
+  - permission_handler (3.2.2):
+    - Flutter
+  - printing (0.0.1):
+=======
+  - permission_handler (4.0.0):
+>>>>>>> 489ba1b8072b0828b17a686eae9be9f082be6c9f
+    - Flutter
   - Reachability (3.2)
   - shared_preferences (0.0.1):
     - Flutter
 
 DEPENDENCIES:
   - barcode_scan (from `.symlinks/plugins/barcode_scan/ios`)
+  - brother_printer (from `.symlinks/plugins/brother_printer/ios`)
   - connectivity (from `.symlinks/plugins/connectivity/ios`)
-  - Flutter (from `.symlinks/flutter/ios`)
+  - Flutter (from `Flutter`)
   - flutter_image_compress (from `.symlinks/plugins/flutter_image_compress/ios`)
-  - flutter_picker (from `.symlinks/plugins/flutter_picker/ios`)
+  - flutter_jpush (from `.symlinks/plugins/flutter_jpush/ios`)
+  - fluttertoast (from `.symlinks/plugins/fluttertoast/ios`)
   - image_picker (from `.symlinks/plugins/image_picker/ios`)
+  - permission_handler (from `.symlinks/plugins/permission_handler/ios`)
   - shared_preferences (from `.symlinks/plugins/shared_preferences/ios`)
 
 SPEC REPOS:
-  https://github.com/cocoapods/specs.git:
+  trunk:
+    - JCore
+    - JPush
     - Mantle
     - MTBBarcodeScanner
     - Reachability
@@ -39,31 +68,51 @@ SPEC REPOS:
 EXTERNAL SOURCES:
   barcode_scan:
     :path: ".symlinks/plugins/barcode_scan/ios"
+  brother_printer:
+    :path: ".symlinks/plugins/brother_printer/ios"
   connectivity:
     :path: ".symlinks/plugins/connectivity/ios"
   Flutter:
-    :path: ".symlinks/flutter/ios"
+    :path: Flutter
   flutter_image_compress:
     :path: ".symlinks/plugins/flutter_image_compress/ios"
-  flutter_picker:
-    :path: ".symlinks/plugins/flutter_picker/ios"
+  flutter_jpush:
+    :path: ".symlinks/plugins/flutter_jpush/ios"
+  fluttertoast:
+    :path: ".symlinks/plugins/fluttertoast/ios"
   image_picker:
     :path: ".symlinks/plugins/image_picker/ios"
+  permission_handler:
+    :path: ".symlinks/plugins/permission_handler/ios"
   shared_preferences:
     :path: ".symlinks/plugins/shared_preferences/ios"
 
 SPEC CHECKSUMS:
   barcode_scan: 33f586d02270046fc6559135038b34b5754eaa4f
-  connectivity: c72716e202a1225ec4810740d5cb56b8ae3bf4cc
-  Flutter: 58dd7d1b27887414a370fcccb9e645c08ffd7a6a
+  brother_printer: 4624b35e200561146a8106f27b5cdf022c0b19b6
+  connectivity: 6e94255659cc86dcbef1d452ad3e0491bb1b3e75
+  Flutter: 0e3d915762c693b495b44d77113d4970485de6ec
   flutter_image_compress: f69d0e0e078ce52b4810695593bc861ee319ae7d
-  flutter_picker: 8ff0d7440b4e8327fcc9e6b21a39ef9369e697c7
-  image_picker: 16e5fec1fbc87fd3b297c53e4048521eaf17cd06
+  flutter_jpush: bb278c661136b2a2032e96ffc15bbce871d3fb02
+  fluttertoast: b644586ef3b16f67fae9a1f8754cef6b2d6b634b
+  image_picker: e3eacd46b94694dde7cf2705955cece853aa1a8f
+  JCore: d345c049141877eb61c33011455fdb5fcab1673f
+  JPush: 41dd48a69bd8c08abc692dc7f2b23c0fb281471f
   Mantle: 2fa750afa478cd625a94230fbf1c13462f29395b
   MTBBarcodeScanner: f453b33c4b7dfe545d8c6484ed744d55671788cb
+<<<<<<< HEAD
+<<<<<<< HEAD
+  nanopb: 2901f78ea1b7b4015c860c2fdd1ea2fee1a18d48
+=======
+>>>>>>> 503d60a59aa74756f24275c46d4fcb6a9fb4b2a9
+  permission_handler: d59f41439f5bc6c4d1005f3355e98f05ddc68ece
+  printing: 341873b2b3771c7226e301bfa4fc608e8ac60a30
+=======
+  permission_handler: 0fb88b8a3c23e31e5de45b8f1bb8b7de28cf8941
+>>>>>>> 489ba1b8072b0828b17a686eae9be9f082be6c9f
   Reachability: 33e18b67625424e47b6cde6d202dce689ad7af96
-  shared_preferences: 1feebfa37bb57264736e16865e7ffae7fc99b523
+  shared_preferences: 430726339841afefe5142b9c1f50cb6bd7793e01
 
-PODFILE CHECKSUM: aff02bfeed411c636180d6812254b2daeea14d09
+PODFILE CHECKSUM: 0c0716bf3d41b30c422cc4aced86e546111782b2
 
-COCOAPODS: 1.7.1
+COCOAPODS: 1.8.4

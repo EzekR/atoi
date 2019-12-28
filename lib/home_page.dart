@@ -10,6 +10,11 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:atoi/login_page.dart';
 import 'dart:async';
 import 'package:atoi/complete_info.dart';
+import 'package:atoi/pages/equipments/equipments_list.dart';
+import 'package:atoi/pages/reports/report_list.dart';
+import 'package:atoi/pages/equipments/equipment_contract.dart';
+import 'package:atoi/pages/equipments/vendors_list.dart';
+import 'package:atoi/pages/equipments/contract_list.dart';
 
 class HomePage extends StatefulWidget {
   static String tag = 'home-page';
@@ -41,14 +46,16 @@ class _HomePageState extends State<HomePage>
     _tabController = new TabController(length: 4, vsync: this, initialIndex: 0);
     super.initState();
     ManagerModel model = MainModel.of(context);
+    ConstantsModel cModel = MainModel.of(context);
+    cModel.getConstants();
     model.getDispatches();
     model.getRequests();
     model.getTodos();
-    //model.getCount();
-    //_timer = new Timer.periodic(new Duration(seconds: 10), (timer) {
-    //  print('polling');
-    //  model.getCount();
-    //});
+    model.getCount();
+    _timer = new Timer.periodic(new Duration(seconds: 10), (timer) {
+      print('polling');
+      model.getCount();
+    });
   }
 
   void deactivate() {
@@ -56,7 +63,7 @@ class _HomePageState extends State<HomePage>
   }
 
   void dispose() {
-    //_timer.cancel();
+    _timer.cancel();
     super.dispose();
   }
 
@@ -72,9 +79,12 @@ class _HomePageState extends State<HomePage>
               appBar: new AppBar(
                 leading: new Container(),
                 title: new Align(
-                  alignment: Alignment(-2.0, 0),
-                  child: new Text('ATOI医疗设备管理系统'),
+                  alignment: Alignment(-1.0, 0),
+                  child: new Text('ATOI医疗设备管理系统',
+                    textAlign: TextAlign.left,
+                  ),
                 ),
+                centerTitle: false,
                 elevation: 0.7,
                 flexibleSpace: Container(
                   decoration: BoxDecoration(
@@ -167,37 +177,8 @@ class _HomePageState extends State<HomePage>
                         color: Theme.of(context).accentColor,
                       ),
                     ),
-                    //ListTile(
-                    //  title: Text('姓名：${_userName}'),
-                    //  onTap: () {
-                    //    Navigator.pop(context);
-                    //  },
-                    //),
-                    //ListTile(
-                    //  title: Text('手机号：${_mobile}'),
-                    //  onTap: () {
-                    //    //_scaffoldKeyManager.currentState
-                    //    //    .showBottomSheet((BuildContext context) {
-                    //    //  return new Container(
-                    //    //    decoration: BoxDecoration(
-                    //    //        border: Border(
-                    //    //            top: BorderSide(color: Colors.grey))),
-                    //    //    child: Padding(
-                    //    //      padding: const EdgeInsets.all(32.0),
-                    //    //      child: Text(
-                    //    //        'This is a Material persistent bottom sheet. Drag downwards to dismiss it.',
-                    //    //        textAlign: TextAlign.center,
-                    //    //        style: TextStyle(
-                    //    //          color: Colors.indigo,
-                    //    //          fontSize: 24.0,
-                    //    //        ),
-                    //    //      ),
-                    //    //    ),
-                    //    //  );
-                    //    //});
-                    //  },
-                    //),
                     ListTile(
+                      leading: Icon(Icons.person),
                       title: Text('个人信息',
                         style: new TextStyle(
                           color: Colors.blue
@@ -210,6 +191,59 @@ class _HomePageState extends State<HomePage>
                       },
                     ),
                     ListTile(
+                      leading: Icon(Icons.list),
+                      title: Text('设备列表',
+                        style: new TextStyle(
+                            color: Colors.blue
+                        ),
+                      ),
+                      onTap: () {
+                        Navigator.of(context).push(new MaterialPageRoute(builder: (_) {
+                          return new EquipmentsList();
+                        }));
+                      },
+                    ),
+                    ListTile(
+                      leading: Icon(Icons.store),
+                      title: Text('供应商列表',
+                        style: new TextStyle(
+                            color: Colors.blue
+                        ),
+                      ),
+                      onTap: () {
+                        Navigator.of(context).push(new MaterialPageRoute(builder: (_) {
+                          return new VendorsList();
+                        }));
+                      },
+                    ),
+                    ListTile(
+                      leading: Icon(Icons.event_note),
+                      title: Text('合同管理',
+                        style: new TextStyle(
+                            color: Colors.blue
+                        ),
+                      ),
+                      onTap: () {
+                        Navigator.of(context).push(new MaterialPageRoute(builder: (_) {
+                          return new ContractList();
+                        }));
+                      },
+                    ),
+                    ListTile(
+                      leading: Icon(Icons.insert_chart),
+                      title: Text('报表',
+                        style: new TextStyle(
+                            color: Colors.blue
+                        ),
+                      ),
+                      onTap: () {
+                        Navigator.of(context).push(new MaterialPageRoute(builder: (_) {
+                          return new ReportList();
+                        }));
+                      },
+                    ),
+                    ListTile(
+                      leading: Icon(Icons.exit_to_app),
                       title: Text('登出'),
                       onTap: () async {
                         var _prefs = await prefs;

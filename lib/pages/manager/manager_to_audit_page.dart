@@ -19,6 +19,9 @@ class _ManagerToAuditPageState extends State<ManagerToAuditPage> {
   List<dynamic> _reports = [];
   Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
   bool _loading = false;
+  bool _noMore = false;
+
+  ScrollController _scrollController = new ScrollController();
 
   Future<Null> getData() async {
     var prefs = await _prefs;
@@ -45,6 +48,24 @@ class _ManagerToAuditPageState extends State<ManagerToAuditPage> {
     //getData();
     refresh();
     super.initState();
+    ManagerModel model = MainModel.of(context);
+    _scrollController.addListener(() {
+      if (_scrollController.position.pixels ==
+          _scrollController.position.maxScrollExtent) {
+        var _length = model.dispatches.length;
+        model.getMoreDispatches().then((result) {
+          if (model.dispatches.length == _length) {
+            setState(() {
+              _noMore = true;
+            });
+          } else {
+            setState(() {
+              _noMore = false;
+            });
+          }
+        });
+      }
+    });
   }
 
   Color iconColor(int statusId) {
@@ -145,7 +166,7 @@ class _ManagerToAuditPageState extends State<ManagerToAuditPage> {
                               })).then((result) => refresh());
                         },
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(24),
+                          borderRadius: BorderRadius.circular(6),
                         ),
                         color: iconColor(journalStatus['ID']),
                         child: new Row(
@@ -173,7 +194,7 @@ class _ManagerToAuditPageState extends State<ManagerToAuditPage> {
                           })).then((result) => refresh());
                         },
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(24),
+                          borderRadius: BorderRadius.circular(6),
                         ),
                         color: iconColor(reportStatus['ID']),
                         child: new Row(
@@ -206,8 +227,20 @@ class _ManagerToAuditPageState extends State<ManagerToAuditPage> {
         return new RefreshIndicator(
             child: model.dispatches.length == 0?ListView(padding: const EdgeInsets.symmetric(vertical: 150.0), children: <Widget>[_loading?SpinKitRotatingPlain(color: Colors.blue):new Center(child: new Text('没有待审核工单'),)],):ListView.builder(
               padding: const EdgeInsets.all(2.0),
-              itemCount: model.dispatches.length,
-              itemBuilder: (context, i) => buildCardItem(model.dispatches[i], model.dispatches[i]['DispatchJournal']['ID'], model.dispatches[i]['DispatchReport']['ID'], model.dispatches[i]['OID'], model.dispatches[i]['ScheduleDate'], model.dispatches[i]['Request']['Equipments'].length>0?model.dispatches[i]['Request']['Equipments'][0]['Name']:'', model.dispatches[i]['Request']['Equipments'].length>0?model.dispatches[i]['Request']['Equipments'][0]['OID']:'', model.dispatches[i]['RequestType']['Name'], model.dispatches[i]['Urgency']['Name'], model.dispatches[i]['Request']['OID'], model.dispatches[i]['DispatchJournal']['Status'], model.dispatches[i]['DispatchReport']['Status']),
+              itemCount: model.dispatches.length>9?model.dispatches.length+1:model.dispatches.length,
+              controller: _scrollController,
+              itemBuilder: (context, i) {
+                if (i != model.dispatches.length) {
+                  return buildCardItem(model.dispatches[i], model.dispatches[i]['DispatchJournal']['ID'], model.dispatches[i]['DispatchReport']['ID'], model.dispatches[i]['OID'], model.dispatches[i]['ScheduleDate'], model.dispatches[i]['Request']['Equipments'].length>0?model.dispatches[i]['Request']['Equipments'][0]['Name']:'', model.dispatches[i]['Request']['Equipments'].length>0?model.dispatches[i]['Request']['Equipments'][0]['OID']:'', model.dispatches[i]['RequestType']['Name'], model.dispatches[i]['Urgency']['Name'], model.dispatches[i]['Request']['OID'], model.dispatches[i]['DispatchJournal']['Status'], model.dispatches[i]['DispatchReport']['Status']);
+                } else {
+                  return new Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget>[
+                      _noMore?new Center(child: new Text('没有更多派工单需要审核'),):new SpinKitChasingDots(color: Colors.blue,)
+                    ],
+                  );
+                }
+              }
             ),
             onRefresh: model.getDispatches
         );

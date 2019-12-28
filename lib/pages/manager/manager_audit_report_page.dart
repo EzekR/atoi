@@ -6,6 +6,9 @@ import 'package:atoi/utils/constants.dart';
 import 'package:atoi/widgets/build_widget.dart';
 import 'dart:convert';
 import 'package:photo_view/photo_view.dart';
+import 'package:scoped_model/scoped_model.dart';
+import 'package:atoi/models/models.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 class ManagerAuditReportPage extends StatefulWidget {
   static String tag = 'manager-audit-report-page';
@@ -26,6 +29,7 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
   var _isExpandedComponent = false;
   var _equipment = {};
   var _comment = new TextEditingController();
+  ConstantsModel model;
 
   List _serviceResults = [
     '待分配',
@@ -42,7 +46,7 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
   String _userName = '';
   String _mobile = '';
   var _accessory;
-  List<String> imageAttach = [];
+  List<dynamic> imageAttach = [];
 
   Future<Null> getRole() async {
     var prefs = await _prefs;
@@ -54,10 +58,24 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
     });
   }
 
-  void initState(){
-    getRole();
+  List iterateMap(Map item) {
+    var _list = [];
+    item.forEach((key, val) {
+      _list.add(key);
+    });
+    return _list;
+  }
+
+  void initDropdown() {
+    _serviceResults = iterateMap(model.SolutionStatus);
     _dropDownMenuItems = getDropDownMenuItems(_serviceResults);
     _currentResult = _dropDownMenuItems[0].value;
+  }
+
+  void initState(){
+    getRole();
+    model = MainModel.of(context);
+    initDropdown();
     getDispatch();
     getReport();
     super.initState();
@@ -98,6 +116,7 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
               )
           )
       ),
+      maxLines: 3,
       controller: controller,
       enabled: isEnabled,
       style: new TextStyle(
@@ -211,7 +230,8 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
       var attachImage = await getAttachFile(resp['Data']['FileInfo']['ID']);
       if (attachImage.isNotEmpty) {
         setState(() {
-          imageAttach.add(attachImage);
+          var decoded = base64Decode(attachImage);
+          imageAttach.add(decoded);
         });
       }
     }
@@ -276,14 +296,23 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
     Map<String, dynamic> _data = {
       'userID': UserId,
       'reportID': widget.reportId,
-      'solutionResultID': AppConstants.SolutionStatus[_currentResult],
+      'solutionResultID': model.SolutionStatus[_currentResult],
       'comments': _comment.text
     };
+    Fluttertoast.showToast(
+        msg: "正在提交...",
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.CENTER,
+        backgroundColor: Colors.black54,
+        textColor: Colors.white,
+        fontSize: 16.0
+    );
     var _response = await HttpRequest.request(
         '/DispatchReport/ApproveDispatchReport',
         method: HttpRequest.POST,
         data: _data
     );
+    Fluttertoast.cancel();
     print(_response);
     if (_response['ResultCode'] == '00') {
       showDialog(
@@ -318,11 +347,20 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
         'reportID': widget.reportId,
         'comments': _comment.text
       };
+      Fluttertoast.showToast(
+          msg: "正在提交...",
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.CENTER,
+          backgroundColor: Colors.black54,
+          textColor: Colors.white,
+          fontSize: 16.0
+      );
       var _response = await HttpRequest.request(
           '/DispatchReport/RejectDispatchReport',
           method: HttpRequest.POST,
           data: _data
       );
+      Fluttertoast.cancel();
       print(_response);
       if (_response['ResultCode'] == '00') {
         showDialog(
@@ -345,7 +383,7 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
       List<Widget> _list = [];
       for(var file in imageAttach) {
         _list.add(new Container(
-          child: new PhotoView(imageProvider: MemoryImage(base64Decode(file))),
+          child: new PhotoView(imageProvider: MemoryImage(file)),
           width: 400.0,
           height: 400.0,
         ));
@@ -390,6 +428,48 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
         _list.addAll(_accList);
       }
     }
+    return _list;
+  }
+
+  List<Widget> buildReportContent() {
+    List<Widget> _list = [];
+    _list.addAll([
+      BuildWidget.buildRow('作业报告编号', _report['OID']),
+      BuildWidget.buildRow('作业报告类型', _report['Type']['Name']),
+      BuildWidget.buildRow('报告明细', _report['SolutionCauseAnalysis']),
+      BuildWidget.buildRow('结果', _report['SolutionWay']),
+    ]);
+    switch (_dispatch['Request']['RequestType']['ID']) {
+      case 2:
+        _list.addAll([
+          BuildWidget.buildRow('服务提供商', _report['ServiceProvider'])
+        ]);
+        break;
+      case 3:
+        _list.addAll([
+          BuildWidget.buildRow('强检要求', _report['FaultDesc']),
+          BuildWidget.buildRow('专用报告', _report['IsPrivate']?'是':'否')
+        ]);
+        break;
+      default:
+        _list.addAll([
+          BuildWidget.buildRow('发生频率', _report['FaultFrequency']),
+          BuildWidget.buildRow('系统状态', _report['FaultSystemStatus']),
+          BuildWidget.buildRow('错误代码', _report['FaultCode']),
+          BuildWidget.buildRow('故障描述', _report['FaultDesc']),
+          BuildWidget.buildRow('分析原因', _report['SolutionCauseAnalysis']),
+          BuildWidget.buildRow('处理方法', _report['SolutionWay']),
+          BuildWidget.buildRow('备注', _report['SolutionUnsolvedComments']),
+        ]);
+        break;
+    }
+    _list.addAll([
+      _report['DelayReason']!=''?BuildWidget.buildRow('误工说明', _report['DelayReason']):new Container(),
+      widget.status==3?BuildWidget.buildRow('作业结果', _report['SolutionResultStatus']['Name']):BuildWidget.buildDropdown('作业结果', _currentResult, _dropDownMenuItems, changedDropDownMethod),
+      BuildWidget.buildRow('附件', ''),
+      buildImageColumn(),
+      widget.status==3?BuildWidget.buildRow('审批备注', _report['FujiComments']??''):new Container()
+    ]);
     return _list;
   }
 
@@ -486,22 +566,7 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
           padding: EdgeInsets.symmetric(horizontal: 8.0),
           child: new Column(
             crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              BuildWidget.buildRow('作业报告编号', _report['OID']),
-              BuildWidget.buildRow('作业报告类型', _report['Type']['Name']),
-              BuildWidget.buildRow('发生频率', _report['FaultFrequency']),
-              BuildWidget.buildRow('系统状态', _report['FaultSystemStatus']),
-              BuildWidget.buildRow('错误代码', _report['FaultCode']),
-              BuildWidget.buildRow('故障描述', _report['FaultDesc']),
-              BuildWidget.buildRow('分析原因', _report['SolutionCauseAnalysis']),
-              BuildWidget.buildRow('处理方法', _report['SolutionWay']),
-              BuildWidget.buildRow('未解决备注', _report['SolutionUnsolvedComments']),
-              _report['DelayReason']!=''?BuildWidget.buildRow('误工说明', _report['DelayReason']):new Container(),
-              widget.status==3?BuildWidget.buildRow('作业结果', _report['SolutionResultStatus']['Name']):BuildWidget.buildDropdown('作业结果', _currentResult, _dropDownMenuItems, changedDropDownMethod),
-              BuildWidget.buildRow('附件', ''),
-              buildImageColumn(),
-              widget.status==3?BuildWidget.buildRow('审批备注', _report['FujiComments']??''):new Container()
-            ],
+            children: buildReportContent()
           ),
         ),
         isExpanded: _isExpandedAssign,
@@ -601,6 +666,7 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
               ),
               SizedBox(height: 24.0),
               widget.status==3?new Container():buildTextField('审批备注', _comment, true),
+              SizedBox(height: 24.0),
               widget.status==3?new Container():new Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 mainAxisSize: MainAxisSize.max,
@@ -611,7 +677,7 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
                       approveReport();
                     },
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(24),
+                      borderRadius: BorderRadius.circular(6),
                     ),
                     padding: EdgeInsets.all(12.0),
                     color: new Color(0xff2E94B9),
@@ -622,14 +688,15 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
                       rejectReport();
                     },
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(24),
+                      borderRadius: BorderRadius.circular(6),
                     ),
                     padding: EdgeInsets.all(12.0),
                     color: new Color(0xffD25565),
                     child: Text('退回报告', style: TextStyle(color: Colors.white)),
                   ),
                 ],
-              )
+              ),
+              SizedBox(height: 24.0),
             ],
           ),
         ),

@@ -11,6 +11,9 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:atoi/utils/http_request.dart';
 import 'package:atoi/utils/constants.dart';
 import 'package:atoi/widgets/build_widget.dart';
+import 'package:flutter_image_compress/flutter_image_compress.dart';
+import 'package:atoi/models/models.dart';
+import 'package:flutter/cupertino.dart';
 
 class MandatoryRequest extends StatefulWidget{
   static String tag = 'mandatory-request';
@@ -21,6 +24,7 @@ class MandatoryRequest extends StatefulWidget{
 class _MandatoryRequestState extends State<MandatoryRequest> {
 
   String barcode = "";
+  bool hold = false;
 
   var _isExpandedBasic = true;
   var _isExpandedDetail = false;
@@ -29,30 +33,14 @@ class _MandatoryRequestState extends State<MandatoryRequest> {
   var _roleName;
   var _fault = new TextEditingController();
   Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
+  ConstantsModel model;
 
-  MainModel mainModel = MainModel();
-
-  List _serviceResults = [
-    '政府要求',
-    '医院要求',
-    '自主强检'
-  ];
+  List _serviceResults = [];
 
   List _recall = [
     '是',
     '否'
   ];
-
-  Map<String, dynamic> _result = {
-    'equipNo': '',
-    'equipLevel': '',
-    'name': '',
-    'model': '',
-    'department': '',
-    'location': '',
-    'manufacturer': '',
-    'guarantee': ''
-  };
 
   var _equipment;
 
@@ -62,11 +50,25 @@ class _MandatoryRequestState extends State<MandatoryRequest> {
   String _currentResult;
   List<dynamic> _imageList = [];
 
-  void initState(){
+  List iterateMap(Map item) {
+    var _list = [];
+    item.forEach((key, val) {
+      _list.add(key);
+    });
+    return _list;
+  }
+
+  void initDropdown() {
+    _serviceResults = iterateMap(model.FaultCheck);
     _dropDownMenuItems = getDropDownMenuItems(_serviceResults);
     _dropDownMenuStatus = getDropDownMenuItems(_recall);
     _currentResult = _dropDownMenuItems[0].value;
     _currentStatus = _dropDownMenuStatus[0].value;
+  }
+
+  void initState(){
+    model = MainModel.of(context);
+    initDropdown();
     getRole();
     super.initState();
   }
@@ -85,16 +87,46 @@ class _MandatoryRequestState extends State<MandatoryRequest> {
       setState(() {
         _equipment = resp['Data'];
       });
+    } else {
+      showDialog(context: context, builder: (context) => AlertDialog(title: new Text(resp['ResultMessage']),));
     }
   }
-  Future getImage() async {
+    void showSheet(context) {
+    showModalBottomSheet(context: context, builder: (context) {
+      return new ListView(
+        shrinkWrap: true,
+        children: <Widget>[
+          ListTile(
+            trailing: new Icon(Icons.collections),
+            title: new Text('从相册添加'),
+            onTap: () {
+              getImage(ImageSource.gallery);
+            },
+          ),
+          ListTile(
+            trailing: new Icon(Icons.add_a_photo),
+            title: new Text('拍照添加'),
+            onTap: () {
+              getImage(ImageSource.camera);
+            },
+          ),
+        ],
+      );
+    });
+  }
+Future getImage(ImageSource sourceType) async {
     var image = await ImagePicker.pickImage(
-        source: ImageSource.camera,
-      imageQuality: 10
+        source: sourceType,
     );
     if (image != null) {
+      var compressed = await FlutterImageCompress.compressAndGetFile(
+        image.absolute.path,
+        image.absolute.path,
+        minHeight: 800,
+        minWidth: 600,
+      );
       setState(() {
-        _imageList.add(image);
+        _imageList.add(compressed);
       });
     }
   }
@@ -203,18 +235,24 @@ class _MandatoryRequestState extends State<MandatoryRequest> {
             }
           ],
           'FaultType': {
-            'ID': AppConstants.FaultCheck[_currentResult],
+            'ID': model.FaultCheck[_currentResult],
           },
           'IsRecall': _currentStatus == '是' ? true : false,
           'FaultDesc': _fault.text,
           'Files': fileList
         }
       };
+      setState(() {
+        hold = true;
+      });
       var resp = await HttpRequest.request(
           '/Request/AddRequest',
           method: HttpRequest.POST,
           data: _data
       );
+      setState(() {
+        hold = false;
+      });
       print(resp);
       if (resp['ResultCode'] == '00') {
         showDialog(context: context, builder: (buider) =>
@@ -483,7 +521,7 @@ class _MandatoryRequestState extends State<MandatoryRequest> {
                                       new IconButton(
                                           icon: Icon(Icons.add_a_photo),
                                           onPressed: () {
-                                            getImage();
+                                            showSheet(context);
                                           })
                                     ],
                                   ),
@@ -505,10 +543,10 @@ class _MandatoryRequestState extends State<MandatoryRequest> {
                       children: <Widget>[
                         new RaisedButton(
                           onPressed: () {
-                            submit();
+                            return hold?null:submit();
                           },
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(24),
+                            borderRadius: BorderRadius.circular(6),
                           ),
                           padding: EdgeInsets.all(12.0),
                           color: new Color(0xff2E94B9),
@@ -519,16 +557,16 @@ class _MandatoryRequestState extends State<MandatoryRequest> {
                             Navigator.of(context).pop();
                           },
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(24),
+                            borderRadius: BorderRadius.circular(6),
                           ),
                           padding: EdgeInsets.all(12.0),
                           color: new Color(0xffD25565),
                           child: Text('返回首页', style: TextStyle(color: Colors.white)),
                         ),
                       ],
-                    )
+                    ),
+                    SizedBox(height: 24.0),
                   ],
-
                 ),
               ),
             )

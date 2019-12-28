@@ -4,6 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 import 'package:atoi/utils/http_request.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:flutter/cupertino.dart';
 
 class CompleteInfo extends StatefulWidget {
   _CompleteInfoState createState() => new _CompleteInfoState();
@@ -139,6 +140,8 @@ class _CompleteInfoState extends State<CompleteInfo> {
       }
     };
     var prefs = await _prefs;
+    userInfo['Name'] = _name.text;
+    userInfo['Mobile'] = _mobile.text;
     userInfo['Email'] = _email.text;
     userInfo['Address'] = _addr.text;
     userInfo['Department'] = _depart;
@@ -178,11 +181,11 @@ class _CompleteInfoState extends State<CompleteInfo> {
       new SizedBox(height: 20.0,),
       BuildWidget.buildRow('用户名/手机号', userInfo['LoginID']),
       new Divider(),
-      BuildWidget.buildInput('姓名', _name),
-      BuildWidget.buildInput('电话', _mobile),
-      BuildWidget.buildInput('邮箱', _email),
-      BuildWidget.buildInput('地址', _addr),
-      BuildWidget.buildInput('新密码', _newPass),
+      BuildWidget.buildInput('姓名', _name, lines: 1),
+      BuildWidget.buildInput('电话', _mobile, lines: 1),
+      BuildWidget.buildInput('邮箱', _email, lines: 1),
+      BuildWidget.buildInput('地址', _addr, lines: 1),
+      BuildWidget.buildInput('新密码', _newPass, lines: 1),
       new Divider(),
       userInfo['Role']['ID']==4?buildDropdown('科室', currentDepart, dropdownItems, changedDropDownMethod):new Container(),
       new SizedBox(height: 20.0,),
@@ -196,7 +199,7 @@ class _CompleteInfoState extends State<CompleteInfo> {
               submit();
             },
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(24),
+              borderRadius: BorderRadius.circular(6),
             ),
             padding: EdgeInsets.all(12.0),
             color: new Color(0xff2E94B9),
