@@ -395,6 +395,8 @@ class _ManagerCompletePageState extends State<ManagerCompletePage> {
     }
     _list.addAll([
       BuildWidget.buildRow('作业报告结果', _report['SolutionResultStatus']['Name']),
+      BuildWidget.buildRow('备注', _report['Comments']),
+      _report['DelayReason']!=''?BuildWidget.buildRow('误工说明', _report['DelayReason']):new Container(),
       BuildWidget.buildRow('附件', ''),
       buildReportImageColumn(),
       BuildWidget.buildRow('审批备注', _report['FujiComments']??'')

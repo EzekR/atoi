@@ -27,8 +27,8 @@ class _EquipmentBarchartState extends State<EquipmentBarchart> {
   List _tableData = [];
   String _tableName = '年份';
   String _currentDimension = '';
-  String _dim1 = '';
-  String _dim2 = '';
+  String _dim1 = ReportDimensions.DIMS[1]['Name'];
+  String _dim2 = ReportDimensions.YEARS[0].toString();
 
   Future<void> initDimension() async {
     var _list = ReportDimensions.DIMS.map((_dim) => {
@@ -42,12 +42,15 @@ class _EquipmentBarchartState extends State<EquipmentBarchart> {
   void initState() {
     super.initState();
     initDimension();
+    _currentDimension = _dim1;
+    getChartData(_dim1, _dim2);
   }
 
   showPickerDialog(BuildContext context) {
     Picker(
         cancelText: '取消',
         confirmText: '确认',
+        selecteds: [ReportDimensions.DIMS.indexWhere((elem) => elem['Name']==_dim1), ReportDimensions.YEARS.indexOf(_dim2)<0?0:ReportDimensions.YEARS.indexOf(_dim2)],
         adapter: PickerDataAdapter<String>(pickerdata: _dimensionList),
         hideHeader: true,
         title: new Text("请选择维度"),
@@ -139,27 +142,20 @@ class _EquipmentBarchartState extends State<EquipmentBarchart> {
       crossAxisAlignment: CrossAxisAlignment.center,
       children: <Widget>[
         new Container(
-          height: _tableData.length*40.toDouble(),
+          height: _tableData.length*50.0+60.0,
           child: new charts.BarChart(
             seriesList,
             animate: true,
             vertical: false,
             barRendererDecorator: new charts.BarLabelDecorator<String>(),
+            behaviors: [
+              new charts.ChartTitle(widget.labelY,
+                  behaviorPosition: charts.BehaviorPosition.bottom,
+                  titleOutsideJustification:
+                  charts.OutsideJustification.middleDrawArea),
+            ],
           ),
         ),
-        new SizedBox(height: 20.0,),
-        new Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            new Text(
-              widget.labelY,
-              style: new TextStyle(
-                color: Colors.blue,
-                fontWeight: FontWeight.w600
-              ),
-            )
-          ],
-        )
       ],
     );
   }
@@ -188,7 +184,16 @@ class _EquipmentBarchartState extends State<EquipmentBarchart> {
               children: <Widget>[
                 buildPickerRow(context),
                 seriesList==null?new Container():buildChart(),
-                _tableData!=null&&_tableData.isNotEmpty?buildTable():new Container()
+                new SizedBox(height: 8.0,),
+                new Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    new Text('数据列表')
+                  ],
+                ),
+                _tableData!=null&&_tableData.isNotEmpty?buildTable():new Center(
+                  child: Text('暂无数据'),
+                )
               ],
             )
         );

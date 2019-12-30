@@ -6,14 +6,16 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter_picker/flutter_picker.dart';
 import 'package:atoi/utils/http_request.dart';
 import 'package:atoi/utils/report_dimensions.dart';
+import 'package:syncfusion_flutter_charts/charts.dart';
 
 class ServiceBarchartLine extends StatefulWidget {
 
-  ServiceBarchartLine({Key key, this.endpoint, this.chartName, this.requestType, this.status}):super(key: key);
+  ServiceBarchartLine({Key key, this.endpoint, this.chartName, this.requestType, this.status, this.labelY}):super(key: key);
   final String endpoint;
   final String chartName;
   final String requestType;
   final String status;
+  final String labelY;
   _ServiceBarchartLineState createState() => _ServiceBarchartLineState();
 }
 
@@ -28,6 +30,8 @@ class _ServiceBarchartLineState extends State<ServiceBarchartLine> {
   String _tableName = '年份';
   String _currentDimension = '';
   ScrollController _scrollController;
+  String _dim1 = '年';
+  String _dim2 = '2019';
 
   Future<void> initDimension() async {
     List _list = [
@@ -52,6 +56,7 @@ class _ServiceBarchartLineState extends State<ServiceBarchartLine> {
     Picker(
         cancelText: '取消',
         confirmText: '确认',
+        selecteds: [_dim1=='年'?0:1, ReportDimensions.YEARS.indexOf(int.parse(_dim2))],
         adapter: PickerDataAdapter<String>(pickerdata: _dimensionList),
         hideHeader: true,
         title: new Text("请选择维度"),
@@ -61,6 +66,8 @@ class _ServiceBarchartLineState extends State<ServiceBarchartLine> {
           getChartData(_selected[0], _selected[1]);
           setState(() {
             _currentDimension = _selected[0];
+            _dim1 = _selected[0];
+            _dim2 = _selected[1];
           });
         }
     ).showDialog(context);
@@ -76,25 +83,7 @@ class _ServiceBarchartLineState extends State<ServiceBarchartLine> {
     );
     if (resp['ResultCode'] == '00') {
       var _data = resp['Data'];
-      var _list = _data.map<ServiceData>((item) => new ServiceData(item['type'], item['total'], item['ratio'])).toList();
       setState(() {
-        seriesList = [
-          new charts.Series<ServiceData, String>(
-            id: 'Sales',
-            colorFn: (_, __) => charts.MaterialPalette.blue.shadeDefault,
-            domainFn: (ServiceData data, _) => data.type,
-            measureFn: (ServiceData data, _) => data.amount,
-            data: _list,
-          ),
-          new charts.Series<ServiceData, String>(
-              id: 'Mobile',
-              colorFn: (_, __) => charts.MaterialPalette.green.shadeDefault,
-              domainFn: (ServiceData sales, _) => sales.type,
-              measureFn: (ServiceData sales, _) => sales.ratio,
-              data: _list)
-            ..setAttribute(charts.rendererIdKey, 'customLine')
-            ..setAttribute(charts.measureAxisIdKey, 'Mobile')
-        ];
         _tableName = type;
         _tableData = _data;
       });
@@ -105,17 +94,19 @@ class _ServiceBarchartLineState extends State<ServiceBarchartLine> {
     return new Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: <Widget>[
-        new FlatButton(
+        new RaisedButton(
             onPressed: () {
               showPickerDialog(context);
             },
             child: new Row(
               children: <Widget>[
-                new Icon(Icons.timeline),
-                new Text('维度')
+                new Icon(Icons.timeline, color: Colors.white,),
+                new Text('维度', style: TextStyle(color: Colors.white),)
               ],
             )
         ),
+        new Text('时间维度分类 $_dim1'),
+        new Text(_dim1=='月'?'年份 $_dim2':_dim2)
       ],
     );
   }
@@ -139,7 +130,7 @@ class _ServiceBarchartLineState extends State<ServiceBarchartLine> {
     );
     return new Card(
       child: new Container(
-        height: _tableData.length*50.0,
+        height: _tableData.length*50.0+60.0,
         child: new ListView(
           scrollDirection: Axis.horizontal,
           controller: _scrollController,
@@ -153,22 +144,38 @@ class _ServiceBarchartLineState extends State<ServiceBarchartLine> {
 
   Container buildChart() {
     return new Container(
-      height: 400.0,
-      child: new charts.OrdinalComboChart(
-        seriesList,
-        animate: true,
-        defaultRenderer: new charts.BarRendererConfig(
-            groupingType: charts.BarGroupingType.grouped),
-        primaryMeasureAxis: new charts.NumericAxisSpec(
-            tickProviderSpec:
-            new charts.BasicNumericTickProviderSpec(desiredTickCount: 3)),
-        secondaryMeasureAxis: new charts.NumericAxisSpec(
-            tickProviderSpec:
-            new charts.BasicNumericTickProviderSpec(desiredTickCount: 3)),
-        customSeriesRenderers: [
-          new charts.LineRendererConfig(
-              customRendererId: 'customLine')
-        ]
+      child: SfCartesianChart(
+        // Initialize category axis
+          primaryXAxis: CategoryAxis(
+              labelRotation: 60
+          ),
+          primaryYAxis: NumericAxis(
+              title: AxisTitle(
+                  text: '请求数量（条）'
+              )
+          ),
+          axes: [
+            NumericAxis(
+                name: 'yAxis',
+                opposedPosition: true,
+                title: AxisTitle(
+                    text: '合格率（%）'
+                )
+            )
+          ],
+          series: <ChartSeries>[
+            ColumnSeries<ServiceData, String>(
+                dataSource: _tableData.map<ServiceData>((item) => ServiceData(item['type'], item['total'])).toList(),
+                xValueMapper: (ServiceData data, _) => data.type,
+                yValueMapper: (ServiceData data, _) => data.amount
+            ),
+            LineSeries<ServiceRatio, String>(
+                dataSource: _tableData.map<ServiceRatio>((item) => ServiceRatio(item['type'], item['ratio'])).toList(),
+                xValueMapper: (ServiceRatio data, _) => data.type,
+                yValueMapper: (ServiceRatio data, _) => data.ratio,
+                yAxisName: 'yAxis'
+            ),
+          ]
       ),
     );
   }
@@ -197,7 +204,14 @@ class _ServiceBarchartLineState extends State<ServiceBarchartLine> {
               controller: _scrollController,
               children: <Widget>[
                 buildPickerRow(context),
-                seriesList==null?new Container():buildChart(),
+                _tableData==null?new Container():buildChart(),
+                new SizedBox(height: 8.0,),
+                new Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    new Text('数据列表')
+                  ],
+                ),
                 _tableData!=null&&_tableData.isNotEmpty?buildTable():new Container()
               ],
             )
@@ -210,7 +224,13 @@ class _ServiceBarchartLineState extends State<ServiceBarchartLine> {
 class ServiceData {
   final String type;
   final double amount;
+
+  ServiceData(this.type, this.amount);
+}
+
+class ServiceRatio {
+  final String type;
   final double ratio;
 
-  ServiceData(this.type, this.amount, this.ratio);
+  ServiceRatio(this.type, this.ratio);
 }

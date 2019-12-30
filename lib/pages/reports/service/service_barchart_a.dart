@@ -9,12 +9,13 @@ import 'package:atoi/utils/report_dimensions.dart';
 
 class ServiceAssets extends StatefulWidget {
   static String tag = '设备数量';
-  ServiceAssets({Key key, this.assetType, this.endpoint, this.chartName, this.requestType, this.status}):super(key: key);
+  ServiceAssets({Key key, this.assetType, this.endpoint, this.chartName, this.requestType, this.status, this.labelY}):super(key: key);
   final String assetType;
   final String endpoint;
   final String chartName;
   final String requestType;
   final String status;
+  final String labelY;
   _ServiceAssetsState createState() => _ServiceAssetsState();
 }
 
@@ -127,7 +128,7 @@ class _ServiceAssetsState extends State<ServiceAssets> {
 
   Container buildChart() {
     return new Container(
-      height: _tableData.length*40.toDouble(),
+      height: _tableData.length*50.0+60.0,
       child: new charts.BarChart(
         seriesList,
         animate: true,
@@ -160,6 +161,13 @@ class _ServiceAssetsState extends State<ServiceAssets> {
               children: <Widget>[
                 buildPickerRow(context),
                 seriesList==null?new Container():buildChart(),
+                new SizedBox(height: 8.0,),
+                new Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    new Text('数据列表')
+                  ],
+                ),
                 _tableData!=null&&_tableData.isNotEmpty?buildTable():new Container()
               ],
             )

@@ -9,11 +9,12 @@ import 'package:atoi/utils/report_dimensions.dart';
 
 class ServiceLinechartA extends StatefulWidget {
 
-  ServiceLinechartA({Key key, this.chartName, this.endpoint, this.requestType, this.status}):super(key: key);
+  ServiceLinechartA({Key key, this.chartName, this.endpoint, this.requestType, this.status, this.labelY}):super(key: key);
   final String endpoint;
   final String chartName;
   final String requestType;
   final String status;
+  final String labelY;
   _ServiceLinechartAState createState() => _ServiceLinechartAState();
 }
 
@@ -31,7 +32,6 @@ class _ServiceLinechartAState extends State<ServiceLinechartA> {
 
   Future<void> initDimension() async {
     _dimSlice = ReportDimensions.DIMS.sublist(2, 8);
-    print(_dimSlice);
     List _list = _dimSlice.map((_dim) => {_dim['Name'].toString(): [
       {
         '年': ReportDimensions.YEARS.map((_year) => {_year.toString(): [' ']}).toList()
@@ -127,7 +127,7 @@ class _ServiceLinechartAState extends State<ServiceLinechartA> {
     );
     return new Card(
         child: new Container(
-          height: _tableData.length*50.0,
+          height: _tableData.length*50.0+60.0,
           child: new ListView(
             scrollDirection: Axis.horizontal,
             controller: _scrollController,
@@ -183,6 +183,13 @@ class _ServiceLinechartAState extends State<ServiceLinechartA> {
               children: <Widget>[
                 buildPickerRow(context),
                 _tableData!=null&&_tableData.isNotEmpty?buildChart():new Container(),
+                new SizedBox(height: 8.0,),
+                new Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    new Text('数据列表')
+                  ],
+                ),
                 _tableData!=null&&_tableData.isNotEmpty?buildTable():new Container()
               ],
             )

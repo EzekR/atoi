@@ -9,9 +9,10 @@ import 'package:atoi/utils/report_dimensions.dart';
 
 class EquipmentLinechart extends StatefulWidget {
 
-  EquipmentLinechart({Key key, this.chartName, this.endpoint}):super(key: key);
+  EquipmentLinechart({Key key, this.labelY, this.chartName, this.endpoint}):super(key: key);
   final String chartName;
   final String endpoint;
+  final String labelY;
   _EquipmentLinechartState createState() => _EquipmentLinechartState();
 }
 
@@ -25,6 +26,8 @@ class _EquipmentLinechartState extends State<EquipmentLinechart> {
   String _tableName = '年份';
   String _currentDimension = '';
   ScrollController _scrollController;
+  String _dim1 = ReportDimensions.DIMS[1]['Name'];
+  String _dim2 = ReportDimensions.YEARS[0].toString();
 
   Future<void> initDimension() async {
     List _list = ReportDimensions.DIMS.map((item) => {
@@ -38,6 +41,8 @@ class _EquipmentLinechartState extends State<EquipmentLinechart> {
   void initState() {
     super.initState();
     initDimension();
+    _currentDimension = _dim1;
+    getChartData(_dim1, _dim2);
   }
 
   showPickerModal(BuildContext context) {
@@ -45,6 +50,7 @@ class _EquipmentLinechartState extends State<EquipmentLinechart> {
         cancelText: '取消',
         confirmText: '确认',
         adapter: PickerDataAdapter<String>(pickerdata: _dimensionList),
+        selecteds: [ReportDimensions.DIMS.indexWhere((elem) => elem['Name']==_dim1), ReportDimensions.YEARS.indexOf(int.parse(_dim2))<0?0:ReportDimensions.YEARS.indexOf(int.parse(_dim2))],
         hideHeader: false,
         title: new Text("请选择维度"),
         selectedTextStyle: TextStyle(color: Colors.blue),
@@ -53,6 +59,8 @@ class _EquipmentLinechartState extends State<EquipmentLinechart> {
           getChartData(_selected[0], _selected[1]);
           setState(() {
             _currentDimension = _selected[0];
+            _dim1 = _selected[0];
+            _dim2 = _selected[1]==' '?'0':_selected[1];
           });
         }
     ).showModal(context);
@@ -81,17 +89,19 @@ class _EquipmentLinechartState extends State<EquipmentLinechart> {
     return new Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: <Widget>[
-        new FlatButton(
+        new RaisedButton(
             onPressed: () {
               showPickerModal(context);
             },
             child: new Row(
               children: <Widget>[
-                new Icon(Icons.timeline),
-                new Text('维度')
+                new Icon(Icons.timeline, color: Colors.white,),
+                new Text('维度', style: TextStyle(color: Colors.white),)
               ],
             )
         ),
+        new Text(_dim1??''),
+        new Text(_dim1=='时间类型-年'?'':'年份：${_dim2}'),
       ],
     );
   }
@@ -117,7 +127,7 @@ class _EquipmentLinechartState extends State<EquipmentLinechart> {
     );
     return new Card(
         child: new Container(
-          height: _tableData.length*50.0,
+          height: _tableData.length*50.0+60.0,
           child: new ListView(
             scrollDirection: Axis.horizontal,
             controller: _scrollController,
@@ -134,7 +144,14 @@ class _EquipmentLinechartState extends State<EquipmentLinechart> {
     return new Container(
       child: SfCartesianChart(
         // Initialize category axis
-          primaryXAxis: CategoryAxis(),
+          primaryXAxis: CategoryAxis(
+            labelRotation: 60
+          ),
+          primaryYAxis: NumericAxis(
+            title: AxisTitle(
+              text: widget.labelY
+            )
+          ),
           series: <LineSeries<EquipmentData, String>>[
             LineSeries<EquipmentData, String>(
               // Bind data source
@@ -173,7 +190,16 @@ class _EquipmentLinechartState extends State<EquipmentLinechart> {
               children: <Widget>[
                 buildPickerRow(context),
                 _tableData!=null&&_tableData.isNotEmpty?buildChart():new Container(),
-                _tableData!=null&&_tableData.isNotEmpty?buildTable():new Container()
+                new SizedBox(height: 8.0,),
+                new Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    new Text('数据列表')
+                  ],
+                ),
+                _tableData!=null&&_tableData.isNotEmpty?buildTable():new Center(
+                  child: Text('暂无数据'),
+                )
               ],
             )
         );

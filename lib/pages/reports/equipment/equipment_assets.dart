@@ -9,10 +9,11 @@ import 'package:atoi/utils/report_dimensions.dart';
 
 class EquipmentAssets extends StatefulWidget {
   static String tag = '设备数量';
-  EquipmentAssets({Key key, this.assetType, this.endpoint, this.chartName}):super(key: key);
+  EquipmentAssets({Key key, this.assetType, this.endpoint, this.chartName, this.labelY}):super(key: key);
   final String assetType;
   final String endpoint;
   final String chartName;
+  final String labelY;
   _EquipmentAssetsState createState() => _EquipmentAssetsState();
 }
 
@@ -26,6 +27,8 @@ class _EquipmentAssetsState extends State<EquipmentAssets> {
   List _tableData = [];
   String _tableName = '年份';
   String _currentDimension = '';
+  int _dim1 = ReportDimensions.YEARS[0];
+  int _dim2 = ReportDimensions.MONTHS[0];
 
   Future<void> initDimension() async {
     var _list = ReportDimensions.YEARS.map((_year) => {
@@ -39,6 +42,7 @@ class _EquipmentAssetsState extends State<EquipmentAssets> {
   void initState() {
     super.initState();
     initDimension();
+    getChartData(_dim1.toString(), _dim2.toString());
   }
 
   showPickerDialog(BuildContext context) {
@@ -46,6 +50,7 @@ class _EquipmentAssetsState extends State<EquipmentAssets> {
         cancelText: '取消',
         confirmText: '确认',
         adapter: PickerDataAdapter<String>(pickerdata: _dimensionList),
+        selecteds: [ReportDimensions.YEARS.indexOf(_dim1), ReportDimensions.MONTHS.indexOf(_dim2)],
         hideHeader: true,
         title: new Text("请选择维度"),
         selectedTextStyle: TextStyle(color: Colors.blue),
@@ -54,6 +59,8 @@ class _EquipmentAssetsState extends State<EquipmentAssets> {
           getChartData(_selected[0], _selected[1]);
           setState(() {
             _currentDimension = _selected[0];
+            _dim1 = int.parse(_selected[0]);
+            _dim2 = int.parse(_selected[1]);
           });
         }
     ).showDialog(context);
@@ -78,6 +85,7 @@ class _EquipmentAssetsState extends State<EquipmentAssets> {
             colorFn: (_, __) => charts.MaterialPalette.blue.shadeDefault,
             domainFn: (EquipmentData data, _) => data.type,
             measureFn: (EquipmentData data, _) => data.amount,
+            labelAccessorFn: (EquipmentData data, _) => '${data.amount.toString()}',
             data: _list,
           )
         ];
@@ -90,17 +98,19 @@ class _EquipmentAssetsState extends State<EquipmentAssets> {
     return new Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: <Widget>[
-        new FlatButton(
+        new RaisedButton(
             onPressed: () {
               showPickerDialog(context);
             },
             child: new Row(
               children: <Widget>[
-                new Icon(Icons.timeline),
-                new Text('维度')
+                new Icon(Icons.timeline, color: Colors.white,),
+                new Text('维度', style: new TextStyle(color: Colors.white),)
               ],
             )
         ),
+        new Text('年份:${_dim1.toString()}'),
+        new Text('月份:${_dim2.toString()}')
       ],
     );
   }
@@ -109,7 +119,7 @@ class _EquipmentAssetsState extends State<EquipmentAssets> {
     var _dataTable = new DataTable(
         columns: [
           DataColumn(label: Text('阶段', textAlign: TextAlign.center, style: new TextStyle(color: Colors.blue, fontSize: 14.0),)),
-          DataColumn(label: Text(widget.assetType=='contract_amount'||widget.assetType=='contract_years'?'合同条数':'设备数量', textAlign: TextAlign.center, style: new TextStyle(color: Colors.blue, fontSize: 14.0),)),
+          DataColumn(label: Text(widget.labelY, textAlign: TextAlign.center, style: new TextStyle(color: Colors.blue, fontSize: 14.0),)),
         ],
         rows: _tableData.map((item) => DataRow(
             cells: [
@@ -128,11 +138,18 @@ class _EquipmentAssetsState extends State<EquipmentAssets> {
       crossAxisAlignment: CrossAxisAlignment.center,
       children: <Widget>[
         new Container(
-          height: _tableData.length*40.toDouble(),
+          height: _tableData.length*50.0+60.0,
           child: new charts.BarChart(
             seriesList,
             animate: true,
             vertical: false,
+            barRendererDecorator: new charts.BarLabelDecorator<String>(),
+            behaviors: [
+              new charts.ChartTitle(widget.labelY,
+                  behaviorPosition: charts.BehaviorPosition.bottom,
+                  titleOutsideJustification:
+                  charts.OutsideJustification.middleDrawArea),
+            ],
           ),
         ),
       ],
@@ -163,7 +180,16 @@ class _EquipmentAssetsState extends State<EquipmentAssets> {
               children: <Widget>[
                 buildPickerRow(context),
                 seriesList==null?new Container():buildChart(),
-                _tableData!=null&&_tableData.isNotEmpty?buildTable():new Container()
+                new SizedBox(height: 8.0,),
+                new Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    new Text('数据列表')
+                  ],
+                ),
+                _tableData!=null&&_tableData.isNotEmpty?buildTable():new Center(
+                  child: new Text('暂无数据'),
+                )
               ],
             )
         );

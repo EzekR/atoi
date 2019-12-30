@@ -9,9 +9,10 @@ import 'package:atoi/utils/report_dimensions.dart';
 
 class EquipmentLinechartA extends StatefulWidget {
 
-  EquipmentLinechartA({Key key, this.chartName, this.endpoint}):super(key: key);
+  EquipmentLinechartA({Key key, this.chartName, this.endpoint, this.labelY}):super(key: key);
   final String endpoint;
   final String chartName;
+  final String labelY;
   _EquipmentLinechartAState createState() => _EquipmentLinechartAState();
 }
 
@@ -26,10 +27,26 @@ class _EquipmentLinechartAState extends State<EquipmentLinechartA> {
   String _tableName = '年份';
   String _currentDimension = '';
   ScrollController _scrollController;
+  String _dim1 = ReportDimensions.DIMS[3]['Name'];
+  String _dim2 = ReportDimensions.TIME_TYPES[0];
+  String _dim3 = ReportDimensions.YEARS[0].toString();
+  String _dim4 = ReportDimensions.MONTHS[0].toString();
+
+  Map _tableTitle = {
+    'EquipmentRatioReport': ['当年数量', '去年数量', '增长率（%）'],
+    'FailureRatioReport': ['当年故障率', '去年故障率', '同比（%）'],
+    'BootRatioReport': ['当年开机率', '去年开机率', '同比（%）'],
+    'ExpenditureRatioReport': ['当年支出', '去年支出', '同比（%）'],
+    'EquipmentIncomeReport': ['当年收入', '去年收入', '同比（%）'],
+    'EquipmentIncomeRatioReport': ['当年收入', '去年收入', '同比（%）'],
+    'IncomeRatioExpenditureReport': ['收入', '支出', '收支比（%）'],
+    'RepairRequestGrowthRatioReport': ['当年数量', '去年数量', '增长率（%）'],
+    'RepairRatioReport?requestType=1&status=3': ['非供应商维修数', '维修总数', '自修率（%）'],
+    'Supplier_RepairRatioReport?requestType=1&status=3': ['供应商维修数', '维修总数', '供应商维修率（%）'],
+  };
 
   Future<void> initDimension() async {
     _dimSlice = ReportDimensions.DIMS.sublist(2, 8);
-    print(_dimSlice);
     List _list = _dimSlice.map((_dim) => {_dim['Name'].toString(): [
       {
         '年': ReportDimensions.YEARS.map((_year) => {_year.toString(): [' ']}).toList()
@@ -47,12 +64,15 @@ class _EquipmentLinechartAState extends State<EquipmentLinechartA> {
   void initState() {
     super.initState();
     initDimension();
+    _currentDimension = _dim1;
+    getChartData(_dim1, _dim3, _dim4);
   }
 
   showPickerModal(BuildContext context) {
     Picker(
         cancelText: '取消',
         confirmText: '确认',
+        //selecteds: [_dimSlice.indexWhere((elem) => elem['Name']==_dim1)],
         adapter: PickerDataAdapter<String>(pickerdata: _dimensionList),
         hideHeader: false,
         title: new Text("请选择维度"),
@@ -62,6 +82,10 @@ class _EquipmentLinechartAState extends State<EquipmentLinechartA> {
           getChartData(_selected[0], _selected[2].toString(), _selected[3].toString());
           setState(() {
             _currentDimension = _selected[0];
+            _dim1 = _selected[0];
+            _dim2 = _selected[1].toString();
+            _dim3 = _selected[2].toString();
+            _dim4 = _selected[3].toString();
           });
         }
     ).showModal(context);
@@ -91,17 +115,21 @@ class _EquipmentLinechartAState extends State<EquipmentLinechartA> {
     return new Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: <Widget>[
-        new FlatButton(
+        new RaisedButton(
             onPressed: () {
               showPickerModal(context);
             },
             child: new Row(
               children: <Widget>[
-                new Icon(Icons.timeline),
-                new Text('维度')
+                new Icon(Icons.timeline, color: Colors.white,),
+                new Text('维度', style: TextStyle(color: Colors.white),)
               ],
             )
         ),
+        new Text(_dim1),
+        new Text(_dim2),
+        new Text('年份:$_dim3'),
+        new Text(_dim2=='月'?'月份:$_dim4':''),
       ],
     );
   }
@@ -110,9 +138,9 @@ class _EquipmentLinechartAState extends State<EquipmentLinechartA> {
     var _dataTable = new DataTable(
         columns: [
           DataColumn(label: Text(_currentDimension, textAlign: TextAlign.center, style: new TextStyle(color: Colors.blue, fontSize: 14.0),)),
-          DataColumn(label: Text('当年故障率', textAlign: TextAlign.center, style: new TextStyle(color: Colors.blue, fontSize: 14.0),)),
-          DataColumn(label: Text('去年故障率', textAlign: TextAlign.center, style: new TextStyle(color: Colors.blue, fontSize: 14.0),)),
-          DataColumn(label: Text('同比（%）', textAlign: TextAlign.center, style: new TextStyle(color: Colors.blue, fontSize: 14.0),)),
+          DataColumn(label: Text(_tableTitle[widget.endpoint][0], textAlign: TextAlign.center, style: new TextStyle(color: Colors.blue, fontSize: 14.0),)),
+          DataColumn(label: Text(_tableTitle[widget.endpoint][1], textAlign: TextAlign.center, style: new TextStyle(color: Colors.blue, fontSize: 14.0),)),
+          DataColumn(label: Text(_tableTitle[widget.endpoint][2], textAlign: TextAlign.center, style: new TextStyle(color: Colors.blue, fontSize: 14.0),)),
         ],
         rows: _tableData.map((item) => DataRow(
             cells: [
@@ -125,7 +153,7 @@ class _EquipmentLinechartAState extends State<EquipmentLinechartA> {
     );
     return new Card(
         child: new Container(
-          height: _tableData.length*50.0,
+          height: _tableData.length*50.0+60.0,
           child: new ListView(
             scrollDirection: Axis.horizontal,
             controller: _scrollController,
@@ -142,7 +170,14 @@ class _EquipmentLinechartAState extends State<EquipmentLinechartA> {
     return new Container(
       child: SfCartesianChart(
         // Initialize category axis
-          primaryXAxis: CategoryAxis(),
+          primaryXAxis: CategoryAxis(
+            labelRotation:60
+          ),
+          primaryYAxis: NumericAxis(
+              title: AxisTitle(
+                  text: widget.labelY
+              )
+          ),
           series: <LineSeries<EquipmentData, String>>[
             LineSeries<EquipmentData, String>(
               // Bind data source
@@ -181,7 +216,16 @@ class _EquipmentLinechartAState extends State<EquipmentLinechartA> {
               children: <Widget>[
                 buildPickerRow(context),
                 _tableData!=null&&_tableData.isNotEmpty?buildChart():new Container(),
-                _tableData!=null&&_tableData.isNotEmpty?buildTable():new Container()
+                new SizedBox(height: 8.0,),
+                new Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    new Text('数据列表')
+                  ],
+                ),
+                _tableData!=null&&_tableData.isNotEmpty?buildTable():new Center(
+                  child: Text('暂无数据'),
+                )
               ],
             )
         );

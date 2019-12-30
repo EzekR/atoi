@@ -9,11 +9,12 @@ import 'package:atoi/utils/report_dimensions.dart';
 
 class ServiceLinechartB extends StatefulWidget {
 
-  ServiceLinechartB({Key key, this.chartName, this.endpoint, this.status, this.requestType}):super(key: key);
+  ServiceLinechartB({Key key, this.chartName, this.endpoint, this.status, this.requestType, this.labelY}):super(key: key);
   final String chartName;
   final String endpoint;
   final String requestType;
   final String status;
+  final String labelY;
   _ServiceLinechartBState createState() => _ServiceLinechartBState();
 }
 
@@ -27,6 +28,8 @@ class _ServiceLinechartBState extends State<ServiceLinechartB> {
   String _tableName = '年份';
   String _currentDimension = '';
   ScrollController _scrollController;
+  String _dim1 = '年';
+  String _dim2 = ' ';
 
   Future<void> initDimension() async {
     List _list = [
@@ -45,12 +48,14 @@ class _ServiceLinechartBState extends State<ServiceLinechartB> {
   void initState() {
     super.initState();
     initDimension();
+    getChartData(_dim1, _dim2);
   }
 
   showPickerModal(BuildContext context) {
     Picker(
         cancelText: '取消',
         confirmText: '确认',
+        selecteds: [_dim1=='年'?0:1, _dim2==' '?0:ReportDimensions.YEARS.indexOf(int.parse(_dim2))],
         adapter: PickerDataAdapter<String>(pickerdata: _dimensionList),
         hideHeader: false,
         title: new Text("请选择维度"),
@@ -60,6 +65,8 @@ class _ServiceLinechartBState extends State<ServiceLinechartB> {
           getChartData(_selected[0], _selected[1]);
           setState(() {
             _currentDimension = _selected[0];
+            _dim1 = _selected[0];
+            _dim2 = _selected[1];
           });
         }
     ).showModal(context);
@@ -69,6 +76,8 @@ class _ServiceLinechartBState extends State<ServiceLinechartB> {
     var _data = {};
     if (type == '月') {
       _data['year'] = year;
+    } else {
+      _data['year'] = 0;
     }
     var resp = await HttpRequest.request(
         '/Report/${widget.endpoint}',
@@ -88,17 +97,19 @@ class _ServiceLinechartBState extends State<ServiceLinechartB> {
     return new Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: <Widget>[
-        new FlatButton(
+        new RaisedButton(
             onPressed: () {
               showPickerModal(context);
             },
             child: new Row(
               children: <Widget>[
-                new Icon(Icons.timeline),
-                new Text('维度')
+                new Icon(Icons.timeline, color: Colors.white,),
+                new Text('维度', style: TextStyle(color: Colors.white),)
               ],
             )
         ),
+        new Text('时间维度分类：$_dim1'),
+        new Text(_dim1=='月'?'年份：$_dim2':_dim2),
       ],
     );
   }
@@ -106,25 +117,23 @@ class _ServiceLinechartBState extends State<ServiceLinechartB> {
   Card buildTable() {
     var _dataTable = new DataTable(
         columns: [
-          DataColumn(label: Text(_currentDimension, textAlign: TextAlign.center, style: new TextStyle(color: Colors.blue, fontSize: 14.0),)),
-          DataColumn(label: Text('故障时间（H）', textAlign: TextAlign.center, style: new TextStyle(color: Colors.blue, fontSize: 14.0),)),
-          DataColumn(label: Text('总时间（D）', textAlign: TextAlign.center, style: new TextStyle(color: Colors.blue, fontSize: 14.0),)),
-          DataColumn(label: Text('设备数量（台）', textAlign: TextAlign.center, style: new TextStyle(color: Colors.blue, fontSize: 14.0),)),
-          DataColumn(label: Text('故障率（%）', textAlign: TextAlign.center, style: new TextStyle(color: Colors.blue, fontSize: 14.0),)),
+          DataColumn(label: Text('类型', textAlign: TextAlign.center, style: new TextStyle(color: Colors.blue, fontSize: 14.0),)),
+          DataColumn(label: Text('达标数量', textAlign: TextAlign.center, style: new TextStyle(color: Colors.blue, fontSize: 14.0),)),
+          DataColumn(label: Text('总数量', textAlign: TextAlign.center, style: new TextStyle(color: Colors.blue, fontSize: 14.0),)),
+          DataColumn(label: Text('达标率（%）', textAlign: TextAlign.center, style: new TextStyle(color: Colors.blue, fontSize: 14.0),)),
         ],
         rows: _tableData.map((item) => DataRow(
             cells: [
               DataCell(Text(item['type'])),
-              DataCell(Text(item['repairTime'].toString())),
-              DataCell(Text(item['totalTime'].toString())),
-              DataCell(Text(item['eqptCount'].toString())),
+              DataCell(Text(item['cur'].toString())),
+              DataCell(Text(item['last'].toString())),
               DataCell(Text(item['ratio'].toString())),
             ]
         )).toList()
     );
     return new Card(
         child: new Container(
-          height: _tableData.length*50.0,
+          height: _tableData.length*50.0+60.0,
           child: new ListView(
             scrollDirection: Axis.horizontal,
             controller: _scrollController,
@@ -180,6 +189,13 @@ class _ServiceLinechartBState extends State<ServiceLinechartB> {
               children: <Widget>[
                 buildPickerRow(context),
                 _tableData!=null&&_tableData.isNotEmpty?buildChart():new Container(),
+                new SizedBox(height: 8.0,),
+                new Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    new Text('数据列表')
+                  ],
+                ),
                 _tableData!=null&&_tableData.isNotEmpty?buildTable():new Container()
               ],
             )

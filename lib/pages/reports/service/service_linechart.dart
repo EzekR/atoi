@@ -9,11 +9,12 @@ import 'package:atoi/utils/report_dimensions.dart';
 
 class ServiceLinechart extends StatefulWidget {
 
-  ServiceLinechart({Key key, this.chartName, this.endpoint, this.status, this.requestType}):super(key: key);
+  ServiceLinechart({Key key, this.chartName, this.endpoint, this.status, this.requestType, this.labelY}):super(key: key);
   final String chartName;
   final String endpoint;
   final String requestType;
   final String status;
+  final String labelY;
   _ServiceLinechartState createState() => _ServiceLinechartState();
 }
 
@@ -28,9 +29,22 @@ class _ServiceLinechartState extends State<ServiceLinechart> {
   String _tableName = '年份';
   String _currentDimension = '';
   ScrollController _scrollController;
+  String _dim1 = ReportDimensions.DIMS[2]['Name'];
+  String _dim2 = ReportDimensions.TIME_TYPES[0];
+
+  Map _tableTitle = {
+    'RequestRatioReport?requestType=1&status=4': ['响应数量', '计划总数'],
+    'DispatchRatio?status=4': ['执行数', '派工总数'],
+    'RequestRatioReport?requestType=2&status=3': ['实际数量', '计划总数'],
+    'RequestRatioReport?requestType=4&status=3': ['实际数量', '计划数量'],
+    'RequestRatioReport?requestType=3&status=3': ['实际数量', '计划数量'],
+    'RequestRatioReport?requestType=5&status=3': ['实际数量', '计划数量'],
+    'RequestRatioReport?requestType=10&status=4': ['响应数量', '计划总数'],
+    'RequestRatioReport?requestType=10&status=3': ['完成数量', '计划总数'],
+  };
 
   Future<void> initDimension() async {
-    _dimSlice = ReportDimensions.DIMS.sublist(2, 7);
+    _dimSlice = ReportDimensions.DIMS.sublist(2, 8);
     List _list = _dimSlice.map((item) => {
       item['Name'].toString(): [
         '年',
@@ -45,6 +59,8 @@ class _ServiceLinechartState extends State<ServiceLinechart> {
   void initState() {
     super.initState();
     initDimension();
+    _currentDimension = _dim1;
+    getChartData(_dim1, _dim2);
   }
 
   showPickerModal(BuildContext context) {
@@ -60,6 +76,8 @@ class _ServiceLinechartState extends State<ServiceLinechart> {
           getChartData(_selected[0], _selected[1]);
           setState(() {
             _currentDimension = _selected[0];
+            _dim1 = _selected[0];
+            _dim2 = _selected[1];
           });
         }
     ).showModal(context);
@@ -88,17 +106,19 @@ class _ServiceLinechartState extends State<ServiceLinechart> {
     return new Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: <Widget>[
-        new FlatButton(
+        new RaisedButton(
             onPressed: () {
               showPickerModal(context);
             },
             child: new Row(
               children: <Widget>[
-                new Icon(Icons.timeline),
-                new Text('维度')
+                new Icon(Icons.timeline, color: Colors.white,),
+                new Text('维度', style: TextStyle(color: Colors.white),)
               ],
             )
         ),
+        new Text(_dim1??''),
+        new Text(_dim2),
       ],
     );
   }
@@ -107,9 +127,9 @@ class _ServiceLinechartState extends State<ServiceLinechart> {
     var _dataTable = new DataTable(
         columns: [
           DataColumn(label: Text(_currentDimension, textAlign: TextAlign.center, style: new TextStyle(color: Colors.blue, fontSize: 14.0),)),
-          DataColumn(label: Text('执行数', textAlign: TextAlign.center, style: new TextStyle(color: Colors.blue, fontSize: 14.0),)),
-          DataColumn(label: Text('总派工数', textAlign: TextAlign.center, style: new TextStyle(color: Colors.blue, fontSize: 14.0),)),
-          DataColumn(label: Text('执行率（%）', textAlign: TextAlign.center, style: new TextStyle(color: Colors.blue, fontSize: 14.0),)),
+          DataColumn(label: Text(_tableTitle[widget.endpoint][0], textAlign: TextAlign.center, style: new TextStyle(color: Colors.blue, fontSize: 14.0),)),
+          DataColumn(label: Text(_tableTitle[widget.endpoint][1], textAlign: TextAlign.center, style: new TextStyle(color: Colors.blue, fontSize: 14.0),)),
+          DataColumn(label: Text(widget.labelY, textAlign: TextAlign.center, style: new TextStyle(color: Colors.blue, fontSize: 14.0),)),
         ],
         rows: _tableData.map((item) => DataRow(
             cells: [
@@ -122,7 +142,7 @@ class _ServiceLinechartState extends State<ServiceLinechart> {
     );
     return new Card(
         child: new Container(
-          height: _tableData.length*50.0,
+          height: _tableData.length*50.0+60.0,
           child: new ListView(
             scrollDirection: Axis.horizontal,
             controller: _scrollController,
@@ -139,7 +159,14 @@ class _ServiceLinechartState extends State<ServiceLinechart> {
     return new Container(
       child: SfCartesianChart(
         // Initialize category axis
-          primaryXAxis: CategoryAxis(),
+          primaryXAxis: CategoryAxis(
+            labelRotation: 60
+          ),
+          primaryYAxis: NumericAxis(
+              title: AxisTitle(
+                  text: widget.labelY
+              )
+          ),
           series: <LineSeries<ServiceData, String>>[
             LineSeries<ServiceData, String>(
               // Bind data source
@@ -178,6 +205,13 @@ class _ServiceLinechartState extends State<ServiceLinechart> {
               children: <Widget>[
                 buildPickerRow(context),
                 _tableData!=null&&_tableData.isNotEmpty?buildChart():new Container(),
+                new SizedBox(height: 8.0,),
+                new Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    new Text('数据列表')
+                  ],
+                ),
                 _tableData!=null&&_tableData.isNotEmpty?buildTable():new Container()
               ],
             )

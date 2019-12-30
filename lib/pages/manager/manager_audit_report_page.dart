@@ -712,6 +712,7 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
       widget.status!=3&&_currentResult=='待第三方支持'?BuildWidget.buildDropdown('服务提供方', _currentProvider, _dropDownMenuProviders, changeProvider):new Container(),
       widget.status==3&&_currentResult=='待第三方支持'?BuildWidget.buildRow('服务提供方', _currentProvider):new Container(),
       BuildWidget.buildRow('备注', _report['Comments']),
+      _report['DelayReason']!=''?BuildWidget.buildRow('误工说明', _report['DelayReason']):new Container(),
       new Padding(
         padding: EdgeInsets.symmetric(vertical: 5.0),
         child: new Row(

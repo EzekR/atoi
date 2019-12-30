@@ -232,9 +232,9 @@ class _ManagerToAssignState extends State<ManagerToAssign> {
                           var _date = DateTime.tryParse(task['SelectiveDate'].toString())??new DateTime.now();
                           showDatePicker(
                               context: context,
-                              initialDate: _date.isBefore(DateTime.now())?DateTime.now():_date,
-                              firstDate: new DateTime.now().subtract(new Duration(days: 1)), // 减 30 天
-                              lastDate: new DateTime.now().add(new Duration(days: 30)),       // 加 30 天
+                              initialDate: _date.isBefore(DateTime.now())?DateTime.now().add(new Duration(days: 1)):_date,
+                              firstDate: new DateTime.now(),
+                              lastDate: new DateTime.now().add(new Duration(days: 30)),
                               locale: Locale('zh')
                           ).then((DateTime val) {
                             var date = '${val.year}-${val.month}-${val.day}';

@@ -9,11 +9,11 @@ import 'package:atoi/utils/report_dimensions.dart';
 
 class ServiceBarchart extends StatefulWidget {
 
-  ServiceBarchart({Key key, this.endpoint, this.chartName, this.requestType, this.status}):super(key: key);
+  ServiceBarchart({Key key, this.endpoint, this.chartName, this.labelX, this.labelY}):super(key: key);
   final String endpoint;
   final String chartName;
-  final String requestType;
-  final String status;
+  final String labelX;
+  final String labelY;
   _ServiceBarchartState createState() => _ServiceBarchartState();
 }
 
@@ -27,6 +27,8 @@ class _ServiceBarchartState extends State<ServiceBarchart> {
   List _tableData = [];
   String _tableName = '年份';
   String _currentDimension = '';
+  String _dim1 = ReportDimensions.DIMS[1]['Name'];
+  String _dim2 = ReportDimensions.YEARS[0].toString();
 
   Future<void> initDimension() async {
     var _list = ReportDimensions.DIMS.map((_dim) => {
@@ -40,12 +42,15 @@ class _ServiceBarchartState extends State<ServiceBarchart> {
   void initState() {
     super.initState();
     initDimension();
+    _currentDimension = _dim1;
+    getChartData(_dim1, _dim2);
   }
 
   showPickerDialog(BuildContext context) {
     Picker(
         cancelText: '取消',
         confirmText: '确认',
+        selecteds: [ReportDimensions.DIMS.indexWhere((elem) => elem['Name']==_dim1), ReportDimensions.YEARS.indexOf(_dim2)<0?0:ReportDimensions.YEARS.indexOf(_dim2)],
         adapter: PickerDataAdapter<String>(pickerdata: _dimensionList),
         hideHeader: true,
         title: new Text("请选择维度"),
@@ -55,6 +60,8 @@ class _ServiceBarchartState extends State<ServiceBarchart> {
           getChartData(_selected[0], _selected[1]);
           setState(() {
             _currentDimension = _selected[0];
+            _dim1 = _selected[0];
+            _dim2 = _selected[1];
           });
         }
     ).showDialog(context);
@@ -67,20 +74,22 @@ class _ServiceBarchartState extends State<ServiceBarchart> {
         method: HttpRequest.POST,
         data: {
           'type': _select['ID'],
-          'year': year==' '?0:year,
+          'year': year==' '?0:year
         }
     );
     if (resp['ResultCode'] == '00') {
       var _data = resp['Data'];
-      var _list = _data.map<ServiceData>((item) => new ServiceData(item['Item1'], item['Item2'])).toList();
+      var _list = _data.map<EquipmentData>((item) => new EquipmentData(item['Item1'], item['Item2'])).toList();
       setState(() {
         seriesList = [
-          new charts.Series<ServiceData, String>(
-            id: 'Sales',
-            colorFn: (_, __) => charts.MaterialPalette.blue.shadeDefault,
-            domainFn: (ServiceData data, _) => data.type,
-            measureFn: (ServiceData data, _) => data.amount,
-            data: _list,
+          new charts.Series<EquipmentData, String>(
+              id: 'Sales',
+              colorFn: (_, __) => charts.MaterialPalette.blue.shadeDefault,
+              domainFn: (EquipmentData data, _) => data.type,
+              measureFn: (EquipmentData data, _) => data.amount,
+              data: _list,
+              labelAccessorFn: (EquipmentData data, _) =>
+              '${data.amount.toString()}'
           )
         ];
         _tableName = type;
@@ -93,17 +102,19 @@ class _ServiceBarchartState extends State<ServiceBarchart> {
     return new Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: <Widget>[
-        new FlatButton(
+        new RaisedButton(
             onPressed: () {
               showPickerDialog(context);
             },
             child: new Row(
               children: <Widget>[
-                new Icon(Icons.timeline),
-                new Text('维度')
+                new Icon(Icons.timeline, color: Colors.white,),
+                new Text('选择维度', style: new TextStyle(color: Colors.white),)
               ],
             )
         ),
+        new Text(_dim1??''),
+        new Text(_dim1=='时间类型-月'?'年份：${_dim2}':''),
       ],
     );
   }
@@ -112,7 +123,7 @@ class _ServiceBarchartState extends State<ServiceBarchart> {
     var _dataTable = new DataTable(
         columns: [
           DataColumn(label: Text(_currentDimension, textAlign: TextAlign.center, style: new TextStyle(color: Colors.blue, fontSize: 14.0),)),
-          DataColumn(label: Text('设备数量', textAlign: TextAlign.center, style: new TextStyle(color: Colors.blue, fontSize: 14.0),)),
+          DataColumn(label: Text(widget.labelY, textAlign: TextAlign.center, style: new TextStyle(color: Colors.blue, fontSize: 14.0),)),
         ],
         rows: _tableData.map((item) => DataRow(
             cells: [
@@ -126,14 +137,26 @@ class _ServiceBarchartState extends State<ServiceBarchart> {
     );
   }
 
-  Container buildChart() {
-    return new Container(
-      height: _tableData.length*40.toDouble(),
-      child: new charts.BarChart(
-        seriesList,
-        animate: true,
-        vertical: false,
-      ),
+  Column buildChart() {
+    return new Column(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: <Widget>[
+        new Container(
+          height: _tableData.length*50.0+60.0,
+          child: new charts.BarChart(
+            seriesList,
+            animate: true,
+            vertical: false,
+            barRendererDecorator: new charts.BarLabelDecorator<String>(),
+            behaviors: [
+              new charts.ChartTitle(widget.labelY,
+                  behaviorPosition: charts.BehaviorPosition.bottom,
+                  titleOutsideJustification:
+                  charts.OutsideJustification.middleDrawArea),
+            ],
+          ),
+        ),
+      ],
     );
   }
 
@@ -161,7 +184,16 @@ class _ServiceBarchartState extends State<ServiceBarchart> {
               children: <Widget>[
                 buildPickerRow(context),
                 seriesList==null?new Container():buildChart(),
-                _tableData!=null&&_tableData.isNotEmpty?buildTable():new Container()
+                new SizedBox(height: 8.0,),
+                new Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    new Text('数据列表')
+                  ],
+                ),
+                _tableData!=null&&_tableData.isNotEmpty?buildTable():new Center(
+                  child: Text('暂无数据'),
+                )
               ],
             )
         );
@@ -170,9 +202,9 @@ class _ServiceBarchartState extends State<ServiceBarchart> {
   }
 }
 
-class ServiceData {
+class EquipmentData {
   final String type;
   final double amount;
 
-  ServiceData(this.type, this.amount);
+  EquipmentData(this.type, this.amount);
 }

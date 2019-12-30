@@ -9,11 +9,12 @@ import 'package:atoi/utils/report_dimensions.dart';
 
 class ServiceBarchartB extends StatefulWidget {
 
-  ServiceBarchartB({Key key, this.endpoint, this.chartName, this.requestType, this.status}):super(key: key);
+  ServiceBarchartB({Key key, this.endpoint, this.chartName, this.requestType, this.status, this.labelY}):super(key: key);
   final String endpoint;
   final String chartName;
   final String requestType;
   final String status;
+  final String labelY;
   _ServiceBarchartBState createState() => _ServiceBarchartBState();
 }
 
@@ -134,7 +135,7 @@ class _ServiceBarchartBState extends State<ServiceBarchartB> {
 
   Container buildChart() {
     return new Container(
-      height: _tableData.length*40.toDouble(),
+      height: _tableData.length*50.0+60.0,
       child: new charts.BarChart(
         seriesList,
         animate: true,
@@ -167,6 +168,13 @@ class _ServiceBarchartBState extends State<ServiceBarchartB> {
               children: <Widget>[
                 buildPickerRow(context),
                 seriesList==null?new Container():buildChart(),
+                new SizedBox(height: 8.0,),
+                new Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    new Text('数据列表')
+                  ],
+                ),
                 _tableData!=null&&_tableData.isNotEmpty?buildTable():new Container()
               ],
             )
