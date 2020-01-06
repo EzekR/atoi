@@ -442,30 +442,7 @@ class _BadRequestState extends State<BadRequest> {
                                         : '${_equipment['Name']}--不良事件'),
                                 BuildWidget.buildRow('请求人', _roleName),
                                 new Divider(),
-                                new Padding(
-                                  padding: EdgeInsets.symmetric(vertical: 5.0),
-                                  child: new Row(
-                                    children: <Widget>[
-                                      new Expanded(
-                                        flex: 3,
-                                        child: new Text(
-                                          '来源：',
-                                          style: new TextStyle(
-                                              fontSize: 20.0,
-                                              fontWeight: FontWeight.w600),
-                                        ),
-                                      ),
-                                      new Expanded(
-                                        flex: 6,
-                                        child: new DropdownButton(
-                                          value: _currentResult,
-                                          items: _dropDownMenuItems,
-                                          onChanged: changedDropDownMethod,
-                                        ),
-                                      )
-                                    ],
-                                  ),
-                                ),
+                                BuildWidget.buildDropdownLeft('来源：', _currentResult, _dropDownMenuItems, changedDropDownMethod),
                                 new Padding(
                                   padding: EdgeInsets.symmetric(vertical: 5.0),
                                   child: new Row(

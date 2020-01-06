@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:carousel_slider/carousel_slider.dart';
 import 'package:barcode_scan/barcode_scan.dart';
 import 'dart:async';
 import 'dart:convert';
@@ -26,17 +25,13 @@ class _UserHomePageState extends State<UserHomePage> {
 
   Future<SharedPreferences> prefs = SharedPreferences.getInstance();
   var _userName;
-  var _mobile;
 
   Future<Null> getRole() async {
     var _prefs = await prefs;
-    var userName = _prefs.getString('userName');
-    var mobile = _prefs.getString('mobile');
     var userInfo = _prefs.getString('userInfo');
     var decoded = jsonDecode(userInfo);
     setState(() {
       _userName = decoded['Name'];
-      _mobile = mobile;
     });
   }
 

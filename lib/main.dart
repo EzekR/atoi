@@ -71,7 +71,6 @@ class _AtoiAppState extends State<AtoiApp> {
   };
 
   final MainModel mainModel = MainModel();
-  String debugLable = '';
 
   Future<SharedPreferences> prefs = SharedPreferences.getInstance();
 

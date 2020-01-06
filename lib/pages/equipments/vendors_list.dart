@@ -89,7 +89,7 @@ class _VendorsListState extends State<VendorsList> {
                 BuildWidget.buildCardRow('省份', item['Province']),
                 BuildWidget.buildCardRow('地址', item['Address']),
                 BuildWidget.buildCardRow('联系人', item['Contact']),
-                BuildWidget.buildCardRow('联系电话', item['ContactMobile']),
+                BuildWidget.buildCardRow('联系人电话', item['ContactMobile']),
                 BuildWidget.buildCardRow('添加日期', item['AddDate'].split('T')[0]),
                 BuildWidget.buildCardRow('状态', item['IsActive']?'启用':'停用'),
               ],
@@ -104,6 +104,9 @@ class _VendorsListState extends State<VendorsList> {
                   Navigator.of(context).push(new MaterialPageRoute(builder: (_) {
                     return new VendorDetail(vendor: item, editable: _editable,);
                   })).then((result) => getVendors());
+                  setState(() {
+                    isSearchState = false;
+                  });
                 },
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(6),

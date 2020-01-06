@@ -124,7 +124,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
   String currentOrigin = '国产';
 
   List checkStatus = ['已验收', '未验收'];
-  String currentCheck = '已验收';
+  String currentCheck = '未验收';
 
   List recall = ['是', '否'];
   String currentRecall = '否';
@@ -430,7 +430,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
               padding: EdgeInsets.symmetric(horizontal: 0.0),
               child: widget.editable?new IconButton(
                   icon: Icon(Icons.cancel),
-                  color: Colors.white,
+                  color: Colors.blue,
                   onPressed: () {
                     setState(() {
                       imageList.remove(image);
@@ -689,6 +689,15 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
           context: context,
           builder: (context) => CupertinoAlertDialog(
             title: new Text('采购金额需小于1亿'),
+          )
+      );
+      return;
+    }
+    if (currentMachine == '已报废' && scrapDate == 'YY-MM-DD') {
+      showDialog(
+          context: context,
+          builder: (context) => CupertinoAlertDialog(
+            title: new Text('报废日期不可为空'),
           )
       );
       return;

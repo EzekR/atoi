@@ -27,18 +27,14 @@ class _EngineerHomePageState extends State<EngineerHomePage>
 
   Future<SharedPreferences> prefs = SharedPreferences.getInstance();
   String _userName = '';
-  String _mobile = '';
   Timer _timer;
 
   Future<Null> getRole() async {
     var _prefs = await prefs;
-    var userName = _prefs.getString('userName');
-    var mobile = _prefs.getString('mobile');
     var userInfo = _prefs.getString('userInfo');
     var decoded = jsonDecode(userInfo);
     setState(() {
       _userName = decoded['Name'];
-      _mobile = mobile;
     });
   }
 

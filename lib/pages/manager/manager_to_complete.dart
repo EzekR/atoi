@@ -172,7 +172,7 @@ class _ManagerToCompleteState extends State<ManagerToComplete> {
     for(var step in steps) {
       _steps.add(Step(
         title: new Text('派工单号：${step['OID']}'),
-        subtitle: new Text('派工单状态：${step['Status']['Name']}'),
+        subtitle: new Text('派工单状态：${step['Status']['Name']}   工程师：${step['Engineer']['Name']}'),
         content: new Text(''),
         isActive: false
       ));

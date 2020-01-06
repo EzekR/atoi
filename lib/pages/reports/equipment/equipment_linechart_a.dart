@@ -175,7 +175,7 @@ class _EquipmentLinechartAState extends State<EquipmentLinechartA> {
           ),
           primaryYAxis: NumericAxis(
               title: AxisTitle(
-                  text: widget.labelY
+                  text: _tableTitle[widget.endpoint][2]
               )
           ),
           series: <LineSeries<EquipmentData, String>>[

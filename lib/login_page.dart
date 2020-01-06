@@ -136,7 +136,6 @@ class _LoginPageState extends State<LoginPage> {
     setState(() {
       _loading = !_loading;
     });
-    var _prefs = await prefs;
     var _data = await HttpRequest.request(
       '/User/Login',
       method: HttpRequest.POST,

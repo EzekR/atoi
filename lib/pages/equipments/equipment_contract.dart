@@ -96,7 +96,7 @@ class _EquipmentContractState extends State<EquipmentContract> {
   }
 
   Future<Null> saveContract() async {
-    if (_equipments.length == 0) {
+    if (_equipments == null) {
       showDialog(context: context, builder: (context) => CupertinoAlertDialog(
         title: new Text('请选择设备'),
       ));

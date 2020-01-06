@@ -106,6 +106,9 @@ class _ContractListState extends State<ContractList> {
                   Navigator.of(context).push(new MaterialPageRoute(builder: (_) {
                     return new EquipmentContract(contract: item, editable: _editable,);
                   })).then((result) => getContracts());
+                  setState(() {
+                    isSearchState = false;
+                  });
                 },
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(6),

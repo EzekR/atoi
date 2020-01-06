@@ -7,19 +7,9 @@ import 'package:atoi/utils/http_request.dart';
 
 class SearchBarVendor extends SearchDelegate<String>{
 
-  static const searchList = [
-    "ChengDu",
-    "ShangHai",
-    "BeiJing",
-    "TianJing",
-    "NanJing",
-    "ShenZheng"
-  ];
+  static const searchList = [];
 
-  static const recentSuggest = [
-    "编号：0000001",
-    "编号：0000002"
-  ];
+  static const recentSuggest = [];
 
   var suggestionList = [];
   var selected;

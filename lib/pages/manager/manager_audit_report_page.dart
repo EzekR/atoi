@@ -345,7 +345,7 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
       );
       return;
     }
-    if ((_dispatch['RequestType']['ID'] == 2 && _currentProvider != '管理方') || (_dispatch['RequestType']['ID'] == 3)) {
+    if ((_dispatch['RequestType']['ID'] == 2 && _currentProvider != '管理方' && _currentResult == '待第三方支持' && _report['Type']['ID'] == 201) || (_dispatch['RequestType']['ID'] == 3)) {
       if (imageAttach.isEmpty) {
         showDialog(context: context,
             builder: (context) => CupertinoAlertDialog(
@@ -444,7 +444,7 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
       );
       return;
     }
-    if ((_dispatch['RequestType']['ID'] == 2 && _currentProvider != '管理方') || (_dispatch['RequestType']['ID'] == 3)) {
+    if ((_dispatch['RequestType']['ID'] == 2 && _currentProvider != '管理方' && _report['Type']['ID'] == 201 && _currentResult == '待第三方支持') || (_dispatch['RequestType']['ID'] == 3)) {
       if (imageAttach.isEmpty) {
         showDialog(context: context,
             builder: (context) => CupertinoAlertDialog(
@@ -453,6 +453,14 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
         );
         return;
       }
+    }
+    if (_dispatch['RequestType']['ID'] == 6 && _currentScope == null) {
+      showDialog(context: context,
+          builder: (context) => CupertinoAlertDialog(
+            title: new Text('整包范围不可为空'),
+          )
+      );
+      return;
     }
     final SharedPreferences prefs = await _prefs;
     var UserId = await prefs.getInt('userID');
@@ -831,11 +839,11 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
               BuildWidget.buildRow('派工单编号', widget.request['OID']),
               BuildWidget.buildRow('派工单状态', widget.request['Status']['Name']),
               BuildWidget.buildRow('派工类型', widget.request['RequestType']['Name']),
-              BuildWidget.buildRow('机器状态', widget.request['MachineStatus']['Name']),
+              _dispatch['Request']['RequestType']['ID'] != 14?BuildWidget.buildRow('机器状态', widget.request['MachineStatus']['Name']):new Container(),
               BuildWidget.buildRow('紧急程度', widget.request['Urgency']['Name']),
               BuildWidget.buildRow('出发时间', AppConstants.TimeForm(_dispatch['ScheduleDate'].toString(), 'hh:mm')),
               BuildWidget.buildRow('工程师姓名', _dispatch['Engineer']['Name']),
-              BuildWidget.buildRow('主管备注', _dispatch['LeaderComments']),
+              BuildWidget.buildRow('备注', _dispatch['LeaderComments']),
             ],
           ),
         ),

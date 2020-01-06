@@ -56,7 +56,7 @@ class _ServiceBarchartLineState extends State<ServiceBarchartLine> {
     Picker(
         cancelText: '取消',
         confirmText: '确认',
-        selecteds: [_dim1=='年'?0:1, ReportDimensions.YEARS.indexOf(int.parse(_dim2))],
+        selecteds: [_dim1=='年'?0:1, _dim1=='月'?ReportDimensions.YEARS.indexOf(int.parse(_dim2)):0],
         adapter: PickerDataAdapter<String>(pickerdata: _dimensionList),
         hideHeader: true,
         title: new Text("请选择维度"),

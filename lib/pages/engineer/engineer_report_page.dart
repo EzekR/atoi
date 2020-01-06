@@ -61,6 +61,11 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
       _comments.clear();
       _description.clear();
       _purchaseAmount.clear();
+      _solution.clear();
+      _code.clear();
+      _currentPrivate = '否';
+      _currentRecall = '否';
+      _acceptDate = 'YY-MM-DD';
       _currentType = value;
     });
   }
@@ -195,7 +200,6 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
     await getReportId(_dispatch['RequestType']['ID']);
     var prefs = await _prefs;
     var userID = prefs.getInt('userID');
-    var reportId = widget.reportId;
     if (reportId != 0) {
       var resp = await HttpRequest.request('/DispatchReport/GetDispatchReport',
           method: HttpRequest.GET,
@@ -229,7 +233,9 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
           _result.text = data['Result'];
           _currentRecall = data['IsRecall']?'是':'否';
           _currentPrivate = data['IsPrivate']?'是':'否';
-          _acceptDate = data['AcceptanceDate'].toString().split('T')[0];
+          if (data['AcceptanceDate'] != null) {
+            _acceptDate = data['AcceptanceDate'].toString().split('T')[0];
+          }
           _currentType = data['Type']['Name'];
           _comments.text = data['Comments'];
           _currentProvider = data['ServiceProvider']['ID']==0?_currentProvider:data['ServiceProvider']['Name'];
@@ -295,7 +301,7 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
   }
 
   Future<Null> uploadReport(int statusId) async {
-    if (_dispatch['RequestType']['ID'] == 9 && _acceptDate == 'YY-MM-DD' && _currentType != '通用作业报告') {
+    if (_dispatch['RequestType']['ID'] == 9 && _acceptDate == 'YY-MM-DD' && _currentType != '通用作业报告' && statusId == 2) {
       showDialog(
           context: context,
           builder: (context) => CupertinoAlertDialog(
@@ -312,7 +318,7 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
             ));
         return;
       }
-      if ((_dispatch['RequestType']['ID'] == 3 && _currentPrivate == '是' && _imageList == null) || (_dispatch['RequestType']['ID'] == 2 && _currentProvider != '管理方' && _imageList == null)) {
+      if ((_dispatch['RequestType']['ID'] == 3 && _currentPrivate == '是' && _imageList == null) || (_dispatch['RequestType']['ID'] == 2 && _currentResult == '待第三方支持' && _currentProvider != '管理方' && _imageList == null)) {
         showDialog(
             context: context,
             builder: (context) => CupertinoAlertDialog(
@@ -489,8 +495,8 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
               title: statusId == 1
                   ? new Text('保存报告成功')
                   : new Text('上传报告成功'))).then((result) {
-            return statusId==1?getReport(resp['Data']):Navigator.of(context, rootNavigator: true).pop(result);
-          });
+                    return statusId == 1?getReport(resp['Data']):Navigator.of(context, rootNavigator: true).pop(result);
+      });
     } else {
       showDialog(
           context: context,
@@ -737,7 +743,7 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
           : new Container(),
       _edit?BuildWidget.buildRadioVert('作业报告类型', _reportType, _currentType, changeType):BuildWidget.buildRow('作业报告类型', _currentType),
       BuildWidget.buildRow('开始时间', AppConstants.TimeForm(_dispatch['StartDate'].toString(), 'hh:mm')),
-      _fujiComments==""?new Container():BuildWidget.buildRow('审批备注', _fujiComments),
+      _fujiComments!=""||widget.status==3?BuildWidget.buildRow('审批备注', _fujiComments):new Container(),
       new Divider(),
     ]);
 
@@ -872,7 +878,7 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
         case 6:
           _list.addAll(
               [
-                _edit?BuildWidget.buildInputLeft('资产金额:', _purchaseAmount, inputType: TextInputType.numberWithOptions(decimal: true), maxLength: 11):BuildWidget.buildRow('资产金额', _purchaseAmount.text),
+                _edit?BuildWidget.buildInputLeft('资产金额:', _purchaseAmount, inputType: TextInputType.numberWithOptions(decimal: true), maxLength: 11, lines: 1):BuildWidget.buildRow('资产金额', _purchaseAmount.text),
                 _edit?buildField('报告明细:', _analysis):BuildWidget.buildRow('报告明细', _analysis.text),
                 _edit?buildField('结果:', _result):BuildWidget.buildRow('结果', _result.text),
               ]
@@ -1101,7 +1107,7 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
               BuildWidget.buildRow('出发时间', AppConstants.TimeForm(_dispatch['ScheduleDate'], 'hh:mm')),
               BuildWidget.buildRow('工程师姓名', _dispatch['Engineer']['Name']),
               //widget.status==3||widget.status==2?new Container():BuildWidget.buildRow('处理方式', _dispatch['Request']['DealType']['Name']),
-              BuildWidget.buildRow('主管备注', _dispatch['LeaderComments']),
+              BuildWidget.buildRow('备注', _dispatch['LeaderComments']),
             ],
           ),
         ),
@@ -1173,10 +1179,10 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
         BuildWidget.buildRow('名称', _equipment['Name'] ?? ''),
         BuildWidget.buildRow('型号', _equipment['EquipmentCode'] ?? ''),
         BuildWidget.buildRow('序列号', _equipment['SerialCode'] ?? ''),
-        BuildWidget.buildRow('使用科室', _equipment['Department']['Name'] ?? ''),
-        BuildWidget.buildRow('安装地点', _equipment['InstalSite'] ?? ''),
         BuildWidget.buildRow('设备厂商', _equipment['Manufacturer']['Name'] ?? ''),
         BuildWidget.buildRow('资产等级', _equipment['AssetLevel']['Name'] ?? ''),
+        BuildWidget.buildRow('使用科室', _equipment['Department']['Name'] ?? ''),
+        BuildWidget.buildRow('安装地点', _equipment['InstalSite'] ?? ''),
         BuildWidget.buildRow('维保状态', _equipment['WarrantyStatus'] ?? ''),
         BuildWidget.buildRow('服务范围', _equipment['ContractScope']['Name'] ?? ''),
         new Divider()

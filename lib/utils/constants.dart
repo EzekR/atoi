@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:date_format/date_format.dart';
-import 'dart:async';
-import 'package:atoi/utils/http_request.dart';
 
 class AppConstants {
 

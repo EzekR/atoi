@@ -335,7 +335,6 @@ class _ManagerCompletePageState extends State<ManagerCompletePage> {
           BuildWidget.buildRow('分析原因', _report['SolutionCauseAnalysis']),
           BuildWidget.buildRow('详细处理方法', _report['SolutionWay']),
           BuildWidget.buildRow('结果', _report['Result']),
-          _report['DelayReason']!=''?BuildWidget.buildRow('误工说明', _report['DelayReason']):new Container(),
         ]);
         break;
       case 201:
@@ -589,7 +588,7 @@ class _ManagerCompletePageState extends State<ManagerCompletePage> {
               BuildWidget.buildRow('派工单编号', _dispatch['OID']),
               BuildWidget.buildRow('派工单状态', _dispatch['Status']['Name']),
               BuildWidget.buildRow('派工类型', _dispatch['RequestType']['Name']),
-              BuildWidget.buildRow('机器状态', _dispatch['MachineStatus']['Name']),
+              _request['RequestType']['ID']==14?new Container():BuildWidget.buildRow('机器状态', _dispatch['MachineStatus']['Name']),
               BuildWidget.buildRow('紧急程度', _dispatch['Urgency']['Name']),
               BuildWidget.buildRow('出发时间', AppConstants.TimeForm(_dispatch['ScheduleDate'].toString(), 'mm:ss')),
               BuildWidget.buildRow('工程师姓名', _dispatch['Engineer']['Name']),
@@ -763,9 +762,15 @@ class _ManagerCompletePageState extends State<ManagerCompletePage> {
                             break;
                           case 2:
                             setState(() {
-                              _request['RequestType']['ID'] == 14
-                                  ? _isExpandedJournal = !_isExpandedJournal
-                                  : _isExpandedAssign = !_isExpandedAssign;
+                              if (_journal == null) {
+                                _request['RequestType']['ID'] == 14
+                                    ? _isExpandedReport = !_isExpandedReport
+                                    : _isExpandedAssign = !_isExpandedAssign;
+                              } else {
+                                _request['RequestType']['ID'] == 14
+                                    ? _isExpandedJournal = !_isExpandedJournal
+                                    : _isExpandedAssign = !_isExpandedAssign;
+                              }
                             });
                             break;
                           case 3:

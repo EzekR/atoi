@@ -199,6 +199,7 @@ class _EquipmentsListState extends State<EquipmentsList> {
                 BuildWidget.buildCardRow('厂商', item['Manufacturer']['Name']),
                 BuildWidget.buildCardRow('资产等级', item['AssetLevel']['Name']),
                 BuildWidget.buildCardRow('使用科室', item['Department']['Name']),
+                BuildWidget.buildCardRow('设备状态', item['EquipmentStatus']['Name']),
                 BuildWidget.buildCardRow('维保状态', item['WarrantyStatus']),
               ],
             ),
@@ -237,6 +238,9 @@ class _EquipmentsListState extends State<EquipmentsList> {
               ),
               new RaisedButton(
                 onPressed: (){
+                  setState(() {
+                    isSearchState = false;
+                  });
                   Navigator.of(context).push(new MaterialPageRoute(builder: (_) {
                     return new EquipmentDetail(equipment: item, editable: _editable,);
                   })).then((result) => getEquipments());
