@@ -27,7 +27,7 @@ class _EquipmentLinechartAState extends State<EquipmentLinechartA> {
   String _tableName = '年份';
   String _currentDimension = '';
   ScrollController _scrollController;
-  String _dim1 = ReportDimensions.DIMS[3]['Name'];
+  String _dim1 = ReportDimensions.DIMS[2]['Name'];
   String _dim2 = ReportDimensions.TIME_TYPES[0];
   String _dim3 = ReportDimensions.YEARS[0].toString();
   String _dim4 = ReportDimensions.MONTHS[0].toString();
@@ -46,7 +46,9 @@ class _EquipmentLinechartAState extends State<EquipmentLinechartA> {
   };
 
   Future<void> initDimension() async {
-    _dimSlice = ReportDimensions.DIMS.sublist(2, 8);
+    setState(() {
+      _dimSlice = ReportDimensions.DIMS.sublist(2, 8);
+    });
     List _list = _dimSlice.map((_dim) => {_dim['Name'].toString(): [
       {
         '年': ReportDimensions.YEARS.map((_year) => {_year.toString(): [' ']}).toList()
@@ -72,7 +74,7 @@ class _EquipmentLinechartAState extends State<EquipmentLinechartA> {
     Picker(
         cancelText: '取消',
         confirmText: '确认',
-        //selecteds: [_dimSlice.indexWhere((elem) => elem['Name']==_dim1)],
+        selecteds: [_dimSlice.indexWhere((elem) => elem['Name']==_dim1), _dim2=='年'?0:1, ReportDimensions.YEARS.indexOf(int.parse(_dim3)), _dim2=='年'?0:ReportDimensions.MONTHS.indexOf(int.parse(_dim4))],
         adapter: PickerDataAdapter<String>(pickerdata: _dimensionList),
         hideHeader: false,
         title: new Text("请选择维度"),
@@ -145,8 +147,8 @@ class _EquipmentLinechartAState extends State<EquipmentLinechartA> {
         rows: _tableData.map((item) => DataRow(
             cells: [
               DataCell(Text(item['type'])),
-              DataCell(Text(item['cur'].toString())),
-              DataCell(Text(item['last'].toString())),
+              DataCell(Text(int.tryParse(item['cur'].toString())??item['cur'].toString())),
+              DataCell(Text(int.tryParse(item['last'].toString())??item['last'].toString())),
               DataCell(Text(item['ratio'].toString())),
             ]
         )).toList()

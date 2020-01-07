@@ -5,6 +5,7 @@ import 'package:atoi/pages/reports/equipment/equipment_linechart.dart';
 import 'package:atoi/pages/reports/equipment/equipment_linechart_a.dart';
 import 'package:atoi/pages/reports/service/service_barchart.dart';
 import 'package:atoi/pages/reports/service/service_barchart_a.dart';
+import 'package:atoi/pages/reports/service/service_barchart_b.dart';
 import 'package:atoi/pages/reports/service/service_barchart_line.dart';
 import 'package:atoi/pages/reports/service/service_linechart.dart';
 import 'package:atoi/pages/reports/service/service_linechart_a.dart';
@@ -55,6 +56,9 @@ class _ReportListState extends State<ReportList> {
                   break;
                 case 's_barchart_2':
                   Navigator.of(context).push(new MaterialPageRoute(builder: (context) => new ServiceAssets(chartName: item['name'], endpoint: item['endpoint'],)));
+                  break;
+                case 's_barchart_3':
+                  Navigator.of(context).push(new MaterialPageRoute(builder: (context) => new ServiceBarchartB(chartName: item['name'], endpoint: item['endpoint'],)));
                   break;
                 case 's_barchart_line':
                   Navigator.of(context).push(new MaterialPageRoute(builder: (context) => new ServiceBarchartLine(chartName: item['name'], endpoint: item['endpoint'],)));
@@ -262,7 +266,8 @@ class _ReportListState extends State<ReportList> {
                   {
                     'name': '设备检查收入',
                     'type': 'barchart_2',
-                    'endpoint': 'EquipmentSumIncome'
+                    'endpoint': 'EquipmentSumIncome',
+                    'label-y': '设备数量（台）'
                   },
                 ];
                 showBottomAll(_list);
@@ -400,7 +405,7 @@ class _ReportListState extends State<ReportList> {
                   },
                   {
                     'name': '维修请求未关闭数量',
-                    'type': 'barchart_1',
+                    'type': 's_barchart_3',
                     'label-y': '请求条数（条）',
                     'endpoint': 'ReportRequestCount?requestType=1&status=1'
                   },
@@ -539,13 +544,13 @@ class _ReportListState extends State<ReportList> {
                   },
                   {
                     'name': '设备未完成强检数量',
-                    'type': 'barchart_1',
+                    'type': 's_barchart_3',
                     'label-y': '请求条数（条）',
                     'endpoint': 'ReportRequestCount?requestType=3&status=1'
                   },
                   {
                     'name': '设备待召回请求数量',
-                    'type': 'barchart_1',
+                    'type': 's_barchart_3',
                     'label-y': '请求条数（条）',
                     'endpoint': 'ReportRequestCount?requestType=-1&status=1'
                   },

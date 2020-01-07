@@ -29,6 +29,11 @@ class _EquipmentLinechartState extends State<EquipmentLinechart> {
   String _dim1 = ReportDimensions.DIMS[1]['Name'];
   String _dim2 = ReportDimensions.YEARS[0].toString();
 
+  Map _tableTitle = {
+    'EquipmentBootRatioReport': ['开机时间','开机率（%）'],
+    'EquipmentRapirRatioReport': ['故障时间','故障率（%）']
+  };
+
   Future<void> initDimension() async {
     List _list = ReportDimensions.DIMS.map((item) => {
       item['Name'].toString(): item['ID']==1?[' ']:ReportDimensions.YEARS.map((_year) => _year.toString()).toList()
@@ -110,10 +115,10 @@ class _EquipmentLinechartState extends State<EquipmentLinechart> {
     var _dataTable = new DataTable(
         columns: [
           DataColumn(label: Text(_currentDimension, textAlign: TextAlign.center, style: new TextStyle(color: Colors.blue, fontSize: 14.0),)),
-          DataColumn(label: Text('故障时间（H）', textAlign: TextAlign.center, style: new TextStyle(color: Colors.blue, fontSize: 14.0),)),
+          DataColumn(label: Text(_tableTitle[widget.endpoint][0], textAlign: TextAlign.center, style: new TextStyle(color: Colors.blue, fontSize: 14.0),)),
           DataColumn(label: Text('总时间（D）', textAlign: TextAlign.center, style: new TextStyle(color: Colors.blue, fontSize: 14.0),)),
           DataColumn(label: Text('设备数量（台）', textAlign: TextAlign.center, style: new TextStyle(color: Colors.blue, fontSize: 14.0),)),
-          DataColumn(label: Text('故障率（%）', textAlign: TextAlign.center, style: new TextStyle(color: Colors.blue, fontSize: 14.0),)),
+          DataColumn(label: Text(_tableTitle[widget.endpoint][1], textAlign: TextAlign.center, style: new TextStyle(color: Colors.blue, fontSize: 14.0),)),
         ],
         rows: _tableData.map((item) => DataRow(
             cells: [

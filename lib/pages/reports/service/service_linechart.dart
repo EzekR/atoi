@@ -36,9 +36,9 @@ class _ServiceLinechartState extends State<ServiceLinechart> {
     'RequestRatioReport?requestType=1&status=4': ['响应数量', '计划总数'],
     'DispatchRatio?status=4': ['执行数', '派工总数'],
     'RequestRatioReport?requestType=2&status=3': ['实际数量', '计划总数'],
-    'RequestRatioReport?requestType=4&status=3': ['实际数量', '计划数量'],
-    'RequestRatioReport?requestType=3&status=3': ['实际数量', '计划数量'],
-    'RequestRatioReport?requestType=5&status=3': ['实际数量', '计划数量'],
+    'RequestRatioReport?requestType=4&status=3': ['实际数量', '计划总数'],
+    'RequestRatioReport?requestType=3&status=3': ['实际数量', '计划总数'],
+    'RequestRatioReport?requestType=5&status=3': ['实际数量', '计划总数'],
     'RequestRatioReport?requestType=10&status=4': ['响应数量', '计划总数'],
     'RequestRatioReport?requestType=10&status=3': ['完成数量', '计划总数'],
   };

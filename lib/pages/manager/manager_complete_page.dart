@@ -382,7 +382,7 @@ class _ManagerCompletePageState extends State<ManagerCompletePage> {
         _list.addAll([
           BuildWidget.buildRow('报告明细', _report['SolutionCauseAnalysis']),
           BuildWidget.buildRow('结果', _report['Result']),
-          BuildWidget.buildRow('验收日期', _report['AcceptanceDate'].split('T')[0]),
+          BuildWidget.buildRow('验收日期', _report['AcceptanceDate']==null?'':_report['AcceptanceDate'].toString().split('T')[0]),
         ]);
         break;
       default:

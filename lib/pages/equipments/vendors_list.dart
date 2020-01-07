@@ -106,6 +106,7 @@ class _VendorsListState extends State<VendorsList> {
                   })).then((result) => getVendors());
                   setState(() {
                     isSearchState = false;
+                    _keywords.clear();
                   });
                 },
                 shape: RoundedRectangleBorder(

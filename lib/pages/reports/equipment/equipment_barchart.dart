@@ -89,7 +89,7 @@ class _EquipmentBarchartState extends State<EquipmentBarchart> {
             measureFn: (EquipmentData data, _) => data.amount,
             data: _list,
             labelAccessorFn: (EquipmentData data, _) =>
-                '${data.amount.toString()}'
+                '${data.amount.toString().split('.')[0]}'
           )
         ];
         _tableName = type;
@@ -128,7 +128,7 @@ class _EquipmentBarchartState extends State<EquipmentBarchart> {
         rows: _tableData.map((item) => DataRow(
             cells: [
               DataCell(Text(item['Item1'])),
-              DataCell(Text(item['Item2'].toString()))
+              DataCell(Text(item['Item2'].toString().split('.')[0]))
             ]
         )).toList()
     );

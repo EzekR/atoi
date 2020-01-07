@@ -240,6 +240,7 @@ class _EquipmentsListState extends State<EquipmentsList> {
                 onPressed: (){
                   setState(() {
                     isSearchState = false;
+                    _keywords.clear();
                   });
                   Navigator.of(context).push(new MaterialPageRoute(builder: (_) {
                     return new EquipmentDetail(equipment: item, editable: _editable,);

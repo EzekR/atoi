@@ -108,6 +108,7 @@ class _ContractListState extends State<ContractList> {
                   })).then((result) => getContracts());
                   setState(() {
                     isSearchState = false;
+                    _keywords.clear();
                   });
                 },
                 shape: RoundedRectangleBorder(

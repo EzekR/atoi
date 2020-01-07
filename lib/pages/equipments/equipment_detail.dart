@@ -419,29 +419,52 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
     List<Widget> _list = [];
     if (imageList.length > 0) {
       for (var image in imageList) {
-        _list.add(new Stack(
-          alignment: FractionalOffset(1.0, 0),
-          children: <Widget>[
-            new Container(
-              width: 150.0,
-              child: Image.memory(Uint8List.fromList(image['content'])),
-            ),
-            new Padding(
-              padding: EdgeInsets.symmetric(horizontal: 0.0),
-              child: widget.editable?new IconButton(
-                  icon: Icon(Icons.cancel),
-                  color: Colors.blue,
-                  onPressed: () {
-                    setState(() {
-                      imageList.remove(image);
-                      if (image['id'] != null) {
-                        deleteFile(image['id']);
-                      }
-                    });
-                  }):new Container(),
+        var _suffix = image['fileName'].split('.')[1];
+        print(_suffix);
+        if (_suffix == 'jpg' || _suffix == 'jpeg' || _suffix == 'bmp' || _suffix == 'png') {
+          _list.add(new Stack(
+            alignment: FractionalOffset(1.0, 0),
+            children: <Widget>[
+              new Container(
+                width: 150.0,
+                child: Image.memory(Uint8List.fromList(image['content'])),
+              ),
+              new Padding(
+                padding: EdgeInsets.symmetric(horizontal: 0.0),
+                child: widget.editable?new IconButton(
+                    icon: Icon(Icons.cancel),
+                    color: Colors.blue,
+                    onPressed: () {
+                      setState(() {
+                        imageList.remove(image);
+                        if (image['id'] != null) {
+                          deleteFile(image['id']);
+                        }
+                      });
+                    }):new Container(),
+              )
+            ],
+          ));
+        } else {
+          _list.add(
+            new Row(
+              children: <Widget>[
+                Text(image['fileName'], style: new TextStyle(color: Colors.blue),),
+                widget.editable?new IconButton(
+                    icon: Icon(Icons.cancel),
+                    color: Colors.blue,
+                    onPressed: () {
+                      setState(() {
+                        imageList.remove(image);
+                        if (image['id'] != null) {
+                          deleteFile(image['id']);
+                        }
+                      });
+                    }):new Container(),
+              ],
             )
-          ],
-        ));
+          );
+        }
       }
     }
     return new GridView.count(
@@ -565,9 +588,10 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
       var _files = _data['EquipmentFile'];
       for(var item in _files) {
         var _fileExt = item['FileName'].split('.')[1];
-        if (_fileExt == 'jpg' || _fileExt == 'png' || _fileExt == 'jpeg' || _fileExt == 'bmp') {
-          switch (item['FileType']) {
-            case 5:
+        switch (item['FileType']) {
+          case 5:
+            if (_fileExt == 'jpg' || _fileExt == 'png' || _fileExt == 'jpeg' ||
+                _fileExt == 'bmp') {
               var _file = await getDeviceFile(item['ID']);
               if (_file != null) {
                 setState(() {
@@ -578,8 +602,19 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
                   });
                 });
               }
-              break;
-            case 6:
+            } else {
+              setState(() {
+                equipmentPlaques.add({
+                  'fileName': item['FileName'],
+                  'content': '',
+                  'id': item['ID']
+                });
+              });
+            }
+            break;
+          case 6:
+            if (_fileExt == 'jpg' || _fileExt == 'png' || _fileExt == 'jpeg' ||
+                _fileExt == 'bmp') {
               var _file = await getDeviceFile(item['ID']);
               if (_file != null) {
                 setState(() {
@@ -590,8 +625,19 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
                   });
                 });
               }
-              break;
-            case 4:
+            } else {
+              setState(() {
+                equipmentLabel.add({
+                  'fileName': item['FileName'],
+                  'content': '',
+                  'id': item['ID']
+                });
+              });
+            }
+            break;
+          case 4:
+            if (_fileExt == 'jpg' || _fileExt == 'png' || _fileExt == 'jpeg' ||
+                _fileExt == 'bmp') {
               var _file = await getDeviceFile(item['ID']);
               if (_file != null) {
                 setState(() {
@@ -602,8 +648,16 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
                   });
                 });
               }
-              break;
-          }
+            } else {
+              setState(() {
+                equipmentAppearance.add({
+                  'fileName': item['FileName'],
+                  'content': '',
+                  'id': item['ID']
+                });
+              });
+            }
+            break;
         }
       }
     }
@@ -697,7 +751,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
       showDialog(
           context: context,
           builder: (context) => CupertinoAlertDialog(
-            title: new Text('报废日期不可为空'),
+            title: new Text('报废时间不可为空'),
           )
       );
       return;

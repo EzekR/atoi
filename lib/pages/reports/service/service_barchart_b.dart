@@ -29,9 +29,13 @@ class _ServiceBarchartBState extends State<ServiceBarchartB> {
   List _tableData = [];
   String _tableName = '年份';
   String _currentDimension = '';
+  String _dim1 = ReportDimensions.DIMS[2]['Name'];
+  String _dim2 = '年';
 
   Future<void> initDimension() async {
-    _dimSlice = ReportDimensions.DIMS.sublist(2, 7);
+    setState(() {
+      _dimSlice = ReportDimensions.DIMS.sublist(2, 8);
+    });
     List _list = _dimSlice.map((item) => {
       item['Name'].toString(): [
         '年',
@@ -46,12 +50,15 @@ class _ServiceBarchartBState extends State<ServiceBarchartB> {
   void initState() {
     super.initState();
     initDimension();
+    _currentDimension = _dim1;
+    getChartData(_dim1, '2020');
   }
 
   showPickerDialog(BuildContext context) {
     Picker(
         cancelText: '取消',
         confirmText: '确认',
+        selecteds: [_dimSlice.indexWhere((item) => item['Name']==_dim1), _dim2=='年'?0:1],
         adapter: PickerDataAdapter<String>(pickerdata: _dimensionList),
         hideHeader: true,
         title: new Text("请选择维度"),
@@ -61,6 +68,8 @@ class _ServiceBarchartBState extends State<ServiceBarchartB> {
           getChartData(_selected[0], _selected[1]);
           setState(() {
             _currentDimension = _selected[0];
+            _dim1 = _selected[0];
+            _dim2 = _selected[1];
           });
         }
     ).showDialog(context);
@@ -73,8 +82,8 @@ class _ServiceBarchartBState extends State<ServiceBarchartB> {
         method: HttpRequest.POST,
         data: {
           'type': _select['ID'],
-          'year': 2019,
-          'month': 12
+          'year': 2020,
+          'month': 0
         }
     );
     if (resp['ResultCode'] == '00') {
@@ -87,6 +96,8 @@ class _ServiceBarchartBState extends State<ServiceBarchartB> {
             colorFn: (_, __) => charts.MaterialPalette.blue.shadeDefault,
             domainFn: (ServiceData data, _) => data.type,
             measureFn: (ServiceData data, _) => data.amount,
+            labelAccessorFn: (ServiceData data, _) =>
+            '${data.amount.toString().split('.')[0]}',
             data: _list,
           )
         ];
@@ -100,17 +111,19 @@ class _ServiceBarchartBState extends State<ServiceBarchartB> {
     return new Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: <Widget>[
-        new FlatButton(
+        new RaisedButton(
             onPressed: () {
               showPickerDialog(context);
             },
             child: new Row(
               children: <Widget>[
-                new Icon(Icons.timeline),
-                new Text('维度')
+                new Icon(Icons.timeline, color: Colors.white,),
+                new Text('选择维度', style: new TextStyle(color: Colors.white),)
               ],
             )
         ),
+        new Text('维度 $_dim1'),
+        new Text('时间维度分类 $_dim2')
       ],
     );
   }
@@ -124,7 +137,7 @@ class _ServiceBarchartBState extends State<ServiceBarchartB> {
         rows: _tableData.map((item) => DataRow(
             cells: [
               DataCell(Text(item['Item1'])),
-              DataCell(Text(item['Item2'].toString()))
+              DataCell(Text(item['Item2'].toString().split('.')[0]))
             ]
         )).toList()
     );

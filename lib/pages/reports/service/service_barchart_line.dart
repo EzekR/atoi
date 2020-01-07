@@ -30,8 +30,8 @@ class _ServiceBarchartLineState extends State<ServiceBarchartLine> {
   String _tableName = '年份';
   String _currentDimension = '';
   ScrollController _scrollController;
-  String _dim1 = '年';
-  String _dim2 = '2019';
+  String _dim1 = '月';
+  String _dim2 = '2020';
 
   Future<void> initDimension() async {
     List _list = [
@@ -50,6 +50,7 @@ class _ServiceBarchartLineState extends State<ServiceBarchartLine> {
   void initState() {
     super.initState();
     initDimension();
+    getChartData(_dim1, _dim2);
   }
 
   showPickerDialog(BuildContext context) {
@@ -122,8 +123,8 @@ class _ServiceBarchartLineState extends State<ServiceBarchartLine> {
         rows: _tableData.map((item) => DataRow(
             cells: [
               DataCell(Text(item['type'])),
-              DataCell(Text(item['total'].toString())),
-              DataCell(Text(item['passed'].toString())),
+              DataCell(Text(item['passed'].toString().split('.')[0])),
+              DataCell(Text(item['total'].toString().split('.')[0])),
               DataCell(Text(item['ratio'].toString()))
             ]
         )).toList()

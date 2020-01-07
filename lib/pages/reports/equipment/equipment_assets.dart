@@ -28,11 +28,12 @@ class _EquipmentAssetsState extends State<EquipmentAssets> {
   String _tableName = '年份';
   String _currentDimension = '';
   int _dim1 = ReportDimensions.YEARS[0];
-  int _dim2 = ReportDimensions.MONTHS[0];
+  int _dim2 = new DateTime.now().month;
+  List _months = [''];
 
   Future<void> initDimension() async {
     var _list = ReportDimensions.YEARS.map((_year) => {
-      _year.toString(): ReportDimensions.MONTHS.map((_month) => _month.toString()).toList()
+      _year.toString(): _months.map((_month) => _month.toString()).toList()
     }).toList();
     setState(() {
       _dimensionList = _list;
@@ -41,6 +42,7 @@ class _EquipmentAssetsState extends State<EquipmentAssets> {
 
   void initState() {
     super.initState();
+    _months.addAll(ReportDimensions.MONTHS);
     initDimension();
     getChartData(_dim1.toString(), _dim2.toString());
   }
@@ -50,7 +52,7 @@ class _EquipmentAssetsState extends State<EquipmentAssets> {
         cancelText: '取消',
         confirmText: '确认',
         adapter: PickerDataAdapter<String>(pickerdata: _dimensionList),
-        selecteds: [ReportDimensions.YEARS.indexOf(_dim1), ReportDimensions.MONTHS.indexOf(_dim2)],
+        selecteds: [ReportDimensions.YEARS.indexOf(_dim1), _dim2==0?0:_months.indexOf(_dim2)],
         hideHeader: true,
         title: new Text("请选择维度"),
         selectedTextStyle: TextStyle(color: Colors.blue),
@@ -60,7 +62,7 @@ class _EquipmentAssetsState extends State<EquipmentAssets> {
           setState(() {
             _currentDimension = _selected[0];
             _dim1 = int.parse(_selected[0]);
-            _dim2 = int.parse(_selected[1]);
+            _dim2 = _selected[1]==''?0:int.parse(_selected[1]);
           });
         }
     ).showDialog(context);
@@ -72,7 +74,7 @@ class _EquipmentAssetsState extends State<EquipmentAssets> {
         method: HttpRequest.POST,
         data: {
           'year': year,
-          'month': month
+          'month': month==''?0:month
         }
     );
     if (resp['ResultCode'] == '00') {
@@ -85,7 +87,7 @@ class _EquipmentAssetsState extends State<EquipmentAssets> {
             colorFn: (_, __) => charts.MaterialPalette.blue.shadeDefault,
             domainFn: (EquipmentData data, _) => data.type,
             measureFn: (EquipmentData data, _) => data.amount,
-            labelAccessorFn: (EquipmentData data, _) => '${data.amount.toString()}',
+            labelAccessorFn: (EquipmentData data, _) => '${data.amount.toString().split('.')[0]}',
             data: _list,
           )
         ];
@@ -110,7 +112,7 @@ class _EquipmentAssetsState extends State<EquipmentAssets> {
             )
         ),
         new Text('年份:${_dim1.toString()}'),
-        new Text('月份:${_dim2.toString()}')
+        new Text(_dim2!=0?'月份:${_dim2.toString()}':'')
       ],
     );
   }
@@ -124,7 +126,7 @@ class _EquipmentAssetsState extends State<EquipmentAssets> {
         rows: _tableData.map((item) => DataRow(
             cells: [
               DataCell(Text(item['Item1'])),
-              DataCell(Text(item['Item2'].toString()))
+              DataCell(Text(item['Item2'].toString().split('.')[0]))
             ]
         )).toList()
     );

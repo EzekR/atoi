@@ -280,7 +280,7 @@ class _UserRepairPageState extends State<UserRepairPage> {
             new Padding(
               padding: EdgeInsets.symmetric(horizontal: 0.0),
               child: new IconButton(
-                  icon: Icon(Icons.cancel),
+                  icon: Icon(Icons.cancel, color: Colors.blue,),
                   color: Colors.white,
                   onPressed: () {
                     imageList.remove(image);

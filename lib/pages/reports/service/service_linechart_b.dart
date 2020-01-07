@@ -28,8 +28,8 @@ class _ServiceLinechartBState extends State<ServiceLinechartB> {
   String _tableName = '年份';
   String _currentDimension = '';
   ScrollController _scrollController;
-  String _dim1 = '年';
-  String _dim2 = ' ';
+  String _dim1 = '月';
+  String _dim2 = '2020';
 
   Future<void> initDimension() async {
     List _list = [
