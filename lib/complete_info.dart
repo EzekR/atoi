@@ -223,7 +223,7 @@ class _CompleteInfoState extends State<CompleteInfo> {
         children: <Widget>[
           new Row(
             children: <Widget>[
-              new Text('版本号: v0.0.1', style: TextStyle(fontSize: 14.0),),
+              new Text('版本号: v${HttpRequest.APP_VERSION}', style: TextStyle(fontSize: 14.0),),
             ],
           ),
           new Row(
