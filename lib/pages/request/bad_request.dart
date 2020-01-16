@@ -14,6 +14,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:flutter/cupertino.dart';
 
+/// 不良事件页面类
 class BadRequest extends StatefulWidget {
   static String tag = 'bad-request';
 

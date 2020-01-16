@@ -17,6 +17,7 @@ import 'package:atoi/widgets/search_bar_vendor.dart';
 import 'package:atoi/models/main_model.dart';
 import 'package:atoi/utils/constants.dart';
 
+/// 设备合同页面类
 class EquipmentContract extends StatefulWidget {
   EquipmentContract({Key key, this.contract, this.editable}) : super(key: key);
   final Map contract;

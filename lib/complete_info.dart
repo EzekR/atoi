@@ -6,6 +6,7 @@ import 'package:atoi/utils/http_request.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:flutter/cupertino.dart';
 
+/// 完善用户信息类
 class CompleteInfo extends StatefulWidget {
   _CompleteInfoState createState() => new _CompleteInfoState();
 }
@@ -26,7 +27,7 @@ class _CompleteInfoState extends State<CompleteInfo> {
   var emailReg = RegExp(r"[w!#$%&'*+/=?^_`{|}~-]+(?:.[w!#$%&'*+/=?^_`{|}~-]+)*@(?:[w](?:[w-]*[w])?.)+[w](?:[w-]*[w])?");
   var emailValid = RegExp(r"^[a-zA-Z0-9.]+@[a-zA-Z0-9]+\.[a-zA-Z]+");
 
-
+  /// 获取用户信息
   Future<Null> getUserInfo() async {
     var prefs = await _prefs;
     var _userInfo = prefs.getString('userInfo');
@@ -41,12 +42,14 @@ class _CompleteInfoState extends State<CompleteInfo> {
       currentDepart = decoded['Department']['Name']??'';
     });
   }
+
   void initState() {
     super.initState();
     getUserInfo();
     getDepartments();
   }
 
+  /// 获取科室
   Future<Null> getDepartments() async {
     var resp = await HttpRequest.request(
       '/User/GetDepartments',
@@ -64,6 +67,7 @@ class _CompleteInfoState extends State<CompleteInfo> {
     }
   }
 
+  /// 初始化下拉菜单
   List<DropdownMenuItem<String>> getDropDownMenuItems(List list) {
     List<DropdownMenuItem<String>> items = new List();
     for (String method in list) {
@@ -79,6 +83,7 @@ class _CompleteInfoState extends State<CompleteInfo> {
     return items;
   }
 
+  /// 选择下拉菜单
   void changedDropDownMethod(String selectedMethod) {
     setState(() {
       currentDepart = selectedMethod;
@@ -128,6 +133,7 @@ class _CompleteInfoState extends State<CompleteInfo> {
     );
   }
 
+  /// 提交用户信息
   Future<Null> submit() async {
     var _depart = departments.firstWhere((depart) => depart['Name']==currentDepart, orElse: () => null);
     var _data = {

@@ -12,6 +12,7 @@ import 'package:atoi/widgets/build_widget.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:atoi/models/constants_model.dart';
 
+/// 供应商页面类
 class VendorDetail extends StatefulWidget {
   VendorDetail({Key key, this.vendor, this.editable}) : super(key: key);
   final Map vendor;

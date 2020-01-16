@@ -2,6 +2,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:scoped_model/scoped_model.dart';
 import 'package:atoi/utils/http_request.dart';
 
+/// 超管模型类
 class ManagerModel extends Model {
   String _badgeA = '0';
   String _badgeB = '0';
@@ -20,7 +21,7 @@ class ManagerModel extends Model {
   get dispatches => _dispatches;
   get todos => _todos;
 
-
+  /// 获取任务数量
   Future<Null> getCount() async {
     var resp = await HttpRequest.request(
       '/User/GetAdminCount',
@@ -35,6 +36,7 @@ class ManagerModel extends Model {
     notifyListeners();
   }
 
+  /// 获取请求
   Future<Null> getRequests() async {
     Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
     var prefs = await _prefs;
@@ -52,6 +54,7 @@ class ManagerModel extends Model {
     notifyListeners();
   }
 
+  /// 获取更多请求
   Future<Null> getMoreRequests() async {
     Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
     var prefs = await _prefs;
@@ -69,6 +72,7 @@ class ManagerModel extends Model {
     notifyListeners();
   }
 
+  /// 获取派工单
   Future<Null> getDispatches() async {
     Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
     var prefs = await _prefs;
@@ -91,6 +95,7 @@ class ManagerModel extends Model {
     notifyListeners();
   }
 
+  /// 获取更多派工单
   Future<Null> getMoreDispatches() async {
     Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
     var prefs = await _prefs;
@@ -113,6 +118,7 @@ class ManagerModel extends Model {
     notifyListeners();
   }
 
+  /// 获取未完成请求
   Future<Null> getTodos() async {
     Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
     var prefs = await _prefs;
@@ -137,6 +143,7 @@ class ManagerModel extends Model {
     notifyListeners();
   }
 
+  /// 获取更多未完成请求
   Future<Null> getMoreTodos() async {
     Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
     var prefs = await _prefs;

@@ -13,6 +13,7 @@ import 'package:atoi/pages/user/request_history.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:atoi/models/models.dart';
 
+/// 用户首页类
 class UserHomePage extends StatefulWidget{
   static String tag = 'user-home-page';
   @override
@@ -26,6 +27,7 @@ class _UserHomePageState extends State<UserHomePage> {
   Future<SharedPreferences> prefs = SharedPreferences.getInstance();
   var _userName;
 
+  /// 获取用户信息
   Future<Null> getRole() async {
     var _prefs = await prefs;
     var userInfo = _prefs.getString('userInfo');
@@ -42,6 +44,7 @@ class _UserHomePageState extends State<UserHomePage> {
     super.initState();
   }
 
+  /// 扫描二维码
   Future scan() async {
     try {
       String barcode = await BarcodeScanner.scan();
@@ -66,6 +69,7 @@ class _UserHomePageState extends State<UserHomePage> {
     }
   }
 
+  /// 根据二维码获取设备信息
   Future<Null> getDevice() async {
     Map<String, dynamic> params = {
       'codeContent': barcode,

@@ -16,6 +16,7 @@ import 'package:atoi/pages/equipments/vendors_list.dart';
 import 'package:atoi/pages/equipments/contract_list.dart';
 import 'dart:convert';
 
+/// 超管首页类
 class HomePage extends StatefulWidget {
   static String tag = 'home-page';
   @override
@@ -28,6 +29,9 @@ class _HomePageState extends State<HomePage>
   Future<SharedPreferences> prefs = SharedPreferences.getInstance();
   String _userName = '';
   Timer _timer;
+  String _badgeA = '0';
+  String _badgeB = '0';
+  String _badgeC = '0';
 
   Future<Null> getRole() async {
     var _prefs = await prefs;

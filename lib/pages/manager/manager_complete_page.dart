@@ -8,6 +8,7 @@ import 'dart:convert';
 import 'package:atoi/widgets/build_widget.dart';
 import 'package:atoi/models/models.dart';
 
+/// 超管未完成页面类
 class ManagerCompletePage extends StatefulWidget {
   static String tag = 'mananger-complete-page';
   ManagerCompletePage({Key key, this.requestId}) : super(key: key);
@@ -588,7 +589,7 @@ class _ManagerCompletePageState extends State<ManagerCompletePage> {
               BuildWidget.buildRow('派工单编号', _dispatch['OID']),
               BuildWidget.buildRow('派工单状态', _dispatch['Status']['Name']),
               BuildWidget.buildRow('派工类型', _dispatch['RequestType']['Name']),
-              _request['RequestType']['ID']==14?new Container():BuildWidget.buildRow('机器状态', _dispatch['MachineStatus']['Name']),
+              _dispatch['RequestType']['ID']==14?new Container():BuildWidget.buildRow('机器状态', _dispatch['MachineStatus']['Name']),
               BuildWidget.buildRow('紧急程度', _dispatch['Urgency']['Name']),
               BuildWidget.buildRow('出发时间', AppConstants.TimeForm(_dispatch['ScheduleDate'].toString(), 'mm:ss')),
               BuildWidget.buildRow('工程师姓名', _dispatch['Engineer']['Name']),

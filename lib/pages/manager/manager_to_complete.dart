@@ -10,6 +10,7 @@ import 'package:atoi/widgets/build_widget.dart';
 import 'package:atoi/utils/constants.dart';
 import 'package:flutter/cupertino.dart';
 
+/// 超管待完成列表页面类
 class ManagerToComplete extends StatefulWidget {
   @override
   _ManagerToCompleteState createState() => _ManagerToCompleteState();

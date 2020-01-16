@@ -4,6 +4,7 @@ import 'package:scoped_model/scoped_model.dart';
 import 'dart:convert';
 import 'package:atoi/utils/http_request.dart';
 
+/// 带复选框的搜索页面类
 class SearchBarCheckBoxDelegate extends SearchDelegate<String>{
 
   static const searchList = [];

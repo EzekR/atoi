@@ -4,8 +4,9 @@ import 'package:atoi/models/main_model.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_picker/flutter_picker.dart';
 import 'package:atoi/utils/http_request.dart';
-import 'package:syncfusion_flutter_charts/charts.dart';
+import 'package:atoi_charts/charts.dart';
 import 'package:atoi/utils/report_dimensions.dart';
+import 'package:should_rebuild/should_rebuild.dart';
 
 class ServiceLinechartB extends StatefulWidget {
 
@@ -30,6 +31,7 @@ class _ServiceLinechartBState extends State<ServiceLinechartB> {
   ScrollController _scrollController;
   String _dim1 = '月';
   String _dim2 = '2020';
+  List _years = ReportDimensions.YEARS;
 
   Future<void> initDimension() async {
     List _list = [
@@ -55,7 +57,7 @@ class _ServiceLinechartBState extends State<ServiceLinechartB> {
     Picker(
         cancelText: '取消',
         confirmText: '确认',
-        selecteds: [_dim1=='年'?0:1, _dim2==' '?0:ReportDimensions.YEARS.indexOf(int.parse(_dim2))],
+        selecteds: [_dim1=='年'?0:1, _dim2==' '?0:_years.indexOf(int.parse(_dim2))],
         adapter: PickerDataAdapter<String>(pickerdata: _dimensionList),
         hideHeader: false,
         title: new Text("请选择维度"),
@@ -114,6 +116,15 @@ class _ServiceLinechartBState extends State<ServiceLinechartB> {
     );
   }
 
+  String trimNum(String num) {
+    var _list = num.split('.');
+    if (_list[1] == '0') {
+      return _list[0];
+    } else {
+      return num;
+    }
+  }
+
   Card buildTable() {
     var _dataTable = new DataTable(
         columns: [
@@ -125,8 +136,8 @@ class _ServiceLinechartBState extends State<ServiceLinechartB> {
         rows: _tableData.map((item) => DataRow(
             cells: [
               DataCell(Text(item['type'])),
-              DataCell(Text(item['cur'].toString())),
-              DataCell(Text(item['last'].toString())),
+              DataCell(Text(trimNum(item['cur'].toString()))),
+              DataCell(Text(trimNum(item['last'].toString()))),
               DataCell(Text(item['ratio'].toString())),
             ]
         )).toList()
@@ -156,7 +167,14 @@ class _ServiceLinechartBState extends State<ServiceLinechartB> {
               // Bind data source
                 dataSource: _tableData.map<ServiceData>((item) => ServiceData(item['type'], item['ratio'])).toList(),
                 xValueMapper: (ServiceData data, _) => data.type,
-                yValueMapper: (ServiceData data, _) => data.Growth
+                yValueMapper: (ServiceData data, _) => data.Growth,
+                markerSettings: MarkerSettings(
+                    isVisible: true
+                ),
+                dataLabelSettings: DataLabelSettings(
+                  // Renders the data label
+                    isVisible: true
+                )
             )
           ]
       ),
@@ -188,7 +206,7 @@ class _ServiceLinechartBState extends State<ServiceLinechartB> {
               controller: _scrollController,
               children: <Widget>[
                 buildPickerRow(context),
-                _tableData!=null&&_tableData.isNotEmpty?buildChart():new Container(),
+                _tableData!=null&&_tableData.isNotEmpty?ShouldRebuild<BuildChart>(shouldRebuild: (_old, _new) => _old.tableData!=_new.tableData, child: BuildChart(labelY: widget.labelY, tableData: _tableData,),):new Container(),
                 new SizedBox(height: 8.0,),
                 new Row(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -196,7 +214,9 @@ class _ServiceLinechartBState extends State<ServiceLinechartB> {
                     new Text('数据列表')
                   ],
                 ),
-                _tableData!=null&&_tableData.isNotEmpty?buildTable():new Container()
+                _tableData!=null&&_tableData.isNotEmpty?buildTable():new Container(child: new Center(
+                  child: Text('暂无数据'),
+                ),),
               ],
             )
         );
@@ -211,3 +231,73 @@ class ServiceData {
 
   ServiceData(this.type, this.Growth);
 }
+
+class BuildChart extends StatelessWidget {
+  final String labelY;
+  final List tableData;
+  final ScrollController scrollController;
+  BuildChart({this.labelY, this.tableData, this.scrollController});
+
+  Widget build(BuildContext context) {
+    print(tableData.length);
+    return new Card(
+        child: new Container(
+          height: 400.0,
+          child: new ListView(
+            scrollDirection: Axis.horizontal,
+            controller: scrollController,
+            shrinkWrap: true,
+            children: <Widget>[
+              new Container(
+                width: tableData.length>10?tableData.length*50.0:400.0,
+                child: SfCartesianChart(
+                  // Initialize category axis
+                    primaryXAxis: CategoryAxis(
+                      labelRotation: 90,
+                      majorGridLines: MajorGridLines(
+                        width: 0
+                      ),
+                      majorTickLines: MajorTickLines(
+                        width: 0
+                      )
+                    ),
+                    primaryYAxis: NumericAxis(
+                        title: AxisTitle(
+                            text: labelY
+                        ),
+                        minimum: 0,
+                        maximum: 100,
+                        interval: 10,
+                        majorGridLines: MajorGridLines(
+                          dashArray: [5, 5]
+                        )
+                    ),
+                    tooltipBehavior: TooltipBehavior(
+                      enable: true,
+                      header: labelY
+                    ),
+                    series: <LineSeries<ServiceData, String>>[
+                      LineSeries<ServiceData, String>(
+                        // Bind data source
+                          dataSource: tableData.map<ServiceData>((item) => ServiceData(item['type'], item['ratio'])).toList(),
+                          xValueMapper: (ServiceData data, _) => data.type,
+                          yValueMapper: (ServiceData data, _) => data.Growth,
+                          markerSettings: MarkerSettings(
+                              isVisible: true
+                          ),
+                          dataLabelSettings: DataLabelSettings(
+                            // Renders the data label
+                              isVisible: true
+                          )
+                      )
+                    ]
+                ),
+              ),
+
+            ],
+          ),
+        )
+    );
+  }
+}
+

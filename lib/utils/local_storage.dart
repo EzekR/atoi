@@ -1,8 +1,10 @@
 import 'package:shared_preferences/shared_preferences.dart';
 
+/// 本地存储类
 class LocalStorage {
   Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
 
+  /// 存储数据
   Future<Null> setStorage(String key, dynamic val) async {
     var prefs = await _prefs;
     switch (val.runtimeType) {
@@ -18,6 +20,7 @@ class LocalStorage {
     }
   }
 
+  /// 获取数据
   getStorage(String key, Type type) async {
     var prefs = await _prefs;
     var val;

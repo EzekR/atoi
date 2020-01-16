@@ -1,6 +1,7 @@
 import 'package:scoped_model/scoped_model.dart';
 import 'package:atoi/utils/http_request.dart';
 
+/// 常量模型类
 class ConstantsModel extends Model {
   Map<String, dynamic> _Constants = {};
   List<Map<String, dynamic>> _ReportDimensions = [];
@@ -45,13 +46,13 @@ class ConstantsModel extends Model {
     '校正要求' ,
     '备注' ,
     '不良事件描述',
-    '合同备注' ,
+    '合同档案备注' ,
     '验收安装备注' ,
     '调拨备注' ,
     '借用备注' ,
     '盘点备注' ,
     '报废备注' ,
-    '其他服务备注'
+    '备注'
   ];
   List<String> _RemarkType = [
     '',
@@ -108,6 +109,7 @@ class ConstantsModel extends Model {
   get PeriodTypeList => _PeriodTypeList;
   get ReportDimensions => _ReportDimensions;
 
+  /// 获取常量
   Future<Null> getConstants() async {
     var resp = await HttpRequest.request(
       '/User/GetConstants',

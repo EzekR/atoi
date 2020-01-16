@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:scoped_model/scoped_model.dart';
 import 'package:atoi/models/main_model.dart';
-import 'package:charts_flutter/flutter.dart' as charts;
+import 'package:should_rebuild/should_rebuild.dart';
+import 'package:atoi_charts/charts.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_picker/flutter_picker.dart';
 import 'package:atoi/utils/http_request.dart';
@@ -20,7 +21,6 @@ class ServiceBarchartB extends StatefulWidget {
 
 class _ServiceBarchartBState extends State<ServiceBarchartB> {
 
-  List<charts.Series<dynamic, String>> seriesList;
   bool animate;
 
   List _dimensionList = [];
@@ -31,6 +31,8 @@ class _ServiceBarchartBState extends State<ServiceBarchartB> {
   String _currentDimension = '';
   String _dim1 = ReportDimensions.DIMS[2]['Name'];
   String _dim2 = '年';
+  List _years = ReportDimensions.YEARS;
+  ScrollController _scrollController;
 
   Future<void> initDimension() async {
     setState(() {
@@ -90,17 +92,6 @@ class _ServiceBarchartBState extends State<ServiceBarchartB> {
       var _data = resp['Data'];
       var _list = _data.map<ServiceData>((item) => new ServiceData(item['Item1'], item['Item2'])).toList();
       setState(() {
-        seriesList = [
-          new charts.Series<ServiceData, String>(
-            id: 'Sales',
-            colorFn: (_, __) => charts.MaterialPalette.blue.shadeDefault,
-            domainFn: (ServiceData data, _) => data.type,
-            measureFn: (ServiceData data, _) => data.amount,
-            labelAccessorFn: (ServiceData data, _) =>
-            '${data.amount.toString().split('.')[0]}',
-            data: _list,
-          )
-        ];
         _tableName = type;
         _tableData = _data;
       });
@@ -118,12 +109,12 @@ class _ServiceBarchartBState extends State<ServiceBarchartB> {
             child: new Row(
               children: <Widget>[
                 new Icon(Icons.timeline, color: Colors.white,),
-                new Text('选择维度', style: new TextStyle(color: Colors.white),)
+                new Text('维度', style: new TextStyle(color: Colors.white),)
               ],
             )
         ),
-        new Text('维度 $_dim1'),
-        new Text('时间维度分类 $_dim2')
+        new Text('$_dim1'),
+        new Text('时间维度分类: $_dim2')
       ],
     );
   }
@@ -132,7 +123,7 @@ class _ServiceBarchartBState extends State<ServiceBarchartB> {
     var _dataTable = new DataTable(
         columns: [
           DataColumn(label: Text(_currentDimension, textAlign: TextAlign.center, style: new TextStyle(color: Colors.blue, fontSize: 14.0),)),
-          DataColumn(label: Text('设备数量', textAlign: TextAlign.center, style: new TextStyle(color: Colors.blue, fontSize: 14.0),)),
+          DataColumn(label: Text('请求数量（条）', textAlign: TextAlign.center, style: new TextStyle(color: Colors.blue, fontSize: 14.0),)),
         ],
         rows: _tableData.map((item) => DataRow(
             cells: [
@@ -143,17 +134,6 @@ class _ServiceBarchartBState extends State<ServiceBarchartB> {
     );
     return new Card(
       child: _dataTable,
-    );
-  }
-
-  Container buildChart() {
-    return new Container(
-      height: _tableData.length*50.0+60.0,
-      child: new charts.BarChart(
-        seriesList,
-        animate: true,
-        vertical: false,
-      ),
     );
   }
 
@@ -180,15 +160,17 @@ class _ServiceBarchartBState extends State<ServiceBarchartB> {
             body: new ListView(
               children: <Widget>[
                 buildPickerRow(context),
-                seriesList==null?new Container():buildChart(),
-                new SizedBox(height: 8.0,),
+                _tableData!=null&&_tableData.isNotEmpty?ShouldRebuild<BuildChart>(shouldRebuild: (_old, _new) => _old.tableData!=_new.tableData, child: BuildChart(labelY: widget.labelY, tableData: _tableData, scrollController: _scrollController,),):new Container(),
+                new SizedBox(height: 22.0,),
                 new Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: <Widget>[
                     new Text('数据列表')
                   ],
                 ),
-                _tableData!=null&&_tableData.isNotEmpty?buildTable():new Container()
+                _tableData!=null&&_tableData.isNotEmpty?buildTable():new Container(child: new Center(
+                  child: Text('暂无数据'),
+                ),),
               ],
             )
         );
@@ -202,4 +184,68 @@ class ServiceData {
   final double amount;
 
   ServiceData(this.type, this.amount);
+}
+
+class BuildChart extends StatelessWidget {
+  final String labelY;
+  final List tableData;
+  final ScrollController scrollController;
+  BuildChart({this.labelY, this.tableData, this.scrollController});
+
+  Widget build(BuildContext context) {
+    print(tableData.length);
+    var max = tableData.reduce((a, b) => b['Item2']>=a['Item2']?b:a);
+    return new Card(
+        child: new Container(
+          height: 400.0,
+          child: new ListView(
+            scrollDirection: Axis.horizontal,
+            controller: scrollController,
+            shrinkWrap: true,
+            children: <Widget>[
+              new Container(
+                width: tableData.length>10?tableData.length*50.0:400.0,
+                child: SfCartesianChart(
+                  // Initialize category axis
+                    primaryXAxis: CategoryAxis(
+                        labelRotation: 90,
+                        majorGridLines: MajorGridLines(
+                            width: 0
+                        )
+                    ),
+                    primaryYAxis: NumericAxis(
+                        title: AxisTitle(
+                            text: labelY
+                        ),
+                        majorGridLines: MajorGridLines(
+                            dashArray: [5, 5]
+                        ),
+                        minimum: 0,
+                        interval: max['Item2']<10?1:(max['Item2']~/10).toDouble(),
+                    ),
+                    tooltipBehavior: TooltipBehavior(
+                      enable: true,
+                      header: labelY
+                    ),
+                    series: <ChartSeries<ServiceData, String>>[
+                      ColumnSeries<ServiceData, String>(
+                        // Bind data source
+                          dataSource: tableData.map<ServiceData>((item) => ServiceData(item['Item1'], item['Item2'])).toList(),
+                          xValueMapper: (ServiceData data, _) => data.type,
+                          yValueMapper: (ServiceData data, _) => data.amount,
+                          dataLabelSettings: DataLabelSettings(
+                            // Renders the data label
+                              isVisible: true,
+                              labelAlignment: ChartDataLabelAlignment.outer
+                          ),
+                          enableTooltip: true
+                      )
+                    ]
+                ),
+              ),
+            ],
+          ),
+        )
+    );
+  }
 }

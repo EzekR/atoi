@@ -6,6 +6,7 @@ import 'package:atoi/pages/equipments/vendor_detail.dart';
 import 'package:atoi/pages/equipments/equipment_contract.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+/// 合同列表页面类
 class ContractList extends StatefulWidget{
   _ContractListState createState() => _ContractListState();
 }

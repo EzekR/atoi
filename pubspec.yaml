@@ -44,10 +44,13 @@ dependencies:
   floating_search_bar: ^0.2.0
   dropdownfield: ^1.0.3
   json_table: ^1.3.2
-  syncfusion_flutter_charts: ^17.3.26
+  # syncfusion_flutter_charts: ^17.3.26
   date_format: ^1.0.8
+  should_rebuild: ^0.1.2
   brother_printer:
       git: https://github.com/EzekR/brother_print.git
+  atoi_charts:
+      git: https://github.com/EzekR/atoi_charts.git
 
 
 dev_dependencies:

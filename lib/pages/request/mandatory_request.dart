@@ -15,6 +15,7 @@ import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:atoi/models/models.dart';
 import 'package:flutter/cupertino.dart';
 
+/// 强检页面类
 class MandatoryRequest extends StatefulWidget{
   static String tag = 'mandatory-request';
 

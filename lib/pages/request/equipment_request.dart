@@ -13,6 +13,7 @@ import 'package:atoi/widgets/build_widget.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:flutter/cupertino.dart';
 
+/// 设备新增页面类
 class EquipmentRequest extends StatefulWidget{
   static String tag = 'equipment-request';
 

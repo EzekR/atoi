@@ -11,6 +11,7 @@ import 'package:atoi/pages/reports/service/service_linechart.dart';
 import 'package:atoi/pages/reports/service/service_linechart_a.dart';
 import 'package:atoi/pages/reports/service/service_linechart_b.dart';
 
+/// 报表列表页面类
 class ReportList extends StatefulWidget {
   _ReportListState createState() => _ReportListState();
 }
@@ -46,7 +47,7 @@ class _ReportListState extends State<ReportList> {
                   Navigator.of(context).push(new MaterialPageRoute(builder: (context) => new EquipmentAssets(chartName: item['name'], endpoint: item['endpoint'], labelY: item['label-y'],)));
                   break;
                 case 'linechart_1':
-                  Navigator.of(context).push(new MaterialPageRoute(builder: (context) => new EquipmentLinechart(chartName: item['name'], endpoint: item['endpoint'],)));
+                  Navigator.of(context).push(new MaterialPageRoute(builder: (context) => new EquipmentLinechart(chartName: item['name'], endpoint: item['endpoint'], labelY: item['label-y'],)));
                   break;
                 case 'linechart_2':
                   Navigator.of(context).push(new MaterialPageRoute(builder: (context) => new EquipmentLinechartA(chartName: item['name'], endpoint: item['endpoint'], labelY: item['label-y'],)));
@@ -58,7 +59,7 @@ class _ReportListState extends State<ReportList> {
                   Navigator.of(context).push(new MaterialPageRoute(builder: (context) => new ServiceAssets(chartName: item['name'], endpoint: item['endpoint'],)));
                   break;
                 case 's_barchart_3':
-                  Navigator.of(context).push(new MaterialPageRoute(builder: (context) => new ServiceBarchartB(chartName: item['name'], endpoint: item['endpoint'],)));
+                  Navigator.of(context).push(new MaterialPageRoute(builder: (context) => new ServiceBarchartB(chartName: item['name'], endpoint: item['endpoint'], labelY: item['label-y'],)));
                   break;
                 case 's_barchart_line':
                   Navigator.of(context).push(new MaterialPageRoute(builder: (context) => new ServiceBarchartLine(chartName: item['name'], endpoint: item['endpoint'],)));
@@ -170,12 +171,14 @@ class _ReportListState extends State<ReportList> {
                   {
                     'name': '设备故障率',
                     'type': 'linechart_1',
-                    'endpoint': 'EquipmentRapirRatioReport'
+                    'endpoint': 'EquipmentRapirRatioReport',
+                    'label-y': '故障率(%)'
                   },
                   {
                     'name': '设备故障率同比',
                     'type': 'linechart_2',
-                    'endpoint': 'FailureRatioReport'
+                    'endpoint': 'FailureRatioReport',
+                    'label-y': '同比（%）'
                   },
                 ];
                 showBottomAll(_list);
@@ -222,7 +225,7 @@ class _ReportListState extends State<ReportList> {
                   {
                     'name': '服务合同年限',
                     'type': 'barchart_2',
-                    'label-y': '设备数量（台）',
+                    'label-y': '合同数量（条）',
                     'endpoint': 'ContractYears'
                   },
                   {
@@ -368,7 +371,7 @@ class _ReportListState extends State<ReportList> {
                   {
                     'name': '派工响应时间',
                     'type': 'barchart_2',
-                    'label-y': '请求条数（条）',
+                    'label-y': '派工单数量（条）',
                     'endpoint': 'ResponseDispatchTime'
                   },
                   {
@@ -400,25 +403,25 @@ class _ReportListState extends State<ReportList> {
                   {
                     'name': '维修请求数量统计',
                     'type': 'barchart_1',
-                    'label-y': '请求条数（条）',
+                    'label-y': '请求数量（条）',
                     'endpoint': 'ReportRequestCount?requestType=1&status=0',
                   },
                   {
                     'name': '维修请求未关闭数量',
                     'type': 's_barchart_3',
-                    'label-y': '请求条数（条）',
+                    'label-y': '请求数量（条）',
                     'endpoint': 'ReportRequestCount?requestType=1&status=1'
                   },
                   {
                     'name': '维修请求未响应数量',
-                    'type': 'barchart_1',
-                    'label-y': '请求条数（条）',
+                    'type': 's_barchart_3',
+                    'label-y': '请求数量（条）',
                     'endpoint': 'ReportRequestCount?requestType=1&status=2'
                   },
                   {
                     'name': '维修请求已关闭数量',
                     'type': 'barchart_1',
-                    'label-y': '请求条数（条）',
+                    'label-y': '请求数量（条）',
                     'endpoint': 'ReportRequestCount?requestType=1&status=3'
                   },
                   {
@@ -435,7 +438,7 @@ class _ReportListState extends State<ReportList> {
                   {
                     'name': '维修请求响应时间',
                     'type': 'barchart_2',
-                    'label-y': '请求条数（条）',
+                    'label-y': '请求数量（条）',
                     'endpoint': 'RepairResponseTimeReport?requestType=1'
                   },
                 ];
@@ -451,12 +454,14 @@ class _ReportListState extends State<ReportList> {
                   {
                     'name': '设备自修率',
                     'type': 'linechart_2',
-                    'endpoint': 'RepairRatioReport?requestType=1&status=3'
+                    'endpoint': 'RepairRatioReport?requestType=1&status=3',
+                    'label-y': '自修率（%）'
                   },
                   {
                     'name': '设备供应商维修率',
                     'type': 'linechart_2',
-                    'endpoint': 'Supplier_RepairRatioReport?requestType=1&status=3'
+                    'endpoint': 'Supplier_RepairRatioReport?requestType=1&status=3',
+                    'label-y': '供应商维修率（%）'
                   },
                 ];
                 showBottomAll(_list);
@@ -471,13 +476,13 @@ class _ReportListState extends State<ReportList> {
                   {
                     'name': '设备实际保养数量',
                     'type': 'barchart_1',
-                    'label-y': '请求条数（条）',
+                    'label-y': '请求数量（条）',
                     'endpoint': 'ReportRequestCount?requestType=2&status=3'
                   },
                   {
                     'name': '设备计划保养数量',
                     'type': 'barchart_1',
-                    'label-y': '请求条数（条）',
+                    'label-y': '请求数量（条）',
                     'endpoint': 'ReportRequestCount?requestType=2&status=0'
                   },
                   {
@@ -489,13 +494,13 @@ class _ReportListState extends State<ReportList> {
                   {
                     'name': '设备供应商保养数',
                     'type': 'barchart_1',
-                    'label-y': '请求条数（条）',
+                    'label-y': '请求数量（条）',
                     'endpoint': 'ResultCount_supplierReport?requestType=2&status=3'
                   },
                   {
                     'name': '设备内部保养数',
                     'type': 'barchart_1',
-                    'label-y': '请求条数（条）',
+                    'label-y': '请求数量（条）',
                     'endpoint': 'ResultCount_self?requestType=2&status=3'
                   },
                 ];
@@ -511,13 +516,13 @@ class _ReportListState extends State<ReportList> {
                   {
                     'name': '设备实际巡检数量',
                     'type': 'barchart_1',
-                    'label-y': '请求条数（条）',
+                    'label-y': '请求数量（条）',
                     'endpoint': 'ReportRequestCount?requestType=4&status=3'
                   },
                   {
                     'name': '设备计划巡检数量',
                     'type': 'barchart_1',
-                    'label-y': '请求条数（条）',
+                    'label-y': '请求数量（条）',
                     'endpoint': 'ReportRequestCount?requestType=4&status=0'
                   },
                   {
@@ -539,25 +544,25 @@ class _ReportListState extends State<ReportList> {
                   {
                     'name': '设备实际强检数量',
                     'type': 'barchart_1',
-                    'label-y': '请求条数（条）',
+                    'label-y': '请求数量（条）',
                     'endpoint': 'ReportRequestCount?requestType=3&status=3'
                   },
                   {
                     'name': '设备未完成强检数量',
                     'type': 's_barchart_3',
-                    'label-y': '请求条数（条）',
+                    'label-y': '请求数量（条）',
                     'endpoint': 'ReportRequestCount?requestType=3&status=1'
                   },
                   {
                     'name': '设备待召回请求数量',
                     'type': 's_barchart_3',
-                    'label-y': '请求条数（条）',
+                    'label-y': '请求数量（条）',
                     'endpoint': 'ReportRequestCount?requestType=-1&status=1'
                   },
                   {
                     'name': '设备计划强检数量',
                     'type': 'barchart_1',
-                    'label-y': '请求条数（条）',
+                    'label-y': '请求数量（条）',
                     'endpoint': 'ReportRequestCount?requestType=3&status=0'
                   },
                   {
@@ -579,13 +584,13 @@ class _ReportListState extends State<ReportList> {
                   {
                     'name': '设备实际校正数量',
                     'type': 'barchart_1',
-                    'label-y': '请求条数（条）',
+                    'label-y': '请求数量（条）',
                     'endpoint': 'ReportRequestCount?requestType=5&status=3'
                   },
                   {
                     'name': '设备计划校正数量',
                     'type': 'barchart_1',
-                    'label-y': '请求条数（条）',
+                    'label-y': '请求数量（条）',
                     'endpoint': 'ReportRequestCount?requestType=5&status=0'
                   },
                   {
@@ -607,7 +612,7 @@ class _ReportListState extends State<ReportList> {
                   {
                     'name': '设备调拨数量',
                     'type': 'barchart_1',
-                    'label-y': '请求条数（条）',
+                    'label-y': '请求数量（条）',
                     'endpoint': 'ReportRequestCount?requestType=10&status=0'
                   },
                   {
@@ -619,7 +624,7 @@ class _ReportListState extends State<ReportList> {
                   {
                     'name': '设备调拨响应时间',
                     'type': 'barchart_2',
-                    'label-y': '请求条数（条）',
+                    'label-y': '请求数量（条）',
                     'endpoint': 'RepairResponseTimeReport?requestType=10'
                   },
                   {

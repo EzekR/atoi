@@ -12,6 +12,7 @@ import 'dart:typed_data';
 import 'package:atoi/models/models.dart';
 import 'package:flutter/cupertino.dart';
 
+/// 工程师报告页面
 class EngineerReportPage extends StatefulWidget {
   static String tag = 'engineer-report-page';
   EngineerReportPage({Key key, this.dispatchId, this.reportId, this.status})
@@ -1053,7 +1054,7 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
 
   List<ExpansionPanel> buildExpansion() {
     List<ExpansionPanel> _list = [];
-    if (_dispatch['RequestType']['ID'] != 14) {
+    if (_dispatch['Request']['RequestType']['ID'] != 14) {
       _list.add(
         new ExpansionPanel(
           headerBuilder: (context, isExpanded) {
@@ -1229,17 +1230,17 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
                       expansionCallback: (index, isExpanded) {
                         setState(() {
                           if (index == 0) {
-                            _dispatch['RequestType']['ID'] == 14
+                            _dispatch['Request']['RequestType']['ID'] == 14
                                 ? _isExpandedDetail = !isExpanded
                                 : _isExpandedBasic = !isExpanded;
                           } else {
                             if (index == 1) {
-                              _dispatch['RequestType']['ID'] == 14
+                              _dispatch['Request']['RequestType']['ID'] == 14
                                   ? _isExpandedAssign = !isExpanded
                                   : _isExpandedDetail = !isExpanded;
                             } else {
                               if (index == 2) {
-                                _dispatch['RequestType']['ID'] == 14
+                                _dispatch['Request']['RequestType']['ID'] == 14
                                     ? _isExpandedComponent = !isExpanded
                                     : _isExpandedAssign = !isExpanded;
                               } else {

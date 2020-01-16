@@ -2,7 +2,10 @@ import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'dart:io';
 import 'dart:async';
 
+/// 图片压缩类
 class ImageUtil {
+
+  /// 压缩图片文件返回二进制数组
   Future<List<int>> CompressFileGetList(File file, {minWidth, minHeight, quality, rotate}) async {
     minWidth??480;
     minHeight??600;
@@ -18,6 +21,7 @@ class ImageUtil {
     return result;
   }
 
+  /// 压缩二进制数组返回数组
   Future<List<int>> CompressListGetList(List<int> list, {minWidth, minHeight, quality, rotate}) async {
     minWidth??480;
     minHeight??600;

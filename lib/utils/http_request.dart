@@ -11,6 +11,8 @@ import 'dart:async';
  *  - 统一打印响应信息；
  *  - 统一打印报错信息；
  */
+
+/// 封装http请求类
 class HttpRequest {
 
   /// global dio object
@@ -18,6 +20,7 @@ class HttpRequest {
 
   /// default options
   //static const String API_PREFIX = 'http://159.226.128.250/MEMS_FUJI/APP';
+  static const String APP_VERSION = '0.0.12';
   static const String API_PREFIX = 'http://159.226.128.250/MEMS/APP';
   static const int CONNECT_TIMEOUT = 10000;
   static const int RECEIVE_TIMEOUT = 10000;

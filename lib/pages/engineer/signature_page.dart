@@ -8,6 +8,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_signature_pad/flutter_signature_pad.dart';
 import 'package:flutter/cupertino.dart';
 
+/// 签名页面类
 class SignaturePage extends StatefulWidget {
   static String tag = 'signature-page';
   SignaturePage({Key key}) : super(key: key);

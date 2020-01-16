@@ -4,6 +4,7 @@ import 'package:atoi/utils/http_request.dart';
 import 'package:brother_printer/brother_printer.dart';
 import 'dart:convert';
 
+/// 打印二维码标签页面类
 class PrintQrcode extends StatefulWidget{
   _PrintQrcodeState createState() => _PrintQrcodeState();
   final String equipmentId;

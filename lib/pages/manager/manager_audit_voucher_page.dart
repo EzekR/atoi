@@ -9,6 +9,7 @@ import 'package:atoi/widgets/build_widget.dart';
 import 'package:atoi/models/models.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
+/// 超管审核凭证页面类
 class ManagerAuditVoucherPage extends StatefulWidget {
   static String tag = 'manager-audit-voucher-page';
   ManagerAuditVoucherPage({Key key, this.journalId, this.request, this.status}):super(key: key);
@@ -423,11 +424,11 @@ class _ManagerAuditVoucherPageState extends State<ManagerAuditVoucherPage> {
             children: <Widget>[
               BuildWidget.buildRow('派工单编号', widget.request['OID']),
               BuildWidget.buildRow('派工单状态', widget.request['Status']['Name']),
-              BuildWidget.buildRow('紧急程度', widget.request['Urgency']['Name']),
               BuildWidget.buildRow('派工类型', widget.request['RequestType']['Name']),
-              _dispatch['Request']['RequestType']['ID']!=14?BuildWidget.buildRow('机器状态', widget.request['MachineStatus']['Name']):new Container(),
-              BuildWidget.buildRow('工程师姓名', _dispatch['Engineer']['Name']??''),
+              _dispatch['RequestType']['ID']!=14?BuildWidget.buildRow('机器状态', widget.request['MachineStatus']['Name']):new Container(),
+              BuildWidget.buildRow('紧急程度', widget.request['Urgency']['Name']),
               BuildWidget.buildRow('出发时间',AppConstants.TimeForm(widget.request['ScheduleDate'], 'hh:mm')),
+              BuildWidget.buildRow('工程师姓名', _dispatch['Engineer']['Name']??''),
               BuildWidget.buildRow('备注', _dispatch['LeaderComments']),
             ],
           ),

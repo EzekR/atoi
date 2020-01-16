@@ -39,6 +39,7 @@ class AtoiApp extends StatefulWidget{
 }
 
 class _AtoiAppState extends State<AtoiApp> {
+  /// 项目静态路由
   final routes = <String, WidgetBuilder>{
     LoginPage.tag: (context) => LoginPage(),
     HomePage.tag: (context) => HomePage(),

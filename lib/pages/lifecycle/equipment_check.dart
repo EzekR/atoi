@@ -14,6 +14,7 @@ import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:atoi/widgets/search_page.dart';
 import 'package:flutter/cupertino.dart';
 
+/// 生命周期-设备验收页面类
 class EquipmentCheck extends StatefulWidget {
   static String tag = 'equipment-check';
 

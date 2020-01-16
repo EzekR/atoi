@@ -4,8 +4,9 @@ import 'package:atoi/models/main_model.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_picker/flutter_picker.dart';
 import 'package:atoi/utils/http_request.dart';
-import 'package:syncfusion_flutter_charts/charts.dart';
+import 'package:atoi_charts/charts.dart';
 import 'package:atoi/utils/report_dimensions.dart';
+import 'package:should_rebuild/should_rebuild.dart';
 
 class ServiceLinechartA extends StatefulWidget {
 
@@ -29,6 +30,7 @@ class _ServiceLinechartAState extends State<ServiceLinechartA> {
   String _tableName = '年份';
   String _currentDimension = '';
   ScrollController _scrollController;
+  List _years = ReportDimensions.YEARS;
 
   Future<void> initDimension() async {
     _dimSlice = ReportDimensions.DIMS.sublist(2, 8);
@@ -150,7 +152,14 @@ class _ServiceLinechartAState extends State<ServiceLinechartA> {
               // Bind data source
                 dataSource: _tableData.map<ServiceData>((item) => ServiceData(item['type'], item['ratio'])).toList(),
                 xValueMapper: (ServiceData data, _) => data.type,
-                yValueMapper: (ServiceData data, _) => data.Growth
+                yValueMapper: (ServiceData data, _) => data.Growth,
+                markerSettings: MarkerSettings(
+                    isVisible: true
+                ),
+                dataLabelSettings: DataLabelSettings(
+                  // Renders the data label
+                    isVisible: true
+                )
             )
           ]
       ),
@@ -183,6 +192,7 @@ class _ServiceLinechartAState extends State<ServiceLinechartA> {
               children: <Widget>[
                 buildPickerRow(context),
                 _tableData!=null&&_tableData.isNotEmpty?buildChart():new Container(),
+                _tableData!=null&&_tableData.isNotEmpty?ShouldRebuild<BuildChart>(shouldRebuild: (_old, _new) => _old.tableData!=_new.tableData, child: BuildChart(labelY: widget.labelY, tableData: _tableData,),):new Container(),
                 new SizedBox(height: 8.0,),
                 new Row(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -190,7 +200,9 @@ class _ServiceLinechartAState extends State<ServiceLinechartA> {
                     new Text('数据列表')
                   ],
                 ),
-                _tableData!=null&&_tableData.isNotEmpty?buildTable():new Container()
+                _tableData!=null&&_tableData.isNotEmpty?buildTable():new Container(child: new Center(
+                  child: Text('暂无数据'),
+                ),),
               ],
             )
         );
@@ -204,4 +216,41 @@ class ServiceData {
   final double Growth;
 
   ServiceData(this.type, this.Growth);
+}
+
+class BuildChart extends StatelessWidget {
+  final String labelY;
+  final List tableData;
+  BuildChart({this.labelY, this.tableData});
+
+  Widget build(BuildContext context) {
+    return new Container(
+      child: SfCartesianChart(
+        // Initialize category axis
+          primaryXAxis: CategoryAxis(
+              labelRotation: 90
+          ),
+          primaryYAxis: NumericAxis(
+              title: AxisTitle(
+                  text: labelY
+              )
+          ),
+          series: <LineSeries<ServiceData, String>>[
+            LineSeries<ServiceData, String>(
+              // Bind data source
+                dataSource: tableData.map<ServiceData>((item) => ServiceData(item['type'], item['ratio'])).toList(),
+                xValueMapper: (ServiceData data, _) => data.type,
+                yValueMapper: (ServiceData data, _) => data.Growth,
+                markerSettings: MarkerSettings(
+                    isVisible: true
+                ),
+                dataLabelSettings: DataLabelSettings(
+                  // Renders the data label
+                    isVisible: true
+                )
+            )
+          ]
+      ),
+    );
+  }
 }

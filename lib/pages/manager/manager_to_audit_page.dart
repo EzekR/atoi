@@ -9,6 +9,7 @@ import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:atoi/widgets/build_widget.dart';
 import 'package:atoi/utils/constants.dart';
 
+/// 超管待审核列表页面类
 class ManagerToAuditPage extends StatefulWidget {
   static String tag = 'manager-to-audit-page';
   _ManagerToAuditPageState createState() => _ManagerToAuditPageState();

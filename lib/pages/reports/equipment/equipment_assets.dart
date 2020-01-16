@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:scoped_model/scoped_model.dart';
 import 'package:atoi/models/main_model.dart';
-import 'package:charts_flutter/flutter.dart' as charts;
+import 'package:should_rebuild/should_rebuild.dart';
+import 'package:atoi_charts/charts.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_picker/flutter_picker.dart';
 import 'package:atoi/utils/http_request.dart';
@@ -19,7 +20,6 @@ class EquipmentAssets extends StatefulWidget {
 
 class _EquipmentAssetsState extends State<EquipmentAssets> {
 
-  List<charts.Series<dynamic, String>> seriesList;
   bool animate;
 
   List _dimensionList = [];
@@ -30,6 +30,8 @@ class _EquipmentAssetsState extends State<EquipmentAssets> {
   int _dim1 = ReportDimensions.YEARS[0];
   int _dim2 = new DateTime.now().month;
   List _months = [''];
+  List _years = ReportDimensions.YEARS;
+  ScrollController _scrollController;
 
   Future<void> initDimension() async {
     var _list = ReportDimensions.YEARS.map((_year) => {
@@ -52,7 +54,7 @@ class _EquipmentAssetsState extends State<EquipmentAssets> {
         cancelText: '取消',
         confirmText: '确认',
         adapter: PickerDataAdapter<String>(pickerdata: _dimensionList),
-        selecteds: [ReportDimensions.YEARS.indexOf(_dim1), _dim2==0?0:_months.indexOf(_dim2)],
+        selecteds: [_years.indexOf(_dim1), _dim2==0?0:_months.indexOf(_dim2)],
         hideHeader: true,
         title: new Text("请选择维度"),
         selectedTextStyle: TextStyle(color: Colors.blue),
@@ -81,16 +83,6 @@ class _EquipmentAssetsState extends State<EquipmentAssets> {
       var _data = resp['Data'];
       var _list = _data.map<EquipmentData>((item) => new EquipmentData(item['Item1'], item['Item2'])).toList();
       setState(() {
-        seriesList = [
-          new charts.Series<EquipmentData, String>(
-            id: 'Sales',
-            colorFn: (_, __) => charts.MaterialPalette.blue.shadeDefault,
-            domainFn: (EquipmentData data, _) => data.type,
-            measureFn: (EquipmentData data, _) => data.amount,
-            labelAccessorFn: (EquipmentData data, _) => '${data.amount.toString().split('.')[0]}',
-            data: _list,
-          )
-        ];
         _tableData = _data;
       });
     }
@@ -117,6 +109,14 @@ class _EquipmentAssetsState extends State<EquipmentAssets> {
     );
   }
 
+  String trimNum(String num) {
+    var _list = num.split('.');
+    if (_list[1] == '0') {
+      return _list[0];
+    } else {
+      return num;
+    }
+  }
   Card buildTable() {
     var _dataTable = new DataTable(
         columns: [
@@ -126,35 +126,12 @@ class _EquipmentAssetsState extends State<EquipmentAssets> {
         rows: _tableData.map((item) => DataRow(
             cells: [
               DataCell(Text(item['Item1'])),
-              DataCell(Text(item['Item2'].toString().split('.')[0]))
+              DataCell(Text(trimNum(item['Item2'].toString())))
             ]
         )).toList()
     );
     return new Card(
       child: _dataTable,
-    );
-  }
-
-  Column buildChart() {
-    return new Column(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: <Widget>[
-        new Container(
-          height: _tableData.length*50.0+60.0,
-          child: new charts.BarChart(
-            seriesList,
-            animate: true,
-            vertical: false,
-            barRendererDecorator: new charts.BarLabelDecorator<String>(),
-            behaviors: [
-              new charts.ChartTitle(widget.labelY,
-                  behaviorPosition: charts.BehaviorPosition.bottom,
-                  titleOutsideJustification:
-                  charts.OutsideJustification.middleDrawArea),
-            ],
-          ),
-        ),
-      ],
     );
   }
 
@@ -181,7 +158,7 @@ class _EquipmentAssetsState extends State<EquipmentAssets> {
             body: new ListView(
               children: <Widget>[
                 buildPickerRow(context),
-                seriesList==null?new Container():buildChart(),
+                _tableData!=null&&_tableData.isNotEmpty?ShouldRebuild<BuildChart>(shouldRebuild: (_old, _new) => _old.tableData!=_new.tableData, child: BuildChart(labelY: widget.labelY, tableData: _tableData, scrollController: _scrollController,),):new Container(),
                 new SizedBox(height: 8.0,),
                 new Row(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -189,9 +166,9 @@ class _EquipmentAssetsState extends State<EquipmentAssets> {
                     new Text('数据列表')
                   ],
                 ),
-                _tableData!=null&&_tableData.isNotEmpty?buildTable():new Center(
+                _tableData!=null&&_tableData.isNotEmpty?buildTable():new Container(child: new Center(
                   child: new Text('暂无数据'),
-                )
+                ),)
               ],
             )
         );
@@ -207,3 +184,63 @@ class EquipmentData {
   EquipmentData(this.type, this.amount);
 }
 
+class BuildChart extends StatelessWidget {
+  final String labelY;
+  final List tableData;
+  final ScrollController scrollController;
+  BuildChart({this.labelY, this.tableData, this.scrollController});
+
+  Widget build(BuildContext context) {
+    print(tableData.length);
+    return new Card(
+        child: new Container(
+          height: 400.0,
+          child: new ListView(
+            scrollDirection: Axis.horizontal,
+            controller: scrollController,
+            shrinkWrap: true,
+            children: <Widget>[
+              new Container(
+                width: tableData.length>10?tableData.length*50.0:400.0,
+                child: SfCartesianChart(
+                  // Initialize category axis
+                    primaryXAxis: CategoryAxis(
+                        labelRotation: 90,
+                        majorGridLines: MajorGridLines(
+                            width: 0
+                        )
+                    ),
+                    primaryYAxis: NumericAxis(
+                        title: AxisTitle(
+                            text: labelY
+                        ),
+                        majorGridLines: MajorGridLines(
+                            dashArray: [5, 5]
+                        )
+                    ),
+                    tooltipBehavior: TooltipBehavior(
+                      enable: true,
+                      header: labelY
+                    ),
+                    series: <ChartSeries<EquipmentData, String>>[
+                      ColumnSeries<EquipmentData, String>(
+                        // Bind data source
+                          dataSource: tableData.map<EquipmentData>((item) => EquipmentData(item['Item1'], item['Item2'])).toList(),
+                          xValueMapper: (EquipmentData data, _) => data.type,
+                          yValueMapper: (EquipmentData data, _) => data.amount,
+                          dataLabelSettings: DataLabelSettings(
+                              isVisible: true,
+                              labelAlignment: ChartDataLabelAlignment.auto
+                          ),
+                          enableTooltip: true
+                      )
+                    ]
+                ),
+              ),
+
+            ],
+          ),
+        )
+    );
+  }
+}

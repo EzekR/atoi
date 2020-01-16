@@ -9,6 +9,7 @@ import 'package:timeline_list/timeline.dart';
 import 'package:timeline_list/timeline_model.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+/// 设备列表页面类
 class EquipmentsList extends StatefulWidget{
   _EquipmentsListState createState() => _EquipmentsListState();
 }

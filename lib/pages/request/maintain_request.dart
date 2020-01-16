@@ -13,6 +13,7 @@ import 'package:atoi/widgets/build_widget.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:flutter/cupertino.dart';
 
+/// 保养页面类
 class MaintainRequest extends StatefulWidget{
   static String tag = 'maintain-request';
 

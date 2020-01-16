@@ -2,6 +2,7 @@ import 'package:scoped_model/scoped_model.dart';
 import 'package:atoi/utils/http_request.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+/// 工程师模型类
 class EngineerModel extends Model {
 
   List<dynamic> _tasksToStart = [];
@@ -18,7 +19,7 @@ class EngineerModel extends Model {
   get tasksToStart => _tasksToStart;
   get tasksToReport => _tasksToReport;
 
-
+  /// 获取任务数量
   Future<Null> getCountEngineer() async {
     Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
     var prefs = await _prefs;
@@ -38,6 +39,7 @@ class EngineerModel extends Model {
     notifyListeners();
   }
 
+  /// 获取待开始工单
   Future<Null> getTasksToStart() async {
     Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
     var prefs = await _prefs;
@@ -61,6 +63,7 @@ class EngineerModel extends Model {
     notifyListeners();
   }
 
+  /// 获取更多待开始工单
   Future<Null> getMoreTasksToStart() async {
     Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
     var prefs = await _prefs;
@@ -83,6 +86,7 @@ class EngineerModel extends Model {
     notifyListeners();
   }
 
+  /// 获取待上传报告工单
   Future<Null> getTasksToReport() async {
     Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
     var prefs = await _prefs;
@@ -99,6 +103,7 @@ class EngineerModel extends Model {
     notifyListeners();
   }
 
+  /// 获取更多待上传报告工单
   Future<Null> getMoreTasksToReport() async {
     Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
     var prefs = await _prefs;

@@ -11,6 +11,7 @@ import 'package:atoi/utils/constants.dart';
 import 'dart:io';
 import 'package:flutter/cupertino.dart';
 
+/// 超管待派工列表页面类
 class ManagerToAssign extends StatefulWidget {
   @override
   _ManagerToAssignState createState() => _ManagerToAssignState();

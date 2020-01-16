@@ -1,5 +1,6 @@
 import 'package:scoped_model/scoped_model.dart';
 
+/// 搜索内容模型
 class SearchModel extends Model{
   Map<String, String> _result = {
     'equipNo': '',

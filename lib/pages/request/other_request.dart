@@ -12,6 +12,7 @@ import 'package:atoi/widgets/build_widget.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:flutter/cupertino.dart';
 
+/// 其他服务页面类
 class OtherRequest extends StatefulWidget{
   static String tag = 'other-request';
 

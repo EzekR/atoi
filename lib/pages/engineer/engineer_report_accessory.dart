@@ -10,6 +10,7 @@ import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:atoi/models/models.dart';
 import 'package:flutter/cupertino.dart';
 
+/// 报告零配件页面类
 class EngineerReportAccessory extends StatefulWidget {
   _EngineerReportAccessoryState createState() => _EngineerReportAccessoryState();
 }

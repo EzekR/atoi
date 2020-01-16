@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:date_format/date_format.dart';
 
+/// app常量类
 class AppConstants {
 
   //BuildContext context;
@@ -201,6 +202,7 @@ class AppConstants {
   //  ''
   //];
 
+  /// 时间格式化方法
   static String TimeForm(String time, String format) {
     var _date = DateTime.tryParse(time);
     if (_date != null) {
@@ -214,6 +216,7 @@ class AppConstants {
     }
   }
 
+  /// app配色设置
   static Map<String, Color> AppColors = {
     'appbar_prime_m': Color(0xff2c5c85),
     'appbar_accent_m': Color(0xff4e8fa),

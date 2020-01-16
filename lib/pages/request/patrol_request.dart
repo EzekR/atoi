@@ -16,6 +16,7 @@ import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:atoi/widgets/search_page.dart';
 import 'package:flutter/cupertino.dart';
 
+/// 巡检页面类
 class PatrolRequest extends StatefulWidget{
   static String tag = 'patrol-request';
 

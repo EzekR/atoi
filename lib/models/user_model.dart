@@ -1,5 +1,6 @@
 import 'package:scoped_model/scoped_model.dart';
 
+/// 用户模型
 class UserModel extends Model {
   Map<String, dynamic> _userInfo = {
     'user_name': '',

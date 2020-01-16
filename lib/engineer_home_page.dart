@@ -15,6 +15,7 @@ import 'package:atoi/pages/reports/report_list.dart';
 import 'package:atoi/pages/equipments/vendors_list.dart';
 import 'package:atoi/pages/equipments/contract_list.dart';
 
+/// 管理员首页类
 class EngineerHomePage extends StatefulWidget {
   static String tag = 'engineer-home-page';
   @override
@@ -29,6 +30,7 @@ class _EngineerHomePageState extends State<EngineerHomePage>
   String _userName = '';
   Timer _timer;
 
+  /// 获取用户信息
   Future<Null> getRole() async {
     var _prefs = await prefs;
     var userInfo = _prefs.getString('userInfo');
@@ -36,9 +38,6 @@ class _EngineerHomePageState extends State<EngineerHomePage>
     setState(() {
       _userName = decoded['Name'];
     });
-  }
-
-  void startTimer() {
   }
 
   @override

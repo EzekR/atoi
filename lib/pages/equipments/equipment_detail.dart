@@ -13,6 +13,7 @@ import 'dart:typed_data';
 import 'dart:convert';
 import 'package:atoi/utils/constants.dart';
 
+/// 设备详情页面类
 class EquipmentDetail extends StatefulWidget {
   EquipmentDetail({Key key, this.equipment, this.editable}) : super(key: key);
   final Map equipment;
@@ -405,6 +406,10 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
       source: sourceType,
     );
     if (image != null) {
+      print(_imageList[0]['id']);
+      if (_imageList.length > 0 && _imageList[0]['id'] != null) {
+        await deleteFile(_imageList[0]['id']);
+      }
       var bytes = await image.readAsBytes();
       var _compressed = await FlutterImageCompress.compressWithList(bytes,
           minWidth: 480, minHeight: 600);
@@ -449,18 +454,24 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
           _list.add(
             new Row(
               children: <Widget>[
-                Text(image['fileName'], style: new TextStyle(color: Colors.blue),),
-                widget.editable?new IconButton(
-                    icon: Icon(Icons.cancel),
-                    color: Colors.blue,
-                    onPressed: () {
-                      setState(() {
-                        imageList.remove(image);
-                        if (image['id'] != null) {
-                          deleteFile(image['id']);
-                        }
-                      });
-                    }):new Container(),
+                new Expanded(
+                  flex: 8,
+                  child: Text(image['fileName'], style: new TextStyle(color: Colors.blue),),
+                ),
+                new Expanded(
+                  flex: 2,
+                  child: widget.editable?new IconButton(
+                      icon: Icon(Icons.cancel),
+                      color: Colors.blue,
+                      onPressed: () {
+                        setState(() {
+                          imageList.remove(image);
+                          if (image['id'] != null) {
+                            deleteFile(image['id']);
+                          }
+                        });
+                      }):new Container(),
+                )
               ],
             )
           );

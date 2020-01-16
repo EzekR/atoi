@@ -4,7 +4,7 @@ import 'package:scoped_model/scoped_model.dart';
 import 'dart:convert';
 import 'package:atoi/utils/http_request.dart';
 
-
+/// 搜索页面类
 class SearchBarDelegate extends SearchDelegate<String>{
 
   static const searchList = [];

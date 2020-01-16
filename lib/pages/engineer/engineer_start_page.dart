@@ -7,6 +7,7 @@ import 'package:atoi/widgets/build_widget.dart';
 import 'package:atoi/models/models.dart';
 import 'package:flutter/cupertino.dart';
 
+/// 工程师开始工单页面类
 class EngineerStartPage extends StatefulWidget {
   static String tag = 'engineer-start-page';
 
@@ -273,7 +274,7 @@ class _EngineerStartPageState extends State<EngineerStartPage> {
               children: <Widget>[
                 BuildWidget.buildRow('派工单状态', _dispatch['Status']['Name']),
                 BuildWidget.buildRow('派工类型', _dispatch['RequestType']['Name']),
-                _dispatch['Request']['RequestType']['ID']!=14?BuildWidget.buildRow('机器状态', _dispatch['MachineStatus']['Name']):new Container(),
+                _dispatch['RequestType']['ID']!=14?BuildWidget.buildRow('机器状态', _dispatch['MachineStatus']['Name']):new Container(),
                 BuildWidget.buildRow('紧急程度', _dispatch['Urgency']['Name']),
                 BuildWidget.buildRow('出发时间', AppConstants.TimeForm(_dispatch['ScheduleDate'], 'hh:mm')),
                 BuildWidget.buildRow('工程师姓名', _dispatch['Engineer']['Name']),

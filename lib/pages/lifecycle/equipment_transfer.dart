@@ -13,6 +13,7 @@ import 'package:atoi/widgets/build_widget.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:flutter/cupertino.dart';
 
+/// 生命周期-设备调拨页面类
 class EquipmentTransfer extends StatefulWidget{
   static String tag = 'equipment-transfer';
 

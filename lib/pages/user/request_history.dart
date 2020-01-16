@@ -5,6 +5,7 @@ import 'package:atoi/utils/http_request.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:atoi/utils/constants.dart';
 
+/// 用户请求历史页面类
 class RequestHistory extends StatefulWidget {
   _RequestHistoryState createState() => _RequestHistoryState();
 }
@@ -23,7 +24,7 @@ class _RequestHistoryState extends State<RequestHistory> {
     var _prefs = await prefs;
     var userId = _prefs.getInt('userID');
     var resp = await HttpRequest.request(
-      '/Request/GetRequests',
+      '/Request/GetRequests?statusID=-1&statusID=1&statusID=2&statusID=3&statusID=4&statusID=5&statusID=6&statusID=7&statusID=99',
       method: HttpRequest.GET,
       params: {
         'userID': userId,

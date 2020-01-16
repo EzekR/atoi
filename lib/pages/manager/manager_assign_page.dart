@@ -13,6 +13,7 @@ import 'package:atoi/models/main_model.dart';
 import 'package:atoi/widgets/build_widget.dart';
 import 'package:flutter/cupertino.dart';
 
+/// 超管派工页面类
 class ManagerAssignPage extends StatefulWidget {
   static String tag = 'mananger-assign-page';
 

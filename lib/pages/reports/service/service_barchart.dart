@@ -29,6 +29,7 @@ class _ServiceBarchartState extends State<ServiceBarchart> {
   String _currentDimension = '';
   String _dim1 = ReportDimensions.DIMS[1]['Name'];
   String _dim2 = ReportDimensions.YEARS[0].toString();
+  List _years = ReportDimensions.YEARS;
 
   Future<void> initDimension() async {
     var _list = ReportDimensions.DIMS.map((_dim) => {
@@ -50,7 +51,7 @@ class _ServiceBarchartState extends State<ServiceBarchart> {
     Picker(
         cancelText: '取消',
         confirmText: '确认',
-        selecteds: [ReportDimensions.DIMS.indexWhere((elem) => elem['Name']==_dim1), ReportDimensions.YEARS.indexOf(_dim2)<0?0:ReportDimensions.YEARS.indexOf(_dim2)],
+        selecteds: [ReportDimensions.DIMS.indexWhere((elem) => elem['Name']==_dim1), _years.indexOf(_dim2)<0?0:_years.indexOf(_dim2)],
         adapter: PickerDataAdapter<String>(pickerdata: _dimensionList),
         hideHeader: true,
         title: new Text("请选择维度"),
@@ -191,9 +192,9 @@ class _ServiceBarchartState extends State<ServiceBarchart> {
                     new Text('数据列表')
                   ],
                 ),
-                _tableData!=null&&_tableData.isNotEmpty?buildTable():new Center(
+                _tableData!=null&&_tableData.isNotEmpty?buildTable():new Container(child: new Center(
                   child: Text('暂无数据'),
-                )
+                ),),
               ],
             )
         );

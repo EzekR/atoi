@@ -29,6 +29,7 @@ class _ServiceAssetsState extends State<ServiceAssets> {
   List _tableData = [];
   String _tableName = '年份';
   String _currentDimension = '';
+  List _years = ReportDimensions.YEARS;
 
   Future<void> initDimension() async {
     var _list = ReportDimensions.YEARS.map((_year) => {
@@ -168,7 +169,9 @@ class _ServiceAssetsState extends State<ServiceAssets> {
                     new Text('数据列表')
                   ],
                 ),
-                _tableData!=null&&_tableData.isNotEmpty?buildTable():new Container()
+                _tableData!=null&&_tableData.isNotEmpty?buildTable():new Container(child: new Center(
+                  child: Text('暂无数据'),
+                ),),
               ],
             )
         );

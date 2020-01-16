@@ -6,7 +6,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter_picker/flutter_picker.dart';
 import 'package:atoi/utils/http_request.dart';
 import 'package:atoi/utils/report_dimensions.dart';
-import 'package:syncfusion_flutter_charts/charts.dart';
+import 'package:atoi_charts/charts.dart';
+import 'package:should_rebuild/should_rebuild.dart';
 
 class ServiceBarchartLine extends StatefulWidget {
 
@@ -32,6 +33,7 @@ class _ServiceBarchartLineState extends State<ServiceBarchartLine> {
   ScrollController _scrollController;
   String _dim1 = '月';
   String _dim2 = '2020';
+  List _years = ReportDimensions.YEARS;
 
   Future<void> initDimension() async {
     List _list = [
@@ -57,7 +59,7 @@ class _ServiceBarchartLineState extends State<ServiceBarchartLine> {
     Picker(
         cancelText: '取消',
         confirmText: '确认',
-        selecteds: [_dim1=='年'?0:1, _dim1=='月'?ReportDimensions.YEARS.indexOf(int.parse(_dim2)):0],
+        selecteds: [_dim1=='年'?0:1, _dim1=='月'?_years.indexOf(int.parse(_dim2)):0],
         adapter: PickerDataAdapter<String>(pickerdata: _dimensionList),
         hideHeader: true,
         title: new Text("请选择维度"),
@@ -106,8 +108,8 @@ class _ServiceBarchartLineState extends State<ServiceBarchartLine> {
               ],
             )
         ),
-        new Text('时间维度分类 $_dim1'),
-        new Text(_dim1=='月'?'年份 $_dim2':_dim2)
+        new Text('时间维度分类: $_dim1'),
+        new Text(_dim1=='月'?'年份: $_dim2':_dim2)
       ],
     );
   }
@@ -148,12 +150,18 @@ class _ServiceBarchartLineState extends State<ServiceBarchartLine> {
       child: SfCartesianChart(
         // Initialize category axis
           primaryXAxis: CategoryAxis(
-              labelRotation: 60
+            labelRotation: 60,
+            majorGridLines: MajorGridLines(
+              width: 0
+            )
           ),
           primaryYAxis: NumericAxis(
               title: AxisTitle(
                   text: '请求数量（条）'
-              )
+              ),
+            majorGridLines: MajorGridLines(
+              dashArray: [5, 5]
+            )
           ),
           axes: [
             NumericAxis(
@@ -161,14 +169,27 @@ class _ServiceBarchartLineState extends State<ServiceBarchartLine> {
                 opposedPosition: true,
                 title: AxisTitle(
                     text: '合格率（%）'
+                ),
+                minimum: 0,
+                maximum: 100,
+                interval: 10,
+                majorGridLines: MajorGridLines(
+                  dashArray: [5, 5]
                 )
             )
           ],
           series: <ChartSeries>[
-            ColumnSeries<ServiceData, String>(
-                dataSource: _tableData.map<ServiceData>((item) => ServiceData(item['type'], item['total'])).toList(),
+            StackedColumnSeries<ServiceData, String>(
+                dataSource: _tableData.map<ServiceData>((item) => ServiceData(item['type'], item['total'], item['passed'])).toList(),
                 xValueMapper: (ServiceData data, _) => data.type,
-                yValueMapper: (ServiceData data, _) => data.amount
+                yValueMapper: (ServiceData data, _) => data.passed,
+                color: Colors.green
+            ),
+            StackedColumnSeries<ServiceData, String>(
+                dataSource: _tableData.map<ServiceData>((item) => ServiceData(item['type'], item['total'], item['passed'])).toList(),
+                xValueMapper: (ServiceData data, _) => data.type,
+                yValueMapper: (ServiceData data, _) => (data.amount-data.passed),
+                color: Colors.blueAccent
             ),
             LineSeries<ServiceRatio, String>(
                 dataSource: _tableData.map<ServiceRatio>((item) => ServiceRatio(item['type'], item['ratio'])).toList(),
@@ -205,7 +226,16 @@ class _ServiceBarchartLineState extends State<ServiceBarchartLine> {
               controller: _scrollController,
               children: <Widget>[
                 buildPickerRow(context),
-                _tableData==null?new Container():buildChart(),
+                _tableData!=null&&_tableData.isNotEmpty?ShouldRebuild<BuildChart>(shouldRebuild: (_old, _new) => _old.tableData!=_new.tableData, child: BuildChart(tableData: _tableData,),):new Container(),
+                _tableData!=null&&_tableData.isNotEmpty?new Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    new Icon(Icons.insert_chart, color: Colors.blue,),
+                    new Text('请求总数 '),
+                    new Icon(Icons.insert_chart, color: Colors.green,),
+                    new Text('合格数'),
+                  ],
+                ):new Container(),
                 new SizedBox(height: 8.0,),
                 new Row(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -213,7 +243,9 @@ class _ServiceBarchartLineState extends State<ServiceBarchartLine> {
                     new Text('数据列表')
                   ],
                 ),
-                _tableData!=null&&_tableData.isNotEmpty?buildTable():new Container()
+                _tableData!=null&&_tableData.isNotEmpty?buildTable():new Container(child: new Center(
+                  child: Text('暂无数据'),
+                ),),
               ],
             )
         );
@@ -225,8 +257,9 @@ class _ServiceBarchartLineState extends State<ServiceBarchartLine> {
 class ServiceData {
   final String type;
   final double amount;
+  final double passed;
 
-  ServiceData(this.type, this.amount);
+  ServiceData(this.type, this.amount, this.passed);
 }
 
 class ServiceRatio {
@@ -234,4 +267,85 @@ class ServiceRatio {
   final double ratio;
 
   ServiceRatio(this.type, this.ratio);
+}
+
+class BuildChart extends StatelessWidget {
+  final List tableData;
+
+  BuildChart({this.tableData});
+
+  Widget build(BuildContext context) {
+    return new Container(
+      child: SfCartesianChart(
+        // Initialize category axis
+          primaryXAxis: CategoryAxis(
+              labelRotation: 60,
+              majorGridLines: MajorGridLines(
+                  width: 0
+              )
+          ),
+          primaryYAxis: NumericAxis(
+              title: AxisTitle(
+                  text: '请求数量（条）'
+              ),
+              majorGridLines: MajorGridLines(
+                  dashArray: [5, 5]
+              )
+          ),
+          axes: [
+            NumericAxis(
+                name: 'yAxis',
+                opposedPosition: true,
+                title: AxisTitle(
+                    text: '合格率（%）',
+                ),
+                minimum: 0,
+                maximum: 100,
+                interval: 10,
+                majorGridLines: MajorGridLines(
+                    dashArray: [5, 5]
+                )
+            )
+          ],
+          legend: Legend(
+            isVisible: false,
+            position: LegendPosition.bottom
+          ),
+          tooltipBehavior: TooltipBehavior(
+            enable: true,
+            header: '请求条数'
+          ),
+          series: <ChartSeries>[
+            StackedColumnSeries<ServiceData, String>(
+                dataSource: tableData.map<ServiceData>((item) => ServiceData(item['type'], item['total'], item['passed'])).toList(),
+                xValueMapper: (ServiceData data, _) => data.type,
+                yValueMapper: (ServiceData data, _) => data.passed,
+                color: Colors.green,
+                enableTooltip: true
+            ),
+            StackedColumnSeries<ServiceData, String>(
+                dataSource: tableData.map<ServiceData>((item) => ServiceData(item['type'], item['total'], item['passed'])).toList(),
+                xValueMapper: (ServiceData data, _) => data.type,
+                yValueMapper: (ServiceData data, _) => (data.amount-data.passed),
+                color: Colors.blueAccent,
+            ),
+            LineSeries<ServiceRatio, String>(
+                isVisibleInLegend: false,
+                dataSource: tableData.map<ServiceRatio>((item) => ServiceRatio(item['type'], item['ratio'])).toList(),
+                xValueMapper: (ServiceRatio data, _) => data.type,
+                yValueMapper: (ServiceRatio data, _) => data.ratio,
+                yAxisName: 'yAxis',
+                dataLabelSettings: DataLabelSettings(
+                  isVisible: true,
+                  labelAlignment: ChartDataLabelAlignment.top
+                ),
+                enableTooltip: false,
+                markerSettings: MarkerSettings(
+                  isVisible: true
+                )
+            ),
+          ]
+      ),
+    );
+  }
 }

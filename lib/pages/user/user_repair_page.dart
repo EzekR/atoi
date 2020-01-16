@@ -12,6 +12,7 @@ import 'package:atoi/widgets/build_widget.dart';
 import 'package:atoi/models/models.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 
+/// 用户报修页面类
 class UserRepairPage extends StatefulWidget {
   static String tag = 'user-repair-page';
   UserRepairPage({Key key, this.equipment}) : super(key: key);
@@ -376,14 +377,14 @@ class _UserRepairPageState extends State<UserRepairPage> {
                               '型号', widget.equipment['EquipmentCode'] ?? ''),
                           BuildWidget.buildRow(
                               '序列号', widget.equipment['SerialCode'] ?? ''),
-                          BuildWidget.buildRow('使用科室',
-                              widget.equipment['Department']['Name'] ?? ''),
-                          BuildWidget.buildRow(
-                              '安装地点', widget.equipment['InstalSite'] ?? ''),
                           BuildWidget.buildRow('设备厂商',
                               widget.equipment['Manufacturer']['Name'] ?? ''),
                           BuildWidget.buildRow('资产等级',
                               widget.equipment['AssetLevel']['Name'] ?? ''),
+                          BuildWidget.buildRow('使用科室',
+                              widget.equipment['Department']['Name'] ?? ''),
+                          BuildWidget.buildRow(
+                              '安装地点', widget.equipment['InstalSite'] ?? ''),
                           BuildWidget.buildRow(
                               '维保状态', widget.equipment['WarrantyStatus'] ?? ''),
                           BuildWidget.buildRow('服务范围',
@@ -414,9 +415,9 @@ class _UserRepairPageState extends State<UserRepairPage> {
                         mainAxisSize: MainAxisSize.max,
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: <Widget>[
-                          BuildWidget.buildInputLeft('故障描述:', _describe, maxLength: 200),
                           BuildWidget.buildDropdownLeft('机器状态:', _currentResult,
                               _dropDownMenuItems, changedDropDownMethod),
+                          BuildWidget.buildInputLeft('故障描述:', _describe, maxLength: 200),
                           new Padding(
                             padding: EdgeInsets.symmetric(vertical: 5.0),
                             child: new Row(

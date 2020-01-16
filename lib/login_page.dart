@@ -12,6 +12,7 @@ import 'dart:convert';
 import 'package:flutter_jpush/flutter_jpush.dart';
 import 'package:permission_handler/permission_handler.dart';
 
+/// 登录注册类
 class LoginPage extends StatefulWidget {
   static String tag = 'login-page';
   @override
@@ -33,8 +34,10 @@ class _LoginPageState extends State<LoginPage> {
   int _countdownTime = 0;
   bool _validPhone = false;
   String _regId = '';
-  
+
+  /// 判断是否已登录
   Future<Null> isLogin() async {
+    await checkVersion();
     var _prefs = await prefs;
     var _isLogin = await _prefs.getBool('isLogin');
     if (_isLogin != null && _isLogin) {
@@ -55,6 +58,32 @@ class _LoginPageState extends State<LoginPage> {
     }
   }
 
+  Future<Null> checkVersion() async {
+    var resp = await HttpRequest.request(
+      '/User/GetSystemSetting',
+      method: HttpRequest.GET,
+    );
+    if (resp['ResultCode'] == '00') {
+      var _version = resp['Data']['AppValidVersion'].split('.');
+      var _currentVersion = HttpRequest.APP_VERSION.split('.');
+      if (int.parse(_version[0]) >int.parse(_currentVersion[0]) || int.parse(_version[1])>int.parse(_currentVersion[1])) {
+        showDialog(context: context,
+            builder: (context) => CupertinoAlertDialog(
+              title: new Text('版本号过低，请升级',
+                style: new TextStyle(
+                    fontSize: 16.0,
+                    fontWeight: FontWeight.w400,
+                    color: Colors.black54
+                ),
+              ),
+            )
+        );
+        return;
+      }
+    }
+  }
+
+  /// 初始化JPUSH推送服务
   void _startupJpush() async {
     print("初始化jpush");
     await FlutterJPush.startup();
@@ -93,6 +122,7 @@ class _LoginPageState extends State<LoginPage> {
     });
   }
 
+  /// 权限检查
   Future<Null> permissionCheck() async {
     var permission = await PermissionHandler().checkPermissionStatus(PermissionGroup.camera);
     print('permission:$permission');
@@ -102,6 +132,7 @@ class _LoginPageState extends State<LoginPage> {
     }
   }
 
+  /// 判断是否已连接wifi
   Future<Null> isConnected() async {
     var connectivityResult = await (Connectivity().checkConnectivity());
     if (connectivityResult == ConnectivityResult.none) {
@@ -119,6 +150,7 @@ class _LoginPageState extends State<LoginPage> {
     }
   }
 
+  /// 开始验证码倒计时
   void startCountdownTimer() {
     const oneSec = const Duration(seconds: 1);
     var callback = (timer) =>
@@ -132,6 +164,7 @@ class _LoginPageState extends State<LoginPage> {
     _timer = Timer.periodic(oneSec, callback);
   }
 
+  /// 执行登录
   Future _doLogin() async {
     setState(() {
       _loading = !_loading;
@@ -184,6 +217,7 @@ class _LoginPageState extends State<LoginPage> {
     }
   }
 
+  /// 用户注册
   Future<Null> _userReg() async {
     if (regPhoneController.text.isEmpty) {
       showDialog(context: context,
@@ -326,6 +360,7 @@ class _LoginPageState extends State<LoginPage> {
     super.dispose();
   }
 
+  /// 获取验证码
   Future<Null> getVerificationCode() async {
     if (regPhoneController.text.isEmpty || regPhoneController.text.length!=11) {
       showDialog(context: context,

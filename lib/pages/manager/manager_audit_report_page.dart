@@ -14,6 +14,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:image_picker/image_picker.dart';
 
+/// 超管审核报告页面类
 class ManagerAuditReportPage extends StatefulWidget {
   static String tag = 'manager-audit-report-page';
   ManagerAuditReportPage({Key key, this.reportId, this.request, this.status}): super(key: key);
@@ -839,7 +840,7 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
               BuildWidget.buildRow('派工单编号', widget.request['OID']),
               BuildWidget.buildRow('派工单状态', widget.request['Status']['Name']),
               BuildWidget.buildRow('派工类型', widget.request['RequestType']['Name']),
-              _dispatch['Request']['RequestType']['ID'] != 14?BuildWidget.buildRow('机器状态', widget.request['MachineStatus']['Name']):new Container(),
+              _dispatch['RequestType']['ID'] != 14?BuildWidget.buildRow('机器状态', widget.request['MachineStatus']['Name']):new Container(),
               BuildWidget.buildRow('紧急程度', widget.request['Urgency']['Name']),
               BuildWidget.buildRow('出发时间', AppConstants.TimeForm(_dispatch['ScheduleDate'].toString(), 'hh:mm')),
               BuildWidget.buildRow('工程师姓名', _dispatch['Engineer']['Name']),

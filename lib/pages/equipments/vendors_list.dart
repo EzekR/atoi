@@ -6,6 +6,7 @@ import 'package:atoi/widgets/build_widget.dart';
 import 'package:atoi/pages/equipments/vendor_detail.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+/// 供应商列表类
 class VendorsList extends StatefulWidget{
   _VendorsListState createState() => _VendorsListState();
 }

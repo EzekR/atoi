@@ -13,6 +13,7 @@ import 'package:atoi/widgets/build_widget.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:flutter/cupertino.dart';
 
+/// 校正页面类
 class CorrectionRequest extends StatefulWidget{
   static String tag = 'correction-request';
 

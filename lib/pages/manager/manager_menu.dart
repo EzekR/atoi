@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+/// 超管菜单页面类
 class ManagerMenu extends StatelessWidget {
   @override
   Widget build(BuildContext context) {

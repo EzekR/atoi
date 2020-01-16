@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 
+/// 页面通用组件构建类
 class BuildWidget {
 
+  /// 构建页面信息行
   static Padding buildRow(String labelText, String defaultText) {
     return new Padding(
       padding: EdgeInsets.symmetric(vertical: 5.0),
@@ -50,6 +52,7 @@ class BuildWidget {
     );
   }
 
+  /// 构建列表信息行
   static Row buildCardRow(String leading, String content) {
     return new Row(
       children: <Widget>[
@@ -92,6 +95,7 @@ class BuildWidget {
     );
   }
 
+  /// 构建常用下拉菜单（4、6分）
   static Row buildDropdown(String title, String currentItem, List dropdownItems, Function changeDropdown) {
     return new Row(
       children: <Widget>[
@@ -139,6 +143,7 @@ class BuildWidget {
     );
   }
 
+  /// 构建常用输入框（4、6分）
   static Padding buildInput(String labelText, TextEditingController controller, {TextInputType inputType, int lines, int maxLength}) {
     inputType??TextInputType.text;
     lines = lines ?? 3;
@@ -191,6 +196,7 @@ class BuildWidget {
     );
   }
 
+  /// 构建左对齐输入框
   static Padding buildInputLeft(String labelText, TextEditingController controller, {TextInputType inputType, int lines, int maxLength}) {
     inputType??TextInputType.text;
     lines = lines ?? 3;
@@ -233,6 +239,7 @@ class BuildWidget {
     );
   }
 
+  /// 构建左对齐下拉菜单
   static Row buildDropdownLeft(String title, String currentItem, List dropdownItems, Function changeDropdown) {
     return new Row(
       children: <Widget>[
@@ -264,6 +271,7 @@ class BuildWidget {
     );
   }
 
+  /// 构建带输入框的下拉菜单
   static Row buildDropdownWithInput(String title, TextEditingController controller, String currentItem, List dropdownItems, Function changeDropdown, {TextInputType inputType}) {
     inputType??TextInputType.text;
     return new Row(
@@ -326,6 +334,7 @@ class BuildWidget {
     );
   }
 
+  /// 构建懒加载动画
   static Row buildListLoading(bool loading) {
     return new Row(
       mainAxisAlignment: MainAxisAlignment.center,
@@ -335,6 +344,7 @@ class BuildWidget {
     );
   }
 
+  /// 构建输入开关
   static Padding buildSwitch(String labelText, Function switchMethod) {
     return new Padding(
       padding: EdgeInsets.symmetric(vertical: 5.0),
@@ -378,6 +388,7 @@ class BuildWidget {
     );
   }
 
+  /// 构建输入单选
   static Padding buildRadio(String labelText, List groupValue, String currentValue, Function changeValue) {
     return new Padding(
       padding: EdgeInsets.symmetric(vertical: 5.0),
@@ -443,6 +454,7 @@ class BuildWidget {
     );
   }
 
+  /// 构建垂直输入单选框
   static Padding buildRadioVert(String labelText, List groupValue, String currentValue, Function changeValue) {
     return new Padding(
       padding: EdgeInsets.symmetric(vertical: 5.0),
@@ -509,6 +521,7 @@ class BuildWidget {
     );
   }
 
+  /// 构建左对齐单选框
   static Padding buildRadioLeft(String labelText, List groupValue, String currentValue, Function changeValue) {
     return new Padding(
       padding: EdgeInsets.symmetric(vertical: 5.0),
