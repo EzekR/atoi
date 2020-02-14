@@ -15,6 +15,9 @@ import 'dart:async';
 /// 封装http请求类
 class HttpRequest {
 
+  ///添加构建方法
+  //HttpRequest({this.apiUrl}):super();
+  //final String apiUrl;
   /// global dio object
   static Dio dio;
 
