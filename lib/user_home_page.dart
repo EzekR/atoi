@@ -161,13 +161,8 @@ class _UserHomePageState extends State<UserHomePage> {
               ),
             ),
             actions: <Widget>[
-              new Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 19.0),
-                  child: new GestureDetector(
-                    onTap: () {
-                    },
-                    child: new Text(_userName),
-                  )
+              new Center(
+                child: new Text(_userName),
               ),
               new SizedBox(width: 10.0,)
             ],

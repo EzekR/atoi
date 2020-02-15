@@ -39,12 +39,16 @@ class _ManagerToAssignState extends State<ManagerToAssign> {
           _scrollController.position.maxScrollExtent) {
         var _length = model.requests.length;
         model.getMoreRequests().then((result) {
+          if (model.requests.length == _length) {
+            setState(() {
+              _noMore = true;
+            });
+          } else {
+            setState(() {
+              _noMore = false;
+            });
+          }
         });
-        if (model.requests.length == _length) {
-          setState(() {
-            _noMore = true;
-          });
-        }
       }
     });
   }

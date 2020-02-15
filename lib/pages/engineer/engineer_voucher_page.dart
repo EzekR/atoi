@@ -502,7 +502,7 @@ class _EngineerVoucherPageState extends State<EngineerVoucherPage> {
             children: <Widget>[
               _journalOID!=null?BuildWidget.buildRow('服务凭证编号', _journalOID):new Container(),
               //BuildWidget.buildRow('审批状态', _journalStatus),
-              _fujiComments.isNotEmpty?BuildWidget.buildRow('审批备注', _fujiComments):new Container(),
+              widget.status==3||_fujiComments!=''?BuildWidget.buildRow('审批备注', _fujiComments):new Container(),
               new Divider(
                 color: Colors.grey,
               ),

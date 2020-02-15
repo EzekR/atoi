@@ -381,7 +381,7 @@ class _EngineerReportAccessoryState extends State<EngineerReportAccessory> {
               )
           ),
           new Expanded(
-              flex: 2,
+              flex: 3,
               child: new IconButton(
                   icon: Icon(Icons.search),
                   onPressed: () async {
@@ -433,7 +433,7 @@ class _EngineerReportAccessoryState extends State<EngineerReportAccessory> {
                   _currentSource=='外部供应商'?buildRowVendor('外部供应商', _vendor==null?'':_vendor['Name']):new Container(),
                   BuildWidget.buildInput('新装编号', _newCode),
                   new Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 95.0),
+                    padding: EdgeInsets.symmetric(horizontal: 110.0),
                     child: new Row(
                       children: <Widget>[
                         new Text('附件：',

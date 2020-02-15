@@ -137,16 +137,10 @@ class _HomePageState extends State<HomePage>
                   ],
                 ),
                 actions: <Widget>[
-                  new Padding(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 0.0, vertical: 19.0),
-                    child: new GestureDetector(
-                      onTap: () {
-                      },
-                      child: new Text(
-                        _userName,
-                        style: new TextStyle(fontSize: 16.0),
-                      ),
+                  new Center(
+                    child: new Text(
+                      _userName,
+                      style: new TextStyle(fontSize: 16.0),
                     ),
                   ),
                   new SizedBox(width: 10.0,)

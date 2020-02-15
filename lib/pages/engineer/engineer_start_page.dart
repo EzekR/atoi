@@ -236,7 +236,7 @@ class _EngineerStartPageState extends State<EngineerStartPage> {
                 BuildWidget.buildRow('主题', '${_dispatch['Request']['EquipmentName']}--${_dispatch['Request']['RequestType']['Name']}'),
                 BuildWidget.buildRow('请求人', _dispatch['Request']['RequestUser']['Name']),
                 BuildWidget.buildRow('请求状态', _dispatch['Request']['Status']['Name']),
-                _dispatch['RequestType']['ID']==1?BuildWidget.buildRow('机器状态', _dispatch['MachineStatus']['Name']):new Container(),
+                _dispatch['RequestType']['ID']==1?BuildWidget.buildRow('机器状态', _dispatch['Request']['MachineStatus']['Name']):new Container(),
                 BuildWidget.buildRow('请求来源', _dispatch['Request']['Source']['Name']),
                 BuildWidget.buildRow(model.Remark[_dispatch['Request']['RequestType']['ID']], _dispatch['Request']['FaultDesc']),
                 _dispatch['Request']['RequestType']['ID']==2||_dispatch['Request']['RequestType']['ID']==3||_dispatch['Request']['RequestType']['ID']==7?BuildWidget.buildRow(model.RemarkType[_dispatch['Request']['RequestType']['ID']], _dispatch['Request']['FaultType']['Name']):new Container(),

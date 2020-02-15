@@ -655,7 +655,6 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
           BuildWidget.buildRow('分析原因', _report['SolutionCauseAnalysis']),
           BuildWidget.buildRow('详细处理方法', _report['SolutionWay']),
           BuildWidget.buildRow('结果', _report['Result']),
-          _report['DelayReason']!=''?BuildWidget.buildRow('误工说明', _report['DelayReason']):new Container(),
         ]);
         break;
       case 201:

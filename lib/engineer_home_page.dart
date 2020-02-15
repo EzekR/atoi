@@ -125,9 +125,11 @@ class _EngineerHomePageState extends State<EngineerHomePage>
                     ],
                   ),
                   actions: <Widget>[
-                    new Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 19.0),
-                      child: Text(_userName),
+                    new Center(
+                      child: new Text(
+                        _userName,
+                        style: new TextStyle(fontSize: 16.0),
+                      ),
                     ),
                     new SizedBox(width: 10.0,)
                   ],

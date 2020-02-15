@@ -176,22 +176,22 @@ class _BadRequestState extends State<BadRequest> {
           'Files': fileList
         }
       };
-      Fluttertoast.showToast(
-          msg: "正在上传...",
-          toastLength: Toast.LENGTH_SHORT,
-          gravity: ToastGravity.CENTER,
-          backgroundColor: Colors.black54,
-          textColor: Colors.white,
-          fontSize: 16.0);
-      setState(() {
-        hold = true;
-      });
+      //Fluttertoast.showToast(
+      //    msg: "正在上传...",
+      //    toastLength: Toast.LENGTH_SHORT,
+      //    gravity: ToastGravity.CENTER,
+      //    backgroundColor: Colors.black54,
+      //    textColor: Colors.white,
+      //    fontSize: 16.0);
+      //setState(() {
+      //  hold = true;
+      //});
       var resp = await HttpRequest.request('/Request/AddRequest',
           method: HttpRequest.POST, data: _data);
-      Fluttertoast.cancel();
-      setState(() {
-        hold = false;
-      });
+      //Fluttertoast.cancel();
+      //setState(() {
+      //  hold = false;
+      //});
       print(resp);
       if (resp['ResultCode'] == '00') {
         showDialog(
@@ -507,7 +507,7 @@ class _BadRequestState extends State<BadRequest> {
                       children: <Widget>[
                         new RaisedButton(
                           onPressed: () {
-                            return hold?null:submit();
+                            return submit();
                           },
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(6),

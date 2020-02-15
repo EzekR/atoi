@@ -136,7 +136,10 @@ class _EngineerToStartState extends State<EngineerToStart> {
                               .push(new MaterialPageRoute(builder: (_) {
                             return new EngineerStartPage(
                                 dispatchId: dispatchId);
-                          })).then((result) => refresh());
+                          })).then((result) =>
+                              refresh()
+                              //null
+                          );
                         },
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(6),

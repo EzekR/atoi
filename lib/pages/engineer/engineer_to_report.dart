@@ -200,7 +200,10 @@ class _EngineerToReportState extends State<EngineerToReport> {
                               new MaterialPageRoute(builder: (_) {
                                 return new EngineerReportPage(
                                     dispatchId: dispatchId, reportId: task['DispatchReport']['ID'], status: task['DispatchReport']['Status']['ID'],);
-                              })).then((result) => refresh());
+                              })).then((result) =>
+                              refresh()
+                              //null
+                          );
                         },
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(6),
