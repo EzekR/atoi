@@ -275,6 +275,14 @@ class _EngineerReportAccessoryState extends State<EngineerReportAccessory> {
       );
       return;
     }
+    if (_qty.text.split('.').length>1) {
+      showDialog(context: context,
+          builder: (context) => CupertinoAlertDialog(
+            title: new Text('零件数量必须为证书'),
+          )
+      );
+      return;
+    }
     if (int.tryParse(_qty.text) > 999999999) {
       showDialog(context: context,
           builder: (context) => CupertinoAlertDialog(

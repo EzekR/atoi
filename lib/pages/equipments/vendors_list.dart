@@ -92,7 +92,7 @@ class _VendorsListState extends State<VendorsList> {
                 BuildWidget.buildCardRow('联系人', item['Contact']),
                 BuildWidget.buildCardRow('联系人电话', item['ContactMobile']),
                 BuildWidget.buildCardRow('添加日期', item['AddDate'].split('T')[0]),
-                BuildWidget.buildCardRow('状态', item['IsActive']?'启用':'停用'),
+                //BuildWidget.buildCardRow('状态', item['IsActive']?'启用':'停用'),
               ],
             ),
           ),
