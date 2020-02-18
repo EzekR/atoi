@@ -171,7 +171,8 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
     if (resp['ResultCode'] == '00') {
       var files = resp['Data']['Files'];
       for (var file in files) {
-        var _list = file['FileName'].split('.').reversed;
+        var _list = file['FileName'].split('.');
+        _list = _list.reversed.toList();
         if (_list[0] == 'jpg' || _list[0] == 'png' || _list[0] == 'jpeg' || _list[0] == 'bmp') {
           getImage(file['ID']);
         } else {
