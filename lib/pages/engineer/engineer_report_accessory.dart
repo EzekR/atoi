@@ -278,7 +278,7 @@ class _EngineerReportAccessoryState extends State<EngineerReportAccessory> {
     if (_qty.text.split('.').length>1) {
       showDialog(context: context,
           builder: (context) => CupertinoAlertDialog(
-            title: new Text('零件数量必须为证书'),
+            title: new Text('零件数量必须为整数'),
           )
       );
       return;
