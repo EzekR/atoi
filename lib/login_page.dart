@@ -68,6 +68,7 @@ class _LoginPageState extends State<LoginPage> {
       var _currentVersion = HttpRequest.APP_VERSION.split('.');
       if (int.parse(_version[0]) >int.parse(_currentVersion[0]) || int.parse(_version[1])>int.parse(_currentVersion[1])) {
         showDialog(context: context,
+            barrierDismissible: false,
             builder: (context) => CupertinoAlertDialog(
               title: new Text('版本号过低，请升级',
                 style: new TextStyle(

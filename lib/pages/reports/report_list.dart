@@ -263,7 +263,7 @@ class _ReportListState extends State<ReportList> {
                     'label-y': '人次（次）'
                   },
                   {
-                    'name': '设备检查费用',
+                    'name': '关键设备检查收入',
                     'type': 'depreciation_rate'
                   },
                   {
