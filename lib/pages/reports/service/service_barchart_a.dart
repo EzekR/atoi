@@ -51,7 +51,7 @@ class _ServiceAssetsState extends State<ServiceAssets> {
         confirmText: '确认',
         adapter: PickerDataAdapter<String>(pickerdata: _dimensionList),
         hideHeader: true,
-        title: new Text("请选择维度"),
+        title: new Text("请选择统计维度"),
         selectedTextStyle: TextStyle(color: Colors.blue),
         onConfirm: (Picker picker, List value) {
           var _selected = picker.getSelectedValues();

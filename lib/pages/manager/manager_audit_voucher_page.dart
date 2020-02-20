@@ -495,7 +495,7 @@ class _ManagerAuditVoucherPageState extends State<ManagerAuditVoucherPage> {
     return new Scaffold(
       appBar: new AppBar(
         title: new Text(
-            widget.status==3?'查看凭证':'审核凭证'
+            widget.status==3?'查看服务凭证':'审核服务凭证'
         ),
         elevation: 0.7,
         flexibleSpace: Container(

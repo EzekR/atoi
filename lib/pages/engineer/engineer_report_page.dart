@@ -1199,7 +1199,7 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
     return new Scaffold(
       appBar: new AppBar(
         title: new Text(
-            widget.status == 2 || widget.status == 3 ? '查看报告' : '上传报告'),
+            widget.status == 2 || widget.status == 3 ? '查看作业报告' : '提交作业报告'),
         elevation: 0.7,
         flexibleSpace: Container(
           decoration: BoxDecoration(

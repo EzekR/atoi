@@ -558,7 +558,7 @@ class _EngineerVoucherPageState extends State<EngineerVoucherPage> {
     return new Scaffold(
       appBar: new AppBar(
         title: new Text(
-            widget.status==0||widget.status==1?'上传凭证':'查看凭证'
+            widget.status==0||widget.status==1?'提交服务凭证':'查看服务凭证'
         ),
         elevation: 0.7,
         flexibleSpace: Container(

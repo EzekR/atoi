@@ -911,7 +911,7 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
     return new Scaffold(
       appBar: new AppBar(
         title: new Text(
-            widget.status==3?'查看报告':'审核报告'
+            widget.status==3?'查看作业报告':'审核作业报告'
         ),
         elevation: 0.7,
         flexibleSpace: Container(

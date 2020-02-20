@@ -54,7 +54,7 @@ class _ServiceBarchartState extends State<ServiceBarchart> {
         selecteds: [ReportDimensions.DIMS.indexWhere((elem) => elem['Name']==_dim1), _years.indexOf(_dim2)<0?0:_years.indexOf(_dim2)],
         adapter: PickerDataAdapter<String>(pickerdata: _dimensionList),
         hideHeader: true,
-        title: new Text("请选择维度"),
+        title: new Text("请选择统计维度"),
         selectedTextStyle: TextStyle(color: Colors.blue),
         onConfirm: (Picker picker, List value) {
           var _selected = picker.getSelectedValues();

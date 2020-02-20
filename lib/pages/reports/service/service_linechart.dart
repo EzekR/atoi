@@ -74,7 +74,7 @@ class _ServiceLinechartState extends State<ServiceLinechart> {
         selecteds: [_dimSlice.indexWhere((item) => item['Name']==_dim1), _dim2=='年'?0:1],
         adapter: PickerDataAdapter<String>(pickerdata: _dimensionList),
         hideHeader: false,
-        title: new Text("请选择维度"),
+        title: new Text("请选择统计维度"),
         selectedTextStyle: TextStyle(color: Colors.blue),
         onConfirm: (Picker picker, List value) {
           var _selected = picker.getSelectedValues();

@@ -19,11 +19,11 @@ class ReportDimensions {
     },
     {
       "ID": 4,
-      "Name": "资产类型"
+      "Name": "资产价值"
     },
     {
       "ID": 5,
-      "Name": "设备年限"
+      "Name": "使用年限"
     },
     {
       "ID": 6,
@@ -31,11 +31,11 @@ class ReportDimensions {
     },
     {
       "ID": 7,
-      "Name": "设备科室"
+      "Name": "使用科室"
     },
     {
       "ID": 8,
-      "Name": "厂商分布"
+      "Name": "厂商"
     }
   ];
 

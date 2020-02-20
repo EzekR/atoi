@@ -62,7 +62,7 @@ class _ServiceBarchartLineState extends State<ServiceBarchartLine> {
         selecteds: [_dim1=='年'?0:1, _dim1=='月'?_years.indexOf(int.parse(_dim2)):0],
         adapter: PickerDataAdapter<String>(pickerdata: _dimensionList),
         hideHeader: true,
-        title: new Text("请选择维度"),
+        title: new Text("请选择统计维度"),
         selectedTextStyle: TextStyle(color: Colors.blue),
         onConfirm: (Picker picker, List value) {
           var _selected = picker.getSelectedValues();
@@ -157,7 +157,7 @@ class _ServiceBarchartLineState extends State<ServiceBarchartLine> {
           ),
           primaryYAxis: NumericAxis(
               title: AxisTitle(
-                  text: '请求数量（条）'
+                  text: '请求数量（个）'
               ),
             majorGridLines: MajorGridLines(
               dashArray: [5, 5]
@@ -286,7 +286,7 @@ class BuildChart extends StatelessWidget {
           ),
           primaryYAxis: NumericAxis(
               title: AxisTitle(
-                  text: '请求数量（条）'
+                  text: '请求数量（个）'
               ),
               majorGridLines: MajorGridLines(
                   dashArray: [5, 5]

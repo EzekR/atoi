@@ -63,7 +63,7 @@ class _ServiceBarchartBState extends State<ServiceBarchartB> {
         selecteds: [_dimSlice.indexWhere((item) => item['Name']==_dim1), _dim2=='年'?0:1],
         adapter: PickerDataAdapter<String>(pickerdata: _dimensionList),
         hideHeader: true,
-        title: new Text("请选择维度"),
+        title: new Text("请选择统计维度"),
         selectedTextStyle: TextStyle(color: Colors.blue),
         onConfirm: (Picker picker, List value) {
           var _selected = picker.getSelectedValues();
@@ -123,7 +123,7 @@ class _ServiceBarchartBState extends State<ServiceBarchartB> {
     var _dataTable = new DataTable(
         columns: [
           DataColumn(label: Text(_currentDimension, textAlign: TextAlign.center, style: new TextStyle(color: Colors.blue, fontSize: 14.0),)),
-          DataColumn(label: Text('请求数量（条）', textAlign: TextAlign.center, style: new TextStyle(color: Colors.blue, fontSize: 14.0),)),
+          DataColumn(label: Text('请求数量（个）', textAlign: TextAlign.center, style: new TextStyle(color: Colors.blue, fontSize: 14.0),)),
         ],
         rows: _tableData.map((item) => DataRow(
             cells: [

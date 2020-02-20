@@ -60,7 +60,7 @@ class _ServiceLinechartBState extends State<ServiceLinechartB> {
         selecteds: [_dim1=='年'?0:1, _dim2==' '?0:_years.indexOf(int.parse(_dim2))],
         adapter: PickerDataAdapter<String>(pickerdata: _dimensionList),
         hideHeader: false,
-        title: new Text("请选择维度"),
+        title: new Text("请选择统计维度"),
         selectedTextStyle: TextStyle(color: Colors.blue),
         onConfirm: (Picker picker, List value) {
           var _selected = picker.getSelectedValues();
