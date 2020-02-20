@@ -406,13 +406,13 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
       source: sourceType,
     );
     if (image != null) {
-      print(_imageList[0]['id']);
       if (_imageList.length > 0 && _imageList[0]['id'] != null) {
         await deleteFile(_imageList[0]['id']);
       }
       var bytes = await image.readAsBytes();
       var _compressed = await FlutterImageCompress.compressWithList(bytes,
           minWidth: 480, minHeight: 600);
+      print(bytes);
       _imageList.clear();
       setState(() {
         _imageList.add({'fileName': image.path, 'content': _compressed});
@@ -424,9 +424,9 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
     List<Widget> _list = [];
     if (imageList.length > 0) {
       for (var image in imageList) {
-        var _suffix = image['fileName'].split('.')[1];
-        print(_suffix);
-        if (_suffix == 'jpg' || _suffix == 'jpeg' || _suffix == 'bmp' || _suffix == 'png') {
+        var _suffix = image['fileName'].split('.');
+        _suffix = _suffix.reversed.toList();
+        if (_suffix[0] == 'jpg' || _suffix[0] == 'jpeg' || _suffix[0] == 'bmp' || _suffix[0] == 'png') {
           _list.add(new Stack(
             alignment: FractionalOffset(1.0, 0),
             children: <Widget>[
@@ -598,11 +598,12 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
       //download equipment files
       var _files = _data['EquipmentFile'];
       for(var item in _files) {
-        var _fileExt = item['FileName'].split('.')[1];
+        var _fileExt = item['FileName'].split('.');
+        _fileExt = _fileExt.reversed.toList();
         switch (item['FileType']) {
           case 5:
-            if (_fileExt == 'jpg' || _fileExt == 'png' || _fileExt == 'jpeg' ||
-                _fileExt == 'bmp') {
+            if (_fileExt[0] == 'jpg' || _fileExt[0] == 'png' || _fileExt[0] == 'jpeg' ||
+                _fileExt[0] == 'bmp') {
               var _file = await getDeviceFile(item['ID']);
               if (_file != null) {
                 setState(() {
@@ -624,8 +625,8 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
             }
             break;
           case 6:
-            if (_fileExt == 'jpg' || _fileExt == 'png' || _fileExt == 'jpeg' ||
-                _fileExt == 'bmp') {
+            if (_fileExt[0] == 'jpg' || _fileExt[0] == 'png' || _fileExt[0] == 'jpeg' ||
+                _fileExt[0] == 'bmp') {
               var _file = await getDeviceFile(item['ID']);
               if (_file != null) {
                 setState(() {
@@ -647,8 +648,8 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
             }
             break;
           case 4:
-            if (_fileExt == 'jpg' || _fileExt == 'png' || _fileExt == 'jpeg' ||
-                _fileExt == 'bmp') {
+            if (_fileExt[0] == 'jpg' || _fileExt[0] == 'png' || _fileExt[0] == 'jpeg' ||
+                _fileExt[0] == 'bmp') {
               var _file = await getDeviceFile(item['ID']);
               if (_file != null) {
                 setState(() {
