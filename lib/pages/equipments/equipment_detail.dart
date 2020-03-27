@@ -26,10 +26,13 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
   List<DropdownMenuItem<String>> dropdownLevel;
   String currentLevel;
   String oid = '系统自动生成';
+  String manufacturingDate = 'YY-MM-DD';
   String validationStartDate = 'YY-MM-DD';
   String validationEndDate = 'YY-MM-DD';
   String installStartDate = 'YY-MM-DD';
   String installEndDate = 'YY-MM-DD';
+  String installDate = 'YY-MM-DD';
+  String usageDate = 'YY-MM-DD';
   String purchaseDate = 'YY-MM-DD';
   String checkDate = 'YY-MM-DD';
   String mandatoryDate = 'YY-MM-DD';
@@ -63,7 +66,9 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
       installSite = new TextEditingController(),
       maintainPeriod = new TextEditingController(),
       patrolPeriod = new TextEditingController(),
-      correctionPeriod = new TextEditingController();
+      correctionPeriod = new TextEditingController(),
+      brand = new TextEditingController(),
+      comments = new TextEditingController();
 
   List departments = [];
   List<DropdownMenuItem<String>> dropdownDepartments;
@@ -352,7 +357,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
     super.initState();
     model = MainModel.of(context);
     dropdownLevel = getDropDownMenuItems(assetLevel);
-    currentLevel = dropdownLevel[0].value;
+    currentLevel = dropdownLevel[1].value;
     dropdownStatus = getDropDownMenuItems(runningStatus);
     currentStatus = dropdownStatus[0].value;
     dropdownMachine = getDropDownMenuItems(machineStatus);
@@ -552,6 +557,8 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
         serialCode.text = _data['SerialCode'];
         responseTime.text = _data['ResponseTimeLength'].toString();
         assetCode.text = _data['AssetCode'];
+        brand.text = _data['Brand'];
+        comments.text = _data['Comments'];
         depreciationYears.text = _data['DepreciationYears'].toString();
         contractName.text = _data['SaleContractName'];
         purchaseWay.text = _data['PurchaseWay'];
@@ -568,8 +575,11 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
         currentLevel = _data['AssetLevel']['Name'];
         validationStartDate = formatDate(_data['ValidityStartDate'].toString());
         validationEndDate = formatDate(_data['ValidityEndDate'].toString());
-        installStartDate = formatDate(_data['InstalStartDate'].toString());
-        installEndDate = formatDate(_data['InstalEndDate'].toString());
+        //installStartDate = formatDate(_data['InstalStartDate'].toString());
+        //installEndDate = formatDate(_data['InstalEndDate'].toString());
+        installDate = formatDate(_data['InstalDate'].toString());
+        usageDate = formatDate(_data['UseageDate'].toString());
+        manufacturingDate = formatDate(_data['ManufacturingDate'].toString());
         purchaseDate = formatDate(_data['PurchaseDate'].toString());
         scrapDate = formatDate(_data['ScrapDate'].toString());
         currentOrigin = _data['OriginType'];
@@ -822,7 +832,16 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
       );
       return;
     }
-    if (installStartDate == 'YY-MM-DD' || installEndDate == 'YY-MM-DD') {
+    if (usageDate == 'YY-MM-DD') {
+      showDialog(
+          context: context,
+          builder: (context) => CupertinoAlertDialog(
+            title: new Text('启用日期不可为空'),
+          )
+      );
+      return;
+    }
+    if (installDate == 'YY-MM-DD') {
       showDialog(
           context: context,
           builder: (context) => CupertinoAlertDialog(
@@ -831,17 +850,17 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
       );
       return;
     }
-    var _iStart = DateTime.parse(installStartDate);
-    var _iEnd = DateTime.parse(installEndDate);
-    if (_iEnd.isBefore(_iStart)) {
-      showDialog(
-          context: context,
-          builder: (context) => CupertinoAlertDialog(
-            title: new Text('安装日期格式有误'),
-          )
-      );
-      return;
-    }
+    //var _iStart = DateTime.parse(installStartDate);
+    //var _iEnd = DateTime.parse(installEndDate);
+    //if (_iEnd.isBefore(_iStart)) {
+    //  showDialog(
+    //      context: context,
+    //      builder: (context) => CupertinoAlertDialog(
+    //        title: new Text('安装日期格式有误'),
+    //      )
+    //  );
+    //  return;
+    //}
     var _prefs = await prefs;
     var _userId = _prefs.getInt('userID');
     var _equipmentFiles = [];
@@ -892,6 +911,9 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
       "ResponseTimeLength": responseTime.text,
       "FixedAsset": currentFixed == '是' ? true : false,
       "ServiceScope": currentServiceScope == '是'?true:false,
+      "Brand": brand.text,
+      "Comments": comments.text,
+      "ManufacturingDate": manufacturingDate,
       "AssetCode": assetCode.text,
       "AssetLevel": {'ID': model.AssetsLevel[currentLevel]},
       "DepreciationYears": depreciationYears.text,
@@ -907,8 +929,10 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
         "ID": model.Departments[currentDepartment],
       },
       "InstalSite": installSite.text,
-      "InstalStartDate": installStartDate,
-      "InstalEndDate": installEndDate,
+      //"InstalStartDate": installStartDate,
+      //"InstalEndDate": installEndDate,
+      "InstalDate": installDate,
+      "UseageDate": usageDate,
       "Accepted": currentCheck == '已验收' ? true : false,
       "AcceptanceDate": checkDate,
       "UsageStatus": {
@@ -1121,6 +1145,61 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
               widget.editable?BuildWidget.buildDropdown('设备类别(III)', currentClass3, dropdownClass3, changeClass3):BuildWidget.buildRow('设备类别(III)', currentClass3==null?'':currentClass3),
               BuildWidget.buildRow('分类编码', classCode1+classCode2+classCode3),
               widget.editable&&isAdmin?BuildWidget.buildRadio('整包范围', serviceScope, currentServiceScope, changeServiceScope):BuildWidget.buildRow('整包范围', currentServiceScope),
+              widget.editable?BuildWidget.buildInput('品牌', brand, lines: 1):BuildWidget.buildRow('品牌', brand.text),
+              widget.editable?BuildWidget.buildInput('备注', comments, lines: 1):BuildWidget.buildRow('备注', comments.text),
+              widget.editable?new Padding(
+                padding: EdgeInsets.symmetric(vertical: 5.0),
+                child: new Row(
+                  children: <Widget>[
+                    new Expanded(
+                      flex: 4,
+                      child: new Wrap(
+                        alignment: WrapAlignment.end,
+                        crossAxisAlignment: WrapCrossAlignment.center,
+                        children: <Widget>[
+                          new Text(
+                            '出厂日期',
+                            style: new TextStyle(
+                                fontSize: 20.0, fontWeight: FontWeight.w600),
+                          )
+                        ],
+                      ),
+                    ),
+                    new Expanded(
+                      flex: 1,
+                      child: new Text(
+                        '：',
+                        style: new TextStyle(
+                          fontSize: 20.0,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                    new Expanded(
+                      flex: 4,
+                      child: new Text(
+                        manufacturingDate,
+                        style: new TextStyle(
+                            fontSize: 20.0,
+                            fontWeight: FontWeight.w400,
+                            color: Colors.black54
+                        ),
+                      ),
+                    ),
+                    new Expanded(
+                      flex: 2,
+                      child: new IconButton(
+                          icon: Icon(Icons.calendar_today, color: AppConstants.AppColors['btn_main'],),
+                          onPressed: () async {
+                            var _date = await pickDate(initialTime: manufacturingDate);
+                            setState(() {
+                              manufacturingDate = _date;
+                            });
+                          }),
+                    ),
+                  ],
+                ),
+              ):BuildWidget.buildRow('出厂日期', displayDate(manufacturingDate)),
             ],
           ),
         ),
@@ -1440,77 +1519,183 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
                       ),
                     ),
                     new Expanded(
-                      flex: 6,
-                      child: new Column(
-                        children: <Widget>[
-                          new Row(
-                            children: <Widget>[
-                              new Expanded(
-                                flex: 4,
-                                child: new Text(
-                                  installStartDate,
-                                  style: new TextStyle(
-                                      fontSize: 20.0,
-                                      fontWeight: FontWeight.w400,
-                                      color: Colors.black54
-                                  ),
-                                ),
-                              ),
-                              new Expanded(
-                                flex: 2,
-                                child: new IconButton(
-                                    icon: Icon(Icons.calendar_today, color: AppConstants.AppColors['btn_main'],),
-                                    onPressed: () async {
-                                      var _date = await pickDate(initialTime: installStartDate);
-                                      setState(() {
-                                        installStartDate = _date;
-                                      });
-                                    }
-                                ),
-                              )
-                            ],
-                          ),
-                          new Row(
-                            children: <Widget>[
-                              new Expanded(
-                                flex: 4,
-                                child: new Text(
-                                  installEndDate,
-                                  style: new TextStyle(
-                                      fontSize: 20.0,
-                                      fontWeight: FontWeight.w400,
-                                      color: Colors.black54
-                                  ),
-                                ),
-                              ),
-                              new Expanded(
-                                flex: 2,
-                                child: new IconButton(
-                                    icon: Icon(Icons.calendar_today, color: AppConstants.AppColors['btn_main'],),
-                                    onPressed: () async {
-                                      var _date = await pickDate(initialTime: installEndDate);
-                                      var _start = DateTime.tryParse(installStartDate);
-                                      var _end = DateTime.tryParse(_date);
-                                      if (_start!=null && _end!=null && _end.isBefore(_start)) {
-                                        showDialog(context: context, builder: (context) => CupertinoAlertDialog(
-                                          title: new Text('安装日期格式有误'),
-                                        ));
-                                      } else {
-                                        setState(() {
-                                          installEndDate = _date;
-                                        });
-                                      }
-                                    }
-                                ),
-                              )
-                            ],
-                          ),
-                        ],
+                      flex: 4,
+                      child: new Text(
+                        installDate,
+                        style: new TextStyle(
+                            fontSize: 20.0,
+                            fontWeight: FontWeight.w400,
+                            color: Colors.black54
+                        ),
                       ),
+                    ),
+                    new Expanded(
+                      flex: 2,
+                      child: new IconButton(
+                          icon: Icon(Icons.calendar_today, color: AppConstants.AppColors['btn_main'],),
+                          onPressed: () async {
+                            var _date = await pickDate(initialTime: installDate);
+                            setState(() {
+                              installDate = _date;
+                            });
+                          }),
                     ),
                   ],
                 ),
-              ):BuildWidget.buildRow('安装日期', '${displayDate(installStartDate)}\n${displayDate(installEndDate)}'),
+              ):BuildWidget.buildRow('安装日期', displayDate(installDate)),
+              widget.editable?new Padding(
+                padding: EdgeInsets.symmetric(vertical: 5.0),
+                child: new Row(
+                  children: <Widget>[
+                    new Expanded(
+                      flex: 4,
+                      child: new Wrap(
+                        alignment: WrapAlignment.end,
+                        crossAxisAlignment: WrapCrossAlignment.center,
+                        children: <Widget>[
+                          new Text(
+                            '启用日期',
+                            style: new TextStyle(
+                                fontSize: 20.0, fontWeight: FontWeight.w600),
+                          )
+                        ],
+                      ),
+                    ),
+                    new Expanded(
+                      flex: 1,
+                      child: new Text(
+                        '：',
+                        style: new TextStyle(
+                          fontSize: 20.0,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                    new Expanded(
+                      flex: 4,
+                      child: new Text(
+                        usageDate,
+                        style: new TextStyle(
+                            fontSize: 20.0,
+                            fontWeight: FontWeight.w400,
+                            color: Colors.black54
+                        ),
+                      ),
+                    ),
+                    new Expanded(
+                      flex: 2,
+                      child: new IconButton(
+                          icon: Icon(Icons.calendar_today, color: AppConstants.AppColors['btn_main'],),
+                          onPressed: () async {
+                            var _date = await pickDate(initialTime: usageDate);
+                            setState(() {
+                              usageDate = _date;
+                            });
+                          }),
+                    ),
+                  ],
+                ),
+              ):BuildWidget.buildRow('启用日期', displayDate(usageDate)),
+              //widget.editable?new Padding(
+              //  padding: EdgeInsets.symmetric(vertical: 5.0),
+              //  child: new Row(
+              //    children: <Widget>[
+              //      new Expanded(
+              //        flex: 4,
+              //        child: new Wrap(
+              //          alignment: WrapAlignment.end,
+              //          crossAxisAlignment: WrapCrossAlignment.center,
+              //          children: <Widget>[
+              //            new Text(
+              //              '安装日期',
+              //              style: new TextStyle(
+              //                  fontSize: 20.0, fontWeight: FontWeight.w600),
+              //            )
+              //          ],
+              //        ),
+              //      ),
+              //      new Expanded(
+              //        flex: 1,
+              //        child: new Text(
+              //          '：',
+              //          style: new TextStyle(
+              //            fontSize: 20.0,
+              //            fontWeight: FontWeight.w600,
+              //          ),
+              //        ),
+              //      ),
+              //      new Expanded(
+              //        flex: 6,
+              //        child: new Column(
+              //          children: <Widget>[
+              //            new Row(
+              //              children: <Widget>[
+              //                new Expanded(
+              //                  flex: 4,
+              //                  child: new Text(
+              //                    installStartDate,
+              //                    style: new TextStyle(
+              //                        fontSize: 20.0,
+              //                        fontWeight: FontWeight.w400,
+              //                        color: Colors.black54
+              //                    ),
+              //                  ),
+              //                ),
+              //                new Expanded(
+              //                  flex: 2,
+              //                  child: new IconButton(
+              //                      icon: Icon(Icons.calendar_today, color: AppConstants.AppColors['btn_main'],),
+              //                      onPressed: () async {
+              //                        var _date = await pickDate(initialTime: installStartDate);
+              //                        setState(() {
+              //                          installStartDate = _date;
+              //                        });
+              //                      }
+              //                  ),
+              //                )
+              //              ],
+              //            ),
+              //            new Row(
+              //              children: <Widget>[
+              //                new Expanded(
+              //                  flex: 4,
+              //                  child: new Text(
+              //                    installEndDate,
+              //                    style: new TextStyle(
+              //                        fontSize: 20.0,
+              //                        fontWeight: FontWeight.w400,
+              //                        color: Colors.black54
+              //                    ),
+              //                  ),
+              //                ),
+              //                new Expanded(
+              //                  flex: 2,
+              //                  child: new IconButton(
+              //                      icon: Icon(Icons.calendar_today, color: AppConstants.AppColors['btn_main'],),
+              //                      onPressed: () async {
+              //                        var _date = await pickDate(initialTime: installEndDate);
+              //                        var _start = DateTime.tryParse(installStartDate);
+              //                        var _end = DateTime.tryParse(_date);
+              //                        if (_start!=null && _end!=null && _end.isBefore(_start)) {
+              //                          showDialog(context: context, builder: (context) => CupertinoAlertDialog(
+              //                            title: new Text('安装日期格式有误'),
+              //                          ));
+              //                        } else {
+              //                          setState(() {
+              //                            installEndDate = _date;
+              //                          });
+              //                        }
+              //                      }
+              //                  ),
+              //                )
+              //              ],
+              //            ),
+              //          ],
+              //        ),
+              //      ),
+              //    ],
+              //  ),
+              //):BuildWidget.buildRow('安装日期', '${displayDate(installStartDate)}\n${displayDate(installEndDate)}'),
               widget.editable?BuildWidget.buildRadio('验收状态', checkStatus, currentCheck, changeCheck):BuildWidget.buildRow('验收状态', currentCheck),
               widget.editable?new Padding(
                 padding: EdgeInsets.symmetric(vertical: 5.0),
