@@ -407,21 +407,24 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
   }
 
   Future getImage(ImageSource sourceType, List _imageList) async {
-    var image = await ImagePicker.pickImage(
-      source: sourceType,
-    );
-    if (image != null) {
-      if (_imageList.length > 0 && _imageList[0]['id'] != null) {
-        await deleteFile(_imageList[0]['id']);
+    try {
+      var image = await ImagePicker.pickImage(
+        source: sourceType,
+      );
+      if (image != null) {
+        if (_imageList.length > 0 && _imageList[0]['id'] != null) {
+          await deleteFile(_imageList[0]['id']);
+        }
+        var bytes = await image.readAsBytes();
+        var _compressed = await FlutterImageCompress.compressWithList(bytes,
+            minWidth: 480, minHeight: 600);
+        _imageList.clear();
+        setState(() {
+          _imageList.add({'fileName': image.path, 'content': _compressed});
+        });
       }
-      var bytes = await image.readAsBytes();
-      var _compressed = await FlutterImageCompress.compressWithList(bytes,
-          minWidth: 480, minHeight: 600);
-      print(bytes);
-      _imageList.clear();
-      setState(() {
-        _imageList.add({'fileName': image.path, 'content': _compressed});
-      });
+    } catch(e) {
+      print('take photo error:'+e.toString());
     }
   }
 
