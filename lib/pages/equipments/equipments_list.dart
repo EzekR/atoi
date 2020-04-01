@@ -212,7 +212,7 @@ class _EquipmentsListState extends State<EquipmentsList> {
               new RaisedButton(
                 onPressed: (){
                   Navigator.of(context).push(new MaterialPageRoute(builder: (_) {
-                    return new PrintQrcode(equipmentId: item['SerialCode'],);
+                    return new PrintQrcode(equipmentId: item['ID'],);
                   }));
                 },
                 shape: RoundedRectangleBorder(
