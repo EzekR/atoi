@@ -18,7 +18,7 @@ class _PrintQrcodeState extends State<PrintQrcode> {
 
   void initState() {
     super.initState();
-    getEquipment();
+    getQrcode();
   }
 
   Future<Null> getEquipment() async {
@@ -33,16 +33,16 @@ class _PrintQrcodeState extends State<PrintQrcode> {
       setState(() {
         _equipment = resp['Data'][0];
       });
-      getQrcode(_equipment['ID']);
+      getQrcode();
     }
   }
 
-  Future<Null> getQrcode(int equipmentId) async {
+  Future<Null> getQrcode() async {
     var resp = await HttpRequest.request(
       '/Equipment/EquipmentLabel',
       method: HttpRequest.GET,
       params: {
-        'id': equipmentId
+        'id': widget.equipmentId
       }
     );
     if (resp['ResultCode'] == '00') {
