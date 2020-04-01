@@ -14,6 +14,8 @@ PODS:
   - flutter_jpush (0.0.1):
     - Flutter
     - JPush
+  - flutter_plugin_android_lifecycle (0.0.1):
+    - Flutter
   - fluttertoast (0.0.2):
     - Flutter
   - image_picker (0.0.1):
@@ -38,6 +40,7 @@ DEPENDENCIES:
   - Flutter (from `Flutter`)
   - flutter_image_compress (from `.symlinks/plugins/flutter_image_compress/ios`)
   - flutter_jpush (from `.symlinks/plugins/flutter_jpush/ios`)
+  - flutter_plugin_android_lifecycle (from `.symlinks/plugins/flutter_plugin_android_lifecycle/ios`)
   - fluttertoast (from `.symlinks/plugins/fluttertoast/ios`)
   - image_picker (from `.symlinks/plugins/image_picker/ios`)
   - permission_handler (from `.symlinks/plugins/permission_handler/ios`)
@@ -64,6 +67,8 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/flutter_image_compress/ios"
   flutter_jpush:
     :path: ".symlinks/plugins/flutter_jpush/ios"
+  flutter_plugin_android_lifecycle:
+    :path: ".symlinks/plugins/flutter_plugin_android_lifecycle/ios"
   fluttertoast:
     :path: ".symlinks/plugins/fluttertoast/ios"
   image_picker:
@@ -80,6 +85,7 @@ SPEC CHECKSUMS:
   Flutter: 0e3d915762c693b495b44d77113d4970485de6ec
   flutter_image_compress: f69d0e0e078ce52b4810695593bc861ee319ae7d
   flutter_jpush: bb278c661136b2a2032e96ffc15bbce871d3fb02
+  flutter_plugin_android_lifecycle: 47de533a02850f070f5696a623995e93eddcdb9b
   fluttertoast: b644586ef3b16f67fae9a1f8754cef6b2d6b634b
   image_picker: e3eacd46b94694dde7cf2705955cece853aa1a8f
   JCore: d345c049141877eb61c33011455fdb5fcab1673f

@@ -183,6 +183,13 @@ packages:
       url: "https://pub.flutter-io.cn"
     source: hosted
     version: "1.1.0"
+  flutter_plugin_android_lifecycle:
+    dependency: transitive
+    description:
+      name: flutter_plugin_android_lifecycle
+      url: "https://pub.flutter-io.cn"
+    source: hosted
+    version: "1.0.6"
   flutter_signature_pad:
     dependency: "direct main"
     description:
@@ -229,7 +236,7 @@ packages:
       name: image_picker
       url: "https://pub.flutter-io.cn"
     source: hosted
-    version: "0.6.2+3"
+    version: "0.6.4"
   intl:
     dependency: transitive
     description:
@@ -433,4 +440,4 @@ packages:
     version: "3.5.0"
 sdks:
   dart: ">2.4.0 <3.0.0"
-  flutter: ">=1.10.0 <2.0.0"
+  flutter: ">=1.12.13 <2.0.0"

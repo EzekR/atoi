@@ -27,6 +27,7 @@ class _LoginPageState extends State<LoginPage> {
   TextEditingController verificationController = new TextEditingController();
   TextEditingController nameController = new TextEditingController();
   TextEditingController confirmPass = new TextEditingController();
+  TextEditingController serverUrl = new TextEditingController();
   bool _loading = false;
   Future<SharedPreferences> prefs = SharedPreferences.getInstance();
   var _stage = 'login';
@@ -34,6 +35,7 @@ class _LoginPageState extends State<LoginPage> {
   int _countdownTime = 0;
   bool _validPhone = false;
   String _regId = '';
+  bool _editServer = false;
 
   /// 判断是否已登录
   Future<Null> isLogin() async {
@@ -56,6 +58,22 @@ class _LoginPageState extends State<LoginPage> {
           return;
       }
     }
+  }
+
+  Future<Null> getServer() async {
+    var _prefs = await prefs;
+    var _serverUrl = await _prefs.getString('serverUrl');
+    setState(() {
+      serverUrl.text = _serverUrl??'192.168.1.1';
+    });
+  }
+
+  Future<Null> setServer() async {
+    var _prefs = await prefs;
+    await _prefs.setString('serverUrl', serverUrl.text);
+    showDialog(context: context, builder: (_) => CupertinoAlertDialog(
+      title: Text('服务器地址修改成功，重启APP后生效'),
+    ));
   }
 
   Future<Null> checkVersion() async {
@@ -347,6 +365,7 @@ class _LoginPageState extends State<LoginPage> {
     _startupJpush();
     super.initState();
     permissionCheck();
+    getServer();
   }
 
   @override
@@ -591,6 +610,30 @@ class _LoginPageState extends State<LoginPage> {
               SizedBox(height: 8.0),
               loginButton,
               userRegister,
+              SizedBox(height: 70.0,),
+              Row(
+                children: <Widget>[
+                  Text('当前服务器:'),
+                  SizedBox(width: 10.0,),
+                  _editServer?Container(
+                    width: 150.0,
+                    child: TextField(
+                      controller: serverUrl,
+                    ),
+                  ):Text('192.168.1.1'),
+                  FlatButton(
+                    onPressed: () {
+                      setState(() {
+                        _editServer = !_editServer;
+                      });
+                    },
+                    child: Text(_editServer?'保存':'修改', style: TextStyle(
+                      fontSize: 12.0,
+                      color: Colors.grey
+                    ),),
+                  )
+                ],
+              )
             ]
         );
       } else {
