@@ -9,8 +9,11 @@ import 'package:flutter/cupertino.dart';
 import 'package:connectivity/connectivity.dart';
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 import 'package:flutter_jpush/flutter_jpush.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:flutter/services.dart';
+import 'package:atoi/utils/event_bus.dart';
 
 /// 登录注册类
 class LoginPage extends StatefulWidget {
@@ -36,6 +39,7 @@ class _LoginPageState extends State<LoginPage> {
   bool _validPhone = false;
   String _regId = '';
   bool _editServer = false;
+  EventBus bus = new EventBus();
 
   /// 判断是否已登录
   Future<Null> isLogin() async {
@@ -64,7 +68,7 @@ class _LoginPageState extends State<LoginPage> {
     var _prefs = await prefs;
     var _serverUrl = await _prefs.getString('serverUrl');
     setState(() {
-      serverUrl.text = _serverUrl??'192.168.1.1';
+      serverUrl.text = _serverUrl??HttpRequest.API_PREFIX;
     });
   }
 
@@ -73,7 +77,7 @@ class _LoginPageState extends State<LoginPage> {
     await _prefs.setString('serverUrl', serverUrl.text);
     showDialog(context: context, builder: (_) => CupertinoAlertDialog(
       title: Text('服务器地址修改成功，重启APP后生效'),
-    ));
+    )).then((result) => exit(0));
   }
 
   Future<Null> checkVersion() async {
@@ -84,17 +88,11 @@ class _LoginPageState extends State<LoginPage> {
     if (resp['ResultCode'] == '00') {
       var _version = resp['Data']['AppValidVersion'].split('.');
       var _currentVersion = HttpRequest.APP_VERSION.split('.');
-      if (int.parse(_version[0]) >int.parse(_currentVersion[0]) || int.parse(_version[1])>int.parse(_currentVersion[1])) {
+      if (_version.length>1&&(int.tryParse(_version[0]) >int.parse(_currentVersion[0]) || int.tryParse(_version[1])>int.parse(_currentVersion[1]))) {
         showDialog(context: context,
             barrierDismissible: false,
             builder: (context) => CupertinoAlertDialog(
-              title: new Text('版本号过低，请升级',
-                style: new TextStyle(
-                    fontSize: 16.0,
-                    fontWeight: FontWeight.w400,
-                    color: Colors.black54
-                ),
-              ),
+              title: new Text('版本号过低，请升级'),
             )
         );
         return;
@@ -157,13 +155,7 @@ class _LoginPageState extends State<LoginPage> {
     if (connectivityResult == ConnectivityResult.none) {
       showDialog(context: context,
         builder: (context) => CupertinoAlertDialog(
-          title: new Text('请连接网络',
-            style: new TextStyle(
-                fontSize: 16.0,
-                fontWeight: FontWeight.w400,
-                color: Colors.black54
-            ),
-          ),
+          title: new Text('请连接网络'),
         )
       );
     }
@@ -226,86 +218,55 @@ class _LoginPageState extends State<LoginPage> {
       showDialog(context: context, builder: (context) => CupertinoAlertDialog(
         title: new Text(
             _data['ResultMessage'],
-          style: new TextStyle(
-            fontSize: 16.0,
-            fontWeight: FontWeight.w400,
-            color: Colors.black54
-          ),
         ),
       ));
     }
   }
+
+  List<FocusNode> _focusReg = new List(5).map((item) {
+    return new FocusNode();
+  }).toList();
 
   /// 用户注册
   Future<Null> _userReg() async {
     if (regPhoneController.text.isEmpty) {
       showDialog(context: context,
           builder: (context) => CupertinoAlertDialog(
-            title: new Text('手机号不可为空',
-              style: new TextStyle(
-                  fontSize: 16.0,
-                  fontWeight: FontWeight.w400,
-                  color: Colors.black54
-              ),
-            ),
+            title: new Text('手机号不可为空'),
           )
-      );
+      ).then((result) => FocusScope.of(context).requestFocus(_focusReg[0]));
       return;
     }
     if (passwordController.text.isEmpty) {
       showDialog(context: context,
           builder: (context) => CupertinoAlertDialog(
-            title: new Text('密码不可为空',
-              style: new TextStyle(
-                  fontSize: 16.0,
-                  fontWeight: FontWeight.w400,
-                  color: Colors.black54
-              ),
-            ),
+            title: new Text('密码不可为空'),
           )
-      );
+      ).then((result) => FocusScope.of(context).requestFocus(_focusReg[1]));
       return;
     }
     if (passwordController.text != confirmPass.text) {
       showDialog(context: context,
           builder: (context) => CupertinoAlertDialog(
-            title: new Text('密码不一致',
-              style: new TextStyle(
-                  fontSize: 16.0,
-                  fontWeight: FontWeight.w400,
-                  color: Colors.black54
-              ),
-            ),
+            title: new Text('密码不一致'),
           )
-      );
+      ).then((result) => FocusScope.of(context).requestFocus(_focusReg[2]));
       return;
     }
     if (nameController.text.isEmpty) {
       showDialog(context: context,
           builder: (context) => CupertinoAlertDialog(
-            title: new Text('姓名不可为空',
-              style: new TextStyle(
-                  fontSize: 16.0,
-                  fontWeight: FontWeight.w400,
-                  color: Colors.black54
-              ),
-            ),
+            title: new Text('姓名不可为空'),
           )
-      );
+      ).then((result) => FocusScope.of(context).requestFocus(_focusReg[3]));
       return;
     }
     if (verificationController.text.isEmpty) {
       showDialog(context: context,
           builder: (context) => CupertinoAlertDialog(
-            title: new Text('验证码不可为空',
-              style: new TextStyle(
-                  fontSize: 16.0,
-                  fontWeight: FontWeight.w400,
-                  color: Colors.black54
-              ),
-            ),
+            title: new Text('验证码不可为空'),
           )
-      );
+      ).then((result) => FocusScope.of(context).requestFocus(_focusReg[4]));
       return;
     }
     var resp = await HttpRequest.request(
@@ -327,13 +288,7 @@ class _LoginPageState extends State<LoginPage> {
     if (resp['ResultCode'] == '00') {
       showDialog(context: context,
           builder: (context) => CupertinoAlertDialog(
-            title: new Text('注册成功',
-              style: new TextStyle(
-                  fontSize: 16.0,
-                  fontWeight: FontWeight.w400,
-                  color: Colors.black54
-              ),
-            ),
+            title: new Text('注册成功'),
           )
       );
       setState(() {
@@ -348,15 +303,14 @@ class _LoginPageState extends State<LoginPage> {
       showDialog(context: context,
           builder: (context) => CupertinoAlertDialog(
             title: new Text(resp['ResultMessage'],
-              style: new TextStyle(
-                  fontSize: 16.0,
-                  fontWeight: FontWeight.w400,
-                  color: Colors.black54
-              ),
             ),
           )
       );
     }
+  }
+
+  Future<Null> exitApp() async {
+    await SystemChannels.platform.invokeMethod('SystemNavigator.pop');
   }
 
   void initState() {
@@ -366,6 +320,11 @@ class _LoginPageState extends State<LoginPage> {
     super.initState();
     permissionCheck();
     getServer();
+    bus.on('timeout', (params) {
+      showDialog(context: context, builder: (_) => CupertinoAlertDialog(
+        title: Text('网络超时'),
+      ));
+    });
   }
 
   @override
@@ -385,15 +344,9 @@ class _LoginPageState extends State<LoginPage> {
     if (regPhoneController.text.isEmpty || regPhoneController.text.length!=11) {
       showDialog(context: context,
         builder: (context) => CupertinoAlertDialog(
-          title: new Text('请输入正确的手机号',
-            style: new TextStyle(
-                fontSize: 16.0,
-                fontWeight: FontWeight.w400,
-                color: Colors.black54
-            ),
-          ),
+          title: new Text('请输入正确的手机号'),
         )
-      );
+      ).then((result) => FocusScope.of(context).requestFocus(_focusReg[0]));
       return;
     }
     var resp = await HttpRequest.request(
@@ -408,11 +361,6 @@ class _LoginPageState extends State<LoginPage> {
       showDialog(context: context,
           builder: (context) => CupertinoAlertDialog(
         title: new Text('验证码已发送',
-          style: new TextStyle(
-              fontSize: 16.0,
-              fontWeight: FontWeight.w400,
-              color: Colors.black54
-          ),
         ),
       )
     );
@@ -424,11 +372,6 @@ class _LoginPageState extends State<LoginPage> {
       showDialog(context: context,
           builder: (context) => CupertinoAlertDialog(
             title: new Text(resp['ResultMessage'],
-              style: new TextStyle(
-                  fontSize: 16.0,
-                  fontWeight: FontWeight.w400,
-                  color: Colors.black54
-              ),
             ),
           )
       );
@@ -453,7 +396,7 @@ class _LoginPageState extends State<LoginPage> {
       autofocus: false,
       decoration: InputDecoration(
         hintText: _stage=='login'?'用户名/手机号':'手机号',
-        contentPadding: EdgeInsets.fromLTRB(20.0, 10.0, 20.0, 10.0),
+        contentPadding: EdgeInsets.fromLTRB(16.0, 10.0, 16.0, 10.0),
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(32.0)),
       ),
       validator: (value) {
@@ -465,9 +408,10 @@ class _LoginPageState extends State<LoginPage> {
       keyboardType: TextInputType.text,
       controller: nameController,
       autofocus: false,
+      focusNode: _focusReg[3],
       decoration: InputDecoration(
         hintText: '姓名',
-        contentPadding: EdgeInsets.fromLTRB(20.0, 10.0, 20.0, 10.0),
+        contentPadding: EdgeInsets.fromLTRB(16.0, 10.0, 16.0, 10.0),
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(32.0)),
       ),
     );
@@ -476,9 +420,10 @@ class _LoginPageState extends State<LoginPage> {
       keyboardType: TextInputType.number,
       controller: regPhoneController,
       autofocus: false,
+      focusNode: _focusReg[0],
       decoration: InputDecoration(
         hintText: '手机号',
-        contentPadding: EdgeInsets.fromLTRB(20.0, 10.0, 20.0, 10.0),
+        contentPadding: EdgeInsets.fromLTRB(16.0, 10.0, 16.0, 10.0),
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(32.0)),
       ),
     );
@@ -491,9 +436,10 @@ class _LoginPageState extends State<LoginPage> {
             keyboardType: TextInputType.number,
             controller: verificationController,
             autofocus: false,
+            focusNode: _focusReg[4],
             decoration: InputDecoration(
               hintText: '验证码',
-              contentPadding: EdgeInsets.fromLTRB(20.0, 10.0, 20.0, 10.0),
+              contentPadding: EdgeInsets.fromLTRB(16.0, 10.0, 16.0, 10.0),
               border: OutlineInputBorder(borderRadius: BorderRadius.circular(32.0)),
             ),
             onChanged: (value) {
@@ -532,10 +478,11 @@ class _LoginPageState extends State<LoginPage> {
       autofocus: false,
       controller: passwordController,
       obscureText: true,
+      focusNode: _focusReg[1],
       enabled: _stage=='login'?true:_validPhone,
       decoration: InputDecoration(
         hintText: '密码',
-        contentPadding: EdgeInsets.fromLTRB(20.0, 10.0, 20.0, 10.0),
+        contentPadding: EdgeInsets.fromLTRB(16.0, 10.0, 16.0, 10.0),
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(32.0)),
       ),
     );
@@ -543,11 +490,12 @@ class _LoginPageState extends State<LoginPage> {
     var confirmPassword = TextFormField(
       autofocus: false,
       controller: confirmPass,
+      focusNode: _focusReg[2],
       obscureText: true,
       enabled: _validPhone,
       decoration: InputDecoration(
         hintText: '确认密码',
-        contentPadding: EdgeInsets.fromLTRB(20.0, 10.0, 20.0, 10.0),
+        contentPadding: EdgeInsets.fromLTRB(16.0, 10.0, 16.0, 10.0),
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(32.0)),
       ),
     );
@@ -603,34 +551,46 @@ class _LoginPageState extends State<LoginPage> {
         _list.addAll(
             [
               logo,
-              _loading?SpinKitRotatingPlain(color: Colors.blue):SizedBox(height: 50.0),
+              _loading?Center(child: SpinKitThreeBounce(color: Colors.lightBlue),):SizedBox(height: 50.0),
               phone,
               SizedBox(height: 8.0),
               password,
               SizedBox(height: 8.0),
               loginButton,
               userRegister,
-              SizedBox(height: 70.0,),
+              SizedBox(height: 100.0,),
               Row(
+                mainAxisAlignment: MainAxisAlignment.end,
                 children: <Widget>[
-                  Text('当前服务器:'),
-                  SizedBox(width: 10.0,),
-                  _editServer?Container(
-                    width: 150.0,
-                    child: TextField(
-                      controller: serverUrl,
-                    ),
-                  ):Text('192.168.1.1'),
-                  FlatButton(
+                  IconButton(
+                    icon: Icon(Icons.settings_ethernet, color: Colors.blueAccent,),
                     onPressed: () {
-                      setState(() {
-                        _editServer = !_editServer;
-                      });
+                      showDialog(context: context, builder: (context) => AlertDialog(
+                        title: Text('修改服务器地址'),
+                        content: Container(
+                          child: TextField(
+                            controller: serverUrl,
+                          ),
+                        ),
+                        actions: <Widget>[
+                          FlatButton(
+                            child: Text('取消', style: TextStyle(color: Colors.redAccent),),
+                            onPressed: () {
+                              getServer();
+                              Navigator.of(context).pop();
+                            },
+                          ),
+                          FlatButton(
+                            child: Text('确认'),
+                            onPressed: () {
+                              setState(() {
+                                setServer();
+                              });
+                            },
+                          ),
+                        ],
+                      ));
                     },
-                    child: Text(_editServer?'保存':'修改', style: TextStyle(
-                      fontSize: 12.0,
-                      color: Colors.grey
-                    ),),
                   )
                 ],
               )
@@ -639,7 +599,7 @@ class _LoginPageState extends State<LoginPage> {
       } else {
         _list.addAll([
           logo,
-          _loading?SpinKitRotatingPlain(color: Colors.blue):SizedBox(height: 50.0),
+          _loading?SpinKitThreeBounce(color: Colors.blue):SizedBox(height: 50.0),
           regPhone,
           SizedBox(height: 8.0,),
           verification,

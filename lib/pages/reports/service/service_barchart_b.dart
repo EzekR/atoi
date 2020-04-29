@@ -161,7 +161,7 @@ class _ServiceBarchartBState extends State<ServiceBarchartB> {
               children: <Widget>[
                 buildPickerRow(context),
                 _tableData!=null&&_tableData.isNotEmpty?ShouldRebuild<BuildChart>(shouldRebuild: (_old, _new) => _old.tableData!=_new.tableData, child: BuildChart(labelY: widget.labelY, tableData: _tableData, scrollController: _scrollController,),):new Container(),
-                new SizedBox(height: 22.0,),
+                new SizedBox(height: 20.0,),
                 new Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: <Widget>[

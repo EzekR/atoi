@@ -19,6 +19,13 @@ class _SearchPageState extends State<SearchPage> {
   void initState() {
     getDevices('');
     super.initState();
+    if (widget.equipments != null) {
+      setState(() {
+        for(var item in widget.equipments) {
+          selected.add(item);
+        }
+      });
+    }
   }
 
   Future<Null> getDevices(String filter) async {
@@ -26,19 +33,14 @@ class _SearchPageState extends State<SearchPage> {
         '/Equipment/Getdevices',
         method: HttpRequest.GET,
         params: {
-          'filterText': filter
+          'filterText': filter,
+          'filterField': 's.Name'
         }
     );
     print(resp);
-    setState(() {
-      suggestionList = resp['Data'];
-    });
-    print('equips:${widget.equipments}');
-    if (widget.equipments != null) {
+    if (resp['ResultCode'] == '00') {
       setState(() {
-        for(var item in widget.equipments) {
-          selected.add(item);
-        }
+        suggestionList = resp['Data'];
       });
     }
   }
@@ -51,13 +53,10 @@ class _SearchPageState extends State<SearchPage> {
           value: selected.firstWhere((item) => item['SerialCode'] == suggestionList[i]['SerialCode'], orElse: ()=>null)!=null?true:false,
           title: RichText(
               text: TextSpan(
-                  text: '${suggestionList[i]['Name']}/${suggestionList[i]['EquipmentCode']}/${suggestionList[i]['SerialCode']}'.substring(0, query.length),
+                  text: '${suggestionList[i]['Name']}/${suggestionList[i]['EquipmentCode']}/${suggestionList[i]['SerialCode']}',
                   style: TextStyle(
                       color: Colors.grey ),
                   children: [
-                    TextSpan(
-                        text: '${suggestionList[i]['Name']}/${suggestionList[i]['EquipmentCode']}/${suggestionList[i]['SerialCode']}'.substring(query.length),
-                        style: TextStyle(color: Colors.grey))
                   ])),
           onChanged: (bool value) {
             setState(() {

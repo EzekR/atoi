@@ -12,6 +12,8 @@ import 'package:atoi/models/models.dart';
 import 'package:atoi/models/main_model.dart';
 import 'package:atoi/widgets/build_widget.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter_cupertino_date_picker/flutter_cupertino_date_picker.dart';
+import 'package:date_format/date_format.dart';
 
 /// 超管派工页面类
 class ManagerAssignPage extends StatefulWidget {
@@ -71,7 +73,7 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
     '保养',
     '强检',
     '巡检',
-    '校正',
+    '校准',
     '设备新增',
     '不良事件',
     '合同档案',
@@ -329,7 +331,7 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
           value: method['Name'],
           child: new Text(method['Name'],
             style: new TextStyle(
-                fontSize: 20.0,
+                fontSize: 16.0,
                 color: method['HasOpenDispatch']?Colors.redAccent:Colors.grey
             ),
           )
@@ -344,7 +346,7 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
           value: method,
           child: new Text(method,
             style: new TextStyle(
-              fontSize: 20.0
+              fontSize: 16.0
             ),
           )
       ));
@@ -427,7 +429,7 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
       List<Widget> _list = [];
       for(var file in imageBytes) {
         _list.add(Container(
-          child: PhotoView(imageProvider: MemoryImage(file)),
+          child: BuildWidget.buildPhotoPageList(context, file),
           width: 400.0,
           height: 400.0,
         ));
@@ -472,7 +474,7 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
       decoration: InputDecoration(
           labelText: labelText,
           labelStyle: new TextStyle(
-              fontSize: 20.0
+              fontSize: 16.0
           ),
           disabledBorder: UnderlineInputBorder(
             borderSide: BorderSide(
@@ -504,7 +506,7 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
                 new Text(
                   labelText,
                   style: new TextStyle(
-                      fontSize: 20.0,
+                      fontSize: 16.0,
                       fontWeight: FontWeight.w600
                   ),
                 )
@@ -516,7 +518,7 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
             child: new Text(
               '',
               style: new TextStyle(
-                  fontSize: 20.0,
+                  fontSize: 16.0,
                   fontWeight: FontWeight.w600,
               ),
             ),
@@ -526,7 +528,7 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
             child: new Text(
               defaultText,
               style: new TextStyle(
-                  fontSize: 20.0,
+                  fontSize: 16.0,
                   fontWeight: FontWeight.w400,
                   color: Colors.black54
               ),
@@ -548,7 +550,7 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
             child: new Text(
               title,
               style: new TextStyle(
-                  fontSize: 20.0,
+                  fontSize: 16.0,
                   fontWeight: FontWeight.w600
               ),
             ),
@@ -708,19 +710,19 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
     }
   }
 
-  List<dynamic> _buildExpansion() {
+  List<dynamic> _buildExpansion(BuildContext context) {
     List<ExpansionPanel> _list = [];
     if (_request['RequestType']['ID'] != 14) {
       _list.add(new ExpansionPanel(
         headerBuilder: (context, isExpanded) {
           return ListTile(
               leading: new Icon(Icons.info,
-                size: 24.0,
+                size: 20.0,
                 color: Colors.blue,
               ),
               title: Text('设备基本信息',
                 style: new TextStyle(
-                    fontSize: 22.0,
+                    fontSize: 20.0,
                     fontWeight: FontWeight.w400
                 ),
               ),
@@ -739,12 +741,12 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
         headerBuilder: (context, isExpanded) {
           return ListTile(
               leading: new Icon(Icons.description,
-                size: 24.0,
+                size: 20.0,
                 color: Colors.blue,
               ),
               title: Text('请求内容',
                 style: new TextStyle(
-                    fontSize: 22.0,
+                    fontSize: 20.0,
                     fontWeight: FontWeight.w400
                 ),
               ),
@@ -783,12 +785,12 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
       headerBuilder: (context, isExpanded) {
         return ListTile(
             leading: new Icon(Icons.perm_contact_calendar,
-              size: 24.0,
+              size: 20.0,
               color: Colors.blue,
             ),
             title: Text('派工内容',
               style: new TextStyle(
-                  fontSize: 22.0,
+                  fontSize: 20.0,
                   fontWeight: FontWeight.w400
               ),
             ),
@@ -817,7 +819,7 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
                         new Text(
                           '出发时间',
                           style: new TextStyle(
-                              fontSize: 20.0,
+                              fontSize: 16.0,
                               fontWeight: FontWeight.w600
                           ),
                         )
@@ -829,7 +831,7 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
                     child: new Text(
                       '：',
                       style: new TextStyle(
-                        fontSize: 20.0,
+                        fontSize: 16.0,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
@@ -852,24 +854,47 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
                       icon: Icon(Icons.calendar_today),
                       onPressed: () {
                         var _initTime = DateTime.tryParse(dispatchDate)??DateTime.now();
-                        showDatePicker(
-                            context: context,
-                            initialDate: _initTime.isBefore(DateTime.now())?DateTime.now():_initTime,
-                            firstDate: DateTime.now().add(new Duration(days: -1)),
-                            lastDate: new DateTime.now().add(new Duration(days: 30)),
-                            locale: Locale('zh')
-                        ).then((DateTime val) {
-                          if (val != null) {
-                            showTimePicker(context: (context), initialTime: TimeOfDay.fromDateTime(_initTime)??TimeOfDay.now()).then((TimeOfDay selectTime) {
-                              var _time = selectTime.format(context);
-                              setState(() {
-                                dispatchDate = '${val.toString().split(' ')[0]} ${_time}';
-                              });
+                        DatePicker.showDatePicker(
+                          context,
+                          pickerTheme: DateTimePickerTheme(
+                            showTitle: true,
+                            confirm: Text('确认', style: TextStyle(color: Colors.blueAccent)),
+                            cancel: Text('取消', style: TextStyle(color: Colors.redAccent)),
+                          ),
+                          minDateTime: DateTime.now().add(Duration(days: -1)),
+                          maxDateTime: DateTime.now().add(Duration(days: 30)),
+                          initialDateTime: _initTime,
+                          dateFormat: 'yyyy-MM-dd,H时:m分',
+                          pickerMode: DateTimePickerMode.datetime,
+                          locale: DateTimePickerLocale.en_us,
+                          onClose: () => print(""),
+                          onCancel: () => print('onCancel'),
+                          onChange: (dateTime, List<int> index) {
+                          },
+                          onConfirm: (dateTime, List<int> index) {
+                            setState(() {
+                              dispatchDate = formatDate(dateTime, [yyyy, '-', mm, '-', dd, ' ', HH, ':', nn]);
                             });
-                          }
-                        }).catchError((err) {
-                          print(err);
-                        });
+                          },
+                        );
+                        //showDatePicker(
+                        //    context: context,
+                        //    initialDate: _initTime.isBefore(DateTime.now())?DateTime.now():_initTime,
+                        //    firstDate: DateTime.now().add(new Duration(days: -1)),
+                        //    lastDate: new DateTime.now().add(new Duration(days: 30)),
+                        //    locale: Locale('zh')
+                        //).then((DateTime val) {
+                        //  if (val != null) {
+                        //    showTimePicker(context: (context), initialTime: TimeOfDay.fromDateTime(_initTime)??TimeOfDay.now()).then((TimeOfDay selectTime) {
+                        //      var _time = selectTime.format(context);
+                        //      setState(() {
+                        //        dispatchDate = '${val.toString().split(' ')[0]} ${_time}';
+                        //      });
+                        //    });
+                        //  }
+                        //}).catchError((err) {
+                        //  print(err);
+                        //});
                       },
                     ),
                   )
@@ -887,7 +912,7 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
                     child: new Text(
                       '主管备注：',
                       style: new TextStyle(
-                          fontSize: 20.0,
+                          fontSize: 16.0,
                           fontWeight: FontWeight.w600
                       ),
                     ),
@@ -930,7 +955,7 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
             actions: <Widget>[
             ],
           ),
-          body: _request.isEmpty?new Center(child: SpinKitRotatingPlain(color: Colors.blue),):new Padding(
+          body: _request.isEmpty?new Center(child: SpinKitThreeBounce(color: Colors.lightBlue,)):new Padding(
             padding: EdgeInsets.symmetric(vertical: 5.0),
             child: new Card(
               child: new ListView(
@@ -958,9 +983,9 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
                         }
                       });
                     },
-                    children: _buildExpansion(),
+                    children: _buildExpansion(context),
                   ),
-                  SizedBox(height: 24.0),
+                  SizedBox(height: 20.0),
                   new Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     mainAxisSize: MainAxisSize.max,
@@ -999,7 +1024,7 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
                                           new Container(
                                             width: 100.0,
                                             child: RaisedButton(
-                                              //padding: EdgeInsets.symmetric(vertical: 10.0, horizontal: 20.0),
+                                              //padding: EdgeInsets.symmetric(vertical: 10.0, horizontal: 16.0),
                                               child: Text('确认', style: TextStyle(color: Colors.white),),
                                               shape: RoundedRectangleBorder(
                                                 borderRadius: BorderRadius.circular(6),
@@ -1062,7 +1087,7 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
                                       new Container(
                                         width: 100.0,
                                         child: RaisedButton(
-                                          //padding: EdgeInsets.symmetric(vertical: 10.0, horizontal: 20.0),
+                                          //padding: EdgeInsets.symmetric(vertical: 10.0, horizontal: 16.0),
                                           child: Text('确认', style: TextStyle(color: Colors.white),),
                                           shape: RoundedRectangleBorder(
                                             borderRadius: BorderRadius.circular(6),
@@ -1106,7 +1131,7 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
                       ),
                     ],
                   ),
-                  SizedBox(height: 24.0),
+                  SizedBox(height: 20.0),
                 ],
               ),
             ),

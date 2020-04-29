@@ -12,6 +12,8 @@ import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'dart:typed_data';
 import 'dart:convert';
 import 'package:atoi/utils/constants.dart';
+import 'package:flutter_cupertino_date_picker/flutter_cupertino_date_picker.dart';
+import 'package:date_format/date_format.dart';
 
 /// 设备详情页面类
 class EquipmentDetail extends StatefulWidget {
@@ -53,6 +55,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
 
   bool isSearchState = false;
   bool isAdmin = true;
+  bool netstat = false;
 
   var name = new TextEditingController(),
       equipmentCode = new TextEditingController(),
@@ -440,7 +443,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
             children: <Widget>[
               new Container(
                 width: 150.0,
-                child: Image.memory(Uint8List.fromList(image['content'])),
+                child: BuildWidget.buildPhotoPageList(context, image['content']),
               ),
               new Padding(
                 padding: EdgeInsets.symmetric(horizontal: 0.0),
@@ -506,7 +509,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
     return resp['ResultCode']=='00'?resp['Data']:null;
   }
 
-  String formatDate(String date) {
+  String formatDateString(String date) {
     if (date == 'null') {
       return 'YY-MM-DD';
     } else {
@@ -576,28 +579,28 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
         currentClass = _data['EquipmentLevel']['Name'];
         currentFixed = _data['FixedAsset'] ? '是' : '否';
         currentLevel = _data['AssetLevel']['Name'];
-        validationStartDate = formatDate(_data['ValidityStartDate'].toString());
-        validationEndDate = formatDate(_data['ValidityEndDate'].toString());
+        validationStartDate = formatDateString(_data['ValidityStartDate'].toString());
+        validationEndDate = formatDateString(_data['ValidityEndDate'].toString());
         //installStartDate = formatDate(_data['InstalStartDate'].toString());
         //installEndDate = formatDate(_data['InstalEndDate'].toString());
-        installDate = formatDate(_data['InstalDate'].toString());
-        usageDate = formatDate(_data['UseageDate'].toString());
-        manufacturingDate = formatDate(_data['ManufacturingDate'].toString());
-        purchaseDate = formatDate(_data['PurchaseDate'].toString());
-        scrapDate = formatDate(_data['ScrapDate'].toString());
+        installDate = formatDateString(_data['InstalDate'].toString());
+        usageDate = formatDateString(_data['UseageDate'].toString());
+        manufacturingDate = formatDateString(_data['ManufacturingDate'].toString());
+        purchaseDate = formatDateString(_data['PurchaseDate'].toString());
+        scrapDate = formatDateString(_data['ScrapDate'].toString());
         currentOrigin = _data['OriginType'];
         currentDepartment = _data['Department']['Name'];
         currentCheck = _data['Accepted'] ? '已验收' : '未验收';
-        checkDate = formatDate(_data['AcceptanceDate'].toString());
+        checkDate = formatDateString(_data['AcceptanceDate'].toString());
         currentStatus = _data['UsageStatus']['Name'];
         currentMachine = _data['EquipmentStatus']['Name'];
         currentMandatory = _data['MandatoryTestStatus']['ID'] == 0
             ? '无'
             : _data['MandatoryTestStatus']['Name'];
-        mandatoryDate = formatDate(_data['MandatoryTestDate'].toString());
+        mandatoryDate = formatDateString(_data['MandatoryTestDate'].toString());
         currentRecall = _data['RecallFlag'] ? '是' : '否';
         currentServiceScope = _data['ServiceScope']?"是":"否";
-        recallDate = formatDate(_data['RecallDate'].toString());
+        recallDate = formatDateString(_data['RecallDate'].toString());
         currentPatrolPeriod = _data['PatrolType']['Name'] == ''
             ? '无'
             : _data['PatrolType']['Name'];
@@ -688,6 +691,10 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
     }
   }
 
+  List<FocusNode> _focusEquip = new List(10).map((item) {
+    return new FocusNode();
+  }).toList();
+
   Future<Null> saveEquipment() async {
     if (name.text.isEmpty) {
       showDialog(
@@ -695,7 +702,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
         builder: (context) => CupertinoAlertDialog(
           title: new Text('设备名称不可为空'),
         )
-      );
+      ).then((result) => FocusScope.of(context).requestFocus(_focusEquip[0]));
       return;
     }
     if (equipmentCode.text.isEmpty) {
@@ -704,7 +711,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
           builder: (context) => CupertinoAlertDialog(
             title: new Text('设备型号不可为空'),
           )
-      );
+      ).then((result) => FocusScope.of(context).requestFocus(_focusEquip[1]));
       return;
     }
     if (serialCode.text.isEmpty) {
@@ -713,7 +720,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
           builder: (context) => CupertinoAlertDialog(
             title: new Text('设备序列号不可为空'),
           )
-      );
+      ).then((result) => FocusScope.of(context).requestFocus(_focusEquip[2]));
       return;
     }
     if (manufacturer == null) {
@@ -731,7 +738,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
           builder: (context) => CupertinoAlertDialog(
             title: new Text('标准响应时间不可为空'),
           )
-      );
+      ).then((result) => FocusScope.of(context).requestFocus(_focusEquip[3]));
       return;
     }
     var _vStart = DateTime.tryParse(validationStartDate);
@@ -751,7 +758,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
           builder: (context) => CupertinoAlertDialog(
             title: new Text('资产编号不可为空'),
           )
-      );
+      ).then((result) => FocusScope.of(context).requestFocus(_focusEquip[4]));
       return;
     }
     if (purchaseDate == 'YY-MM-DD') {
@@ -769,7 +776,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
           builder: (context) => CupertinoAlertDialog(
             title: new Text('采购金额需小于1亿'),
           )
-      );
+      ).then((result) => FocusScope.of(context).requestFocus(_focusEquip[5]));
       return;
     }
     if (currentMachine == '已报废' && scrapDate == 'YY-MM-DD') {
@@ -787,7 +794,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
           builder: (context) => CupertinoAlertDialog(
             title: new Text('巡检周期不可为空'),
           )
-      );
+      ).then((result) => FocusScope.of(context).requestFocus(_focusEquip[6]));
       return;
     }
     if (int.tryParse(patrolPeriod.text.toString()) != null && int.tryParse(patrolPeriod.text.toString()) <= 0 && currentPatrolPeriod != '无') {
@@ -796,7 +803,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
           builder: (context) => CupertinoAlertDialog(
             title: new Text('巡检周期需大于0'),
           )
-      );
+      ).then((result) => FocusScope.of(context).requestFocus(_focusEquip[6]));
       return;
     }
     if (currentMaintainPeriod != '无' && maintainPeriod.text.isEmpty) {
@@ -805,7 +812,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
           builder: (context) => CupertinoAlertDialog(
             title: new Text('保养周期不可为空'),
           )
-      );
+      ).then((result) => FocusScope.of(context).requestFocus(_focusEquip[7]));
       return;
     }
     if (int.tryParse(maintainPeriod.text.toString()) !=null && int.tryParse(maintainPeriod.text.toString()) <= 0 && currentMaintainPeriod !='无') {
@@ -814,25 +821,25 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
           builder: (context) => CupertinoAlertDialog(
             title: new Text('保养周期需大于0'),
           )
-      );
+      ).then((result) => FocusScope.of(context).requestFocus(_focusEquip[7]));
       return;
     }
     if (currentCorrectionPeriod != '无' && correctionPeriod.text.isEmpty) {
       showDialog(
           context: context,
           builder: (context) => CupertinoAlertDialog(
-            title: new Text('校正周期不可为空'),
+            title: new Text('校准周期不可为空'),
           )
-      );
+      ).then((result) => FocusScope.of(context).requestFocus(_focusEquip[8]));
       return;
     }
     if (int.tryParse(correctionPeriod.text.toString()) != null && int.tryParse(correctionPeriod.text.toString()) <= 0 && currentCorrectionPeriod != '无') {
       showDialog(
           context: context,
           builder: (context) => CupertinoAlertDialog(
-            title: new Text('校正周期需大于0'),
+            title: new Text('校准周期需大于0'),
           )
-      );
+      ).then((result) => FocusScope.of(context).requestFocus(_focusEquip[8]));
       return;
     }
     if (usageDate == 'YY-MM-DD') {
@@ -971,6 +978,9 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
     } else {
       _data['ID'] = 0;
     }
+    setState(() {
+      netstat = true;
+    });
     var resp = await HttpRequest.request('/Equipment/SaveEquipment',
         method: HttpRequest.POST, data: {"userID": _userId, "info": _data});
     if (resp['ResultCode'] == '00') {
@@ -986,27 +996,53 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
                 title: new Text(resp['ResultMessage']),
               ));
     }
+    setState(() {
+      netstat = false;
+    });
   }
 
   void switchAsset(value) {
     print(value);
   }
 
-  Future<String> pickDate({String initialTime}) async {
+  Future<Null> pickDate<T>(BuildContext context, initialTime) async {
     DateTime _time;
     _time = DateTime.tryParse(initialTime)??DateTime.now();
-    var val = await showDatePicker(
-        context: context,
-        initialDate: _time,
-        firstDate:
-            new DateTime.now().subtract(new Duration(days: 3650)), // 减 30 天
-        lastDate: new DateTime.now().add(new Duration(days: 3650)), // 加 30 天
-        locale: Locale('zh'));
-    return val==null?initialTime:val.toString().split(' ')[0];
+    DatePicker.showDatePicker(
+      context,
+      pickerTheme: DateTimePickerTheme(
+        showTitle: true,
+        confirm: Text('确认', style: TextStyle(color: Colors.blueAccent)),
+        cancel: Text('取消', style: TextStyle(color: Colors.redAccent)),
+      ),
+      minDateTime: DateTime.parse('2000-01-01'),
+      maxDateTime: DateTime.parse('2030-01-01'),
+      initialDateTime: _time,
+      dateFormat: 'yyyy-MM-dd',
+      locale: DateTimePickerLocale.en_us,
+      onClose: () => print(""),
+      onCancel: () => print('onCancel'),
+      onChange: (dateTime, List<int> index) {
+      },
+      onConfirm: (dateTime, List<int> index) {
+        var _date = formatDate(dateTime, [yyyy, '-', mm, '-', dd]);
+        setState(() {
+          initialTime = _date;
+        });
+      },
+    );
+    //var val = await showDatePicker(
+    //    context: context,
+    //    initialDate: _time,
+    //    firstDate:
+    //        new DateTime.now().subtract(new Duration(days: 3650)), // 减 30 天
+    //    lastDate: new DateTime.now().add(new Duration(days: 3650)), // 加 30 天
+    //    locale: Locale('zh'));
+    //return val==null?initialTime:val.toString().split(' ')[0];
   }
 
 
-  List<ExpansionPanel> buildExpansion() {
+  List<ExpansionPanel> buildExpansion(BuildContext context) {
     List<ExpansionPanel> _list = [];
     //device info
     _list.add(ExpansionPanel(
@@ -1020,7 +1056,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
               title: Text(
                 '设备信息',
                 style:
-                    new TextStyle(fontSize: 22.0, fontWeight: FontWeight.w400),
+                    new TextStyle(fontSize: 20.0, fontWeight: FontWeight.w400),
               ));
         },
         body: new Padding(
@@ -1028,9 +1064,9 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
           child: new Column(
             children: <Widget>[
               BuildWidget.buildRow('系统编号', oid),
-              widget.editable?BuildWidget.buildInput('设备名称', name, lines: 1):BuildWidget.buildRow('设备名称', name.text),
-              widget.editable?BuildWidget.buildInput('设备型号', equipmentCode, lines: 1):BuildWidget.buildRow('设备型号', equipmentCode.text),
-              widget.editable?BuildWidget.buildInput('设备序列号', serialCode, lines: 1):BuildWidget.buildRow('设备序列号', serialCode.text),
+              widget.editable?BuildWidget.buildInput('设备名称', name, lines: 1, focusNode: _focusEquip[0]):BuildWidget.buildRow('设备名称', name.text),
+              widget.editable?BuildWidget.buildInput('设备型号', equipmentCode, lines: 1, focusNode: _focusEquip[1]):BuildWidget.buildRow('设备型号', equipmentCode.text),
+              widget.editable?BuildWidget.buildInput('设备序列号', serialCode, lines: 1, focusNode: _focusEquip[2]):BuildWidget.buildRow('设备序列号', serialCode.text),
               widget.editable?new Padding(
                 padding: EdgeInsets.symmetric(vertical: 5.0),
                 child: new Row(
@@ -1044,7 +1080,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
                           new Text(
                             '设备厂商',
                             style: new TextStyle(
-                                fontSize: 20.0, fontWeight: FontWeight.w600),
+                                fontSize: 16.0, fontWeight: FontWeight.w600),
                           )
                         ],
                       ),
@@ -1054,7 +1090,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
                       child: new Text(
                         '：',
                         style: new TextStyle(
-                          fontSize: 20.0,
+                          fontSize: 16.0,
                           fontWeight: FontWeight.w600,
                         ),
                       ),
@@ -1064,7 +1100,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
                         child: new Text(
                           manufacturer == null ? '' : manufacturer['Name'],
                           style: new TextStyle(
-                              fontSize: 20.0,
+                              fontSize: 16.0,
                               fontWeight: FontWeight.w400,
                               color: Colors.black54),
                         )),
@@ -1101,7 +1137,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
                           new Text(
                             '标准响应时间',
                             style: new TextStyle(
-                                fontSize: 20.0, fontWeight: FontWeight.w600),
+                                fontSize: 16.0, fontWeight: FontWeight.w600),
                           )
                         ],
                       ),
@@ -1111,7 +1147,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
                       child: new Text(
                         '：',
                         style: new TextStyle(
-                          fontSize: 20.0,
+                          fontSize: 16.0,
                           fontWeight: FontWeight.w600,
                         ),
                       ),
@@ -1122,6 +1158,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
                         controller: responseTime,
                         maxLines: 1,
                         maxLength: 3,
+                        focusNode: _focusEquip[3],
                         keyboardType: TextInputType.numberWithOptions(),
                         decoration: InputDecoration(
                           fillColor: Color(0xfff0f0f0),
@@ -1134,7 +1171,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
                         child: new Text(
                           ' 分',
                           style: new TextStyle(
-                              fontSize: 20.0,
+                              fontSize: 16.0,
                               fontWeight: FontWeight.w600
                           ),
                         )
@@ -1163,7 +1200,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
                           new Text(
                             '出厂日期',
                             style: new TextStyle(
-                                fontSize: 20.0, fontWeight: FontWeight.w600),
+                                fontSize: 16.0, fontWeight: FontWeight.w600),
                           )
                         ],
                       ),
@@ -1173,7 +1210,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
                       child: new Text(
                         '：',
                         style: new TextStyle(
-                          fontSize: 20.0,
+                          fontSize: 16.0,
                           fontWeight: FontWeight.w600,
                         ),
                       ),
@@ -1183,7 +1220,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
                       child: new Text(
                         manufacturingDate,
                         style: new TextStyle(
-                            fontSize: 20.0,
+                            fontSize: 16.0,
                             fontWeight: FontWeight.w400,
                             color: Colors.black54
                         ),
@@ -1194,10 +1231,30 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
                       child: new IconButton(
                           icon: Icon(Icons.calendar_today, color: AppConstants.AppColors['btn_main'],),
                           onPressed: () async {
-                            var _date = await pickDate(initialTime: manufacturingDate);
-                            setState(() {
-                              manufacturingDate = _date;
-                            });
+                            var _time = DateTime.tryParse(manufacturingDate)??DateTime.now();
+                            DatePicker.showDatePicker(
+                              context,
+                              pickerTheme: DateTimePickerTheme(
+                                showTitle: true,
+                                confirm: Text('确认', style: TextStyle(color: Colors.blueAccent)),
+                                cancel: Text('取消', style: TextStyle(color: Colors.redAccent)),
+                              ),
+                              minDateTime: DateTime.now().add(Duration(days: -7300)),
+                              maxDateTime: DateTime.parse('2030-01-01'),
+                              initialDateTime: _time,
+                              dateFormat: 'yyyy-MM-dd',
+                              locale: DateTimePickerLocale.en_us,
+                              onClose: () => print(""),
+                              onCancel: () => print('onCancel'),
+                              onChange: (dateTime, List<int> index) {
+                              },
+                              onConfirm: (dateTime, List<int> index) {
+                                var _date = formatDate(dateTime, [yyyy, '-', mm, '-', dd]);
+                                setState(() {
+                                  manufacturingDate = _date;
+                                });
+                              },
+                            );
                           }),
                     ),
                   ],
@@ -1219,7 +1276,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
               title: Text(
                 '资产信息',
                 style:
-                    new TextStyle(fontSize: 22.0, fontWeight: FontWeight.w400),
+                    new TextStyle(fontSize: 20.0, fontWeight: FontWeight.w400),
               ));
         },
         body: new Padding(
@@ -1228,7 +1285,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
             children: <Widget>[
               widget.editable?BuildWidget.buildRadio('固定资产', isFixed, currentFixed, changeValue):BuildWidget.buildRow('固定资产', currentFixed),
               widget.editable?BuildWidget.buildDropdown('资产等级', currentLevel, dropdownLevel, changeLevel):BuildWidget.buildRow('资产等级', currentLevel),
-              widget.editable?BuildWidget.buildInput('资产编号', assetCode, lines: 1):BuildWidget.buildRow('资产编号', assetCode.text),
+              widget.editable?BuildWidget.buildInput('资产编号', assetCode, lines: 1, focusNode: _focusEquip[4]):BuildWidget.buildRow('资产编号', assetCode.text),
               widget.editable?BuildWidget.buildInput('折旧年限(年)', depreciationYears, lines: 1, maxLength: 3, inputType: TextInputType.number):BuildWidget.buildRow('折旧年限', depreciationYears.text),
               widget.editable?new Padding(
                 padding: EdgeInsets.symmetric(vertical: 5.0),
@@ -1243,7 +1300,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
                           new Text(
                             '注册证有效日期',
                             style: new TextStyle(
-                                fontSize: 20.0, fontWeight: FontWeight.w600),
+                                fontSize: 16.0, fontWeight: FontWeight.w600),
                           )
                         ],
                       ),
@@ -1253,7 +1310,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
                       child: new Text(
                         '：',
                         style: new TextStyle(
-                          fontSize: 20.0,
+                          fontSize: 16.0,
                           fontWeight: FontWeight.w600,
                         ),
                       ),
@@ -1269,7 +1326,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
                                 child: new Text(
                                   validationStartDate,
                                   style: new TextStyle(
-                                      fontSize: 20.0,
+                                      fontSize: 16.0,
                                       fontWeight: FontWeight.w400,
                                       color: Colors.black54
                                   ),
@@ -1280,10 +1337,30 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
                                 child: new IconButton(
                                     icon: Icon(Icons.calendar_today, color: AppConstants.AppColors['btn_main'],),
                                     onPressed: () async {
-                                      var _date = await pickDate(initialTime: validationStartDate);
-                                      setState(() {
-                                        validationStartDate = _date;
-                                      });
+                                      var _time = DateTime.tryParse(validationStartDate)??DateTime.now();
+                                      DatePicker.showDatePicker(
+                                        context,
+                                        pickerTheme: DateTimePickerTheme(
+                                          showTitle: true,
+                                          confirm: Text('确认', style: TextStyle(color: Colors.blueAccent)),
+                                          cancel: Text('取消', style: TextStyle(color: Colors.redAccent)),
+                                        ),
+                                        minDateTime: DateTime.now().add(Duration(days: -7300)),
+                                        maxDateTime: DateTime.parse('2030-01-01'),
+                                        initialDateTime: _time,
+                                        dateFormat: 'yyyy-MM-dd',
+                                        locale: DateTimePickerLocale.en_us,
+                                        onClose: () => print(""),
+                                        onCancel: () => print('onCancel'),
+                                        onChange: (dateTime, List<int> index) {
+                                        },
+                                        onConfirm: (dateTime, List<int> index) {
+                                          var _date = formatDate(dateTime, [yyyy, '-', mm, '-', dd]);
+                                          setState(() {
+                                            validationStartDate = _date;
+                                          });
+                                        },
+                                      );
                                     }
                                 ),
                               )
@@ -1296,7 +1373,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
                                 child: new Text(
                                   validationEndDate,
                                   style: new TextStyle(
-                                      fontSize: 20.0,
+                                      fontSize: 16.0,
                                       fontWeight: FontWeight.w400,
                                       color: Colors.black54
                                   ),
@@ -1307,18 +1384,41 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
                                 child: new IconButton(
                                     icon: Icon(Icons.calendar_today, color: AppConstants.AppColors['btn_main'],),
                                     onPressed: () async {
-                                      var _date = await pickDate(initialTime: validationEndDate);
-                                      var _start = DateTime.tryParse(validationStartDate);
-                                      var _end = DateTime.tryParse(_date);
-                                      if (_start!=null && _end!=null && _end.isBefore(_start)) {
-                                        showDialog(context: context, builder: (context) => CupertinoAlertDialog(
-                                          title: new Text('有效日期格式有误'),
-                                        ));
-                                      } else {
-                                        setState(() {
-                                          validationEndDate = _date;
-                                        });
-                                      }
+                                      var _time = DateTime.tryParse(validationEndDate)??DateTime.now();
+                                      DatePicker.showDatePicker(
+                                        context,
+                                        pickerTheme: DateTimePickerTheme(
+                                          showTitle: true,
+                                          confirm: Text('确认', style: TextStyle(color: Colors.blueAccent)),
+                                          cancel: Text('取消', style: TextStyle(color: Colors.redAccent)),
+                                        ),
+                                        minDateTime: DateTime.now().add(Duration(days: -7300)),
+                                        maxDateTime: DateTime.parse('2030-01-01'),
+                                        initialDateTime: _time,
+                                        dateFormat: 'yyyy-MM-dd',
+                                        locale: DateTimePickerLocale.en_us,
+                                        onClose: () => print(""),
+                                        onCancel: () => print('onCancel'),
+                                        onChange: (dateTime, List<int> index) {
+                                        },
+                                        onConfirm: (dateTime, List<int> index) {
+                                          var _date = formatDate(dateTime, [yyyy, '-', mm, '-', dd]);
+                                          setState(() {
+                                            validationEndDate = _date;
+                                          });
+                                        },
+                                      );
+                                      //var _start = DateTime.tryParse(validationStartDate);
+                                      //var _end = DateTime.tryParse(_date);
+                                      //if (_start!=null && _end!=null && _end.isBefore(_start)) {
+                                      //  showDialog(context: context, builder: (context) => CupertinoAlertDialog(
+                                      //    title: new Text('有效日期格式有误'),
+                                      //  ));
+                                      //} else {
+                                      //  setState(() {
+                                      //    validationEndDate = _date;
+                                      //  });
+                                      //}
                                     }
                                 ),
                               )
@@ -1346,7 +1446,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
               title: Text(
                 '采购信息',
                 style:
-                    new TextStyle(fontSize: 22.0, fontWeight: FontWeight.w400),
+                    new TextStyle(fontSize: 20.0, fontWeight: FontWeight.w400),
               ));
         },
         body: new Padding(
@@ -1368,7 +1468,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
                           new Text(
                             '采购日期',
                             style: new TextStyle(
-                                fontSize: 20.0, fontWeight: FontWeight.w600),
+                                fontSize: 16.0, fontWeight: FontWeight.w600),
                           )
                         ],
                       ),
@@ -1378,7 +1478,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
                       child: new Text(
                         '：',
                         style: new TextStyle(
-                          fontSize: 20.0,
+                          fontSize: 16.0,
                           fontWeight: FontWeight.w600,
                         ),
                       ),
@@ -1388,7 +1488,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
                       child: new Text(
                         purchaseDate,
                         style: new TextStyle(
-                            fontSize: 20.0,
+                            fontSize: 16.0,
                             fontWeight: FontWeight.w400,
                             color: Colors.black54
                         ),
@@ -1399,10 +1499,30 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
                       child: new IconButton(
                           icon: Icon(Icons.calendar_today, color: AppConstants.AppColors['btn_main'],),
                           onPressed: () async {
-                            var _date = await pickDate(initialTime: purchaseDate);
-                            setState(() {
-                              purchaseDate = _date;
-                            });
+                            var _time = DateTime.tryParse(purchaseDate)??DateTime.now();
+                            DatePicker.showDatePicker(
+                              context,
+                              pickerTheme: DateTimePickerTheme(
+                                showTitle: true,
+                                confirm: Text('确认', style: TextStyle(color: Colors.blueAccent)),
+                                cancel: Text('取消', style: TextStyle(color: Colors.redAccent)),
+                              ),
+                              minDateTime: DateTime.now().add(Duration(days: -7300)),
+                              maxDateTime: DateTime.parse('2030-01-01'),
+                              initialDateTime: _time,
+                              dateFormat: 'yyyy-MM-dd',
+                              locale: DateTimePickerLocale.en_us,
+                              onClose: () => print(""),
+                              onCancel: () => print('onCancel'),
+                              onChange: (dateTime, List<int> index) {
+                              },
+                              onConfirm: (dateTime, List<int> index) {
+                                var _date = formatDate(dateTime, [yyyy, '-', mm, '-', dd]);
+                                setState(() {
+                                  purchaseDate = _date;
+                                });
+                              },
+                            );
                           }),
                     ),
                   ],
@@ -1421,7 +1541,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
                           new Text(
                             '经销商',
                             style: new TextStyle(
-                                fontSize: 20.0, fontWeight: FontWeight.w600),
+                                fontSize: 16.0, fontWeight: FontWeight.w600),
                           )
                         ],
                       ),
@@ -1431,7 +1551,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
                       child: new Text(
                         '：',
                         style: new TextStyle(
-                          fontSize: 20.0,
+                          fontSize: 16.0,
                           fontWeight: FontWeight.w600,
                         ),
                       ),
@@ -1441,7 +1561,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
                         child: new Text(
                           supplier == null ? '' : supplier['Name'],
                           style: new TextStyle(
-                              fontSize: 20.0,
+                              fontSize: 16.0,
                               fontWeight: FontWeight.w400,
                               color: Colors.black54),
                         )),
@@ -1465,7 +1585,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
                   ],
                 ),
               ):BuildWidget.buildRow('经销商', supplier==null?'':supplier['Name']),
-              widget.editable?BuildWidget.buildInput('采购金额(元)', purchaseAmount, lines: 1, maxLength: 11, inputType: TextInputType.numberWithOptions(decimal: true)):BuildWidget.buildRow('采购金额（元）', purchaseAmount.text),
+              widget.editable?BuildWidget.buildInput('采购金额(元)', purchaseAmount, lines: 1, maxLength: 11, inputType: TextInputType.numberWithOptions(decimal: true), focusNode: _focusEquip[5]):BuildWidget.buildRow('采购金额（元）', purchaseAmount.text),
               widget.editable?BuildWidget.buildRadio('设备产地', origin, currentOrigin, changeOrigin):BuildWidget.buildRow('设备产地', currentOrigin),
             ],
           ),
@@ -1483,7 +1603,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
               title: Text(
                 '使用状态',
                 style:
-                    new TextStyle(fontSize: 22.0, fontWeight: FontWeight.w400),
+                    new TextStyle(fontSize: 20.0, fontWeight: FontWeight.w400),
               ));
         },
         body: new Padding(
@@ -1506,7 +1626,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
                           new Text(
                             '安装日期',
                             style: new TextStyle(
-                                fontSize: 20.0, fontWeight: FontWeight.w600),
+                                fontSize: 16.0, fontWeight: FontWeight.w600),
                           )
                         ],
                       ),
@@ -1516,7 +1636,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
                       child: new Text(
                         '：',
                         style: new TextStyle(
-                          fontSize: 20.0,
+                          fontSize: 16.0,
                           fontWeight: FontWeight.w600,
                         ),
                       ),
@@ -1526,7 +1646,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
                       child: new Text(
                         installDate,
                         style: new TextStyle(
-                            fontSize: 20.0,
+                            fontSize: 16.0,
                             fontWeight: FontWeight.w400,
                             color: Colors.black54
                         ),
@@ -1537,10 +1657,30 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
                       child: new IconButton(
                           icon: Icon(Icons.calendar_today, color: AppConstants.AppColors['btn_main'],),
                           onPressed: () async {
-                            var _date = await pickDate(initialTime: installDate);
-                            setState(() {
-                              installDate = _date;
-                            });
+                            var _time = DateTime.tryParse(installDate)??DateTime.now();
+                            DatePicker.showDatePicker(
+                              context,
+                              pickerTheme: DateTimePickerTheme(
+                                showTitle: true,
+                                confirm: Text('确认', style: TextStyle(color: Colors.blueAccent)),
+                                cancel: Text('取消', style: TextStyle(color: Colors.redAccent)),
+                              ),
+                              minDateTime: DateTime.now().add(Duration(days: -7300)),
+                              maxDateTime: DateTime.parse('2030-01-01'),
+                              initialDateTime: _time,
+                              dateFormat: 'yyyy-MM-dd',
+                              locale: DateTimePickerLocale.en_us,
+                              onClose: () => print(""),
+                              onCancel: () => print('onCancel'),
+                              onChange: (dateTime, List<int> index) {
+                              },
+                              onConfirm: (dateTime, List<int> index) {
+                                var _date = formatDate(dateTime, [yyyy, '-', mm, '-', dd]);
+                                setState(() {
+                                  installDate = _date;
+                                });
+                              },
+                            );
                           }),
                     ),
                   ],
@@ -1559,7 +1699,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
                           new Text(
                             '启用日期',
                             style: new TextStyle(
-                                fontSize: 20.0, fontWeight: FontWeight.w600),
+                                fontSize: 16.0, fontWeight: FontWeight.w600),
                           )
                         ],
                       ),
@@ -1569,7 +1709,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
                       child: new Text(
                         '：',
                         style: new TextStyle(
-                          fontSize: 20.0,
+                          fontSize: 16.0,
                           fontWeight: FontWeight.w600,
                         ),
                       ),
@@ -1579,7 +1719,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
                       child: new Text(
                         usageDate,
                         style: new TextStyle(
-                            fontSize: 20.0,
+                            fontSize: 16.0,
                             fontWeight: FontWeight.w400,
                             color: Colors.black54
                         ),
@@ -1590,10 +1730,30 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
                       child: new IconButton(
                           icon: Icon(Icons.calendar_today, color: AppConstants.AppColors['btn_main'],),
                           onPressed: () async {
-                            var _date = await pickDate(initialTime: usageDate);
-                            setState(() {
-                              usageDate = _date;
-                            });
+                            var _time = DateTime.tryParse(usageDate)??DateTime.now();
+                            DatePicker.showDatePicker(
+                              context,
+                              pickerTheme: DateTimePickerTheme(
+                                showTitle: true,
+                                confirm: Text('确认', style: TextStyle(color: Colors.blueAccent)),
+                                cancel: Text('取消', style: TextStyle(color: Colors.redAccent)),
+                              ),
+                              minDateTime: DateTime.now().add(Duration(days: -7300)),
+                              maxDateTime: DateTime.parse('2030-01-01'),
+                              initialDateTime: _time,
+                              dateFormat: 'yyyy-MM-dd',
+                              locale: DateTimePickerLocale.en_us,
+                              onClose: () => print(""),
+                              onCancel: () => print('onCancel'),
+                              onChange: (dateTime, List<int> index) {
+                              },
+                              onConfirm: (dateTime, List<int> index) {
+                                var _date = formatDate(dateTime, [yyyy, '-', mm, '-', dd]);
+                                setState(() {
+                                  usageDate = _date;
+                                });
+                              },
+                            );
                           }),
                     ),
                   ],
@@ -1612,7 +1772,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
               //            new Text(
               //              '安装日期',
               //              style: new TextStyle(
-              //                  fontSize: 20.0, fontWeight: FontWeight.w600),
+              //                  fontSize: 16.0, fontWeight: FontWeight.w600),
               //            )
               //          ],
               //        ),
@@ -1622,7 +1782,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
               //        child: new Text(
               //          '：',
               //          style: new TextStyle(
-              //            fontSize: 20.0,
+              //            fontSize: 16.0,
               //            fontWeight: FontWeight.w600,
               //          ),
               //        ),
@@ -1638,7 +1798,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
               //                  child: new Text(
               //                    installStartDate,
               //                    style: new TextStyle(
-              //                        fontSize: 20.0,
+              //                        fontSize: 16.0,
               //                        fontWeight: FontWeight.w400,
               //                        color: Colors.black54
               //                    ),
@@ -1665,7 +1825,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
               //                  child: new Text(
               //                    installEndDate,
               //                    style: new TextStyle(
-              //                        fontSize: 20.0,
+              //                        fontSize: 16.0,
               //                        fontWeight: FontWeight.w400,
               //                        color: Colors.black54
               //                    ),
@@ -1713,7 +1873,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
                           new Text(
                             '验收时间',
                             style: new TextStyle(
-                                fontSize: 20.0, fontWeight: FontWeight.w600),
+                                fontSize: 16.0, fontWeight: FontWeight.w600),
                           )
                         ],
                       ),
@@ -1723,7 +1883,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
                       child: new Text(
                         '：',
                         style: new TextStyle(
-                          fontSize: 20.0,
+                          fontSize: 16.0,
                           fontWeight: FontWeight.w600,
                         ),
                       ),
@@ -1733,7 +1893,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
                       child: new Text(
                         checkDate,
                         style: new TextStyle(
-                            fontSize: 20.0,
+                            fontSize: 16.0,
                             fontWeight: FontWeight.w400,
                             color: Colors.black54
                         ),
@@ -1744,10 +1904,30 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
                       child: new IconButton(
                           icon: Icon(Icons.calendar_today, color: AppConstants.AppColors['btn_main'],),
                           onPressed: () async {
-                            var _date = await pickDate(initialTime: checkDate);
-                            setState(() {
-                              checkDate = _date;
-                            });
+                            var _time = DateTime.tryParse(checkDate)??DateTime.now();
+                            DatePicker.showDatePicker(
+                              context,
+                              pickerTheme: DateTimePickerTheme(
+                                showTitle: true,
+                                confirm: Text('确认', style: TextStyle(color: Colors.blueAccent)),
+                                cancel: Text('取消', style: TextStyle(color: Colors.redAccent)),
+                              ),
+                              minDateTime: DateTime.now().add(Duration(days: -7300)),
+                              maxDateTime: DateTime.parse('2030-01-01'),
+                              initialDateTime: _time,
+                              dateFormat: 'yyyy-MM-dd',
+                              locale: DateTimePickerLocale.en_us,
+                              onClose: () => print(""),
+                              onCancel: () => print('onCancel'),
+                              onChange: (dateTime, List<int> index) {
+                              },
+                              onConfirm: (dateTime, List<int> index) {
+                                var _date = formatDate(dateTime, [yyyy, '-', mm, '-', dd]);
+                                setState(() {
+                                  checkDate = _date;
+                                });
+                              },
+                            );
                           }),
                     ),
                   ],
@@ -1770,7 +1950,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
                           new Text(
                             '报废时间',
                             style: new TextStyle(
-                                fontSize: 20.0, fontWeight: FontWeight.w600),
+                                fontSize: 16.0, fontWeight: FontWeight.w600),
                           )
                         ],
                       ),
@@ -1780,7 +1960,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
                       child: new Text(
                         '：',
                         style: new TextStyle(
-                          fontSize: 20.0,
+                          fontSize: 16.0,
                           fontWeight: FontWeight.w600,
                         ),
                       ),
@@ -1790,7 +1970,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
                       child: new Text(
                         scrapDate,
                         style: new TextStyle(
-                            fontSize: 20.0,
+                            fontSize: 16.0,
                             fontWeight: FontWeight.w400,
                             color: Colors.black54
                         ),
@@ -1801,10 +1981,30 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
                       child: new IconButton(
                           icon: Icon(Icons.calendar_today, color: AppConstants.AppColors['btn_main'],),
                           onPressed: () async {
-                            var _date = await pickDate(initialTime: scrapDate);
-                            setState(() {
-                              scrapDate = _date;
-                            });
+                            var _time = DateTime.tryParse(scrapDate)??DateTime.now();
+                            DatePicker.showDatePicker(
+                              context,
+                              pickerTheme: DateTimePickerTheme(
+                                showTitle: true,
+                                confirm: Text('确认', style: TextStyle(color: Colors.blueAccent)),
+                                cancel: Text('取消', style: TextStyle(color: Colors.redAccent)),
+                              ),
+                              minDateTime: DateTime.now().add(Duration(days: -7300)),
+                              maxDateTime: DateTime.parse('2030-01-01'),
+                              initialDateTime: _time,
+                              dateFormat: 'yyyy-MM-dd',
+                              locale: DateTimePickerLocale.en_us,
+                              onClose: () => print(""),
+                              onCancel: () => print('onCancel'),
+                              onChange: (dateTime, List<int> index) {
+                              },
+                              onConfirm: (dateTime, List<int> index) {
+                                var _date = formatDate(dateTime, [yyyy, '-', mm, '-', dd]);
+                                setState(() {
+                                  scrapDate = _date;
+                                });
+                              },
+                            );
                           }),
                     ),
                   ],
@@ -1825,7 +2025,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
                           new Text(
                             '强检时间',
                             style: new TextStyle(
-                                fontSize: 20.0, fontWeight: FontWeight.w600),
+                                fontSize: 16.0, fontWeight: FontWeight.w600),
                           )
                         ],
                       ),
@@ -1835,7 +2035,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
                       child: new Text(
                         '：',
                         style: new TextStyle(
-                          fontSize: 20.0,
+                          fontSize: 16.0,
                           fontWeight: FontWeight.w600,
                         ),
                       ),
@@ -1845,7 +2045,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
                       child: new Text(
                         mandatoryDate,
                         style: new TextStyle(
-                            fontSize: 20.0,
+                            fontSize: 16.0,
                             fontWeight: FontWeight.w400,
                             color: Colors.black54
                         ),
@@ -1856,10 +2056,30 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
                       child: new IconButton(
                           icon: Icon(Icons.calendar_today, color: AppConstants.AppColors['btn_main'],),
                           onPressed: () async {
-                            var _date = await pickDate(initialTime: mandatoryDate);
-                            setState(() {
-                              mandatoryDate = _date;
-                            });
+                            var _time = DateTime.tryParse(mandatoryDate)??DateTime.now();
+                            DatePicker.showDatePicker(
+                              context,
+                              pickerTheme: DateTimePickerTheme(
+                                showTitle: true,
+                                confirm: Text('确认', style: TextStyle(color: Colors.blueAccent)),
+                                cancel: Text('取消', style: TextStyle(color: Colors.redAccent)),
+                              ),
+                              minDateTime: DateTime.now().add(Duration(days: -7300)),
+                              maxDateTime: DateTime.parse('2030-01-01'),
+                              initialDateTime: _time,
+                              dateFormat: 'yyyy-MM-dd',
+                              locale: DateTimePickerLocale.en_us,
+                              onClose: () => print(""),
+                              onCancel: () => print('onCancel'),
+                              onChange: (dateTime, List<int> index) {
+                              },
+                              onConfirm: (dateTime, List<int> index) {
+                                var _date = formatDate(dateTime, [yyyy, '-', mm, '-', dd]);
+                                setState(() {
+                                  mandatoryDate = _date;
+                                });
+                              },
+                            );
                           }),
                     ),
                   ],
@@ -1879,7 +2099,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
                           new Text(
                             '召回时间',
                             style: new TextStyle(
-                                fontSize: 20.0, fontWeight: FontWeight.w600),
+                                fontSize: 16.0, fontWeight: FontWeight.w600),
                           )
                         ],
                       ),
@@ -1889,7 +2109,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
                       child: new Text(
                         '：',
                         style: new TextStyle(
-                          fontSize: 20.0,
+                          fontSize: 16.0,
                           fontWeight: FontWeight.w600,
                         ),
                       ),
@@ -1899,7 +2119,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
                       child: new Text(
                         recallDate,
                         style: new TextStyle(
-                            fontSize: 20.0,
+                            fontSize: 16.0,
                             fontWeight: FontWeight.w400,
                             color: Colors.black54
                         ),
@@ -1910,30 +2130,50 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
                       child: new IconButton(
                           icon: Icon(Icons.calendar_today, color: AppConstants.AppColors['btn_main'],),
                           onPressed: () async {
-                            var _date = await pickDate(initialTime: recallDate);
-                            setState(() {
-                              recallDate = _date;
-                            });
+                            var _time = DateTime.tryParse(recallDate)??DateTime.now();
+                            DatePicker.showDatePicker(
+                              context,
+                              pickerTheme: DateTimePickerTheme(
+                                showTitle: true,
+                                confirm: Text('确认', style: TextStyle(color: Colors.blueAccent)),
+                                cancel: Text('取消', style: TextStyle(color: Colors.redAccent)),
+                              ),
+                              minDateTime: DateTime.now().add(Duration(days: -7300)),
+                              maxDateTime: DateTime.parse('2030-01-01'),
+                              initialDateTime: _time,
+                              dateFormat: 'yyyy-MM-dd',
+                              locale: DateTimePickerLocale.en_us,
+                              onClose: () => print(""),
+                              onCancel: () => print('onCancel'),
+                              onChange: (dateTime, List<int> index) {
+                              },
+                              onConfirm: (dateTime, List<int> index) {
+                                var _date = formatDate(dateTime, [yyyy, '-', mm, '-', dd]);
+                                setState(() {
+                                  recallDate = _date;
+                                });
+                              },
+                            );
                           }),
                     ),
                   ],
                 ),
               ):BuildWidget.buildRow('召回时间', displayDate(recallDate)),
-              widget.editable?BuildWidget.buildDropdownWithInput('巡检周期', patrolPeriod, currentPatrolPeriod, dropdownPatrolPeriod, changePatrolPeriod, inputType: TextInputType.number):BuildWidget.buildRow('巡检周期', currentPatrolPeriod=='无'?'无巡检':'${patrolPeriod.text} $currentPatrolPeriod'),
+              widget.editable?BuildWidget.buildDropdownWithInput('巡检周期', patrolPeriod, currentPatrolPeriod, dropdownPatrolPeriod, changePatrolPeriod, inputType: TextInputType.number, focusNode: _focusEquip[6]):BuildWidget.buildRow('巡检周期', currentPatrolPeriod=='无'?'无巡检':'${patrolPeriod.text} $currentPatrolPeriod'),
               widget.editable?BuildWidget.buildDropdownWithInput(
                   '保养周期',
                   maintainPeriod,
                   currentMaintainPeriod,
                   dropdownMandatoryPeriod,
                   changeMandatoryPeriod,
-                  inputType: TextInputType.number):BuildWidget.buildRow('保养周期', currentMaintainPeriod=='无'?'无保养':'${maintainPeriod.text} $currentMaintainPeriod'),
+                  inputType: TextInputType.number, focusNode: _focusEquip[7]):BuildWidget.buildRow('保养周期', currentMaintainPeriod=='无'?'无保养':'${maintainPeriod.text} $currentMaintainPeriod'),
               widget.editable?BuildWidget.buildDropdownWithInput(
-                  '校正周期',
+                  '校准周期',
                   correctionPeriod,
                   currentCorrectionPeriod,
                   dropdownCorrectionPeriod,
                   changeCorrectionPeriod,
-                  inputType: TextInputType.number):BuildWidget.buildRow('校正周期', currentCorrectionPeriod=='无'?'无校正':'${correctionPeriod.text} $currentCorrectionPeriod'),
+                  inputType: TextInputType.number, focusNode: _focusEquip[8]):BuildWidget.buildRow('校准周期', currentCorrectionPeriod=='无'?'无校准':'${correctionPeriod.text} $currentCorrectionPeriod'),
             ],
           ),
         ),
@@ -1950,7 +2190,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
               title: Text(
                 '设备附件',
                 style:
-                    new TextStyle(fontSize: 22.0, fontWeight: FontWeight.w400),
+                    new TextStyle(fontSize: 20.0, fontWeight: FontWeight.w400),
               ));
         },
         body: new Padding(
@@ -1965,7 +2205,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
                     new Text(
                       '设备铭牌：',
                       style: new TextStyle(
-                          fontSize: 20.0, fontWeight: FontWeight.w600),
+                          fontSize: 16.0, fontWeight: FontWeight.w600),
                     ),
                     widget.editable?new IconButton(
                         icon: Icon(Icons.add_a_photo),
@@ -1983,7 +2223,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
                     new Text(
                       '设备外观：',
                       style: new TextStyle(
-                          fontSize: 20.0, fontWeight: FontWeight.w600),
+                          fontSize: 16.0, fontWeight: FontWeight.w600),
                     ),
                     widget.editable?new IconButton(
                         icon: Icon(Icons.add_a_photo),
@@ -2001,7 +2241,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
                     new Text(
                       '设备标签：',
                       style: new TextStyle(
-                          fontSize: 20.0, fontWeight: FontWeight.w600),
+                          fontSize: 16.0, fontWeight: FontWeight.w600),
                     ),
                     widget.editable?new IconButton(
                         icon: Icon(Icons.add_a_photo),
@@ -2049,7 +2289,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
                       expansionList[index] = !isExpanded;
                     });
                   },
-                  children: buildExpansion(),
+                  children: buildExpansion(context),
                 ),
                 SizedBox(height: 24.0),
                 new Row(
@@ -2061,7 +2301,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
                       padding: EdgeInsets.symmetric(horizontal: 5.0),
                       child: new RaisedButton(
                         onPressed: () {
-                          saveEquipment();
+                          netstat?null:saveEquipment();
                         },
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(6),

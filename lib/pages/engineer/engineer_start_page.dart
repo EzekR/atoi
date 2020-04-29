@@ -103,7 +103,7 @@ class _EngineerStartPageState extends State<EngineerStartPage> {
       decoration: InputDecoration(
           labelText: labelText,
           labelStyle: new TextStyle(
-              fontSize: 20.0
+              fontSize: 16.0
           ),
           disabledBorder: UnderlineInputBorder(
               borderSide: BorderSide(
@@ -130,7 +130,7 @@ class _EngineerStartPageState extends State<EngineerStartPage> {
             child: new Text(
               labelText,
               style: new TextStyle(
-                  fontSize: 20.0,
+                  fontSize: 16.0,
                   fontWeight: FontWeight.w600
               ),
             ),
@@ -140,7 +140,7 @@ class _EngineerStartPageState extends State<EngineerStartPage> {
             child: new Text(
               defaultText,
               style: new TextStyle(
-                  fontSize: 20.0,
+                  fontSize: 16.0,
                   fontWeight: FontWeight.w400,
                   color: Colors.black54
               ),
@@ -182,13 +182,13 @@ class _EngineerStartPageState extends State<EngineerStartPage> {
             return ListTile(
                 leading: new Icon(
                   Icons.info,
-                  size: 24.0,
+                  size: 20.0,
                   color: Colors.blue,
                 ),
                 title: Text(
                   '设备基本信息',
                   style: new TextStyle(
-                      fontSize: 22.0,
+                      fontSize: 20.0,
                       fontWeight: FontWeight.w400
                   ),
                 )
@@ -211,14 +211,14 @@ class _EngineerStartPageState extends State<EngineerStartPage> {
             return ListTile(
                 leading: new Icon(
                   Icons.description,
-                  size: 24.0,
+                  size: 20.0,
                   color: Colors.blue,
                 ),
                 title: new Text(
                   '请求详细信息',
                   style: new TextStyle(
                       fontWeight: FontWeight.w400,
-                      fontSize: 22.0
+                      fontSize: 20.0
                   ),
                 )
             );
@@ -252,13 +252,13 @@ class _EngineerStartPageState extends State<EngineerStartPage> {
             return ListTile(
               leading: new Icon(
                 Icons.perm_contact_calendar,
-                size: 24.0,
+                size: 20.0,
                 color: Colors.blue,
               ),
               title: Text(
                 '派工内容',
                 style: new TextStyle(
-                    fontSize: 22.0,
+                    fontSize: 20.0,
                     fontWeight: FontWeight.w400
                 ),
               ),
@@ -310,7 +310,7 @@ class _EngineerStartPageState extends State<EngineerStartPage> {
         actions: <Widget>[
         ],
       ),
-      body: _dispatch.isEmpty?new Center(child: new SpinKitRotatingPlain(color: Colors.blue),):new Padding(
+      body: _dispatch.isEmpty?new Center(child: new SpinKitThreeBounce(color: Colors.blue),):new Padding(
         padding: EdgeInsets.symmetric(vertical: 5.0),
         child: new Card(
           child: new ListView(
@@ -332,7 +332,7 @@ class _EngineerStartPageState extends State<EngineerStartPage> {
                 },
                 children: buildExpansion(),
               ),
-              SizedBox(height: 24.0),
+              SizedBox(height: 20.0),
               new Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 mainAxisSize: MainAxisSize.max,

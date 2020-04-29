@@ -28,10 +28,7 @@ class ManagerAuditReportPage extends StatefulWidget {
 
 class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
 
-  var _isExpandedBasic = false;
-  var _isExpandedDetail = false;
-  var _isExpandedAssign = true;
-  var _isExpandedComponent = false;
+  List<bool> _expandList =  [false, false, false, true, false, false];
   List _equipments = [];
   var _comment = new TextEditingController();
   ConstantsModel model;
@@ -58,6 +55,7 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
   String _userName = '';
   String _mobile = '';
   var _accessory;
+  List reportAccess = [];
   List<dynamic> imageAttach = [];
 
   List _serviceScope = ['是', '否'];
@@ -111,7 +109,7 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
           value: method,
           child: new Text(method,
             style: new TextStyle(
-                fontSize: 20.0
+                fontSize: 16.0
             ),
           )
       ));
@@ -145,7 +143,7 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
       decoration: InputDecoration(
           labelText: labelText,
           labelStyle: new TextStyle(
-              fontSize: 20.0
+              fontSize: 16.0
           ),
           disabledBorder: UnderlineInputBorder(
               borderSide: BorderSide(
@@ -157,9 +155,10 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
       maxLines: 3,
       maxLength: 200,
       controller: controller,
+      focusNode: _focusReport[3],
       enabled: isEnabled,
       style: new TextStyle(
-          fontSize: 20.0
+          fontSize: 16.0
       ),
     );
   }
@@ -174,7 +173,7 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
             child: new Text(
               labelText,
               style: new TextStyle(
-                  fontSize: 20.0,
+                  fontSize: 16.0,
                   fontWeight: FontWeight.w600
               ),
             ),
@@ -184,7 +183,7 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
             child: new Text(
               defaultText,
               style: new TextStyle(
-                  fontSize: 20.0,
+                  fontSize: 16.0,
                   fontWeight: FontWeight.w400,
                   color: Colors.black54
               ),
@@ -206,7 +205,7 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
             child: new Text(
               title,
               style: new TextStyle(
-                  fontSize: 20.0,
+                  fontSize: 16.0,
                   fontWeight: FontWeight.w600
               ),
             ),
@@ -245,21 +244,25 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
         _report = resp['Data'];
         _unsolved.text = resp['Data']['SolutionUnsolvedComments'];
         _currentProvider = resp['Data']['ServiceProvider']['Name'];
+
       });
+      for(var item in resp['Data']['ReportAccessories']) {
+        reportAccess.add(jsonEncode(item));
+      }
       _accessory = resp['Data']['ReportAccessories'];
       for(var _acc in _accessory) {
         var _imageNew = _acc['FileInfos'].firstWhere((info) => info['FileType']==1, orElse: () => null);
         var _imageOld = _acc['FileInfos'].firstWhere((info) => info['FileType']==2, orElse: () => null);
         if (_imageNew != null) {
           var _fileNew = await getAccessoryFile(_imageNew['ID']);
-          _imageNew['FileContent'] = _fileNew;
+          _imageNew['FileContent'] = base64Decode(_fileNew);
           setState(() {
             _acc['ImageNew'] = _imageNew;
           });
         }
         if (_imageOld != null) {
           var _fileOld = await getAccessoryFile(_imageOld['ID']);
-          _imageOld['FileContent'] = _fileOld;
+          _imageOld['FileContent'] = base64Decode(_fileOld);
           setState(() {
             _acc['ImageOld'] = _imageOld;
           });
@@ -337,13 +340,17 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
     return _image;
   }
 
+  List<FocusNode> _focusReport = new List(4).map((item) {
+    return new FocusNode();
+  }).toList();
+
   Future<Null> approveReport() async {
     if (_currentResult == '问题升级' && _unsolved.text.isEmpty) {
       showDialog(context: context,
           builder: (context) => CupertinoAlertDialog(
             title: new Text('问题升级不可为空'),
           )
-      );
+      ).then((result) => FocusScope.of(context).requestFocus(_focusReport[0]));
       return;
     }
     if ((_dispatch['RequestType']['ID'] == 2 && _currentProvider != '管理方' && _currentResult == '待第三方支持' && _report['Type']['ID'] == 201) || (_dispatch['RequestType']['ID'] == 3)) {
@@ -352,7 +359,7 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
             builder: (context) => CupertinoAlertDialog(
               title: new Text('附件不可为空'),
             )
-        );
+        ).then((result) => FocusScope.of(context).requestFocus(_focusReport[1]));
         return;
       }
     }
@@ -361,7 +368,7 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
           builder: (context) => CupertinoAlertDialog(
             title: new Text('整包范围不可为空'),
           )
-      );
+      ).then((result) => FocusScope.of(context).requestFocus(_focusReport[2]));
       return;
     }
     final SharedPreferences prefs = await _prefs;
@@ -391,6 +398,9 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
     };
     _body['FujiComments'] = _comment.text;
     _body['ServiceScope'] = _currentScope=='是'?true:false;
+    _body['ReportAccessories'] = reportAccess.map((item) {
+      return jsonDecode(item);
+    }).toList();
     Map<String, dynamic> _data = {
       'userID': UserId,
       'info': _body
@@ -434,7 +444,7 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
           builder: (context) => CupertinoAlertDialog(
             title: new Text('问题升级不可为空'),
           )
-      );
+      ).then((result) => FocusScope.of(context).requestFocus(_focusReport[0]));
       return;
     }
     if (_comment.text.isEmpty) {
@@ -442,7 +452,7 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
         builder: (context) => CupertinoAlertDialog(
           title: new Text('审批备注不可为空'),
         )
-      );
+      ).then((result) => FocusScope.of(context).requestFocus(_focusReport[3]));
       return;
     }
     if ((_dispatch['RequestType']['ID'] == 2 && _currentProvider != '管理方' && _report['Type']['ID'] == 201 && _currentResult == '待第三方支持') || (_dispatch['RequestType']['ID'] == 3)) {
@@ -451,7 +461,7 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
             builder: (context) => CupertinoAlertDialog(
               title: new Text('附件不可为空'),
             )
-        );
+        ).then((result) => FocusScope.of(context).requestFocus(_focusReport[1]));
         return;
       }
     }
@@ -460,7 +470,7 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
           builder: (context) => CupertinoAlertDialog(
             title: new Text('整包范围不可为空'),
           )
-      );
+      ).then((result) => FocusScope.of(context).requestFocus(_focusReport[2]));
       return;
     }
     final SharedPreferences prefs = await _prefs;
@@ -489,6 +499,9 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
       'ID': _currentResult!='待第三方支持'?0:model.ServiceProviders[_currentProvider]
     };
     _body['FujiComments'] = _comment.text;
+    _body['ReportAccessories'] = reportAccess.map((item) {
+      return jsonDecode(item);
+    }).toList();
     Map<String, dynamic> _data = {
       'userID': UserId,
       'info': _body
@@ -575,7 +588,7 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
           alignment: FractionalOffset(1.0, 0.0),
           children: <Widget>[
             new Container(
-              child: new PhotoView(imageProvider: MemoryImage(Uint8List.fromList(file))),
+              child: BuildWidget.buildPhotoPageList(context, file),
               width: 400.0,
               height: 400.0,
             ),
@@ -606,8 +619,7 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
               _acc['ImageNew']!=null&&_acc['ImageNew']['FileContent']!=null?new Container(width: 100.0,
-                child: new Image.memory(
-                    base64Decode(_acc['ImageNew']['FileContent'])),):new Container()
+                child: BuildWidget.buildPhotoPageList(context, _acc['ImageNew']['FileContent'])):new Container()
             ],
           ),
           BuildWidget.buildRow('金额（元/件）', _acc['Amount'].toString()),
@@ -618,8 +630,7 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
               _acc['ImageOld']!=null&&_acc['ImageOld']['FileContent']!=null?new Container(width: 100.0,
-                child: new Image.memory(
-                    base64Decode(_acc['ImageOld']['FileContent'])),):new Container()
+                child: BuildWidget.buildPhotoPageList(context, _acc['ImageOld']['FileContent'])):new Container()
             ],
           ),
           new Divider()
@@ -715,7 +726,7 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
     }
     _list.addAll([
       widget.status==3?BuildWidget.buildRow('作业报告结果', _currentResult):BuildWidget.buildDropdown('作业报告结果', _currentResult, _dropDownMenuItems, changedDropDownMethod),
-      widget.status!=3&&_currentResult=='问题升级'?BuildWidget.buildInput('问题升级', _unsolved, maxLength: 500):new Container(),
+      widget.status!=3&&_currentResult=='问题升级'?BuildWidget.buildInput('问题升级', _unsolved, maxLength: 500, focusNode: _focusReport[0]):new Container(),
       widget.status==3&&_currentResult=='问题升级'?BuildWidget.buildRow('问题升级', _unsolved.text):new Container(),
       widget.status!=3&&_currentResult=='待第三方支持'?BuildWidget.buildDropdown('服务提供方', _currentProvider, _dropDownMenuProviders, changeProvider):new Container(),
       widget.status==3&&_currentResult=='待第三方支持'?BuildWidget.buildRow('服务提供方', _currentProvider):new Container(),
@@ -735,7 +746,7 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
                   new Text(
                     '附件',
                     style: new TextStyle(
-                        fontSize: 20.0,
+                        fontSize: 16.0,
                         fontWeight: FontWeight.w600
                     ),
                   )
@@ -747,7 +758,7 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
               child: new Text(
                 '：',
                 style: new TextStyle(
-                  fontSize: 20.0,
+                  fontSize: 16.0,
                   fontWeight: FontWeight.w600,
                 ),
               ),
@@ -779,12 +790,12 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
           headerBuilder: (context, isExpanded) {
             return ListTile(
               leading: new Icon(Icons.info,
-                size: 24.0,
+                size: 20.0,
                 color: Colors.blue,
               ),
               title: Text('设备基本信息',
                 style: new TextStyle(
-                    fontSize: 22.0,
+                    fontSize: 20.0,
                     fontWeight: FontWeight.w400
                 ),
               ),
@@ -811,22 +822,68 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
               }),
             ),
           ),
-          isExpanded: _isExpandedBasic,
+          isExpanded: _expandList[0],
         ),
       );
     }
+
+    _list.add(
+      new ExpansionPanel(
+        headerBuilder: (context, isExpanded) {
+          return ListTile(
+            leading: new Icon(
+              Icons.description,
+              size: 20.0,
+              color: Colors.blue,
+            ),
+            title: Text(
+              '请求详细信息',
+              style: new TextStyle(fontSize: 20.0, fontWeight: FontWeight.w400),
+            ),
+          );
+        },
+        body: new Padding(
+          padding: EdgeInsets.symmetric(horizontal: 8.0),
+          child: new Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            mainAxisSize: MainAxisSize.max,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              BuildWidget.buildRow('服务申请编号', _dispatch['Request']['OID']),
+              BuildWidget.buildRow('类型', _dispatch['Request']['SourceType']),
+              BuildWidget.buildRow('主题', _dispatch['Request']['SubjectName']),
+              BuildWidget.buildRow('请求人', _dispatch['Request']['RequestUser']['Name']),
+              BuildWidget.buildRow('请求状态', _dispatch['Request']['Status']['Name']),
+              _dispatch['Request']['RequestType']['ID'] == 1?BuildWidget.buildRow('机器状态', _dispatch['Request']['MachineStatus']['Name']):new Container(),
+              BuildWidget.buildRow(model.Remark[_dispatch['Request']['RequestType']['ID']], _dispatch['Request']['FaultDesc']),
+              _dispatch['Request']['RequestType']['ID'] == 2 ||
+                  _dispatch['Request']['RequestType']['ID'] == 3 ||
+                  _dispatch['Request']['RequestType']['ID'] == 7
+                  ? BuildWidget.buildRow(
+                  model.RemarkType[_dispatch['Request']['RequestType']['ID']],
+                  _dispatch['Request']['FaultType']['Name'])
+                  : new Container(),
+              _dispatch['Request']['Status']['ID'] == 1
+                  ? new Container()
+                  : BuildWidget.buildRow('处理方式', _dispatch['Request']['DealType']['Name']),
+            ],
+          ),
+        ),
+        isExpanded: _expandList[1],
+      ),
+    );
 
     _list.addAll([
       new ExpansionPanel(
         headerBuilder: (context, isExpanded) {
           return ListTile(
             leading: new Icon(Icons.description,
-              size: 24.0,
+              size: 20.0,
               color: Colors.blue,
             ),
             title: Text('派工内容',
               style: new TextStyle(
-                  fontSize: 22.0,
+                  fontSize: 20.0,
                   fontWeight: FontWeight.w400
               ),
             ),
@@ -847,18 +904,18 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
             ],
           ),
         ),
-        isExpanded: _isExpandedDetail,
+        isExpanded: _expandList[2],
       ),
       new ExpansionPanel(
         headerBuilder: (context, isExpanded) {
           return ListTile(
             leading: new Icon(Icons.perm_contact_calendar,
-              size: 24.0,
+              size: 20.0,
               color: Colors.blue,
             ),
             title: Text('作业报告信息',
               style: new TextStyle(
-                  fontSize: 22.0,
+                  fontSize: 20.0,
                   fontWeight: FontWeight.w400
               ),
             ),
@@ -871,7 +928,7 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
             children: buildReportContent()
           ),
         ),
-        isExpanded: _isExpandedAssign,
+        isExpanded: _expandList[3],
       ),
     ]);
 
@@ -881,12 +938,12 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
           headerBuilder: (context, isExpanded) {
             return ListTile(
               leading: new Icon(Icons.settings,
-                size: 24.0,
+                size: 20.0,
                 color: Colors.blue,
               ),
               title: Text('零配件信息',
                 style: new TextStyle(
-                    fontSize: 22.0,
+                    fontSize: 20.0,
                     fontWeight: FontWeight.w400
                 ),
               ),
@@ -898,7 +955,7 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
               children: buildAccessory(),
             ),
           ):new Container(),
-          isExpanded: _isExpandedComponent,
+          isExpanded: _expandList[4],
         ),
       );
     }
@@ -929,7 +986,7 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
         actions: <Widget>[
         ],
       ),
-      body: _report.isEmpty||_dispatch.isEmpty?new Center(child: SpinKitRotatingPlain(color: Colors.blue,),):new Padding(
+      body: _report.isEmpty||_dispatch.isEmpty?new Center(child: SpinKitThreeBounce(color: Colors.blue,),):new Padding(
         padding: EdgeInsets.symmetric(vertical: 5.0),
         child: new Card(
           child: new ListView(
@@ -938,34 +995,16 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
                 animationDuration: Duration(milliseconds: 200),
                 expansionCallback: (index, isExpanded) {
                   setState(() {
-                    if (index == 0) {
-                      if (_dispatch['Request']['RequestType']['ID']==14) {
-                        _isExpandedDetail = !isExpanded;
-                      } else {
-                        _isExpandedBasic = !isExpanded;
-                      }
-                    } else {
-                      if (index == 1) {
-                        if (_dispatch['Request']['RequestType']['ID']==14) {
-                          _isExpandedAssign = !isExpanded;
-                        } else {
-                          _isExpandedDetail = !isExpanded;
-                        }
-                      } else {
-                        if (index == 2) {
-                          _isExpandedAssign = !isExpanded;
-                        } else {
-                          _isExpandedComponent = !isExpanded;
-                        }
-                      }
-                    }
+                    _dispatch['Request']['RequestType']['ID'] != 14?
+                    _expandList[index] = !isExpanded:
+                        _expandList[index+1] = !isExpanded;
                   });
                 },
                 children: buildExpansion(),
               ),
-              SizedBox(height: 24.0),
+              SizedBox(height: 20.0),
               widget.status==3?new Container():buildTextField('审批备注', _comment, true),
-              SizedBox(height: 24.0),
+              SizedBox(height: 20.0),
               widget.status==3?new Container():new Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 mainAxisSize: MainAxisSize.max,
@@ -995,7 +1034,7 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
                   ),
                 ],
               ),
-              SizedBox(height: 24.0),
+              SizedBox(height: 20.0),
             ],
           ),
         ),

@@ -162,7 +162,7 @@ class _UserHomePageState extends State<UserHomePage> {
             ),
             actions: <Widget>[
               new Center(
-                child: new Text(_userName),
+                child: new Text(_userName??''),
               ),
               new SizedBox(width: 10.0,)
             ],
@@ -225,7 +225,9 @@ class _UserHomePageState extends State<UserHomePage> {
                   title: Text('登出'),
                   onTap: () async {
                     var _prefs = await prefs;
+                    var _server = await _prefs.getString('serverUrl');
                     await _prefs.clear();
+                    await _prefs.setString('serverUrl', _server);
                     Navigator.of(context).push(new MaterialPageRoute(builder: (_) {
                       return new LoginPage();
                     }

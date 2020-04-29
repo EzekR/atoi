@@ -33,7 +33,7 @@ class _RepairRequestState extends State<RepairRequest> {
   var _isExpandedAssign = false;
   var _fault = new TextEditingController();
   ConstantsModel model;
-
+  FocusNode _focusNode = new FocusNode();
 
   List _serviceResults = [];
 
@@ -143,6 +143,8 @@ class _RepairRequestState extends State<RepairRequest> {
         builder: (context) => CupertinoAlertDialog(
           title: new Text('故障描述不可为空')
         )
+      ).then((result) =>
+        FocusScope.of(context).requestFocus(_focusNode)
       );
     } else {
       var prefs = await _prefs;
@@ -154,7 +156,7 @@ class _RepairRequestState extends State<RepairRequest> {
         var file = {
           'FileContent': fileContent,
           'FileName': image.path,
-          'FiltType': 1,
+          'FileType': 1,
           'ID': 0
         };
         fileList.add(file);
@@ -211,7 +213,7 @@ class _RepairRequestState extends State<RepairRequest> {
               children: <Widget>[
                 new Container(
                   width: 150.0,
-                  child: Image.file(image),
+                  child: BuildWidget.buildPhotoPageFile(context, image),
                 ),
                 new Padding(
                   padding: EdgeInsets.symmetric(horizontal: 0.0),
@@ -247,7 +249,7 @@ class _RepairRequestState extends State<RepairRequest> {
           value: method,
           child: new Text(method,
             style: new TextStyle(
-                fontSize: 20.0
+                fontSize: 16.0
             ),
           )
       ));
@@ -282,7 +284,7 @@ class _RepairRequestState extends State<RepairRequest> {
             child: new Text(
               labelText,
               style: new TextStyle(
-                  fontSize: 20.0,
+                  fontSize: 16.0,
                   fontWeight: FontWeight.w600
               ),
             ),
@@ -292,7 +294,7 @@ class _RepairRequestState extends State<RepairRequest> {
             child: new Text(
               defaultText,
               style: new TextStyle(
-                  fontSize: 20.0,
+                  fontSize: 16.0,
                   fontWeight: FontWeight.w400,
                   color: Colors.black54
               ),
@@ -366,12 +368,12 @@ class _RepairRequestState extends State<RepairRequest> {
                           headerBuilder: (context, isExpanded) {
                             return ListTile(
                                 leading: new Icon(Icons.info,
-                                  size: 24.0,
+                                  size: 20.0,
                                   color: Colors.blue,
                                 ),
                                 title: Text('设备基本信息',
                                   style: new TextStyle(
-                                      fontSize: 22.0,
+                                      fontSize: 20.0,
                                       fontWeight: FontWeight.w400
                                   ),
                                 ),
@@ -401,12 +403,12 @@ class _RepairRequestState extends State<RepairRequest> {
                           headerBuilder: (context, isExpanded) {
                             return ListTile(
                                 leading: new Icon(Icons.description,
-                                  size: 24.0,
+                                  size: 20.0,
                                   color: Colors.blue,
                                 ),
                                 title: Text('请求详细信息',
                                   style: new TextStyle(
-                                      fontSize: 22.0,
+                                      fontSize: 20.0,
                                       fontWeight: FontWeight.w400
                                   ),
                                 ),
@@ -429,7 +431,7 @@ class _RepairRequestState extends State<RepairRequest> {
                                         child: new Text(
                                           '机器状态：',
                                           style: new TextStyle(
-                                              fontSize: 20.0,
+                                              fontSize: 16.0,
                                               fontWeight: FontWeight.w600
                                           ),
                                         ),
@@ -454,7 +456,7 @@ class _RepairRequestState extends State<RepairRequest> {
                                         child: new Text(
                                           '故障描述：',
                                           style: new TextStyle(
-                                            fontSize: 20.0,
+                                            fontSize: 16.0,
                                             fontWeight: FontWeight.w600
                                           ),
                                         ),
@@ -463,6 +465,7 @@ class _RepairRequestState extends State<RepairRequest> {
                                         flex: 6,
                                         child: new TextField(
                                           controller: _fault, maxLength: 200, maxLines: 3,
+                                          focusNode: _focusNode,
                                           decoration: InputDecoration(
                                             fillColor: Color(0xfff0f0f0),
                                             filled: true,
@@ -479,7 +482,7 @@ class _RepairRequestState extends State<RepairRequest> {
                                       new Text(
                                         '添加附件：',
                                         style: new TextStyle(
-                                          fontSize: 20.0,
+                                          fontSize: 16.0,
                                           fontWeight: FontWeight.w600
                                         ),
                                       ),
@@ -500,7 +503,7 @@ class _RepairRequestState extends State<RepairRequest> {
                         ),
                       ],
                     ),
-                    SizedBox(height: 24.0),
+                    SizedBox(height: 20.0),
                     new Row(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       mainAxisSize: MainAxisSize.max,
@@ -530,7 +533,7 @@ class _RepairRequestState extends State<RepairRequest> {
                         ),
                       ],
                     ),
-                    SizedBox(height: 24.0),
+                    SizedBox(height: 20.0),
                   ],
 
                 ),

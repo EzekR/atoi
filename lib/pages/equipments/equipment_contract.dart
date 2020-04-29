@@ -16,6 +16,8 @@ import 'package:atoi/widgets/search_page.dart';
 import 'package:atoi/widgets/search_bar_vendor.dart';
 import 'package:atoi/models/main_model.dart';
 import 'package:atoi/utils/constants.dart';
+import 'package:flutter_cupertino_date_picker/flutter_cupertino_date_picker.dart';
+import 'package:date_format/date_format.dart';
 
 /// 设备合同页面类
 class EquipmentContract extends StatefulWidget {
@@ -96,6 +98,10 @@ class _EquipmentContractState extends State<EquipmentContract> {
     }
   }
 
+  List<FocusNode> _focusContract = new List(5).map((item) {
+    return new FocusNode();
+  }).toList();
+
   Future<Null> saveContract() async {
     if (_equipments == null) {
       showDialog(context: context, builder: (context) => CupertinoAlertDialog(
@@ -107,19 +113,19 @@ class _EquipmentContractState extends State<EquipmentContract> {
     if (contractNum.text.isEmpty) {
       showDialog(context: context, builder: (context) => CupertinoAlertDialog(
         title: new Text('合同编号不可为空'),
-      ));
+      )).then((result) => FocusScope.of(context).requestFocus(_focusContract[0]));
       return;
     }
     if (amount.text.isEmpty || double.parse(amount.text) > 99999999.99) {
       showDialog(context: context, builder: (context) => CupertinoAlertDialog(
         title: new Text('金额不可为空且金额不可大于1亿'),
-      ));
+      )).then((result) => FocusScope.of(context).requestFocus(_focusContract[1]));
       return;
     }
     if (name.text.isEmpty) {
       showDialog(context: context, builder: (context) => CupertinoAlertDialog(
         title: new Text('名称不可为空'),
-      ));
+      )).then((result) => FocusScope.of(context).requestFocus(_focusContract[2]));
       return;
     }
     if (startDate == 'YY-MM-DD' || endDate == 'YY-MM-DD') {
@@ -186,7 +192,7 @@ class _EquipmentContractState extends State<EquipmentContract> {
       )).then((result) => Navigator.of(context).pop());
     } else {
       showDialog(context: context, builder: (context) => CupertinoAlertDialog(
-        title: new Text(resp['Data']),
+        title: new Text(resp['ResultMessage']),
       ));
     }
   }
@@ -215,49 +221,65 @@ class _EquipmentContractState extends State<EquipmentContract> {
     });
   }
 
-  Future<String> pickDate(String dateType, {String initialTime}) async {
+  Future<Null> pickDate(String dateType, {String initialTime}) async {
     DateTime _time = DateTime.tryParse(initialTime)??DateTime.now();
-    var val = await showDatePicker(
-        context: context,
-        initialDate: _time,
-        firstDate: new DateTime.now().subtract(new Duration(days: 3650)), // 减 30 天
-        lastDate: new DateTime.now().add(new Duration(days: 3650)), // 加 30 天
-        locale: Locale('zh'));
-    var _today = new DateTime.now();
-    switch (dateType) {
-      case 'start':
-        if (_today.isBefore(val)) {
-          setState(() {
-            _contractStatus = '未生效';
-          });
-        } else {
-          setState(() {
-            _contractStatus = '生效';
-          });
-        }
-        break;
-      case 'end':
-        if (_today.isAfter(DateTime.parse(startDate))) {
-          _contractStatus = '未生效';
-        } else {
-          if (_today.isAfter(val)) {
-            setState(() {
-              _contractStatus = '失效';
-            });
-          } else {
-            if (_today.add(new Duration(days: 30)).isAfter(val) && _today.isBefore(val)) {
+    DatePicker.showDatePicker(
+      context,
+      pickerTheme: DateTimePickerTheme(
+        showTitle: true,
+        confirm: Text('确认', style: TextStyle(color: Colors.blueAccent)),
+        cancel: Text('取消', style: TextStyle(color: Colors.redAccent)),
+      ),
+      minDateTime: DateTime.parse('2000-01-01'),
+      maxDateTime: DateTime.parse('2030-01-01'),
+      initialDateTime: _time,
+      dateFormat: 'yyyy-MM-dd',
+      locale: DateTimePickerLocale.en_us,
+      onClose: () => print(""),
+      onCancel: () => print('onCancel'),
+      onChange: (dateTime, List<int> index) {
+      },
+      onConfirm: (dateTime, List<int> index) {
+        var _date = formatDate(dateTime, [yyyy, '-', mm, '-', dd]);
+        setState(() {
+          dateType=='start'?startDate=_date:endDate=_date;
+        });
+        var _today = new DateTime.now();
+        switch (dateType) {
+          case 'start':
+            if (_today.isBefore(dateTime)) {
               setState(() {
-                _contractStatus = '即将失效';
+                _contractStatus = '未生效';
               });
             } else {
               setState(() {
                 _contractStatus = '生效';
               });
             }
-          }
+            break;
+          case 'end':
+            if (_today.isAfter(DateTime.parse(startDate))) {
+              _contractStatus = '未生效';
+            } else {
+              if (_today.isAfter(dateTime)) {
+                setState(() {
+                  _contractStatus = '失效';
+                });
+              } else {
+                if (_today.add(new Duration(days: 30)).isAfter(dateTime) && _today.isBefore(dateTime)) {
+                  setState(() {
+                    _contractStatus = '即将失效';
+                  });
+                } else {
+                  setState(() {
+                    _contractStatus = '生效';
+                  });
+                }
+              }
+            }
         }
-    }
-    return val==null?initialTime:val.toString().split(' ')[0];
+      },
+    );
   }
 
   Future<Null> getDevice() async {
@@ -333,7 +355,7 @@ class _EquipmentContractState extends State<EquipmentContract> {
           children: <Widget>[
             new Container(
               width: 100.0,
-              child: Image.file(image),
+              child: BuildWidget.buildPhotoPageFile(context, image),
             ),
             new Padding(
               padding: EdgeInsets.symmetric(horizontal: 0.0),
@@ -370,7 +392,7 @@ class _EquipmentContractState extends State<EquipmentContract> {
           value: method,
           child: new Text(
             method,
-            style: new TextStyle(fontSize: 20.0),
+            style: new TextStyle(fontSize: 16.0),
           )));
     }
     return items;
@@ -402,7 +424,7 @@ class _EquipmentContractState extends State<EquipmentContract> {
             flex: 4,
             child: new Text(
               labelText,
-              style: new TextStyle(fontSize: 20.0, fontWeight: FontWeight.w600),
+              style: new TextStyle(fontSize: 16.0, fontWeight: FontWeight.w600),
             ),
           ),
           new Expanded(
@@ -410,7 +432,7 @@ class _EquipmentContractState extends State<EquipmentContract> {
             child: new Text(
               defaultText,
               style: new TextStyle(
-                  fontSize: 20.0,
+                  fontSize: 16.0,
                   fontWeight: FontWeight.w400,
                   color: Colors.black54),
             ),
@@ -537,13 +559,13 @@ class _EquipmentContractState extends State<EquipmentContract> {
                             return ListTile(
                               leading: new Icon(
                                 Icons.info,
-                                size: 24.0,
+                                size: 20.0,
                                 color: Colors.blue,
                               ),
                               title: Text(
                                 '设备基本信息',
                                 style: new TextStyle(
-                                    fontSize: 22.0,
+                                    fontSize: 20.0,
                                     fontWeight: FontWeight.w400),
                               ),
                             );
@@ -558,13 +580,13 @@ class _EquipmentContractState extends State<EquipmentContract> {
                             return ListTile(
                               leading: new Icon(
                                 Icons.description,
-                                size: 24.0,
+                                size: 20.0,
                                 color: Colors.blue,
                               ),
                               title: Text(
                                 '合同详细信息',
                                 style: new TextStyle(
-                                    fontSize: 22.0,
+                                    fontSize: 20.0,
                                     fontWeight: FontWeight.w400),
                               ),
                             );
@@ -574,10 +596,10 @@ class _EquipmentContractState extends State<EquipmentContract> {
                             child: new Column(
                               children: <Widget>[
                                 BuildWidget.buildRow('系统编号', OID),
-                                widget.editable?BuildWidget.buildInput('合同编号', contractNum, maxLength: 20):BuildWidget.buildRow('合同编号', contractNum.text),
+                                widget.editable?BuildWidget.buildInput('合同编号', contractNum, maxLength: 20, focusNode: _focusContract[0]):BuildWidget.buildRow('合同编号', contractNum.text),
                                 widget.editable?BuildWidget.buildInput('项目编号', projectNum, maxLength: 20):BuildWidget.buildRow('项目编号', projectNum.text),
-                                widget.editable?BuildWidget.buildInput('金额', amount, inputType: TextInputType.numberWithOptions(decimal: true), maxLength: 11):BuildWidget.buildRow('金额', amount.text),
-                                widget.editable?BuildWidget.buildInput('名称', name, maxLength: 50):BuildWidget.buildRow('名称', name.text),
+                                widget.editable?BuildWidget.buildInput('金额', amount, inputType: TextInputType.numberWithOptions(decimal: true), maxLength: 11, focusNode: _focusContract[1]):BuildWidget.buildRow('金额', amount.text),
+                                widget.editable?BuildWidget.buildInput('名称', name, maxLength: 50, focusNode: _focusContract[2]):BuildWidget.buildRow('名称', name.text),
                                 widget.editable?BuildWidget.buildDropdown('类型', currentType, dropdownType, changeType):BuildWidget.buildRow('类型', currentType),
                                 widget.editable?new Padding(
                                   padding: EdgeInsets.symmetric(vertical: 5.0),
@@ -593,7 +615,7 @@ class _EquipmentContractState extends State<EquipmentContract> {
                                             new Text(
                                               '供应商',
                                               style: new TextStyle(
-                                                  fontSize: 20.0,
+                                                  fontSize: 16.0,
                                                   fontWeight: FontWeight.w600),
                                             )
                                           ],
@@ -604,7 +626,7 @@ class _EquipmentContractState extends State<EquipmentContract> {
                                         child: new Text(
                                           '：',
                                           style: new TextStyle(
-                                            fontSize: 20.0,
+                                            fontSize: 16.0,
                                             fontWeight: FontWeight.w600,
                                           ),
                                         ),
@@ -616,7 +638,7 @@ class _EquipmentContractState extends State<EquipmentContract> {
                                                 ? ''
                                                 : supplier['Name'],
                                             style: new TextStyle(
-                                                fontSize: 20.0,
+                                                fontSize: 16.0,
                                                 fontWeight: FontWeight.w400,
                                                 color: Colors.black54),
                                           )),
@@ -656,7 +678,7 @@ class _EquipmentContractState extends State<EquipmentContract> {
                                             new Text(
                                               '起止日期',
                                               style: new TextStyle(
-                                                  fontSize: 20.0, fontWeight: FontWeight.w600),
+                                                  fontSize: 16.0, fontWeight: FontWeight.w600),
                                             )
                                           ],
                                         ),
@@ -666,7 +688,7 @@ class _EquipmentContractState extends State<EquipmentContract> {
                                         child: new Text(
                                           '：',
                                           style: new TextStyle(
-                                            fontSize: 20.0,
+                                            fontSize: 16.0,
                                             fontWeight: FontWeight.w600,
                                           ),
                                         ),
@@ -682,7 +704,7 @@ class _EquipmentContractState extends State<EquipmentContract> {
                                                   child: new Text(
                                                     startDate,
                                                     style: new TextStyle(
-                                                        fontSize: 20.0,
+                                                        fontSize: 16.0,
                                                         fontWeight: FontWeight.w400,
                                                         color: Colors.black54
                                                     ),
@@ -693,10 +715,7 @@ class _EquipmentContractState extends State<EquipmentContract> {
                                                   child: new IconButton(
                                                       icon: Icon(Icons.calendar_today, color: AppConstants.AppColors['btn_main'],),
                                                       onPressed: () async {
-                                                        var _date = await pickDate('start', initialTime: startDate);
-                                                        setState(() {
-                                                          startDate = _date;
-                                                        });
+                                                        await pickDate('start', initialTime: startDate);
                                                       }
                                                   ),
                                                 )
@@ -709,7 +728,7 @@ class _EquipmentContractState extends State<EquipmentContract> {
                                                   child: new Text(
                                                     endDate,
                                                     style: new TextStyle(
-                                                        fontSize: 20.0,
+                                                        fontSize: 16.0,
                                                         fontWeight: FontWeight.w400,
                                                         color: Colors.black54
                                                     ),
@@ -720,10 +739,7 @@ class _EquipmentContractState extends State<EquipmentContract> {
                                                   child: new IconButton(
                                                       icon: Icon(Icons.calendar_today, color: AppConstants.AppColors['btn_main'],),
                                                       onPressed: () async {
-                                                        var _date = await pickDate('end', initialTime: endDate);
-                                                        setState(() {
-                                                          endDate = _date;
-                                                        });
+                                                        await pickDate('end', initialTime: endDate);
                                                       }
                                                   ),
                                                 )
@@ -751,7 +767,7 @@ class _EquipmentContractState extends State<EquipmentContract> {
                         ),
                       ],
                     ),
-                    SizedBox(height: 24.0),
+                    SizedBox(height: 20.0),
                     new Row(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       mainAxisSize: MainAxisSize.max,

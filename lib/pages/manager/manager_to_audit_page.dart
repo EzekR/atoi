@@ -224,7 +224,7 @@ class _ManagerToAuditPageState extends State<ManagerToAuditPage> {
     return ScopedModelDescendant<MainModel>(
       builder: (context, child, model) {
         return new RefreshIndicator(
-            child: model.dispatches.length == 0?ListView(padding: const EdgeInsets.symmetric(vertical: 150.0), children: <Widget>[_loading?SpinKitRotatingPlain(color: Colors.blue):new Center(child: new Text('没有待审核工单'),)],):ListView.builder(
+            child: model.dispatches.length == 0?ListView(padding: const EdgeInsets.symmetric(vertical: 150.0), children: <Widget>[_loading?SpinKitThreeBounce(color: Colors.blue):new Center(child: new Text('没有待审核工单'),)],):ListView.builder(
               padding: const EdgeInsets.all(2.0),
               itemCount: model.dispatches.length>9?model.dispatches.length+1:model.dispatches.length,
               controller: _scrollController,

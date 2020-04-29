@@ -28,6 +28,7 @@ class _EngineerVoucherPageState extends State<EngineerVoucherPage> {
   var _isExpandedBasic = false;
   var _isExpandedDetail = false;
   var _isExpandedAssign = true;
+  List<bool> _expandList = [false, false, false, true];
   var _faultCode = new TextEditingController();
   var _jobContent = new TextEditingController();
   var _followProblem = new TextEditingController();
@@ -124,13 +125,17 @@ class _EngineerVoucherPageState extends State<EngineerVoucherPage> {
     }
   }
 
+  List<FocusNode> _focusJournal = new List(5).map((item) {
+    return new FocusNode();
+  }).toList();
+
   Future<Null> uploadJournal() async {
     if (_customerNumber.text.isEmpty) {
       showDialog(context: context,
           builder: (context) => CupertinoAlertDialog(
             title: new Text('客户电话不可为空'),
           )
-      );
+      ).then((result) => FocusScope.of(context).requestFocus(_focusJournal[0]));
       return;
     }
     if (_customerName.text.isEmpty) {
@@ -138,7 +143,7 @@ class _EngineerVoucherPageState extends State<EngineerVoucherPage> {
           builder: (context) => CupertinoAlertDialog(
             title: new Text('客户姓名不可为空'),
           )
-      );
+      ).then((result) => FocusScope.of(context).requestFocus(_focusJournal[1]));
       return;
     }
     if (_img == null) {
@@ -154,7 +159,7 @@ class _EngineerVoucherPageState extends State<EngineerVoucherPage> {
           builder: (context) => CupertinoAlertDialog(
             title: new Text('工作内容不可为空'),
           )
-      );
+      ).then((result) => FocusScope.of(context).requestFocus(_focusJournal[2]));
       return;
     }
     if (_currentResult == '待跟进' && _followProblem.text.isEmpty) {
@@ -162,7 +167,7 @@ class _EngineerVoucherPageState extends State<EngineerVoucherPage> {
           builder: (context) => CupertinoAlertDialog(
             title: new Text('待跟进问题不可为空'),
           )
-      );
+      ).then((result) => FocusScope.of(context).requestFocus(_focusJournal[3]));
       return;
     }
     if (_faultCode.text.isEmpty) {
@@ -170,7 +175,7 @@ class _EngineerVoucherPageState extends State<EngineerVoucherPage> {
         builder: (context) => CupertinoAlertDialog(
           title: new Text('故障事由不可为空'),
         )
-      );
+      ).then((result) => FocusScope.of(context).requestFocus(_focusJournal[4]));
     } else {
       var prefs = await _prefs;
       var userId = prefs.getInt('userID');
@@ -250,7 +255,7 @@ class _EngineerVoucherPageState extends State<EngineerVoucherPage> {
           value: method,
           child: new Text(method,
             style: new TextStyle(
-                fontSize: 20.0
+                fontSize: 16.0
             ),
           )
       ));
@@ -284,7 +289,7 @@ class _EngineerVoucherPageState extends State<EngineerVoucherPage> {
       controller: new TextEditingController(text: defaultText),
       enabled: isEnabled,
       style: new TextStyle(
-          fontSize: 20.0,
+          fontSize: 16.0,
           color: Colors.grey
       ),
     );
@@ -301,7 +306,7 @@ class _EngineerVoucherPageState extends State<EngineerVoucherPage> {
             child: new Text(
               title,
               style: new TextStyle(
-                  fontSize: 20.0,
+                  fontSize: 16.0,
                   fontWeight: FontWeight.w600
               ),
             ),
@@ -326,7 +331,7 @@ class _EngineerVoucherPageState extends State<EngineerVoucherPage> {
         new Text(
           label,
           style: new TextStyle(
-            fontSize: 20.0,
+            fontSize: 16.0,
             fontWeight: FontWeight.w600
           ),
         ),
@@ -338,15 +343,16 @@ class _EngineerVoucherPageState extends State<EngineerVoucherPage> {
     );
   }
 
-  Column buildEditor(String label, TextEditingController controller, {int maxLength}) {
+  Column buildEditor(String label, TextEditingController controller, {int maxLength, FocusNode focusNode}) {
     maxLength = maxLength??200;
+    focusNode = focusNode??new FocusNode();
     return new Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
         new Text(
           '$label：',
           style: new TextStyle(
-              fontSize: 20.0,
+              fontSize: 16.0,
               fontWeight: FontWeight.w600
           ),
         ),
@@ -358,6 +364,7 @@ class _EngineerVoucherPageState extends State<EngineerVoucherPage> {
           ),
           maxLines: 3,
           maxLength: 200,
+          focusNode: focusNode,
         ),
         new SizedBox(height: 5.0,)
       ],
@@ -374,7 +381,7 @@ class _EngineerVoucherPageState extends State<EngineerVoucherPage> {
             child: new Text(
               labelText,
               style: new TextStyle(
-                  fontSize: 20.0,
+                  fontSize: 16.0,
                   fontWeight: FontWeight.w600
               ),
             ),
@@ -384,7 +391,7 @@ class _EngineerVoucherPageState extends State<EngineerVoucherPage> {
             child: new Text(
               defaultText,
               style: new TextStyle(
-                  fontSize: 20.0,
+                  fontSize: 16.0,
                   fontWeight: FontWeight.w400,
                   color: Colors.black54
               ),
@@ -425,12 +432,12 @@ class _EngineerVoucherPageState extends State<EngineerVoucherPage> {
           headerBuilder: (context, isExpanded) {
             return ListTile(
               leading: new Icon(Icons.info,
-                size: 24.0,
+                size: 20.0,
                 color: Colors.blue,
               ),
               title: Text('设备基本信息',
                 style: new TextStyle(
-                    fontSize: 22.0,
+                    fontSize: 20.0,
                     fontWeight: FontWeight.w400
                 ),
               ),
@@ -442,21 +449,66 @@ class _EngineerVoucherPageState extends State<EngineerVoucherPage> {
               children: buildEquipments(),
             ),
           ),
-          isExpanded: _isExpandedBasic,
+          isExpanded: _expandList[0],
         ),
       );
     }
+    _list.add(
+      new ExpansionPanel(
+        headerBuilder: (context, isExpanded) {
+          return ListTile(
+            leading: new Icon(
+              Icons.description,
+              size: 20.0,
+              color: Colors.blue,
+            ),
+            title: Text(
+              '请求详细信息',
+              style: new TextStyle(fontSize: 20.0, fontWeight: FontWeight.w400),
+            ),
+          );
+        },
+        body: new Padding(
+          padding: EdgeInsets.symmetric(horizontal: 8.0),
+          child: new Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            mainAxisSize: MainAxisSize.max,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              BuildWidget.buildRow('服务申请编号', _dispatch['Request']['OID']),
+              BuildWidget.buildRow('类型', _dispatch['Request']['SourceType']),
+              BuildWidget.buildRow('主题', _dispatch['Request']['SubjectName']),
+              BuildWidget.buildRow('请求人', _dispatch['Request']['RequestUser']['Name']),
+              BuildWidget.buildRow('请求状态', _dispatch['Request']['Status']['Name']),
+              _dispatch['Request']['RequestType']['ID'] == 1?BuildWidget.buildRow('机器状态', _dispatch['Request']['MachineStatus']['Name']):new Container(),
+              BuildWidget.buildRow(model.Remark[_dispatch['Request']['RequestType']['ID']], _dispatch['Request']['FaultDesc']),
+              _dispatch['Request']['RequestType']['ID'] == 2 ||
+                  _dispatch['Request']['RequestType']['ID'] == 3 ||
+                  _dispatch['Request']['RequestType']['ID'] == 7
+                  ? BuildWidget.buildRow(
+                  model.RemarkType[_dispatch['Request']['RequestType']['ID']],
+                  _dispatch['Request']['FaultType']['Name'])
+                  : new Container(),
+              _dispatch['Request']['Status']['ID'] == 1
+                  ? new Container()
+                  : BuildWidget.buildRow('处理方式', _dispatch['Request']['DealType']['Name']),
+            ],
+          ),
+        ),
+        isExpanded: _expandList[1],
+      ),
+    );
     _list.addAll([
       new ExpansionPanel(
         headerBuilder: (context, isExpanded) {
           return ListTile(
             leading: new Icon(Icons.description,
-              size: 24.0,
+              size: 20.0,
               color: Colors.blue,
             ),
             title: Text('派工内容',
               style: new TextStyle(
-                  fontSize: 22.0,
+                  fontSize: 20.0,
                   fontWeight: FontWeight.w400
               ),
             ),
@@ -478,18 +530,18 @@ class _EngineerVoucherPageState extends State<EngineerVoucherPage> {
             ],
           ),
         ),
-        isExpanded: _isExpandedDetail,
+        isExpanded: _expandList[2],
       ),
       new ExpansionPanel(
         headerBuilder: (context, isExpanded) {
           return ListTile(
             leading: new Icon(Icons.perm_contact_calendar,
-              size: 24.0,
+              size: 20.0,
               color: Colors.blue,
             ),
             title: Text('服务详情信息',
               style: new TextStyle(
-                  fontSize: 22.0,
+                  fontSize: 20.0,
                   fontWeight: FontWeight.w400
               ),
             ),
@@ -506,30 +558,30 @@ class _EngineerVoucherPageState extends State<EngineerVoucherPage> {
               new Divider(
                 color: Colors.grey,
               ),
-              widget.status!=0&&widget.status!=1?BuildWidget.buildRow('故障现象/错误代码/事由', _faultCode.text):buildEditor('故障现象/\n错误代码/事由', _faultCode),
-              widget.status!=0&&widget.status!=1?BuildWidget.buildRow('工作内容', _jobContent.text):buildEditor('工作内容', _jobContent),
+              widget.status!=0&&widget.status!=1?BuildWidget.buildRow('故障现象/错误代码/事由', _faultCode.text):buildEditor('故障现象/\n错误代码/事由', _faultCode, focusNode: _focusJournal[4]),
+              widget.status!=0&&widget.status!=1?BuildWidget.buildRow('工作内容', _jobContent.text):buildEditor('工作内容', _jobContent, focusNode: _focusJournal[2]),
               widget.status!=0&&widget.status!=1?BuildWidget.buildRow('服务结果', _currentResult):BuildWidget.buildDropdownLeft('服务结果：', _currentResult, _dropDownMenuItems, changedDropDownMethod),
-              _currentResult=='完成'?new Container():widget.status!=0&&widget.status!=1?BuildWidget.buildRow('待跟进问题', _followProblem.text):buildEditor('待跟进问题', _followProblem),
+              _currentResult=='完成'?new Container():widget.status!=0&&widget.status!=1?BuildWidget.buildRow('待跟进问题', _followProblem.text):buildEditor('待跟进问题', _followProblem, focusNode: _focusJournal[3]),
               //_currentResult=='完成'?new Container():widget.status!=0&&widget.status!=1?BuildWidget.buildRow('待确认问题', _unconfirmed.text):buildEditor('待确认问题', _unconfirmed),
               widget.status!=0&&widget.status!=1?BuildWidget.buildRow('建议留言', _advice.text):buildEditor('建议留言', _advice),
               new Divider(),
-              widget.status!=0&&widget.status!=1?BuildWidget.buildRow('客户姓名', _customerName.text):BuildWidget.buildInputLeft('客户姓名:', _customerName, lines: 1),
-              widget.status!=0&&widget.status!=1?BuildWidget.buildRow('客户电话', _customerNumber.text):BuildWidget.buildInputLeft('客户电话:', _customerNumber, lines: 1),
+              widget.status!=0&&widget.status!=1?BuildWidget.buildRow('客户姓名', _customerName.text):BuildWidget.buildInputLeft('客户姓名:', _customerName, lines: 1, focusNode: _focusJournal[1]),
+              widget.status!=0&&widget.status!=1?BuildWidget.buildRow('客户电话', _customerNumber.text):BuildWidget.buildInputLeft('客户电话:', _customerNumber, lines: 1, focusNode: _focusJournal[0]),
               widget.status==0||widget.status==1?new Padding(
                 padding: EdgeInsets.symmetric(vertical: 5.0),
                 child: new Text('客户签名：',
                   style: new TextStyle(
-                      fontSize: 20.0,
+                      fontSize: 16.0,
                       fontWeight: FontWeight.w600
                   ),
                 ),
               ):BuildWidget.buildRow('客户签名', ''),
               widget.status==0||widget.status==1?new RaisedButton(onPressed: () {toSignature(context);}, child: new Icon(Icons.add, color: Colors.white,)):new Container(),
-              _img!=null?new Container(width: 400.0, height: 400.0, child: new Image.memory(Uint8List.fromList(_img))):new Container()
+              _img!=null?new Container(width: 400.0, height: 400.0, child: BuildWidget.buildPhotoPageList(context, _img)):new Container()
             ],
           ),
         ),
-        isExpanded: _isExpandedAssign,
+        isExpanded: _expandList[3],
       ),
     ]);
     return _list;
@@ -576,7 +628,7 @@ class _EngineerVoucherPageState extends State<EngineerVoucherPage> {
         actions: <Widget>[
         ],
       ),
-      body: _dispatch.isEmpty?new Center(child: new SpinKitRotatingPlain(color: Colors.blue)):new Padding(
+      body: _dispatch.isEmpty?new Center(child: new SpinKitThreeBounce(color: Colors.blue)):new Padding(
         padding: EdgeInsets.symmetric(vertical: 5.0),
         child: new Card(
           child: new ListView(
@@ -585,20 +637,14 @@ class _EngineerVoucherPageState extends State<EngineerVoucherPage> {
                 animationDuration: Duration(milliseconds: 200),
                 expansionCallback: (index, isExpanded) {
                   setState(() {
-                    if (index == 0) {
-                      _dispatch['Request']['RequestType']['ID']==14?_isExpandedDetail=!isExpanded:_isExpandedBasic = !isExpanded;
-                    } else {
-                      if (index == 1) {
-                        _dispatch['Request']['RequestType']['ID']==14?_isExpandedAssign=!isExpanded:_isExpandedDetail = !isExpanded;
-                      } else {
-                        _isExpandedAssign =!isExpanded;
-                      }
-                    }
+                    _dispatch['Request']['RequestType']['ID'] !=14?
+                    _expandList[index] = !isExpanded:
+                    _expandList[index+1] = !isExpanded;
                   });
                 },
                 children: buildExpansion(),
               ),
-              SizedBox(height: 24.0),
+              SizedBox(height: 20.0),
               new Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 mainAxisSize: MainAxisSize.max,

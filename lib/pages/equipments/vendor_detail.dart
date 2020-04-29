@@ -172,23 +172,27 @@ class _VendorDetailState extends State<VendorDetail> {
         });
   }
 
+  List<FocusNode> _focusVendor = new List(3).map((item) {
+    return new FocusNode();
+  }).toList();
+
   Future<Null> saveVendor() async {
     if (name.text.isEmpty) {
       showDialog(context: context, builder: (context) => CupertinoAlertDialog(
         title: new Text('供应商名称不可为空'),
-      ));
+      )).then((result) => FocusScope.of(context).requestFocus(_focusVendor[0]));
       return;
     }
     if (province == "") {
       showDialog(context: context, builder: (context) => CupertinoAlertDialog(
         title: new Text('供应商省份不可为空'),
-      ));
+      )).then((result) => FocusScope.of(context).requestFocus(_focusVendor[1]));
       return;
     }
     if (contact.text.isEmpty) {
       showDialog(context: context, builder: (context) => CupertinoAlertDialog(
         title: new Text('供应商联系人不可为空'),
-      ));
+      )).then((result) => FocusScope.of(context).requestFocus(_focusVendor[2]));
       return;
     }
     var prefs = await _prefs;
@@ -258,7 +262,7 @@ class _VendorDetailState extends State<VendorDetail> {
           children: <Widget>[
             new Container(
               width: 100.0,
-              child: Image.file(image),
+              child: BuildWidget.buildPhotoPageFile(context, image),
             ),
             new Padding(
               padding: EdgeInsets.symmetric(horizontal: 0.0),
@@ -295,7 +299,7 @@ class _VendorDetailState extends State<VendorDetail> {
           value: method,
           child: new Text(
             method,
-            style: new TextStyle(fontSize: 20.0),
+            style: new TextStyle(fontSize: 16.0),
           )));
     }
     return items;
@@ -310,7 +314,7 @@ class _VendorDetailState extends State<VendorDetail> {
             flex: 4,
             child: new Text(
               labelText,
-              style: new TextStyle(fontSize: 20.0, fontWeight: FontWeight.w600),
+              style: new TextStyle(fontSize: 16.0, fontWeight: FontWeight.w600),
             ),
           ),
           new Expanded(
@@ -318,7 +322,7 @@ class _VendorDetailState extends State<VendorDetail> {
             child: new Text(
               defaultText,
               style: new TextStyle(
-                  fontSize: 20.0,
+                  fontSize: 16.0,
                   fontWeight: FontWeight.w400,
                   color: Colors.black54),
             ),
@@ -375,7 +379,7 @@ class _VendorDetailState extends State<VendorDetail> {
                               title: Text(
                                 '供应商基本信息',
                                 style: new TextStyle(
-                                    fontSize: 22.0,
+                                    fontSize: 20.0,
                                     fontWeight: FontWeight.w400),
                               ),
                             );
@@ -385,12 +389,12 @@ class _VendorDetailState extends State<VendorDetail> {
                             child: new Column(
                               children: <Widget>[
                                 BuildWidget.buildRow('系统编号', oid),
-                                widget.editable?BuildWidget.buildInput('名称', name, maxLength: 50):BuildWidget.buildRow('名称', name.text),
+                                widget.editable?BuildWidget.buildInput('名称', name, maxLength: 50, focusNode: _focusVendor[0]):BuildWidget.buildRow('名称', name.text),
                                 widget.editable?BuildWidget.buildDropdown('类型', currentType, dropdownType, changeType):BuildWidget.buildRow('类型', currentType),
                                 widget.editable?BuildWidget.buildDropdown('省份', currentProvince, dropdownProvince, changeProvince):BuildWidget.buildRow('省份', currentProvince),
                                 widget.editable?BuildWidget.buildInput('电话', mobile, maxLength: 20):BuildWidget.buildRow('电话', mobile.text),
                                 widget.editable?BuildWidget.buildInput('地址', address, maxLength: 255):BuildWidget.buildRow('地址', address.text),
-                                widget.editable?BuildWidget.buildInput('联系人', contact):BuildWidget.buildRow('联系人', contact.text),
+                                widget.editable?BuildWidget.buildInput('联系人', contact, focusNode: _focusVendor[2]):BuildWidget.buildRow('联系人', contact.text),
                                 widget.editable?BuildWidget.buildInput('联系人电话', contactMobile, maxLength: 20):BuildWidget.buildRow('联系人电话', contactMobile.text),
                                 widget.editable?BuildWidget.buildRadio('供应商经营状态', vendorStatus,
                                     currentStatus, changeStatus):BuildWidget.buildRow('供应商经营状态', currentStatus),

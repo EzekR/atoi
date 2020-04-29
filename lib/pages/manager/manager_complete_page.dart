@@ -63,7 +63,7 @@ class _ManagerCompletePageState extends State<ManagerCompletePage> {
           value: method,
           child: new Text(
             method,
-            style: new TextStyle(fontSize: 20.0),
+            style: new TextStyle(fontSize: 16.0),
           )));
     }
     return items;
@@ -203,7 +203,7 @@ class _ManagerCompletePageState extends State<ManagerCompletePage> {
       List<Widget> _list = [];
       for (var file in imageBytes) {
         _list.add(new Container(
-          child: new PhotoView(imageProvider: MemoryImage(file)),
+          child: BuildWidget.buildPhotoPageList(context, file),
           width: 400.0,
           height: 400.0,
         ));
@@ -220,7 +220,7 @@ class _ManagerCompletePageState extends State<ManagerCompletePage> {
       List<Widget> _list = [];
       for (var file in reportImages) {
         _list.add(new Container(
-          child: new PhotoView(imageProvider: MemoryImage(file)),
+          child: BuildWidget.buildPhotoPageList(context, file),
           width: 400.0,
           height: 400.0,
         ));
@@ -264,7 +264,7 @@ class _ManagerCompletePageState extends State<ManagerCompletePage> {
     return new TextField(
       decoration: InputDecoration(
           labelText: labelText,
-          labelStyle: new TextStyle(fontSize: 20.0),
+          labelStyle: new TextStyle(fontSize: 16.0),
           disabledBorder: UnderlineInputBorder(
               borderSide: BorderSide(color: Colors.grey, width: 1))),
       controller: new TextEditingController(text: defaultText),
@@ -282,7 +282,7 @@ class _ManagerCompletePageState extends State<ManagerCompletePage> {
             flex: 4,
             child: new Text(
               labelText,
-              style: new TextStyle(fontSize: 20.0, fontWeight: FontWeight.w600),
+              style: new TextStyle(fontSize: 16.0, fontWeight: FontWeight.w600),
             ),
           ),
           new Expanded(
@@ -290,7 +290,7 @@ class _ManagerCompletePageState extends State<ManagerCompletePage> {
             child: new Text(
               defaultText,
               style: new TextStyle(
-                  fontSize: 20.0,
+                  fontSize: 16.0,
                   fontWeight: FontWeight.w400,
                   color: Colors.black54),
             ),
@@ -449,12 +449,9 @@ class _ManagerCompletePageState extends State<ManagerCompletePage> {
               _acc['ImageNew'] != null &&
                       _acc['ImageNew']['FileContent'] != null
                   ? new Container(
-                      width: 120.0,
+                      width: 116.0,
                       height: 160,
-                      child: new PhotoView(
-                        imageProvider:
-                            MemoryImage(_acc['ImageNew']['FileContent']),
-                      ),
+                      child: BuildWidget.buildPhotoPageList(context, _acc['ImageNew']['FileContent'])
                     )
                   : new Container()
             ],
@@ -469,12 +466,9 @@ class _ManagerCompletePageState extends State<ManagerCompletePage> {
               _acc['ImageOld'] != null &&
                       _acc['ImageOld']['FileContent'] != null
                   ? new Container(
-                      width: 120.0,
+                      width: 116.0,
                       height: 160,
-                      child: new PhotoView(
-                        imageProvider:
-                            MemoryImage(_acc['ImageOld']['FileContent']),
-                      ),
+                      child: BuildWidget.buildPhotoPageList(context, _acc['ImageOld']['FileContent'])
                     )
                   : new Container()
             ],
@@ -496,13 +490,13 @@ class _ManagerCompletePageState extends State<ManagerCompletePage> {
             return ListTile(
               leading: new Icon(
                 Icons.info,
-                size: 24.0,
+                size: 20.0,
                 color: Colors.blue,
               ),
               title: Text(
                 '设备基本信息',
                 style:
-                    new TextStyle(fontSize: 22.0, fontWeight: FontWeight.w400),
+                    new TextStyle(fontSize: 20.0, fontWeight: FontWeight.w400),
               ),
             );
           },
@@ -522,12 +516,12 @@ class _ManagerCompletePageState extends State<ManagerCompletePage> {
           return ListTile(
             leading: new Icon(
               Icons.description,
-              size: 24.0,
+              size: 20.0,
               color: Colors.blue,
             ),
             title: Text(
               '请求详细信息',
-              style: new TextStyle(fontSize: 22.0, fontWeight: FontWeight.w400),
+              style: new TextStyle(fontSize: 20.0, fontWeight: FontWeight.w400),
             ),
           );
         },
@@ -571,12 +565,12 @@ class _ManagerCompletePageState extends State<ManagerCompletePage> {
           return ListTile(
             leading: new Icon(
               Icons.description,
-              size: 24.0,
+              size: 20.0,
               color: Colors.blue,
             ),
             title: Text(
               '派工内容信息',
-              style: new TextStyle(fontSize: 22.0, fontWeight: FontWeight.w400),
+              style: new TextStyle(fontSize: 20.0, fontWeight: FontWeight.w400),
             ),
           );
         },
@@ -607,13 +601,13 @@ class _ManagerCompletePageState extends State<ManagerCompletePage> {
           return ListTile(
               leading: new Icon(
                 Icons.description,
-                size: 24.0,
+                size: 20.0,
                 color: Colors.blue,
               ),
               title: Text(
                 '凭证信息',
                 style:
-                    new TextStyle(fontSize: 22.0, fontWeight: FontWeight.w400),
+                    new TextStyle(fontSize: 20.0, fontWeight: FontWeight.w400),
               ));
         },
         body: new Padding(
@@ -638,11 +632,11 @@ class _ManagerCompletePageState extends State<ManagerCompletePage> {
                 children: <Widget>[
                   new Padding(
                     padding: const EdgeInsets.all(10.0),
-                    child: Image.memory(
-                      _imageBytes ?? [],
-                      width: 300.0,
+                    child: Container(
                       height: 300.0,
-                    ),
+                      width: 300.0,
+                      child: BuildWidget.buildPhotoPageList(context, _imageBytes??[]),
+                    )
                   ),
                 ],
               ),
@@ -661,12 +655,12 @@ class _ManagerCompletePageState extends State<ManagerCompletePage> {
           return ListTile(
             leading: new Icon(
               Icons.description,
-              size: 24.0,
+              size: 20.0,
               color: Colors.blue,
             ),
             title: Text(
               '报告信息',
-              style: new TextStyle(fontSize: 22.0, fontWeight: FontWeight.w400),
+              style: new TextStyle(fontSize: 20.0, fontWeight: FontWeight.w400),
             ),
           );
         },
@@ -688,13 +682,13 @@ class _ManagerCompletePageState extends State<ManagerCompletePage> {
           return ListTile(
               leading: new Icon(
                 Icons.description,
-                size: 24.0,
+                size: 20.0,
                 color: Colors.blue,
               ),
               title: Text(
                 '零件信息',
                 style:
-                    new TextStyle(fontSize: 22.0, fontWeight: FontWeight.w400),
+                    new TextStyle(fontSize: 20.0, fontWeight: FontWeight.w400),
               ));
         },
         body: new Padding(
@@ -735,7 +729,7 @@ class _ManagerCompletePageState extends State<ManagerCompletePage> {
       ),
       body: _request.isEmpty
           ? new Center(
-              child: new SpinKitRotatingPlain(
+              child: new SpinKitThreeBounce(
                 color: Colors.blue,
               ),
             )

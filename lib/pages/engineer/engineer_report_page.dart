@@ -11,6 +11,9 @@ import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'dart:typed_data';
 import 'package:atoi/models/models.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter_cupertino_date_picker/flutter_cupertino_date_picker.dart';
+import 'package:date_format/date_format.dart';
+import 'package:photo_view/photo_view.dart';
 
 /// 工程师报告页面
 class EngineerReportPage extends StatefulWidget {
@@ -30,6 +33,7 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
   var _isExpandedDetail = false;
   var _isExpandedAssign = true;
   var _isExpandedComponent = false;
+  List<bool> _expandList = [false, false, false, true, false];
   bool _isDelayed = false;
   var _accessory = [];
   ConstantsModel model;
@@ -301,6 +305,10 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
     }
   }
 
+  List<FocusNode> _focusReport = new List(11).map((item) {
+    return new FocusNode();
+  }).toList();
+
   Future<Null> uploadReport(int statusId) async {
     if (_dispatch['RequestType']['ID'] == 9 && _acceptDate == 'YY-MM-DD' && _currentType != '通用作业报告' && statusId == 2) {
       showDialog(
@@ -316,7 +324,7 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
             context: context,
             builder: (context) => CupertinoAlertDialog(
               title: new Text('误工说明不可为空'),
-            ));
+            )).then((result) => FocusScope.of(context).requestFocus(_focusReport[0]));
         return;
       }
       if ((_dispatch['RequestType']['ID'] == 3 && _currentPrivate == '是' && _imageList == null) || (_dispatch['RequestType']['ID'] == 2 && _currentResult == '待第三方支持' && _currentProvider != '管理方' && _imageList == null)) {
@@ -332,7 +340,7 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
             context: context,
             builder: (context) => CupertinoAlertDialog(
               title: new Text('错误代码不可为空'),
-            ));
+            )).then((result) => FocusScope.of(context).requestFocus(_focusReport[1]));
         return;
       }
       if (_dispatch['RequestType']['ID'] == 1 && _currentStatus == null) {
@@ -348,7 +356,7 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
             context: context,
             builder: (context) => CupertinoAlertDialog(
               title: new Text('强检要求不可为空'),
-            ));
+            )).then((result) => FocusScope.of(context).requestFocus(_focusReport[2]));
         return;
       }
       if (_dispatch['RequestType']['ID'] == 6 && (_purchaseAmount.text.isEmpty || double.tryParse(_purchaseAmount.text) == 0.0 || double.tryParse(_purchaseAmount.text) >= 100000000.0)) {
@@ -356,7 +364,7 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
             context: context,
             builder: (context) => CupertinoAlertDialog(
               title: new Text('资产金额需介于0到99999999.99之间'),
-            ));
+            )).then((result) => FocusScope.of(context).requestFocus(_focusReport[3]));
         return;
       }
       if (_dispatch['RequestType']['ID'] == 1 && _solution.text.isEmpty) {
@@ -364,7 +372,7 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
             context: context,
             builder: (context) => CupertinoAlertDialog(
               title: new Text('详细处理方法不可为空'),
-            ));
+            )).then((result) => FocusScope.of(context).requestFocus(_focusReport[4]));
         return;
       }
       if (_analysis.text.isEmpty) {
@@ -372,7 +380,7 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
             context: context,
             builder: (context) => CupertinoAlertDialog(
               title: new Text(_dispatch['RequestType']['ID']==1?'分析原因不可为空':'报告明细不可为空'),
-            ));
+            )).then((result) => FocusScope.of(context).requestFocus(_focusReport[5]));
         return;
       }
       if (_result.text.isEmpty) {
@@ -380,7 +388,7 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
             context: context,
             builder: (context) => CupertinoAlertDialog(
               title: new Text('结果不可为空'),
-            ));
+            )).then((result) => FocusScope.of(context).requestFocus(_focusReport[6]));
         return;
       }
       if (_currentResult == '问题升级' && _unsolved.text.isEmpty) {
@@ -388,7 +396,7 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
             context: context,
             builder: (context) => CupertinoAlertDialog(
               title: new Text('问题升级不可为空'),
-            ));
+            )).then((result) => FocusScope.of(context).requestFocus(_focusReport[7]));
         return;
       }
     }
@@ -398,7 +406,7 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
             context: context,
             builder: (context) => CupertinoAlertDialog(
               title: new Text('报告明细不可为空'),
-            ));
+            )).then((result) => FocusScope.of(context).requestFocus(_focusReport[5]));
         return;
       }
       if (_result.text.isEmpty) {
@@ -406,7 +414,7 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
             context: context,
             builder: (context) => CupertinoAlertDialog(
               title: new Text('结果不可为空'),
-            ));
+            )).then((result) => FocusScope.of(context).requestFocus(_focusReport[6]));
         return;
       }
       if (_currentResult == '问题升级' && _unsolved.text.isEmpty) {
@@ -414,7 +422,7 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
             context: context,
             builder: (context) => CupertinoAlertDialog(
               title: new Text('问题升级不可为空'),
-            ));
+            )).then((result) => FocusScope.of(context).requestFocus(_focusReport[7]));
         return;
       }
       if (_isDelayed && _delay.text.isEmpty) {
@@ -422,7 +430,7 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
             context: context,
             builder: (context) => CupertinoAlertDialog(
               title: new Text('误工说明不可为空'),
-            ));
+            )).then((result) => FocusScope.of(context).requestFocus(_focusReport[0]));
         return;
       }
     }
@@ -507,19 +515,6 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
     }
   }
 
-  Future<String> pickDate({String initialTime}) async {
-    DateTime _time;
-    _time = DateTime.tryParse(initialTime)??DateTime.now();
-    var val = await showDatePicker(
-        context: context,
-        initialDate: _time,
-        firstDate:
-        new DateTime.now().subtract(new Duration(days: 3650)), // 减 30 天
-        lastDate: new DateTime.now().add(new Duration(days: 3650)), // 加 30 天
-        locale: Locale('zh'));
-    return val==null?initialTime:val.toString().split(' ')[0];
-  }
-
   List iterateMap(Map item) {
     var _list = [];
     item.forEach((key, val) {
@@ -572,22 +567,23 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
           value: method,
           child: new Text(
             method,
-            style: new TextStyle(fontSize: 20.0),
+            style: new TextStyle(fontSize: 16.0),
           )));
     }
     return items;
   }
 
   Column buildField(String label, TextEditingController controller,
-      {String hintText, int maxLength}) {
+      {String hintText, int maxLength, FocusNode focusNode}) {
     String hint = hintText ?? '';
     maxLength = maxLength??500;
+    focusNode = focusNode??new FocusNode();
     return new Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
         new Text(
           label,
-          style: new TextStyle(fontSize: 20.0, fontWeight: FontWeight.w600),
+          style: new TextStyle(fontSize: 16.0, fontWeight: FontWeight.w600),
         ),
         new TextField(
           controller: controller,
@@ -635,14 +631,14 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
     return new TextField(
       decoration: InputDecoration(
           labelText: labelText,
-          labelStyle: new TextStyle(fontSize: 20.0),
+          labelStyle: new TextStyle(fontSize: 16.0),
           fillColor: AppConstants.AppColors['app_accent_m'],
           filled: true,
           disabledBorder: UnderlineInputBorder(
               borderSide: BorderSide(color: Colors.grey, width: 1))),
       controller: new TextEditingController(text: defaultText),
       enabled: isEnabled,
-      style: new TextStyle(fontSize: 20.0),
+      style: new TextStyle(fontSize: 16.0),
     );
   }
 
@@ -655,7 +651,7 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
             flex: 4,
             child: new Text(
               labelText,
-              style: new TextStyle(fontSize: 20.0, fontWeight: FontWeight.w600),
+              style: new TextStyle(fontSize: 16.0, fontWeight: FontWeight.w600),
             ),
           ),
           new Expanded(
@@ -663,7 +659,7 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
             child: new Text(
               defaultText,
               style: new TextStyle(
-                  fontSize: 20.0,
+                  fontSize: 16.0,
                   fontWeight: FontWeight.w400,
                   color: Colors.black54),
             ),
@@ -684,7 +680,7 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
             padding: EdgeInsets.symmetric(vertical: 5.0),
             child: new Text(
               title,
-              style: new TextStyle(fontSize: 20.0, fontWeight: FontWeight.w600),
+              style: new TextStyle(fontSize: 16.0, fontWeight: FontWeight.w600),
             ),
           ),
         ),
@@ -707,8 +703,8 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
         alignment: FractionalOffset(1.0, 0),
         children: <Widget>[
           new Container(
-            width: 100.0,
-            child: Image.memory(Uint8List.fromList(_imageList)),
+            width: 200.0,
+            child: BuildWidget.buildPhotoPageList(context, _imageList),
           ),
           widget.status == 0 || widget.status == 1
               ? new Padding(
@@ -751,15 +747,15 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
     if (_currentType == '通用作业报告') {
       _list.addAll(
         [
-          _edit?buildField('报告明细:', _analysis):BuildWidget.buildRow('报告明细', _analysis.text),
-          _edit?buildField('结果:', _result):BuildWidget.buildRow('结果', _result.text),
+          _edit?buildField('报告明细:', _analysis, focusNode: _focusReport[5]):BuildWidget.buildRow('报告明细', _analysis.text),
+          _edit?buildField('结果:', _result, focusNode: _focusReport[6]):BuildWidget.buildRow('结果', _result.text),
         ]
       );
       _list.addAll(
           [
             _edit?BuildWidget.buildDropdownLeft('作业报告结果:', _currentResult, _dropDownMenuItems, changedDropDownMethod):BuildWidget.buildRow('作业报告结果', _currentResult),
             !_edit&&_currentResult=='问题升级'?BuildWidget.buildRow('问题升级', _unsolved.text):new Container(),
-            _edit&&_currentResult=='问题升级'?buildField('问题升级:', _unsolved):new Container(),
+            _edit&&_currentResult=='问题升级'?buildField('问题升级:', _unsolved, focusNode: _focusReport[7]):new Container(),
             _edit&&_currentResult=='待第三方支持'?BuildWidget.buildDropdownLeft('服务提供方:', _currentProvider, _dropDownMenuProviders, changedDropDownProvider):new Container(),
             !_edit&&_currentResult=='待第三方支持'?BuildWidget.buildRow('服务提供方', _currentProvider):new Container(),
             _edit?buildField('备注:', _comments):BuildWidget.buildRow('备注', _comments.text),
@@ -771,30 +767,30 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
         case 1:
           _list.addAll(
             [
-              _edit?buildField('错误代码:', _code, maxLength: 20):BuildWidget.buildRow('错误代码', _code.text),
+              _edit?buildField('错误代码:', _code, maxLength: 20, focusNode: _focusReport[1]):BuildWidget.buildRow('错误代码', _code.text),
               BuildWidget.buildRow('设备状态（报修）', _dispatch['MachineStatus']['Name']),
               _edit?BuildWidget.buildDropdownLeft('设备状态（离场）:', _currentStatus, _dropDownMenuStatus, changedStatus):BuildWidget.buildRow('设备状态（离场）', _currentStatus??''),
-              _edit?buildField('详细故障描述:', _description):BuildWidget.buildRow('详细故障描述', _description.text),
-              _edit?buildField('分析原因:', _analysis):BuildWidget.buildRow('分析原因', _analysis.text),
-              _edit?buildField('详细处理方法:', _solution):BuildWidget.buildRow('详细处理方法', _solution.text),
-              _edit?buildField('结果:', _result):BuildWidget.buildRow('结果', _result.text),
+              _edit?buildField('详细故障描述:', _description, focusNode: _focusReport[2]):BuildWidget.buildRow('详细故障描述', _description.text),
+              _edit?buildField('分析原因:', _analysis, focusNode: _focusReport[5]):BuildWidget.buildRow('分析原因', _analysis.text),
+              _edit?buildField('详细处理方法:', _solution, focusNode: _focusReport[4]):BuildWidget.buildRow('详细处理方法', _solution.text),
+              _edit?buildField('结果:', _result, focusNode: _focusReport[6]):BuildWidget.buildRow('结果', _result.text),
             ]
           );
           break;
         case 4:
           _list.addAll(
               [
-                _edit?buildField('报告明细:', _analysis):BuildWidget.buildRow('报告明细', _analysis.text),
-                _edit?buildField('结果:', _result):BuildWidget.buildRow('结果', _result.text),
+                _edit?buildField('报告明细:', _analysis, focusNode: _focusReport[5]):BuildWidget.buildRow('报告明细', _analysis.text),
+                _edit?buildField('结果:', _result, focusNode: _focusReport[6]):BuildWidget.buildRow('结果', _result.text),
               ]
           );
           break;
         case 3:
           _list.addAll(
             [
-              _edit?buildField('强检要求:', _description, hintText: 'FDA, Manufacture, Hospital, Etc...'):BuildWidget.buildRow('强检要求', _description.text),
-              _edit?buildField('报告明细:', _analysis):BuildWidget.buildRow('报告明细', _analysis.text),
-              _edit?buildField('结果:', _result):BuildWidget.buildRow('结果', _result.text),
+              _edit?buildField('强检要求:', _description, hintText: 'FDA, Manufacture, Hospital, Etc...', focusNode: _focusReport[2]):BuildWidget.buildRow('强检要求', _description.text),
+              _edit?buildField('报告明细:', _analysis, focusNode: _focusReport[5]):BuildWidget.buildRow('报告明细', _analysis.text),
+              _edit?buildField('结果:', _result, focusNode: _focusReport[6]):BuildWidget.buildRow('结果', _result.text),
               _edit?BuildWidget.buildRadioLeft('专用报告:', _isPrivate, _currentPrivate, changePrivate):BuildWidget.buildRow('专用报告', _currentPrivate),
               _edit?BuildWidget.buildRadioLeft('待召回:', _isRecall, _currentRecall, changeRecall):BuildWidget.buildRow('待召回', _currentRecall),
             ]
@@ -803,32 +799,32 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
         case 2:
           _list.addAll(
             [
-              _edit?buildField('报告明细:', _analysis):BuildWidget.buildRow('报告明细', _analysis.text),
-              _edit?buildField('结果:', _result):BuildWidget.buildRow('结果', _result.text),
+              _edit?buildField('报告明细:', _analysis, focusNode: _focusReport[5]):BuildWidget.buildRow('报告明细', _analysis.text),
+              _edit?buildField('结果:', _result, focusNode: _focusReport[6]):BuildWidget.buildRow('结果', _result.text),
             ]
           );
           break;
         case 5:
           _list.addAll(
               [
-                _edit?buildField('报告明细:', _analysis):BuildWidget.buildRow('报告明细', _analysis.text),
-                _edit?buildField('结果:', _result):BuildWidget.buildRow('结果', _result.text),
+                _edit?buildField('报告明细:', _analysis, focusNode: _focusReport[5]):BuildWidget.buildRow('报告明细', _analysis.text),
+                _edit?buildField('结果:', _result, focusNode: _focusReport[6]):BuildWidget.buildRow('结果', _result.text),
               ]
           );
           break;
         case 7:
           _list.addAll(
               [
-                _edit?buildField('报告明细:', _analysis):BuildWidget.buildRow('报告明细', _analysis.text),
-                _edit?buildField('结果:', _result):BuildWidget.buildRow('结果', _result.text),
+                _edit?buildField('报告明细:', _analysis, focusNode: _focusReport[5]):BuildWidget.buildRow('报告明细', _analysis.text),
+                _edit?buildField('结果:', _result, focusNode: _focusReport[6]):BuildWidget.buildRow('结果', _result.text),
               ]
           );
           break;
         case 9:
           _list.addAll(
               [
-                _edit?buildField('报告明细:', _analysis):BuildWidget.buildRow('报告明细', _analysis.text),
-                _edit?buildField('结果:', _result):BuildWidget.buildRow('结果', _result.text),
+                _edit?buildField('报告明细:', _analysis, focusNode: _focusReport[5]):BuildWidget.buildRow('报告明细', _analysis.text),
+                _edit?buildField('结果:', _result, focusNode: _focusReport[6]):BuildWidget.buildRow('结果', _result.text),
                 _edit?
                 new Padding(
                   padding: EdgeInsets.symmetric(vertical: 5.0),
@@ -843,7 +839,7 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
                             new Text(
                               '验收日期:',
                               style: new TextStyle(
-                                  fontSize: 20.0, fontWeight: FontWeight.w600),
+                                  fontSize: 16.0, fontWeight: FontWeight.w600),
                             )
                           ],
                         ),
@@ -853,7 +849,7 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
                         child: new Text(
                           _acceptDate,
                           style: new TextStyle(
-                              fontSize: 20.0,
+                              fontSize: 16.0,
                               fontWeight: FontWeight.w400,
                               color: Colors.black54
                           ),
@@ -864,10 +860,28 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
                         child: new IconButton(
                             icon: Icon(Icons.calendar_today, color: AppConstants.AppColors['btn_main'],),
                             onPressed: () async {
-                              var _date = await pickDate(initialTime: _acceptDate);
-                              setState(() {
-                                _acceptDate = _date;
-                              });
+                              DatePicker.showDatePicker(
+                                context,
+                                pickerTheme: DateTimePickerTheme(
+                                  showTitle: true,
+                                  confirm: Text('确认', style: TextStyle(color: Colors.blueAccent)),
+                                  cancel: Text('取消', style: TextStyle(color: Colors.redAccent)),
+                                ),
+                                minDateTime: DateTime.parse('2000-01-01'),
+                                maxDateTime: DateTime.parse('2030-01-01'),
+                                initialDateTime: DateTime.tryParse(_acceptDate)??DateTime.now(),
+                                dateFormat: 'yyyy-MM-dd',
+                                locale: DateTimePickerLocale.en_us,
+                                onClose: () => print(""),
+                                onCancel: () => print('onCancel'),
+                                onChange: (dateTime, List<int> index) {
+                                },
+                                onConfirm: (dateTime, List<int> index) {
+                                  setState(() {
+                                    _acceptDate = formatDate(dateTime, [yyyy,'-', mm, '-', dd]);
+                                  });
+                                },
+                              );
                             }),
                       ),
                     ],
@@ -879,17 +893,17 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
         case 6:
           _list.addAll(
               [
-                _edit?BuildWidget.buildInputLeft('资产金额:', _purchaseAmount, inputType: TextInputType.numberWithOptions(decimal: true), maxLength: 11, lines: 1):BuildWidget.buildRow('资产金额', _purchaseAmount.text),
-                _edit?buildField('报告明细:', _analysis):BuildWidget.buildRow('报告明细', _analysis.text),
-                _edit?buildField('结果:', _result):BuildWidget.buildRow('结果', _result.text),
+                _edit?BuildWidget.buildInputLeft('资产金额:', _purchaseAmount, inputType: TextInputType.numberWithOptions(decimal: true), maxLength: 11, lines: 1, focusNode: _focusReport[3]):BuildWidget.buildRow('资产金额', _purchaseAmount.text),
+                _edit?buildField('报告明细:', _analysis, focusNode: _focusReport[5]):BuildWidget.buildRow('报告明细', _analysis.text),
+                _edit?buildField('结果:', _result, focusNode: _focusReport[6]):BuildWidget.buildRow('结果', _result.text),
               ]
           );
           break;
         default:
           _list.addAll(
               [
-                _edit?buildField('报告明细:', _analysis):BuildWidget.buildRow('报告明细', _analysis.text),
-                _edit?buildField('结果:', _result):BuildWidget.buildRow('结果', _result.text),
+                _edit?buildField('报告明细:', _analysis, focusNode: _focusReport[5]):BuildWidget.buildRow('报告明细', _analysis.text),
+                _edit?buildField('结果:', _result, focusNode: _focusReport[6]):BuildWidget.buildRow('结果', _result.text),
               ]
           );
           break;
@@ -898,7 +912,7 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
       _list.addAll(
         [
           _edit?BuildWidget.buildDropdownLeft('作业报告结果:', _currentResult, _dropDownMenuItems, changedDropDownMethod):BuildWidget.buildRow('作业报告结果', _currentResult),
-          _edit&&_currentResult=='问题升级'?buildField('问题升级:', _unsolved):new Container(),
+          _edit&&_currentResult=='问题升级'?buildField('问题升级:', _unsolved, focusNode: _focusReport[7]):new Container(),
           !_edit&&_currentResult=='问题升级'?BuildWidget.buildRow('问题升级', _unsolved.text):new Container(),
           _edit&&_currentResult=='待第三方支持'?BuildWidget.buildDropdownLeft('服务提供方:', _currentProvider, _dropDownMenuProviders, changedDropDownProvider):new Container(),
           !_edit&&_currentResult=='待第三方支持'?BuildWidget.buildRow('服务提供方', _currentProvider):new Container(),
@@ -910,7 +924,7 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
 
     if (_edit && _isDelayed && _dispatch['RequestType']['ID'] == 1 && _dispatch['Request']['LastStatus']['ID'] == 1) {
       _list.add(
-          buildField('误工说明:', _delay)
+          buildField('误工说明:', _delay, focusNode: _focusReport[0])
       );
     }
     if (!_edit && _isDelayed && _dispatch['RequestType']['ID'] == 1 && _delay.text.isNotEmpty) {
@@ -926,7 +940,7 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
                   new Text(
                     '添加附件：',
                     style: new TextStyle(
-                        fontSize: 20.0, fontWeight: FontWeight.w600),
+                        fontSize: 16.0, fontWeight: FontWeight.w600),
                   ),
                   new IconButton(
                       icon: Icon(Icons.add_a_photo),
@@ -1004,8 +1018,7 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
                       _acc['ImageNew']['FileContent'] != null
                   ? new Container(
                       width: 100.0,
-                      child: new Image.memory(
-                          base64Decode(_acc['ImageNew']['FileContent'])),
+                      child: BuildWidget.buildPhotoPageList(context, base64Decode(_acc['ImageNew']['FileContent'])),
                     )
                   : new Container()
             ],
@@ -1021,8 +1034,7 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
                       _acc['ImageOld']['FileContent'] != null
                   ? new Container(
                       width: 100.0,
-                      child: new Image.memory(
-                          base64Decode(_acc['ImageOld']['FileContent'])),
+                      child: BuildWidget.buildPhotoPageList(context, base64Decode(_acc['ImageOld']['FileContent'])),
                     )
                   : new Container()
             ],
@@ -1061,13 +1073,13 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
             return ListTile(
               leading: new Icon(
                 Icons.info,
-                size: 24.0,
+                size: 20.0,
                 color: Colors.blue,
               ),
               title: Text(
                 '设备基本信息',
                 style:
-                    new TextStyle(fontSize: 22.0, fontWeight: FontWeight.w400),
+                    new TextStyle(fontSize: 20.0, fontWeight: FontWeight.w400),
               ),
             );
           },
@@ -1077,22 +1089,67 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
               children: buildEquipments(),
             ),
           ),
-          isExpanded: _isExpandedBasic,
+          isExpanded: _expandList[0],
         ),
       );
     }
+    _list.add(
+      new ExpansionPanel(
+        headerBuilder: (context, isExpanded) {
+          return ListTile(
+            leading: new Icon(
+              Icons.description,
+              size: 20.0,
+              color: Colors.blue,
+            ),
+            title: Text(
+              '请求详细信息',
+              style: new TextStyle(fontSize: 20.0, fontWeight: FontWeight.w400),
+            ),
+          );
+        },
+        body: new Padding(
+          padding: EdgeInsets.symmetric(horizontal: 8.0),
+          child: new Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            mainAxisSize: MainAxisSize.max,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              BuildWidget.buildRow('服务申请编号', _dispatch['Request']['OID']),
+              BuildWidget.buildRow('类型', _dispatch['Request']['SourceType']),
+              BuildWidget.buildRow('主题', _dispatch['Request']['SubjectName']),
+              BuildWidget.buildRow('请求人', _dispatch['Request']['RequestUser']['Name']),
+              BuildWidget.buildRow('请求状态', _dispatch['Request']['Status']['Name']),
+              _dispatch['Request']['RequestType']['ID'] == 1?BuildWidget.buildRow('机器状态', _dispatch['Request']['MachineStatus']['Name']):new Container(),
+              BuildWidget.buildRow(model.Remark[_dispatch['Request']['RequestType']['ID']], _dispatch['Request']['FaultDesc']),
+              _dispatch['Request']['RequestType']['ID'] == 2 ||
+                  _dispatch['Request']['RequestType']['ID'] == 3 ||
+                  _dispatch['Request']['RequestType']['ID'] == 7
+                  ? BuildWidget.buildRow(
+                  model.RemarkType[_dispatch['Request']['RequestType']['ID']],
+                  _dispatch['Request']['FaultType']['Name'])
+                  : new Container(),
+              _dispatch['Request']['Status']['ID'] == 1
+                  ? new Container()
+                  : BuildWidget.buildRow('处理方式', _dispatch['Request']['DealType']['Name']),
+            ],
+          ),
+        ),
+        isExpanded: _expandList[1],
+      ),
+    );
     _list.addAll([
       new ExpansionPanel(
         headerBuilder: (context, isExpanded) {
           return ListTile(
             leading: new Icon(
               Icons.description,
-              size: 24.0,
+              size: 20.0,
               color: Colors.blue,
             ),
             title: Text(
               '派工内容',
-              style: new TextStyle(fontSize: 22.0, fontWeight: FontWeight.w400),
+              style: new TextStyle(fontSize: 20.0, fontWeight: FontWeight.w400),
             ),
           );
         },
@@ -1112,19 +1169,19 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
             ],
           ),
         ),
-        isExpanded: _isExpandedDetail,
+        isExpanded: _expandList[2],
       ),
       new ExpansionPanel(
         headerBuilder: (context, isExpanded) {
           return ListTile(
             leading: new Icon(
               Icons.perm_contact_calendar,
-              size: 24.0,
+              size: 20.0,
               color: Colors.blue,
             ),
             title: Text(
               '作业报告信息',
-              style: new TextStyle(fontSize: 22.0, fontWeight: FontWeight.w400),
+              style: new TextStyle(fontSize: 20.0, fontWeight: FontWeight.w400),
             ),
           );
         },
@@ -1135,7 +1192,7 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
             children: buildReportList(),
           ),
         ),
-        isExpanded: _isExpandedAssign,
+        isExpanded: _expandList[3],
       ),
     ]);
     if (_dispatch['RequestType']['ID'] != 4 && _dispatch['RequestType']['ID'] != 12 && _dispatch['RequestType']['ID'] != 14) {
@@ -1145,13 +1202,13 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
             return ListTile(
               leading: new Icon(
                 Icons.settings,
-                size: 24.0,
+                size: 20.0,
                 color: Colors.blue,
               ),
               title: Text(
                 '零配件信息',
                 style:
-                    new TextStyle(fontSize: 22.0, fontWeight: FontWeight.w400),
+                    new TextStyle(fontSize: 20.0, fontWeight: FontWeight.w400),
               ),
             );
           },
@@ -1161,7 +1218,7 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
               children: buildAccessory(),
             ),
           ),
-          isExpanded: _isExpandedComponent,
+          isExpanded: _expandList[4],
         ),
       );
     }
@@ -1218,7 +1275,7 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
       ),
       body: _dispatch.isEmpty||_reportType.isEmpty
           ? new Center(
-              child: new SpinKitRotatingPlain(color: Colors.blue),
+              child: new SpinKitThreeBounce(color: Colors.blue),
             )
           : new Padding(
               padding: EdgeInsets.symmetric(vertical: 5.0),
@@ -1229,30 +1286,14 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
                       animationDuration: Duration(milliseconds: 200),
                       expansionCallback: (index, isExpanded) {
                         setState(() {
-                          if (index == 0) {
-                            _dispatch['Request']['RequestType']['ID'] == 14
-                                ? _isExpandedDetail = !isExpanded
-                                : _isExpandedBasic = !isExpanded;
-                          } else {
-                            if (index == 1) {
-                              _dispatch['Request']['RequestType']['ID'] == 14
-                                  ? _isExpandedAssign = !isExpanded
-                                  : _isExpandedDetail = !isExpanded;
-                            } else {
-                              if (index == 2) {
-                                _dispatch['Request']['RequestType']['ID'] == 14
-                                    ? _isExpandedComponent = !isExpanded
-                                    : _isExpandedAssign = !isExpanded;
-                              } else {
-                                _isExpandedComponent = !isExpanded;
-                              }
-                            }
-                          }
+                          _dispatch['Request']['RequestType']['ID'] !=14?
+                          _expandList[index] = !isExpanded:
+                          _expandList[index+1] = !isExpanded;
                         });
                       },
                       children: buildExpansion(),
                     ),
-                    SizedBox(height: 24.0),
+                    SizedBox(height: 20.0),
                     widget.status == 0 || widget.status == 1
                         ? new Row(
                             mainAxisAlignment: MainAxisAlignment.spaceEvenly,

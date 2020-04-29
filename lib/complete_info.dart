@@ -26,6 +26,7 @@ class _CompleteInfoState extends State<CompleteInfo> {
   var dropdownItems;
   var emailReg = RegExp(r"[w!#$%&'*+/=?^_`{|}~-]+(?:.[w!#$%&'*+/=?^_`{|}~-]+)*@(?:[w](?:[w-]*[w])?.)+[w](?:[w-]*[w])?");
   var emailValid = RegExp(r"^[a-zA-Z0-9.]+@[a-zA-Z0-9]+\.[a-zA-Z]+");
+  String serverUrl = '';
 
   /// 获取用户信息
   Future<Null> getUserInfo() async {
@@ -33,13 +34,15 @@ class _CompleteInfoState extends State<CompleteInfo> {
     var _userInfo = prefs.getString('userInfo');
     print(_userInfo);
     var decoded = jsonDecode(_userInfo);
+    var _server = await prefs.getString('serverUrl');
     setState(() {
       userInfo = decoded;
       _name.text = decoded['Name'];
       _mobile.text = decoded['Mobile'];
       _email.text = decoded['Email'];
       _addr.text = decoded['Address'];
-      currentDepart = decoded['Department']['Name']??'';
+      currentDepart = decoded['Department']['Name'];
+      serverUrl = _server??HttpRequest.API_PREFIX;
     });
   }
 
@@ -57,7 +60,7 @@ class _CompleteInfoState extends State<CompleteInfo> {
     );
     if (resp['ResultCode'] == '00') {
       for(var depart in resp['Data']) {
-        departmentNames.add(depart['Name']);
+        departmentNames.add(depart['Description']);
       }
       setState(() {
         departments = resp['Data'];
@@ -75,7 +78,7 @@ class _CompleteInfoState extends State<CompleteInfo> {
           value: method,
           child: new Text(method,
             style: new TextStyle(
-                fontSize: 20.0
+                fontSize: 16.0
             ),
           )
       ));
@@ -102,7 +105,7 @@ class _CompleteInfoState extends State<CompleteInfo> {
               new Text(
                 title,
                 style: new TextStyle(
-                    fontSize: 20.0,
+                    fontSize: 16.0,
                     fontWeight: FontWeight.w600
                 ),
               )
@@ -114,7 +117,7 @@ class _CompleteInfoState extends State<CompleteInfo> {
           child: new Text(
             '：',
             style: new TextStyle(
-              fontSize: 20.0,
+              fontSize: 16.0,
               fontWeight: FontWeight.w600,
             ),
           ),
@@ -135,7 +138,8 @@ class _CompleteInfoState extends State<CompleteInfo> {
 
   /// 提交用户信息
   Future<Null> submit() async {
-    var _depart = departments.firstWhere((depart) => depart['Name']==currentDepart, orElse: () => null);
+    var _depart = departments.firstWhere((depart) => depart['Description']==currentDepart, orElse: () => null);
+    print(_depart);
     var _data = {
       'info': {
         'ID': userInfo['ID'],
@@ -150,7 +154,12 @@ class _CompleteInfoState extends State<CompleteInfo> {
     userInfo['Mobile'] = _mobile.text;
     userInfo['Email'] = _email.text;
     userInfo['Address'] = _addr.text;
-    userInfo['Department'] = _depart;
+    if (userInfo['Role']['ID'] == 4) {
+      userInfo['Department'] = {
+        'ID': _depart['ID'],
+        'Name': _depart['Description']
+      };
+    }
     prefs.setString('userInfo', jsonEncode(userInfo));
     if (_email.text.isNotEmpty&&!emailValid.hasMatch(_email.text)) {
       showDialog(context: context,
@@ -164,7 +173,10 @@ class _CompleteInfoState extends State<CompleteInfo> {
       _data['info']['LoginPwd'] = _newPass.text;
     }
     if (userInfo['Role']['ID'] == 4) {
-      _data['info']['Department'] = _depart;
+      _data['info']['Department'] = {
+        'ID': _depart['ID'],
+        'Name': _depart['Description']
+      };
     }
     var resp = await HttpRequest.request(
       '/User/UpdateUserInfo',
@@ -184,7 +196,7 @@ class _CompleteInfoState extends State<CompleteInfo> {
 
   List<Widget> buildInfo() {
     List<Widget> _list = [
-      new SizedBox(height: 20.0,),
+      new SizedBox(height: 16.0,),
       BuildWidget.buildRow('用户名/手机号', userInfo['LoginID']),
       new Divider(),
       BuildWidget.buildInput('姓名', _name, lines: 1),
@@ -193,8 +205,8 @@ class _CompleteInfoState extends State<CompleteInfo> {
       BuildWidget.buildInput('地址', _addr, lines: 1),
       BuildWidget.buildInput('新密码', _newPass, lines: 1),
       new Divider(),
-      userInfo['Role']['ID']==4?buildDropdown('科室', currentDepart, dropdownItems, changedDropDownMethod):new Container(),
-      new SizedBox(height: 20.0,),
+      userInfo['Role']['ID']==4&&currentDepart!=null?buildDropdown('科室', currentDepart, dropdownItems, changedDropDownMethod):new Container(),
+      new SizedBox(height: 16.0,),
       new Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         mainAxisSize: MainAxisSize.max,
@@ -228,7 +240,7 @@ class _CompleteInfoState extends State<CompleteInfo> {
           ),
           new Row(
             children: <Widget>[
-              new Text('服务器：${HttpRequest.API_PREFIX}', style: TextStyle(fontSize: 14.0),),
+              new Text('服务器：${serverUrl}', style: TextStyle(fontSize: 14.0),),
             ],
           ),
         ],
@@ -255,7 +267,7 @@ class _CompleteInfoState extends State<CompleteInfo> {
           ),
         ),
       ),
-      body: userInfo.isEmpty?new Center(child: new SpinKitRotatingPlain(color: Colors.blue),):Center(
+      body: userInfo.isEmpty?new Center(child: new SpinKitThreeBounce(color: Colors.blue),):Center(
         child: ListView(
             shrinkWrap: false,
             padding: EdgeInsets.only(left: 24.0, right: 24.0),

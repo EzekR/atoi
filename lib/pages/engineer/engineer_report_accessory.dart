@@ -44,7 +44,7 @@ class _EngineerReportAccessoryState extends State<EngineerReportAccessory> {
           value: method,
           child: new Text(method,
             style: new TextStyle(
-                fontSize: 20.0
+                fontSize: 16.0
             ),
           )
       ));
@@ -95,7 +95,7 @@ class _EngineerReportAccessoryState extends State<EngineerReportAccessory> {
             child: new Text(
               title,
               style: new TextStyle(
-                  fontSize: 20.0,
+                  fontSize: 16.0,
                   fontWeight: FontWeight.w600
               ),
             ),
@@ -194,7 +194,7 @@ class _EngineerReportAccessoryState extends State<EngineerReportAccessory> {
                 new Text(
                   labelText,
                   style: new TextStyle(
-                      fontSize: 20.0,
+                      fontSize: 16.0,
                       fontWeight: FontWeight.w600
                   ),
                 ),
@@ -206,7 +206,7 @@ class _EngineerReportAccessoryState extends State<EngineerReportAccessory> {
             child: new Text(
               '：',
               style: new TextStyle(
-                fontSize: 20.0,
+                fontSize: 16.0,
                 fontWeight: FontWeight.w600
               ),
             ),
@@ -226,13 +226,17 @@ class _EngineerReportAccessoryState extends State<EngineerReportAccessory> {
     );
   }
 
+  List<FocusNode> _focusAcc = new List(5).map((item) {
+    return new FocusNode();
+  }).toList();
+
   void saveAccessory() async {
     if (_name.text.isEmpty) {
       showDialog(context: context,
         builder: (context) => CupertinoAlertDialog(
           title: new Text('名称不可为空'),
         )
-      );
+      ).then((result) => FocusScope.of(context).requestFocus(_focusAcc[0]));
       return;
     }
     if (_newCode.text.isEmpty) {
@@ -240,7 +244,7 @@ class _EngineerReportAccessoryState extends State<EngineerReportAccessory> {
           builder: (context) => CupertinoAlertDialog(
             title: new Text('新装编号不可为空'),
           )
-      );
+      ).then((result) => FocusScope.of(context).requestFocus(_focusAcc[1]));
       return;
     }
     if (_oldCode.text.isEmpty) {
@@ -248,7 +252,7 @@ class _EngineerReportAccessoryState extends State<EngineerReportAccessory> {
           builder: (context) => CupertinoAlertDialog(
             title: new Text('拆下不可为空'),
           )
-      );
+      ).then((result) => FocusScope.of(context).requestFocus(_focusAcc[2]));
       return;
     }
     if (_amount.text.isEmpty) {
@@ -256,7 +260,7 @@ class _EngineerReportAccessoryState extends State<EngineerReportAccessory> {
           builder: (context) => CupertinoAlertDialog(
             title: new Text('新装部件金额不可为空'),
           )
-      );
+      ).then((result) => FocusScope.of(context).requestFocus(_focusAcc[3]));
       return;
     }
     if (double.tryParse(_amount.text) > 99999999.99) {
@@ -264,7 +268,7 @@ class _EngineerReportAccessoryState extends State<EngineerReportAccessory> {
           builder: (context) => CupertinoAlertDialog(
             title: new Text('新装部件金额过大'),
           )
-      );
+      ).then((result) => FocusScope.of(context).requestFocus(_focusAcc[3]));
       return;
     }
     if (_qty.text.isEmpty) {
@@ -272,7 +276,7 @@ class _EngineerReportAccessoryState extends State<EngineerReportAccessory> {
           builder: (context) => CupertinoAlertDialog(
             title: new Text('数量不可为空'),
           )
-      );
+      ).then((result) => FocusScope.of(context).requestFocus(_focusAcc[4]));
       return;
     }
     if (_qty.text.split('.').length>1) {
@@ -280,7 +284,7 @@ class _EngineerReportAccessoryState extends State<EngineerReportAccessory> {
           builder: (context) => CupertinoAlertDialog(
             title: new Text('零件数量必须为整数'),
           )
-      );
+      ).then((result) => FocusScope.of(context).requestFocus(_focusAcc[4]));
       return;
     }
     if (int.tryParse(_qty.text) > 999999999) {
@@ -288,7 +292,7 @@ class _EngineerReportAccessoryState extends State<EngineerReportAccessory> {
           builder: (context) => CupertinoAlertDialog(
             title: new Text('数量过大'),
           )
-      );
+      ).then((result) => FocusScope.of(context).requestFocus(_focusAcc[4]));
       return;
     }
     if (_currentSource == '外部供应商' && _vendor == null) {
@@ -360,7 +364,7 @@ class _EngineerReportAccessoryState extends State<EngineerReportAccessory> {
                 new Text(
                   labelText,
                   style: new TextStyle(
-                      fontSize: 20.0,
+                      fontSize: 16.0,
                       fontWeight: FontWeight.w600
                   ),
                 )
@@ -372,7 +376,7 @@ class _EngineerReportAccessoryState extends State<EngineerReportAccessory> {
             child: new Text(
               '：',
               style: new TextStyle(
-                fontSize: 20.0,
+                fontSize: 16.0,
                 fontWeight: FontWeight.w600,
               ),
             ),
@@ -382,7 +386,7 @@ class _EngineerReportAccessoryState extends State<EngineerReportAccessory> {
               child: new Text(
                 vendor,
                 style: new TextStyle(
-                    fontSize: 20.0,
+                    fontSize: 16.0,
                     fontWeight: FontWeight.w400,
                     color: Colors.black54
                 ),
@@ -426,27 +430,27 @@ class _EngineerReportAccessoryState extends State<EngineerReportAccessory> {
           ),
         ),
       ),
-      body: _vendorList.isEmpty?new Center(child: SpinKitRotatingPlain(color: Colors.blue,),):new Center(
+      body: _vendorList.isEmpty?new Center(child: SpinKitThreeBounce(color: Colors.blue,),):new Center(
         child: new ListView(
           children: <Widget>[
             new Card(
               child: new Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
-                  BuildWidget.buildInput('名称', _name),
+                  BuildWidget.buildInput('名称', _name, focusNode: _focusAcc[0]),
                   BuildWidget.buildDropdown('来源', _currentSource, _dropDownMenuSources, changedDropDownSource),
                   new SizedBox(
                     height: 5.0,
                   ),
                   _currentSource=='外部供应商'?buildRowVendor('外部供应商', _vendor==null?'':_vendor['Name']):new Container(),
-                  BuildWidget.buildInput('新装编号', _newCode),
+                  BuildWidget.buildInput('新装编号', _newCode, focusNode: _focusAcc[1]),
                   new Padding(
                     padding: EdgeInsets.symmetric(horizontal: 110.0),
                     child: new Row(
                       children: <Widget>[
                         new Text('附件：',
                           style: new TextStyle(
-                              fontSize: 20.0,
+                              fontSize: 16.0,
                               fontWeight: FontWeight.w600
                           ),
                         ),
@@ -465,7 +469,7 @@ class _EngineerReportAccessoryState extends State<EngineerReportAccessory> {
                         children: <Widget>[
                           new Container(
                             width: 150.0,
-                            child: Image.file(_imageNew),
+                            child: BuildWidget.buildPhotoPageFile(context, _imageNew),
                           ),
                           new Padding(
                             padding: EdgeInsets.symmetric(horizontal: 0.0),
@@ -482,16 +486,16 @@ class _EngineerReportAccessoryState extends State<EngineerReportAccessory> {
                   BuildWidget.buildInput('新装部件金额（元/件）', _amount, inputType: TextInputType.numberWithOptions(
                     decimal: true,
                     signed: false
-                  ), maxLength: 11),
-                  BuildWidget.buildInput('数量', _qty, inputType: TextInputType.number, maxLength: 9),
-                  BuildWidget.buildInput('拆下编号', _oldCode),
+                  ), maxLength: 11, focusNode: _focusAcc[3]),
+                  BuildWidget.buildInput('数量', _qty, inputType: TextInputType.number, maxLength: 9, focusNode: _focusAcc[4]),
+                  BuildWidget.buildInput('拆下编号', _oldCode, focusNode: _focusAcc[2]),
                   new Padding(
                     padding: EdgeInsets.symmetric(horizontal: 95.0),
                     child: new Row(
                       children: <Widget>[
                         new Text('附件：',
                           style: new TextStyle(
-                              fontSize: 20.0,
+                              fontSize: 16.0,
                               fontWeight: FontWeight.w600
                           ),
                         ),
@@ -510,7 +514,7 @@ class _EngineerReportAccessoryState extends State<EngineerReportAccessory> {
                         children: <Widget>[
                           new Container(
                             width: 150.0,
-                            child: Image.file(_imageOld),
+                            child: BuildWidget.buildPhotoPageFile(context, _imageOld),
                           ),
                           new Padding(
                             padding: EdgeInsets.symmetric(horizontal: 0.0),

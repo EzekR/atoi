@@ -89,7 +89,7 @@ class ManagerMenu extends StatelessWidget {
                 ),
                 Expanded(
                   flex: 4,
-                  child: buildIconColumn(Icons.remove_red_eye, '校正', 'correction-request'),
+                  child: buildIconColumn(Icons.remove_red_eye, '校准', 'correction-request'),
                 )
               ],
             ),
@@ -125,7 +125,7 @@ class ManagerMenu extends StatelessWidget {
                                             '合同档案',
                                             style: new TextStyle(
                                                 fontWeight: FontWeight.w600,
-                                                fontSize: 20.0,
+                                                fontSize: 16.0,
                                                 color: Colors.blue
                                             ),
                                           ),
@@ -141,7 +141,7 @@ class ManagerMenu extends StatelessWidget {
                                           child: Text('验收安装',
                                             style: new TextStyle(
                                                 fontWeight: FontWeight.w600,
-                                                fontSize: 20.0,
+                                                fontSize: 16.0,
                                                 color: Colors.blue
                                             ),
                                           ),
@@ -157,7 +157,7 @@ class ManagerMenu extends StatelessWidget {
                                           child: Text('调拨',
                                             style: new TextStyle(
                                                 fontWeight: FontWeight.w600,
-                                                fontSize: 20.0,
+                                                fontSize: 16.0,
                                                 color: Colors.blue
                                             ),
                                           ),
@@ -173,7 +173,7 @@ class ManagerMenu extends StatelessWidget {
                                           child: Text('借用',
                                             style: new TextStyle(
                                                 fontWeight: FontWeight.w600,
-                                                fontSize: 20.0,
+                                                fontSize: 16.0,
                                                 color: Colors.blue
                                             ),
                                           ),
@@ -189,7 +189,7 @@ class ManagerMenu extends StatelessWidget {
                                           child: Text('盘点',
                                             style: new TextStyle(
                                                 fontWeight: FontWeight.w600,
-                                                fontSize: 20.0,
+                                                fontSize: 16.0,
                                                 color: Colors.blue
                                             ),
                                           ),
@@ -205,7 +205,7 @@ class ManagerMenu extends StatelessWidget {
                                           child: Text('报废',
                                             style: new TextStyle(
                                                 fontWeight: FontWeight.w600,
-                                                fontSize: 20.0,
+                                                fontSize: 16.0,
                                                 color: Colors.blue
                                             ),
                                           ),

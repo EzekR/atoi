@@ -21,11 +21,14 @@ class SearchBarCheckBoxDelegate extends SearchDelegate<String>{
         '/Equipment/Getdevices',
         method: HttpRequest.GET,
         params: {
-          'filterText': filter
+          'filterText': filter,
+          'filterField': 'e.ID'
         }
     );
     print(resp);
-    suggestionList = resp['Data'];
+    if (resp['ResultCode'] == '00') {
+      suggestionList = resp['Data'];
+    }
   }
 
   final Map<String, String> equipmentInfo = {};
@@ -85,13 +88,10 @@ class SearchBarCheckBoxDelegate extends SearchDelegate<String>{
                 value: model.selected.contains(suggestionList[i])?true:false,
                 title: RichText(
                   text: TextSpan(
-                      text: '${suggestionList[i]['Name']}/${suggestionList[i]['EquipmentCode']}/${suggestionList[i]['SerialCode']}'.substring(0, query.length),
+                      text: '${suggestionList[i]['Name']}/${suggestionList[i]['EquipmentCode']}/${suggestionList[i]['SerialCode']}',
                       style: TextStyle(
-                          color: Colors.black, fontWeight: FontWeight.bold),
+                          color: Colors.black, fontWeight: FontWeight.w400),
                       children: [
-                        TextSpan(
-                            text: '${suggestionList[i]['Name']}/${suggestionList[i]['EquipmentCode']}/${suggestionList[i]['SerialCode']}'.substring(query.length),
-                            style: TextStyle(color: Colors.grey))
                       ])),
                 onChanged: (bool value) {
                   print(value);

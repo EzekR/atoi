@@ -5,6 +5,7 @@ import 'package:atoi/pages/equipments/print_qrcode.dart';
 import 'package:atoi/widgets/build_widget.dart';
 import 'package:atoi/pages/equipments/vendor_detail.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:atoi/models/models.dart';
 
 /// 供应商列表类
 class VendorsList extends StatefulWidget{
@@ -20,12 +21,62 @@ class _VendorsListState extends State<VendorsList> {
   bool _editable = true;
 
   TextEditingController _keywords = new TextEditingController();
+  String field = 's.ID';
+  int useStatus = -1;
+  List useList = [];
+  int supplierId = 0;
+  List supplierList = [];
   Future<SharedPreferences> prefs = SharedPreferences.getInstance();
+  ConstantsModel cModel;
 
   Future<Null> getRole() async {
     var _prefs = await prefs;
     var _role = _prefs.getInt('role');
     _editable = _role==1?true:false;
+  }
+
+  void setFilter() {
+    getVendors();
+  }
+
+  List initList(Map _map) {
+    List _list = [];
+    _list.add({
+      'value': 0,
+      'text': '全部'
+    });
+    _map.forEach((key, val) {
+      _list.add({
+        'value': val,
+        'text': key
+      });
+    });
+    return _list;
+  }
+
+  void initFilter() async {
+    await cModel.getConstants();
+    setState(() {
+      useStatus = -1;
+      field = 's.ID';
+      _keywords.clear();
+      useList = [
+        {
+          'value': -1,
+          'text': '全部'
+        },
+        {
+          'value': 1,
+          'text': '启用'
+        },
+        {
+          'value': 0,
+          'text': '停用'
+        },
+      ];
+      supplierList = initList(cModel.SupplierType);
+      supplierId = supplierList[0]['value'];
+    });
   }
 
   Future<Null> getVendors({String filterText}) async {
@@ -37,7 +88,10 @@ class _VendorsListState extends State<VendorsList> {
       '/DispatchReport/GetSuppliers',
       method: HttpRequest.GET,
       params: {
-        'filterText': filterText
+        'filterText': _keywords.text,
+        'filterField': field,
+        'typeID': supplierId,
+        'status': useStatus
       }
     );
     setState(() {
@@ -50,8 +104,233 @@ class _VendorsListState extends State<VendorsList> {
     }
   }
 
+  void showSheet(BuildContext context) {
+    showModalBottomSheet(context: context, builder: (context) {
+      return StatefulBuilder(
+        builder: (context, setState) {
+          return ListView(
+            children: <Widget>[
+              SizedBox(height: 18.0,),
+              Row(
+                children: <Widget>[
+                  SizedBox(width: 16.0,),
+                  Text('搜索', style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.w600),)
+                ],
+              ),
+              SizedBox(height: 6.0,),
+              Row(
+                children: <Widget>[
+                  SizedBox(width: 16.0,),
+                  Container(
+                      width: 230.0,
+                      height: 40.0,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(5.0),
+                        color: Color(0xfff2f2f2),
+                      ),
+                      child: Row(
+                        children: <Widget>[
+                          SizedBox(width: 10.0,),
+                          Icon(Icons.search, color: Color(0xffaaaaaa),),
+                          SizedBox(width: 10.0,),
+                          Container(
+                              width: 150.0,
+                              child: Align(
+                                alignment: Alignment(0.0, -0.5),
+                                child: TextField(
+                                  decoration: InputDecoration.collapsed(hintText: ''),
+                                  controller: _keywords,
+                                ),
+                              )
+                          ),
+                        ],
+                      )
+                  ),
+                  SizedBox(width: 16.0,),
+                  Container(
+                    width: 130.0,
+                    height: 40.0,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(5.0),
+                      color: Color(0xfff2f2f2),
+                    ),
+                    child: Row(
+                      children: <Widget>[
+                        SizedBox(width: 6.0,),
+                        DropdownButton(
+                          value: field,
+                          underline: Container(),
+                          items: <DropdownMenuItem>[
+                            DropdownMenuItem(
+                              value: 's.ID',
+                              child: Text('系统编号'),
+                            ),
+                            DropdownMenuItem(
+                              value: 's.Name',
+                              child: Text('供应商名称'),
+                            ),
+                            DropdownMenuItem(
+                              value: 's.Address',
+                              child: Text('地址'),
+                            ),
+                            DropdownMenuItem(
+                              value: 's.Contact',
+                              child: Text('联系人'),
+                            ),
+                            DropdownMenuItem(
+                              value: 's.ContactMobile',
+                              child: Text('联系人电话'),
+                            ),
+                          ],
+                          onChanged: (val) {
+                            setState(() {
+                              field = val;
+                            });
+                          },
+                        ),
+                      ],
+                    ),
+                  )
+                ],
+              ),
+              SizedBox(height: 18.0,),
+              Row(
+                children: <Widget>[
+                  SizedBox(width: 16.0,),
+                  Text('类型', style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.w600),)
+                ],
+              ),
+              SizedBox(height: 6.0,),
+              Row(
+                children: <Widget>[
+                  SizedBox(width: 16.0,),
+                  Container(
+                      width: 230.0,
+                      height: 40.0,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(5.0),
+                        color: Color(0xfff2f2f2),
+                      ),
+                      child: Row(
+                        children: <Widget>[
+                          SizedBox(width: 6.0,),
+                          DropdownButton(
+                            value: supplierId,
+                            underline: Container(),
+                            items: supplierList.map<DropdownMenuItem>((item) {
+                              return DropdownMenuItem(
+                                value: item['value'],
+                                child: Text(item['text']),
+                              );
+                            }).toList(),
+                            onChanged: (val) {
+                              print(val);
+                              setState(() {
+                                supplierId = val;
+                              });
+                            },
+                          )
+                        ],
+                      )
+                  ),
+                ],
+              ),
+              SizedBox(height: 18.0,),
+              Row(
+                children: <Widget>[
+                  SizedBox(width: 16.0,),
+                  Text('状态', style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.w600),)
+                ],
+              ),
+              SizedBox(height: 6.0,),
+              Row(
+                children: <Widget>[
+                  SizedBox(width: 16.0,),
+                  Container(
+                      width: 230.0,
+                      height: 40.0,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(5.0),
+                        color: Color(0xfff2f2f2),
+                      ),
+                      child: Row(
+                        children: <Widget>[
+                          SizedBox(width: 6.0,),
+                          DropdownButton(
+                            value: useStatus,
+                            underline: Container(),
+                            items: useList.map<DropdownMenuItem>((item) {
+                              return DropdownMenuItem(
+                                value: item['value'],
+                                child: Text(item['text']),
+                              );
+                            }).toList(),
+                            onChanged: (val) {
+                              print(val);
+                              setState(() {
+                                useStatus = val;
+                              });
+                            },
+                          )
+                        ],
+                      )
+                  ),
+                ],
+              ),
+              SizedBox(height: 30.0,),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: <Widget>[
+                  Container(
+                    width: 100.0,
+                    height: 40.0,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(5.0),
+                      border: Border.all(
+                          color: Color(0xff3394B9),
+                          width: 1.0
+                      ),
+                      color: Color(0xffEBF9FF),
+                    ),
+                    child: Center(
+                      child: FlatButton(onPressed: () {
+                        setState((){
+                          useStatus = -1;
+                          field = 's.ID';
+                          _keywords.clear();
+                          supplierId = supplierList[0]['value'];
+                        });
+                        initFilter();
+                      }, child: Text('重置')),
+                    ),
+                  ),
+                  Container(
+                    width: 100.0,
+                    height: 40.0,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(5.0),
+                      color: Color(0xff3394B9),
+                    ),
+                    child: Center(
+                      child: FlatButton(onPressed: () {
+                        setFilter();
+                        Navigator.of(context).pop();
+                      }, child: Text('确认', style: TextStyle(color: Colors.white),)),
+                    ),
+                  ),
+                ],
+              )
+            ],
+          );
+        },
+      );
+    });
+  }
+
   void initState() {
     super.initState();
+    cModel = MainModel.of(context);
+    initFilter();
     getVendors();
     getRole();
   }
@@ -161,14 +440,16 @@ class _VendorsListState extends State<VendorsList> {
           isSearchState?IconButton(
             icon: Icon(Icons.cancel),
             onPressed: () {
-              setState(() {
-                isSearchState = false;
-              });
+              //setState(() {
+              //  isSearchState = false;
+              //);
+              showSheet(context);
             },
           ):IconButton(icon: Icon(Icons.search), onPressed: () {
-            setState(() {
-              isSearchState = true;
-            });
+            //setState(() {
+            //  isSearchState = true;
+            //});
+            showSheet(context);
           })
         ],
         flexibleSpace: Container(
@@ -184,12 +465,12 @@ class _VendorsListState extends State<VendorsList> {
           ),
         ),
       ),
-      body: _loading?new Center(child: new SpinKitRotatingPlain(color: Colors.blue,),):new ListView.builder(
+      body: _loading?new Center(child: new SpinKitThreeBounce(color: Colors.blue,),):(_vendors.length==0?Center(child: Text('无供应商'),):new ListView.builder(
         itemCount: _vendors.length,
         itemBuilder: (context, i) {
           return buildEquipmentCard(_vendors[i]);
         },
-      ),
+      )),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           Navigator.of(context).push(new MaterialPageRoute(builder: (_) {

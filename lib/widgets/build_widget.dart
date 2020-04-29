@@ -1,5 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:flutter_cupertino_date_picker/flutter_cupertino_date_picker.dart';
+import 'package:photo_view/photo_view.dart';
+import 'dart:typed_data';
+import 'dart:io';
+import 'package:should_rebuild/should_rebuild.dart';
 
 /// 页面通用组件构建类
 class BuildWidget {
@@ -19,7 +24,7 @@ class BuildWidget {
                 new Text(
                   labelText,
                   style: new TextStyle(
-                      fontSize: 20.0,
+                      fontSize: 16.0,
                       fontWeight: FontWeight.w600
                   ),
                 )
@@ -31,7 +36,7 @@ class BuildWidget {
             child: new Text(
               '：',
               style: new TextStyle(
-                fontSize: 20.0,
+                fontSize: 16.0,
                 fontWeight: FontWeight.w600,
               ),
             ),
@@ -41,7 +46,7 @@ class BuildWidget {
             child: new Text(
               defaultText,
               style: new TextStyle(
-                  fontSize: 20.0,
+                  fontSize: 16.0,
                   fontWeight: FontWeight.w400,
                   color: Colors.black54
               ),
@@ -108,7 +113,7 @@ class BuildWidget {
               new Text(
                 title,
                 style: new TextStyle(
-                    fontSize: 20.0,
+                    fontSize: 16.0,
                     fontWeight: FontWeight.w600
                 ),
               )
@@ -120,7 +125,7 @@ class BuildWidget {
           child: new Text(
             '：',
             style: new TextStyle(
-              fontSize: 20.0,
+              fontSize: 16.0,
               fontWeight: FontWeight.w600,
             ),
           ),
@@ -144,10 +149,11 @@ class BuildWidget {
   }
 
   /// 构建常用输入框（4、6分）
-  static Padding buildInput(String labelText, TextEditingController controller, {TextInputType inputType, int lines, int maxLength}) {
+  static Padding buildInput(String labelText, TextEditingController controller, {TextInputType inputType, int lines, int maxLength, FocusNode focusNode}) {
     inputType??TextInputType.text;
     lines = lines ?? 3;
     maxLength = maxLength ?? 30;
+    focusNode = focusNode ?? new FocusNode();
     return new Padding(
       padding: EdgeInsets.symmetric(vertical: 5.0),
       child: new Row(
@@ -161,7 +167,7 @@ class BuildWidget {
                 new Text(
                   labelText,
                   style: new TextStyle(
-                      fontSize: 20.0,
+                      fontSize: 16.0,
                       fontWeight: FontWeight.w600
                   ),
                 )
@@ -173,7 +179,7 @@ class BuildWidget {
             child: new Text(
               '：',
               style: new TextStyle(
-                fontSize: 20.0,
+                fontSize: 16.0,
                 fontWeight: FontWeight.w600,
               ),
             ),
@@ -185,6 +191,7 @@ class BuildWidget {
               maxLines: lines,
               maxLength: maxLength,
               keyboardType: inputType,
+              focusNode: focusNode,
               decoration: InputDecoration(
                 fillColor: Color(0xfff0f0f0),
                 filled: true,
@@ -197,10 +204,11 @@ class BuildWidget {
   }
 
   /// 构建左对齐输入框
-  static Padding buildInputLeft(String labelText, TextEditingController controller, {TextInputType inputType, int lines, int maxLength}) {
+  static Padding buildInputLeft(String labelText, TextEditingController controller, {TextInputType inputType, int lines, int maxLength, FocusNode focusNode}) {
     inputType??TextInputType.text;
     lines = lines ?? 3;
     maxLength = maxLength ?? 30;
+    focusNode = focusNode ?? new FocusNode();
     return new Padding(
       padding: EdgeInsets.symmetric(vertical: 5.0),
       child: new Row(
@@ -214,7 +222,7 @@ class BuildWidget {
                 new Text(
                   labelText,
                   style: new TextStyle(
-                      fontSize: 20.0,
+                      fontSize: 16.0,
                       fontWeight: FontWeight.w600
                   ),
                 )
@@ -228,6 +236,7 @@ class BuildWidget {
               maxLines: lines,
               maxLength: maxLength,
               keyboardType: inputType,
+              focusNode: focusNode,
               decoration: InputDecoration(
                 fillColor: Color(0xfff0f0f0),
                 filled: true,
@@ -252,7 +261,7 @@ class BuildWidget {
               new Text(
                 title,
                 style: new TextStyle(
-                    fontSize: 20.0,
+                    fontSize: 16.0,
                     fontWeight: FontWeight.w600
                 ),
               )
@@ -272,8 +281,9 @@ class BuildWidget {
   }
 
   /// 构建带输入框的下拉菜单
-  static Row buildDropdownWithInput(String title, TextEditingController controller, String currentItem, List dropdownItems, Function changeDropdown, {TextInputType inputType}) {
+  static Row buildDropdownWithInput(String title, TextEditingController controller, String currentItem, List dropdownItems, Function changeDropdown, {TextInputType inputType, FocusNode focusNode}) {
     inputType??TextInputType.text;
+    focusNode = focusNode ?? new FocusNode();
     return new Row(
       children: <Widget>[
         new Expanded(
@@ -285,7 +295,7 @@ class BuildWidget {
               new Text(
                 title,
                 style: new TextStyle(
-                    fontSize: 20.0,
+                    fontSize: 16.0,
                     fontWeight: FontWeight.w600
                 ),
               )
@@ -297,7 +307,7 @@ class BuildWidget {
           child: new Text(
             '：',
             style: new TextStyle(
-              fontSize: 20.0,
+              fontSize: 16.0,
               fontWeight: FontWeight.w600,
             ),
           ),
@@ -307,6 +317,7 @@ class BuildWidget {
           child: new TextField(
             controller: controller,
             keyboardType: inputType,
+            focusNode: focusNode,
             enabled: currentItem=='无'?false:true,
             decoration: InputDecoration(
               fillColor: Color(0xfff0f0f0),
@@ -359,7 +370,7 @@ class BuildWidget {
                 new Text(
                   labelText,
                   style: new TextStyle(
-                      fontSize: 20.0,
+                      fontSize: 16.0,
                       fontWeight: FontWeight.w600
                   ),
                 )
@@ -371,7 +382,7 @@ class BuildWidget {
             child: new Text(
               '：',
               style: new TextStyle(
-                fontSize: 20.0,
+                fontSize: 16.0,
                 fontWeight: FontWeight.w600,
               ),
             ),
@@ -403,7 +414,7 @@ class BuildWidget {
                 new Text(
                   labelText,
                   style: new TextStyle(
-                      fontSize: 20.0,
+                      fontSize: 16.0,
                       fontWeight: FontWeight.w600
                   ),
                 )
@@ -415,7 +426,7 @@ class BuildWidget {
             child: new Text(
               '：',
               style: new TextStyle(
-                fontSize: 20.0,
+                fontSize: 16.0,
                 fontWeight: FontWeight.w600,
               ),
             ),
@@ -469,7 +480,7 @@ class BuildWidget {
                 new Text(
                   labelText,
                   style: new TextStyle(
-                      fontSize: 20.0,
+                      fontSize: 16.0,
                       fontWeight: FontWeight.w600
                   ),
                 )
@@ -481,7 +492,7 @@ class BuildWidget {
             child: new Text(
               '：',
               style: new TextStyle(
-                fontSize: 20.0,
+                fontSize: 16.0,
                 fontWeight: FontWeight.w600,
               ),
             ),
@@ -536,7 +547,7 @@ class BuildWidget {
                 new Text(
                   labelText,
                   style: new TextStyle(
-                      fontSize: 20.0,
+                      fontSize: 16.0,
                       fontWeight: FontWeight.w600
                   ),
                 )
@@ -573,6 +584,97 @@ class BuildWidget {
               )
           ),
         ],
+      ),
+    );
+  }
+
+  /// 构建可放大缩小的图片
+  static PhotoView buildFilePhoto(File image) {
+    return PhotoView(
+      imageProvider: FileImage(image),
+      backgroundDecoration: BoxDecoration(
+        color: Colors.white
+      ),
+    );
+  }
+
+  static PhotoView buildListPhoto(List<int> image) {
+    return PhotoView(
+      imageProvider: MemoryImage(Uint8List.fromList(image)),
+      backgroundDecoration: BoxDecoration(
+        color: Colors.white
+      ),
+    );
+  }
+
+  static GestureDetector buildPhotoPageList(BuildContext context, List<int> image) {
+    var _image = Uint8List.fromList(image);
+    return GestureDetector(
+      onTap: () {
+        Navigator.of(context).push(new MaterialPageRoute(builder: (_) =>
+            FullScreenWrapper(
+              imageProvider: MemoryImage(Uint8List.fromList(image)),
+              backgroundDecoration: BoxDecoration(
+                color: Colors.white
+              ),
+            )
+        ));
+      },
+      child: Image.memory(_image),
+    );
+  }
+
+  static GestureDetector buildPhotoPageFile(BuildContext context, File image) {
+    return GestureDetector(
+      onTap: () {
+        Navigator.of(context).push(new MaterialPageRoute(builder: (_) =>
+            FullScreenWrapper(
+              imageProvider: FileImage(image),
+              backgroundDecoration: BoxDecoration(
+                  color: Colors.white
+              ),
+            )
+        ));
+      },
+      child: Image.file(image),
+    );
+  }
+}
+
+class FullScreenWrapper extends StatelessWidget {
+  const FullScreenWrapper({
+    this.imageProvider,
+    this.backgroundDecoration,
+    this.minScale,
+    this.maxScale,
+    this.initialScale,
+    this.basePosition = Alignment.center,
+    this.filterQuality = FilterQuality.none,
+  });
+
+  final ImageProvider imageProvider;
+  final Decoration backgroundDecoration;
+  final dynamic minScale;
+  final dynamic maxScale;
+  final dynamic initialScale;
+  final Alignment basePosition;
+  final FilterQuality filterQuality;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Container(
+        constraints: BoxConstraints.expand(
+          height: MediaQuery.of(context).size.height,
+        ),
+        child: PhotoView(
+          imageProvider: imageProvider,
+          backgroundDecoration: backgroundDecoration,
+          minScale: minScale,
+          maxScale: maxScale,
+          initialScale: initialScale,
+          basePosition: basePosition,
+        ),
       ),
     );
   }

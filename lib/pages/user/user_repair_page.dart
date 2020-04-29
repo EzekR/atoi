@@ -58,7 +58,7 @@ class _UserRepairPageState extends State<UserRepairPage> {
           value: method,
           child: new Text(
             method,
-            style: new TextStyle(fontSize: 20.0),
+            style: new TextStyle(fontSize: 16.0),
           )));
     }
     return items;
@@ -205,7 +205,7 @@ class _UserRepairPageState extends State<UserRepairPage> {
     return new TextField(
       decoration: InputDecoration(
           labelText: labelText,
-          labelStyle: new TextStyle(fontSize: 20.0),
+          labelStyle: new TextStyle(fontSize: 16.0),
           disabledBorder: UnderlineInputBorder(
               borderSide: BorderSide(color: Colors.grey, width: 1))),
       controller: new TextEditingController(text: defaultText),
@@ -223,7 +223,7 @@ class _UserRepairPageState extends State<UserRepairPage> {
             flex: 4,
             child: new Text(
               labelText,
-              style: new TextStyle(fontSize: 20.0, fontWeight: FontWeight.w600),
+              style: new TextStyle(fontSize: 16.0, fontWeight: FontWeight.w600),
             ),
           ),
           new Expanded(
@@ -231,7 +231,7 @@ class _UserRepairPageState extends State<UserRepairPage> {
             child: new Text(
               defaultText,
               style: new TextStyle(
-                  fontSize: 20.0,
+                  fontSize: 16.0,
                   fontWeight: FontWeight.w400,
                   color: Colors.black54),
             ),
@@ -250,7 +250,7 @@ class _UserRepairPageState extends State<UserRepairPage> {
             flex: 4,
             child: new Text(
               labelText,
-              style: new TextStyle(fontSize: 20.0, fontWeight: FontWeight.w600),
+              style: new TextStyle(fontSize: 16.0, fontWeight: FontWeight.w600),
             ),
           ),
           new Expanded(
@@ -276,7 +276,7 @@ class _UserRepairPageState extends State<UserRepairPage> {
           children: <Widget>[
             new Container(
               width: 100.0,
-              child: Image.file(image),
+              child: BuildWidget.buildPhotoPageFile(context, image),
             ),
             new Padding(
               padding: EdgeInsets.symmetric(horizontal: 0.0),
@@ -356,13 +356,13 @@ class _UserRepairPageState extends State<UserRepairPage> {
                       return ListTile(
                           leading: new Icon(
                             Icons.info,
-                            size: 24.0,
+                            size: 20.0,
                             color: Colors.blue,
                           ),
                           title: Text(
                             '设备基本信息',
                             style: new TextStyle(
-                                fontSize: 22.0, fontWeight: FontWeight.w400),
+                                fontSize: 20.0, fontWeight: FontWeight.w400),
                           ));
                     },
                     body: new Padding(
@@ -399,13 +399,13 @@ class _UserRepairPageState extends State<UserRepairPage> {
                       return ListTile(
                           leading: new Icon(
                             Icons.description,
-                            size: 24.0,
+                            size: 20.0,
                             color: Colors.blue,
                           ),
                           title: new Text(
                             '报修内容',
                             style: new TextStyle(
-                                fontWeight: FontWeight.w400, fontSize: 22.0),
+                                fontWeight: FontWeight.w400, fontSize: 20.0),
                           ));
                     },
                     body: new Padding(
@@ -425,7 +425,7 @@ class _UserRepairPageState extends State<UserRepairPage> {
                                 new Text(
                                   '添加附件:',
                                   style: new TextStyle(
-                                      fontSize: 20.0,
+                                      fontSize: 16.0,
                                       fontWeight: FontWeight.w600),
                                 ),
                                 new IconButton(
@@ -444,7 +444,7 @@ class _UserRepairPageState extends State<UserRepairPage> {
                   ),
                 ],
               ),
-              SizedBox(height: 24.0),
+              SizedBox(height: 20.0),
               new Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 mainAxisSize: MainAxisSize.max,

@@ -13,7 +13,7 @@ import 'package:atoi/widgets/build_widget.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:flutter/cupertino.dart';
 
-/// 校正页面类
+/// 校准页面类
 class CorrectionRequest extends StatefulWidget{
   static String tag = 'correction-request';
 
@@ -31,6 +31,7 @@ class _CorrectionRequestState extends State<CorrectionRequest> {
   Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
   var _fault = new TextEditingController();
   var _roleName;
+  FocusNode _focus = new FocusNode();
 
   MainModel mainModel = MainModel();
 
@@ -121,9 +122,9 @@ class _CorrectionRequestState extends State<CorrectionRequest> {
     if (_fault.text.isEmpty || _fault.text == null) {
       showDialog(context: context,
         builder: (context) => CupertinoAlertDialog(
-          title: new Text('校正要求不可为空'),
+          title: new Text('校准要求不可为空'),
         )
-      );
+      ).then((result) => FocusScope.of(context).requestFocus(_focus));
     } else {
       var prefs = await _prefs;
       var userID = prefs.getInt('userID');
@@ -134,7 +135,7 @@ class _CorrectionRequestState extends State<CorrectionRequest> {
         var file = {
           'FileContent': fileContent,
           'FileName': image.path,
-          'FiltType': 1,
+          'FileType': 1,
           'ID': 0
         };
         fileList.add(file);
@@ -188,7 +189,7 @@ class _CorrectionRequestState extends State<CorrectionRequest> {
               children: <Widget>[
                 new Container(
                   width: 100.0,
-                  child: Image.file(image),
+                  child: BuildWidget.buildPhotoPageFile(context, image),
                 ),
                 new Padding(
                   padding: EdgeInsets.symmetric(horizontal: 0.0),
@@ -223,7 +224,7 @@ class _CorrectionRequestState extends State<CorrectionRequest> {
           value: method,
           child: new Text(method,
             style: new TextStyle(
-                fontSize: 20.0
+                fontSize: 16.0
             ),
           )
       ));
@@ -256,7 +257,7 @@ class _CorrectionRequestState extends State<CorrectionRequest> {
             child: new Text(
               labelText,
               style: new TextStyle(
-                  fontSize: 20.0,
+                  fontSize: 16.0,
                   fontWeight: FontWeight.w600
               ),
             ),
@@ -266,7 +267,7 @@ class _CorrectionRequestState extends State<CorrectionRequest> {
             child: new Text(
               defaultText,
               style: new TextStyle(
-                  fontSize: 20.0,
+                  fontSize: 16.0,
                   fontWeight: FontWeight.w400,
                   color: Colors.black54
               ),
@@ -282,7 +283,7 @@ class _CorrectionRequestState extends State<CorrectionRequest> {
       builder: (context, child, mainModel) {
         return new Scaffold(
             appBar: new AppBar(
-              title: new Text('新建请求--校正'),
+              title: new Text('新建请求--校准'),
               elevation: 0.7,
               flexibleSpace: Container(
                 decoration: BoxDecoration(
@@ -340,12 +341,12 @@ class _CorrectionRequestState extends State<CorrectionRequest> {
                           headerBuilder: (context, isExpanded) {
                             return ListTile(
                                 leading: new Icon(Icons.info,
-                                  size: 24.0,
+                                  size: 20.0,
                                   color: Colors.blue,
                                 ),
                                 title: Text('设备基本信息',
                                   style: new TextStyle(
-                                      fontSize: 22.0,
+                                      fontSize: 20.0,
                                       fontWeight: FontWeight.w400
                                   ),
                                 )
@@ -375,12 +376,12 @@ class _CorrectionRequestState extends State<CorrectionRequest> {
                           headerBuilder: (context, isExpanded) {
                             return ListTile(
                                 leading: new Icon(Icons.description,
-                                  size: 24.0,
+                                  size: 20.0,
                                   color: Colors.blue,
                                 ),
                                 title: Text('请求详细信息',
                                   style: new TextStyle(
-                                      fontSize: 22.0,
+                                      fontSize: 20.0,
                                       fontWeight: FontWeight.w400
                                   ),
                                 )
@@ -390,8 +391,8 @@ class _CorrectionRequestState extends State<CorrectionRequest> {
                             padding: EdgeInsets.symmetric(horizontal: 12.0),
                             child: new Column(
                               children: <Widget>[
-                                BuildWidget.buildRow('类型', '校正'),
-                                BuildWidget.buildRow('主题', _equipment==null?'--校正':'${_equipment['Name']}--校正'),
+                                BuildWidget.buildRow('类型', '校准'),
+                                BuildWidget.buildRow('主题', _equipment==null?'--校准':'${_equipment['Name']}--校准'),
                                 BuildWidget.buildRow('请求人', _roleName),
                                 new Divider(),
                                 new Padding(
@@ -401,9 +402,9 @@ class _CorrectionRequestState extends State<CorrectionRequest> {
                                       new Expanded(
                                         flex: 4,
                                         child: new Text(
-                                          '校正要求：',
+                                          '校准要求：',
                                           style: new TextStyle(
-                                              fontSize: 20.0,
+                                              fontSize: 16.0,
                                               fontWeight: FontWeight.w600
                                           ),
                                         ),
@@ -412,6 +413,7 @@ class _CorrectionRequestState extends State<CorrectionRequest> {
                                         flex: 6,
                                         child: new TextField(
                                           controller: _fault, maxLength: 200, maxLines: 3,
+                                          focusNode: _focus,
                                           decoration: InputDecoration(
                                             fillColor: Color(0xfff0f0f0),
                                             filled: true,
@@ -428,7 +430,7 @@ class _CorrectionRequestState extends State<CorrectionRequest> {
                                       new Text(
                                         '添加附件：',
                                         style: new TextStyle(
-                                            fontSize: 20.0,
+                                            fontSize: 16.0,
                                             fontWeight: FontWeight.w600
                                         ),
                                       ),
@@ -449,7 +451,7 @@ class _CorrectionRequestState extends State<CorrectionRequest> {
                         ),
                       ],
                     ),
-                    SizedBox(height: 24.0),
+                    SizedBox(height: 20.0),
                     new Row(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       mainAxisSize: MainAxisSize.max,
@@ -479,7 +481,7 @@ class _CorrectionRequestState extends State<CorrectionRequest> {
                         ),
                       ],
                     ),
-                    SizedBox(height: 24.0),
+                    SizedBox(height: 20.0),
                   ],
                 ),
               ),

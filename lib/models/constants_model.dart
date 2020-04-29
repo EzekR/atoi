@@ -43,7 +43,7 @@ class ConstantsModel extends Model {
     '保养要求' ,
     '强检要求' ,
     '巡检要求' ,
-    '校正要求' ,
+    '校准要求' ,
     '备注' ,
     '不良事件描述',
     '合同档案备注' ,
@@ -211,14 +211,27 @@ class ConstantsModel extends Model {
           _ContractTypeList.add(_item['Name']);
         }
       }
-      for(var _item in resp['Data']['GetDepartment']) {
-        _Departments.putIfAbsent(_item['Name'], () => _item['ID']);
-        if (!_DepartmentsList.contains(_item['Name'])) {
-          _DepartmentsList.add(_item['Name']);
-        }
-      }
+      //for(var _item in resp['Data']['GetDepartment']) {
+      //  _Departments.putIfAbsent(_item['Name'], () => _item['ID']);
+      //  if (!_DepartmentsList.contains(_item['Name'])) {
+      //    _DepartmentsList.add(_item['Name']);
+      //  }
+      //}
       for(var _item in resp['Data']['ServiceProviders']) {
         _ServiceProviders.putIfAbsent(_item['Name'], () => _item['ID']);
+      }
+    }
+
+    var _departments = await HttpRequest.request(
+      '/User/GetDepartments',
+      method: HttpRequest.GET
+    );
+    if (_departments['ResultCode'] == '00') {
+      for(var _item in _departments['Data']) {
+        _Departments.putIfAbsent(_item['Description'], () => _item['ID']);
+        if (!_DepartmentsList.contains(_item['Description'])) {
+          _DepartmentsList.add(_item['Description']);
+        }
       }
     }
     notifyListeners();

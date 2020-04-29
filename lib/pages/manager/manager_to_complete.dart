@@ -335,7 +335,7 @@ class _ManagerToCompleteState extends State<ManagerToComplete> {
                                         new Container(
                                           width: 100.0,
                                           child: RaisedButton(
-                                            //padding: EdgeInsets.symmetric(vertical: 10.0, horizontal: 20.0),
+                                            //padding: EdgeInsets.symmetric(vertical: 10.0, horizontal: 16.0),
                                             child: Text('确认', style: TextStyle(color: Colors.white),),
                                             shape: RoundedRectangleBorder(
                                               borderRadius: BorderRadius.circular(6),
@@ -383,7 +383,7 @@ class _ManagerToCompleteState extends State<ManagerToComplete> {
                                           new Container(
                                             width: 100.0,
                                             child: RaisedButton(
-                                              //padding: EdgeInsets.symmetric(vertical: 10.0, horizontal: 20.0),
+                                              //padding: EdgeInsets.symmetric(vertical: 10.0, horizontal: 16.0),
                                               child: Text('确认', style: TextStyle(color: Colors.white),),
                                               shape: RoundedRectangleBorder(
                                                 borderRadius: BorderRadius.circular(6),
@@ -440,7 +440,7 @@ class _ManagerToCompleteState extends State<ManagerToComplete> {
                                                       new Container(
                                                         width: 100.0,
                                                         child: RaisedButton(
-                                                          //padding: EdgeInsets.symmetric(vertical: 10.0, horizontal: 20.0),
+                                                          //padding: EdgeInsets.symmetric(vertical: 10.0, horizontal: 16.0),
                                                           child: Text('确认', style: TextStyle(color: Colors.white),),
                                                           shape: RoundedRectangleBorder(
                                                             borderRadius: BorderRadius.circular(6),
@@ -514,7 +514,7 @@ class _ManagerToCompleteState extends State<ManagerToComplete> {
     return ScopedModelDescendant<MainModel>(
         builder: (context, child, model) {
           return new RefreshIndicator(
-              child: model.todos.length == 0?ListView(padding: const EdgeInsets.symmetric(vertical: 150.0), children: <Widget>[_loading?SpinKitRotatingPlain(color: Colors.blue):new Center(child: new Text('没有待派工请求'),)],):ListView.builder(
+              child: model.todos.length == 0?ListView(padding: const EdgeInsets.symmetric(vertical: 150.0), children: <Widget>[_loading?SpinKitThreeBounce(color: Colors.blue):new Center(child: new Text('没有更多未完成请求'),)],):ListView.builder(
                   padding: const EdgeInsets.all(2.0),
                   itemCount: model.todos.length>9?model.todos.length+1:model.todos.length,
                   controller: _scrollController,

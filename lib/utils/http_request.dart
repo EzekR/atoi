@@ -1,5 +1,7 @@
 import 'package:dio/dio.dart';
 import 'dart:async';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:atoi/utils/event_bus.dart';
 
 /*
  * 封装 restful 请求
@@ -24,7 +26,8 @@ class HttpRequest {
   /// default options
   //static const String API_PREFIX = 'http://159.226.128.250/MEMS_FUJI/APP';
   static const String APP_VERSION = '1.1.12';
-  static const String API_PREFIX = 'http://159.226.128.250/MEMS/APP';
+  // default server
+  static const String API_PREFIX = 'http://159.226.128.250/MEMS';
   static const int CONNECT_TIMEOUT = 10000;
   static const int RECEIVE_TIMEOUT = 10000;
 
@@ -35,6 +38,7 @@ class HttpRequest {
   static const String PATCH = 'patch';
   static const String DELETE = 'delete';
 
+
   /// request method
   static Future<Map> request (
       String url,
@@ -44,12 +48,17 @@ class HttpRequest {
     params ?? {};
     method = method ?? 'GET';
 
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    var _url = await prefs.getString('serverUrl');
+    var serverUrl = _url ?? API_PREFIX;
+    EventBus bus = new EventBus();
     /// 打印请求相关信息：请求地址、请求方式、请求参数
     print('请求地址：【' + method + '  ' + url + '】');
     print('请求body：' + data.toString());
     print('请求params：'+params.toString());
+    print('服务器地址：'+serverUrl);
 
-    Dio dio = createInstance();
+    Dio dio = createInstance(serverUrl+'/APP');
     var result;
 
     try {
@@ -62,23 +71,20 @@ class HttpRequest {
     } on DioError catch (e) {
       /// 打印请求失败相关信息
       print('请求出错：' + e.toString());
+      if (e.type == DioErrorType.CONNECT_TIMEOUT) {
+        bus.emit('timeout', url);
+      }
     }
 
     return result;
   }
 
   /// 创建 dio 实例对象
-  static Dio createInstance () {
+  static Dio createInstance (String serverUrl) {
     if (dio == null) {
       /// 全局属性：请求前缀、连接超时时间、响应超时时间
-      //Options options = new BaseOptions(
-      //  baseUrl: API_PREFIX,
-      //  connectTimeout: CONNECT_TIMEOUT,
-      //  receiveTimeout: RECEIVE_TIMEOUT,
-      //);
-
       dio = new Dio();
-      dio.options.baseUrl = API_PREFIX;
+      dio.options.baseUrl = serverUrl;
       dio.options.connectTimeout = CONNECT_TIMEOUT;
       dio.options.receiveTimeout = RECEIVE_TIMEOUT;
     }

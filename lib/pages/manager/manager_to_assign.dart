@@ -10,6 +10,8 @@ import 'package:atoi/widgets/build_widget.dart';
 import 'package:atoi/utils/constants.dart';
 import 'dart:io';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter_cupertino_date_picker/flutter_cupertino_date_picker.dart';
+import 'package:date_format/date_format.dart';
 
 /// 超管待派工列表页面类
 class ManagerToAssign extends StatefulWidget {
@@ -235,41 +237,50 @@ class _ManagerToAssignState extends State<ManagerToAssign> {
                       new RaisedButton(
                         onPressed: (){
                           var _date = DateTime.tryParse(task['SelectiveDate'].toString())??new DateTime.now();
-                          showDatePicker(
-                              context: context,
-                              initialDate: _date.isBefore(DateTime.now())?DateTime.now().add(new Duration(days: 1)):_date,
-                              firstDate: new DateTime.now(),
-                              lastDate: new DateTime.now().add(new Duration(days: 30)),
-                              locale: Locale('zh')
-                          ).then((DateTime val) {
-                            var date = '${val.year}-${val.month}-${val.day}';
-                            HttpRequest.request(
-                              '/Request/UpdateSelectiveDate',
-                              method: HttpRequest.POST,
-                              data: {
-                                'requestId': requestId,
-                                'selectiveDate': date
-                              }
-                            ).then((resp) {
-                              if (resp['ResultCode'] == '00') {
-                                showDialog(context: context,
-                                  builder: (context) =>CupertinoAlertDialog(
-                                    title: new Text('择期成功'),
-                                  )
-                                ).then((result) {
-                                  refresh();
-                                });
-                              } else {
-                                showDialog(context: context,
-                                    builder: (context) =>CupertinoAlertDialog(
-                                      title: new Text(resp['ResultMessage']),
-                                    )
-                                );
-                              }
-                            });
-                          }).catchError((err) {
-                            print(err);
-                          });
+                          DatePicker.showDatePicker(
+                            context,
+                            pickerTheme: DateTimePickerTheme(
+                              showTitle: true,
+                              confirm: Text('确认', style: TextStyle(color: Colors.blueAccent)),
+                              cancel: Text('取消', style: TextStyle(color: Colors.redAccent)),
+                            ),
+                            minDateTime: DateTime.parse('2000-01-01'),
+                            maxDateTime: DateTime.parse('2030-01-01'),
+                            initialDateTime: _date,
+                            dateFormat: 'yyyy-MM-dd',
+                            locale: DateTimePickerLocale.en_us,
+                            onClose: () => print(""),
+                            onCancel: () => print('onCancel'),
+                            onChange: (dateTime, List<int> index) {
+                            },
+                            onConfirm: (dateTime, List<int> index) {
+                              var date = formatDate(dateTime, [yyyy, '-', mm, '-', dd]);
+                              HttpRequest.request(
+                                  '/Request/UpdateSelectiveDate',
+                                  method: HttpRequest.POST,
+                                  data: {
+                                    'requestId': requestId,
+                                    'selectiveDate': date
+                                  }
+                              ).then((resp) {
+                                if (resp['ResultCode'] == '00') {
+                                  showDialog(context: context,
+                                      builder: (context) =>CupertinoAlertDialog(
+                                        title: new Text('择期成功'),
+                                      )
+                                  ).then((result) {
+                                    refresh();
+                                  });
+                                } else {
+                                  showDialog(context: context,
+                                      builder: (context) =>CupertinoAlertDialog(
+                                        title: new Text(resp['ResultMessage']),
+                                      )
+                                  );
+                                }
+                              });
+                            },
+                          );
                         },
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(6),
@@ -303,7 +314,9 @@ class _ManagerToAssignState extends State<ManagerToAssign> {
     return ScopedModelDescendant<MainModel>(
       builder: (context, child, model) {
         return new RefreshIndicator(
-            child: model.requests.length == 0?ListView(padding: const EdgeInsets.symmetric(vertical: 150.0), children: <Widget>[new Center(child: _loading?SpinKitRotatingPlain(color: Colors.blue):new Text('没有待派工请求'),)],):ListView.builder(
+            child:
+            model.requests.length == 0?ListView(padding: const EdgeInsets.symmetric(vertical: 150.0), children: <Widget>[new Center(child: _loading?SpinKitThreeBounce(color: Colors.blue):new Text('没有待派工请求'),)],):
+            ListView.builder(
                 padding: const EdgeInsets.all(2.0),
                 itemCount: model.requests.length>9?model.requests.length+1:model.requests.length,
                 controller: _scrollController,

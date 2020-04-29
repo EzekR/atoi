@@ -19,11 +19,14 @@ class SearchBarDelegate extends SearchDelegate<String>{
       '/Equipment/Getdevices',
       method: HttpRequest.GET,
       params: {
-        'filterText': filter
+        'filterText': filter,
+        'filterField': 'e.ID'
       }
     );
     print(resp);
-    suggestionList = resp['Data'];
+    if (resp['ResultCode'] == '00') {
+      suggestionList = resp['Data'];
+    }
   }
 
   final Map<String, String> equipmentInfo = {};
@@ -93,13 +96,10 @@ class SearchBarDelegate extends SearchDelegate<String>{
               },
               title: RichText(
                   text: TextSpan(
-                      text: '${suggestionList[i]['Name']}/${suggestionList[i]['EquipmentCode']}/${suggestionList[i]['SerialCode']}'.substring(0, query.length),
+                      text: '${suggestionList[i]['Name']}/${suggestionList[i]['EquipmentCode']}/${suggestionList[i]['SerialCode']}',
                       style: TextStyle(
                           color: Colors.grey),
                       children: [
-                        TextSpan(
-                            text: '${suggestionList[i]['Name']}/${suggestionList[i]['EquipmentCode']}/${suggestionList[i]['SerialCode']}'.substring(query.length),
-                            style: TextStyle(color: Colors.grey))
                       ])),
             ));
       },

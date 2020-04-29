@@ -19,11 +19,14 @@ class SearchBarVendor extends SearchDelegate<String>{
         '/DispatchReport/GetSuppliers',
         method: HttpRequest.GET,
         params: {
-          'filterText': filter
+          'filterText': filter,
+          'filterField': 's.Name'
         }
     );
     print(resp);
-    suggestionList = resp['Data'];
+    if (resp['ResultCode'] == '00') {
+      suggestionList = resp['Data'];
+    }
   }
 
   final Map<String, String> equipmentInfo = {};
@@ -93,14 +96,10 @@ class SearchBarVendor extends SearchDelegate<String>{
               },
               title: RichText(
                   text: TextSpan(
-                      text: '${suggestionList[i]['Name']}-${suggestionList[i]['SupplierType']['Name']}'.substring(0, query.length),
+                      text: '${suggestionList[i]['Name']}-${suggestionList[i]['SupplierType']['Name']}',
                       style: TextStyle(
-                          color: Colors.black, fontWeight: FontWeight.bold),
-                      children: [
-                        TextSpan(
-                            text: '${suggestionList[i]['Name']}-${suggestionList[i]['SupplierType']['Name']}'.substring(query.length),
-                            style: TextStyle(color: Colors.grey))
-                      ])),
+                          color: Colors.black, fontWeight: FontWeight.w400),
+                      children: [])),
             ));
       },
       future: getDevices(query),

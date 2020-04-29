@@ -88,24 +88,32 @@ class _AtoiAppState extends State<AtoiApp> {
     ]);
     return ScopedModel<MainModel>(
       model: mainModel,
-      child: new MaterialApp(
-          builder: (context, child) => MediaQuery(data: MediaQuery.of(context).copyWith(alwaysUse24HourFormat: true), child: child),
-          title: 'ATOI医疗设备管理系统',
-          theme: new ThemeData(
-              primaryColor: new Color(0xff3b4674),
-              accentColor: new Color(0xff2c5c85),
-              buttonColor: new Color(0xff2E94B9)
-          ),
-          home: new LoginPage(),
-          routes: routes,
-          localizationsDelegates: [
-            GlobalMaterialLocalizations.delegate,
-            GlobalWidgetsLocalizations.delegate,
-          ],
-          supportedLocales: [
-            const Locale('zh', 'CH'),
-            const Locale('en', 'US'),
-          ]
+      child: GestureDetector(
+        onTap: () {
+          FocusScopeNode currentFocus = FocusScope.of(context);
+          if (!currentFocus.hasPrimaryFocus) {
+            currentFocus.unfocus();
+          }
+        },
+        child: new MaterialApp(
+          //builder: (context, child) => MediaQuery(data: MediaQuery.of(context).copyWith(alwaysUse24HourFormat: true), child: child),
+            title: 'ATOI医疗设备管理系统',
+            theme: new ThemeData(
+                primaryColor: new Color(0xff3b4674),
+                accentColor: new Color(0xff2c5c85),
+                buttonColor: new Color(0xff2E94B9)
+            ),
+            home: new LoginPage(),
+            routes: routes,
+            localizationsDelegates: [
+              GlobalMaterialLocalizations.delegate,
+              GlobalWidgetsLocalizations.delegate,
+            ],
+            supportedLocales: [
+              const Locale('zh', 'CH'),
+              const Locale('en', 'US'),
+            ]
+        ),
       )
     );
   }

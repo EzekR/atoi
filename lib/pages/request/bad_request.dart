@@ -32,6 +32,7 @@ class _BadRequestState extends State<BadRequest> {
   var _roleName = '';
   var _fault = new TextEditingController();
   ConstantsModel model;
+  FocusNode _focus = new FocusNode();
 
   List _serviceResults = [];
 
@@ -146,7 +147,7 @@ class _BadRequestState extends State<BadRequest> {
           context: context,
           builder: (context) => CupertinoAlertDialog(
                 title: new Text('不良事件描述不可为空'),
-              ));
+              )).then((result) => FocusScope.of(context).requestFocus(_focus));
     } else {
       var prefs = await _prefs;
       var userID = prefs.getInt('userID');
@@ -157,7 +158,7 @@ class _BadRequestState extends State<BadRequest> {
         var file = {
           'FileContent': fileContent,
           'FileName': image.path,
-          'FiltType': 1,
+          'FileType': 1,
           'ID': 0
         };
         fileList.add(file);
@@ -209,12 +210,13 @@ class _BadRequestState extends State<BadRequest> {
 
     if (imageList.length > 0) {
       for (var image in imageList) {
+        print(image.runtimeType);
         _list.add(new Stack(
           alignment: FractionalOffset(1.0, 0),
           children: <Widget>[
             new Container(
               width: 100.0,
-              child: Image.file(image),
+              child: BuildWidget.buildPhotoPageFile(context, image),
             ),
             new Padding(
               padding: EdgeInsets.symmetric(horizontal: 0.0),
@@ -251,7 +253,7 @@ class _BadRequestState extends State<BadRequest> {
           value: method,
           child: new Text(
             method,
-            style: new TextStyle(fontSize: 20.0),
+            style: new TextStyle(fontSize: 16.0),
           )));
     }
     return items;
@@ -282,7 +284,7 @@ class _BadRequestState extends State<BadRequest> {
             flex: 4,
             child: new Text(
               labelText,
-              style: new TextStyle(fontSize: 20.0, fontWeight: FontWeight.w600),
+              style: new TextStyle(fontSize: 16.0, fontWeight: FontWeight.w600),
             ),
           ),
           new Expanded(
@@ -290,7 +292,7 @@ class _BadRequestState extends State<BadRequest> {
             child: new Text(
               defaultText,
               style: new TextStyle(
-                  fontSize: 20.0,
+                  fontSize: 16.0,
                   fontWeight: FontWeight.w400,
                   color: Colors.black54),
             ),
@@ -363,13 +365,13 @@ class _BadRequestState extends State<BadRequest> {
                             return ListTile(
                               leading: new Icon(
                                 Icons.info,
-                                size: 24.0,
+                                size: 20.0,
                                 color: Colors.blue,
                               ),
                               title: Text(
                                 '设备基本信息',
                                 style: new TextStyle(
-                                    fontSize: 22.0,
+                                    fontSize: 20.0,
                                     fontWeight: FontWeight.w400),
                               ),
                             );
@@ -421,13 +423,13 @@ class _BadRequestState extends State<BadRequest> {
                             return ListTile(
                                 leading: new Icon(
                                   Icons.description,
-                                  size: 24.0,
+                                  size: 20.0,
                                   color: Colors.blue,
                                 ),
                                 title: Text(
                                   '请求详细信息',
                                   style: new TextStyle(
-                                      fontSize: 22.0,
+                                      fontSize: 20.0,
                                       fontWeight: FontWeight.w400),
                                 ));
                           },
@@ -453,7 +455,7 @@ class _BadRequestState extends State<BadRequest> {
                                         child: new Text(
                                           '不良事件描述：',
                                           style: new TextStyle(
-                                              fontSize: 20.0,
+                                              fontSize: 16.0,
                                               fontWeight: FontWeight.w600),
                                         ),
                                       ),
@@ -461,6 +463,7 @@ class _BadRequestState extends State<BadRequest> {
                                         flex: 6,
                                         child: new TextField(
                                           controller: _fault, maxLength: 200, maxLines: 3,
+                                          focusNode: _focus,
                                           decoration: InputDecoration(
                                             fillColor: Color(0xfff0f0f0),
                                             filled: true,
@@ -477,7 +480,7 @@ class _BadRequestState extends State<BadRequest> {
                                       new Text(
                                         '添加附件：',
                                         style: new TextStyle(
-                                            fontSize: 20.0,
+                                            fontSize: 16.0,
                                             fontWeight: FontWeight.w600),
                                       ),
                                       new IconButton(
@@ -499,7 +502,7 @@ class _BadRequestState extends State<BadRequest> {
                         ),
                       ],
                     ),
-                    SizedBox(height: 24.0),
+                    SizedBox(height: 20.0),
                     new Row(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       mainAxisSize: MainAxisSize.max,
@@ -531,7 +534,7 @@ class _BadRequestState extends State<BadRequest> {
                         ),
                       ],
                     ),
-                    SizedBox(height: 24.0),
+                    SizedBox(height: 20.0),
                   ],
                 ),
               ),

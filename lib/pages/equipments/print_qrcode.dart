@@ -3,11 +3,12 @@ import 'package:flutter/cupertino.dart';
 import 'package:atoi/utils/http_request.dart';
 import 'package:brother_printer/brother_printer.dart';
 import 'dart:convert';
+import 'package:atoi/widgets/build_widget.dart';
 
 /// 打印二维码标签页面类
 class PrintQrcode extends StatefulWidget{
   _PrintQrcodeState createState() => _PrintQrcodeState();
-  final String equipmentId;
+  final int equipmentId;
   PrintQrcode({Key key, this.equipmentId}):super(key: key);
 }
 
@@ -62,7 +63,7 @@ class _PrintQrcodeState extends State<PrintQrcode> {
       _textList.add(new Text(
         _head,
         style: new TextStyle(
-          fontSize: 20.0
+          fontSize: 16.0
         ),
       ));
     }
@@ -106,7 +107,9 @@ class _PrintQrcodeState extends State<PrintQrcode> {
         height: 270,
         child: new Padding(
           padding: EdgeInsets.symmetric(horizontal: 10.0),
-          child: new Image.memory(_image),
+          child: Center(
+            child: BuildWidget.buildPhotoPageList(context, _image),
+          ),
         ),
 //        child: new Padding(
 //          padding: EdgeInsets.symmetric(vertical: 10.0, horizontal: 10.0),
@@ -141,14 +144,14 @@ class _PrintQrcodeState extends State<PrintQrcode> {
 //                    new Container(
 //                      child: Image.asset('assets/atoi.png'),
 //                    ),
-//                    new SizedBox(height: 20.0,),
+//                    new SizedBox(height: 16.0,),
 //                    new QrImage(
 //                      data: "www.baidu.com",
 //                      version: QrVersions.auto,
 //                      size: 150.0,
 //                    ),
 //                    new Padding(
-//                      padding: EdgeInsets.symmetric(horizontal: 20.0),
+//                      padding: EdgeInsets.symmetric(horizontal: 16.0),
 //                      child: new Text('微信扫一扫报修'),
 //                    )
 //                  ],
@@ -217,7 +220,7 @@ class _PrintQrcodeState extends State<PrintQrcode> {
       body: new Column(
         children: <Widget>[
           _image==null?new Container():buildPrintCard(),
-          new SizedBox(height: 20.0,),
+          new SizedBox(height: 16.0,),
           new RaisedButton(
               onPressed: () async {
                 printQRcode();

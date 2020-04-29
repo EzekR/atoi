@@ -31,6 +31,7 @@ class _EquipmentTransferState extends State<EquipmentTransfer> {
   Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
   var _roleName;
   var _fault = new TextEditingController();
+  FocusNode _focus = new FocusNode();
 
   MainModel mainModel = MainModel();
 
@@ -122,7 +123,7 @@ Future getImage(ImageSource sourceType) async {
           builder: (context) => CupertinoAlertDialog(
             title: new Text('设备调拨备注不可为空'),
           )
-      );
+      ).then((result) => FocusScope.of(context).requestFocus(_focus));
     } else {
       var prefs = await _prefs;
       var userID = prefs.getInt('userID');
@@ -133,7 +134,7 @@ Future getImage(ImageSource sourceType) async {
         var file = {
           'FileContent': fileContent,
           'FileName': image.path,
-          'FiltType': 1,
+          'FileType': 1,
           'ID': 0
         };
         fileList.add(file);
@@ -187,7 +188,7 @@ Future getImage(ImageSource sourceType) async {
               children: <Widget>[
                 new Container(
                   width: 100.0,
-                  child: Image.file(image),
+                  child: BuildWidget.buildPhotoPageFile(context, image),
                 ),
                 new Padding(
                   padding: EdgeInsets.symmetric(horizontal: 0.0),
@@ -223,7 +224,7 @@ Future getImage(ImageSource sourceType) async {
           value: method,
           child: new Text(method,
             style: new TextStyle(
-                fontSize: 20.0
+                fontSize: 16.0
             ),
           )
       ));
@@ -250,7 +251,7 @@ Future getImage(ImageSource sourceType) async {
             child: new Text(
               labelText,
               style: new TextStyle(
-                  fontSize: 20.0,
+                  fontSize: 16.0,
                   fontWeight: FontWeight.w600
               ),
             ),
@@ -260,7 +261,7 @@ Future getImage(ImageSource sourceType) async {
             child: new Text(
               defaultText,
               style: new TextStyle(
-                  fontSize: 20.0,
+                  fontSize: 16.0,
                   fontWeight: FontWeight.w400,
                   color: Colors.black54
               ),
@@ -334,12 +335,12 @@ Future getImage(ImageSource sourceType) async {
                           headerBuilder: (context, isExpanded) {
                             return ListTile(
                                 leading: new Icon(Icons.info,
-                                  size: 24.0,
+                                  size: 20.0,
                                   color: Colors.blue,
                                 ),
                                 title: Text('设备基本信息',
                                   style: new TextStyle(
-                                      fontSize: 22.0,
+                                      fontSize: 20.0,
                                       fontWeight: FontWeight.w400
                                   ),
                                 ),
@@ -369,12 +370,12 @@ Future getImage(ImageSource sourceType) async {
                           headerBuilder: (context, isExpanded) {
                             return ListTile(
                                 leading: new Icon(Icons.description,
-                                  size: 24.0,
+                                  size: 20.0,
                                   color: Colors.blue,
                                 ),
                                 title: Text('请求详细信息',
                                   style: new TextStyle(
-                                      fontSize: 22.0,
+                                      fontSize: 20.0,
                                       fontWeight: FontWeight.w400
                                   ),
                                 ),
@@ -397,7 +398,7 @@ Future getImage(ImageSource sourceType) async {
                                         child: new Text(
                                           '调拨备注：',
                                           style: new TextStyle(
-                                              fontSize: 20.0,
+                                              fontSize: 16.0,
                                               fontWeight: FontWeight.w600
                                           ),
                                         ),
@@ -410,6 +411,7 @@ Future getImage(ImageSource sourceType) async {
                                             filled: true,
                                           ),
                                           controller: _fault, maxLength: 200, maxLines: 3,
+                                          focusNode: _focus,
                                         ),
                                       )
                                     ],
@@ -422,7 +424,7 @@ Future getImage(ImageSource sourceType) async {
                                       new Text(
                                         '添加附件：',
                                         style: new TextStyle(
-                                            fontSize: 20.0,
+                                            fontSize: 16.0,
                                             fontWeight: FontWeight.w600
                                         ),
                                       ),
@@ -443,7 +445,7 @@ Future getImage(ImageSource sourceType) async {
                         ),
                       ],
                     ),
-                    SizedBox(height: 24.0),
+                    SizedBox(height: 20.0),
                     new Row(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       mainAxisSize: MainAxisSize.max,
@@ -473,7 +475,7 @@ Future getImage(ImageSource sourceType) async {
                         ),
                       ],
                     ),
-                    SizedBox(height: 24.0),
+                    SizedBox(height: 20.0),
                   ],
                 ),
               ),

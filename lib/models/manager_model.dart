@@ -14,6 +14,29 @@ class ManagerModel extends Model {
   int _offsetDispatch = 10;
   int _offsetTodo = 10;
 
+  int get offset => _offset;
+
+  set offset(int value) {
+    _offset = value;
+  } // filter
+  String _text = '';
+  String _field = 'r.ID';
+  String _startDate = '';
+  String _endDate = '';
+  int _statusId = 98;
+  int _typeId =0;
+  bool _recall = false;
+  int _departmentId = 0;
+  int _urgencyId = 0;
+  bool _overDue = false;
+  int _dispatchStatusId = 3;
+
+  int get dispatchStatusId => _dispatchStatusId;
+
+  set dispatchStatusId(int value) {
+    _dispatchStatusId = value;
+  }
+
   get badgeA => _badgeA;
   get badgeB => _badgeB;
   get badgeC => _badgeC;
@@ -21,6 +44,71 @@ class ManagerModel extends Model {
   get dispatches => _dispatches;
   get todos => _todos;
 
+  int get urgencyId => _urgencyId;
+
+  String get field => _field;
+
+  String get startDate => _startDate;
+
+  String get endDate => _endDate;
+
+  int get statusId => _statusId;
+
+  set statusId(int value) {
+    _statusId = value;
+  }
+
+  bool get overDue => _overDue;
+
+  String get text => _text;
+
+  set text(String value) {
+    _text = value;
+  }
+
+  int get departmentId => _departmentId;
+
+  bool get recall => _recall;
+
+  int get typeId => _typeId;
+
+  set typeId(int value) {
+    _typeId = value;
+  }
+
+  set recall(bool value) {
+    _recall = value;
+  }
+
+  set departmentId(int value) {
+    _departmentId = value;
+  }
+
+  set overDue(bool value) {
+    _overDue = value;
+  }
+
+  set endDate(String value) {
+    _endDate = value;
+  }
+
+  set startDate(String value) {
+    _startDate = value;
+  }
+
+  set field(String value) {
+    _field = value;
+  }
+
+  set urgencyId(int value) {
+    _urgencyId = value;
+  }
+
+  int get offsetDispatch => _offsetDispatch;
+
+  set offsetDispatch(int value) {
+    _offsetDispatch = value;
+  }
   /// 获取任务数量
   Future<Null> getCount() async {
     var resp = await HttpRequest.request(
@@ -42,7 +130,7 @@ class ManagerModel extends Model {
     var prefs = await _prefs;
     var userID = await prefs.getInt('userID');
     var resp = await HttpRequest.request(
-      '/Request/GetRequests?userID=${userID}&statusID=1&statusID=2&statusID=3&statusID=4&statusID=5&statusID=6&statusID=7&typeID=0&PageSize=10&CurRowNum=0',
+      '/Request/GetRequests?userID=${userID}&PageSize=10&CurRowNum=0&statusID=$_statusId&typeID=$_typeId&isRecall=$_recall&department=$_departmentId&urgency=$_urgencyId&overDue=$_overDue&startDate=$_startDate&endDate=$_endDate&filterField=$_field&filterText=$_text',
       method: HttpRequest.GET,
     );
     print(resp);
@@ -54,13 +142,14 @@ class ManagerModel extends Model {
     notifyListeners();
   }
 
+
   /// 获取更多请求
   Future<Null> getMoreRequests() async {
     Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
     var prefs = await _prefs;
     var userID = await prefs.getInt('userID');
     var resp = await HttpRequest.request(
-      '/Request/GetRequests?userID=${userID}&statusID=1&statusID=2&statusID=3&statusID=4&statusID=5&statusID=6&statusID=7&typeID=0&PageSize=10&CurRowNum=${_offset}',
+      '/Request/GetRequests?userID=${userID}&PageSize=10&CurRowNum=$_offset&statusID=$_statusId&typeID=$_typeId&isRecall=$_recall&department=$_departmentId&urgency=$_urgencyId&overDue=$_overDue&startDate=$_startDate&endDate=$_endDate&filterField=$_field&filterText=$_text',
       method: HttpRequest.GET,
     );
     print(resp);
@@ -77,15 +166,22 @@ class ManagerModel extends Model {
     Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
     var prefs = await _prefs;
     var userID = await prefs.getInt('userID');
+    Map<String, dynamic> _params = {
+      'userID': userID,
+      'statusIDs': _dispatchStatusId,
+      'urgency': _urgencyId,
+      'type': _typeId,
+      'pageSize': 10,
+      'curRowNum': 0,
+    };
+    if (_text != '') {
+      _params['filterText'] = _text;
+      _params['filterField'] = _field;
+    }
     var resp = await HttpRequest.request(
       '/Dispatch/GetDispatchs',
       method: HttpRequest.GET,
-      params: {
-        'userID': userID,
-        'statusIDs': 3,
-        'pageSize': 10,
-        'curRowNum': 0
-      }
+      params: _params
     );
     print(resp);
     if (resp['ResultCode'] == '00') {
@@ -100,15 +196,22 @@ class ManagerModel extends Model {
     Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
     var prefs = await _prefs;
     var userID = await prefs.getInt('userID');
+    Map<String, dynamic> _params = {
+      'userID': userID,
+      'statusIDs': _dispatchStatusId,
+      'urgency': _urgencyId,
+      'type': _typeId,
+      'pageSize': 10,
+      'curRowNum': _offsetDispatch,
+    };
+    if (_text != '') {
+      _params['filterText'] = _text;
+      _params['filterField'] = _field;
+    }
     var resp = await HttpRequest.request(
         '/Dispatch/GetDispatchs',
         method: HttpRequest.GET,
-        params: {
-          'userID': userID,
-          'statusIDs': 3,
-          'pageSize': 10,
-          'curRowNum': _offsetDispatch
-        }
+        params: _params
     );
     print(resp);
     if (resp['ResultCode'] == '00') {
@@ -125,10 +228,19 @@ class ManagerModel extends Model {
     var userID = await prefs.getInt('userID');
     Map<String, dynamic> params = {
       'userID': userID,
-      'statusID': 98,
+      'statusID': _statusId,
       'typeID': 0,
       'pageSize': 10,
-      'curRowNum': 0
+      'curRowNum': 0,
+      'typeID': _typeId,
+      'isRecall': _recall,
+      'department': _departmentId,
+      'urgency': _urgencyId,
+      'overDue': _overDue,
+      'startDate': _startDate,
+      'endDate': _endDate,
+      'filterField': _field,
+      'filterText': _text
     };
     var resp = await HttpRequest.request(
         '/Request/GetRequests',
@@ -150,10 +262,19 @@ class ManagerModel extends Model {
     var userID = await prefs.getInt('userID');
     Map<String, dynamic> params = {
       'userID': userID,
-      'statusID': 98,
+      'statusID': _statusId,
       'typeID': 0,
       'pageSize': 10,
-      'curRowNum': _offsetTodo
+      'curRowNum': _offsetTodo,
+      'typeID': _typeId,
+      'isRecall': _recall,
+      'department': _departmentId,
+      'urgency': _urgencyId,
+      'overDue': _overDue,
+      'startDate': _startDate,
+      'endDate': _endDate,
+      'filterField': _field,
+      'filterText': _text
     };
     var resp = await HttpRequest.request(
         '/Request/GetRequests',

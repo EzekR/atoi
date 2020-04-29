@@ -33,7 +33,7 @@ class _ReportListState extends State<ReportList> {
               child: Text(item['name'],
                 style: new TextStyle(
                     fontWeight: FontWeight.w600,
-                    fontSize: 20.0,
+                    fontSize: 16.0,
                     color: Colors.blue
                 ),
               ),
@@ -94,7 +94,6 @@ class _ReportListState extends State<ReportList> {
   Widget build(BuildContext context) {
     return new Scaffold(
         appBar: new AppBar(
-          leading: new Icon(Icons.menu),
           title: new Text('报表'),
           elevation: 0.7,
           flexibleSpace: Container(
@@ -578,25 +577,25 @@ class _ReportListState extends State<ReportList> {
             new Divider(color: Color(0xffEBEEF5),),
             new ListTile(
               leading: Icon(Icons.visibility, color: Color(0xff2F5C85),),
-              title: new Text('校正请求报表'),
+              title: new Text('校准请求报表'),
               onTap: () {
                 var _list = [
                   {
-                    'name': '设备实际校正数量',
+                    'name': '设备实际校准数量',
                     'type': 'barchart_1',
                     'label-y': '请求数量（个）',
                     'endpoint': 'ReportRequestCount?requestType=5&status=3'
                   },
                   {
-                    'name': '设备计划校正数量',
+                    'name': '设备计划校准数量',
                     'type': 'barchart_1',
                     'label-y': '请求数量（个）',
                     'endpoint': 'ReportRequestCount?requestType=5&status=0'
                   },
                   {
-                    'name': '设备校正率',
+                    'name': '设备校准率',
                     'type': 's_linechart_1',
-                    'label-y': '校正率（%）',
+                    'label-y': '校准率（%）',
                     'endpoint': 'RequestRatioReport?requestType=5&status=3'
                   },
                 ];

@@ -26,6 +26,8 @@ class _ManagerAuditVoucherPageState extends State<ManagerAuditVoucherPage> {
   var _isExpandedBasic = true;
   var _isExpandedDetail = false;
   var _isExpandedAssign = false;
+  var _isExpandedReq = false;
+  List<bool> _expandList = [false, false, false, true];
   Map<String, dynamic> _dispatch = {};
   List _equipments = [];
   TextEditingController _comment = new TextEditingController();
@@ -111,7 +113,7 @@ class _ManagerAuditVoucherPageState extends State<ManagerAuditVoucherPage> {
           value: method,
           child: new Text(method,
             style: new TextStyle(
-                fontSize: 20.0
+                fontSize: 16.0
             ),
           )
       ));
@@ -131,7 +133,7 @@ class _ManagerAuditVoucherPageState extends State<ManagerAuditVoucherPage> {
       decoration: InputDecoration(
           labelText: labelText,
           labelStyle: new TextStyle(
-              fontSize: 20.0
+              fontSize: 16.0
           ),
           disabledBorder: UnderlineInputBorder(
               borderSide: BorderSide(
@@ -143,9 +145,10 @@ class _ManagerAuditVoucherPageState extends State<ManagerAuditVoucherPage> {
       maxLines: 3,
       maxLength: 200,
       controller: controller,
+      focusNode: _focusComment,
       enabled: isEnabled,
       style: new TextStyle(
-          fontSize: 20.0
+          fontSize: 16.0
       ),
     );
   }
@@ -161,7 +164,7 @@ class _ManagerAuditVoucherPageState extends State<ManagerAuditVoucherPage> {
             child: new Text(
               labelText,
               style: new TextStyle(
-                fontSize: 20.0,
+                fontSize: 16.0,
                 fontWeight: FontWeight.w600,
               ),
               textAlign: TextAlign.justify,
@@ -171,7 +174,7 @@ class _ManagerAuditVoucherPageState extends State<ManagerAuditVoucherPage> {
             flex: 1,
             child: new Text(':',
               style: new TextStyle(
-                fontSize: 20.0,
+                fontSize: 16.0,
                 fontWeight: FontWeight.w600
               ),
             ),
@@ -181,7 +184,7 @@ class _ManagerAuditVoucherPageState extends State<ManagerAuditVoucherPage> {
             child: new Text(
               defaultText,
               style: new TextStyle(
-                  fontSize: 20.0,
+                  fontSize: 16.0,
                   fontWeight: FontWeight.w400,
                   color: Colors.black54
               ),
@@ -203,7 +206,7 @@ class _ManagerAuditVoucherPageState extends State<ManagerAuditVoucherPage> {
             child: new Text(
               title,
               style: new TextStyle(
-                  fontSize: 20.0,
+                  fontSize: 16.0,
                   fontWeight: FontWeight.w600
               ),
             ),
@@ -246,6 +249,8 @@ class _ManagerAuditVoucherPageState extends State<ManagerAuditVoucherPage> {
     }
   }
 
+  FocusNode _focusFollow = new FocusNode();
+
   Future<Null> approveJournal() async {
     final SharedPreferences prefs = await _prefs;
     var UserId = await prefs.getInt('userID');
@@ -254,7 +259,7 @@ class _ManagerAuditVoucherPageState extends State<ManagerAuditVoucherPage> {
           builder: (context) => CupertinoAlertDialog(
               title: new Text('待跟进问题不可为空')
           )
-      );
+      ).then((result) => FocusScope.of(context).requestFocus(_focusFollow));
       return;
     }
     Map<String, dynamic> _data = {
@@ -297,6 +302,8 @@ class _ManagerAuditVoucherPageState extends State<ManagerAuditVoucherPage> {
     }
   }
 
+  FocusNode _focusComment = new FocusNode();
+
   Future<Null> rejectJournal() async {
     final SharedPreferences prefs = await _prefs;
     var UserId = await prefs.getInt('userID');
@@ -306,7 +313,7 @@ class _ManagerAuditVoucherPageState extends State<ManagerAuditVoucherPage> {
           builder: (context) => CupertinoAlertDialog(
               title: new Text('审批备注不可为空')
           )
-      );
+      ).then((result) => FocusScope.of(context).requestFocus(_focusComment));
       return;
     }
     if (_currentResult =='待跟进' && _follow.text.isEmpty) {
@@ -314,7 +321,7 @@ class _ManagerAuditVoucherPageState extends State<ManagerAuditVoucherPage> {
           builder: (context) => CupertinoAlertDialog(
               title: new Text('待跟进问题不可为空')
           )
-      );
+      ).then((result) => FocusScope.of(context).requestFocus(_focusFollow));
       return;
     }
     Map<String, dynamic> _data = {
@@ -365,12 +372,12 @@ class _ManagerAuditVoucherPageState extends State<ManagerAuditVoucherPage> {
           headerBuilder: (context, isExpanded) {
             return ListTile(
               leading: new Icon(Icons.info,
-                size: 24.0,
+                size: 20.0,
                 color: Colors.blue,
               ),
               title: Text('设备基本信息',
                 style: new TextStyle(
-                    fontSize: 22.0,
+                    fontSize: 20.0,
                     fontWeight: FontWeight.w400
                 ),
               ),
@@ -397,22 +404,68 @@ class _ManagerAuditVoucherPageState extends State<ManagerAuditVoucherPage> {
               }),
             ),
           ),
-          isExpanded: _isExpandedBasic,
+          isExpanded: _expandList[0],
         ),
       );
     }
+
+    _list.add(
+      new ExpansionPanel(
+        headerBuilder: (context, isExpanded) {
+          return ListTile(
+            leading: new Icon(
+              Icons.description,
+              size: 20.0,
+              color: Colors.blue,
+            ),
+            title: Text(
+              '请求详细信息',
+              style: new TextStyle(fontSize: 20.0, fontWeight: FontWeight.w400),
+            ),
+          );
+        },
+        body: new Padding(
+          padding: EdgeInsets.symmetric(horizontal: 8.0),
+          child: new Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            mainAxisSize: MainAxisSize.max,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              BuildWidget.buildRow('服务申请编号', _dispatch['Request']['OID']),
+              BuildWidget.buildRow('类型', _dispatch['Request']['SourceType']),
+              BuildWidget.buildRow('主题', _dispatch['Request']['SubjectName']),
+              BuildWidget.buildRow('请求人', _dispatch['Request']['RequestUser']['Name']),
+              BuildWidget.buildRow('请求状态', _dispatch['Request']['Status']['Name']),
+              _dispatch['Request']['RequestType']['ID'] == 1?BuildWidget.buildRow('机器状态', _dispatch['Request']['MachineStatus']['Name']):new Container(),
+              BuildWidget.buildRow(model.Remark[_dispatch['Request']['RequestType']['ID']], _dispatch['Request']['FaultDesc']),
+              _dispatch['Request']['RequestType']['ID'] == 2 ||
+                  _dispatch['Request']['RequestType']['ID'] == 3 ||
+                  _dispatch['Request']['RequestType']['ID'] == 7
+                  ? BuildWidget.buildRow(
+                  model.RemarkType[_dispatch['Request']['RequestType']['ID']],
+                  _dispatch['Request']['FaultType']['Name'])
+                  : new Container(),
+              _dispatch['Request']['Status']['ID'] == 1
+                  ? new Container()
+                  : BuildWidget.buildRow('处理方式', _dispatch['Request']['DealType']['Name']),
+            ],
+          ),
+        ),
+        isExpanded: _expandList[1],
+      ),
+    );
 
     _list.addAll([
       new ExpansionPanel(
         headerBuilder: (context, isExpanded) {
           return ListTile(
             leading: new Icon(Icons.description,
-              size: 24.0,
+              size: 20.0,
               color: Colors.blue,
             ),
             title: Text('派工内容',
               style: new TextStyle(
-                  fontSize: 22.0,
+                  fontSize: 20.0,
                   fontWeight: FontWeight.w400
               ),
             ),
@@ -433,18 +486,18 @@ class _ManagerAuditVoucherPageState extends State<ManagerAuditVoucherPage> {
             ],
           ),
         ),
-        isExpanded: _isExpandedDetail,
+        isExpanded: _expandList[2],
       ),
       new ExpansionPanel(
         headerBuilder: (context, isExpanded) {
           return ListTile(
               leading: new Icon(Icons.perm_contact_calendar,
-                size: 24.0,
+                size: 20.0,
                 color: Colors.blue,
               ),
               title: Text('服务详情信息',
                 style: new TextStyle(
-                    fontSize: 22.0,
+                    fontSize: 20.0,
                     fontWeight: FontWeight.w400
                 ),
               )
@@ -459,7 +512,7 @@ class _ManagerAuditVoucherPageState extends State<ManagerAuditVoucherPage> {
               BuildWidget.buildRow('故障现象/错误代码/事由', _journal['FaultCode']),
               BuildWidget.buildRow('工作内容', _journal['JobContent']),
               widget.status==3?BuildWidget.buildRow('服务结果', _currentResult):BuildWidget.buildDropdown('服务结果', _currentResult, _dropDownMenuItems, changedDropDownMethod),
-              widget.status!=3&&_currentResult=='待跟进'?BuildWidget.buildInput('待跟进问题', _follow):new Container(),
+              widget.status!=3&&_currentResult=='待跟进'?BuildWidget.buildInput('待跟进问题', _follow, focusNode: _focusFollow):new Container(),
               widget.status==3&&_currentResult=='待跟进'?BuildWidget.buildRow('待跟进问题', _follow.text):new Container(),
               BuildWidget.buildRow('建议留言', _journal['Advice']),
               BuildWidget.buildRow('客户姓名', _journal['UserName']??''),
@@ -470,11 +523,11 @@ class _ManagerAuditVoucherPageState extends State<ManagerAuditVoucherPage> {
                 children: <Widget>[
                   new Padding(
                     padding: const EdgeInsets.all(10.0),
-                    child: Image.memory(
-                      imageBytes??[],
+                    child: Container(
                       width: 300.0,
                       height: 300.0,
-                    ),
+                      child: BuildWidget.buildPhotoPageList(context, imageBytes),
+                    )
                   ),
                 ],
               ),
@@ -482,7 +535,7 @@ class _ManagerAuditVoucherPageState extends State<ManagerAuditVoucherPage> {
             ],
           ),
         ),
-        isExpanded: _isExpandedAssign,
+        isExpanded: _expandList[3],
       ),
     ]);
 
@@ -513,7 +566,7 @@ class _ManagerAuditVoucherPageState extends State<ManagerAuditVoucherPage> {
         actions: <Widget>[
         ],
       ),
-      body: _journal.isEmpty?new Center(child: SpinKitRotatingPlain(color: Colors.blue,),):new Padding(
+      body: _journal.isEmpty?new Center(child: SpinKitThreeBounce(color: Colors.blue,),):new Padding(
         padding: EdgeInsets.symmetric(vertical: 5.0),
         child: new Card(
           child: new ListView(
@@ -522,30 +575,16 @@ class _ManagerAuditVoucherPageState extends State<ManagerAuditVoucherPage> {
                 animationDuration: Duration(milliseconds: 200),
                 expansionCallback: (index, isExpanded) {
                   setState(() {
-                    if (index == 0) {
-                      if (_dispatch['Request']['RequestType']['ID'] == 14) {
-                        _isExpandedDetail = !isExpanded;
-                      } else {
-                        _isExpandedBasic = !isExpanded;
-                      }
-                    } else {
-                      if (index == 1) {
-                        if (_dispatch['Request']['RequestType']['ID'] == 14) {
-                          _isExpandedAssign = !isExpanded;
-                        } else {
-                          _isExpandedDetail = !isExpanded;
-                        }
-                      } else {
-                        _isExpandedAssign =!isExpanded;
-                      }
-                    }
+                    _dispatch['Request']['RequestType']['ID'] !=14?
+                    _expandList[index] = !isExpanded:
+                    _expandList[index+1] = !isExpanded;
                   });
                 },
                 children: buildExpansion(),
               ),
-              SizedBox(height: 24.0),
+              SizedBox(height: 20.0),
               widget.status==3?new Container():buildTextField('审批备注', _comment, true),
-              SizedBox(height: 24.0),
+              SizedBox(height: 20.0),
               widget.status==3?new Container():new Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 mainAxisSize: MainAxisSize.max,
@@ -575,7 +614,7 @@ class _ManagerAuditVoucherPageState extends State<ManagerAuditVoucherPage> {
                   ),
                 ],
               ),
-              SizedBox(height: 24.0),
+              SizedBox(height: 20.0),
             ],
           ),
         ),

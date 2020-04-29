@@ -47,6 +47,7 @@ dependencies:
   # syncfusion_flutter_charts: ^17.3.26
   date_format: ^1.0.8
   should_rebuild: ^0.1.2
+  flutter_cupertino_date_picker: ^1.0.12
   brother_printer:
       git: https://github.com/EzekR/brother_print.git
   atoi_charts:
@@ -79,6 +80,7 @@ flutter:
     - assets/banner.jpg
     - assets/bg_01.jpg
     - assets/bg.jpg
+    - assets/loading-1.gif
   fonts:
     - family: Nunito
       fonts:
