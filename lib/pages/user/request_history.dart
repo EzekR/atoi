@@ -87,8 +87,8 @@ class _RequestHistoryState extends State<RequestHistory> {
                               context,
                               pickerTheme: DateTimePickerTheme(
                                 showTitle: true,
-                                confirm: Text('确认', style: TextStyle(color: Colors.red)),
-                                cancel: Text('取消', style: TextStyle(color: Colors.cyan)),
+                                confirm: Text('确认', style: TextStyle(color: Colors.blueAccent)),
+                                cancel: Text('取消', style: TextStyle(color: Colors.redAccent)),
                               ),
                               minDateTime: DateTime.parse('2000-01-01'),
                               maxDateTime: DateTime.parse('2030-01-01'),
@@ -106,7 +106,7 @@ class _RequestHistoryState extends State<RequestHistory> {
                               },
                             );
                           },
-                          child: Text(startDate, style: TextStyle(fontWeight: FontWeight.w400),)
+                          child: Text(startDate, style: TextStyle(fontWeight: FontWeight.w400, fontSize: 12.0),)
                       ),
                     ),
                   ),
@@ -144,7 +144,7 @@ class _RequestHistoryState extends State<RequestHistory> {
                               },
                             );
                           },
-                          child: Text(endDate, style: TextStyle(fontWeight: FontWeight.w400),)
+                          child: Text(endDate, style: TextStyle(fontWeight: FontWeight.w400, fontSize: 12.0),)
                       ),
                     ),
                   ),

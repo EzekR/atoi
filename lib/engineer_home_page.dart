@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:atoi/pages/engineer/engineer_menu.dart';
 import 'package:atoi/pages/engineer/engineer_to_report.dart';
 import 'package:badges/badges.dart';
@@ -14,6 +15,7 @@ import 'package:atoi/pages/equipments/equipments_list.dart';
 import 'package:atoi/pages/reports/report_list.dart';
 import 'package:atoi/pages/equipments/vendors_list.dart';
 import 'package:atoi/pages/equipments/contract_list.dart';
+import 'package:atoi/utils/event_bus.dart';
 
 /// 管理员首页类
 class EngineerHomePage extends StatefulWidget {
@@ -40,6 +42,7 @@ class _EngineerHomePageState extends State<EngineerHomePage>
   EngineerModel model;
   ConstantsModel cModel;
   int currentTabIndex = 0;
+  EventBus bus = new EventBus();
 
   /// 获取用户信息
   Future<Null> getRole() async {
@@ -64,6 +67,7 @@ class _EngineerHomePageState extends State<EngineerHomePage>
       urgencyList = initList(cModel.UrgencyID);
       urgencyId = 0;
       dispatchStatusList = initList(cModel.DispatchStatus);
+      dispatchStatusList.removeWhere((item) => item['value'] == -1 || item['value'] == 1 || item['value'] ==4);
       dispatchStatusId = 0;
       model.offset = 10;
       model.offsetReport = 10;
@@ -121,6 +125,12 @@ class _EngineerHomePageState extends State<EngineerHomePage>
     initFilter();
     _timer = new Timer.periodic(new Duration(seconds: 10), (timer) {
       model.getCountEngineer();
+    });
+    bus.on('timeout', (params) {
+      print('catch timeout event');
+      showDialog(context: context, builder: (_) => CupertinoAlertDialog(
+        title: Text('网络超时'),
+      ));
     });
   }
 

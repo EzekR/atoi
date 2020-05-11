@@ -18,6 +18,7 @@ import 'package:atoi/models/main_model.dart';
 import 'package:atoi/utils/constants.dart';
 import 'package:flutter_cupertino_date_picker/flutter_cupertino_date_picker.dart';
 import 'package:date_format/date_format.dart';
+import 'package:atoi/utils/event_bus.dart';
 
 /// 设备合同页面类
 class EquipmentContract extends StatefulWidget {
@@ -44,6 +45,7 @@ class _EquipmentContractState extends State<EquipmentContract> {
   String endDate = 'YY-MM-DD';
   String OID = '系统自动生成';
   String _contractStatus = '生效';
+  EventBus bus = new EventBus();
 
   ConstantsModel model;
 
@@ -98,15 +100,15 @@ class _EquipmentContractState extends State<EquipmentContract> {
     }
   }
 
-  List<FocusNode> _focusContract = new List(5).map((item) {
+  List<FocusNode> _focusContract = new List(10).map((item) {
     return new FocusNode();
   }).toList();
 
   Future<Null> saveContract() async {
-    if (_equipments == null) {
+    if (_equipments == null || _equipments.isEmpty) {
       showDialog(context: context, builder: (context) => CupertinoAlertDialog(
         title: new Text('请选择设备'),
-      ));
+      )).then((result) => FocusScope.of(context).requestFocus(_focusContract[5]));
       return;
     }
 
@@ -131,7 +133,7 @@ class _EquipmentContractState extends State<EquipmentContract> {
     if (startDate == 'YY-MM-DD' || endDate == 'YY-MM-DD') {
       showDialog(context: context, builder: (context) => CupertinoAlertDialog(
         title: new Text('起始日期不可为空'),
-      ));
+      )).then((result) => FocusScope.of(context).requestFocus(_focusContract[6]));
       return;
     }
     var _start = DateTime.parse(startDate);
@@ -139,13 +141,13 @@ class _EquipmentContractState extends State<EquipmentContract> {
     if (_end.isBefore(_start)) {
       showDialog(context: context, builder: (context) => CupertinoAlertDialog(
         title: new Text('起止日期格式有误'),
-      ));
+      )).then((result) => FocusScope.of(context).requestFocus(_focusContract[6]));
       return;
     }
     if (supplier == null) {
       showDialog(context: context, builder: (context) => CupertinoAlertDialog(
         title: new Text('供应商不可为空'),
-      ));
+      )).then((result) => FocusScope.of(context).requestFocus(_focusContract[7]));
       return;
     }
     var _equipList = _equipments.map((item) => {'ID': item['ID']}).toList();
@@ -207,6 +209,13 @@ class _EquipmentContractState extends State<EquipmentContract> {
     if (widget.contract != null) {
       getContract(widget.contract['ID']);
     }
+    bus.on('unfocus', (param) {
+      _focusContract.forEach((item) {
+        if (item.hasFocus) {
+          item.unfocus();
+        }
+      });
+    });
   }
 
   void changeType(String selected) {
@@ -400,7 +409,7 @@ class _EquipmentContractState extends State<EquipmentContract> {
 
   Future toSearch() async {
     final _searchResult =
-        await showSearch(context: context, delegate: SearchBarDelegate());
+        await showSearch(context: context, delegate: SearchBarDelegate(), hintText: '请输入设备名称');
     if (_searchResult != null && _searchResult != 'null') {
       print(_searchResult);
       Map _data = jsonDecode(_searchResult);
@@ -512,11 +521,13 @@ class _EquipmentContractState extends State<EquipmentContract> {
                   icon: Icon(Icons.search),
                   color: Colors.white,
                   iconSize: 30.0,
+                  focusNode: _focusContract[5],
                   onPressed: () async {
                     //toSearch();
                     Navigator.of(context).push(new MaterialPageRoute(builder: (context) {
                       return SearchPage(equipments: _equipments,);
                     })).then((selected) {
+                      print(selected.toString());
                       if (selected != null) {
                         setState(() {
                           _equipments = selected;
@@ -570,7 +581,7 @@ class _EquipmentContractState extends State<EquipmentContract> {
                               ),
                             );
                           },
-                          body: _equipments ==null
+                          body: _equipments ==null || _equipments.isEmpty
                               ? new Center(child: new Text('请选择设备'))
                               : buildEquip(),
                           isExpanded: _isExpandedBasic,
@@ -597,7 +608,7 @@ class _EquipmentContractState extends State<EquipmentContract> {
                               children: <Widget>[
                                 BuildWidget.buildRow('系统编号', OID),
                                 widget.editable?BuildWidget.buildInput('合同编号', contractNum, maxLength: 20, focusNode: _focusContract[0]):BuildWidget.buildRow('合同编号', contractNum.text),
-                                widget.editable?BuildWidget.buildInput('项目编号', projectNum, maxLength: 20):BuildWidget.buildRow('项目编号', projectNum.text),
+                                widget.editable?BuildWidget.buildInput('项目编号', projectNum, maxLength: 20, focusNode: _focusContract[9]):BuildWidget.buildRow('项目编号', projectNum.text),
                                 widget.editable?BuildWidget.buildInput('金额', amount, inputType: TextInputType.numberWithOptions(decimal: true), maxLength: 11, focusNode: _focusContract[1]):BuildWidget.buildRow('金额', amount.text),
                                 widget.editable?BuildWidget.buildInput('名称', name, maxLength: 50, focusNode: _focusContract[2]):BuildWidget.buildRow('名称', name.text),
                                 widget.editable?BuildWidget.buildDropdown('类型', currentType, dropdownType, changeType):BuildWidget.buildRow('类型', currentType),
@@ -645,6 +656,7 @@ class _EquipmentContractState extends State<EquipmentContract> {
                                       new Expanded(
                                           flex: 3,
                                           child: new IconButton(
+                                              focusNode: _focusContract[7],
                                               icon: Icon(Icons.search),
                                               onPressed: () async {
                                                 final _searchResult =
@@ -713,6 +725,7 @@ class _EquipmentContractState extends State<EquipmentContract> {
                                                 new Expanded(
                                                   flex: 2,
                                                   child: new IconButton(
+                                                      focusNode: _focusContract[6],
                                                       icon: Icon(Icons.calendar_today, color: AppConstants.AppColors['btn_main'],),
                                                       onPressed: () async {
                                                         await pickDate('start', initialTime: startDate);

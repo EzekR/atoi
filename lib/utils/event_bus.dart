@@ -1,5 +1,6 @@
 typedef void EventCallback(arg);
 
+/// 事件总线
 class EventBus {
   EventBus._internal();
 

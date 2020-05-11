@@ -287,7 +287,7 @@ Future getImage(ImageSource sourceType) async {
   }
 
   Future toSearch() async {
-    final _searchResult = await showSearch(context: context, delegate: SearchBarDelegate());
+    final _searchResult = await showSearch(context: context, delegate: SearchBarDelegate(), hintText: '请输入设备名称');
     Map _data = jsonDecode(_searchResult);
     setState(() {
       //_result.addAll(_data);

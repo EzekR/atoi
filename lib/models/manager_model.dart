@@ -168,7 +168,6 @@ class ManagerModel extends Model {
     var userID = await prefs.getInt('userID');
     Map<String, dynamic> _params = {
       'userID': userID,
-      'statusIDs': _dispatchStatusId,
       'urgency': _urgencyId,
       'type': _typeId,
       'pageSize': 10,
@@ -179,7 +178,7 @@ class ManagerModel extends Model {
       _params['filterField'] = _field;
     }
     var resp = await HttpRequest.request(
-      '/Dispatch/GetDispatchs',
+      _dispatchStatusId==0?'/Dispatch/GetDispatchs?statusIDs=2&statusIDs=3':'/Dispatch/GetDispatchs?statusIDs=$_dispatchStatusId',
       method: HttpRequest.GET,
       params: _params
     );
@@ -198,7 +197,6 @@ class ManagerModel extends Model {
     var userID = await prefs.getInt('userID');
     Map<String, dynamic> _params = {
       'userID': userID,
-      'statusIDs': _dispatchStatusId,
       'urgency': _urgencyId,
       'type': _typeId,
       'pageSize': 10,
@@ -209,7 +207,7 @@ class ManagerModel extends Model {
       _params['filterField'] = _field;
     }
     var resp = await HttpRequest.request(
-        '/Dispatch/GetDispatchs',
+        _dispatchStatusId==0?'/Dispatch/GetDispatchs?statusIDs=2&statusIDs=3':'/Dispatch/GetDispatchs?statusIDs=$_dispatchStatusId',
         method: HttpRequest.GET,
         params: _params
     );

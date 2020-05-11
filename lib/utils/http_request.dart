@@ -71,7 +71,8 @@ class HttpRequest {
     } on DioError catch (e) {
       /// 打印请求失败相关信息
       print('请求出错：' + e.toString());
-      if (e.type == DioErrorType.CONNECT_TIMEOUT) {
+      // 网络超时且请求地址非轮询接口时，emit超时事件
+      if (url != '/User/GetEngineerCount' && url !='/User/GetAdminCount') {
         bus.emit('timeout', url);
       }
     }

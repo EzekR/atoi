@@ -14,6 +14,7 @@ import 'package:atoi/widgets/build_widget.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_cupertino_date_picker/flutter_cupertino_date_picker.dart';
 import 'package:date_format/date_format.dart';
+import 'package:should_rebuild/should_rebuild.dart';
 
 /// 超管派工页面类
 class ManagerAssignPage extends StatefulWidget {
@@ -175,7 +176,7 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
       for (var file in files) {
         var _list = file['FileName'].split('.');
         _list = _list.reversed.toList();
-        if (_list[0] == 'jpg' || _list[0] == 'png' || _list[0] == 'jpeg' || _list[0] == 'bmp') {
+        if (_list[0].toLowerCase() == 'jpg' || _list[0].toLowerCase() == 'png' || _list[0].toLowerCase() == 'jpeg' || _list[0].toLowerCase() == 'bmp') {
           getImage(file['ID']);
         } else {
           _fileNames.add(file['FileName']);
@@ -429,7 +430,19 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
       List<Widget> _list = [];
       for(var file in imageBytes) {
         _list.add(Container(
-          child: BuildWidget.buildPhotoPageList(context, file),
+          child: GestureDetector(
+            onTap: () {
+              Navigator.of(context).push(new MaterialPageRoute(builder: (_) =>
+                  FullScreenWrapper(
+                    imageProvider: MemoryImage(file),
+                    backgroundDecoration: BoxDecoration(
+                        color: Colors.white
+                    ),
+                  )
+              ));
+            },
+            child: Image.memory(file),
+          ),
           width: 400.0,
           height: 400.0,
         ));
@@ -771,6 +784,7 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
               _request['RequestType']['ID']==3?BuildWidget.buildRow('是否召回', _request['IsRecall']?'是':'否'):new Container(),
               BuildWidget.buildRow('请求附件', ''),
               buildImageColumn(),
+              //imageBytes.isNotEmpty?ShouldRebuild<BuildImageColumn>(shouldRebuild: (_old, _new) => _old.imageList!=_new.imageList, child: BuildImageColumn(imageList: imageBytes,),):Container(),
               buildFileName(),
               new Divider(),
               BuildWidget.buildDropdown('处理方式', _currentMethod, _dropDownMenuItems, changedDropDownMethod),
@@ -1140,4 +1154,23 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
       },
     );
   }
+}
+
+class BuildImageColumn extends StatelessWidget {
+  final List imageList;
+  BuildImageColumn({this.imageList});
+
+  Widget build(BuildContext context) {
+    List<Widget> _list = [];
+    for(var file in imageList) {
+      _list.add(Container(
+        child: BuildWidget.buildPhotoPageList(context, file),
+        width: 400.0,
+        height: 400.0,
+      ));
+      _list.add(SizedBox(height: 8.0,));
+    }
+    return Column(children: _list);
+  }
+
 }

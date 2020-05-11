@@ -353,7 +353,7 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
       ).then((result) => FocusScope.of(context).requestFocus(_focusReport[0]));
       return;
     }
-    if ((_dispatch['RequestType']['ID'] == 2 && _currentProvider != '管理方' && _currentResult == '待第三方支持' && _report['Type']['ID'] == 201) || (_dispatch['RequestType']['ID'] == 3)) {
+    if ((_dispatch['RequestType']['ID'] == 2 && _currentProvider != '管理方' && _currentResult == '待第三方支持' && _report['Type']['ID'] == 201) || (_dispatch['RequestType']['ID'] == 3 && _report['Type']['ID'] != 1 && _report['IsPrivate'])) {
       if (imageAttach.isEmpty) {
         showDialog(context: context,
             builder: (context) => CupertinoAlertDialog(
@@ -455,7 +455,7 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
       ).then((result) => FocusScope.of(context).requestFocus(_focusReport[3]));
       return;
     }
-    if ((_dispatch['RequestType']['ID'] == 2 && _currentProvider != '管理方' && _report['Type']['ID'] == 201 && _currentResult == '待第三方支持') || (_dispatch['RequestType']['ID'] == 3)) {
+    if ((_dispatch['RequestType']['ID'] == 2 && _currentProvider != '管理方' && _report['Type']['ID'] == 201 && _currentResult == '待第三方支持') || (_dispatch['RequestType']['ID'] == 3 && _report['Type']['ID'] != 1 && _report['IsPrivate'])) {
       if (imageAttach.isEmpty) {
         showDialog(context: context,
             builder: (context) => CupertinoAlertDialog(
@@ -574,7 +574,7 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
           minWidth: 480, minHeight: 600);
       setState(() {
         imageAttach.clear();
-        imageAttach.add(_compressed);
+        imageAttach.add(Uint8List.fromList(_compressed));
       });
     }
   }

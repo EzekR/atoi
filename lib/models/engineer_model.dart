@@ -162,14 +162,13 @@ class EngineerModel extends Model {
     Map<String, dynamic> _params = {
       'urgency': _dispatchUrgencyId,
       'type': _dispatchTypeId,
-      'statusIDs': _engineerDispatchStatusId
     };
     if (_filterText != '') {
       _params['filterText'] = _filterText;
       _params['filterField'] = _engineerField;
     }
     var resp = await HttpRequest.request(
-      '/Dispatch/GetDispatchs?userID=${userID}&pageSize=10&curRowNum=0',
+      _engineerDispatchStatusId==0?'/Dispatch/GetDispatchs?userID=${userID}&pageSize=10&curRowNum=0&statusIDs=2&statusIDs=3':'/Dispatch/GetDispatchs?userID=${userID}&pageSize=10&curRowNum=0&statusIDs=$_engineerDispatchStatusId',
       method: HttpRequest.GET,
       params: _params
     );
@@ -189,14 +188,13 @@ class EngineerModel extends Model {
     Map<String, dynamic> _params = {
       'urgency': _dispatchUrgencyId,
       'type': _dispatchTypeId,
-      'statusIDs': _engineerDispatchStatusId
     };
     if (_filterText != '') {
       _params['filterText'] = _filterText;
       _params['filterField'] = _engineerField;
     }
     var resp = await HttpRequest.request(
-      '/Dispatch/GetDispatchs?userID=${userID}&pageSize=10&curRowNum=${_offsetReport}',
+        _engineerDispatchStatusId==0?'/Dispatch/GetDispatchs?userID=${userID}&pageSize=10&curRowNum=0&statusIDs=2&statusIDs=3':'/Dispatch/GetDispatchs?userID=${userID}&pageSize=10&curRowNum=0&statusIDs=$_engineerDispatchStatusId',
       method: HttpRequest.GET,
       params: _params
     );

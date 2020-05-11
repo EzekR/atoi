@@ -14,6 +14,7 @@ import 'package:flutter_jpush/flutter_jpush.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:flutter/services.dart';
 import 'package:atoi/utils/event_bus.dart';
+import 'package:dio/dio.dart';
 
 /// 登录注册类
 class LoginPage extends StatefulWidget {
@@ -74,10 +75,19 @@ class _LoginPageState extends State<LoginPage> {
 
   Future<Null> setServer() async {
     var _prefs = await prefs;
-    await _prefs.setString('serverUrl', serverUrl.text);
-    showDialog(context: context, builder: (_) => CupertinoAlertDialog(
-      title: Text('服务器地址修改成功，重启APP后生效'),
-    )).then((result) => exit(0));
+    try {
+      var resp = await Dio().get(serverUrl.text+'/APP/User/GetConstants');
+      if (resp.data['ResultCode'] == '00') {
+        await _prefs.setString('serverUrl', serverUrl.text);
+        showDialog(context: context, builder: (_) => CupertinoAlertDialog(
+          title: Text('服务器地址修改成功，重启APP后生效'),
+        )).then((result) => exit(0));
+      }
+    } catch (e) {
+      showDialog(context: context, builder: (_) => CupertinoAlertDialog(
+        title: Text('服务器地址无效'),
+      ));
+    }
   }
 
   Future<Null> checkVersion() async {
@@ -320,11 +330,6 @@ class _LoginPageState extends State<LoginPage> {
     super.initState();
     permissionCheck();
     getServer();
-    bus.on('timeout', (params) {
-      showDialog(context: context, builder: (_) => CupertinoAlertDialog(
-        title: Text('网络超时'),
-      ));
-    });
   }
 
   @override

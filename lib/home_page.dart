@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:atoi/pages/manager/manager_menu.dart';
 import 'package:atoi/pages/manager/manager_to_assign.dart';
 import 'package:atoi/pages/manager/manager_to_audit_page.dart';
@@ -17,6 +18,7 @@ import 'package:atoi/pages/equipments/contract_list.dart';
 import 'dart:convert';
 import 'package:date_format/date_format.dart';
 import 'package:flutter_cupertino_date_picker/flutter_cupertino_date_picker.dart';
+import 'package:atoi/utils/event_bus.dart';
 
 /// 超管首页类
 class HomePage extends StatefulWidget {
@@ -43,8 +45,6 @@ class _HomePageState extends State<HomePage>
   int urgencyId = 0;
   int dispatchStatusId = 3;
   bool overDue = false;
-  var _start = DateTime.now().add(new Duration(days: -30));
-  var _end = DateTime.now();
   String startDate = '';
   String endDate = '';
   String field = 'r.ID';
@@ -54,6 +54,7 @@ class _HomePageState extends State<HomePage>
   List departmentList = [];
   List urgencyList = [];
   List dispatchList = [];
+  EventBus bus = new EventBus();
 
   Future<Null> getRole() async {
     var _prefs = await prefs;
@@ -100,6 +101,8 @@ class _HomePageState extends State<HomePage>
   }
 
   void initFilter() async {
+    var _start = DateTime.now().add(new Duration(days: -30));
+    var _end = DateTime.now();
     await cModel.getConstants();
     model.startDate = formatDate(_start, [yyyy, '-', mm, '-', dd]);
     model.endDate = formatDate(_end, [yyyy, '-', mm, '-', dd]);
@@ -120,13 +123,15 @@ class _HomePageState extends State<HomePage>
       typeList = initList(cModel.RequestType);
       typeId = typeList[0]['value'];
       statusList = initList(cModel.RequestStatus);
+      statusList.removeWhere((item) => item['value'] == -1 || item['value'] == 99);
       statusId = statusList[0]['value'];
       departmentList = initList(cModel.Departments);
       departmentId = departmentList[0]['value'];
       urgencyList = initList(cModel.UrgencyID);
       urgencyId = urgencyList[0]['value'];
       dispatchList = initList(cModel.DispatchStatus);
-      dispatchStatusId = dispatchList[0]['value'];
+      dispatchList.removeWhere((item) => item['value'] == -1 || item['value'] == 1 || item['value'] == 4);
+      dispatchStatusId = 3;
       filterText.clear();
       _currentTabIndex==2?field='d.ID':field='r.ID';
     });
@@ -175,6 +180,12 @@ class _HomePageState extends State<HomePage>
     _timer = new Timer.periodic(new Duration(seconds: 10), (timer) {
       print('polling');
       model.getCount();
+    });
+    bus.on('timeout', (params) {
+      print('catch timeout event');
+      showDialog(context: context, builder: (_) => CupertinoAlertDialog(
+        title: Text('网络超时'),
+      ));
     });
   }
 
@@ -304,8 +315,8 @@ class _HomePageState extends State<HomePage>
                               context,
                               pickerTheme: DateTimePickerTheme(
                                 showTitle: true,
-                                confirm: Text('确认', style: TextStyle(color: Colors.red)),
-                                cancel: Text('取消', style: TextStyle(color: Colors.cyan)),
+                                confirm: Text('确认', style: TextStyle(color: Colors.blueAccent)),
+                                cancel: Text('取消', style: TextStyle(color: Colors.redAccent)),
                               ),
                               minDateTime: DateTime.parse('2000-01-01'),
                               maxDateTime: DateTime.parse('2030-01-01'),
@@ -323,7 +334,7 @@ class _HomePageState extends State<HomePage>
                               },
                             );
                           },
-                          child: Text(startDate, style: TextStyle(fontWeight: FontWeight.w400),)
+                          child: Text(startDate, style: TextStyle(fontWeight: FontWeight.w400, fontSize: 12.0),)
                       ),
                     ),
                   ),
@@ -361,21 +372,21 @@ class _HomePageState extends State<HomePage>
                               },
                             );
                           },
-                          child: Text(endDate, style: TextStyle(fontWeight: FontWeight.w400),)
+                          child: Text(endDate, style: TextStyle(fontWeight: FontWeight.w400, fontSize: 12.0),)
                       ),
                     ),
                   ),
                 ],
               ),
               _currentTabIndex==2?Container():SizedBox(height: 18.0,),
-              Row(
+              _currentTabIndex==2?Container():Row(
                 children: <Widget>[
                   SizedBox(width: 16.0,),
-                  Text(_currentTabIndex==2?'审批状态':'请求状态', style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.w600),)
+                  Text('请求状态', style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.w600),)
                 ],
               ),
-              SizedBox(height: 6.0,),
-              Row(
+              _currentTabIndex==2?Container():SizedBox(height: 6.0,),
+              _currentTabIndex==2?Container():Row(
                 children: <Widget>[
                   SizedBox(width: 16.0,),
                   Container(
@@ -386,25 +397,7 @@ class _HomePageState extends State<HomePage>
                         color: Color(0xfff2f2f2),
                       ),
                       child: Row(
-                        children: _currentTabIndex==2?<Widget>[
-                          SizedBox(width: 6.0,),
-                          DropdownButton(
-                            value: dispatchStatusId,
-                            underline: Container(),
-                            items: dispatchList.map<DropdownMenuItem>((item) {
-                              return DropdownMenuItem(
-                                value: item['value'],
-                                child: Text(item['text']),
-                              );
-                            }).toList(),
-                            onChanged: (val) {
-                              print(val);
-                              setState(() {
-                                dispatchStatusId = val;
-                              });
-                            },
-                          )
-                        ]:<Widget>[
+                        children: <Widget>[
                           SizedBox(width: 6.0,),
                           DropdownButton(
                             value: statusId,
@@ -634,10 +627,10 @@ class _HomePageState extends State<HomePage>
                           field = _currentTabIndex==2?'d.ID':'r.ID';
                           recall = false;
                           overDue = false;
-                          startDate = formatDate(_start, [yyyy, '-', mm, '-', dd]);
-                          endDate = formatDate(_end, [yyyy, '-', mm, '-', dd]);
+                          startDate = formatDate(DateTime.now().add(new Duration(days: -30)), [yyyy, '-', mm, '-', dd]);
+                          endDate = formatDate(DateTime.now(), [yyyy, '-', mm, '-', dd]);
                           typeId = typeList[0]['value'];
-                          dispatchStatusId = dispatchList[0]['value'];
+                          dispatchStatusId = 3;
                           statusId = statusList[0]['value'];
                           departmentId = departmentList[0]['value'];
                           urgencyId = urgencyList[0]['value'];

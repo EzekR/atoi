@@ -14,6 +14,7 @@ import 'dart:convert';
 import 'package:atoi/utils/constants.dart';
 import 'package:flutter_cupertino_date_picker/flutter_cupertino_date_picker.dart';
 import 'package:date_format/date_format.dart';
+import 'package:atoi/utils/event_bus.dart';
 
 /// 设备详情页面类
 class EquipmentDetail extends StatefulWidget {
@@ -56,6 +57,9 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
   bool isSearchState = false;
   bool isAdmin = true;
   bool netstat = false;
+  // 自动资产编号
+  bool autoAssetCode = true;
+  EventBus bus = new EventBus();
 
   var name = new TextEditingController(),
       equipmentCode = new TextEditingController(),
@@ -381,6 +385,18 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
       getDevice(widget.equipment['ID']);
     }
     getRole();
+    getSystemSetting();
+    _focusEquip.forEach((_node) {
+      _node.addListener(() {
+      });
+    });
+    bus.on('unfocus', (param) {
+      _focusEquip.forEach((item) {
+        if (item.hasFocus) {
+          item.unfocus();
+        }
+      });
+    });
   }
 
   void showSheet(context, List _imageList) {
@@ -423,7 +439,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
             minWidth: 480, minHeight: 600);
         _imageList.clear();
         setState(() {
-          _imageList.add({'fileName': image.path, 'content': _compressed});
+          _imageList.add({'fileName': image.path, 'content': Uint8List.fromList(_compressed)});
         });
       }
     } catch(e) {
@@ -437,7 +453,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
       for (var image in imageList) {
         var _suffix = image['fileName'].split('.');
         _suffix = _suffix.reversed.toList();
-        if (_suffix[0] == 'jpg' || _suffix[0] == 'jpeg' || _suffix[0] == 'bmp' || _suffix[0] == 'png') {
+        if (_suffix[0].toLowerCase() == 'jpg' || _suffix[0].toLowerCase() == 'jpeg' || _suffix[0].toLowerCase() == 'bmp' || _suffix[0].toLowerCase() == 'png') {
           _list.add(new Stack(
             alignment: FractionalOffset(1.0, 0),
             children: <Widget>[
@@ -532,6 +548,18 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
     print(resp);
   }
 
+  Future<Null> getSystemSetting() async {
+    var resp = await HttpRequest.request(
+      '/User/GetSystemSetting',
+      method: HttpRequest.GET
+    );
+    if (resp['ResultCode'] == '00') {
+      setState(() {
+        autoAssetCode = resp['Data']['AutoAssetCode'];
+      });
+    }
+  }
+
   Future<Null> getDevice(int deviceId) async {
     var resp = await HttpRequest.request('/Equipment/GetDeviceById',
         method: HttpRequest.GET, params: {'id': deviceId});
@@ -618,8 +646,8 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
         _fileExt = _fileExt.reversed.toList();
         switch (item['FileType']) {
           case 5:
-            if (_fileExt[0] == 'jpg' || _fileExt[0] == 'png' || _fileExt[0] == 'jpeg' ||
-                _fileExt[0] == 'bmp') {
+            if (_fileExt[0].toLowerCase() == 'jpg' || _fileExt[0].toLowerCase() == 'png' || _fileExt[0].toLowerCase() == 'jpeg' ||
+                _fileExt[0].toLowerCase() == 'bmp') {
               var _file = await getDeviceFile(item['ID']);
               if (_file != null) {
                 setState(() {
@@ -641,8 +669,8 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
             }
             break;
           case 6:
-            if (_fileExt[0] == 'jpg' || _fileExt[0] == 'png' || _fileExt[0] == 'jpeg' ||
-                _fileExt[0] == 'bmp') {
+            if (_fileExt[0].toLowerCase() == 'jpg' || _fileExt[0].toLowerCase() == 'png' || _fileExt[0].toLowerCase() == 'jpeg' ||
+                _fileExt[0].toLowerCase() == 'bmp') {
               var _file = await getDeviceFile(item['ID']);
               if (_file != null) {
                 setState(() {
@@ -664,8 +692,8 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
             }
             break;
           case 4:
-            if (_fileExt[0] == 'jpg' || _fileExt[0] == 'png' || _fileExt[0] == 'jpeg' ||
-                _fileExt[0] == 'bmp') {
+            if (_fileExt[0].toLowerCase() == 'jpg' || _fileExt[0].toLowerCase() == 'png' || _fileExt[0].toLowerCase() == 'jpeg' ||
+                _fileExt[0].toLowerCase() == 'bmp') {
               var _file = await getDeviceFile(item['ID']);
               if (_file != null) {
                 setState(() {
@@ -692,6 +720,10 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
   }
 
   List<FocusNode> _focusEquip = new List(10).map((item) {
+    return new FocusNode();
+  }).toList();
+
+  List<FocusNode> _focusOther = new List(10).map((item) {
     return new FocusNode();
   }).toList();
 
@@ -729,7 +761,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
           builder: (context) => CupertinoAlertDialog(
             title: new Text('设备厂商不可为空'),
           )
-      );
+      ).then((result) => FocusScope.of(context).requestFocus(_focusOther[0]));
       return;
     }
     if (responseTime.text.isEmpty || responseTime.text == "0" || responseTime.text == "") {
@@ -749,10 +781,10 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
           builder: (context) => CupertinoAlertDialog(
             title: new Text('有效日期格式有误'),
           )
-      );
+      ).then((result) => FocusScope.of(context).requestFocus(_focusOther[1]));
       return;
     }
-    if (assetCode.text.isEmpty) {
+    if (assetCode.text.isEmpty && !autoAssetCode) {
       showDialog(
           context: context,
           builder: (context) => CupertinoAlertDialog(
@@ -767,7 +799,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
           builder: (context) => CupertinoAlertDialog(
             title: new Text('采购日期不可为空'),
           )
-      );
+      ).then((result) => FocusScope.of(context).requestFocus(_focusOther[2]));
       return;
     }
     if (double.tryParse(purchaseAmount.text.toString()) !=null && double.tryParse(purchaseAmount.text.toString()) > 99999999.99) {
@@ -785,7 +817,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
           builder: (context) => CupertinoAlertDialog(
             title: new Text('报废时间不可为空'),
           )
-      );
+      ).then((result) => FocusScope.of(context).requestFocus(_focusOther[3]));
       return;
     }
     if (currentPatrolPeriod != '无' && patrolPeriod.text.isEmpty) {
@@ -842,22 +874,22 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
       ).then((result) => FocusScope.of(context).requestFocus(_focusEquip[8]));
       return;
     }
-    if (usageDate == 'YY-MM-DD') {
-      showDialog(
-          context: context,
-          builder: (context) => CupertinoAlertDialog(
-            title: new Text('启用日期不可为空'),
-          )
-      );
-      return;
-    }
+    //if (usageDate == 'YY-MM-DD') {
+    //  showDialog(
+    //      context: context,
+    //      builder: (context) => CupertinoAlertDialog(
+    //        title: new Text('启用日期不可为空'),
+    //      )
+    //  );
+    //  return;
+    //}
     if (installDate == 'YY-MM-DD') {
       showDialog(
           context: context,
           builder: (context) => CupertinoAlertDialog(
             title: new Text('安装日期不可为空'),
           )
-      );
+      ).then((result) => FocusScope.of(context).requestFocus(_focusOther[4]));
       return;
     }
     //var _iStart = DateTime.parse(installStartDate);
@@ -924,7 +956,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
       "Brand": brand.text,
       "Comments": comments.text,
       "ManufacturingDate": manufacturingDate,
-      "AssetCode": assetCode.text,
+      "AssetCode": autoAssetCode&&widget.equipment==null?null:assetCode.text,
       "AssetLevel": {'ID': model.AssetsLevel[currentLevel]},
       "DepreciationYears": depreciationYears.text,
       "ValidityStartDate": validationStartDate,
@@ -1103,10 +1135,12 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
                               fontSize: 16.0,
                               fontWeight: FontWeight.w400,
                               color: Colors.black54),
-                        )),
+                        ),
+                    ),
                     new Expanded(
                         flex: 2,
                         child: new IconButton(
+                            focusNode: _focusOther[0],
                             icon: Icon(Icons.search),
                             onPressed: () async {
                               final _searchResult = await showSearch(
@@ -1186,7 +1220,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
               BuildWidget.buildRow('分类编码', classCode1+classCode2+classCode3),
               widget.editable&&isAdmin?BuildWidget.buildRadio('整包范围', serviceScope, currentServiceScope, changeServiceScope):BuildWidget.buildRow('整包范围', currentServiceScope),
               widget.editable?BuildWidget.buildInput('品牌', brand, lines: 1):BuildWidget.buildRow('品牌', brand.text),
-              widget.editable?BuildWidget.buildInput('备注', comments, lines: 1):BuildWidget.buildRow('备注', comments.text),
+              widget.editable?BuildWidget.buildInput('备注', comments, lines: 1, maxLength: 100):BuildWidget.buildRow('备注', comments.text),
               widget.editable?new Padding(
                 padding: EdgeInsets.symmetric(vertical: 5.0),
                 child: new Row(
@@ -1285,7 +1319,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
             children: <Widget>[
               widget.editable?BuildWidget.buildRadio('固定资产', isFixed, currentFixed, changeValue):BuildWidget.buildRow('固定资产', currentFixed),
               widget.editable?BuildWidget.buildDropdown('资产等级', currentLevel, dropdownLevel, changeLevel):BuildWidget.buildRow('资产等级', currentLevel),
-              widget.editable?BuildWidget.buildInput('资产编号', assetCode, lines: 1, focusNode: _focusEquip[4]):BuildWidget.buildRow('资产编号', assetCode.text),
+              widget.editable&&!autoAssetCode?BuildWidget.buildInput('资产编号', assetCode, lines: 1, focusNode: _focusEquip[4]):BuildWidget.buildRow('资产编号', widget.editable&&widget.equipment==null?'系统自动生成':assetCode.text),
               widget.editable?BuildWidget.buildInput('折旧年限(年)', depreciationYears, lines: 1, maxLength: 3, inputType: TextInputType.number):BuildWidget.buildRow('折旧年限', depreciationYears.text),
               widget.editable?new Padding(
                 padding: EdgeInsets.symmetric(vertical: 5.0),
@@ -1370,14 +1404,17 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
                             children: <Widget>[
                               new Expanded(
                                 flex: 4,
-                                child: new Text(
-                                  validationEndDate,
-                                  style: new TextStyle(
-                                      fontSize: 16.0,
-                                      fontWeight: FontWeight.w400,
-                                      color: Colors.black54
+                                child: Focus(
+                                  focusNode: _focusOther[1],
+                                  child: new Text(
+                                    validationEndDate,
+                                    style: new TextStyle(
+                                        fontSize: 16.0,
+                                        fontWeight: FontWeight.w400,
+                                        color: Colors.black54
+                                    ),
                                   ),
-                                ),
+                                )
                               ),
                               new Expanded(
                                 flex: 2,
@@ -1498,6 +1535,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
                       flex: 2,
                       child: new IconButton(
                           icon: Icon(Icons.calendar_today, color: AppConstants.AppColors['btn_main'],),
+                          focusNode: _focusOther[2],
                           onPressed: () async {
                             var _time = DateTime.tryParse(purchaseDate)??DateTime.now();
                             DatePicker.showDatePicker(
@@ -1656,6 +1694,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
                       flex: 2,
                       child: new IconButton(
                           icon: Icon(Icons.calendar_today, color: AppConstants.AppColors['btn_main'],),
+                          focusNode: _focusOther[4],
                           onPressed: () async {
                             var _time = DateTime.tryParse(installDate)??DateTime.now();
                             DatePicker.showDatePicker(
@@ -1980,6 +2019,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
                       flex: 2,
                       child: new IconButton(
                           icon: Icon(Icons.calendar_today, color: AppConstants.AppColors['btn_main'],),
+                          focusNode: _focusOther[3],
                           onPressed: () async {
                             var _time = DateTime.tryParse(scrapDate)??DateTime.now();
                             DatePicker.showDatePicker(

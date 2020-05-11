@@ -101,7 +101,8 @@ class BuildWidget {
   }
 
   /// 构建常用下拉菜单（4、6分）
-  static Row buildDropdown(String title, String currentItem, List dropdownItems, Function changeDropdown) {
+  static Row buildDropdown(String title, String currentItem, List dropdownItems, Function changeDropdown, {FocusNode focusNode}) {
+    focusNode = focusNode??new FocusNode();
     return new Row(
       children: <Widget>[
         new Expanded(
@@ -140,6 +141,7 @@ class BuildWidget {
               color: Colors.black54,
               fontSize: 12.0,
             ),
+            focusNode: focusNode,
             //isDense: true,
             //isExpanded: true,
           ),
@@ -149,10 +151,14 @@ class BuildWidget {
   }
 
   /// 构建常用输入框（4、6分）
-  static Padding buildInput(String labelText, TextEditingController controller, {TextInputType inputType, int lines, int maxLength, FocusNode focusNode}) {
+  static Padding buildInput(String labelText, TextEditingController controller, {TextInputType inputType, int lines, int maxLength, FocusNode focusNode, Function tapEvent}) {
     inputType??TextInputType.text;
     lines = lines ?? 3;
     maxLength = maxLength ?? 30;
+    bool hasFocusNode = false;
+    if (focusNode != null) {
+      hasFocusNode = true;
+    }
     focusNode = focusNode ?? new FocusNode();
     return new Padding(
       padding: EdgeInsets.symmetric(vertical: 5.0),
@@ -196,6 +202,11 @@ class BuildWidget {
                 fillColor: Color(0xfff0f0f0),
                 filled: true,
               ),
+              onTap: () {
+                if (hasFocusNode) {
+                  focusNode.requestFocus();
+                }
+              },
             ),
           )
         ],
@@ -241,6 +252,9 @@ class BuildWidget {
                 fillColor: Color(0xfff0f0f0),
                 filled: true,
               ),
+              onTap: () {
+                focusNode.requestFocus();
+              },
             ),
           )
         ],
@@ -249,7 +263,8 @@ class BuildWidget {
   }
 
   /// 构建左对齐下拉菜单
-  static Row buildDropdownLeft(String title, String currentItem, List dropdownItems, Function changeDropdown) {
+  static Row buildDropdownLeft(String title, String currentItem, List dropdownItems, Function changeDropdown, {FocusNode focusNode}) {
+    focusNode = focusNode??new FocusNode();
     return new Row(
       children: <Widget>[
         new Expanded(
@@ -274,6 +289,7 @@ class BuildWidget {
             value: currentItem,
             items: dropdownItems,
             onChanged: changeDropdown,
+            focusNode: focusNode,
           ),
         )
       ],
@@ -356,7 +372,8 @@ class BuildWidget {
   }
 
   /// 构建输入开关
-  static Padding buildSwitch(String labelText, Function switchMethod) {
+  static Padding buildSwitch(String labelText, Function switchMethod, {FocusNode focusNode}) {
+    focusNode = focusNode??new FocusNode();
     return new Padding(
       padding: EdgeInsets.symmetric(vertical: 5.0),
       child: new Row(
@@ -391,6 +408,7 @@ class BuildWidget {
             flex: 6,
             child: new Switch.adaptive(
                 value: true,
+                focusNode: focusNode,
                 onChanged: switchMethod
             )
           )
@@ -608,7 +626,7 @@ class BuildWidget {
   }
 
   static GestureDetector buildPhotoPageList(BuildContext context, List<int> image) {
-    var _image = Uint8List.fromList(image);
+    //final List<int> _image = Uint8List.fromList(image);
     return GestureDetector(
       onTap: () {
         Navigator.of(context).push(new MaterialPageRoute(builder: (_) =>
@@ -620,7 +638,7 @@ class BuildWidget {
             )
         ));
       },
-      child: Image.memory(_image),
+      child: Image.memory(image),
     );
   }
 

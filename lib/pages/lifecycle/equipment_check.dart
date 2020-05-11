@@ -231,7 +231,7 @@ class _EquipmentCheckState extends State<EquipmentCheck> {
 
   Future toSearch() async {
     final _searchResult =
-        await showSearch(context: context, delegate: SearchBarDelegate());
+        await showSearch(context: context, delegate: SearchBarDelegate(), hintText: '请输入设备名称');
     if (_searchResult != null && _searchResult != 'null') {
       print(_searchResult);
       Map _data = jsonDecode(_searchResult);

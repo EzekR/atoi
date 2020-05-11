@@ -33,6 +33,8 @@ import 'package:atoi/pages/lifecycle/equipment_transfer.dart';
 import 'package:flutter/services.dart';
 import 'dart:async';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:atoi/utils/event_bus.dart';
+import 'package:flutter/cupertino.dart';
 
 class AtoiApp extends StatefulWidget{
   _AtoiAppState createState() => _AtoiAppState();
@@ -75,9 +77,19 @@ class _AtoiAppState extends State<AtoiApp> {
 
   Future<SharedPreferences> prefs = SharedPreferences.getInstance();
 
+  /// 事件总线
+  EventBus bus = new EventBus();
+
   @override
   void initState() {
     super.initState();
+    // 全局事件监听
+    bus.on('timeout', (params) {
+      print('catch timeout event');
+      showDialog(context: context, builder: (_) => CupertinoAlertDialog(
+        title: Text('网络超时'),
+      ));
+    });
   }
 
   @override
@@ -94,6 +106,7 @@ class _AtoiAppState extends State<AtoiApp> {
           if (!currentFocus.hasPrimaryFocus) {
             currentFocus.unfocus();
           }
+          bus.emit('unfocus');
         },
         child: new MaterialApp(
           //builder: (context, child) => MediaQuery(data: MediaQuery.of(context).copyWith(alwaysUse24HourFormat: true), child: child),
@@ -108,6 +121,7 @@ class _AtoiAppState extends State<AtoiApp> {
             localizationsDelegates: [
               GlobalMaterialLocalizations.delegate,
               GlobalWidgetsLocalizations.delegate,
+              const CupertinoLocalizationDelegate(),
             ],
             supportedLocales: [
               const Locale('zh', 'CH'),
@@ -122,4 +136,19 @@ class _AtoiAppState extends State<AtoiApp> {
 
 void main() {
   runApp(new AtoiApp());
+}
+
+class CupertinoLocalizationDelegate
+    extends LocalizationsDelegate<CupertinoLocalizations> {
+  const CupertinoLocalizationDelegate();
+
+  @override
+  bool isSupported(Locale locale) => true;
+
+  @override
+  Future<CupertinoLocalizations> load(Locale locale) =>
+      DefaultCupertinoLocalizations.load(locale);
+
+  @override
+  bool shouldReload(CupertinoLocalizationDelegate old) => false;
 }

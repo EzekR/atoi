@@ -244,7 +244,7 @@ class _ManagerToAssignState extends State<ManagerToAssign> {
                               confirm: Text('确认', style: TextStyle(color: Colors.blueAccent)),
                               cancel: Text('取消', style: TextStyle(color: Colors.redAccent)),
                             ),
-                            minDateTime: DateTime.parse('2000-01-01'),
+                            minDateTime: DateTime.now(),
                             maxDateTime: DateTime.parse('2030-01-01'),
                             initialDateTime: _date,
                             dateFormat: 'yyyy-MM-dd',

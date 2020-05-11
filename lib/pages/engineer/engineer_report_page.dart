@@ -14,6 +14,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter_cupertino_date_picker/flutter_cupertino_date_picker.dart';
 import 'package:date_format/date_format.dart';
 import 'package:photo_view/photo_view.dart';
+import 'package:atoi/utils/event_bus.dart';
 
 /// 工程师报告页面
 class EngineerReportPage extends StatefulWidget {
@@ -42,6 +43,7 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
   var _report;
   bool _edit = true;
   String _acceptDate = 'YY-MM-DD';
+  EventBus bus = new EventBus();
 
   List _serviceResults = [];
   List _sources = [];
@@ -174,7 +176,7 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
       var _compressed = await FlutterImageCompress.compressWithList(bytes,
           minWidth: 480, minHeight: 600);
       setState(() {
-        _imageList = _compressed;
+        _imageList = Uint8List.fromList(_compressed);
       });
     }
   }
@@ -305,7 +307,7 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
     }
   }
 
-  List<FocusNode> _focusReport = new List(11).map((item) {
+  List<FocusNode> _focusReport = new List(20).map((item) {
     return new FocusNode();
   }).toList();
 
@@ -315,7 +317,7 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
           context: context,
           builder: (context) => CupertinoAlertDialog(
             title: new Text('验收日期不可为空'),
-          ));
+          )).then((result) => FocusScope.of(context).requestFocus(_focusReport[9]));
       return;
     }
     if (statusId == 2 && _currentType != '通用作业报告') {
@@ -332,7 +334,7 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
             context: context,
             builder: (context) => CupertinoAlertDialog(
               title: new Text('附件不可为空'),
-            ));
+            )).then((result) => FocusScope.of(context).requestFocus(_focusReport[10]));
         return;
       }
       if (_dispatch['RequestType']['ID'] == 1 && _code.text.isEmpty) {
@@ -348,7 +350,7 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
             context: context,
             builder: (context) => CupertinoAlertDialog(
               title: new Text('设备状态（离场）不可为空'),
-            ));
+            )).then((result) => FocusScope.of(context).requestFocus(_focusReport[11]));
         return;
       }
       if (_dispatch['RequestType']['ID'] == 3 && _description.text.isEmpty) {
@@ -558,6 +560,13 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
       _edit = true;
     }
     super.initState();
+    bus.on('unfocus', (param) {
+      _focusReport.forEach((item) {
+        if (item.hasFocus) {
+          item.unfocus();
+        }
+      });
+    });
   }
 
   List<DropdownMenuItem<String>> getDropDownMenuItems(List list) {
@@ -594,6 +603,7 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
           ),
           maxLines: 3,
           maxLength: maxLength,
+          focusNode: focusNode,
         ),
         new SizedBox(
           height: 5.0,
@@ -769,7 +779,7 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
             [
               _edit?buildField('错误代码:', _code, maxLength: 20, focusNode: _focusReport[1]):BuildWidget.buildRow('错误代码', _code.text),
               BuildWidget.buildRow('设备状态（报修）', _dispatch['MachineStatus']['Name']),
-              _edit?BuildWidget.buildDropdownLeft('设备状态（离场）:', _currentStatus, _dropDownMenuStatus, changedStatus):BuildWidget.buildRow('设备状态（离场）', _currentStatus??''),
+              _edit?BuildWidget.buildDropdownLeft('设备状态（离场）:', _currentStatus, _dropDownMenuStatus, changedStatus, focusNode: _focusReport[11]):BuildWidget.buildRow('设备状态（离场）', _currentStatus??''),
               _edit?buildField('详细故障描述:', _description, focusNode: _focusReport[2]):BuildWidget.buildRow('详细故障描述', _description.text),
               _edit?buildField('分析原因:', _analysis, focusNode: _focusReport[5]):BuildWidget.buildRow('分析原因', _analysis.text),
               _edit?buildField('详细处理方法:', _solution, focusNode: _focusReport[4]):BuildWidget.buildRow('详细处理方法', _solution.text),
@@ -859,6 +869,7 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
                         flex: 2,
                         child: new IconButton(
                             icon: Icon(Icons.calendar_today, color: AppConstants.AppColors['btn_main'],),
+                            focusNode: _focusReport[9],
                             onPressed: () async {
                               DatePicker.showDatePicker(
                                 context,
@@ -943,6 +954,7 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
                         fontSize: 16.0, fontWeight: FontWeight.w600),
                   ),
                   new IconButton(
+                      focusNode: _focusReport[10],
                       icon: Icon(Icons.add_a_photo),
                       onPressed: () {
                         showSheet(context);

@@ -132,9 +132,9 @@ class _RepairRequestState extends State<RepairRequest> {
   Future<Null> submit() async {
     if (_equipment == null) {
       showDialog(context: context,
-        builder: (context) => CupertinoAlertDialog(
-          title: new Text('请选择设备'),
-        )
+          builder: (context) => CupertinoAlertDialog(
+            title: new Text('请选择设备'),
+          )
       );
       return;
     }
@@ -264,7 +264,7 @@ class _RepairRequestState extends State<RepairRequest> {
   }
 
   Future toSearch() async {
-    final _searchResult = await showSearch(context: context, delegate: SearchBarDelegate());
+    final _searchResult = await showSearch(context: context, delegate: SearchBarDelegate(), hintText: '请输入设备名称');
     if (_searchResult != null) {
       Map _data = jsonDecode(_searchResult);
       print(_data);

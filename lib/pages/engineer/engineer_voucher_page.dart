@@ -125,7 +125,7 @@ class _EngineerVoucherPageState extends State<EngineerVoucherPage> {
     }
   }
 
-  List<FocusNode> _focusJournal = new List(5).map((item) {
+  List<FocusNode> _focusJournal = new List(10).map((item) {
     return new FocusNode();
   }).toList();
 
@@ -151,7 +151,7 @@ class _EngineerVoucherPageState extends State<EngineerVoucherPage> {
           builder: (context) => CupertinoAlertDialog(
           title: new Text('签名不可为空'),
         )
-      );
+      ).then((result) => FocusScope.of(context).requestFocus(_focusJournal[5]));
       return;
     }
     if (_jobContent.text.isEmpty) {
@@ -576,7 +576,7 @@ class _EngineerVoucherPageState extends State<EngineerVoucherPage> {
                   ),
                 ),
               ):BuildWidget.buildRow('客户签名', ''),
-              widget.status==0||widget.status==1?new RaisedButton(onPressed: () {toSignature(context);}, child: new Icon(Icons.add, color: Colors.white,)):new Container(),
+              widget.status==0||widget.status==1?new RaisedButton(focusNode: _focusJournal[5],onPressed: () {toSignature(context);}, child: new Icon(Icons.add, color: Colors.white,)):new Container(),
               _img!=null?new Container(width: 400.0, height: 400.0, child: BuildWidget.buildPhotoPageList(context, _img)):new Container()
             ],
           ),
@@ -598,9 +598,8 @@ class _EngineerVoucherPageState extends State<EngineerVoucherPage> {
         minHeight: 200,
         minWidth: 150
     );
-    print(compressed);
     setState(() {
-      _img = compressed;
+      _img = Uint8List.fromList(compressed);
     });
   }
 

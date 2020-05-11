@@ -22,7 +22,7 @@ class _VendorsListState extends State<VendorsList> {
 
   TextEditingController _keywords = new TextEditingController();
   String field = 's.ID';
-  int useStatus = -1;
+  int useStatus = 1;
   List useList = [];
   int supplierId = 0;
   List supplierList = [];
@@ -57,7 +57,7 @@ class _VendorsListState extends State<VendorsList> {
   void initFilter() async {
     await cModel.getConstants();
     setState(() {
-      useStatus = -1;
+      useStatus = 1;
       field = 's.ID';
       _keywords.clear();
       useList = [

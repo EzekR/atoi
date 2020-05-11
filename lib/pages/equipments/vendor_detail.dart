@@ -11,6 +11,7 @@ import 'package:atoi/utils/http_request.dart';
 import 'package:atoi/widgets/build_widget.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:atoi/models/constants_model.dart';
+import 'package:atoi/utils/event_bus.dart';
 
 /// 供应商页面类
 class VendorDetail extends StatefulWidget {
@@ -71,6 +72,7 @@ class _VendorDetailState extends State<VendorDetail> {
   String currentProvince;
   List _imageList = [];
   String oid = '系统自动生成';
+  EventBus bus = new EventBus();
 
   var name = new TextEditingController(),
       mobile = new TextEditingController(),
@@ -95,6 +97,13 @@ class _VendorDetailState extends State<VendorDetail> {
       getVendor();
     }
     model = MainModel.of(context);
+    bus.on('unfocus', (param) {
+      _focusVendor.forEach((item) {
+        if (item.hasFocus) {
+          item.unfocus();
+        }
+      });
+    });
   }
 
   void changeType(String selected) {
@@ -172,7 +181,7 @@ class _VendorDetailState extends State<VendorDetail> {
         });
   }
 
-  List<FocusNode> _focusVendor = new List(3).map((item) {
+  List<FocusNode> _focusVendor = new List(10).map((item) {
     return new FocusNode();
   }).toList();
 
@@ -392,10 +401,10 @@ class _VendorDetailState extends State<VendorDetail> {
                                 widget.editable?BuildWidget.buildInput('名称', name, maxLength: 50, focusNode: _focusVendor[0]):BuildWidget.buildRow('名称', name.text),
                                 widget.editable?BuildWidget.buildDropdown('类型', currentType, dropdownType, changeType):BuildWidget.buildRow('类型', currentType),
                                 widget.editable?BuildWidget.buildDropdown('省份', currentProvince, dropdownProvince, changeProvince):BuildWidget.buildRow('省份', currentProvince),
-                                widget.editable?BuildWidget.buildInput('电话', mobile, maxLength: 20):BuildWidget.buildRow('电话', mobile.text),
-                                widget.editable?BuildWidget.buildInput('地址', address, maxLength: 255):BuildWidget.buildRow('地址', address.text),
+                                widget.editable?BuildWidget.buildInput('电话', mobile, maxLength: 20, focusNode: _focusVendor[3]):BuildWidget.buildRow('电话', mobile.text),
+                                widget.editable?BuildWidget.buildInput('地址', address, maxLength: 255, focusNode: _focusVendor[4]):BuildWidget.buildRow('地址', address.text),
                                 widget.editable?BuildWidget.buildInput('联系人', contact, focusNode: _focusVendor[2]):BuildWidget.buildRow('联系人', contact.text),
-                                widget.editable?BuildWidget.buildInput('联系人电话', contactMobile, maxLength: 20):BuildWidget.buildRow('联系人电话', contactMobile.text),
+                                widget.editable?BuildWidget.buildInput('联系人电话', contactMobile, maxLength: 20, focusNode: _focusVendor[5]):BuildWidget.buildRow('联系人电话', contactMobile.text),
                                 widget.editable?BuildWidget.buildRadio('供应商经营状态', vendorStatus,
                                     currentStatus, changeStatus):BuildWidget.buildRow('供应商经营状态', currentStatus),
                                 new Divider(),

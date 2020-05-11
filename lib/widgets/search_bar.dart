@@ -20,7 +20,7 @@ class SearchBarDelegate extends SearchDelegate<String>{
       method: HttpRequest.GET,
       params: {
         'filterText': filter,
-        'filterField': 'e.ID'
+        'filterField': 'e.Name'
       }
     );
     print(resp);

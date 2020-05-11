@@ -7,6 +7,7 @@ import 'package:photo_view/photo_view.dart';
 import 'dart:convert';
 import 'package:atoi/widgets/build_widget.dart';
 import 'package:atoi/models/models.dart';
+import 'dart:typed_data';
 
 /// 超管未完成页面类
 class ManagerCompletePage extends StatefulWidget {
@@ -183,7 +184,7 @@ class _ManagerCompletePageState extends State<ManagerCompletePage> {
       for (var file in files) {
         var _list = file['FileName'].split('.');
         _list = _list.reversed.toList();
-        if (_list[0] == 'jpg' || _list[0] == 'png' || _list[0] == 'jpeg' || _list[0] == 'bmp') {
+        if (_list[0].toLowerCase() == 'jpg' || _list[0].toLowerCase() == 'png' || _list[0].toLowerCase() == 'jpeg' || _list[0].toLowerCase() == 'bmp') {
           getImage(file['ID']);
         } else {
           _fileNames.add(file['FileName']);

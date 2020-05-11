@@ -34,7 +34,7 @@ class _SearchPageState extends State<SearchPage> {
         method: HttpRequest.GET,
         params: {
           'filterText': filter,
-          'filterField': 's.Name'
+          'filterField': 'e.Name'
         }
     );
     print(resp);
@@ -50,7 +50,7 @@ class _SearchPageState extends State<SearchPage> {
       itemCount: suggestionList.length,
       itemBuilder: (BuildContext context, int i) {
         return CheckboxListTile(
-          value: selected.firstWhere((item) => item['SerialCode'] == suggestionList[i]['SerialCode'], orElse: ()=>null)!=null?true:false,
+          value: selected.firstWhere((item) => item['ID'] == suggestionList[i]['ID'], orElse: ()=>null)!=null?true:false,
           title: RichText(
               text: TextSpan(
                   text: '${suggestionList[i]['Name']}/${suggestionList[i]['EquipmentCode']}/${suggestionList[i]['SerialCode']}',
@@ -60,7 +60,7 @@ class _SearchPageState extends State<SearchPage> {
                   ])),
           onChanged: (bool value) {
             setState(() {
-              value?selected.add(suggestionList[i]):selected.removeWhere((item) => item['SerialCode']==suggestionList[i]['SerialCode']);
+              value?selected.add(suggestionList[i]):selected.removeWhere((item) => item['ID']==suggestionList[i]['ID']);
             });
           },
         );
@@ -82,7 +82,7 @@ class _SearchPageState extends State<SearchPage> {
       },
       onTap: () {},
       decoration: InputDecoration.collapsed(
-        hintText: "请输入设备名称/型号/序列号",
+        hintText: "请输入设备名称",
         hintStyle: new TextStyle(
           fontSize: 14.0,
           color: Colors.grey,

@@ -9,6 +9,7 @@ import 'package:atoi/widgets/search_bar_vendor.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:atoi/models/models.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:atoi/utils/event_bus.dart';
 
 /// 报告零配件页面类
 class EngineerReportAccessory extends StatefulWidget {
@@ -33,6 +34,7 @@ class _EngineerReportAccessoryState extends State<EngineerReportAccessory> {
   List _vendorList = [];
   var _vendors;
   var _vendor;
+  EventBus bus = new EventBus();
 
   List<DropdownMenuItem<String>> _dropDownMenuSources;
   List<DropdownMenuItem<String>> _dropDownMenuVendors;
@@ -138,6 +140,13 @@ class _EngineerReportAccessoryState extends State<EngineerReportAccessory> {
     model = MainModel.of(context);
     initDropdown();
     super.initState();
+    bus.on('unfocus', (params) {
+      _focusAcc.forEach((item) {
+        if (item.hasFocus) {
+          item.unfocus();
+        }
+      });
+    });
   }
 
   void showSheet(context, String type) {
@@ -226,7 +235,7 @@ class _EngineerReportAccessoryState extends State<EngineerReportAccessory> {
     );
   }
 
-  List<FocusNode> _focusAcc = new List(5).map((item) {
+  List<FocusNode> _focusAcc = new List(10).map((item) {
     return new FocusNode();
   }).toList();
 
@@ -300,7 +309,7 @@ class _EngineerReportAccessoryState extends State<EngineerReportAccessory> {
         builder: (context) => CupertinoAlertDialog(
           title: new Text('请选择供应商'),
         )
-      );
+      ).then((result) => FocusScope.of(context).requestFocus(_focusAcc[5]));
       return;
     }
     var _supplier = _vendor;
@@ -396,6 +405,7 @@ class _EngineerReportAccessoryState extends State<EngineerReportAccessory> {
               flex: 3,
               child: new IconButton(
                   icon: Icon(Icons.search),
+                  focusNode: _focusAcc[5],
                   onPressed: () async {
                     final _searchResult = await showSearch(context: context, delegate: SearchBarVendor(), hintText: '请输入供应商名称');
                     print(_searchResult);
