@@ -12,7 +12,8 @@ import 'package:scoped_model/scoped_model.dart';
 import 'package:atoi/models/models.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
-import 'package:image_picker/image_picker.dart';
+import 'package:multi_image_picker/multi_image_picker.dart';
+import 'package:uuid/uuid.dart';
 
 /// 超管审核报告页面类
 class ManagerAuditReportPage extends StatefulWidget {
@@ -118,12 +119,14 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
   }
 
   void changedDropDownMethod(String selectedMethod) {
+    FocusScope.of(context).requestFocus(new FocusNode());
     setState(() {
       _currentResult = selectedMethod;
     });
   }
 
   void changeProvider(String selectedMethod) {
+    FocusScope.of(context).requestFocus(new FocusNode());
     setState(() {
       _currentProvider = selectedMethod;
     });
@@ -488,9 +491,10 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
     } else {
       _body['FileInfo'] = null;
     }
-    _body['Dispatch'] = {
-      'ID': _dispatch['ID']
-    };
+    //_body['Dispatch'] = {
+    //  'ID': _dispatch['ID']
+    //};
+    _body['Dispatch']['ID'] = _dispatch['ID'];
     _body['SolutionUnsolvedComments'] = _unsolved.text;
     _body['SolutionResultStatus'] = {
       'ID': model.SolutionStatus[_currentResult]
@@ -538,46 +542,27 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
     }
   }
 
-  void showSheet(context) {
-    showModalBottomSheet(
-        context: context,
-        builder: (context) {
-          return new ListView(
-            shrinkWrap: true,
-            children: <Widget>[
-              ListTile(
-                trailing: new Icon(Icons.collections),
-                title: new Text('从相册添加'),
-                onTap: () {
-                  getImage(ImageSource.gallery);
-                },
-              ),
-              ListTile(
-                trailing: new Icon(Icons.add_a_photo),
-                title: new Text('拍照添加'),
-                onTap: () {
-                  getImage(ImageSource.camera);
-                },
-              ),
-            ],
-          );
-        });
-  }
-
-  Future getImage(ImageSource sourceType) async {
-    var image = await ImagePicker.pickImage(
-      source: sourceType,
+  Future getImage() async {
+    List<Asset> image = await MultiImagePicker.pickImages(
+        maxImages: 1,
+        enableCamera: true
     );
     if (image != null) {
-      var bytes = await image.readAsBytes();
-      var _compressed = await FlutterImageCompress.compressWithList(bytes,
-          minWidth: 480, minHeight: 600);
-      setState(() {
-        imageAttach.clear();
-        imageAttach.add(Uint8List.fromList(_compressed));
+      image.forEach((_image) async {
+        var _data = await _image.getByteData();
+        var compressed = await FlutterImageCompress.compressWithList(
+          _data.buffer.asUint8List(),
+          minHeight: 800,
+          minWidth: 600,
+        );
+        setState(() {
+          imageAttach.clear();
+          imageAttach.add(Uint8List.fromList(compressed));
+        });
       });
     }
   }
+
   Column buildImageColumn() {
     if (imageAttach == null) {
       return new Column();
@@ -699,7 +684,7 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
         _list.addAll([
           BuildWidget.buildRow('资产金额', _report['PurchaseAmount'].toString()),
           //BuildWidget.buildRow('整包范围', _report['ServiceScope']?'是':'否'),
-          widget.status!=3?BuildWidget.buildRadio('整包范围', _serviceScope, _currentScope, changeScope):BuildWidget.buildRow('整包范围', _report['ServiceScope']?'是':'否'),
+          widget.status!=3?BuildWidget.buildRadio('整包范围', _serviceScope, _currentScope, changeScope, required: true):BuildWidget.buildRow('整包范围', _report['ServiceScope']?'是':'否'),
           BuildWidget.buildRow('报告明细', _report['SolutionCauseAnalysis']),
           BuildWidget.buildRow('结果', _report['Result']),
         ]);
@@ -726,7 +711,7 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
     }
     _list.addAll([
       widget.status==3?BuildWidget.buildRow('作业报告结果', _currentResult):BuildWidget.buildDropdown('作业报告结果', _currentResult, _dropDownMenuItems, changedDropDownMethod),
-      widget.status!=3&&_currentResult=='问题升级'?BuildWidget.buildInput('问题升级', _unsolved, maxLength: 500, focusNode: _focusReport[0]):new Container(),
+      widget.status!=3&&_currentResult=='问题升级'?BuildWidget.buildInput('问题升级', _unsolved, maxLength: 500, focusNode: _focusReport[0], required: true):new Container(),
       widget.status==3&&_currentResult=='问题升级'?BuildWidget.buildRow('问题升级', _unsolved.text):new Container(),
       widget.status!=3&&_currentResult=='待第三方支持'?BuildWidget.buildDropdown('服务提供方', _currentProvider, _dropDownMenuProviders, changeProvider):new Container(),
       widget.status==3&&_currentResult=='待第三方支持'?BuildWidget.buildRow('服务提供方', _currentProvider):new Container(),
@@ -743,6 +728,12 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
                 alignment: WrapAlignment.end,
                 crossAxisAlignment: WrapCrossAlignment.center,
                 children: <Widget>[
+                  new Text(
+                    '*',
+                    style: new TextStyle(
+                        color: Colors.red
+                    ),
+                  ),
                   new Text(
                     '附件',
                     style: new TextStyle(
@@ -769,7 +760,7 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: <Widget>[
                   widget.status!=3?IconButton(icon: Icon(Icons.add_a_photo), onPressed: () {
-                    showSheet(context);
+                    getImage();
                   }):new Container()
                 ],
               )
@@ -806,11 +797,11 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
             child: new Column(
               children: _equipments.map((_equipment) => [
                 BuildWidget.buildRow('系统编号', _equipment['OID']??''),
+                BuildWidget.buildRow('资产编号', _equipment['AssetCode']??''),
                 BuildWidget.buildRow('名称', _equipment['Name']??''),
                 BuildWidget.buildRow('型号', _equipment['EquipmentCode']??''),
                 BuildWidget.buildRow('序列号', _equipment['SerialCode']??''),
                 BuildWidget.buildRow('设备厂商', _equipment['Manufacturer']['Name']??''),
-                BuildWidget.buildRow('资产等级', _equipment['AssetLevel']['Name']??''),
                 BuildWidget.buildRow('使用科室', _equipment['Department']['Name']??''),
                 BuildWidget.buildRow('安装地点', _equipment['InstalSite']??''),
                 BuildWidget.buildRow('维保状态', _equipment['WarrantyStatus']??''),

@@ -121,8 +121,8 @@ class _ManagerAuditVoucherPageState extends State<ManagerAuditVoucherPage> {
     return items;
   }
 
-
   void changedDropDownMethod(String selectedMethod) {
+    FocusScope.of(context).requestFocus(new FocusNode());
     setState(() {
       _currentResult = selectedMethod;
     });
@@ -388,11 +388,11 @@ class _ManagerAuditVoucherPageState extends State<ManagerAuditVoucherPage> {
             child: new Column(
               children: _equipments.map((_equipment) => [
                 BuildWidget.buildRow('系统编号', _equipment['OID']??''),
+                BuildWidget.buildRow('资产编号', _equipment['AssetCode']??''),
                 BuildWidget.buildRow('名称', _equipment['Name']??''),
                 BuildWidget.buildRow('型号', _equipment['EquipmentCode']??''),
                 BuildWidget.buildRow('序列号', _equipment['SerialCode']??''),
                 BuildWidget.buildRow('设备厂商', _equipment['Manufacturer']['Name']??''),
-                BuildWidget.buildRow('资产等级', _equipment['AssetLevel']['Name']??''),
                 BuildWidget.buildRow('使用科室', _equipment['Department']['Name']??''),
                 BuildWidget.buildRow('安装地点', _equipment['InstalSite']??''),
                 BuildWidget.buildRow('维保状态', _equipment['WarrantyStatus']??''),
@@ -511,8 +511,8 @@ class _ManagerAuditVoucherPageState extends State<ManagerAuditVoucherPage> {
               BuildWidget.buildRow('服务凭证编号', _journal['OID']),
               BuildWidget.buildRow('故障现象/错误代码/事由', _journal['FaultCode']),
               BuildWidget.buildRow('工作内容', _journal['JobContent']),
-              widget.status==3?BuildWidget.buildRow('服务结果', _currentResult):BuildWidget.buildDropdown('服务结果', _currentResult, _dropDownMenuItems, changedDropDownMethod),
-              widget.status!=3&&_currentResult=='待跟进'?BuildWidget.buildInput('待跟进问题', _follow, focusNode: _focusFollow):new Container(),
+              widget.status==3?BuildWidget.buildRow('服务结果', _currentResult):BuildWidget.buildDropdown('服务结果', _currentResult, _dropDownMenuItems, changedDropDownMethod, context: context),
+              widget.status!=3&&_currentResult=='待跟进'?BuildWidget.buildInput('待跟进问题', _follow, focusNode: _focusFollow, required: true):new Container(),
               widget.status==3&&_currentResult=='待跟进'?BuildWidget.buildRow('待跟进问题', _follow.text):new Container(),
               BuildWidget.buildRow('建议留言', _journal['Advice']),
               BuildWidget.buildRow('客户姓名', _journal['UserName']??''),

@@ -10,6 +10,8 @@ import 'package:timeline_list/timeline_model.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:atoi/pages/manager/manager_complete_page.dart';
 import 'package:atoi/models/models.dart';
+import 'dart:convert';
+import 'package:atoi/widgets/search_department.dart';
 
 /// 设备列表页面类
 class EquipmentsList extends StatefulWidget{
@@ -35,9 +37,13 @@ class _EquipmentsListState extends State<EquipmentsList> {
   int machineStatusId = 0;
   int warrantyId = 0;
   List departmentList = [];
-  int departmentId = 0;
+  int departmentId = -1;
   bool usageStatus = false;
   Future<SharedPreferences> prefs = SharedPreferences.getInstance();
+
+  ScrollController _scrollController = new ScrollController();
+  bool _noMore = false;
+  int offset = 0;
 
   Future<Null> getRole() async {
     var _prefs = await prefs;
@@ -45,10 +51,11 @@ class _EquipmentsListState extends State<EquipmentsList> {
     _editable = _role==1?true:false;
   }
 
-  List initList(Map _map) {
+  List initList(Map _map, {int valueForAll}) {
     List _list = [];
+    valueForAll = valueForAll??0;
     _list.add({
-      'value': 0,
+      'value': valueForAll,
       'text': '全部'
     });
     _map.forEach((key, val) {
@@ -64,7 +71,7 @@ class _EquipmentsListState extends State<EquipmentsList> {
     setState(() {
       machineStatusList = initList(cModel.EquipmentStatus);
       machineStatusId = machineStatusList[0]['value'];
-      departmentList = initList(cModel.Departments);
+      departmentList = initList(cModel.Departments, valueForAll: -1);
       departmentId = departmentList[0]['value'];
       warrantyId = 0;
       _keywords.clear();
@@ -82,9 +89,6 @@ class _EquipmentsListState extends State<EquipmentsList> {
 
   Future<Null> getEquipments({String filterText}) async {
     filterText = filterText??'';
-    setState(() {
-      _loading = true;
-    });
     var resp = await HttpRequest.request(
       '/Equipment/Getdevices',
       method: HttpRequest.GET,
@@ -96,15 +100,14 @@ class _EquipmentsListState extends State<EquipmentsList> {
         'filterTextName': _deviceName.text,
         'filterTextSerialCode': _deviceCode.text,
         'filterField': searchFilter,
-        'useStatus': usageStatus
+        'useStatus': usageStatus,
+        'PageSize': 10,
+        'CurRowNum': offset
       }
     );
-    setState(() {
-      _loading = false;
-    });
     if (resp['ResultCode'] == '00') {
       setState(() {
-        _equipments = resp['Data'];
+        _equipments.addAll(resp['Data']);
       });
     }
   }
@@ -113,323 +116,355 @@ class _EquipmentsListState extends State<EquipmentsList> {
     showModalBottomSheet(context: context, builder: (context) {
       return StatefulBuilder(
         builder: (context, setState) {
-          return ListView(
+          return Column(
             children: <Widget>[
-              SizedBox(height: 18.0,),
-              Row(
-                children: <Widget>[
-                  SizedBox(width: 16.0,),
-                  Text('搜索', style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.w600),)
-                ],
-              ),
-              SizedBox(height: 6.0,),
-              Row(
-                children: <Widget>[
-                  SizedBox(width: 16.0,),
-                  Container(
-                      width: 230.0,
-                      height: 40.0,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(5.0),
-                        color: Color(0xfff2f2f2),
-                      ),
-                      child: Row(
-                        children: <Widget>[
-                          SizedBox(width: 10.0,),
-                          Icon(Icons.search, color: Color(0xffaaaaaa),),
-                          SizedBox(width: 10.0,),
-                          Container(
-                              width: 150.0,
-                              child: Align(
-                                alignment: Alignment(0.0, -0.5),
-                                child: TextField(
-                                  decoration: InputDecoration.collapsed(hintText: ''),
-                                  controller: _keywords,
-                                ),
-                              )
-                          ),
-                        ],
-                      )
-                  ),
-                  SizedBox(width: 16.0,),
-                  Container(
-                    width: 130.0,
-                    height: 40.0,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(5.0),
-                      color: Color(0xfff2f2f2),
-                    ),
-                    child: Row(
+              SizedBox(height: 8.0,),
+              Container(
+                height: 450.0,
+                child: ListView(
+                  children: <Widget>[
+                    SizedBox(height: 18.0,),
+                    Row(
                       children: <Widget>[
-                        SizedBox(width: 6.0,),
-                        DropdownButton(
-                          value: searchFilter,
-                          underline: Container(),
-                          items: <DropdownMenuItem>[
-                            DropdownMenuItem(
-                              value: 'e.ID',
-                              child: Text('系统编号'),
+                        SizedBox(width: 16.0,),
+                        Text('搜索', style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.w600),)
+                      ],
+                    ),
+                    SizedBox(height: 6.0,),
+                    Row(
+                      children: <Widget>[
+                        SizedBox(width: 16.0,),
+                        Container(
+                            width: 230.0,
+                            height: 40.0,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(5.0),
+                              color: Color(0xfff2f2f2),
                             ),
-                            DropdownMenuItem(
-                              value: 'e.AssetCode',
-                              child: Text('资产编号'),
+                            child: Row(
+                              children: <Widget>[
+                                SizedBox(width: 10.0,),
+                                Icon(Icons.search, color: Color(0xffaaaaaa),),
+                                SizedBox(width: 10.0,),
+                                Container(
+                                    width: 150.0,
+                                    child: Align(
+                                      alignment: Alignment(0.0, -0.5),
+                                      child: TextField(
+                                        decoration: InputDecoration.collapsed(hintText: ''),
+                                        controller: _keywords,
+                                      ),
+                                    )
+                                ),
+                              ],
+                            )
+                        ),
+                        SizedBox(width: 16.0,),
+                        Container(
+                          width: 130.0,
+                          height: 40.0,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(5.0),
+                            color: Color(0xfff2f2f2),
+                          ),
+                          child: Row(
+                            children: <Widget>[
+                              SizedBox(width: 6.0,),
+                              DropdownButton(
+                                value: searchFilter,
+                                underline: Container(),
+                                items: <DropdownMenuItem>[
+                                  DropdownMenuItem(
+                                    value: 'e.ID',
+                                    child: Text('系统编号'),
+                                  ),
+                                  DropdownMenuItem(
+                                    value: 'e.AssetCode',
+                                    child: Text('资产编号'),
+                                  ),
+                                  DropdownMenuItem(
+                                    value: 'e.EquipmentCode',
+                                    child: Text('设备型号'),
+                                  ),
+                                ],
+                                onChanged: (val) {
+                                  setState(() {
+                                    searchFilter = val;
+                                  });
+                                },
+                              ),
+                            ],
+                          ),
+                        )
+                      ],
+                    ),
+                    SizedBox(height: 18.0,),
+                    Row(
+                      children: <Widget>[
+                        SizedBox(width: 16.0,),
+                        Text('设备名称', style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.w600),)
+                      ],
+                    ),
+                    SizedBox(height: 6.0,),
+                    Row(
+                      children: <Widget>[
+                        SizedBox(width: 16.0,),
+                        Container(
+                            width: 230.0,
+                            height: 40.0,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(5.0),
+                              color: Color(0xfff2f2f2),
                             ),
-                            DropdownMenuItem(
-                              value: 'e.EquipmentCode',
-                              child: Text('设备型号'),
-                            ),
-                          ],
-                          onChanged: (val) {
-                            setState(() {
-                              searchFilter = val;
-                            });
-                          },
+                            child: Row(
+                              children: <Widget>[
+                                SizedBox(width: 10.0,),
+                                Icon(Icons.search, color: Color(0xffaaaaaa),),
+                                SizedBox(width: 10.0,),
+                                Container(
+                                    width: 150.0,
+                                    child: Align(
+                                      alignment: Alignment(0.0, -0.5),
+                                      child: TextField(
+                                        decoration: InputDecoration.collapsed(hintText: ''),
+                                        controller: _deviceName,
+                                      ),
+                                    )
+                                ),
+                              ],
+                            )
                         ),
                       ],
                     ),
-                  )
-                ],
-              ),
-              SizedBox(height: 18.0,),
-              Row(
-                children: <Widget>[
-                  SizedBox(width: 16.0,),
-                  Text('设备名称', style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.w600),)
-                ],
-              ),
-              SizedBox(height: 6.0,),
-              Row(
-                children: <Widget>[
-                  SizedBox(width: 16.0,),
-                  Container(
-                      width: 230.0,
-                      height: 40.0,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(5.0),
-                        color: Color(0xfff2f2f2),
-                      ),
-                      child: Row(
-                        children: <Widget>[
-                          SizedBox(width: 10.0,),
-                          Icon(Icons.search, color: Color(0xffaaaaaa),),
-                          SizedBox(width: 10.0,),
-                          Container(
-                              width: 150.0,
-                              child: Align(
-                                alignment: Alignment(0.0, -0.5),
-                                child: TextField(
-                                  decoration: InputDecoration.collapsed(hintText: ''),
-                                  controller: _deviceName,
-                                ),
-                              )
-                          ),
-                        ],
-                      )
-                  ),
-                ],
-              ),
-              SizedBox(height: 18.0,),
-              Row(
-                children: <Widget>[
-                  SizedBox(width: 16.0,),
-                  Text('设备序列号', style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.w600),)
-                ],
-              ),
-              SizedBox(height: 6.0,),
-              Row(
-                children: <Widget>[
-                  SizedBox(width: 16.0,),
-                  Container(
-                      width: 230.0,
-                      height: 40.0,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(5.0),
-                        color: Color(0xfff2f2f2),
-                      ),
-                      child: Row(
-                        children: <Widget>[
-                          SizedBox(width: 10.0,),
-                          Icon(Icons.search, color: Color(0xffaaaaaa),),
-                          SizedBox(width: 10.0,),
-                          Container(
-                              width: 150.0,
-                              child: Align(
-                                alignment: Alignment(0.0, -0.5),
-                                child: TextField(
-                                  decoration: InputDecoration.collapsed(hintText: ''),
-                                  controller: _deviceCode,
-                                ),
-                              )
-                          ),
-                        ],
-                      )
-                  ),
-                ],
-              ),
-              SizedBox(height: 18.0,),
-              Row(
-                children: <Widget>[
-                  SizedBox(width: 16.0,),
-                  Text('设备状态', style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.w600),)
-                ],
-              ),
-              SizedBox(height: 6.0,),
-              Row(
-                children: <Widget>[
-                  SizedBox(width: 16.0,),
-                  Container(
-                      width: 230.0,
-                      height: 40.0,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(5.0),
-                        color: Color(0xfff2f2f2),
-                      ),
-                      child: Row(
-                        children: <Widget>[
-                          SizedBox(width: 6.0,),
-                          DropdownButton(
-                            value: machineStatusId,
-                            underline: Container(),
-                            items: machineStatusList.map<DropdownMenuItem>((item) {
-                              return DropdownMenuItem(
-                                value: item['value'],
-                                child: Text(item['text']),
-                              );
-                            }).toList(),
-                            onChanged: (val) {
-                              print(val);
-                              setState(() {
-                                machineStatusId = val;
-                              });
-                            },
-                          )
-                        ],
-                      )
-                  ),
-                ],
-              ),
-              SizedBox(height: 18.0,),
-              Row(
-                children: <Widget>[
-                  SizedBox(width: 16.0,),
-                  Text('科室', style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.w600),)
-                ],
-              ),
-              SizedBox(height: 6.0,),
-              Row(
-                children: <Widget>[
-                  SizedBox(width: 16.0,),
-                  Container(
-                      width: 230.0,
-                      height: 40.0,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(5.0),
-                        color: Color(0xfff2f2f2),
-                      ),
-                      child: Row(
-                        children: <Widget>[
-                          SizedBox(width: 6.0,),
-                          DropdownButton(
-                            value: departmentId,
-                            underline: Container(),
-                            items: departmentList.map<DropdownMenuItem>((item) {
-                              return DropdownMenuItem(
-                                value: item['value'],
-                                child: Text(item['text']),
-                              );
-                            }).toList(),
-                            onChanged: (val) {
-                              setState(() {
-                                departmentId = val;
-                              });
-                            },
-                          )
-                        ],
-                      )
-                  ),
-                ],
-              ),
-              SizedBox(height: 18.0,),
-              Row(
-                children: <Widget>[
-                  SizedBox(width: 16.0,),
-                  Text('维保状态', style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.w600),)
-                ],
-              ),
-              SizedBox(height: 6.0,),
-              Row(
-                children: <Widget>[
-                  SizedBox(width: 16.0,),
-                  Container(
-                      width: 230.0,
-                      height: 40.0,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(5.0),
-                        color: Color(0xfff2f2f2),
-                      ),
-                      child: Row(
-                        children: <Widget>[
-                          SizedBox(width: 6.0,),
-                          DropdownButton(
-                            value: warrantyId,
-                            underline: Container(),
-                            items: <DropdownMenuItem>[
-                              DropdownMenuItem(
-                                value: 0,
-                                child: Text('全部'),
-                              ),
-                              DropdownMenuItem(
-                                value: 1,
-                                child: Text('保外'),
-                              ),
-                              DropdownMenuItem(
-                                value: 2,
-                                child: Text('保内'),
-                              ),
-                            ],
-                            onChanged: (val) {
-                              setState(() {
-                                warrantyId = val;
-                              });
-                            },
-                          )
-                        ],
-                      )
-                  ),
-                ],
-              ),
-              SizedBox(height: 18.0,),
-              Row(
-                children: <Widget>[
-                  SizedBox(width: 16.0,),
-                  Text('停用', style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.w600),)
-                ],
-              ),
-              SizedBox(height: 6.0,),
-              Row(
-                children: <Widget>[
-                  SizedBox(width: 16.0,),
-                  Container(
-                    width: 100.0,
-                    height: 40.0,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(5.0),
-                      color: Color(0xfff2f2f2),
+                    SizedBox(height: 18.0,),
+                    Row(
+                      children: <Widget>[
+                        SizedBox(width: 16.0,),
+                        Text('设备序列号', style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.w600),)
+                      ],
                     ),
-                    child: Center(
-                      child: Switch(
-                        value: usageStatus,
-                        onChanged: (val) {
-                          setState(() {
-                            usageStatus = val;
-                          });
-                        },
-                      ),
+                    SizedBox(height: 6.0,),
+                    Row(
+                      children: <Widget>[
+                        SizedBox(width: 16.0,),
+                        Container(
+                            width: 230.0,
+                            height: 40.0,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(5.0),
+                              color: Color(0xfff2f2f2),
+                            ),
+                            child: Row(
+                              children: <Widget>[
+                                SizedBox(width: 10.0,),
+                                Icon(Icons.search, color: Color(0xffaaaaaa),),
+                                SizedBox(width: 10.0,),
+                                Container(
+                                    width: 150.0,
+                                    child: Align(
+                                      alignment: Alignment(0.0, -0.5),
+                                      child: TextField(
+                                        decoration: InputDecoration.collapsed(hintText: ''),
+                                        controller: _deviceCode,
+                                      ),
+                                    )
+                                ),
+                              ],
+                            )
+                        ),
+                      ],
                     ),
-                  )
-                ],
+                    SizedBox(height: 18.0,),
+                    Row(
+                      children: <Widget>[
+                        SizedBox(width: 16.0,),
+                        Text('设备状态', style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.w600),)
+                      ],
+                    ),
+                    SizedBox(height: 6.0,),
+                    Row(
+                      children: <Widget>[
+                        SizedBox(width: 16.0,),
+                        Container(
+                            width: 230.0,
+                            height: 40.0,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(5.0),
+                              color: Color(0xfff2f2f2),
+                            ),
+                            child: Row(
+                              children: <Widget>[
+                                SizedBox(width: 6.0,),
+                                DropdownButton(
+                                  value: machineStatusId,
+                                  underline: Container(),
+                                  items: machineStatusList.map<DropdownMenuItem>((item) {
+                                    return DropdownMenuItem(
+                                      value: item['value'],
+                                      child: Text(item['text']),
+                                    );
+                                  }).toList(),
+                                  onChanged: (val) {
+                                    print(val);
+                                    FocusScope.of(context).requestFocus(new FocusNode());
+                                    setState(() {
+                                      machineStatusId = val;
+                                    });
+                                  },
+                                )
+                              ],
+                            )
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 18.0,),
+                    Row(
+                      children: <Widget>[
+                        SizedBox(width: 16.0,),
+                        Text('科室', style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.w600),)
+                      ],
+                    ),
+                    SizedBox(height: 6.0,),
+                    Row(
+                      children: <Widget>[
+                        SizedBox(width: 16.0,),
+                        Container(
+                            width: 230.0,
+                            height: 40.0,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(5.0),
+                              color: Color(0xfff2f2f2),
+                            ),
+                            child: Row(
+                              children: <Widget>[
+                                SizedBox(width: 6.0,),
+                                DropdownButton(
+                                  value: departmentId,
+                                  underline: Container(),
+                                  items: departmentList.map<DropdownMenuItem>((item) {
+                                    return DropdownMenuItem(
+                                      value: item['value'],
+                                      child: Text(item['text']),
+                                    );
+                                  }).toList(),
+                                  onChanged: (val) {
+                                    FocusScope.of(context).requestFocus(new FocusNode());
+                                    setState(() {
+                                      departmentId = val;
+                                    });
+                                  },
+                                )
+                              ],
+                            )
+                        ),
+                        SizedBox(width: 16.0,),
+                        Container(
+                          width: 40.0,
+                          height: 40.0,
+                          child: Center(
+                            child: IconButton(
+                                onPressed: () {
+                                  showSearch(context: context, delegate: SearchBarDepartment(), hintText: '请输入科室名称/拼音/ID').then((result) {
+                                    if (result != null) {
+                                      var _result = jsonDecode(result);
+                                      setState(() {
+                                        departmentId = _result['ID'];
+                                      });
+                                    }
+                                  });
+                                },
+                                icon: Icon(Icons.search)
+                            ),
+                          ),
+                        )
+                      ],
+                    ),
+                    SizedBox(height: 18.0,),
+                    Row(
+                      children: <Widget>[
+                        SizedBox(width: 16.0,),
+                        Text('维保状态', style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.w600),)
+                      ],
+                    ),
+                    SizedBox(height: 6.0,),
+                    Row(
+                      children: <Widget>[
+                        SizedBox(width: 16.0,),
+                        Container(
+                            width: 230.0,
+                            height: 40.0,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(5.0),
+                              color: Color(0xfff2f2f2),
+                            ),
+                            child: Row(
+                              children: <Widget>[
+                                SizedBox(width: 6.0,),
+                                DropdownButton(
+                                  value: warrantyId,
+                                  underline: Container(),
+                                  items: <DropdownMenuItem>[
+                                    DropdownMenuItem(
+                                      value: 0,
+                                      child: Text('全部'),
+                                    ),
+                                    DropdownMenuItem(
+                                      value: 1,
+                                      child: Text('保外'),
+                                    ),
+                                    DropdownMenuItem(
+                                      value: 2,
+                                      child: Text('保内'),
+                                    ),
+                                  ],
+                                  onChanged: (val) {
+                                    FocusScope.of(context).requestFocus(new FocusNode());
+                                    setState(() {
+                                      warrantyId = val;
+                                    });
+                                  },
+                                )
+                              ],
+                            )
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 18.0,),
+                    Row(
+                      children: <Widget>[
+                        SizedBox(width: 16.0,),
+                        Text('停用', style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.w600),)
+                      ],
+                    ),
+                    SizedBox(height: 6.0,),
+                    Row(
+                      children: <Widget>[
+                        SizedBox(width: 16.0,),
+                        Container(
+                          width: 100.0,
+                          height: 40.0,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(5.0),
+                            color: Color(0xfff2f2f2),
+                          ),
+                          child: Center(
+                            child: Switch(
+                              value: usageStatus,
+                              onChanged: (val) {
+                                FocusScope.of(context).requestFocus(new FocusNode());
+                                setState(() {
+                                  usageStatus = val;
+                                });
+                              },
+                            ),
+                          ),
+                        )
+                      ],
+                    ),
+                    SizedBox(height: 30.0,),
+                  ],
+                ),
               ),
-              SizedBox(height: 30.0,),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: <Widget>[
@@ -487,8 +522,30 @@ class _EquipmentsListState extends State<EquipmentsList> {
     super.initState();
     cModel = MainModel.of(context);
     initFilter();
-    getEquipments();
+    setState(() {
+      _loading = true;
+    });
+    getEquipments().then((result) => setState(() {
+      _loading = false;
+    }));
     getRole();
+    _scrollController.addListener(() {
+      if (_scrollController.position.pixels == _scrollController.position.maxScrollExtent) {
+        var _length = _equipments.length;
+        offset += 10;
+        getEquipments().then((result) {
+          if (_equipments.length == _length) {
+            setState(() {
+              _noMore = true;
+            });
+          } else {
+            setState(() {
+              _noMore = false;
+            });
+          }
+        });
+      }
+    });
   }
 
   Future<List<TimelineModel>> getTimeline(int deviceId) async {
@@ -817,9 +874,19 @@ class _EquipmentsListState extends State<EquipmentsList> {
           ),
         ),
         body: _loading?new Center(child: new SpinKitThreeBounce(color: Colors.blue,),):(_equipments.length==0?Center(child: Text('无设备'),):new ListView.builder(
-          itemCount: _equipments.length,
+          itemCount: _equipments.length+1,
+          controller: _scrollController,
           itemBuilder: (context, i) {
-            return buildEquipmentCard(_equipments[i]);
+            if (i != _equipments.length) {
+              return buildEquipmentCard(_equipments[i]);
+            } else {
+              return new Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  _noMore?new Center(child: new Text('没有更多设备'),):new SpinKitChasingDots(color: Colors.blue,)
+                ],
+              );
+            }
           },
         )),
         floatingActionButton: FloatingActionButton(

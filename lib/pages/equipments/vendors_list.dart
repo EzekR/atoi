@@ -28,6 +28,9 @@ class _VendorsListState extends State<VendorsList> {
   List supplierList = [];
   Future<SharedPreferences> prefs = SharedPreferences.getInstance();
   ConstantsModel cModel;
+  ScrollController _scrollController = new ScrollController();
+  int offset = 0;
+  bool _noMore = false;
 
   Future<Null> getRole() async {
     var _prefs = await prefs;
@@ -81,9 +84,6 @@ class _VendorsListState extends State<VendorsList> {
 
   Future<Null> getVendors({String filterText}) async {
     filterText = filterText??'';
-    setState(() {
-      _loading = true;
-    });
     var resp = await HttpRequest.request(
       '/DispatchReport/GetSuppliers',
       method: HttpRequest.GET,
@@ -91,15 +91,14 @@ class _VendorsListState extends State<VendorsList> {
         'filterText': _keywords.text,
         'filterField': field,
         'typeID': supplierId,
-        'status': useStatus
+        'status': useStatus,
+        'CurRowNum': offset,
+        'PageSize': 10
       }
     );
-    setState(() {
-      _loading = false;
-    });
     if (resp['ResultCode'] == '00') {
       setState(() {
-        _vendors = resp['Data'];
+        _vendors.addAll(resp['Data']);
       });
     }
   }
@@ -183,6 +182,7 @@ class _VendorsListState extends State<VendorsList> {
                             ),
                           ],
                           onChanged: (val) {
+                            FocusScope.of(context).requestFocus(new FocusNode());
                             setState(() {
                               field = val;
                             });
@@ -225,6 +225,7 @@ class _VendorsListState extends State<VendorsList> {
                             }).toList(),
                             onChanged: (val) {
                               print(val);
+                              FocusScope.of(context).requestFocus(new FocusNode());
                               setState(() {
                                 supplierId = val;
                               });
@@ -267,6 +268,7 @@ class _VendorsListState extends State<VendorsList> {
                             }).toList(),
                             onChanged: (val) {
                               print(val);
+                              FocusScope.of(context).requestFocus(new FocusNode());
                               setState(() {
                                 useStatus = val;
                               });
@@ -331,8 +333,30 @@ class _VendorsListState extends State<VendorsList> {
     super.initState();
     cModel = MainModel.of(context);
     initFilter();
-    getVendors();
+    setState(() {
+      _loading = true;
+    });
+    getVendors().then((result) => setState(() {
+      _loading = false;
+    }));
     getRole();
+    _scrollController.addListener(() {
+      if (_scrollController.position.pixels == _scrollController.position.maxScrollExtent) {
+        var _length = _vendors.length;
+        offset += 10;
+        getVendors().then((result) {
+          if (_vendors.length == _length) {
+            setState(() {
+              _noMore = true;
+            });
+          } else {
+            setState(() {
+              _noMore = false;
+            });
+          }
+        });
+      }
+    });
   }
 
   Card buildEquipmentCard(Map item) {
@@ -466,9 +490,19 @@ class _VendorsListState extends State<VendorsList> {
         ),
       ),
       body: _loading?new Center(child: new SpinKitThreeBounce(color: Colors.blue,),):(_vendors.length==0?Center(child: Text('无供应商'),):new ListView.builder(
-        itemCount: _vendors.length,
+        itemCount: _vendors.length+1,
+        controller: _scrollController,
         itemBuilder: (context, i) {
-          return buildEquipmentCard(_vendors[i]);
+          if (i !=_vendors.length) {
+            return buildEquipmentCard(_vendors[i]);
+          } else {
+            return new Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                _noMore?new Center(child: new Text('没有更多供应商'),):new SpinKitChasingDots(color: Colors.blue,)
+              ],
+            );
+          }
         },
       )),
       floatingActionButton: FloatingActionButton(

@@ -3,7 +3,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:atoi/utils/http_request.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:atoi/utils/constants.dart';
-import 'package:image_picker/image_picker.dart';
 import 'dart:convert';
 import 'package:atoi/pages/engineer/engineer_report_accessory.dart';
 import 'package:atoi/widgets/build_widget.dart';
@@ -15,6 +14,9 @@ import 'package:flutter_cupertino_date_picker/flutter_cupertino_date_picker.dart
 import 'package:date_format/date_format.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:atoi/utils/event_bus.dart';
+import 'package:multi_image_picker/multi_image_picker.dart';
+import 'dart:typed_data';
+import 'package:uuid/uuid.dart';
 
 /// 工程师报告页面
 class EngineerReportPage extends StatefulWidget {
@@ -78,6 +80,7 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
   }
 
   void changeScope(value) {
+    FocusScope.of(context).requestFocus(new FocusNode());
     setState(() {
       _currentScope = value;
     });
@@ -121,12 +124,14 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
   String _currentRecall = '否';
 
   void changePrivate(value) {
+    FocusScope.of(context).requestFocus(new FocusNode());
     setState(() {
       _currentPrivate = value;
     });
   }
 
   void changeRecall(value) {
+    FocusScope.of(context).requestFocus(new FocusNode());
     setState(() {
       _currentRecall = value;
     });
@@ -141,42 +146,22 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
     });
   }
 
-  void showSheet(context) {
-    showModalBottomSheet(
-        context: context,
-        builder: (context) {
-          return new ListView(
-            shrinkWrap: true,
-            children: <Widget>[
-              ListTile(
-                trailing: new Icon(Icons.collections),
-                title: new Text('从相册添加'),
-                onTap: () {
-                  getImage(ImageSource.gallery);
-                },
-              ),
-              ListTile(
-                trailing: new Icon(Icons.add_a_photo),
-                title: new Text('拍照添加'),
-                onTap: () {
-                  getImage(ImageSource.camera);
-                },
-              ),
-            ],
-          );
-        });
-  }
-
-  Future getImage(ImageSource sourceType) async {
-    var image = await ImagePicker.pickImage(
-      source: sourceType,
+  Future getImage() async {
+    List<Asset> image = await MultiImagePicker.pickImages(
+        maxImages: 1,
+        enableCamera: true
     );
     if (image != null) {
-      var bytes = await image.readAsBytes();
-      var _compressed = await FlutterImageCompress.compressWithList(bytes,
-          minWidth: 480, minHeight: 600);
-      setState(() {
-        _imageList = Uint8List.fromList(_compressed);
+      image.forEach((_image) async {
+        var _data = await _image.getByteData();
+        var compressed = await FlutterImageCompress.compressWithList(
+          _data.buffer.asUint8List(),
+          minHeight: 800,
+          minWidth: 600,
+        );
+        setState(() {
+          _imageList = Uint8List.fromList(compressed);
+        });
       });
     }
   }
@@ -560,13 +545,6 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
       _edit = true;
     }
     super.initState();
-    bus.on('unfocus', (param) {
-      _focusReport.forEach((item) {
-        if (item.hasFocus) {
-          item.unfocus();
-        }
-      });
-    });
   }
 
   List<DropdownMenuItem<String>> getDropDownMenuItems(List list) {
@@ -583,16 +561,26 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
   }
 
   Column buildField(String label, TextEditingController controller,
-      {String hintText, int maxLength, FocusNode focusNode}) {
+      {String hintText, int maxLength, FocusNode focusNode, bool required}) {
     String hint = hintText ?? '';
     maxLength = maxLength??500;
-    focusNode = focusNode??new FocusNode();
+    required = required??false;
     return new Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
-        new Text(
-          label,
-          style: new TextStyle(fontSize: 16.0, fontWeight: FontWeight.w600),
+        new Row(
+          children: <Widget>[
+            required?new Text(
+              '*',
+              style: new TextStyle(
+                  color: Colors.red
+              ),
+            ):Container(),
+            new Text(
+              label,
+              style: new TextStyle(fontSize: 16.0, fontWeight: FontWeight.w600),
+            ),
+          ],
         ),
         new TextField(
           controller: controller,
@@ -613,24 +601,28 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
   }
 
   void changedDropDownMethod(String selectedMethod) {
+    FocusScope.of(context).requestFocus(new FocusNode());
     setState(() {
       _currentResult = selectedMethod;
     });
   }
 
   void changedDropDownSource(String selectedMethod) {
+    FocusScope.of(context).requestFocus(new FocusNode());
     setState(() {
       _currentSource = selectedMethod;
     });
   }
 
   void changedDropDownProvider(String selectedMethod) {
+    FocusScope.of(context).requestFocus(new FocusNode());
     setState(() {
       _currentProvider = selectedMethod;
     });
   }
 
   void changedStatus(String selectedMethod) {
+    FocusScope.of(context).requestFocus(new FocusNode());
     setState(() {
       _currentStatus = selectedMethod;
     });
@@ -757,16 +749,16 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
     if (_currentType == '通用作业报告') {
       _list.addAll(
         [
-          _edit?buildField('报告明细:', _analysis, focusNode: _focusReport[5]):BuildWidget.buildRow('报告明细', _analysis.text),
-          _edit?buildField('结果:', _result, focusNode: _focusReport[6]):BuildWidget.buildRow('结果', _result.text),
+          _edit?buildField('报告明细:', _analysis, focusNode: _focusReport[5], required: true):BuildWidget.buildRow('报告明细', _analysis.text),
+          _edit?buildField('结果:', _result, focusNode: _focusReport[6], required: true):BuildWidget.buildRow('结果', _result.text),
         ]
       );
       _list.addAll(
           [
-            _edit?BuildWidget.buildDropdownLeft('作业报告结果:', _currentResult, _dropDownMenuItems, changedDropDownMethod):BuildWidget.buildRow('作业报告结果', _currentResult),
+            _edit?BuildWidget.buildDropdownLeft('作业报告结果:', _currentResult, _dropDownMenuItems, changedDropDownMethod, context: context, required: true):BuildWidget.buildRow('作业报告结果', _currentResult),
             !_edit&&_currentResult=='问题升级'?BuildWidget.buildRow('问题升级', _unsolved.text):new Container(),
-            _edit&&_currentResult=='问题升级'?buildField('问题升级:', _unsolved, focusNode: _focusReport[7]):new Container(),
-            _edit&&_currentResult=='待第三方支持'?BuildWidget.buildDropdownLeft('服务提供方:', _currentProvider, _dropDownMenuProviders, changedDropDownProvider):new Container(),
+            _edit&&_currentResult=='问题升级'?buildField('问题升级:', _unsolved, focusNode: _focusReport[7], required: true):new Container(),
+            _edit&&_currentResult=='待第三方支持'?BuildWidget.buildDropdownLeft('服务提供方:', _currentProvider, _dropDownMenuProviders, changedDropDownProvider, context: context, required: true):new Container(),
             !_edit&&_currentResult=='待第三方支持'?BuildWidget.buildRow('服务提供方', _currentProvider):new Container(),
             _edit?buildField('备注:', _comments):BuildWidget.buildRow('备注', _comments.text),
 
@@ -777,64 +769,64 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
         case 1:
           _list.addAll(
             [
-              _edit?buildField('错误代码:', _code, maxLength: 20, focusNode: _focusReport[1]):BuildWidget.buildRow('错误代码', _code.text),
+              _edit?buildField('错误代码:', _code, maxLength: 20, focusNode: _focusReport[1], required: true):BuildWidget.buildRow('错误代码', _code.text),
               BuildWidget.buildRow('设备状态（报修）', _dispatch['MachineStatus']['Name']),
-              _edit?BuildWidget.buildDropdownLeft('设备状态（离场）:', _currentStatus, _dropDownMenuStatus, changedStatus, focusNode: _focusReport[11]):BuildWidget.buildRow('设备状态（离场）', _currentStatus??''),
-              _edit?buildField('详细故障描述:', _description, focusNode: _focusReport[2]):BuildWidget.buildRow('详细故障描述', _description.text),
-              _edit?buildField('分析原因:', _analysis, focusNode: _focusReport[5]):BuildWidget.buildRow('分析原因', _analysis.text),
-              _edit?buildField('详细处理方法:', _solution, focusNode: _focusReport[4]):BuildWidget.buildRow('详细处理方法', _solution.text),
-              _edit?buildField('结果:', _result, focusNode: _focusReport[6]):BuildWidget.buildRow('结果', _result.text),
+              _edit?BuildWidget.buildDropdownLeft('设备状态（离场）:', _currentStatus, _dropDownMenuStatus, changedStatus, focusNode: _focusReport[11], context: context, required: true):BuildWidget.buildRow('设备状态（离场）', _currentStatus??''),
+              _edit?buildField('详细故障描述:', _description, focusNode: _focusReport[2], required: true):BuildWidget.buildRow('详细故障描述', _description.text),
+              _edit?buildField('分析原因:', _analysis, focusNode: _focusReport[5], required: true):BuildWidget.buildRow('分析原因', _analysis.text),
+              _edit?buildField('详细处理方法:', _solution, focusNode: _focusReport[4], required: true):BuildWidget.buildRow('详细处理方法', _solution.text),
+              _edit?buildField('结果:', _result, focusNode: _focusReport[6], required: true):BuildWidget.buildRow('结果', _result.text),
             ]
           );
           break;
         case 4:
           _list.addAll(
               [
-                _edit?buildField('报告明细:', _analysis, focusNode: _focusReport[5]):BuildWidget.buildRow('报告明细', _analysis.text),
-                _edit?buildField('结果:', _result, focusNode: _focusReport[6]):BuildWidget.buildRow('结果', _result.text),
+                _edit?buildField('报告明细:', _analysis, focusNode: _focusReport[5], required: true):BuildWidget.buildRow('报告明细', _analysis.text),
+                _edit?buildField('结果:', _result, focusNode: _focusReport[6], required: true):BuildWidget.buildRow('结果', _result.text),
               ]
           );
           break;
         case 3:
           _list.addAll(
             [
-              _edit?buildField('强检要求:', _description, hintText: 'FDA, Manufacture, Hospital, Etc...', focusNode: _focusReport[2]):BuildWidget.buildRow('强检要求', _description.text),
-              _edit?buildField('报告明细:', _analysis, focusNode: _focusReport[5]):BuildWidget.buildRow('报告明细', _analysis.text),
-              _edit?buildField('结果:', _result, focusNode: _focusReport[6]):BuildWidget.buildRow('结果', _result.text),
-              _edit?BuildWidget.buildRadioLeft('专用报告:', _isPrivate, _currentPrivate, changePrivate):BuildWidget.buildRow('专用报告', _currentPrivate),
-              _edit?BuildWidget.buildRadioLeft('待召回:', _isRecall, _currentRecall, changeRecall):BuildWidget.buildRow('待召回', _currentRecall),
+              _edit?buildField('强检要求:', _description, hintText: 'FDA, Manufacture, Hospital, Etc...', focusNode: _focusReport[2], required: true):BuildWidget.buildRow('强检要求', _description.text),
+              _edit?buildField('报告明细:', _analysis, focusNode: _focusReport[5], required: true):BuildWidget.buildRow('报告明细', _analysis.text),
+              _edit?buildField('结果:', _result, focusNode: _focusReport[6], required: true):BuildWidget.buildRow('结果', _result.text),
+              _edit?BuildWidget.buildRadioLeft('专用报告:', _isPrivate, _currentPrivate, changePrivate, required: true):BuildWidget.buildRow('专用报告', _currentPrivate),
+              _edit?BuildWidget.buildRadioLeft('待召回:', _isRecall, _currentRecall, changeRecall, required: true):BuildWidget.buildRow('待召回', _currentRecall),
             ]
           );
           break;
         case 2:
           _list.addAll(
             [
-              _edit?buildField('报告明细:', _analysis, focusNode: _focusReport[5]):BuildWidget.buildRow('报告明细', _analysis.text),
-              _edit?buildField('结果:', _result, focusNode: _focusReport[6]):BuildWidget.buildRow('结果', _result.text),
+              _edit?buildField('报告明细:', _analysis, focusNode: _focusReport[5], required: true):BuildWidget.buildRow('报告明细', _analysis.text),
+              _edit?buildField('结果:', _result, focusNode: _focusReport[6], required: true):BuildWidget.buildRow('结果', _result.text),
             ]
           );
           break;
         case 5:
           _list.addAll(
               [
-                _edit?buildField('报告明细:', _analysis, focusNode: _focusReport[5]):BuildWidget.buildRow('报告明细', _analysis.text),
-                _edit?buildField('结果:', _result, focusNode: _focusReport[6]):BuildWidget.buildRow('结果', _result.text),
+                _edit?buildField('报告明细:', _analysis, focusNode: _focusReport[5], required: true):BuildWidget.buildRow('报告明细', _analysis.text),
+                _edit?buildField('结果:', _result, focusNode: _focusReport[6], required: true):BuildWidget.buildRow('结果', _result.text),
               ]
           );
           break;
         case 7:
           _list.addAll(
               [
-                _edit?buildField('报告明细:', _analysis, focusNode: _focusReport[5]):BuildWidget.buildRow('报告明细', _analysis.text),
-                _edit?buildField('结果:', _result, focusNode: _focusReport[6]):BuildWidget.buildRow('结果', _result.text),
+                _edit?buildField('报告明细:', _analysis, focusNode: _focusReport[5], required: true):BuildWidget.buildRow('报告明细', _analysis.text),
+                _edit?buildField('结果:', _result, focusNode: _focusReport[6], required: true):BuildWidget.buildRow('结果', _result.text),
               ]
           );
           break;
         case 9:
           _list.addAll(
               [
-                _edit?buildField('报告明细:', _analysis, focusNode: _focusReport[5]):BuildWidget.buildRow('报告明细', _analysis.text),
-                _edit?buildField('结果:', _result, focusNode: _focusReport[6]):BuildWidget.buildRow('结果', _result.text),
+                _edit?buildField('报告明细:', _analysis, focusNode: _focusReport[5], required: true):BuildWidget.buildRow('报告明细', _analysis.text),
+                _edit?buildField('结果:', _result, focusNode: _focusReport[6], required: true):BuildWidget.buildRow('结果', _result.text),
                 _edit?
                 new Padding(
                   padding: EdgeInsets.symmetric(vertical: 5.0),
@@ -846,6 +838,12 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
                           alignment: WrapAlignment.start,
                           crossAxisAlignment: WrapCrossAlignment.center,
                           children: <Widget>[
+                            new Text(
+                              '*',
+                              style: new TextStyle(
+                                  color: Colors.red
+                              ),
+                            ),
                             new Text(
                               '验收日期:',
                               style: new TextStyle(
@@ -904,17 +902,17 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
         case 6:
           _list.addAll(
               [
-                _edit?BuildWidget.buildInputLeft('资产金额:', _purchaseAmount, inputType: TextInputType.numberWithOptions(decimal: true), maxLength: 11, lines: 1, focusNode: _focusReport[3]):BuildWidget.buildRow('资产金额', _purchaseAmount.text),
-                _edit?buildField('报告明细:', _analysis, focusNode: _focusReport[5]):BuildWidget.buildRow('报告明细', _analysis.text),
-                _edit?buildField('结果:', _result, focusNode: _focusReport[6]):BuildWidget.buildRow('结果', _result.text),
+                _edit?BuildWidget.buildInputLeft('资产金额:', _purchaseAmount, inputType: TextInputType.numberWithOptions(decimal: true), maxLength: 11, lines: 1, focusNode: _focusReport[3], required: true):BuildWidget.buildRow('资产金额', _purchaseAmount.text),
+                _edit?buildField('报告明细:', _analysis, focusNode: _focusReport[5], required: true):BuildWidget.buildRow('报告明细', _analysis.text),
+                _edit?buildField('结果:', _result, focusNode: _focusReport[6], required: true):BuildWidget.buildRow('结果', _result.text),
               ]
           );
           break;
         default:
           _list.addAll(
               [
-                _edit?buildField('报告明细:', _analysis, focusNode: _focusReport[5]):BuildWidget.buildRow('报告明细', _analysis.text),
-                _edit?buildField('结果:', _result, focusNode: _focusReport[6]):BuildWidget.buildRow('结果', _result.text),
+                _edit?buildField('报告明细:', _analysis, focusNode: _focusReport[5], required: true):BuildWidget.buildRow('报告明细', _analysis.text),
+                _edit?buildField('结果:', _result, focusNode: _focusReport[6], required: true):BuildWidget.buildRow('结果', _result.text),
               ]
           );
           break;
@@ -922,12 +920,12 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
 
       _list.addAll(
         [
-          _edit?BuildWidget.buildDropdownLeft('作业报告结果:', _currentResult, _dropDownMenuItems, changedDropDownMethod):BuildWidget.buildRow('作业报告结果', _currentResult),
-          _edit&&_currentResult=='问题升级'?buildField('问题升级:', _unsolved, focusNode: _focusReport[7]):new Container(),
+          _edit?BuildWidget.buildDropdownLeft('作业报告结果:', _currentResult, _dropDownMenuItems, changedDropDownMethod, context: context, required: true):BuildWidget.buildRow('作业报告结果', _currentResult),
+          _edit&&_currentResult=='问题升级'?buildField('问题升级:', _unsolved, focusNode: _focusReport[7], required: true):new Container(),
           !_edit&&_currentResult=='问题升级'?BuildWidget.buildRow('问题升级', _unsolved.text):new Container(),
-          _edit&&_currentResult=='待第三方支持'?BuildWidget.buildDropdownLeft('服务提供方:', _currentProvider, _dropDownMenuProviders, changedDropDownProvider):new Container(),
+          _edit&&_currentResult=='待第三方支持'?BuildWidget.buildDropdownLeft('服务提供方:', _currentProvider, _dropDownMenuProviders, changedDropDownProvider, context: context, required: true):new Container(),
           !_edit&&_currentResult=='待第三方支持'?BuildWidget.buildRow('服务提供方', _currentProvider):new Container(),
-          _edit?buildField('备注:', _comments):BuildWidget.buildRow('备注', _comments.text),
+          _edit?buildField('备注:', _comments, focusNode: _focusReport[19]):BuildWidget.buildRow('备注', _comments.text),
 
         ]
       );
@@ -935,7 +933,7 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
 
     if (_edit && _isDelayed && _dispatch['RequestType']['ID'] == 1 && _dispatch['Request']['LastStatus']['ID'] == 1) {
       _list.add(
-          buildField('误工说明:', _delay, focusNode: _focusReport[0])
+          buildField('误工说明:', _delay, focusNode: _focusReport[0], required: true)
       );
     }
     if (!_edit && _isDelayed && _dispatch['RequestType']['ID'] == 1 && _delay.text.isNotEmpty) {
@@ -957,7 +955,7 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
                       focusNode: _focusReport[10],
                       icon: Icon(Icons.add_a_photo),
                       onPressed: () {
-                        showSheet(context);
+                        getImage();
                       })
                 ],
               ),
@@ -1246,11 +1244,11 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
     for (var _equipment in _equipments) {
       var equipList = [
         BuildWidget.buildRow('系统编号', _equipment['OID'] ?? ''),
+        BuildWidget.buildRow('资产编号', _equipment['AssetCode']??''),
         BuildWidget.buildRow('名称', _equipment['Name'] ?? ''),
         BuildWidget.buildRow('型号', _equipment['EquipmentCode'] ?? ''),
         BuildWidget.buildRow('序列号', _equipment['SerialCode'] ?? ''),
         BuildWidget.buildRow('设备厂商', _equipment['Manufacturer']['Name'] ?? ''),
-        BuildWidget.buildRow('资产等级', _equipment['AssetLevel']['Name'] ?? ''),
         BuildWidget.buildRow('使用科室', _equipment['Department']['Name'] ?? ''),
         BuildWidget.buildRow('安装地点', _equipment['InstalSite'] ?? ''),
         BuildWidget.buildRow('维保状态', _equipment['WarrantyStatus'] ?? ''),

@@ -13,6 +13,7 @@ class SearchBarDelegate extends SearchDelegate<String>{
 
   var suggestionList = [];
   var selected;
+  int offset = 0;
 
   Future<Null> getDevices(String filter) async {
     var resp = await HttpRequest.request(
@@ -20,13 +21,21 @@ class SearchBarDelegate extends SearchDelegate<String>{
       method: HttpRequest.GET,
       params: {
         'filterText': filter,
-        'filterField': 'e.Name'
+        'filterField': 'e.Name',
+        'departmentId': -1,
+        'PageSize': 10,
+        'CurRowNum': offset
       }
     );
     print(resp);
     if (resp['ResultCode'] == '00') {
       suggestionList = resp['Data'];
     }
+  }
+
+  void getMore() {
+    offset += 10;
+    getDevices(query);
   }
 
   final Map<String, String> equipmentInfo = {};
@@ -87,21 +96,42 @@ class SearchBarDelegate extends SearchDelegate<String>{
     return FutureBuilder(
       builder: (context, snapshot) {
         return ListView.builder(
-            itemCount: suggestionList.length,
-            itemBuilder: (context, i) => ListTile(
-              onTap: (){
-                query = suggestionList[i]['Name'];
-                selected = suggestionList[i];
-                showResults(context);
-              },
-              title: RichText(
-                  text: TextSpan(
-                      text: '${suggestionList[i]['Name']}/${suggestionList[i]['EquipmentCode']}/${suggestionList[i]['SerialCode']}',
-                      style: TextStyle(
-                          color: Colors.grey),
-                      children: [
-                      ])),
-            ));
+            itemCount: suggestionList.length>=10?suggestionList.length+1:suggestionList.length,
+            itemBuilder: (context, i) {
+              if (i != suggestionList.length) {
+                return ListTile(
+                  onTap: (){
+                    query = suggestionList[i]['Name'];
+                    selected = suggestionList[i];
+                    showResults(context);
+                  },
+                  title: RichText(
+                      text: TextSpan(
+                          text: '${suggestionList[i]['Name']}/${suggestionList[i]['EquipmentCode']}/${suggestionList[i]['SerialCode']}',
+                          style: TextStyle(
+                              color: Colors.grey),
+                          children: [
+                          ])),
+                );
+              } else {
+                return Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    FlatButton(
+                      child: Text(
+                        '点击获取更多设备',
+                        style: TextStyle(
+                          fontSize: 10.0,
+                        ),
+                      ),
+                      onPressed: () {
+                        getMore();
+                      },
+                    )
+                  ],
+                );
+              }
+            });
       },
       future: getDevices(query),
     );

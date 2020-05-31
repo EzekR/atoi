@@ -157,11 +157,11 @@ class _EngineerStartPageState extends State<EngineerStartPage> {
     for(var _equipment in _equipments) {
       var equipList = [
         BuildWidget.buildRow('系统编号', _equipment['OID']??''),
+        BuildWidget.buildRow('资产编号', _equipment['AssetCode']??''),
         BuildWidget.buildRow('名称', _equipment['Name']??''),
         BuildWidget.buildRow('型号', _equipment['EquipmentCode']??''),
         BuildWidget.buildRow('序列号', _equipment['SerialCode']??''),
         BuildWidget.buildRow('设备厂商', _equipment['Manufacturer']['Name']??''),
-        BuildWidget.buildRow('资产等级', _equipment['AssetLevel']['Name']??''),
         BuildWidget.buildRow('使用科室', _equipment['Department']['Name']??''),
         BuildWidget.buildRow('安装地点', _equipment['InstalSite']??''),
         BuildWidget.buildRow('维保状态', _equipment['WarrantyStatus']??''),

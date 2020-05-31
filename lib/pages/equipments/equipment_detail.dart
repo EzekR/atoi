@@ -7,7 +7,6 @@ import 'package:scoped_model/scoped_model.dart';
 import 'package:atoi/models/models.dart';
 import 'package:atoi/utils/http_request.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'dart:typed_data';
 import 'dart:convert';
@@ -15,6 +14,10 @@ import 'package:atoi/utils/constants.dart';
 import 'package:flutter_cupertino_date_picker/flutter_cupertino_date_picker.dart';
 import 'package:date_format/date_format.dart';
 import 'package:atoi/utils/event_bus.dart';
+import 'package:multi_image_picker/multi_image_picker.dart';
+import 'package:uuid/uuid.dart';
+import 'package:atoi/widgets/search_department.dart';
+
 
 /// 设备详情页面类
 class EquipmentDetail extends StatefulWidget {
@@ -53,6 +56,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
   List<bool> expansionList = [
     true, false, false, false, false
   ];
+  ScrollController _scrollController = new ScrollController();
 
   bool isSearchState = false;
   bool isAdmin = true;
@@ -225,25 +229,41 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
     });
   }
 
+  void searchDepartment() {
+    showSearch(context: context, delegate: SearchBarDepartment(), hintText: '请输入科室名称/拼音/ID').then((result) {
+      print(result);
+      if (result != null) {
+        var _result = jsonDecode(result);
+        setState(() {
+          currentDepartment = _result['Description'];
+        });
+      }
+    });
+  }
+
   void changeStatus(String selectedMethod) {
+    FocusScope.of(context).requestFocus(new FocusNode());
     setState(() {
       currentStatus = selectedMethod;
     });
   }
 
   void changeMachine(String selectedMethod) {
+    FocusScope.of(context).requestFocus(new FocusNode());
     setState(() {
       currentMachine = selectedMethod;
     });
   }
 
   void changeMandatory(String selectedMethod) {
+    FocusScope.of(context).requestFocus(new FocusNode());
     setState(() {
       currentMandatory = selectedMethod;
     });
   }
 
   void changePatrolPeriod(String selectedMethod) {
+    FocusScope.of(context).requestFocus(new FocusNode());
     if (selectedMethod == '无') {
       patrolPeriod.clear();
     }
@@ -253,6 +273,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
   }
 
   void changeMandatoryPeriod(String selectedMethod) {
+    FocusScope.of(context).requestFocus(new FocusNode());
     if (selectedMethod == '无') {
       maintainPeriod.clear();
     }
@@ -262,6 +283,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
   }
 
   void changeCorrectionPeriod(String selectedMethod) {
+    FocusScope.of(context).requestFocus(new FocusNode());
     if (selectedMethod == '无') {
       correctionPeriod.clear();
     }
@@ -271,6 +293,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
   }
 
   void changeClass(String selectedMethod) {
+    FocusScope.of(context).requestFocus(new FocusNode());
     setState(() {
       currentClass = selectedMethod;
     });
@@ -324,6 +347,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
   }
 
   void changeClass1(String selectedClass) {
+    FocusScope.of(context).requestFocus(new FocusNode());
     var _selectedItem = class1Item.firstWhere((item) {
       return item['Description'] == selectedClass;
     });
@@ -336,6 +360,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
   }
 
   void changeClass2(String selectedMethod) {
+    FocusScope.of(context).requestFocus(new FocusNode());
     var _selectedItem = class2Item.firstWhere((item) {
       return item['Description'] == selectedMethod;
     });
@@ -349,6 +374,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
   }
 
   void changeClass3(String selectedMethod) {
+    FocusScope.of(context).requestFocus(new FocusNode());
     setState(() {
       currentClass3 = selectedMethod;
     });
@@ -386,64 +412,26 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
     }
     getRole();
     getSystemSetting();
-    _focusEquip.forEach((_node) {
-      _node.addListener(() {
-      });
-    });
-    bus.on('unfocus', (param) {
-      _focusEquip.forEach((item) {
-        if (item.hasFocus) {
-          item.unfocus();
-        }
-      });
-    });
   }
 
-  void showSheet(context, List _imageList) {
-    showModalBottomSheet(
-        context: context,
-        builder: (context) {
-          return new ListView(
-            shrinkWrap: true,
-            children: <Widget>[
-              ListTile(
-                trailing: new Icon(Icons.collections),
-                title: new Text('从相册添加'),
-                onTap: () {
-                  getImage(ImageSource.gallery, _imageList);
-                },
-              ),
-              ListTile(
-                trailing: new Icon(Icons.add_a_photo),
-                title: new Text('拍照添加'),
-                onTap: () {
-                  getImage(ImageSource.camera, _imageList);
-                },
-              ),
-            ],
-          );
-        });
-  }
-
-  Future getImage(ImageSource sourceType, List _imageList) async {
-    try {
-      var image = await ImagePicker.pickImage(
-        source: sourceType,
-      );
-      if (image != null) {
-        if (_imageList.length > 0 && _imageList[0]['id'] != null) {
-          await deleteFile(_imageList[0]['id']);
-        }
-        var bytes = await image.readAsBytes();
-        var _compressed = await FlutterImageCompress.compressWithList(bytes,
-            minWidth: 480, minHeight: 600);
-        _imageList.clear();
+  Future getImage(List _imageList) async {
+    List<Asset> image = await MultiImagePicker.pickImages(
+        maxImages: 1,
+        enableCamera: true
+    );
+    if (image != null) {
+      image.forEach((_image) async {
+        var _data = await _image.getByteData();
+        var compressed = await FlutterImageCompress.compressWithList(
+          _data.buffer.asUint8List(),
+          minHeight: 800,
+          minWidth: 600,
+        );
         setState(() {
-          _imageList.add({'fileName': image.path, 'content': Uint8List.fromList(_compressed)});
+          _imageList.clear();
+          _imageList.add({'fileName': 'equip_attach_${Uuid().v1()}.jpg', 'content': Uint8List.fromList(compressed)});
         });
-      }
-    } catch(e) {
-      print('take photo error:'+e.toString());
+      });
     }
   }
 
@@ -719,7 +707,16 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
     }
   }
 
-  List<FocusNode> _focusEquip = new List(10).map((item) {
+  void removeFocus() {
+    _focusEquip.forEach((_focus) {
+      _focus.unfocus();
+    });
+    _focusOther.forEach((_focus) {
+      _focus.unfocus();
+    });
+  }
+
+  List<FocusNode> _focusEquip = new List(20).map((item) {
     return new FocusNode();
   }).toList();
 
@@ -761,7 +758,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
           builder: (context) => CupertinoAlertDialog(
             title: new Text('设备厂商不可为空'),
           )
-      ).then((result) => FocusScope.of(context).requestFocus(_focusOther[0]));
+      ).then((result) => _scrollController.jumpTo(200.0));
       return;
     }
     if (responseTime.text.isEmpty || responseTime.text == "0" || responseTime.text == "") {
@@ -781,7 +778,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
           builder: (context) => CupertinoAlertDialog(
             title: new Text('有效日期格式有误'),
           )
-      ).then((result) => FocusScope.of(context).requestFocus(_focusOther[1]));
+      ).then((result) => _scrollController.jumpTo(400.0));
       return;
     }
     if (assetCode.text.isEmpty && !autoAssetCode) {
@@ -799,7 +796,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
           builder: (context) => CupertinoAlertDialog(
             title: new Text('采购日期不可为空'),
           )
-      ).then((result) => FocusScope.of(context).requestFocus(_focusOther[2]));
+      ).then((result) => _scrollController.jumpTo(1600.0));
       return;
     }
     if (double.tryParse(purchaseAmount.text.toString()) !=null && double.tryParse(purchaseAmount.text.toString()) > 99999999.99) {
@@ -817,7 +814,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
           builder: (context) => CupertinoAlertDialog(
             title: new Text('报废时间不可为空'),
           )
-      ).then((result) => FocusScope.of(context).requestFocus(_focusOther[3]));
+      ).then((result) => _scrollController.jumpTo(2000.0));
       return;
     }
     if (currentPatrolPeriod != '无' && patrolPeriod.text.isEmpty) {
@@ -1096,9 +1093,9 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
           child: new Column(
             children: <Widget>[
               BuildWidget.buildRow('系统编号', oid),
-              widget.editable?BuildWidget.buildInput('设备名称', name, lines: 1, focusNode: _focusEquip[0]):BuildWidget.buildRow('设备名称', name.text),
-              widget.editable?BuildWidget.buildInput('设备型号', equipmentCode, lines: 1, focusNode: _focusEquip[1]):BuildWidget.buildRow('设备型号', equipmentCode.text),
-              widget.editable?BuildWidget.buildInput('设备序列号', serialCode, lines: 1, focusNode: _focusEquip[2]):BuildWidget.buildRow('设备序列号', serialCode.text),
+              widget.editable?BuildWidget.buildInput('设备名称', name, lines: 1, focusNode: _focusEquip[0], required: true):BuildWidget.buildRow('设备名称', name.text),
+              widget.editable?BuildWidget.buildInput('设备型号', equipmentCode, lines: 1, focusNode: _focusEquip[1], required: true):BuildWidget.buildRow('设备型号', equipmentCode.text),
+              widget.editable?BuildWidget.buildInput('设备序列号', serialCode, lines: 1, focusNode: _focusEquip[2], required: true):BuildWidget.buildRow('设备序列号', serialCode.text),
               widget.editable?new Padding(
                 padding: EdgeInsets.symmetric(vertical: 5.0),
                 child: new Row(
@@ -1109,6 +1106,12 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
                         alignment: WrapAlignment.end,
                         crossAxisAlignment: WrapCrossAlignment.center,
                         children: <Widget>[
+                          new Text(
+                            '*',
+                            style: new TextStyle(
+                                color: Colors.red
+                            ),
+                          ),
                           new Text(
                             '设备厂商',
                             style: new TextStyle(
@@ -1169,6 +1172,12 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
                         crossAxisAlignment: WrapCrossAlignment.center,
                         children: <Widget>[
                           new Text(
+                            '*',
+                            style: new TextStyle(
+                                color: Colors.red
+                            ),
+                          ),
+                          new Text(
                             '标准响应时间',
                             style: new TextStyle(
                                 fontSize: 16.0, fontWeight: FontWeight.w600),
@@ -1213,14 +1222,14 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
                   ],
                 ),
               ):BuildWidget.buildRow('标准响应时间', '${responseTime.text} 分'),
-              widget.editable?BuildWidget.buildDropdown('等级', currentClass, dropdownClass, changeClass):BuildWidget.buildRow('等级', currentClass),
-              widget.editable?BuildWidget.buildDropdown('设备类别(I)', currentClass1, dropdownClass1, changeClass1):BuildWidget.buildRow('设备类别(I)', currentClass1==null?'':currentClass1),
-              widget.editable?BuildWidget.buildDropdown('设备类别(II)', currentClass2, dropdownClass2, changeClass2):BuildWidget.buildRow('设备类别(II)', currentClass2==null?'':currentClass2),
-              widget.editable?BuildWidget.buildDropdown('设备类别(III)', currentClass3, dropdownClass3, changeClass3):BuildWidget.buildRow('设备类别(III)', currentClass3==null?'':currentClass3),
+              widget.editable?BuildWidget.buildDropdown('等级', currentClass, dropdownClass, changeClass, context: context):BuildWidget.buildRow('等级', currentClass),
+              widget.editable?BuildWidget.buildDropdown('设备类别(I)', currentClass1, dropdownClass1, changeClass1, context: context):BuildWidget.buildRow('设备类别(I)', currentClass1==null?'':currentClass1),
+              widget.editable?BuildWidget.buildDropdown('设备类别(II)', currentClass2, dropdownClass2, changeClass2, context: context):BuildWidget.buildRow('设备类别(II)', currentClass2==null?'':currentClass2),
+              widget.editable?BuildWidget.buildDropdown('设备类别(III)', currentClass3, dropdownClass3, changeClass3, context: context):BuildWidget.buildRow('设备类别(III)', currentClass3==null?'':currentClass3),
               BuildWidget.buildRow('分类编码', classCode1+classCode2+classCode3),
               widget.editable&&isAdmin?BuildWidget.buildRadio('整包范围', serviceScope, currentServiceScope, changeServiceScope):BuildWidget.buildRow('整包范围', currentServiceScope),
-              widget.editable?BuildWidget.buildInput('品牌', brand, lines: 1):BuildWidget.buildRow('品牌', brand.text),
-              widget.editable?BuildWidget.buildInput('备注', comments, lines: 1, maxLength: 100):BuildWidget.buildRow('备注', comments.text),
+              widget.editable?BuildWidget.buildInput('品牌', brand, lines: 1, focusNode: _focusEquip[10]):BuildWidget.buildRow('品牌', brand.text),
+              widget.editable?BuildWidget.buildInput('备注', comments, lines: 1, maxLength: 100, focusNode: _focusEquip[11]):BuildWidget.buildRow('备注', comments.text),
               widget.editable?new Padding(
                 padding: EdgeInsets.symmetric(vertical: 5.0),
                 child: new Row(
@@ -1318,9 +1327,9 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
           child: new Column(
             children: <Widget>[
               widget.editable?BuildWidget.buildRadio('固定资产', isFixed, currentFixed, changeValue):BuildWidget.buildRow('固定资产', currentFixed),
-              widget.editable?BuildWidget.buildDropdown('资产等级', currentLevel, dropdownLevel, changeLevel):BuildWidget.buildRow('资产等级', currentLevel),
-              widget.editable&&!autoAssetCode?BuildWidget.buildInput('资产编号', assetCode, lines: 1, focusNode: _focusEquip[4]):BuildWidget.buildRow('资产编号', widget.editable&&widget.equipment==null?'系统自动生成':assetCode.text),
-              widget.editable?BuildWidget.buildInput('折旧年限(年)', depreciationYears, lines: 1, maxLength: 3, inputType: TextInputType.number):BuildWidget.buildRow('折旧年限', depreciationYears.text),
+              widget.editable?BuildWidget.buildDropdown('资产等级', currentLevel, dropdownLevel, changeLevel, context: context):BuildWidget.buildRow('资产等级', currentLevel),
+              widget.editable&&!autoAssetCode?BuildWidget.buildInput('资产编号', assetCode, lines: 1, focusNode: _focusEquip[4], required: true):BuildWidget.buildRow('资产编号', widget.editable&&widget.equipment==null?'系统自动生成':assetCode.text),
+              widget.editable?BuildWidget.buildInput('折旧年限(年)', depreciationYears, lines: 1, maxLength: 3, inputType: TextInputType.number, focusNode: _focusEquip[12]):BuildWidget.buildRow('折旧年限', depreciationYears.text),
               widget.editable?new Padding(
                 padding: EdgeInsets.symmetric(vertical: 5.0),
                 child: new Row(
@@ -1490,8 +1499,8 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
           padding: EdgeInsets.symmetric(horizontal: 12.0),
           child: new Column(
             children: <Widget>[
-              widget.editable?BuildWidget.buildInput('销售合同名称', contractName, lines: 1):BuildWidget.buildRow('销售合同名称', contractName.text),
-              widget.editable?BuildWidget.buildInput('购入方式', purchaseWay, lines: 1):BuildWidget.buildRow('购入方式', purchaseWay.text),
+              widget.editable?BuildWidget.buildInput('销售合同名称', contractName, lines: 1, focusNode: _focusEquip[13]):BuildWidget.buildRow('销售合同名称', contractName.text),
+              widget.editable?BuildWidget.buildInput('购入方式', purchaseWay, lines: 1, focusNode: _focusEquip[14]):BuildWidget.buildRow('购入方式', purchaseWay.text),
               widget.editable?new Padding(
                 padding: EdgeInsets.symmetric(vertical: 5.0),
                 child: new Row(
@@ -1502,6 +1511,12 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
                         alignment: WrapAlignment.end,
                         crossAxisAlignment: WrapCrossAlignment.center,
                         children: <Widget>[
+                          new Text(
+                            '*',
+                            style: new TextStyle(
+                                color: Colors.red
+                            ),
+                          ),
                           new Text(
                             '采购日期',
                             style: new TextStyle(
@@ -1648,9 +1663,9 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
           padding: EdgeInsets.symmetric(horizontal: 12.0),
           child: new Column(
             children: <Widget>[
-              widget.editable&&departments!=null?BuildWidget.buildDropdown('使用科室', currentDepartment, dropdownDepartments, changeDepartment):new Container(),
+              widget.editable&&departments!=null?BuildWidget.buildDropdownWithSearch('使用科室', currentDepartment, dropdownDepartments, changeDepartment, search: searchDepartment):new Container(),
               !widget.editable?BuildWidget.buildRow('使用科室', currentDepartment):new Container(),
-              widget.editable?BuildWidget.buildInput('安装地点', installSite, lines: 1):BuildWidget.buildRow('安装地点', installSite.text),
+              widget.editable?BuildWidget.buildInput('安装地点', installSite, lines: 1, focusNode: _focusEquip[15]):BuildWidget.buildRow('安装地点', installSite.text),
               widget.editable?new Padding(
                 padding: EdgeInsets.symmetric(vertical: 5.0),
                 child: new Row(
@@ -1798,106 +1813,6 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
                   ],
                 ),
               ):BuildWidget.buildRow('启用日期', displayDate(usageDate)),
-              //widget.editable?new Padding(
-              //  padding: EdgeInsets.symmetric(vertical: 5.0),
-              //  child: new Row(
-              //    children: <Widget>[
-              //      new Expanded(
-              //        flex: 4,
-              //        child: new Wrap(
-              //          alignment: WrapAlignment.end,
-              //          crossAxisAlignment: WrapCrossAlignment.center,
-              //          children: <Widget>[
-              //            new Text(
-              //              '安装日期',
-              //              style: new TextStyle(
-              //                  fontSize: 16.0, fontWeight: FontWeight.w600),
-              //            )
-              //          ],
-              //        ),
-              //      ),
-              //      new Expanded(
-              //        flex: 1,
-              //        child: new Text(
-              //          '：',
-              //          style: new TextStyle(
-              //            fontSize: 16.0,
-              //            fontWeight: FontWeight.w600,
-              //          ),
-              //        ),
-              //      ),
-              //      new Expanded(
-              //        flex: 6,
-              //        child: new Column(
-              //          children: <Widget>[
-              //            new Row(
-              //              children: <Widget>[
-              //                new Expanded(
-              //                  flex: 4,
-              //                  child: new Text(
-              //                    installStartDate,
-              //                    style: new TextStyle(
-              //                        fontSize: 16.0,
-              //                        fontWeight: FontWeight.w400,
-              //                        color: Colors.black54
-              //                    ),
-              //                  ),
-              //                ),
-              //                new Expanded(
-              //                  flex: 2,
-              //                  child: new IconButton(
-              //                      icon: Icon(Icons.calendar_today, color: AppConstants.AppColors['btn_main'],),
-              //                      onPressed: () async {
-              //                        var _date = await pickDate(initialTime: installStartDate);
-              //                        setState(() {
-              //                          installStartDate = _date;
-              //                        });
-              //                      }
-              //                  ),
-              //                )
-              //              ],
-              //            ),
-              //            new Row(
-              //              children: <Widget>[
-              //                new Expanded(
-              //                  flex: 4,
-              //                  child: new Text(
-              //                    installEndDate,
-              //                    style: new TextStyle(
-              //                        fontSize: 16.0,
-              //                        fontWeight: FontWeight.w400,
-              //                        color: Colors.black54
-              //                    ),
-              //                  ),
-              //                ),
-              //                new Expanded(
-              //                  flex: 2,
-              //                  child: new IconButton(
-              //                      icon: Icon(Icons.calendar_today, color: AppConstants.AppColors['btn_main'],),
-              //                      onPressed: () async {
-              //                        var _date = await pickDate(initialTime: installEndDate);
-              //                        var _start = DateTime.tryParse(installStartDate);
-              //                        var _end = DateTime.tryParse(_date);
-              //                        if (_start!=null && _end!=null && _end.isBefore(_start)) {
-              //                          showDialog(context: context, builder: (context) => CupertinoAlertDialog(
-              //                            title: new Text('安装日期格式有误'),
-              //                          ));
-              //                        } else {
-              //                          setState(() {
-              //                            installEndDate = _date;
-              //                          });
-              //                        }
-              //                      }
-              //                  ),
-              //                )
-              //              ],
-              //            ),
-              //          ],
-              //        ),
-              //      ),
-              //    ],
-              //  ),
-              //):BuildWidget.buildRow('安装日期', '${displayDate(installStartDate)}\n${displayDate(installEndDate)}'),
               widget.editable?BuildWidget.buildRadio('验收状态', checkStatus, currentCheck, changeCheck):BuildWidget.buildRow('验收状态', currentCheck),
               widget.editable?new Padding(
                 padding: EdgeInsets.symmetric(vertical: 5.0),
@@ -1972,9 +1887,9 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
                   ],
                 ),
               ):BuildWidget.buildRow('验收日期', displayDate(checkDate)),
-              widget.editable?BuildWidget.buildDropdown('使用状态', currentStatus, dropdownStatus, changeStatus):BuildWidget.buildRow('使用状态', currentStatus),
+              widget.editable?BuildWidget.buildDropdown('使用状态', currentStatus, dropdownStatus, changeStatus, context: context):BuildWidget.buildRow('使用状态', currentStatus),
               BuildWidget.buildRow('维保状态', warrantyStatus),
-              widget.editable?BuildWidget.buildDropdown('设备状态', currentMachine, dropdownMachine, changeMachine):BuildWidget.buildRow('设备状态', currentMachine),
+              widget.editable?BuildWidget.buildDropdown('设备状态', currentMachine, dropdownMachine, changeMachine, context: context):BuildWidget.buildRow('设备状态', currentMachine),
               widget.editable&&currentMachine=='已报废'?
               new Padding(
                 padding: EdgeInsets.symmetric(vertical: 5.0),
@@ -2051,7 +1966,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
                 ),
               ):new Container(),
               !widget.editable&&currentMachine=='已报废'?BuildWidget.buildRow('报废时间', displayDate(scrapDate)):new Container(),
-              widget.editable?BuildWidget.buildDropdown('强检标记', currentMandatory, dropdownMandatory, changeMandatory):BuildWidget.buildRow('强检标记', currentMandatory),
+              widget.editable?BuildWidget.buildDropdown('强检标记', currentMandatory, dropdownMandatory, changeMandatory, context: context):BuildWidget.buildRow('强检标记', currentMandatory),
               widget.editable?new Padding(
                 padding: EdgeInsets.symmetric(vertical: 5.0),
                 child: new Row(
@@ -2199,21 +2114,21 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
                   ],
                 ),
               ):BuildWidget.buildRow('召回时间', displayDate(recallDate)),
-              widget.editable?BuildWidget.buildDropdownWithInput('巡检周期', patrolPeriod, currentPatrolPeriod, dropdownPatrolPeriod, changePatrolPeriod, inputType: TextInputType.number, focusNode: _focusEquip[6]):BuildWidget.buildRow('巡检周期', currentPatrolPeriod=='无'?'无巡检':'${patrolPeriod.text} $currentPatrolPeriod'),
+              widget.editable?BuildWidget.buildDropdownWithInput('巡检周期', patrolPeriod, currentPatrolPeriod, dropdownPatrolPeriod, changePatrolPeriod, inputType: TextInputType.number, focusNode: _focusEquip[6], context: context):BuildWidget.buildRow('巡检周期', currentPatrolPeriod=='无'?'无巡检':'${patrolPeriod.text} $currentPatrolPeriod'),
               widget.editable?BuildWidget.buildDropdownWithInput(
                   '保养周期',
                   maintainPeriod,
                   currentMaintainPeriod,
                   dropdownMandatoryPeriod,
                   changeMandatoryPeriod,
-                  inputType: TextInputType.number, focusNode: _focusEquip[7]):BuildWidget.buildRow('保养周期', currentMaintainPeriod=='无'?'无保养':'${maintainPeriod.text} $currentMaintainPeriod'),
+                  inputType: TextInputType.number, focusNode: _focusEquip[7], context: context):BuildWidget.buildRow('保养周期', currentMaintainPeriod=='无'?'无保养':'${maintainPeriod.text} $currentMaintainPeriod'),
               widget.editable?BuildWidget.buildDropdownWithInput(
                   '校准周期',
                   correctionPeriod,
                   currentCorrectionPeriod,
                   dropdownCorrectionPeriod,
                   changeCorrectionPeriod,
-                  inputType: TextInputType.number, focusNode: _focusEquip[8]):BuildWidget.buildRow('校准周期', currentCorrectionPeriod=='无'?'无校准':'${correctionPeriod.text} $currentCorrectionPeriod'),
+                  inputType: TextInputType.number, focusNode: _focusEquip[8], context: context):BuildWidget.buildRow('校准周期', currentCorrectionPeriod=='无'?'无校准':'${correctionPeriod.text} $currentCorrectionPeriod'),
             ],
           ),
         ),
@@ -2250,7 +2165,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
                     widget.editable?new IconButton(
                         icon: Icon(Icons.add_a_photo),
                         onPressed: () {
-                          showSheet(context, equipmentPlaques);
+                          getImage(equipmentPlaques);
                         }):new Container()
                   ],
                 ),
@@ -2268,7 +2183,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
                     widget.editable?new IconButton(
                         icon: Icon(Icons.add_a_photo),
                         onPressed: () {
-                          showSheet(context, equipmentAppearance);
+                          getImage(equipmentAppearance);
                         }):new Container()
                   ],
                 ),
@@ -2286,7 +2201,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
                     widget.editable?new IconButton(
                         icon: Icon(Icons.add_a_photo),
                         onPressed: () {
-                          showSheet(context, equipmentLabel);
+                          getImage(equipmentLabel);
                         }):new Container()
                   ],
                 ),
@@ -2317,61 +2232,72 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
             ),
           ),
         ),
-        body: new Padding(
-          padding: EdgeInsets.symmetric(vertical: 8.0),
-          child: Card(
-            child: new ListView(
-              children: <Widget>[
-                new ExpansionPanelList(
-                  animationDuration: Duration(milliseconds: 200),
-                  expansionCallback: (index, isExpanded) {
-                    setState(() {
-                      expansionList[index] = !isExpanded;
-                    });
-                  },
-                  children: buildExpansion(context),
-                ),
-                SizedBox(height: 24.0),
-                new Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  mainAxisSize: MainAxisSize.max,
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: <Widget>[
-                    widget.editable?new Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 5.0),
-                      child: new RaisedButton(
-                        onPressed: () {
-                          netstat?null:saveEquipment();
-                        },
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(6),
+        body: new GestureDetector(
+          onTap: () {
+            print('equipment tab');
+            FocusNode currentFocus = FocusScope.of(context);
+            currentFocus.unfocus();
+            if (!currentFocus.hasPrimaryFocus) {
+            }
+          },
+          child: new Padding(
+            padding: EdgeInsets.symmetric(vertical: 8.0),
+            child: Card(
+              child: new ListView(
+                controller: _scrollController,
+                children: <Widget>[
+                  new ExpansionPanelList(
+                    animationDuration: Duration(milliseconds: 200),
+                    expansionCallback: (index, isExpanded) {
+                      setState(() {
+                        expansionList[index] = !isExpanded;
+                      });
+                    },
+                    children: buildExpansion(context),
+                  ),
+                  SizedBox(height: 24.0),
+                  new Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    mainAxisSize: MainAxisSize.max,
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: <Widget>[
+                      widget.editable?new Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 5.0),
+                        child: new RaisedButton(
+                          onPressed: () {
+                            FocusScope.of(context).requestFocus(new FocusNode());
+                            netstat?null:saveEquipment();
+                          },
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          padding: EdgeInsets.all(12.0),
+                          color: new Color(0xff2E94B9),
+                          child:
+                          Text('保存', style: TextStyle(color: Colors.white)),
                         ),
-                        padding: EdgeInsets.all(12.0),
-                        color: new Color(0xff2E94B9),
-                        child:
-                            Text('保存', style: TextStyle(color: Colors.white)),
-                      ),
-                    ):new Container(),
-                    new Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 5.0),
-                      child: new RaisedButton(
-                        onPressed: () {
-                          Navigator.of(context).pop();
-                        },
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(6),
+                      ):new Container(),
+                      new Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 5.0),
+                        child: new RaisedButton(
+                          onPressed: () {
+                            Navigator.of(context).pop();
+                          },
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          padding: EdgeInsets.all(12.0),
+                          color: new Color(0xffD25565),
+                          child:
+                          Text('返回', style: TextStyle(color: Colors.white)),
                         ),
-                        padding: EdgeInsets.all(12.0),
-                        color: new Color(0xffD25565),
-                        child:
-                            Text('返回', style: TextStyle(color: Colors.white)),
                       ),
-                    ),
-                  ],
-                )
-              ],
+                    ],
+                  )
+                ],
+              ),
             ),
-          ),
-        ));
+          )),
+        );
   }
 }

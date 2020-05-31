@@ -4,26 +4,22 @@ import 'package:scoped_model/scoped_model.dart';
 import 'dart:convert';
 import 'package:atoi/utils/http_request.dart';
 
-/// 带复选框的搜索页面类
-class SearchBarCheckBoxDelegate extends SearchDelegate<String>{
+/// 供应商搜索页面类
+class SearchBarDepartment extends SearchDelegate<String>{
 
   static const searchList = [];
 
   static const recentSuggest = [];
 
   var suggestionList = [];
-  List selected = [];
-  bool value = false;
-  SearchModel model;
+  var selected;
 
   Future<Null> getDevices(String filter) async {
     var resp = await HttpRequest.request(
-        '/Equipment/Getdevices',
+        '/User/GetDepartments',
         method: HttpRequest.GET,
         params: {
           'filterText': filter,
-          'filterField': 'e.ID',
-          'departmentId': -1
         }
     );
     print(resp);
@@ -70,37 +66,40 @@ class SearchBarCheckBoxDelegate extends SearchDelegate<String>{
 
   @override
   void showResults(BuildContext context) {
+    Map<String, String> mutated = {
+      'equipNo': '10086',
+      'equipLevel': '重要',
+      'name': '医用磁共振设备',
+      'model': 'Philips 781-296',
+      'department': '磁共振',
+      'location': '磁共振1室',
+      'manufacturer': '飞利浦',
+      'guarantee': '保内'
+    };
+    MainModel mainModel = ScopedModel.of<MainModel>(context);
+    mainModel.setResult(mutated);
     close(context, jsonEncode(selected));
-  }
-
-  void checkIt(bool val, Map item) {
-    val?selected.add(item):selected.remove(item);
   }
 
   @override
   Widget buildSuggestions(BuildContext context) {
     return FutureBuilder(
       builder: (context, snapshot) {
-        model = MainModel.of(context);
         return ListView.builder(
             itemCount: suggestionList.length,
-            itemBuilder: (context, i) {
-              return CheckboxListTile(
-                value: model.selected.contains(suggestionList[i])?true:false,
-                title: RichText(
+            itemBuilder: (context, i) => ListTile(
+              onTap: (){
+                query = suggestionList[i]['Description'];
+                selected = suggestionList[i];
+                showResults(context);
+              },
+              title: RichText(
                   text: TextSpan(
-                      text: '${suggestionList[i]['Name']}/${suggestionList[i]['EquipmentCode']}/${suggestionList[i]['SerialCode']}',
+                      text: '${suggestionList[i]['Description']}-${suggestionList[i]['DepartmentType']['Name']}',
                       style: TextStyle(
                           color: Colors.black, fontWeight: FontWeight.w400),
-                      children: [
-                      ])),
-                onChanged: (bool value) {
-                  print(value);
-                  value?model.addToSelected(suggestionList[i]):model.removeSelected(suggestionList[i]);
-                },
-              );
-            }
-        );
+                      children: [])),
+            ));
       },
       future: getDevices(query),
     );

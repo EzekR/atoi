@@ -5,11 +5,9 @@ import 'package:atoi/models/models.dart';
 import 'package:scoped_model/scoped_model.dart';
 import 'dart:async';
 import 'dart:convert';
-import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:atoi/utils/http_request.dart';
 import 'package:atoi/widgets/build_widget.dart';
-import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:atoi/models/constants_model.dart';
 import 'package:atoi/utils/event_bus.dart';
 
@@ -107,18 +105,21 @@ class _VendorDetailState extends State<VendorDetail> {
   }
 
   void changeType(String selected) {
+    FocusScope.of(context).requestFocus(new FocusNode());
     setState(() {
       currentType = selected;
     });
   }
 
   void changeProvince(String selected) {
+    FocusScope.of(context).requestFocus(new FocusNode());
     setState(() {
       currentProvince = selected;
     });
   }
 
   void changeStatus(value) {
+    FocusScope.of(context).requestFocus(new FocusNode());
     setState(() {
       currentStatus = value;
     });
@@ -153,32 +154,6 @@ class _VendorDetailState extends State<VendorDetail> {
         lastDate: new DateTime.now().add(new Duration(days: 30)), // 加 30 天
         locale: Locale('zh'));
     return '${val.year}-${val.month}-${val.day}';
-  }
-
-  void showSheet(context) {
-    showModalBottomSheet(
-        context: context,
-        builder: (context) {
-          return new ListView(
-            shrinkWrap: true,
-            children: <Widget>[
-              ListTile(
-                trailing: new Icon(Icons.collections),
-                title: new Text('从相册添加'),
-                onTap: () {
-                  getImage(ImageSource.gallery);
-                },
-              ),
-              ListTile(
-                trailing: new Icon(Icons.add_a_photo),
-                title: new Text('拍照添加'),
-                onTap: () {
-                  getImage(ImageSource.camera);
-                },
-              ),
-            ],
-          );
-        });
   }
 
   List<FocusNode> _focusVendor = new List(10).map((item) {
@@ -244,23 +219,6 @@ class _VendorDetailState extends State<VendorDetail> {
     }
   }
 
-  Future getImage(ImageSource sourceType) async {
-    var image = await ImagePicker.pickImage(
-      source: sourceType,
-    );
-    if (image != null) {
-      var compressed = await FlutterImageCompress.compressAndGetFile(
-        image.absolute.path,
-        image.absolute.path,
-        minHeight: 800,
-        minWidth: 600,
-      );
-      setState(() {
-        _imageList.add(compressed);
-      });
-    }
-  }
-
   GridView buildImageRow(List imageList) {
     List<Widget> _list = [];
 
@@ -271,7 +229,7 @@ class _VendorDetailState extends State<VendorDetail> {
           children: <Widget>[
             new Container(
               width: 100.0,
-              child: BuildWidget.buildPhotoPageFile(context, image),
+              child: BuildWidget.buildPhotoPageList(context, image),
             ),
             new Padding(
               padding: EdgeInsets.symmetric(horizontal: 0.0),
@@ -398,12 +356,12 @@ class _VendorDetailState extends State<VendorDetail> {
                             child: new Column(
                               children: <Widget>[
                                 BuildWidget.buildRow('系统编号', oid),
-                                widget.editable?BuildWidget.buildInput('名称', name, maxLength: 50, focusNode: _focusVendor[0]):BuildWidget.buildRow('名称', name.text),
+                                widget.editable?BuildWidget.buildInput('名称', name, maxLength: 50, focusNode: _focusVendor[0], required: true):BuildWidget.buildRow('名称', name.text),
                                 widget.editable?BuildWidget.buildDropdown('类型', currentType, dropdownType, changeType):BuildWidget.buildRow('类型', currentType),
-                                widget.editable?BuildWidget.buildDropdown('省份', currentProvince, dropdownProvince, changeProvince):BuildWidget.buildRow('省份', currentProvince),
+                                widget.editable?BuildWidget.buildDropdown('省份', currentProvince, dropdownProvince, changeProvince, required: true):BuildWidget.buildRow('省份', currentProvince),
                                 widget.editable?BuildWidget.buildInput('电话', mobile, maxLength: 20, focusNode: _focusVendor[3]):BuildWidget.buildRow('电话', mobile.text),
                                 widget.editable?BuildWidget.buildInput('地址', address, maxLength: 255, focusNode: _focusVendor[4]):BuildWidget.buildRow('地址', address.text),
-                                widget.editable?BuildWidget.buildInput('联系人', contact, focusNode: _focusVendor[2]):BuildWidget.buildRow('联系人', contact.text),
+                                widget.editable?BuildWidget.buildInput('联系人', contact, focusNode: _focusVendor[2], required: true):BuildWidget.buildRow('联系人', contact.text),
                                 widget.editable?BuildWidget.buildInput('联系人电话', contactMobile, maxLength: 20, focusNode: _focusVendor[5]):BuildWidget.buildRow('联系人电话', contactMobile.text),
                                 widget.editable?BuildWidget.buildRadio('供应商经营状态', vendorStatus,
                                     currentStatus, changeStatus):BuildWidget.buildRow('供应商经营状态', currentStatus),

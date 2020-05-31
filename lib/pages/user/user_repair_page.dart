@@ -2,14 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'dart:io';
 import 'dart:async';
-import 'package:dio/dio.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:atoi/utils/constants.dart';
 import 'package:atoi/utils/http_request.dart';
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:atoi/widgets/build_widget.dart';
 import 'package:atoi/models/models.dart';
+import 'package:atoi/utils/image_util.dart';
+import 'dart:typed_data';
+import 'package:uuid/uuid.dart';
+import 'package:multi_image_picker/multi_image_picker.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 
 /// 用户报修页面类
@@ -29,7 +31,7 @@ class _UserRepairPageState extends State<UserRepairPage> {
   //增加操作状态
   bool _stunned = false;
 
-  List<File> _imageList = [];
+  List<Uint8List> _imageList = [];
 
   TextEditingController _describe = new TextEditingController();
   TextEditingController _category = new TextEditingController();
@@ -90,52 +92,52 @@ class _UserRepairPageState extends State<UserRepairPage> {
     super.initState();
   }
 
-  void showSheet(context) {
-    showModalBottomSheet(
-        context: context,
-        builder: (context) {
-          return new ListView(
-            shrinkWrap: true,
-            children: <Widget>[
-              ListTile(
-                trailing: new Icon(Icons.collections),
-                title: new Text('从相册添加'),
-                onTap: () {
-                  getImage(ImageSource.gallery);
-                },
-              ),
-              ListTile(
-                trailing: new Icon(Icons.add_a_photo),
-                title: new Text('拍照添加'),
-                onTap: () {
-                  getImage(ImageSource.camera);
-                },
-              ),
-            ],
-          );
-        });
-  }
+  //void showSheet(context) {
+  //  showModalBottomSheet(
+  //      context: context,
+  //      builder: (context) {
+  //        return new ListView(
+  //          shrinkWrap: true,
+  //          children: <Widget>[
+  //            ListTile(
+  //              trailing: new Icon(Icons.collections),
+  //              title: new Text('从相册添加'),
+  //              onTap: () {
+  //                getImage(ImageSource.gallery);
+  //              },
+  //            ),
+  //            ListTile(
+  //              trailing: new Icon(Icons.add_a_photo),
+  //              title: new Text('拍照添加'),
+  //              onTap: () {
+  //                getImage(ImageSource.camera);
+  //              },
+  //            ),
+  //          ],
+  //        );
+  //      });
+  //}
 
-  Future getImage(ImageSource sourceType) async {
-    try {
-      var image = await ImagePicker.pickImage(
-        source: sourceType,
-      );
-      if (image != null) {
-        var compressed = await FlutterImageCompress.compressAndGetFile(
-          image.absolute.path,
-          image.absolute.path,
-          minHeight: 800,
-          minWidth: 600,
-        );
-        setState(() {
-          _imageList.add(compressed);
-        });
-      }
-    } catch (e) {
-      print(e);
-    }
-  }
+  //Future getImage(ImageSource sourceType) async {
+  //  try {
+  //    var image = await ImagePicker.pickImage(
+  //      source: sourceType,
+  //    );
+  //    if (image != null) {
+  //      var compressed = await FlutterImageCompress.compressAndGetFile(
+  //        image.absolute.path,
+  //        image.absolute.path,
+  //        minHeight: 800,
+  //        minWidth: 600,
+  //      );
+  //      setState(() {
+  //        _imageList.add(compressed);
+  //      });
+  //    }
+  //  } catch (e) {
+  //    print(e);
+  //  }
+  //}
 
   Future<Null> submit() async {
     if (_describe.text.isEmpty) {
@@ -148,11 +150,10 @@ class _UserRepairPageState extends State<UserRepairPage> {
     }
     List<dynamic> Files = [];
     for (var image in _imageList) {
-      List<int> imageBytes = await image.readAsBytes();
-      var content = base64Encode(imageBytes);
+      var content = base64Encode(image);
       Map _json = {
         'FileContent': content,
-        'FileName': image.path,
+        'FileName': 'repair_${Uuid().v1()}.jpg',
         'ID': 0,
         'FileType': 1
       };
@@ -266,6 +267,33 @@ class _UserRepairPageState extends State<UserRepairPage> {
     );
   }
 
+List<String> _imageIdentifiers = [];
+
+Future getImage() async {
+  List<Asset> image = await MultiImagePicker.pickImages(
+      maxImages: 3,
+      enableCamera: true,
+  );
+  if (image != null) {
+    image.forEach((_image) async {
+      print(_image.identifier);
+      if (_imageIdentifiers.indexOf(_image.identifier) < 0) {
+        _imageIdentifiers.add(_image.identifier);
+        var _data = await _image.getByteData();
+        var compressed = await FlutterImageCompress.compressWithList(
+          _data.buffer.asUint8List(),
+          minHeight: 800,
+          minWidth: 600,
+        );
+        setState(() {
+          _imageList.add(Uint8List.fromList(compressed));
+        });
+      }
+    });
+  }
+}
+
+
   GridView buildImageRow(List imageList) {
     List<Widget> _list = [];
 
@@ -276,7 +304,7 @@ class _UserRepairPageState extends State<UserRepairPage> {
           children: <Widget>[
             new Container(
               width: 100.0,
-              child: BuildWidget.buildPhotoPageFile(context, image),
+              child: BuildWidget.buildPhotoPageList(context, image),
             ),
             new Padding(
               padding: EdgeInsets.symmetric(horizontal: 0.0),
@@ -371,6 +399,7 @@ class _UserRepairPageState extends State<UserRepairPage> {
                         children: <Widget>[
                           BuildWidget.buildRow(
                               '系统编号', widget.equipment['OID'] ?? ''),
+                          BuildWidget.buildRow('资产编号', widget.equipment['AssetCode']??''),
                           BuildWidget.buildRow(
                               '名称', widget.equipment['Name'] ?? ''),
                           BuildWidget.buildRow(
@@ -379,8 +408,6 @@ class _UserRepairPageState extends State<UserRepairPage> {
                               '序列号', widget.equipment['SerialCode'] ?? ''),
                           BuildWidget.buildRow('设备厂商',
                               widget.equipment['Manufacturer']['Name'] ?? ''),
-                          BuildWidget.buildRow('资产等级',
-                              widget.equipment['AssetLevel']['Name'] ?? ''),
                           BuildWidget.buildRow('使用科室',
                               widget.equipment['Department']['Name'] ?? ''),
                           BuildWidget.buildRow(
@@ -416,8 +443,8 @@ class _UserRepairPageState extends State<UserRepairPage> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: <Widget>[
                           BuildWidget.buildDropdownLeft('机器状态:', _currentResult,
-                              _dropDownMenuItems, changedDropDownMethod),
-                          BuildWidget.buildInputLeft('故障描述:', _describe, maxLength: 200),
+                              _dropDownMenuItems, changedDropDownMethod, context: context),
+                          BuildWidget.buildInputLeft('故障描述:', _describe, maxLength: 200, required: true),
                           new Padding(
                             padding: EdgeInsets.symmetric(vertical: 5.0),
                             child: new Row(
@@ -430,8 +457,8 @@ class _UserRepairPageState extends State<UserRepairPage> {
                                 ),
                                 new IconButton(
                                     icon: Icon(Icons.add_a_photo),
-                                    onPressed: () {
-                                      showSheet(context);
+                                    onPressed: () async  {
+                                      getImage();
                                     })
                               ],
                             ),

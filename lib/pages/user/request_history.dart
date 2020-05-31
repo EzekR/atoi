@@ -8,6 +8,8 @@ import 'package:flutter_cupertino_date_picker/flutter_cupertino_date_picker.dart
 import 'package:atoi/models/models.dart';
 import 'package:atoi/models/constants_model.dart';
 import 'package:date_format/date_format.dart';
+import 'dart:convert';
+import 'package:atoi/widgets/search_department.dart';
 
 /// 用户请求历史页面类
 class RequestHistory extends StatefulWidget {
@@ -23,7 +25,7 @@ class _RequestHistoryState extends State<RequestHistory> {
   List departmentList;
   int statusId;
   List statusList;
-  DateTime _start = DateTime.now().add(Duration(days: -30));
+  DateTime _start = DateTime.now().add(Duration(days: -90));
   DateTime _end = DateTime.now();
   String startDate;
   String endDate;
@@ -31,7 +33,7 @@ class _RequestHistoryState extends State<RequestHistory> {
   void initFilter() async {
     await cModel.getConstants();
     setState(() {
-      departmentList = initList(cModel.Departments);
+      departmentList = initList(cModel.Departments, valueForAll: -1);
       statusList = initList(cModel.RequestStatus);
       departmentId = departmentList[0]['value'];
       statusId = statusList[0]['value'];
@@ -41,10 +43,11 @@ class _RequestHistoryState extends State<RequestHistory> {
     await getUserRequests();
   }
 
-  List initList(Map _map) {
+  List initList(Map _map, {int valueForAll}) {
+    valueForAll = valueForAll??0;
     List _list = [];
     _list.add({
-      'value': 0,
+      'value': valueForAll,
       'text': '全部'
     });
     _map.forEach((key, val) {
@@ -231,6 +234,26 @@ class _RequestHistoryState extends State<RequestHistory> {
                         ],
                       )
                   ),
+                  SizedBox(width: 16.0,),
+                  Container(
+                    width: 40.0,
+                    height: 40.0,
+                    child: Center(
+                      child: IconButton(
+                          onPressed: () {
+                            showSearch(context: context, delegate: SearchBarDepartment(), hintText: '请输入科室名称/拼音/ID').then((result) {
+                              if (result != null) {
+                                var _result = jsonDecode(result);
+                                setState(() {
+                                  departmentId = _result['ID'];
+                                });
+                              }
+                            });
+                          },
+                          icon: Icon(Icons.search)
+                      ),
+                    ),
+                  )
                 ],
               ),
               SizedBox(height: 30.0,),

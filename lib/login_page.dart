@@ -464,7 +464,8 @@ class _LoginPageState extends State<LoginPage> {
             child: Text(
               _countdownTime>0?'$_countdownTime后重新获取':'获取验证码',
               style: new TextStyle(
-                  color: Colors.white
+                  color: Colors.white,
+                  fontSize: 12.0
               ),
             ),
             shape: RoundedRectangleBorder(

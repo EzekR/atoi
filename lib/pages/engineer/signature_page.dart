@@ -65,7 +65,6 @@ class _SignaturePageState extends State<SignaturePage> {
                     color: Colors.indigo,
                     onPressed: () async {
                       final sign = _sign.currentState;
-                      print(sign.points);
                       //retrieve image data, do whatever you want with it (send to server, save locally...)
                       final image = await sign.getData();
                       var data = await image.toByteData(format: ui.ImageByteFormat.png);

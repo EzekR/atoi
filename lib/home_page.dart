@@ -19,6 +19,8 @@ import 'dart:convert';
 import 'package:date_format/date_format.dart';
 import 'package:flutter_cupertino_date_picker/flutter_cupertino_date_picker.dart';
 import 'package:atoi/utils/event_bus.dart';
+import 'package:atoi/widgets/search_department.dart';
+import 'package:atoi/widgets/search_lazy.dart';
 
 /// 超管首页类
 class HomePage extends StatefulWidget {
@@ -85,10 +87,11 @@ class _HomePageState extends State<HomePage>
     });
   }
 
-  List initList(Map _map) {
+  List initList(Map _map, {int valueForAll}) {
+    valueForAll = valueForAll??0;
     List _list = [];
     _list.add({
-      'value': 0,
+      'value': valueForAll,
       'text': '全部'
     });
     _map.forEach((key, val) {
@@ -101,7 +104,7 @@ class _HomePageState extends State<HomePage>
   }
 
   void initFilter() async {
-    var _start = DateTime.now().add(new Duration(days: -30));
+    var _start = DateTime.now().add(new Duration(days: -90));
     var _end = DateTime.now();
     await cModel.getConstants();
     model.startDate = formatDate(_start, [yyyy, '-', mm, '-', dd]);
@@ -125,7 +128,7 @@ class _HomePageState extends State<HomePage>
       statusList = initList(cModel.RequestStatus);
       statusList.removeWhere((item) => item['value'] == -1 || item['value'] == 99);
       statusId = statusList[0]['value'];
-      departmentList = initList(cModel.Departments);
+      departmentList = initList(cModel.Departments, valueForAll: -1);
       departmentId = departmentList[0]['value'];
       urgencyList = initList(cModel.UrgencyID);
       urgencyId = urgencyList[0]['value'];
@@ -200,415 +203,451 @@ class _HomePageState extends State<HomePage>
     showModalBottomSheet(context: context, builder: (context) {
       return StatefulBuilder(
         builder: (context, setState) {
-          return ListView(
+          return Column(
             children: <Widget>[
-              SizedBox(height: 18.0,),
-              Row(
-                children: <Widget>[
-                  SizedBox(width: 16.0,),
-                  Text('搜索', style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.w600),)
-                ],
-              ),
-              SizedBox(height: 6.0,),
-              Row(
-                children: <Widget>[
-                  SizedBox(width: 16.0,),
-                  Container(
-                      width: 230.0,
-                      height: 40.0,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(5.0),
-                        color: Color(0xfff2f2f2),
-                      ),
-                      child: Row(
-                        children: <Widget>[
-                          SizedBox(width: 10.0,),
-                          Icon(Icons.search, color: Color(0xffaaaaaa),),
-                          SizedBox(width: 10.0,),
-                          Container(
-                              width: 150.0,
-                              child: Align(
-                                alignment: Alignment(0.0, -0.5),
-                                child: TextField(
-                                  decoration: InputDecoration.collapsed(hintText: ''),
-                                  controller: filterText,
-                                ),
-                              )
-                          ),
-                        ],
-                      )
-                  ),
-                  SizedBox(width: 16.0,),
-                  Container(
-                    width: 130.0,
-                    height: 40.0,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(5.0),
-                      color: Color(0xfff2f2f2),
-                    ),
-                    child: Row(
+              SizedBox(height: 8.0,),
+              Container(
+                height: 450.0,
+                child: ListView(
+                  children: <Widget>[
+                    SizedBox(height: 18.0,),
+                    Row(
                       children: <Widget>[
-                        SizedBox(width: 6.0,),
-                        DropdownButton(
-                          value: field,
-                          underline: Container(),
-                          items: _currentTabIndex==1||_currentTabIndex==3?<DropdownMenuItem>[
-                            DropdownMenuItem(
-                              value: 'r.ID',
-                              child: Text('请求编号'),
+                        SizedBox(width: 16.0,),
+                        Text('搜索', style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.w600),)
+                      ],
+                    ),
+                    SizedBox(height: 6.0,),
+                    Row(
+                      children: <Widget>[
+                        SizedBox(width: 16.0,),
+                        Container(
+                            width: 230.0,
+                            height: 40.0,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(5.0),
+                              color: Color(0xfff2f2f2),
                             ),
-                            DropdownMenuItem(
-                              value: 'e.ID',
-                              child: Text('设备系统编号'),
+                            child: Row(
+                              children: <Widget>[
+                                SizedBox(width: 10.0,),
+                                Icon(Icons.search, color: Color(0xffaaaaaa),),
+                                SizedBox(width: 10.0,),
+                                Container(
+                                    width: 150.0,
+                                    child: Align(
+                                      alignment: Alignment(0.0, -0.5),
+                                      child: TextField(
+                                        decoration: InputDecoration.collapsed(hintText: ''),
+                                        controller: filterText,
+                                      ),
+                                    )
+                                ),
+                              ],
+                            )
+                        ),
+                        SizedBox(width: 16.0,),
+                        Container(
+                          width: 130.0,
+                          height: 40.0,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(5.0),
+                            color: Color(0xfff2f2f2),
+                          ),
+                          child: Row(
+                            children: <Widget>[
+                              SizedBox(width: 6.0,),
+                              DropdownButton(
+                                value: field,
+                                underline: Container(),
+                                items: _currentTabIndex==1||_currentTabIndex==3?<DropdownMenuItem>[
+                                  DropdownMenuItem(
+                                    value: 'r.ID',
+                                    child: Text('请求编号'),
+                                  ),
+                                  DropdownMenuItem(
+                                    value: 'e.ID',
+                                    child: Text('设备系统编号'),
+                                  ),
+                                  DropdownMenuItem(
+                                    value: 'e.Name',
+                                    child: Text('设备名称'),
+                                  ),
+                                  DropdownMenuItem(
+                                    value: 'r.RequestUserName',
+                                    child: Text('请求人'),
+                                  ),
+                                ]:<DropdownMenuItem>[
+                                  DropdownMenuItem(
+                                    value: 'd.RequestID',
+                                    child: Text('请求编号'),
+                                  ),
+                                  DropdownMenuItem(
+                                    value: 'd.ID',
+                                    child: Text('派工单编号'),
+                                  ),
+                                ],
+                                onChanged: (val) {
+                                  FocusScope.of(context).requestFocus(new FocusNode());
+                                  setState(() {
+                                    field = val;
+                                  });
+                                },
+                              ),
+                            ],
+                          ),
+                        )
+                      ],
+                    ),
+                    SizedBox(height: 18.0,),
+                    _currentTabIndex==2?Container():Row(
+                      children: <Widget>[
+                        SizedBox(width: 16.0,),
+                        Text('请求日期', style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.w600),)
+                      ],
+                    ),
+                    _currentTabIndex==2?Container():SizedBox(height: 6.0,),
+                    _currentTabIndex==2?Container():Row(
+                      children: <Widget>[
+                        SizedBox(width: 16.0,),
+                        Container(
+                          width: 116.0,
+                          height: 40.0,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(5.0),
+                            color: Color(0xfff2f2f2),
+                          ),
+                          child: Center(
+                            child: FlatButton(
+                                onPressed: () {
+                                  DatePicker.showDatePicker(
+                                    context,
+                                    pickerTheme: DateTimePickerTheme(
+                                      showTitle: true,
+                                      confirm: Text('确认', style: TextStyle(color: Colors.blueAccent)),
+                                      cancel: Text('取消', style: TextStyle(color: Colors.redAccent)),
+                                    ),
+                                    minDateTime: DateTime.parse('2000-01-01'),
+                                    maxDateTime: DateTime.parse('2030-01-01'),
+                                    initialDateTime: DateTime.parse(startDate),
+                                    dateFormat: 'yyyy-MM-dd',
+                                    locale: DateTimePickerLocale.en_us,
+                                    onClose: () => print(""),
+                                    onCancel: () => print('onCancel'),
+                                    onChange: (dateTime, List<int> index) {
+                                    },
+                                    onConfirm: (dateTime, List<int> index) {
+                                      setState(() {
+                                        startDate = formatDate(dateTime, [yyyy,'-', mm, '-', dd]);
+                                      });
+                                    },
+                                  );
+                                },
+                                child: Text(startDate, style: TextStyle(fontWeight: FontWeight.w400, fontSize: 12.0),)
                             ),
-                            DropdownMenuItem(
-                              value: 'e.Name',
-                              child: Text('设备名称'),
+                          ),
+                        ),
+                        Text('   -   '),
+                        Container(
+                          width: 116.0,
+                          height: 40.0,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(5.0),
+                            color: Color(0xfff2f2f2),
+                          ),
+                          child: Center(
+                            child: FlatButton(
+                                onPressed: () {
+                                  DatePicker.showDatePicker(
+                                    context,
+                                    pickerTheme: DateTimePickerTheme(
+                                      showTitle: true,
+                                      confirm: Text('确认', style: TextStyle(color: Colors.blueAccent)),
+                                      cancel: Text('取消', style: TextStyle(color: Colors.redAccent)),
+                                    ),
+                                    minDateTime: DateTime.parse('2000-01-01'),
+                                    maxDateTime: DateTime.parse('2030-01-01'),
+                                    initialDateTime: DateTime.parse(endDate),
+                                    dateFormat: 'yyyy-MM-dd',
+                                    locale: DateTimePickerLocale.en_us,
+                                    onClose: () => print(""),
+                                    onCancel: () => print('onCancel'),
+                                    onChange: (dateTime, List<int> index) {
+                                    },
+                                    onConfirm: (dateTime, List<int> index) {
+                                      setState(() {
+                                        endDate = formatDate(dateTime, [yyyy,'-', mm, '-', dd]);
+                                      });
+                                    },
+                                  );
+                                },
+                                child: Text(endDate, style: TextStyle(fontWeight: FontWeight.w400, fontSize: 12.0),)
                             ),
-                            DropdownMenuItem(
-                              value: 'r.RequestUserName',
-                              child: Text('请求人'),
-                            ),
-                          ]:<DropdownMenuItem>[
-                            DropdownMenuItem(
-                              value: 'd.RequestID',
-                              child: Text('请求编号'),
-                            ),
-                            DropdownMenuItem(
-                              value: 'd.ID',
-                              child: Text('派工单编号'),
-                            ),
-                          ],
-                          onChanged: (val) {
-                            setState(() {
-                              field = val;
-                            });
-                          },
+                          ),
                         ),
                       ],
                     ),
-                  )
-                ],
-              ),
-              SizedBox(height: 18.0,),
-              _currentTabIndex==2?Container():Row(
-                children: <Widget>[
-                  SizedBox(width: 16.0,),
-                  Text('请求日期', style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.w600),)
-                ],
-              ),
-              _currentTabIndex==2?Container():SizedBox(height: 6.0,),
-              _currentTabIndex==2?Container():Row(
-                children: <Widget>[
-                  SizedBox(width: 16.0,),
-                  Container(
-                    width: 116.0,
-                    height: 40.0,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(5.0),
-                      color: Color(0xfff2f2f2),
+                    _currentTabIndex==2?Container():SizedBox(height: 18.0,),
+                    _currentTabIndex==2?Container():Row(
+                      children: <Widget>[
+                        SizedBox(width: 16.0,),
+                        Text('请求状态', style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.w600),)
+                      ],
                     ),
-                    child: Center(
-                      child: FlatButton(
-                          onPressed: () {
-                            DatePicker.showDatePicker(
-                              context,
-                              pickerTheme: DateTimePickerTheme(
-                                showTitle: true,
-                                confirm: Text('确认', style: TextStyle(color: Colors.blueAccent)),
-                                cancel: Text('取消', style: TextStyle(color: Colors.redAccent)),
-                              ),
-                              minDateTime: DateTime.parse('2000-01-01'),
-                              maxDateTime: DateTime.parse('2030-01-01'),
-                              initialDateTime: DateTime.parse(startDate),
-                              dateFormat: 'yyyy-MM-dd',
-                              locale: DateTimePickerLocale.en_us,
-                              onClose: () => print(""),
-                              onCancel: () => print('onCancel'),
-                              onChange: (dateTime, List<int> index) {
-                              },
-                              onConfirm: (dateTime, List<int> index) {
+                    _currentTabIndex==2?Container():SizedBox(height: 6.0,),
+                    _currentTabIndex==2?Container():Row(
+                      children: <Widget>[
+                        SizedBox(width: 16.0,),
+                        Container(
+                            width: 230.0,
+                            height: 40.0,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(5.0),
+                              color: Color(0xfff2f2f2),
+                            ),
+                            child: Row(
+                              children: <Widget>[
+                                SizedBox(width: 6.0,),
+                                DropdownButton(
+                                  value: statusId,
+                                  underline: Container(),
+                                  items: statusList.map<DropdownMenuItem>((item) {
+                                    return DropdownMenuItem(
+                                      value: item['value'],
+                                      child: Text(item['text']),
+                                    );
+                                  }).toList(),
+                                  onChanged: (val) {
+                                    print(val);
+                                    FocusScope.of(context).requestFocus(new FocusNode());
+                                    setState(() {
+                                      statusId = val;
+                                    });
+                                  },
+                                )
+                              ],
+                            )
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 18.0,),
+                    Row(
+                      children: <Widget>[
+                        SizedBox(width: 16.0,),
+                        Text(_currentTabIndex==2?'派工类型':'请求类型', style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.w600),)
+                      ],
+                    ),
+                    SizedBox(height: 6.0,),
+                    Row(
+                      children: <Widget>[
+                        SizedBox(width: 16.0,),
+                        Container(
+                            width: 230.0,
+                            height: 40.0,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(5.0),
+                              color: Color(0xfff2f2f2),
+                            ),
+                            child: Row(
+                              children: <Widget>[
+                                SizedBox(width: 6.0,),
+                                DropdownButton(
+                                  value: typeId,
+                                  underline: Container(),
+                                  items: typeList.map<DropdownMenuItem>((item) {
+                                    return DropdownMenuItem(
+                                      value: item['value'],
+                                      child: Text(item['text']),
+                                    );
+                                  }).toList(),
+                                  onChanged: (val) {
+                                    FocusScope.of(context).requestFocus(new FocusNode());
+                                    setState(() {
+                                      typeId = val;
+                                    });
+                                  },
+                                )
+                              ],
+                            )
+                        ),
+                      ],
+                    ),
+                    _currentTabIndex==2?Container():SizedBox(height: 18.0,),
+                    _currentTabIndex==2?Container():Row(
+                      children: <Widget>[
+                        SizedBox(width: 16.0,),
+                        Text('是否召回', style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.w600),)
+                      ],
+                    ),
+                    _currentTabIndex==2?Container():SizedBox(height: 6.0,),
+                    _currentTabIndex==2?Container():Row(
+                      children: <Widget>[
+                        SizedBox(width: 16.0,),
+                        Container(
+                          width: 100.0,
+                          height: 40.0,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(5.0),
+                            color: Color(0xfff2f2f2),
+                          ),
+                          child: Center(
+                            child: Switch(
+                              value: recall,
+                              onChanged: (val) {
+                                FocusScope.of(context).requestFocus(new FocusNode());
                                 setState(() {
-                                  startDate = formatDate(dateTime, [yyyy,'-', mm, '-', dd]);
+                                  recall = val;
                                 });
                               },
-                            );
-                          },
-                          child: Text(startDate, style: TextStyle(fontWeight: FontWeight.w400, fontSize: 12.0),)
-                      ),
+                            ),
+                          ),
+                        )
+                      ],
                     ),
-                  ),
-                  Text('   -   '),
-                  Container(
-                    width: 116.0,
-                    height: 40.0,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(5.0),
-                      color: Color(0xfff2f2f2),
+                    _currentTabIndex==2?Container():SizedBox(height: 18.0,),
+                    _currentTabIndex==2?Container():Row(
+                      children: <Widget>[
+                        SizedBox(width: 16.0,),
+                        Text('科室', style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.w600),)
+                      ],
                     ),
-                    child: Center(
-                      child: FlatButton(
-                          onPressed: () {
-                            DatePicker.showDatePicker(
-                              context,
-                              pickerTheme: DateTimePickerTheme(
-                                showTitle: true,
-                                confirm: Text('确认', style: TextStyle(color: Colors.blueAccent)),
-                                cancel: Text('取消', style: TextStyle(color: Colors.redAccent)),
-                              ),
-                              minDateTime: DateTime.parse('2000-01-01'),
-                              maxDateTime: DateTime.parse('2030-01-01'),
-                              initialDateTime: DateTime.parse(endDate),
-                              dateFormat: 'yyyy-MM-dd',
-                              locale: DateTimePickerLocale.en_us,
-                              onClose: () => print(""),
-                              onCancel: () => print('onCancel'),
-                              onChange: (dateTime, List<int> index) {
-                              },
-                              onConfirm: (dateTime, List<int> index) {
+                    _currentTabIndex==2?Container():SizedBox(height: 6.0,),
+                    _currentTabIndex==2?Container():Row(
+                      children: <Widget>[
+                        SizedBox(width: 16.0,),
+                        Container(
+                            width: 200.0,
+                            height: 40.0,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(5.0),
+                              color: Color(0xfff2f2f2),
+                            ),
+                            child: Row(
+                              children: <Widget>[
+                                SizedBox(width: 6.0,),
+                                DropdownButton(
+                                  value: departmentId,
+                                  underline: Container(),
+                                  items: departmentList.map<DropdownMenuItem>((item) {
+                                    return DropdownMenuItem(
+                                      value: item['value'],
+                                      child: Text(item['text']),
+                                    );
+                                  }).toList(),
+                                  onChanged: (val) {
+                                    FocusScope.of(context).requestFocus(new FocusNode());
+                                    setState(() {
+                                      departmentId = val;
+                                    });
+                                  },
+                                )
+                              ],
+                            )
+                        ),
+                        SizedBox(width: 16.0,),
+                        Container(
+                          width: 40.0,
+                          height: 40.0,
+                          child: Center(
+                            child: IconButton(
+                                onPressed: () {
+                                  Navigator.of(context).push(new MaterialPageRoute(builder: (_) => SearchLazy(searchType: SearchType.DEPARTMENT,))).then((result) {
+                                    if (result != null) {
+                                      var _result = jsonDecode(result);
+                                      setState(() {
+                                        departmentId = _result['ID'];
+                                      });
+                                    }
+                                  });
+                                },
+                                icon: Icon(Icons.search)
+                            ),
+                          ),
+                        )
+                      ],
+                    ),
+                    SizedBox(height: 18.0,),
+                    Row(
+                      children: <Widget>[
+                        SizedBox(width: 16.0,),
+                        Text('紧急程度', style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.w600),)
+                      ],
+                    ),
+                    SizedBox(height: 6.0,),
+                    Row(
+                      children: <Widget>[
+                        SizedBox(width: 16.0,),
+                        Container(
+                            width: 200.0,
+                            height: 40.0,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(5.0),
+                              color: Color(0xfff2f2f2),
+                            ),
+                            child: Row(
+                              children: <Widget>[
+                                SizedBox(width: 6.0,),
+                                DropdownButton(
+                                  value: urgencyId,
+                                  underline: Container(),
+                                  items: urgencyList.map<DropdownMenuItem>((item) {
+                                    return DropdownMenuItem(
+                                      value: item['value'],
+                                      child: Text(item['text']),
+                                    );
+                                  }).toList(),
+                                  onChanged: (val) {
+                                    FocusScope.of(context).requestFocus(new FocusNode());
+                                    setState(() {
+                                      urgencyId = val;
+                                    });
+                                  },
+                                )
+                              ],
+                            )
+                        ),
+                      ],
+                    ),
+                    _currentTabIndex==2?Container():SizedBox(height: 18.0,),
+                    _currentTabIndex==2?Container():Row(
+                      children: <Widget>[
+                        SizedBox(width: 16.0,),
+                        Text('是否超期', style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.w600),)
+                      ],
+                    ),
+                    _currentTabIndex==2?Container():SizedBox(height: 6.0,),
+                    _currentTabIndex==2?Container():Row(
+                      children: <Widget>[
+                        SizedBox(width: 16.0,),
+                        Container(
+                          width: 100.0,
+                          height: 40.0,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(5.0),
+                            color: Color(0xfff2f2f2),
+                          ),
+                          child: Center(
+                            child: Switch(
+                              value: overDue,
+                              onChanged: (val) {
+                                FocusScope.of(context).requestFocus(new FocusNode());
                                 setState(() {
-                                  endDate = formatDate(dateTime, [yyyy,'-', mm, '-', dd]);
+                                  overDue = val;
                                 });
                               },
-                            );
-                          },
-                          child: Text(endDate, style: TextStyle(fontWeight: FontWeight.w400, fontSize: 12.0),)
-                      ),
+                            ),
+                          ),
+                        )
+                      ],
                     ),
-                  ),
-                ],
+                    SizedBox(height: 30.0,),
+                  ],
+                ),
               ),
-              _currentTabIndex==2?Container():SizedBox(height: 18.0,),
-              _currentTabIndex==2?Container():Row(
-                children: <Widget>[
-                  SizedBox(width: 16.0,),
-                  Text('请求状态', style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.w600),)
-                ],
-              ),
-              _currentTabIndex==2?Container():SizedBox(height: 6.0,),
-              _currentTabIndex==2?Container():Row(
-                children: <Widget>[
-                  SizedBox(width: 16.0,),
-                  Container(
-                      width: 230.0,
-                      height: 40.0,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(5.0),
-                        color: Color(0xfff2f2f2),
-                      ),
-                      child: Row(
-                        children: <Widget>[
-                          SizedBox(width: 6.0,),
-                          DropdownButton(
-                            value: statusId,
-                            underline: Container(),
-                            items: statusList.map<DropdownMenuItem>((item) {
-                              return DropdownMenuItem(
-                                value: item['value'],
-                                child: Text(item['text']),
-                              );
-                            }).toList(),
-                            onChanged: (val) {
-                              print(val);
-                              setState(() {
-                                statusId = val;
-                              });
-                            },
-                          )
-                        ],
-                      )
-                  ),
-                ],
-              ),
-              SizedBox(height: 18.0,),
               Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: <Widget>[
-                  SizedBox(width: 16.0,),
-                  Text(_currentTabIndex==2?'派工类型':'请求类型', style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.w600),)
-                ],
-              ),
-              SizedBox(height: 6.0,),
-              Row(
-                children: <Widget>[
-                  SizedBox(width: 16.0,),
-                  Container(
-                      width: 230.0,
-                      height: 40.0,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(5.0),
-                        color: Color(0xfff2f2f2),
-                      ),
-                      child: Row(
-                        children: <Widget>[
-                          SizedBox(width: 6.0,),
-                          DropdownButton(
-                            value: typeId,
-                            underline: Container(),
-                            items: typeList.map<DropdownMenuItem>((item) {
-                              return DropdownMenuItem(
-                                value: item['value'],
-                                child: Text(item['text']),
-                              );
-                            }).toList(),
-                            onChanged: (val) {
-                              setState(() {
-                                typeId = val;
-                              });
-                            },
-                          )
-                        ],
-                      )
-                  ),
-                ],
-              ),
-              _currentTabIndex==2?Container():SizedBox(height: 18.0,),
-              _currentTabIndex==2?Container():Row(
-                children: <Widget>[
-                  SizedBox(width: 16.0,),
-                  Text('是否召回', style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.w600),)
-                ],
-              ),
-              _currentTabIndex==2?Container():SizedBox(height: 6.0,),
-              _currentTabIndex==2?Container():Row(
-                children: <Widget>[
-                  SizedBox(width: 16.0,),
-                  Container(
-                    width: 100.0,
-                    height: 40.0,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(5.0),
-                      color: Color(0xfff2f2f2),
-                    ),
-                    child: Center(
-                      child: Switch(
-                        value: recall,
-                        onChanged: (val) {
-                          setState(() {
-                            recall = val;
-                          });
-                        },
-                      ),
-                    ),
-                  )
-                ],
-              ),
-              _currentTabIndex==2?Container():SizedBox(height: 18.0,),
-              _currentTabIndex==2?Container():Row(
-                children: <Widget>[
-                  SizedBox(width: 16.0,),
-                  Text('科室', style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.w600),)
-                ],
-              ),
-              _currentTabIndex==2?Container():SizedBox(height: 6.0,),
-              _currentTabIndex==2?Container():Row(
-                children: <Widget>[
-                  SizedBox(width: 16.0,),
-                  Container(
-                      width: 230.0,
-                      height: 40.0,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(5.0),
-                        color: Color(0xfff2f2f2),
-                      ),
-                      child: Row(
-                        children: <Widget>[
-                          SizedBox(width: 6.0,),
-                          DropdownButton(
-                            value: departmentId,
-                            underline: Container(),
-                            items: departmentList.map<DropdownMenuItem>((item) {
-                              return DropdownMenuItem(
-                                value: item['value'],
-                                child: Text(item['text']),
-                              );
-                            }).toList(),
-                            onChanged: (val) {
-                              setState(() {
-                                departmentId = val;
-                              });
-                            },
-                          )
-                        ],
-                      )
-                  ),
-                ],
-              ),
-              SizedBox(height: 18.0,),
-              Row(
-                children: <Widget>[
-                  SizedBox(width: 16.0,),
-                  Text('紧急程度', style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.w600),)
-                ],
-              ),
-              SizedBox(height: 6.0,),
-              Row(
-                children: <Widget>[
-                  SizedBox(width: 16.0,),
-                  Container(
-                      width: 200.0,
-                      height: 40.0,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(5.0),
-                        color: Color(0xfff2f2f2),
-                      ),
-                      child: Row(
-                        children: <Widget>[
-                          SizedBox(width: 6.0,),
-                          DropdownButton(
-                            value: urgencyId,
-                            underline: Container(),
-                            items: urgencyList.map<DropdownMenuItem>((item) {
-                              return DropdownMenuItem(
-                                value: item['value'],
-                                child: Text(item['text']),
-                              );
-                            }).toList(),
-                            onChanged: (val) {
-                              setState(() {
-                                urgencyId = val;
-                              });
-                            },
-                          )
-                        ],
-                      )
-                  ),
-                ],
-              ),
-              _currentTabIndex==2?Container():SizedBox(height: 18.0,),
-              _currentTabIndex==2?Container():Row(
-                children: <Widget>[
-                  SizedBox(width: 16.0,),
-                  Text('是否超期', style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.w600),)
-                ],
-              ),
-              _currentTabIndex==2?Container():SizedBox(height: 6.0,),
-              _currentTabIndex==2?Container():Row(
-                children: <Widget>[
-                  SizedBox(width: 16.0,),
-                  Container(
-                    width: 100.0,
-                    height: 40.0,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(5.0),
-                      color: Color(0xfff2f2f2),
-                    ),
-                    child: Center(
-                      child: Switch(
-                        value: overDue,
-                        onChanged: (val) {
-                          setState(() {
-                            overDue = val;
-                          });
-                        },
-                      ),
-                    ),
-                  )
-                ],
-              ),
-              SizedBox(height: 30.0,),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: <Widget>[
+                  SizedBox(width: 9.0,),
                   Container(
                     width: 100.0,
                     height: 40.0,
@@ -653,8 +692,9 @@ class _HomePageState extends State<HomePage>
                       }, child: Text('确认', style: TextStyle(color: Colors.white),)),
                     ),
                   ),
+                  SizedBox(width: 8.0,)
                 ],
-              )
+              ),
             ],
           );
         },

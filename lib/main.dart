@@ -90,6 +90,9 @@ class _AtoiAppState extends State<AtoiApp> {
         title: Text('网络超时'),
       ));
     });
+    //bus.on('unfocus', (pamras) {
+    //  FocusScope.of(context).unfocus();
+    //});
   }
 
   @override
@@ -102,11 +105,12 @@ class _AtoiAppState extends State<AtoiApp> {
       model: mainModel,
       child: GestureDetector(
         onTap: () {
+          print('main tab');
           FocusScopeNode currentFocus = FocusScope.of(context);
           if (!currentFocus.hasPrimaryFocus) {
             currentFocus.unfocus();
           }
-          bus.emit('unfocus');
+          //bus.emit('unfocus');
         },
         child: new MaterialApp(
           //builder: (context, child) => MediaQuery(data: MediaQuery.of(context).copyWith(alwaysUse24HourFormat: true), child: child),

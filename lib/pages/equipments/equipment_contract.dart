@@ -7,7 +7,6 @@ import 'package:barcode_scan/barcode_scan.dart';
 import 'dart:async';
 import 'package:flutter/services.dart';
 import 'dart:convert';
-import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:atoi/utils/http_request.dart';
 import 'package:atoi/widgets/build_widget.dart';
@@ -19,6 +18,9 @@ import 'package:atoi/utils/constants.dart';
 import 'package:flutter_cupertino_date_picker/flutter_cupertino_date_picker.dart';
 import 'package:date_format/date_format.dart';
 import 'package:atoi/utils/event_bus.dart';
+import 'package:multi_image_picker/multi_image_picker.dart';
+import 'dart:typed_data';
+import 'package:uuid/uuid.dart';
 
 /// 设备合同页面类
 class EquipmentContract extends StatefulWidget {
@@ -219,12 +221,14 @@ class _EquipmentContractState extends State<EquipmentContract> {
   }
 
   void changeType(String selected) {
+    FocusScope.of(context).requestFocus(new FocusNode());
     setState(() {
       currentType = selected;
     });
   }
 
   void changeScope(String selected) {
+    FocusScope.of(context).requestFocus(new FocusNode());
     setState(() {
       currentScope = selected;
     });
@@ -311,48 +315,32 @@ class _EquipmentContractState extends State<EquipmentContract> {
     }
   }
 
-  void showSheet(context) {
-    showModalBottomSheet(
-        context: context,
-        builder: (context) {
-          return new ListView(
-            shrinkWrap: true,
-            children: <Widget>[
-              ListTile(
-                trailing: new Icon(Icons.collections),
-                title: new Text('从相册添加'),
-                onTap: () {
-                  getImage(ImageSource.gallery);
-                },
-              ),
-              ListTile(
-                trailing: new Icon(Icons.add_a_photo),
-                title: new Text('拍照添加'),
-                onTap: () {
-                  getImage(ImageSource.camera);
-                },
-              ),
-            ],
-          );
-        });
-  }
+List<String> _imageIdentifiers = [];
 
-  Future getImage(ImageSource sourceType) async {
-    var image = await ImagePicker.pickImage(
-      source: sourceType,
-    );
-    if (image != null) {
-      var compressed = await FlutterImageCompress.compressAndGetFile(
-        image.absolute.path,
-        image.absolute.path,
-        minHeight: 800,
-        minWidth: 600,
-      );
-      setState(() {
-        _imageList.add(compressed);
-      });
-    }
+Future getImage() async {
+  List<Asset> image = await MultiImagePicker.pickImages(
+      maxImages: 3,
+      enableCamera: true,
+  );
+  if (image != null) {
+    image.forEach((_image) async {
+      print(_image.identifier);
+      if (_imageIdentifiers.indexOf(_image.identifier) < 0) {
+        _imageIdentifiers.add(_image.identifier);
+        var _data = await _image.getByteData();
+        var compressed = await FlutterImageCompress.compressWithList(
+          _data.buffer.asUint8List(),
+          minHeight: 800,
+          minWidth: 600,
+        );
+        setState(() {
+          _imageList.add(Uint8List.fromList(compressed));
+        });
+      }
+    });
   }
+}
+
 
   GridView buildImageRow(List imageList) {
     List<Widget> _list = [];
@@ -364,7 +352,7 @@ class _EquipmentContractState extends State<EquipmentContract> {
           children: <Widget>[
             new Container(
               width: 100.0,
-              child: BuildWidget.buildPhotoPageFile(context, image),
+              child: BuildWidget.buildPhotoPageList(context, image),
             ),
             new Padding(
               padding: EdgeInsets.symmetric(horizontal: 0.0),
@@ -607,10 +595,10 @@ class _EquipmentContractState extends State<EquipmentContract> {
                             child: new Column(
                               children: <Widget>[
                                 BuildWidget.buildRow('系统编号', OID),
-                                widget.editable?BuildWidget.buildInput('合同编号', contractNum, maxLength: 20, focusNode: _focusContract[0]):BuildWidget.buildRow('合同编号', contractNum.text),
-                                widget.editable?BuildWidget.buildInput('项目编号', projectNum, maxLength: 20, focusNode: _focusContract[9]):BuildWidget.buildRow('项目编号', projectNum.text),
-                                widget.editable?BuildWidget.buildInput('金额', amount, inputType: TextInputType.numberWithOptions(decimal: true), maxLength: 11, focusNode: _focusContract[1]):BuildWidget.buildRow('金额', amount.text),
-                                widget.editable?BuildWidget.buildInput('名称', name, maxLength: 50, focusNode: _focusContract[2]):BuildWidget.buildRow('名称', name.text),
+                                widget.editable?BuildWidget.buildInput('合同编号', contractNum, maxLength: 20, focusNode: _focusContract[0], required: true):BuildWidget.buildRow('合同编号', contractNum.text),
+                                widget.editable?BuildWidget.buildInput('项目编号', projectNum, maxLength: 20, focusNode: _focusContract[9], required: true):BuildWidget.buildRow('项目编号', projectNum.text),
+                                widget.editable?BuildWidget.buildInput('金额', amount, inputType: TextInputType.numberWithOptions(decimal: true), maxLength: 11, focusNode: _focusContract[1], required: true):BuildWidget.buildRow('金额', amount.text),
+                                widget.editable?BuildWidget.buildInput('名称', name, maxLength: 50, focusNode: _focusContract[2], required: true):BuildWidget.buildRow('名称', name.text),
                                 widget.editable?BuildWidget.buildDropdown('类型', currentType, dropdownType, changeType):BuildWidget.buildRow('类型', currentType),
                                 widget.editable?new Padding(
                                   padding: EdgeInsets.symmetric(vertical: 5.0),
@@ -623,6 +611,12 @@ class _EquipmentContractState extends State<EquipmentContract> {
                                           crossAxisAlignment:
                                           WrapCrossAlignment.center,
                                           children: <Widget>[
+                                            new Text(
+                                              '*',
+                                              style: new TextStyle(
+                                                  color: Colors.red
+                                              ),
+                                            ),
                                             new Text(
                                               '供应商',
                                               style: new TextStyle(
@@ -687,6 +681,12 @@ class _EquipmentContractState extends State<EquipmentContract> {
                                           alignment: WrapAlignment.end,
                                           crossAxisAlignment: WrapCrossAlignment.center,
                                           children: <Widget>[
+                                            new Text(
+                                              '*',
+                                              style: new TextStyle(
+                                                  color: Colors.red
+                                              ),
+                                            ),
                                             new Text(
                                               '起止日期',
                                               style: new TextStyle(

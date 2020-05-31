@@ -19,14 +19,18 @@ class _ContractListState extends State<ContractList> {
   bool isSearchState = false;
   bool _loading = false;
   bool _editable = true;
+  bool _noMore = false;
   List contractStatusList = [];
   int contractStatusId = 0;
   ConstantsModel cModel;
+  int offset = 0;
 
   TextEditingController _keywords = new TextEditingController();
   String field = 'c.ID';
 
   Future<SharedPreferences> prefs = SharedPreferences.getInstance();
+
+  ScrollController _scrollController = new ScrollController();
 
   Future<Null> getRole() async {
     var _prefs = await prefs;
@@ -84,24 +88,20 @@ class _ContractListState extends State<ContractList> {
 
   Future<Null> getContracts({String filterText}) async {
     filterText = filterText??'';
-    setState(() {
-      _loading = true;
-    });
     var resp = await HttpRequest.request(
       '/Contract/GetContracts',
       method: HttpRequest.GET,
       params: {
         'filterText': _keywords.text,
         'filterField': field,
-        'status': contractStatusId
+        'status': contractStatusId,
+        'CurRowNum': offset,
+        'PageSize': 10
       }
     );
-    setState(() {
-      _loading = false;
-    });
     if (resp['ResultCode'] == '00') {
       setState(() {
-        _contracts = resp['Data'];
+        _contracts.addAll(resp['Data']);
       });
     }
   }
@@ -223,6 +223,7 @@ class _ContractListState extends State<ContractList> {
                             }).toList(),
                             onChanged: (val) {
                               print(val);
+                              FocusScope.of(context).requestFocus(new FocusNode());
                               setState(() {
                                 contractStatusId = val;
                               });
@@ -286,8 +287,30 @@ class _ContractListState extends State<ContractList> {
     super.initState();
     cModel = MainModel.of(context);
     initFilter();
-    getContracts();
+    setState(() {
+      _loading = true;
+    });
+    getContracts().then((result) => setState(() {
+      _loading = false;
+    }));
     getRole();
+    _scrollController.addListener(() {
+      if (_scrollController.position.pixels == _scrollController.position.maxScrollExtent) {
+        var _length = _contracts.length;
+        offset += 10;
+        getContracts().then((result) {
+          if (_contracts.length == _length) {
+            setState(() {
+              _noMore = true;
+            });
+          } else {
+            setState(() {
+              _noMore = false;
+            });
+          }
+        });
+      }
+    });
   }
 
   Card buildEquipmentCard(Map item) {
@@ -422,9 +445,19 @@ class _ContractListState extends State<ContractList> {
         ),
       ),
       body: _loading?new Center(child: new SpinKitThreeBounce(color: Colors.blue,),):(_contracts.length==0?Center(child: Text('无合同'),):new ListView.builder(
-        itemCount: _contracts.length,
+        itemCount: _contracts.length+1,
+        controller: _scrollController,
         itemBuilder: (context, i) {
-          return buildEquipmentCard(_contracts[i]);
+          if (i != _contracts.length) {
+            return buildEquipmentCard(_contracts[i]);
+          } else {
+            return new Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                _noMore?new Center(child: new Text('没有更多合同'),):new SpinKitChasingDots(color: Colors.blue,)
+              ],
+            );
+          }
         },
       )),
       floatingActionButton: FloatingActionButton(

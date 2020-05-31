@@ -356,68 +356,80 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
   }
 
   void changedDropDownMethod(String selectedMethod) {
+    FocusScope.of(context).requestFocus(new FocusNode());
     setState(() {
       _currentMethod = selectedMethod;
     });
   }
 
   void changedDropDownPri(String selectedMethod) {
+    FocusScope.of(context).requestFocus(new FocusNode());
     setState(() {
       _currentPriority = selectedMethod;
     });
   }
 
   void changedDropDownType(String selectedMethod) {
+    FocusScope.of(context).requestFocus(new FocusNode());
     setState(() {
       _currentType = selectedMethod;
     });
   }
 
   void changedDropDownLevel(String selectedMethod) {
+    FocusScope.of(context).requestFocus(new FocusNode());
     setState(() {
       _currentLevel = selectedMethod;
     });
   }
 
   void changedDropDownStatus(String selectedMethod) {
+    FocusScope.of(context).requestFocus(new FocusNode());
     setState(() {
       _currentStatus = selectedMethod;
     });
   }
 
   void changedDropDownStatusReq(String selectedMethod) {
+    FocusScope.of(context).requestFocus(new FocusNode());
     setState(() {
       _currentStatusReq = selectedMethod;
     });
   }
 
   void changedDropDownName(String selectedMethod) {
+    FocusScope.of(context).requestFocus(new FocusNode());
     setState(() {
       _currentName = selectedMethod;
     });
   }
 
   void changedDropDownFault(String selectedMethod) {
+    FocusScope.of(context).requestFocus(new FocusNode());
     setState(() {
       _currentFault = selectedMethod;
     });
   }
   void changedDropDownMaintain(String selectedMethod) {
+    FocusScope.of(context).requestFocus(new FocusNode());
     setState(() {
       _currentMaintain = selectedMethod;
     });
   }
   void changedDropDownSource(String selectedMethod) {
+    FocusScope.of(context).requestFocus(new FocusNode());
     setState(() {
       _currentSource = selectedMethod;
     });
   }
   void changedDropDownMandatory(String selectedMethod) {
+    FocusScope.of(context).requestFocus(new FocusNode());
     setState(() {
       _currentMandatory= selectedMethod;
     });
   }
   void changedDropDownRecall(String selectedMethod) {
+    FocusScope.of(context).requestFocus(new FocusNode());
     setState(() {
       _currentRecall= selectedMethod;
     });
@@ -704,11 +716,11 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
       for (var _equipment in _equipments) {
         var _list = [
           BuildWidget.buildRow('系统编号', _equipment['OID']??''),
+          BuildWidget.buildRow('资产编号', _equipment['AssetCode']??''),
           BuildWidget.buildRow('名称', _equipment['Name']??''),
           BuildWidget.buildRow('型号', _equipment['EquipmentCode']??''),
           BuildWidget.buildRow('序列号', _equipment['SerialCode']??''),
           BuildWidget.buildRow('设备厂商', _equipment['Manufacturer']['Name']??''),
-          BuildWidget.buildRow('资产等级', _equipment['AssetLevel']['Name']??''),
           BuildWidget.buildRow('使用科室', _equipment['Department']['Name']??''),
           BuildWidget.buildRow('安装地点', _equipment['InstalSite']??''),
           BuildWidget.buildRow('维保状态', _equipment['WarrantyStatus']??''),
@@ -776,18 +788,18 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
               BuildWidget.buildRow('主题', _request['SubjectName']),
               BuildWidget.buildRow('请求人', _request['RequestUser']['Name']),
               BuildWidget.buildRow('请求状态', _request['Status']['Name']),
-              _request['RequestType']['ID']==1?BuildWidget.buildDropdown('机器状态', _currentStatusReq, _dropDownMenuStatusesReq, changedDropDownStatusReq):new Container(),
+              _request['RequestType']['ID']==1?BuildWidget.buildDropdown('机器状态', _currentStatusReq, _dropDownMenuStatusesReq, changedDropDownStatusReq, context: context):new Container(),
               BuildWidget.buildInput(model.Remark[_request['RequestType']['ID']], _desc, maxLength: 200),
-              _request['RequestType']['ID']==2?BuildWidget.buildDropdown('保养类型', _currentMaintain, _dropDownMenuMaintain, changedDropDownMaintain):new Container(),
-              _request['RequestType']['ID']==3?BuildWidget.buildDropdown('强检原因', _currentMandatory, _dropDownMenuMandatory, changedDropDownMandatory):new Container(),
-              _request['RequestType']['ID']==7?BuildWidget.buildDropdown('来源', _currentSource, _dropDownMenuSource, changedDropDownSource):new Container(),
+              _request['RequestType']['ID']==2?BuildWidget.buildDropdown('保养类型', _currentMaintain, _dropDownMenuMaintain, changedDropDownMaintain, context: context):new Container(),
+              _request['RequestType']['ID']==3?BuildWidget.buildDropdown('强检原因', _currentMandatory, _dropDownMenuMandatory, changedDropDownMandatory, context: context):new Container(),
+              _request['RequestType']['ID']==7?BuildWidget.buildDropdown('来源', _currentSource, _dropDownMenuSource, changedDropDownSource, context: context):new Container(),
               _request['RequestType']['ID']==3?BuildWidget.buildRow('是否召回', _request['IsRecall']?'是':'否'):new Container(),
               BuildWidget.buildRow('请求附件', ''),
               buildImageColumn(),
               //imageBytes.isNotEmpty?ShouldRebuild<BuildImageColumn>(shouldRebuild: (_old, _new) => _old.imageList!=_new.imageList, child: BuildImageColumn(imageList: imageBytes,),):Container(),
               buildFileName(),
               new Divider(),
-              BuildWidget.buildDropdown('处理方式', _currentMethod, _dropDownMenuItems, changedDropDownMethod),
+              BuildWidget.buildDropdown('处理方式', _currentMethod, _dropDownMenuItems, changedDropDownMethod, context: context),
               //BuildWidget.buildDropdown('紧急程度', _currentPriority, _dropDownMenuPris, changedDropDownPri),
             ],
           ),
@@ -817,9 +829,9 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
           mainAxisSize: MainAxisSize.max,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
-            BuildWidget.buildDropdown('派工类型', _currentType, _dropDownMenuTypes, changedDropDownType),
-            _currentType!='其他服务'?BuildWidget.buildDropdown('机器状态', _currentStatus, _dropDownMenuStatuses, changedDropDownStatus):new Container(),
-            BuildWidget.buildDropdown('紧急程度', _currentLevel, _dropDownMenuLevels, changedDropDownLevel),
+            BuildWidget.buildDropdown('派工类型', _currentType, _dropDownMenuTypes, changedDropDownType, context: context),
+            _currentType!='其他服务'?BuildWidget.buildDropdown('机器状态', _currentStatus, _dropDownMenuStatuses, changedDropDownStatus, context: context):new Container(),
+            BuildWidget.buildDropdown('紧急程度', _currentLevel, _dropDownMenuLevels, changedDropDownLevel, context: context),
             new Padding(
               padding: EdgeInsets.symmetric(vertical: 5.0),
               child: new Row(
@@ -915,7 +927,7 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
                 ],
               ),
             ),
-            _engineerNames.isEmpty?new Container():BuildWidget.buildDropdown('工程师姓名', _currentName, _dropDownMenuNames, changedDropDownName),
+            _engineerNames.isEmpty?new Container():BuildWidget.buildDropdown('工程师姓名', _currentName, _dropDownMenuNames, changedDropDownName, context: context),
             new Padding(
               padding: EdgeInsets.symmetric(vertical: 5.0),
               child: new Column(

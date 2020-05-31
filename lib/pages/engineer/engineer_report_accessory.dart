@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:atoi/widgets/build_widget.dart';
 import 'package:atoi/utils/constants.dart';
 import 'dart:convert';
@@ -10,6 +9,9 @@ import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:atoi/models/models.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:atoi/utils/event_bus.dart';
+import 'dart:typed_data';
+import 'package:multi_image_picker/multi_image_picker.dart';
+import 'package:uuid/uuid.dart';
 
 /// 报告零配件页面类
 class EngineerReportAccessory extends StatefulWidget {
@@ -34,8 +36,6 @@ class _EngineerReportAccessoryState extends State<EngineerReportAccessory> {
   List _vendorList = [];
   var _vendors;
   var _vendor;
-  EventBus bus = new EventBus();
-
   List<DropdownMenuItem<String>> _dropDownMenuSources;
   List<DropdownMenuItem<String>> _dropDownMenuVendors;
 
@@ -140,52 +140,24 @@ class _EngineerReportAccessoryState extends State<EngineerReportAccessory> {
     model = MainModel.of(context);
     initDropdown();
     super.initState();
-    bus.on('unfocus', (params) {
-      _focusAcc.forEach((item) {
-        if (item.hasFocus) {
-          item.unfocus();
-        }
-      });
-    });
   }
 
-  void showSheet(context, String type) {
-    showModalBottomSheet(context: context, builder: (context) {
-      return new ListView(
-        shrinkWrap: true,
-        children: <Widget>[
-          ListTile(
-            trailing: new Icon(Icons.collections),
-            title: new Text('从相册添加'),
-            onTap: () {
-              getImage(ImageSource.gallery, type);
-            },
-          ),
-          ListTile(
-            trailing: new Icon(Icons.add_a_photo),
-            title: new Text('拍照添加'),
-            onTap: () {
-              getImage(ImageSource.camera, type);
-            },
-          ),
-        ],
-      );
-    });
-  }
-
-  void getImage(ImageSource sourceType, String imageType) async {
-    var image = await ImagePicker.pickImage(
-      source: sourceType,
+  Future getImage(String imageType) async {
+    List<Asset> image = await MultiImagePicker.pickImages(
+        maxImages: 1,
+        enableCamera: true
     );
     if (image != null) {
-      var compressed = await FlutterImageCompress.compressAndGetFile(
-        image.absolute.path,
-        image.absolute.path,
-        minHeight: 800,
-        minWidth: 600,
-      );
-      setState(() {
-        imageType=='new'?_imageNew = compressed:_imageOld = compressed;
+      image.forEach((_image) async {
+        var _data = await _image.getByteData();
+        var compressed = await FlutterImageCompress.compressWithList(
+          _data.buffer.asUint8List(),
+          minHeight: 800,
+          minWidth: 600,
+        );
+        setState(() {
+          imageType=='new'?_imageNew = Uint8List.fromList(compressed):_imageOld = Uint8List.fromList(compressed);
+        });
       });
     }
   }
@@ -318,12 +290,10 @@ class _EngineerReportAccessoryState extends State<EngineerReportAccessory> {
     var imageOld;
     List<Map> _files = [];
     if (_imageNew != null) {
-      var _newByte = await _imageNew.readAsBytes();
-      var _compressed = await FlutterImageCompress.compressWithList(_newByte, minWidth: 480, minHeight: 600);
-      imageNew = base64Encode(_compressed);
+      imageNew = base64Encode(_imageNew);
       _files.add(
         {
-          'FileName': _imageNew.path,
+          'FileName': 'acc_new_${Uuid().v1()}.jpg',
           'ID': 0,
           'FileType': 1,
           'FileContent': imageNew
@@ -331,12 +301,10 @@ class _EngineerReportAccessoryState extends State<EngineerReportAccessory> {
       );
     }
     if (_imageOld != null) {
-      var _oldByte = await _imageOld.readAsBytes();
-      var _compressed = await FlutterImageCompress.compressWithList(_oldByte, minWidth: 480, minHeight: 600);
-      imageOld = base64Encode(_compressed);
+      imageOld = base64Encode(_imageOld);
       _files.add(
         {
-          'FileName': _imageOld.path,
+          'FileName': 'acc_old_${Uuid().v1()}.jpg',
           'ID': 0,
           'FileType': 2,
           'FileContent': imageOld
@@ -447,13 +415,13 @@ class _EngineerReportAccessoryState extends State<EngineerReportAccessory> {
               child: new Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
-                  BuildWidget.buildInput('名称', _name, focusNode: _focusAcc[0]),
-                  BuildWidget.buildDropdown('来源', _currentSource, _dropDownMenuSources, changedDropDownSource),
+                  BuildWidget.buildInput('名称', _name, focusNode: _focusAcc[0], lines: 1, required: true),
+                  BuildWidget.buildDropdown('来源', _currentSource, _dropDownMenuSources, changedDropDownSource, context: context),
                   new SizedBox(
                     height: 5.0,
                   ),
                   _currentSource=='外部供应商'?buildRowVendor('外部供应商', _vendor==null?'':_vendor['Name']):new Container(),
-                  BuildWidget.buildInput('新装编号', _newCode, focusNode: _focusAcc[1]),
+                  BuildWidget.buildInput('新装编号', _newCode, focusNode: _focusAcc[1], lines: 1, required: true),
                   new Padding(
                     padding: EdgeInsets.symmetric(horizontal: 110.0),
                     child: new Row(
@@ -465,7 +433,7 @@ class _EngineerReportAccessoryState extends State<EngineerReportAccessory> {
                           ),
                         ),
                         new IconButton(icon: Icon(Icons.add_a_photo), onPressed: () async {
-                          showSheet(context, 'new');
+                          getImage('new');
                         }),
                       ],
                     )
@@ -479,7 +447,7 @@ class _EngineerReportAccessoryState extends State<EngineerReportAccessory> {
                         children: <Widget>[
                           new Container(
                             width: 150.0,
-                            child: BuildWidget.buildPhotoPageFile(context, _imageNew),
+                            child: BuildWidget.buildPhotoPageList(context, _imageNew),
                           ),
                           new Padding(
                             padding: EdgeInsets.symmetric(horizontal: 0.0),
@@ -496,9 +464,9 @@ class _EngineerReportAccessoryState extends State<EngineerReportAccessory> {
                   BuildWidget.buildInput('新装部件金额（元/件）', _amount, inputType: TextInputType.numberWithOptions(
                     decimal: true,
                     signed: false
-                  ), maxLength: 11, focusNode: _focusAcc[3]),
-                  BuildWidget.buildInput('数量', _qty, inputType: TextInputType.number, maxLength: 9, focusNode: _focusAcc[4]),
-                  BuildWidget.buildInput('拆下编号', _oldCode, focusNode: _focusAcc[2]),
+                  ), maxLength: 11, focusNode: _focusAcc[3], lines: 1, required: true),
+                  BuildWidget.buildInput('数量', _qty, inputType: TextInputType.number, maxLength: 9, focusNode: _focusAcc[4], lines: 1, required: true),
+                  BuildWidget.buildInput('拆下编号', _oldCode, focusNode: _focusAcc[2], lines: 1, required: true),
                   new Padding(
                     padding: EdgeInsets.symmetric(horizontal: 95.0),
                     child: new Row(
@@ -510,7 +478,7 @@ class _EngineerReportAccessoryState extends State<EngineerReportAccessory> {
                           ),
                         ),
                         new IconButton(icon: Icon(Icons.add_a_photo), onPressed: () async {
-                          showSheet(context, 'old');
+                          getImage('old');
                         }),
                       ],
                     )
@@ -524,7 +492,7 @@ class _EngineerReportAccessoryState extends State<EngineerReportAccessory> {
                         children: <Widget>[
                           new Container(
                             width: 150.0,
-                            child: BuildWidget.buildPhotoPageFile(context, _imageOld),
+                            child: BuildWidget.buildPhotoPageList(context, _imageOld),
                           ),
                           new Padding(
                             padding: EdgeInsets.symmetric(horizontal: 0.0),

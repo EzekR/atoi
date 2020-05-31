@@ -265,6 +265,7 @@ class _EngineerVoucherPageState extends State<EngineerVoucherPage> {
 
 
   void changedDropDownMethod(String selectedMethod) {
+    FocusScope.of(context).requestFocus(new FocusNode());
     setState(() {
       _currentResult = selectedMethod;
     });
@@ -343,18 +344,29 @@ class _EngineerVoucherPageState extends State<EngineerVoucherPage> {
     );
   }
 
-  Column buildEditor(String label, TextEditingController controller, {int maxLength, FocusNode focusNode}) {
+  Column buildEditor(String label, TextEditingController controller, {int maxLength, FocusNode focusNode, bool required}) {
     maxLength = maxLength??200;
     focusNode = focusNode??new FocusNode();
+    required = required??false;
     return new Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
-        new Text(
-          '$label：',
-          style: new TextStyle(
-              fontSize: 16.0,
-              fontWeight: FontWeight.w600
-          ),
+        new Row(
+          children: <Widget>[
+            required?new Text(
+              '*',
+              style: new TextStyle(
+                  color: Colors.red
+              ),
+            ):Container(),
+            new Text(
+              '$label：',
+              style: new TextStyle(
+                  fontSize: 16.0,
+                  fontWeight: FontWeight.w600
+              ),
+            ),
+          ],
         ),
         new TextField(
           controller: controller,
@@ -408,13 +420,13 @@ class _EngineerVoucherPageState extends State<EngineerVoucherPage> {
     for(var _equipment in _equipments) {
       var equipList = [
         BuildWidget.buildRow('系统编号', _equipment['OID']??''),
+        BuildWidget.buildRow('资产编号', _equipment['AssetCode']??''),
         BuildWidget.buildRow('名称', _equipment['Name']??''),
         BuildWidget.buildRow('型号', _equipment['EquipmentCode']??''),
         BuildWidget.buildRow('序列号', _equipment['SerialCode']??''),
         BuildWidget.buildRow('使用科室', _equipment['Department']['Name']??''),
         BuildWidget.buildRow('安装地点', _equipment['InstalSite']??''),
         BuildWidget.buildRow('设备厂商', _equipment['Manufacturer']['Name']??''),
-        BuildWidget.buildRow('资产等级', _equipment['AssetLevel']['Name']??''),
         BuildWidget.buildRow('维保状态', _equipment['WarrantyStatus']??''),
         BuildWidget.buildRow('服务范围', _equipment['ContractScope']['Name']??''),
         new Divider()
@@ -558,15 +570,15 @@ class _EngineerVoucherPageState extends State<EngineerVoucherPage> {
               new Divider(
                 color: Colors.grey,
               ),
-              widget.status!=0&&widget.status!=1?BuildWidget.buildRow('故障现象/错误代码/事由', _faultCode.text):buildEditor('故障现象/\n错误代码/事由', _faultCode, focusNode: _focusJournal[4]),
-              widget.status!=0&&widget.status!=1?BuildWidget.buildRow('工作内容', _jobContent.text):buildEditor('工作内容', _jobContent, focusNode: _focusJournal[2]),
-              widget.status!=0&&widget.status!=1?BuildWidget.buildRow('服务结果', _currentResult):BuildWidget.buildDropdownLeft('服务结果：', _currentResult, _dropDownMenuItems, changedDropDownMethod),
-              _currentResult=='完成'?new Container():widget.status!=0&&widget.status!=1?BuildWidget.buildRow('待跟进问题', _followProblem.text):buildEditor('待跟进问题', _followProblem, focusNode: _focusJournal[3]),
+              widget.status!=0&&widget.status!=1?BuildWidget.buildRow('故障现象/错误代码/事由', _faultCode.text):buildEditor('故障现象/\n错误代码/事由', _faultCode, focusNode: _focusJournal[4], required: true),
+              widget.status!=0&&widget.status!=1?BuildWidget.buildRow('工作内容', _jobContent.text):buildEditor('工作内容', _jobContent, focusNode: _focusJournal[2], required: true),
+              widget.status!=0&&widget.status!=1?BuildWidget.buildRow('服务结果', _currentResult):BuildWidget.buildDropdownLeft('服务结果：', _currentResult, _dropDownMenuItems, changedDropDownMethod, context: context, required: true),
+              _currentResult=='完成'?new Container():widget.status!=0&&widget.status!=1?BuildWidget.buildRow('待跟进问题', _followProblem.text):buildEditor('待跟进问题', _followProblem, focusNode: _focusJournal[3], required: true),
               //_currentResult=='完成'?new Container():widget.status!=0&&widget.status!=1?BuildWidget.buildRow('待确认问题', _unconfirmed.text):buildEditor('待确认问题', _unconfirmed),
               widget.status!=0&&widget.status!=1?BuildWidget.buildRow('建议留言', _advice.text):buildEditor('建议留言', _advice),
               new Divider(),
-              widget.status!=0&&widget.status!=1?BuildWidget.buildRow('客户姓名', _customerName.text):BuildWidget.buildInputLeft('客户姓名:', _customerName, lines: 1, focusNode: _focusJournal[1]),
-              widget.status!=0&&widget.status!=1?BuildWidget.buildRow('客户电话', _customerNumber.text):BuildWidget.buildInputLeft('客户电话:', _customerNumber, lines: 1, focusNode: _focusJournal[0]),
+              widget.status!=0&&widget.status!=1?BuildWidget.buildRow('客户姓名', _customerName.text):BuildWidget.buildInputLeft('客户姓名:', _customerName, lines: 1, focusNode: _focusJournal[1], required: true),
+              widget.status!=0&&widget.status!=1?BuildWidget.buildRow('客户电话', _customerNumber.text):BuildWidget.buildInputLeft('客户电话:', _customerNumber, lines: 1, focusNode: _focusJournal[0], required: true),
               widget.status==0||widget.status==1?new Padding(
                 padding: EdgeInsets.symmetric(vertical: 5.0),
                 child: new Text('客户签名：',

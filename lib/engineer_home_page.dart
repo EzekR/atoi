@@ -154,206 +154,218 @@ class _EngineerHomePageState extends State<EngineerHomePage>
     showModalBottomSheet(context: context, builder: (context) {
       return StatefulBuilder(
         builder: (context, setState) {
-          return ListView(
+          return Column(
             children: <Widget>[
-              SizedBox(height: 18.0,),
-              Row(
-                children: <Widget>[
-                  SizedBox(width: 16.0,),
-                  Text('搜索', style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.w600),)
-                ],
-              ),
-              SizedBox(height: 6.0,),
-              Row(
-                children: <Widget>[
-                  SizedBox(width: 16.0,),
-                  Container(
-                      width: 230.0,
-                      height: 40.0,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(5.0),
-                        color: Color(0xfff2f2f2),
-                      ),
-                      child: Row(
-                        children: <Widget>[
-                          SizedBox(width: 10.0,),
-                          Icon(Icons.search, color: Color(0xffaaaaaa),),
-                          SizedBox(width: 10.0,),
-                          Container(
-                              width: 150.0,
-                              child: Align(
-                                alignment: Alignment(0.0, -0.5),
-                                child: TextField(
-                                  decoration: InputDecoration.collapsed(hintText: ''),
-                                  controller: filterText,
-                                ),
-                              )
-                          ),
-                        ],
-                      )
-                  ),
-                  SizedBox(width: 16.0,),
-                  Container(
-                    width: 130.0,
-                    height: 40.0,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(5.0),
-                      color: Color(0xfff2f2f2),
-                    ),
-                    child: Row(
+              SizedBox(height: 8.0,),
+              Container(
+                height: 450.0,
+                child: ListView(
+                  children: <Widget>[
+                    SizedBox(height: 18.0,),
+                    Row(
                       children: <Widget>[
-                        SizedBox(width: 6.0,),
-                        DropdownButton(
-                          value: field,
-                          underline: Container(),
-                          items: <DropdownMenuItem>[
-                            DropdownMenuItem(
-                              value: 'd.RequestID',
-                              child: Text('请求编号'),
+                        SizedBox(width: 16.0,),
+                        Text('搜索', style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.w600),)
+                      ],
+                    ),
+                    SizedBox(height: 6.0,),
+                    Row(
+                      children: <Widget>[
+                        SizedBox(width: 16.0,),
+                        Container(
+                            width: 230.0,
+                            height: 40.0,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(5.0),
+                              color: Color(0xfff2f2f2),
                             ),
-                            DropdownMenuItem(
-                              value: 'd.ID',
-                              child: Text('派工单编号'),
+                            child: Row(
+                              children: <Widget>[
+                                SizedBox(width: 10.0,),
+                                Icon(Icons.search, color: Color(0xffaaaaaa),),
+                                SizedBox(width: 10.0,),
+                                Container(
+                                    width: 150.0,
+                                    child: Align(
+                                      alignment: Alignment(0.0, -0.5),
+                                      child: TextField(
+                                        decoration: InputDecoration.collapsed(hintText: ''),
+                                        controller: filterText,
+                                      ),
+                                    )
+                                ),
+                              ],
+                            )
+                        ),
+                        SizedBox(width: 16.0,),
+                        Container(
+                          width: 130.0,
+                          height: 40.0,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(5.0),
+                            color: Color(0xfff2f2f2),
+                          ),
+                          child: Row(
+                            children: <Widget>[
+                              SizedBox(width: 6.0,),
+                              DropdownButton(
+                                value: field,
+                                underline: Container(),
+                                items: <DropdownMenuItem>[
+                                  DropdownMenuItem(
+                                    value: 'd.RequestID',
+                                    child: Text('请求编号'),
+                                  ),
+                                  DropdownMenuItem(
+                                    value: 'd.ID',
+                                    child: Text('派工单编号'),
+                                  ),
+                                ],
+                                onChanged: (val) {
+                                  FocusScope.of(context).requestFocus(new FocusNode());
+                                  setState(() {
+                                    field = val;
+                                  });
+                                },
+                              ),
+                            ],
+                          ),
+                        )
+                      ],
+                    ),
+                    SizedBox(height: 18.0,),
+                    Row(
+                      children: <Widget>[
+                        SizedBox(width: 16.0,),
+                        Text('派工类型', style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.w600),)
+                      ],
+                    ),
+                    SizedBox(height: 6.0,),
+                    Row(
+                      children: <Widget>[
+                        SizedBox(width: 16.0,),
+                        Container(
+                            width: 230.0,
+                            height: 40.0,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(5.0),
+                              color: Color(0xfff2f2f2),
                             ),
-                          ],
-                          onChanged: (val) {
-                            setState(() {
-                              field = val;
-                            });
-                          },
+                            child: Row(
+                              children: <Widget>[
+                                SizedBox(width: 6.0,),
+                                DropdownButton(
+                                  value: dispatchTypeId,
+                                  underline: Container(),
+                                  items: dispatchTypeList.map<DropdownMenuItem>((item) {
+                                    return DropdownMenuItem(
+                                      value: item['value'],
+                                      child: Text(item['text']),
+                                    );
+                                  }).toList(),
+                                  onChanged: (val) {
+                                    print(val);
+                                    FocusScope.of(context).requestFocus(new FocusNode());
+                                    setState(() {
+                                      dispatchTypeId = val;
+                                    });
+                                  },
+                                )
+                              ],
+                            )
                         ),
                       ],
                     ),
-                  )
-                ],
+                    currentTabIndex==1?SizedBox(height: 18.0,):Container(),
+                    currentTabIndex==1?Row(
+                      children: <Widget>[
+                        SizedBox(width: 16.0,),
+                        Text('审批状态', style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.w600),)
+                      ],
+                    ):Container(),
+                    currentTabIndex==1?SizedBox(height: 6.0,):Container(),
+                    currentTabIndex==1?Row(
+                      children: <Widget>[
+                        SizedBox(width: 16.0,),
+                        Container(
+                            width: 230.0,
+                            height: 40.0,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(5.0),
+                              color: Color(0xfff2f2f2),
+                            ),
+                            child: Row(
+                              children: <Widget>[
+                                SizedBox(width: 6.0,),
+                                DropdownButton(
+                                  value: dispatchStatusId,
+                                  underline: Container(),
+                                  items: dispatchStatusList.map<DropdownMenuItem>((item) {
+                                    return DropdownMenuItem(
+                                      value: item['value'],
+                                      child: Text(item['text']),
+                                    );
+                                  }).toList(),
+                                  onChanged: (val) {
+                                    print(val);
+                                    FocusScope.of(context).requestFocus(new FocusNode());
+                                    setState(() {
+                                      dispatchStatusId = val;
+                                    });
+                                  },
+                                )
+                              ],
+                            )
+                        ),
+                      ],
+                    ):Container(),
+                    SizedBox(height: 18.0,),
+                    Row(
+                      children: <Widget>[
+                        SizedBox(width: 16.0,),
+                        Text('紧急程度', style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.w600),)
+                      ],
+                    ),
+                    SizedBox(height: 6.0,),
+                    Row(
+                      children: <Widget>[
+                        SizedBox(width: 16.0,),
+                        Container(
+                            width: 200.0,
+                            height: 40.0,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(5.0),
+                              color: Color(0xfff2f2f2),
+                            ),
+                            child: Row(
+                              children: <Widget>[
+                                SizedBox(width: 6.0,),
+                                DropdownButton(
+                                  value: urgencyId,
+                                  underline: Container(),
+                                  items: urgencyList.map<DropdownMenuItem>((item) {
+                                    return DropdownMenuItem(
+                                      value: item['value'],
+                                      child: Text(item['text']),
+                                    );
+                                  }).toList(),
+                                  onChanged: (val) {
+                                    print(val);
+                                    FocusScope.of(context).requestFocus(new FocusNode());
+                                    setState(() {
+                                      urgencyId = val;
+                                    });
+                                  },
+                                )
+                              ],
+                            )
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 30.0,),
+                  ],
+                ),
               ),
-              SizedBox(height: 18.0,),
-              Row(
-                children: <Widget>[
-                  SizedBox(width: 16.0,),
-                  Text('派工类型', style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.w600),)
-                ],
-              ),
-              SizedBox(height: 6.0,),
-              Row(
-                children: <Widget>[
-                  SizedBox(width: 16.0,),
-                  Container(
-                      width: 230.0,
-                      height: 40.0,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(5.0),
-                        color: Color(0xfff2f2f2),
-                      ),
-                      child: Row(
-                        children: <Widget>[
-                          SizedBox(width: 6.0,),
-                          DropdownButton(
-                            value: dispatchTypeId,
-                            underline: Container(),
-                            items: dispatchTypeList.map<DropdownMenuItem>((item) {
-                              return DropdownMenuItem(
-                                value: item['value'],
-                                child: Text(item['text']),
-                              );
-                            }).toList(),
-                            onChanged: (val) {
-                              print(val);
-                              setState(() {
-                                dispatchTypeId = val;
-                              });
-                            },
-                          )
-                        ],
-                      )
-                  ),
-                ],
-              ),
-              currentTabIndex==1?SizedBox(height: 18.0,):Container(),
-              currentTabIndex==1?Row(
-                children: <Widget>[
-                  SizedBox(width: 16.0,),
-                  Text('审批状态', style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.w600),)
-                ],
-              ):Container(),
-              currentTabIndex==1?SizedBox(height: 6.0,):Container(),
-              currentTabIndex==1?Row(
-                children: <Widget>[
-                  SizedBox(width: 16.0,),
-                  Container(
-                      width: 230.0,
-                      height: 40.0,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(5.0),
-                        color: Color(0xfff2f2f2),
-                      ),
-                      child: Row(
-                        children: <Widget>[
-                          SizedBox(width: 6.0,),
-                          DropdownButton(
-                            value: dispatchStatusId,
-                            underline: Container(),
-                            items: dispatchStatusList.map<DropdownMenuItem>((item) {
-                              return DropdownMenuItem(
-                                value: item['value'],
-                                child: Text(item['text']),
-                              );
-                            }).toList(),
-                            onChanged: (val) {
-                              print(val);
-                              setState(() {
-                                dispatchStatusId = val;
-                              });
-                            },
-                          )
-                        ],
-                      )
-                  ),
-                ],
-              ):Container(),
-              SizedBox(height: 18.0,),
-              Row(
-                children: <Widget>[
-                  SizedBox(width: 16.0,),
-                  Text('紧急程度', style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.w600),)
-                ],
-              ),
-              SizedBox(height: 6.0,),
-              Row(
-                children: <Widget>[
-                  SizedBox(width: 16.0,),
-                  Container(
-                      width: 200.0,
-                      height: 40.0,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(5.0),
-                        color: Color(0xfff2f2f2),
-                      ),
-                      child: Row(
-                        children: <Widget>[
-                          SizedBox(width: 6.0,),
-                          DropdownButton(
-                            value: urgencyId,
-                            underline: Container(),
-                            items: urgencyList.map<DropdownMenuItem>((item) {
-                              return DropdownMenuItem(
-                                value: item['value'],
-                                child: Text(item['text']),
-                              );
-                            }).toList(),
-                            onChanged: (val) {
-                              print(val);
-                              setState(() {
-                                urgencyId = val;
-                              });
-                            },
-                          )
-                        ],
-                      )
-                  ),
-                ],
-              ),
-              SizedBox(height: 30.0,),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: <Widget>[
@@ -396,7 +408,7 @@ class _EngineerHomePageState extends State<EngineerHomePage>
                     ),
                   ),
                 ],
-              )
+              ),
             ],
           );
         },

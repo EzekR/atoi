@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
-import 'package:flutter_cupertino_date_picker/flutter_cupertino_date_picker.dart';
 import 'package:photo_view/photo_view.dart';
 import 'dart:typed_data';
 import 'dart:io';
-import 'package:should_rebuild/should_rebuild.dart';
 
 /// 页面通用组件构建类
 class BuildWidget {
+
 
   /// 构建页面信息行
   static Padding buildRow(String labelText, String defaultText) {
@@ -101,65 +100,79 @@ class BuildWidget {
   }
 
   /// 构建常用下拉菜单（4、6分）
-  static Row buildDropdown(String title, String currentItem, List dropdownItems, Function changeDropdown, {FocusNode focusNode}) {
-    focusNode = focusNode??new FocusNode();
-    return new Row(
-      children: <Widget>[
-        new Expanded(
-          flex: 4,
-          child: new Wrap(
-            alignment: WrapAlignment.end,
-            crossAxisAlignment: WrapCrossAlignment.center,
-            children: <Widget>[
-              new Text(
-                title,
-                style: new TextStyle(
-                    fontSize: 16.0,
-                    fontWeight: FontWeight.w600
+  static GestureDetector buildDropdown(String title, String currentItem, List dropdownItems, Function changeDropdown, {FocusNode focusNode, BuildContext context, bool required}) {
+    //if (context != null) {
+    //  FocusScope.of(context).requestFocus(new FocusNode());
+    //}
+    required = required??false;
+    return new GestureDetector(
+      onTap: () {
+        print('dropdown tab');
+      },
+      child: new Row(
+        children: <Widget>[
+          new Expanded(
+            flex: 4,
+            child: new Wrap(
+              alignment: WrapAlignment.end,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              children: <Widget>[
+                required?new Text(
+                  '*',
+                  style: new TextStyle(
+                    color: Colors.red
+                  ),
+                ):Container(),
+                new Text(
+                  title,
+                  style: new TextStyle(
+                      fontSize: 16.0,
+                      fontWeight: FontWeight.w600
+                  ),
+                )
+              ],
+            ),
+          ),
+          new Expanded(
+            flex: 1,
+            child: new Text(
+              '：',
+              style: new TextStyle(
+                fontSize: 16.0,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+          new Expanded(
+              flex: 6,
+              child: new GestureDetector(
+                onTap: () {
+                },
+                child: new DropdownButton(
+                  value: currentItem,
+                  items: dropdownItems,
+                  onChanged: changeDropdown,
+                  style: new TextStyle(
+                    color: Colors.black54,
+                    fontSize: 12.0,
+                  ),
+                  //isDense: true,
+                  //isExpanded: true,
                 ),
               )
-            ],
-          ),
-        ),
-        new Expanded(
-          flex: 1,
-          child: new Text(
-            '：',
-            style: new TextStyle(
-              fontSize: 16.0,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-        ),
-        new Expanded(
-          flex: 6,
-          child: new DropdownButton(
-            value: currentItem,
-            items: dropdownItems,
-            onChanged: changeDropdown,
-            style: new TextStyle(
-              color: Colors.black54,
-              fontSize: 12.0,
-            ),
-            focusNode: focusNode,
-            //isDense: true,
-            //isExpanded: true,
-          ),
-        )
-      ],
+          )
+        ],
+      ),
     );
   }
 
   /// 构建常用输入框（4、6分）
-  static Padding buildInput(String labelText, TextEditingController controller, {TextInputType inputType, int lines, int maxLength, FocusNode focusNode, Function tapEvent}) {
+  static Padding buildInput(String labelText, TextEditingController controller, {TextInputType inputType, int lines, int maxLength, FocusNode focusNode, Function tapEvent, bool required}) {
     inputType??TextInputType.text;
     lines = lines ?? 3;
     maxLength = maxLength ?? 30;
-    bool hasFocusNode = false;
-    if (focusNode != null) {
-      hasFocusNode = true;
-    }
     focusNode = focusNode ?? new FocusNode();
+    required = required??false;
     return new Padding(
       padding: EdgeInsets.symmetric(vertical: 5.0),
       child: new Row(
@@ -170,6 +183,12 @@ class BuildWidget {
               alignment: WrapAlignment.end,
               crossAxisAlignment: WrapCrossAlignment.center,
               children: <Widget>[
+                required?new Text(
+                  '*',
+                  style: new TextStyle(
+                      color: Colors.red
+                  ),
+                ):Container(),
                 new Text(
                   labelText,
                   style: new TextStyle(
@@ -198,14 +217,16 @@ class BuildWidget {
               maxLength: maxLength,
               keyboardType: inputType,
               focusNode: focusNode,
+              //textInputAction: TextInputAction.next,
               decoration: InputDecoration(
                 fillColor: Color(0xfff0f0f0),
                 filled: true,
               ),
+              onSubmitted: (_) {
+                //focusNode.unfocus();
+              },
               onTap: () {
-                if (hasFocusNode) {
-                  focusNode.requestFocus();
-                }
+                focusNode.requestFocus();
               },
             ),
           )
@@ -215,11 +236,12 @@ class BuildWidget {
   }
 
   /// 构建左对齐输入框
-  static Padding buildInputLeft(String labelText, TextEditingController controller, {TextInputType inputType, int lines, int maxLength, FocusNode focusNode}) {
+  static Padding buildInputLeft(String labelText, TextEditingController controller, {TextInputType inputType, int lines, int maxLength, FocusNode focusNode, bool required}) {
     inputType??TextInputType.text;
     lines = lines ?? 3;
     maxLength = maxLength ?? 30;
     focusNode = focusNode ?? new FocusNode();
+    required = required??false;
     return new Padding(
       padding: EdgeInsets.symmetric(vertical: 5.0),
       child: new Row(
@@ -230,6 +252,12 @@ class BuildWidget {
               alignment: WrapAlignment.start,
               crossAxisAlignment: WrapCrossAlignment.center,
               children: <Widget>[
+                required?new Text(
+                  '*',
+                  style: new TextStyle(
+                      color: Colors.red
+                  ),
+                ):Container(),
                 new Text(
                   labelText,
                   style: new TextStyle(
@@ -263,8 +291,11 @@ class BuildWidget {
   }
 
   /// 构建左对齐下拉菜单
-  static Row buildDropdownLeft(String title, String currentItem, List dropdownItems, Function changeDropdown, {FocusNode focusNode}) {
-    focusNode = focusNode??new FocusNode();
+  static Row buildDropdownLeft(String title, String currentItem, List dropdownItems, Function changeDropdown, {FocusNode focusNode, BuildContext context, bool required}) {
+    //if (context != null) {
+    //  FocusScope.of(context).requestFocus(new FocusNode());
+    //}
+    required = required??false;
     return new Row(
       children: <Widget>[
         new Expanded(
@@ -273,6 +304,12 @@ class BuildWidget {
             alignment: WrapAlignment.start,
             crossAxisAlignment: WrapCrossAlignment.center,
             children: <Widget>[
+              required?new Text(
+                '*',
+                style: new TextStyle(
+                    color: Colors.red
+                ),
+              ):Container(),
               new Text(
                 title,
                 style: new TextStyle(
@@ -289,7 +326,6 @@ class BuildWidget {
             value: currentItem,
             items: dropdownItems,
             onChanged: changeDropdown,
-            focusNode: focusNode,
           ),
         )
       ],
@@ -297,9 +333,13 @@ class BuildWidget {
   }
 
   /// 构建带输入框的下拉菜单
-  static Row buildDropdownWithInput(String title, TextEditingController controller, String currentItem, List dropdownItems, Function changeDropdown, {TextInputType inputType, FocusNode focusNode}) {
+  static Row buildDropdownWithInput(String title, TextEditingController controller, String currentItem, List dropdownItems, Function changeDropdown, {TextInputType inputType, FocusNode focusNode, BuildContext context, bool required}) {
     inputType??TextInputType.text;
     focusNode = focusNode ?? new FocusNode();
+    //if (context != null) {
+    //  FocusScope.of(context).requestFocus(new FocusNode());
+    //}
+    required = required??false;
     return new Row(
       children: <Widget>[
         new Expanded(
@@ -308,6 +348,12 @@ class BuildWidget {
             alignment: WrapAlignment.end,
             crossAxisAlignment: WrapCrossAlignment.center,
             children: <Widget>[
+              required?new Text(
+                '*',
+                style: new TextStyle(
+                    color: Colors.red
+                ),
+              ):Container(),
               new Text(
                 title,
                 style: new TextStyle(
@@ -333,8 +379,8 @@ class BuildWidget {
           child: new TextField(
             controller: controller,
             keyboardType: inputType,
-            focusNode: focusNode,
             enabled: currentItem=='无'?false:true,
+            focusNode: focusNode,
             decoration: InputDecoration(
               fillColor: Color(0xfff0f0f0),
               filled: true,
@@ -372,8 +418,9 @@ class BuildWidget {
   }
 
   /// 构建输入开关
-  static Padding buildSwitch(String labelText, Function switchMethod, {FocusNode focusNode}) {
+  static Padding buildSwitch(String labelText, Function switchMethod, {FocusNode focusNode, bool required}) {
     focusNode = focusNode??new FocusNode();
+    required = required??false;
     return new Padding(
       padding: EdgeInsets.symmetric(vertical: 5.0),
       child: new Row(
@@ -384,6 +431,12 @@ class BuildWidget {
               alignment: WrapAlignment.end,
               crossAxisAlignment: WrapCrossAlignment.center,
               children: <Widget>[
+                required?new Text(
+                  '*',
+                  style: new TextStyle(
+                      color: Colors.red
+                  ),
+                ):Container(),
                 new Text(
                   labelText,
                   style: new TextStyle(
@@ -418,7 +471,8 @@ class BuildWidget {
   }
 
   /// 构建输入单选
-  static Padding buildRadio(String labelText, List groupValue, String currentValue, Function changeValue) {
+  static Padding buildRadio(String labelText, List groupValue, String currentValue, Function changeValue, {bool required}) {
+    required = required??false;
     return new Padding(
       padding: EdgeInsets.symmetric(vertical: 5.0),
       child: new Row(
@@ -429,6 +483,12 @@ class BuildWidget {
               alignment: WrapAlignment.end,
               crossAxisAlignment: WrapCrossAlignment.center,
               children: <Widget>[
+                required?new Text(
+                  '*',
+                  style: new TextStyle(
+                      color: Colors.red
+                  ),
+                ):Container(),
                 new Text(
                   labelText,
                   style: new TextStyle(
@@ -484,7 +544,8 @@ class BuildWidget {
   }
 
   /// 构建垂直输入单选框
-  static Padding buildRadioVert(String labelText, List groupValue, String currentValue, Function changeValue) {
+  static Padding buildRadioVert(String labelText, List groupValue, String currentValue, Function changeValue,{bool required}) {
+    required = required??false;
     return new Padding(
       padding: EdgeInsets.symmetric(vertical: 5.0),
       child: new Row(
@@ -495,6 +556,12 @@ class BuildWidget {
               alignment: WrapAlignment.end,
               crossAxisAlignment: WrapCrossAlignment.center,
               children: <Widget>[
+                required?new Text(
+                  '*',
+                  style: new TextStyle(
+                      color: Colors.red
+                  ),
+                ):Container(),
                 new Text(
                   labelText,
                   style: new TextStyle(
@@ -551,7 +618,8 @@ class BuildWidget {
   }
 
   /// 构建左对齐单选框
-  static Padding buildRadioLeft(String labelText, List groupValue, String currentValue, Function changeValue) {
+  static Padding buildRadioLeft(String labelText, List groupValue, String currentValue, Function changeValue, {bool required}) {
+    required = required??false;
     return new Padding(
       padding: EdgeInsets.symmetric(vertical: 5.0),
       child: new Row(
@@ -562,6 +630,12 @@ class BuildWidget {
               alignment: WrapAlignment.start,
               crossAxisAlignment: WrapCrossAlignment.center,
               children: <Widget>[
+                required?new Text(
+                  '*',
+                  style: new TextStyle(
+                      color: Colors.red
+                  ),
+                ):Container(),
                 new Text(
                   labelText,
                   style: new TextStyle(
@@ -655,6 +729,83 @@ class BuildWidget {
         ));
       },
       child: Image.file(image),
+    );
+  }
+
+  static GestureDetector buildDropdownWithSearch(String title, String currentItem, List dropdownItems, Function changeDropdown, {FocusNode focusNode, BuildContext context, Function search, bool required}) {
+    required = required??false;
+    focusNode = focusNode??new FocusNode();
+    //if (context != null) {
+    //  FocusScope.of(context).requestFocus(new FocusNode());
+    //}
+    return new GestureDetector(
+      onTap: () {
+        print('dropdown tab');
+      },
+      child: new Row(
+        children: <Widget>[
+          new Expanded(
+            flex: 4,
+            child: new Wrap(
+              alignment: WrapAlignment.end,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              children: <Widget>[
+                required?new Text(
+                  '*',
+                  style: new TextStyle(
+                      color: Colors.red
+                  ),
+                ):Container(),
+                new Text(
+                  title,
+                  style: new TextStyle(
+                      fontSize: 16.0,
+                      fontWeight: FontWeight.w600
+                  ),
+                )
+              ],
+            ),
+          ),
+          new Expanded(
+            flex: 1,
+            child: new Text(
+              '：',
+              style: new TextStyle(
+                fontSize: 16.0,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+          new Expanded(
+              flex: 4,
+              child: new GestureDetector(
+                onTap: () {
+                },
+                child: new DropdownButton(
+                  value: currentItem,
+                  items: dropdownItems,
+                  onChanged: changeDropdown,
+                  style: new TextStyle(
+                    color: Colors.black54,
+                    fontSize: 12.0,
+                  ),
+                  focusNode: focusNode,
+                  //isDense: true,
+                  //isExpanded: true,
+                ),
+              )
+          ),
+          new Expanded(
+              flex: 2,
+              child: IconButton(
+                  icon: Icon(Icons.search),
+                  onPressed: () {
+                    search();
+                  }
+              )
+          )
+        ],
+      ),
     );
   }
 }

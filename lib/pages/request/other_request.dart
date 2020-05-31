@@ -5,12 +5,14 @@ import 'package:barcode_scan/barcode_scan.dart';
 import 'dart:async';
 import 'package:flutter/services.dart';
 import 'dart:convert';
-import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:atoi/utils/http_request.dart';
 import 'package:atoi/widgets/build_widget.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:multi_image_picker/multi_image_picker.dart';
+import 'dart:typed_data';
+import 'package:uuid/uuid.dart';
 
 /// 其他服务页面类
 class OtherRequest extends StatefulWidget{
@@ -48,45 +50,32 @@ class _OtherRequestState extends State<OtherRequest> {
     super.initState();
   }
 
-    void showSheet(context) {
-    showModalBottomSheet(context: context, builder: (context) {
-      return new ListView(
-        shrinkWrap: true,
-        children: <Widget>[
-          ListTile(
-            trailing: new Icon(Icons.collections),
-            title: new Text('从相册添加'),
-            onTap: () {
-              getImage(ImageSource.gallery);
-            },
-          ),
-          ListTile(
-            trailing: new Icon(Icons.add_a_photo),
-            title: new Text('拍照添加'),
-            onTap: () {
-              getImage(ImageSource.camera);
-            },
-          ),
-        ],
-      );
+List<String> _imageIdentifiers = [];
+
+Future getImage() async {
+  List<Asset> image = await MultiImagePicker.pickImages(
+      maxImages: 3,
+      enableCamera: true,
+  );
+  if (image != null) {
+    image.forEach((_image) async {
+      print(_image.identifier);
+      if (_imageIdentifiers.indexOf(_image.identifier) < 0) {
+        _imageIdentifiers.add(_image.identifier);
+        var _data = await _image.getByteData();
+        var compressed = await FlutterImageCompress.compressWithList(
+          _data.buffer.asUint8List(),
+          minHeight: 800,
+          minWidth: 600,
+        );
+        setState(() {
+          _imageList.add(Uint8List.fromList(compressed));
+        });
+      }
     });
   }
-Future getImage(ImageSource sourceType) async {
-    var image = await ImagePicker.pickImage(
-        source: sourceType,
-    );
-    if (image != null) {
-      var compressed = await FlutterImageCompress.compressAndGetFile(
-        image.absolute.path,
-        image.absolute.path,
-        minHeight: 800,
-        minWidth: 600,
-      );
-      setState(() {
-        _imageList.add(compressed);
-      });
-    }
-  }
+}
+
 
   GridView buildImageRow(List imageList) {
     List<Widget> _list = [];
@@ -99,7 +88,7 @@ Future getImage(ImageSource sourceType) async {
               children: <Widget>[
                 new Container(
                   width: 100.0,
-                  child: BuildWidget.buildPhotoPageFile(context, image),
+                  child: BuildWidget.buildPhotoPageList(context, image),
                 ),
                 new Padding(
                   padding: EdgeInsets.symmetric(horizontal: 0.0),
@@ -155,11 +144,10 @@ Future getImage(ImageSource sourceType) async {
       var userID = prefs.getInt('userID');
       var fileList = [];
       for (var image in _imageList) {
-        List<int> imageBytes = await image.readAsBytes();
-        var fileContent = base64Encode(imageBytes);
+        var fileContent = base64Encode(image);
         var file = {
           'FileContent': fileContent,
-          'FileName': image.path,
+          'FileName': 'other_${Uuid().v1()}.jpg',
           'FileType': 1,
           'ID': 0
         };
@@ -296,14 +284,24 @@ Future getImage(ImageSource sourceType) async {
                                   child: new Row(
                                     children: <Widget>[
                                       new Expanded(
-                                        flex: 4,
-                                        child: new Text(
-                                          '备注：',
-                                          style: new TextStyle(
-                                              fontSize: 16.0,
-                                              fontWeight: FontWeight.w600
-                                          ),
-                                        ),
+                                          flex: 4,
+                                          child: Row(
+                                            children: <Widget>[
+                                              new Text(
+                                                '*',
+                                                style: new TextStyle(
+                                                    color: Colors.red
+                                                ),
+                                              ),
+                                              new Text(
+                                                '备注：',
+                                                style: new TextStyle(
+                                                    fontSize: 16.0,
+                                                    fontWeight: FontWeight.w600
+                                                ),
+                                              ),
+                                            ],
+                                          )
                                       ),
                                       new Expanded(
                                         flex: 6,
@@ -335,7 +333,7 @@ Future getImage(ImageSource sourceType) async {
                                       new IconButton(
                                           icon: Icon(Icons.add_a_photo),
                                           onPressed: () {
-                                            showSheet(context);
+                                            getImage();
                                           })
                                     ],
                                   ),
