@@ -366,13 +366,19 @@ class _ContractListState extends State<ContractList> {
             mainAxisSize: MainAxisSize.max,
             children: <Widget>[
               new RaisedButton(
-                onPressed: (){
-                  Navigator.of(context).push(new MaterialPageRoute(builder: (_) {
+                onPressed: () async {
+                  final _result = await Navigator.of(context).push(new MaterialPageRoute(builder: (_) {
                     return new EquipmentContract(contract: item, editable: _editable,);
-                  })).then((result) => getContracts());
+                  }));
+                  print(_result);
                   setState(() {
-                    isSearchState = false;
-                    _keywords.clear();
+                    offset = 0;
+                    _contracts.clear();
+                    _loading = true;
+                  });
+                  await getContracts();
+                  setState(() {
+                    _loading = false;
                   });
                 },
                 shape: RoundedRectangleBorder(
@@ -472,6 +478,7 @@ class _ContractListState extends State<ContractList> {
           Navigator.of(context).push(new MaterialPageRoute(builder: (_) {
             return new EquipmentContract(editable: true,);
           })).then((result) {
+            print(result);
             setState(() {
               offset = 0;
               _contracts.clear();

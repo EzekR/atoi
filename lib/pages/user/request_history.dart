@@ -90,6 +90,7 @@ class _RequestHistoryState extends State<RequestHistory> {
                           child: Center(
                             child: FlatButton(
                                 onPressed: () {
+                                  FocusScope.of(context).requestFocus(new FocusNode());
                                   DatePicker.showDatePicker(
                                     context,
                                     pickerTheme: DateTimePickerTheme(
@@ -128,6 +129,7 @@ class _RequestHistoryState extends State<RequestHistory> {
                           child: Center(
                             child: FlatButton(
                                 onPressed: () {
+                                  FocusScope.of(context).requestFocus(new FocusNode());
                                   DatePicker.showDatePicker(
                                     context,
                                     pickerTheme: DateTimePickerTheme(

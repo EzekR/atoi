@@ -442,24 +442,52 @@ Future getImage() async {
                         mainAxisSize: MainAxisSize.max,
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: <Widget>[
-                          BuildWidget.buildDropdownLeft('机器状态:', _currentResult,
-                              _dropDownMenuItems, changedDropDownMethod, context: context),
-                          BuildWidget.buildInputLeft('故障描述:', _describe, maxLength: 200, required: true),
+                          BuildWidget.buildDropdown('机器状态:', _currentResult,
+                              _dropDownMenuItems, changedDropDownMethod, context: context, required: true),
+                          BuildWidget.buildInput('故障描述:', _describe, maxLength: 200, required: true),
                           new Padding(
                             padding: EdgeInsets.symmetric(vertical: 5.0),
                             child: new Row(
                               children: <Widget>[
-                                new Text(
-                                  ' 添加附件:',
-                                  style: new TextStyle(
-                                      fontSize: 16.0,
-                                      fontWeight: FontWeight.w600),
+                                new Expanded(
+                                  flex: 4,
+                                  child: new Wrap(
+                                    alignment: WrapAlignment.end,
+                                    crossAxisAlignment: WrapCrossAlignment.center,
+                                    children: <Widget>[
+                                      new Text(
+                                        '附件',
+                                        style: new TextStyle(
+                                            fontSize: 16.0,
+                                            fontWeight: FontWeight.w600
+                                        ),
+                                      )
+                                    ],
+                                  ),
                                 ),
-                                new IconButton(
-                                    icon: Icon(Icons.add_a_photo),
-                                    onPressed: () async  {
-                                      getImage();
-                                    })
+                                new Expanded(
+                                  flex: 1,
+                                  child: new Text(
+                                    '：',
+                                    style: new TextStyle(
+                                      fontSize: 16.0,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ),
+                                new Expanded(
+                                  flex: 6,
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.start,
+                                    children: <Widget>[
+                                      new IconButton(
+                                          icon: Icon(Icons.add_a_photo),
+                                          onPressed: () {
+                                            getImage();
+                                          })
+                                    ],
+                                  ),
+                                )
                               ],
                             ),
                           ),

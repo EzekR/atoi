@@ -414,10 +414,17 @@ class _VendorsListState extends State<VendorsList> {
                 onPressed: (){
                   Navigator.of(context).push(new MaterialPageRoute(builder: (_) {
                     return new VendorDetail(vendor: item, editable: _editable,);
-                  })).then((result) => getVendors());
-                  setState(() {
-                    isSearchState = false;
-                    _keywords.clear();
+                  })).then((result) {
+                    setState(() {
+                      _loading = true;
+                      _vendors.clear();
+                      offset = 0;
+                    });
+                    getVendors().then((result) {
+                      setState(() {
+                        _loading = false;
+                      });
+                    });
                   });
                 },
                 shape: RoundedRectangleBorder(

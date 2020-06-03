@@ -753,7 +753,18 @@ class _EquipmentsListState extends State<EquipmentsList> {
                   });
                   Navigator.of(context).push(new MaterialPageRoute(builder: (_) {
                     return new EquipmentDetail(equipment: item, editable: _editable,);
-                  })).then((result) => getEquipments());
+                  })).then((result) {
+                    setState(() {
+                      _loading = true;
+                      offset = 0;
+                      _equipments.clear();
+                    });
+                    getEquipments().then((result) {
+                      setState(() {
+                        _loading = false;
+                      });
+                    });
+                  });
                 },
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(6),

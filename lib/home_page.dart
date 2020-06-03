@@ -320,6 +320,7 @@ class _HomePageState extends State<HomePage>
                           child: Center(
                             child: FlatButton(
                                 onPressed: () {
+                                  FocusScope.of(context).requestFocus(new FocusNode());
                                   DatePicker.showDatePicker(
                                     context,
                                     pickerTheme: DateTimePickerTheme(
@@ -358,6 +359,7 @@ class _HomePageState extends State<HomePage>
                           child: Center(
                             child: FlatButton(
                                 onPressed: () {
+                                  FocusScope.of(context).requestFocus(new FocusNode());
                                   DatePicker.showDatePicker(
                                     context,
                                     pickerTheme: DateTimePickerTheme(
