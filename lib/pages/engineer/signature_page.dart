@@ -68,7 +68,6 @@ class _SignaturePageState extends State<SignaturePage> {
                       //retrieve image data, do whatever you want with it (send to server, save locally...)
                       final image = await sign.getData();
                       var data = await image.toByteData(format: ui.ImageByteFormat.png);
-                      final encoded = base64.encode(data.buffer.asUint8List());
                       setState(() {
                         _img = data;
                       });

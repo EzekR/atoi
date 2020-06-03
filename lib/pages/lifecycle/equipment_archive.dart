@@ -377,60 +377,50 @@ Future getImage() async {
                                 BuildWidget.buildRow('主题', _equipment==null?'--合同档案':'${_equipment['Name']}--合同档案'),
                                 BuildWidget.buildRow('请求人', _roleName),
                                 new Divider(),
+                                BuildWidget.buildInput('合同档案备注', _fault, focusNode: _focus, maxLength: 200, lines: 3, required: true),
                                 new Padding(
                                   padding: EdgeInsets.symmetric(vertical: 5.0),
                                   child: new Row(
                                     children: <Widget>[
                                       new Expanded(
                                         flex: 4,
-                                        child: Row(
+                                        child: new Wrap(
+                                          alignment: WrapAlignment.end,
+                                          crossAxisAlignment: WrapCrossAlignment.center,
                                           children: <Widget>[
                                             new Text(
-                                              '*',
-                                              style: new TextStyle(
-                                                  color: Colors.red
-                                              ),
-                                            ),
-                                            new Text(
-                                              '合同档案备注：',
+                                              '附件',
                                               style: new TextStyle(
                                                   fontSize: 16.0,
                                                   fontWeight: FontWeight.w600
                                               ),
-                                            ),
+                                            )
                                           ],
-                                        )
+                                        ),
+                                      ),
+                                      new Expanded(
+                                        flex: 1,
+                                        child: new Text(
+                                          '：',
+                                          style: new TextStyle(
+                                            fontSize: 16.0,
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                        ),
                                       ),
                                       new Expanded(
                                         flex: 6,
-                                        child: new TextField(
-                                          controller: _fault, maxLength: 200, maxLines: 3,
-                                          focusNode: _focus,
-                                          decoration: InputDecoration(
-                                            fillColor: Color(0xfff0f0f0),
-                                            filled: true,
-                                          ),
+                                        child: Row(
+                                          mainAxisAlignment: MainAxisAlignment.start,
+                                          children: <Widget>[
+                                            new IconButton(
+                                                icon: Icon(Icons.add_a_photo),
+                                                onPressed: () {
+                                                  getImage();
+                                                })
+                                          ],
                                         ),
                                       )
-                                    ],
-                                  ),
-                                ),
-                                new Padding(
-                                  padding: EdgeInsets.symmetric(vertical: 5.0),
-                                  child: new Row(
-                                    children: <Widget>[
-                                      new Text(
-                                        '添加附件：',
-                                        style: new TextStyle(
-                                            fontSize: 16.0,
-                                            fontWeight: FontWeight.w600
-                                        ),
-                                      ),
-                                      new IconButton(
-                                          icon: Icon(Icons.add_a_photo),
-                                          onPressed: () {
-                                            getImage();
-                                          })
                                     ],
                                   ),
                                 ),

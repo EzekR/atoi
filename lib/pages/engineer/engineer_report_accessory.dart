@@ -339,6 +339,10 @@ class _EngineerReportAccessoryState extends State<EngineerReportAccessory> {
               crossAxisAlignment: WrapCrossAlignment.center,
               children: <Widget>[
                 new Text(
+                  '*',
+                  style: TextStyle(color: Colors.red),
+                ),
+                new Text(
                   labelText,
                   style: new TextStyle(
                       fontSize: 16.0,

@@ -207,7 +207,7 @@ class _HomePageState extends State<HomePage>
             children: <Widget>[
               SizedBox(height: 8.0,),
               Container(
-                height: 450.0,
+                height: 300.0,
                 child: ListView(
                   children: <Widget>[
                     SizedBox(height: 18.0,),

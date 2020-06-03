@@ -728,12 +728,12 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
                 alignment: WrapAlignment.end,
                 crossAxisAlignment: WrapCrossAlignment.center,
                 children: <Widget>[
-                  new Text(
+                  ((_dispatch['RequestType']['ID'] == 2 && _currentProvider != '管理方' && _report['Type']['ID'] == 201 && _currentResult == '待第三方支持') || (_dispatch['RequestType']['ID'] == 3 && _report['Type']['ID'] != 1 && _report['IsPrivate']))?new Text(
                     '*',
                     style: new TextStyle(
                         color: Colors.red
                     ),
-                  ),
+                  ):Container(),
                   new Text(
                     '附件',
                     style: new TextStyle(

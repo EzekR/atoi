@@ -21,6 +21,7 @@ class _SearchLazyState extends State<SearchLazy> {
   bool _noMore = false;
   TextEditingController query = new TextEditingController();
   String hintText = '请输入设备名称/型号/序列';
+  String noMoreText = '没有更多设备';
 
   void initState() {
     getData('');
@@ -34,6 +35,19 @@ class _SearchLazyState extends State<SearchLazy> {
       case SearchType.DEPARTMENT:
         setState(() {
           hintText = '请输入科室名称/拼音/ID';
+          noMoreText = '没有更多科室';
+        });
+        break;
+      case SearchType.VENDOR:
+        setState(() {
+          hintText = '请输入供应商名称';
+          noMoreText = '没有更多供应商';
+        });
+        break;
+      case SearchType.MANUFACTURER:
+        setState(() {
+          hintText = '请输入厂商名称';
+          noMoreText = '没有更多厂商';
         });
         break;
     }
@@ -74,6 +88,26 @@ class _SearchLazyState extends State<SearchLazy> {
         _url = '/User/GetDepartments';
         _params = {
           'filterText': filter,
+          'CurRowNum': offset,
+          'PageSize': 20
+        };
+        break;
+      case SearchType.VENDOR:
+        _url = '/DispatchReport/GetSuppliers';
+        _params = {
+          'filterText': filter,
+          'filterField': 's.Name',
+          'status': 1,
+          'CurRowNum': offset,
+          'PageSize': 20
+        };
+        break;
+      case SearchType.MANUFACTURER:
+        _url = '/DispatchReport/GetSuppliers';
+        _params = {
+          'filterText': filter,
+          'filterField': 's.Name',
+          'status': 1,
           'CurRowNum': offset,
           'PageSize': 20
         };
@@ -136,8 +170,23 @@ class _SearchLazyState extends State<SearchLazy> {
           itemCount: suggestionList.length>=20?suggestionList.length+1:suggestionList.length,
           itemBuilder: (context, i) {
             if (i != suggestionList.length) {
+              var _title = '';
+              switch (widget.searchType) {
+                case SearchType.DEVICE:
+                  _title = '${suggestionList[i]['Name']}/${suggestionList[i]['EquipmentCode']}/${suggestionList[i]['SerialCode']}';
+                  break;
+                case SearchType.DEPARTMENT:
+                  _title = '${suggestionList[i]['Description']}-${suggestionList[i]['DepartmentType']['Name']}';
+                  break;
+                case SearchType.VENDOR:
+                  _title = '${suggestionList[i]['Name']}-${suggestionList[i]['SupplierType']['Name']}';
+                  break;
+                case SearchType.MANUFACTURER:
+                  _title = '${suggestionList[i]['Name']}-${suggestionList[i]['SupplierType']['Name']}';
+                  break;
+              }
               return ListTile(
-                title: Text(widget.searchType==SearchType.DEPARTMENT?'${suggestionList[i]['Description']}-${suggestionList[i]['DepartmentType']['Name']}':'${suggestionList[i]['Name']}/${suggestionList[i]['EquipmentCode']}/${suggestionList[i]['SerialCode']}',
+                title: Text(_title,
                   style: TextStyle(
                     fontSize: 12.0,
                     color: Colors.grey
@@ -148,7 +197,7 @@ class _SearchLazyState extends State<SearchLazy> {
                 },
               );
             } else {
-              return _noMore?new Center(child: new Text(widget.searchType==SearchType.DEVICE?'没有更多设备':'没有更多科室'),):new SpinKitThreeBounce(color: Colors.blue,);
+              return _noMore?new Center(child: new Text(noMoreText),):new SpinKitThreeBounce(color: Colors.blue,);
             }
           },
         ),
@@ -159,5 +208,7 @@ class _SearchLazyState extends State<SearchLazy> {
 
 enum SearchType {
   DEVICE,
-  DEPARTMENT
+  DEPARTMENT,
+  VENDOR,
+  MANUFACTURER
 }

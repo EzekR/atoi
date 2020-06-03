@@ -409,101 +409,51 @@ Future getImage() async {
                                 BuildWidget.buildRow('主题', _equipment==null?'--保养':'${_equipment['Name']}--保养'),
                                 BuildWidget.buildRow('请求人', roleName),
                                 new Divider(),
+                                BuildWidget.buildDropdown('保养类型', _currentResult, _dropDownMenuItems, changedDropDownMethod, required: true),
+                                BuildWidget.buildInput('保养要求', _fault, maxLength: 200, lines: 3, required: true, focusNode: _focus),
                                 new Padding(
                                   padding: EdgeInsets.symmetric(vertical: 5.0),
                                   child: new Row(
                                     children: <Widget>[
                                       new Expanded(
-                                          flex: 4,
-                                          child: Row(
-                                            children: <Widget>[
-                                              new Text(
-                                                '*',
-                                                style: new TextStyle(
-                                                    color: Colors.red
-                                                ),
+                                        flex: 4,
+                                        child: new Wrap(
+                                          alignment: WrapAlignment.end,
+                                          crossAxisAlignment: WrapCrossAlignment.center,
+                                          children: <Widget>[
+                                            new Text(
+                                              '附件',
+                                              style: new TextStyle(
+                                                  fontSize: 16.0,
+                                                  fontWeight: FontWeight.w600
                                               ),
-                                              new Text(
-                                                '保养类型：',
-                                                style: new TextStyle(
-                                                    fontSize: 16.0,
-                                                    fontWeight: FontWeight.w600
-                                                ),
-                                              ),
-                                            ],
-                                          )
+                                            )
+                                          ],
+                                        ),
                                       ),
                                       new Expanded(
-                                        flex: 6,
-                                        child: new DropdownButton(
-                                          value: _currentResult,
-                                          items: _dropDownMenuItems,
+                                        flex: 1,
+                                        child: new Text(
+                                          '：',
                                           style: new TextStyle(
-                                            fontSize: 10,
-                                            color: Colors.black
+                                            fontSize: 16.0,
+                                            fontWeight: FontWeight.w600,
                                           ),
-                                          onChanged: changedDropDownMethod,
                                         ),
-                                      )
-                                    ],
-                                  ),
-                                ),
-                                new Padding(
-                                  padding: EdgeInsets.symmetric(vertical: 5.0),
-                                  child: new Row(
-                                    children: <Widget>[
-                                      new Expanded(
-                                          flex: 4,
-                                          child: Row(
-                                            children: <Widget>[
-                                              new Text(
-                                                '*',
-                                                style: new TextStyle(
-                                                    color: Colors.red
-                                                ),
-                                              ),
-                                              new Text(
-                                                '保养要求：',
-                                                style: new TextStyle(
-                                                    fontSize: 16.0,
-                                                    fontWeight: FontWeight.w600
-                                                ),
-                                              ),
-                                            ],
-                                          )
                                       ),
                                       new Expanded(
                                         flex: 6,
-                                        child: new TextField(
-                                          controller: _fault,
-                                          maxLength: 200,
-                                          maxLines: 3,
-                                          focusNode: _focus,
-                                          decoration: InputDecoration(
-                                            fillColor: Color(0xfff0f0f0),
-                                            filled: true,
-                                          ),
-                                        )
-                                      )
-                                    ],
-                                  ),
-                                ),
-                                new Padding(
-                                  padding: EdgeInsets.symmetric(vertical: 5.0),
-                                  child: new Row(
-                                    children: <Widget>[
-                                      new Text(
-                                        '添加附件：',
-                                        style: new TextStyle(
-                                            fontSize: 16.0,
-                                            fontWeight: FontWeight.w600
+                                        child: Row(
+                                          mainAxisAlignment: MainAxisAlignment.start,
+                                          children: <Widget>[
+                                            new IconButton(
+                                                icon: Icon(Icons.add_a_photo),
+                                                onPressed: () {
+                                                  getImage();
+                                                })
+                                          ],
                                         ),
-                                      ),
-                                      new IconButton(
-                                          icon: Icon(Icons.add_a_photo),
-                                          onPressed: () {
-                                            getImage();
-                                          })
+                                      )
                                     ],
                                   ),
                                 ),

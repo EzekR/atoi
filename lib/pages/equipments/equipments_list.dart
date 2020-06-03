@@ -120,7 +120,7 @@ class _EquipmentsListState extends State<EquipmentsList> {
             children: <Widget>[
               SizedBox(height: 8.0,),
               Container(
-                height: 450.0,
+                height: 300.0,
                 child: ListView(
                   children: <Widget>[
                     SizedBox(height: 18.0,),
@@ -893,7 +893,17 @@ class _EquipmentsListState extends State<EquipmentsList> {
           onPressed: () {
             Navigator.of(context).push(new MaterialPageRoute(builder: (_) {
               return new EquipmentDetail(editable: true,);
-            })).then((result) => getEquipments());
+            })).then((result) {
+              setState(() {
+                offset = 0;
+                _equipments.clear();
+                _loading = true;
+              });
+              getEquipments().then((result) {
+                setState(() {
+                  _loading = false;
+                });
+              });});
           },
           child: Icon(Icons.add_circle),
           backgroundColor: Colors.blue,

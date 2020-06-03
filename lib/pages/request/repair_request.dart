@@ -410,85 +410,51 @@ class _RepairRequestState extends State<RepairRequest> {
                                 BuildWidget.buildRow('主题', _equipment==null?'--维修':'${_equipment['Name']}--维修'),
                                 BuildWidget.buildRow('请求人', _roleName),
                                 new Divider(),
+                                BuildWidget.buildDropdown('机器状态', _currentResult, _dropDownMenuItems, changedDropDownMethod, required: true),
+                                BuildWidget.buildInput('故障描述', _fault, focusNode: _focusNode, maxLength: 200, lines: 3, required: true),
                                 new Padding(
                                   padding: EdgeInsets.symmetric(vertical: 5.0),
                                   child: new Row(
                                     children: <Widget>[
                                       new Expanded(
                                         flex: 4,
+                                        child: new Wrap(
+                                          alignment: WrapAlignment.end,
+                                          crossAxisAlignment: WrapCrossAlignment.center,
+                                          children: <Widget>[
+                                            new Text(
+                                              '附件',
+                                              style: new TextStyle(
+                                                  fontSize: 16.0,
+                                                  fontWeight: FontWeight.w600
+                                              ),
+                                            )
+                                          ],
+                                        ),
+                                      ),
+                                      new Expanded(
+                                        flex: 1,
                                         child: new Text(
-                                          '机器状态：',
+                                          '：',
                                           style: new TextStyle(
-                                              fontSize: 16.0,
-                                              fontWeight: FontWeight.w600
+                                            fontSize: 16.0,
+                                            fontWeight: FontWeight.w600,
                                           ),
                                         ),
                                       ),
                                       new Expanded(
                                         flex: 6,
-                                        child: new DropdownButton(
-                                          value: _currentResult,
-                                          items: _dropDownMenuItems,
-                                          onChanged: changedDropDownMethod,
+                                        child: Row(
+                                          mainAxisAlignment: MainAxisAlignment.start,
+                                          children: <Widget>[
+                                            new IconButton(
+                                                icon: Icon(Icons.add_a_photo),
+                                                onPressed: () {
+                                                  getImage();
+                                                })
+                                          ],
                                         ),
                                       )
-                                    ],
-                                  ),
-                                ),
-                                new Padding(
-                                  padding: EdgeInsets.symmetric(vertical: 5.0),
-                                  child: new Row(
-                                    children: <Widget>[
-                                      new Expanded(
-                                          flex: 4,
-                                          child: Row(
-                                            children: <Widget>[
-                                              new Text(
-                                                '*',
-                                                style: new TextStyle(
-                                                    color: Colors.red
-                                                ),
-                                              ),
-                                              new Text(
-                                                '故障描述：',
-                                                style: new TextStyle(
-                                                    fontSize: 16.0,
-                                                    fontWeight: FontWeight.w600
-                                                ),
-                                              ),
-                                            ],
-                                          )
-                                      ),
-                                      new Expanded(
-                                        flex: 6,
-                                        child: new TextField(
-                                          controller: _fault, maxLength: 200, maxLines: 3,
-                                          focusNode: _focusNode,
-                                          decoration: InputDecoration(
-                                            fillColor: Color(0xfff0f0f0),
-                                            filled: true,
-                                          ),
-                                        ),
-                                      )
-                                    ],
-                                  ),
-                                ),
-                                new Padding(
-                                  padding: EdgeInsets.symmetric(vertical: 5.0),
-                                  child: new Row(
-                                    children: <Widget>[
-                                      new Text(
-                                        '添加附件：',
-                                        style: new TextStyle(
-                                          fontSize: 16.0,
-                                          fontWeight: FontWeight.w600
-                                        ),
-                                      ),
-                                      new IconButton(
-                                          icon: Icon(Icons.add_a_photo),
-                                          onPressed: () {
-                                            getImage();
-                                      })
                                     ],
                                   ),
                                 ),

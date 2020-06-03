@@ -17,6 +17,7 @@ import 'package:atoi/utils/event_bus.dart';
 import 'package:multi_image_picker/multi_image_picker.dart';
 import 'package:uuid/uuid.dart';
 import 'package:atoi/widgets/search_department.dart';
+import 'package:atoi/widgets/search_lazy.dart';
 
 
 /// 设备详情页面类
@@ -198,7 +199,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
     print(model.DepartmentsList);
     departments = model.DepartmentsList;
     dropdownDepartments = getDropDownMenuItems(departments);
-    currentDepartment = dropdownDepartments[0].value;
+    currentDepartment = '其他';
     print(currentDepartment);
   }
 
@@ -778,7 +779,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
           builder: (context) => CupertinoAlertDialog(
             title: new Text('有效日期格式有误'),
           )
-      ).then((result) => _scrollController.jumpTo(400.0));
+      ).then((result) => _scrollController.jumpTo(1000.0));
       return;
     }
     if (assetCode.text.isEmpty && !autoAssetCode) {
@@ -1146,10 +1147,8 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
                             focusNode: _focusOther[0],
                             icon: Icon(Icons.search),
                             onPressed: () async {
-                              final _searchResult = await showSearch(
-                                  context: context,
-                                  delegate: SearchBarVendor(),
-                                  hintText: '请输厂商名称');
+                              FocusScope.of(context).requestFocus(new FocusNode());
+                              final _searchResult = await Navigator.of(context).push(new MaterialPageRoute(builder: (_) => SearchLazy(searchType: SearchType.MANUFACTURER,)));
                               print(_searchResult);
                               if (_searchResult != null &&
                                   _searchResult != 'null') {
@@ -1274,6 +1273,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
                       child: new IconButton(
                           icon: Icon(Icons.calendar_today, color: AppConstants.AppColors['btn_main'],),
                           onPressed: () async {
+                            FocusScope.of(context).requestFocus(new FocusNode());
                             var _time = DateTime.tryParse(manufacturingDate)??DateTime.now();
                             DatePicker.showDatePicker(
                               context,
@@ -1380,6 +1380,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
                                 child: new IconButton(
                                     icon: Icon(Icons.calendar_today, color: AppConstants.AppColors['btn_main'],),
                                     onPressed: () async {
+                                      FocusScope.of(context).requestFocus(new FocusNode());
                                       var _time = DateTime.tryParse(validationStartDate)??DateTime.now();
                                       DatePicker.showDatePicker(
                                         context,
@@ -1430,6 +1431,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
                                 child: new IconButton(
                                     icon: Icon(Icons.calendar_today, color: AppConstants.AppColors['btn_main'],),
                                     onPressed: () async {
+                                      FocusScope.of(context).requestFocus(new FocusNode());
                                       var _time = DateTime.tryParse(validationEndDate)??DateTime.now();
                                       DatePicker.showDatePicker(
                                         context,
@@ -1552,6 +1554,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
                           icon: Icon(Icons.calendar_today, color: AppConstants.AppColors['btn_main'],),
                           focusNode: _focusOther[2],
                           onPressed: () async {
+                            FocusScope.of(context).requestFocus(new FocusNode());
                             var _time = DateTime.tryParse(purchaseDate)??DateTime.now();
                             DatePicker.showDatePicker(
                               context,
@@ -1623,10 +1626,8 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
                         child: new IconButton(
                             icon: Icon(Icons.search),
                             onPressed: () async {
-                              final _searchResult = await showSearch(
-                                  context: context,
-                                  delegate: SearchBarVendor(),
-                                  hintText: '请输供应商名称');
+                              FocusScope.of(context).requestFocus(new FocusNode());
+                              final _searchResult = await Navigator.of(context).push(new MaterialPageRoute(builder: (_) => SearchLazy(searchType: SearchType.VENDOR,)));
                               print(_searchResult);
                               if (_searchResult != null &&
                                   _searchResult != 'null') {
@@ -1663,7 +1664,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
           padding: EdgeInsets.symmetric(horizontal: 12.0),
           child: new Column(
             children: <Widget>[
-              widget.editable&&departments!=null?BuildWidget.buildDropdownWithSearch('使用科室', currentDepartment, dropdownDepartments, changeDepartment, search: searchDepartment):new Container(),
+              widget.editable&&departments!=null?BuildWidget.buildDropdownWithSearch('使用科室', currentDepartment, dropdownDepartments, changeDepartment, search: searchDepartment, required: true):new Container(),
               !widget.editable?BuildWidget.buildRow('使用科室', currentDepartment):new Container(),
               widget.editable?BuildWidget.buildInput('安装地点', installSite, lines: 1, focusNode: _focusEquip[15]):BuildWidget.buildRow('安装地点', installSite.text),
               widget.editable?new Padding(
@@ -1676,6 +1677,12 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
                         alignment: WrapAlignment.end,
                         crossAxisAlignment: WrapCrossAlignment.center,
                         children: <Widget>[
+                          new Text(
+                            '*',
+                            style: new TextStyle(
+                                color: Colors.red
+                            ),
+                          ),
                           new Text(
                             '安装日期',
                             style: new TextStyle(
@@ -1711,6 +1718,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
                           icon: Icon(Icons.calendar_today, color: AppConstants.AppColors['btn_main'],),
                           focusNode: _focusOther[4],
                           onPressed: () async {
+                            FocusScope.of(context).requestFocus(new FocusNode());
                             var _time = DateTime.tryParse(installDate)??DateTime.now();
                             DatePicker.showDatePicker(
                               context,
@@ -1784,6 +1792,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
                       child: new IconButton(
                           icon: Icon(Icons.calendar_today, color: AppConstants.AppColors['btn_main'],),
                           onPressed: () async {
+                            FocusScope.of(context).requestFocus(new FocusNode());
                             var _time = DateTime.tryParse(usageDate)??DateTime.now();
                             DatePicker.showDatePicker(
                               context,
@@ -1858,6 +1867,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
                       child: new IconButton(
                           icon: Icon(Icons.calendar_today, color: AppConstants.AppColors['btn_main'],),
                           onPressed: () async {
+                            FocusScope.of(context).requestFocus(new FocusNode());
                             var _time = DateTime.tryParse(checkDate)??DateTime.now();
                             DatePicker.showDatePicker(
                               context,
@@ -1936,6 +1946,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
                           icon: Icon(Icons.calendar_today, color: AppConstants.AppColors['btn_main'],),
                           focusNode: _focusOther[3],
                           onPressed: () async {
+                            FocusScope.of(context).requestFocus(new FocusNode());
                             var _time = DateTime.tryParse(scrapDate)??DateTime.now();
                             DatePicker.showDatePicker(
                               context,
@@ -2011,6 +2022,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
                       child: new IconButton(
                           icon: Icon(Icons.calendar_today, color: AppConstants.AppColors['btn_main'],),
                           onPressed: () async {
+                            FocusScope.of(context).requestFocus(new FocusNode());
                             var _time = DateTime.tryParse(mandatoryDate)??DateTime.now();
                             DatePicker.showDatePicker(
                               context,
@@ -2085,6 +2097,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
                       child: new IconButton(
                           icon: Icon(Icons.calendar_today, color: AppConstants.AppColors['btn_main'],),
                           onPressed: () async {
+                            FocusScope.of(context).requestFocus(new FocusNode());
                             var _time = DateTime.tryParse(recallDate)??DateTime.now();
                             DatePicker.showDatePicker(
                               context,

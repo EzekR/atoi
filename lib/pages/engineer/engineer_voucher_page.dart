@@ -581,12 +581,20 @@ class _EngineerVoucherPageState extends State<EngineerVoucherPage> {
               widget.status!=0&&widget.status!=1?BuildWidget.buildRow('客户电话', _customerNumber.text):BuildWidget.buildInputLeft('客户电话:', _customerNumber, lines: 1, focusNode: _focusJournal[0], required: true),
               widget.status==0||widget.status==1?new Padding(
                 padding: EdgeInsets.symmetric(vertical: 5.0),
-                child: new Text('客户签名：',
-                  style: new TextStyle(
-                      fontSize: 16.0,
-                      fontWeight: FontWeight.w600
-                  ),
-                ),
+                child: Row(
+                  children: <Widget>[
+                    new Text(
+                      '*',
+                      style: TextStyle(color: Colors.red),
+                    ),
+                    new Text('客户签名：',
+                      style: new TextStyle(
+                          fontSize: 16.0,
+                          fontWeight: FontWeight.w600
+                      ),
+                    ),
+                  ],
+                )
               ):BuildWidget.buildRow('客户签名', ''),
               widget.status==0||widget.status==1?new RaisedButton(focusNode: _focusJournal[5],onPressed: () {toSignature(context);}, child: new Icon(Icons.add, color: Colors.white,)):new Container(),
               _img!=null?new Container(width: 400.0, height: 400.0, child: BuildWidget.buildPhotoPageList(context, _img)):new Container()

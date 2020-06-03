@@ -63,200 +63,207 @@ class _RequestHistoryState extends State<RequestHistory> {
     showModalBottomSheet(context: context, builder: (context) {
       return StatefulBuilder(
         builder: (context, setState) {
-          return ListView(
+          return Column(
             children: <Widget>[
-              SizedBox(height: 18.0,),
-              Row(
-                children: <Widget>[
-                  SizedBox(width: 16.0,),
-                  Text('请求日期', style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.w600),)
-                ],
-              ),
-              SizedBox(height: 6.0,),
-              Row(
-                children: <Widget>[
-                  SizedBox(width: 16.0,),
-                  Container(
-                    width: 116.0,
-                    height: 40.0,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(5.0),
-                      color: Color(0xfff2f2f2),
+              Container(
+                height: 300.0,
+                child: ListView(
+                  children: <Widget>[
+                    SizedBox(height: 18.0,),
+                    Row(
+                      children: <Widget>[
+                        SizedBox(width: 16.0,),
+                        Text('请求日期', style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.w600),)
+                      ],
                     ),
-                    child: Center(
-                      child: FlatButton(
-                          onPressed: () {
-                            DatePicker.showDatePicker(
-                              context,
-                              pickerTheme: DateTimePickerTheme(
-                                showTitle: true,
-                                confirm: Text('确认', style: TextStyle(color: Colors.blueAccent)),
-                                cancel: Text('取消', style: TextStyle(color: Colors.redAccent)),
-                              ),
-                              minDateTime: DateTime.parse('2000-01-01'),
-                              maxDateTime: DateTime.parse('2030-01-01'),
-                              initialDateTime: DateTime.parse(startDate),
-                              dateFormat: 'yyyy-MM-dd',
-                              locale: DateTimePickerLocale.en_us,
-                              onClose: () => print(""),
-                              onCancel: () => print('onCancel'),
-                              onChange: (dateTime, List<int> index) {
-                              },
-                              onConfirm: (dateTime, List<int> index) {
-                                setState(() {
-                                  startDate = formatDate(dateTime, [yyyy,'-', mm, '-', dd]);
-                                });
-                              },
-                            );
-                          },
-                          child: Text(startDate, style: TextStyle(fontWeight: FontWeight.w400, fontSize: 12.0),)
-                      ),
+                    SizedBox(height: 6.0,),
+                    Row(
+                      children: <Widget>[
+                        SizedBox(width: 16.0,),
+                        Container(
+                          width: 116.0,
+                          height: 40.0,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(5.0),
+                            color: Color(0xfff2f2f2),
+                          ),
+                          child: Center(
+                            child: FlatButton(
+                                onPressed: () {
+                                  DatePicker.showDatePicker(
+                                    context,
+                                    pickerTheme: DateTimePickerTheme(
+                                      showTitle: true,
+                                      confirm: Text('确认', style: TextStyle(color: Colors.blueAccent)),
+                                      cancel: Text('取消', style: TextStyle(color: Colors.redAccent)),
+                                    ),
+                                    minDateTime: DateTime.parse('2000-01-01'),
+                                    maxDateTime: DateTime.parse('2030-01-01'),
+                                    initialDateTime: DateTime.parse(startDate),
+                                    dateFormat: 'yyyy-MM-dd',
+                                    locale: DateTimePickerLocale.en_us,
+                                    onClose: () => print(""),
+                                    onCancel: () => print('onCancel'),
+                                    onChange: (dateTime, List<int> index) {
+                                    },
+                                    onConfirm: (dateTime, List<int> index) {
+                                      setState(() {
+                                        startDate = formatDate(dateTime, [yyyy,'-', mm, '-', dd]);
+                                      });
+                                    },
+                                  );
+                                },
+                                child: Text(startDate, style: TextStyle(fontWeight: FontWeight.w400, fontSize: 12.0),)
+                            ),
+                          ),
+                        ),
+                        Text('   -   '),
+                        Container(
+                          width: 116.0,
+                          height: 40.0,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(5.0),
+                            color: Color(0xfff2f2f2),
+                          ),
+                          child: Center(
+                            child: FlatButton(
+                                onPressed: () {
+                                  DatePicker.showDatePicker(
+                                    context,
+                                    pickerTheme: DateTimePickerTheme(
+                                      showTitle: true,
+                                      confirm: Text('确认', style: TextStyle(color: Colors.blueAccent)),
+                                      cancel: Text('取消', style: TextStyle(color: Colors.redAccent)),
+                                    ),
+                                    minDateTime: DateTime.parse('2000-01-01'),
+                                    maxDateTime: DateTime.parse('2030-01-01'),
+                                    initialDateTime: DateTime.parse(endDate),
+                                    dateFormat: 'yyyy-MM-dd',
+                                    locale: DateTimePickerLocale.en_us,
+                                    onClose: () => print(""),
+                                    onCancel: () => print('onCancel'),
+                                    onChange: (dateTime, List<int> index) {
+                                    },
+                                    onConfirm: (dateTime, List<int> index) {
+                                      setState(() {
+                                        endDate = formatDate(dateTime, [yyyy,'-', mm, '-', dd]);
+                                      });
+                                    },
+                                  );
+                                },
+                                child: Text(endDate, style: TextStyle(fontWeight: FontWeight.w400, fontSize: 12.0),)
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
-                  ),
-                  Text('   -   '),
-                  Container(
-                    width: 116.0,
-                    height: 40.0,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(5.0),
-                      color: Color(0xfff2f2f2),
+                    SizedBox(height: 18.0,),
+                    Row(
+                      children: <Widget>[
+                        SizedBox(width: 16.0,),
+                        Text('请求状态', style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.w600),)
+                      ],
                     ),
-                    child: Center(
-                      child: FlatButton(
-                          onPressed: () {
-                            DatePicker.showDatePicker(
-                              context,
-                              pickerTheme: DateTimePickerTheme(
-                                showTitle: true,
-                                confirm: Text('确认', style: TextStyle(color: Colors.blueAccent)),
-                                cancel: Text('取消', style: TextStyle(color: Colors.redAccent)),
-                              ),
-                              minDateTime: DateTime.parse('2000-01-01'),
-                              maxDateTime: DateTime.parse('2030-01-01'),
-                              initialDateTime: DateTime.parse(endDate),
-                              dateFormat: 'yyyy-MM-dd',
-                              locale: DateTimePickerLocale.en_us,
-                              onClose: () => print(""),
-                              onCancel: () => print('onCancel'),
-                              onChange: (dateTime, List<int> index) {
-                              },
-                              onConfirm: (dateTime, List<int> index) {
-                                setState(() {
-                                  endDate = formatDate(dateTime, [yyyy,'-', mm, '-', dd]);
-                                });
-                              },
-                            );
-                          },
-                          child: Text(endDate, style: TextStyle(fontWeight: FontWeight.w400, fontSize: 12.0),)
-                      ),
+                    SizedBox(height: 6.0,),
+                    Row(
+                      children: <Widget>[
+                        SizedBox(width: 16.0,),
+                        Container(
+                            width: 230.0,
+                            height: 40.0,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(5.0),
+                              color: Color(0xfff2f2f2),
+                            ),
+                            child: Row(
+                              children: <Widget>[
+                                SizedBox(width: 6.0,),
+                                DropdownButton(
+                                  value: statusId,
+                                  underline: Container(),
+                                  items: statusList.map<DropdownMenuItem>((item) {
+                                    return DropdownMenuItem(
+                                      value: item['value'],
+                                      child: Text(item['text']),
+                                    );
+                                  }).toList(),
+                                  onChanged: (val) {
+                                    print(val);
+                                    setState(() {
+                                      statusId = val;
+                                    });
+                                  },
+                                )
+                              ],
+                            )
+                        ),
+                      ],
                     ),
-                  ),
-                ],
-              ),
-              SizedBox(height: 18.0,),
-              Row(
-                children: <Widget>[
-                  SizedBox(width: 16.0,),
-                  Text('请求状态', style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.w600),)
-                ],
-              ),
-              SizedBox(height: 6.0,),
-              Row(
-                children: <Widget>[
-                  SizedBox(width: 16.0,),
-                  Container(
-                      width: 230.0,
-                      height: 40.0,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(5.0),
-                        color: Color(0xfff2f2f2),
-                      ),
-                      child: Row(
-                        children: <Widget>[
-                          SizedBox(width: 6.0,),
-                          DropdownButton(
-                            value: statusId,
-                            underline: Container(),
-                            items: statusList.map<DropdownMenuItem>((item) {
-                              return DropdownMenuItem(
-                                value: item['value'],
-                                child: Text(item['text']),
-                              );
-                            }).toList(),
-                            onChanged: (val) {
-                              print(val);
-                              setState(() {
-                                statusId = val;
-                              });
-                            },
-                          )
-                        ],
-                      )
-                  ),
-                ],
-              ),
-              SizedBox(height: 18.0,),
-              Row(
-                children: <Widget>[
-                  SizedBox(width: 16.0,),
-                  Text('科室', style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.w600),)
-                ],
-              ),
-              SizedBox(height: 6.0,),
-              Row(
-                children: <Widget>[
-                  SizedBox(width: 16.0,),
-                  Container(
-                      width: 230.0,
-                      height: 40.0,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(5.0),
-                        color: Color(0xfff2f2f2),
-                      ),
-                      child: Row(
-                        children: <Widget>[
-                          SizedBox(width: 6.0,),
-                          DropdownButton(
-                            value: departmentId,
-                            underline: Container(),
-                            items: departmentList.map<DropdownMenuItem>((item) {
-                              return DropdownMenuItem(
-                                value: item['value'],
-                                child: Text(item['text']),
-                              );
-                            }).toList(),
-                            onChanged: (val) {
-                              setState(() {
-                                departmentId = val;
-                              });
-                            },
-                          )
-                        ],
-                      )
-                  ),
-                  SizedBox(width: 16.0,),
-                  Container(
-                    width: 40.0,
-                    height: 40.0,
-                    child: Center(
-                      child: IconButton(
-                          onPressed: () {
-                            showSearch(context: context, delegate: SearchBarDepartment(), hintText: '请输入科室名称/拼音/ID').then((result) {
-                              if (result != null) {
-                                var _result = jsonDecode(result);
-                                setState(() {
-                                  departmentId = _result['ID'];
-                                });
-                              }
-                            });
-                          },
-                          icon: Icon(Icons.search)
-                      ),
+                    SizedBox(height: 18.0,),
+                    Row(
+                      children: <Widget>[
+                        SizedBox(width: 16.0,),
+                        Text('科室', style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.w600),)
+                      ],
                     ),
-                  )
-                ],
+                    SizedBox(height: 6.0,),
+                    Row(
+                      children: <Widget>[
+                        SizedBox(width: 16.0,),
+                        Container(
+                            width: 230.0,
+                            height: 40.0,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(5.0),
+                              color: Color(0xfff2f2f2),
+                            ),
+                            child: Row(
+                              children: <Widget>[
+                                SizedBox(width: 6.0,),
+                                DropdownButton(
+                                  value: departmentId,
+                                  underline: Container(),
+                                  items: departmentList.map<DropdownMenuItem>((item) {
+                                    return DropdownMenuItem(
+                                      value: item['value'],
+                                      child: Text(item['text']),
+                                    );
+                                  }).toList(),
+                                  onChanged: (val) {
+                                    setState(() {
+                                      departmentId = val;
+                                    });
+                                  },
+                                )
+                              ],
+                            )
+                        ),
+                        SizedBox(width: 16.0,),
+                        Container(
+                          width: 40.0,
+                          height: 40.0,
+                          child: Center(
+                            child: IconButton(
+                                onPressed: () {
+                                  showSearch(context: context, delegate: SearchBarDepartment(), hintText: '请输入科室名称/拼音/ID').then((result) {
+                                    if (result != null) {
+                                      var _result = jsonDecode(result);
+                                      setState(() {
+                                        departmentId = _result['ID'];
+                                      });
+                                    }
+                                  });
+                                },
+                                icon: Icon(Icons.search)
+                            ),
+                          ),
+                        )
+                      ],
+                    ),
+                    SizedBox(height: 30.0,),
+                  ],
+                ),
               ),
-              SizedBox(height: 30.0,),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: <Widget>[

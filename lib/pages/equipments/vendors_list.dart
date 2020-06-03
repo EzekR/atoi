@@ -107,179 +107,186 @@ class _VendorsListState extends State<VendorsList> {
     showModalBottomSheet(context: context, builder: (context) {
       return StatefulBuilder(
         builder: (context, setState) {
-          return ListView(
+          return Column(
             children: <Widget>[
-              SizedBox(height: 18.0,),
-              Row(
-                children: <Widget>[
-                  SizedBox(width: 16.0,),
-                  Text('搜索', style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.w600),)
-                ],
-              ),
-              SizedBox(height: 6.0,),
-              Row(
-                children: <Widget>[
-                  SizedBox(width: 16.0,),
-                  Container(
-                      width: 230.0,
-                      height: 40.0,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(5.0),
-                        color: Color(0xfff2f2f2),
-                      ),
-                      child: Row(
-                        children: <Widget>[
-                          SizedBox(width: 10.0,),
-                          Icon(Icons.search, color: Color(0xffaaaaaa),),
-                          SizedBox(width: 10.0,),
-                          Container(
-                              width: 150.0,
-                              child: Align(
-                                alignment: Alignment(0.0, -0.5),
-                                child: TextField(
-                                  decoration: InputDecoration.collapsed(hintText: ''),
-                                  controller: _keywords,
-                                ),
-                              )
-                          ),
-                        ],
-                      )
-                  ),
-                  SizedBox(width: 16.0,),
-                  Container(
-                    width: 130.0,
-                    height: 40.0,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(5.0),
-                      color: Color(0xfff2f2f2),
-                    ),
-                    child: Row(
+              Container(
+                height: 300.0,
+                child: ListView(
+                  children: <Widget>[
+                    SizedBox(height: 18.0,),
+                    Row(
                       children: <Widget>[
-                        SizedBox(width: 6.0,),
-                        DropdownButton(
-                          value: field,
-                          underline: Container(),
-                          items: <DropdownMenuItem>[
-                            DropdownMenuItem(
-                              value: 's.ID',
-                              child: Text('系统编号'),
+                        SizedBox(width: 16.0,),
+                        Text('搜索', style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.w600),)
+                      ],
+                    ),
+                    SizedBox(height: 6.0,),
+                    Row(
+                      children: <Widget>[
+                        SizedBox(width: 16.0,),
+                        Container(
+                            width: 230.0,
+                            height: 40.0,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(5.0),
+                              color: Color(0xfff2f2f2),
                             ),
-                            DropdownMenuItem(
-                              value: 's.Name',
-                              child: Text('供应商名称'),
+                            child: Row(
+                              children: <Widget>[
+                                SizedBox(width: 10.0,),
+                                Icon(Icons.search, color: Color(0xffaaaaaa),),
+                                SizedBox(width: 10.0,),
+                                Container(
+                                    width: 150.0,
+                                    child: Align(
+                                      alignment: Alignment(0.0, -0.5),
+                                      child: TextField(
+                                        decoration: InputDecoration.collapsed(hintText: ''),
+                                        controller: _keywords,
+                                      ),
+                                    )
+                                ),
+                              ],
+                            )
+                        ),
+                        SizedBox(width: 16.0,),
+                        Container(
+                          width: 130.0,
+                          height: 40.0,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(5.0),
+                            color: Color(0xfff2f2f2),
+                          ),
+                          child: Row(
+                            children: <Widget>[
+                              SizedBox(width: 6.0,),
+                              DropdownButton(
+                                value: field,
+                                underline: Container(),
+                                items: <DropdownMenuItem>[
+                                  DropdownMenuItem(
+                                    value: 's.ID',
+                                    child: Text('系统编号'),
+                                  ),
+                                  DropdownMenuItem(
+                                    value: 's.Name',
+                                    child: Text('供应商名称'),
+                                  ),
+                                  DropdownMenuItem(
+                                    value: 's.Address',
+                                    child: Text('地址'),
+                                  ),
+                                  DropdownMenuItem(
+                                    value: 's.Contact',
+                                    child: Text('联系人'),
+                                  ),
+                                  DropdownMenuItem(
+                                    value: 's.ContactMobile',
+                                    child: Text('联系人电话'),
+                                  ),
+                                ],
+                                onChanged: (val) {
+                                  FocusScope.of(context).requestFocus(new FocusNode());
+                                  setState(() {
+                                    field = val;
+                                  });
+                                },
+                              ),
+                            ],
+                          ),
+                        )
+                      ],
+                    ),
+                    SizedBox(height: 18.0,),
+                    Row(
+                      children: <Widget>[
+                        SizedBox(width: 16.0,),
+                        Text('类型', style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.w600),)
+                      ],
+                    ),
+                    SizedBox(height: 6.0,),
+                    Row(
+                      children: <Widget>[
+                        SizedBox(width: 16.0,),
+                        Container(
+                            width: 230.0,
+                            height: 40.0,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(5.0),
+                              color: Color(0xfff2f2f2),
                             ),
-                            DropdownMenuItem(
-                              value: 's.Address',
-                              child: Text('地址'),
-                            ),
-                            DropdownMenuItem(
-                              value: 's.Contact',
-                              child: Text('联系人'),
-                            ),
-                            DropdownMenuItem(
-                              value: 's.ContactMobile',
-                              child: Text('联系人电话'),
-                            ),
-                          ],
-                          onChanged: (val) {
-                            FocusScope.of(context).requestFocus(new FocusNode());
-                            setState(() {
-                              field = val;
-                            });
-                          },
+                            child: Row(
+                              children: <Widget>[
+                                SizedBox(width: 6.0,),
+                                DropdownButton(
+                                  value: supplierId,
+                                  underline: Container(),
+                                  items: supplierList.map<DropdownMenuItem>((item) {
+                                    return DropdownMenuItem(
+                                      value: item['value'],
+                                      child: Text(item['text']),
+                                    );
+                                  }).toList(),
+                                  onChanged: (val) {
+                                    print(val);
+                                    FocusScope.of(context).requestFocus(new FocusNode());
+                                    setState(() {
+                                      supplierId = val;
+                                    });
+                                  },
+                                )
+                              ],
+                            )
                         ),
                       ],
                     ),
-                  )
-                ],
+                    SizedBox(height: 18.0,),
+                    Row(
+                      children: <Widget>[
+                        SizedBox(width: 16.0,),
+                        Text('状态', style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.w600),)
+                      ],
+                    ),
+                    SizedBox(height: 6.0,),
+                    Row(
+                      children: <Widget>[
+                        SizedBox(width: 16.0,),
+                        Container(
+                            width: 230.0,
+                            height: 40.0,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(5.0),
+                              color: Color(0xfff2f2f2),
+                            ),
+                            child: Row(
+                              children: <Widget>[
+                                SizedBox(width: 6.0,),
+                                DropdownButton(
+                                  value: useStatus,
+                                  underline: Container(),
+                                  items: useList.map<DropdownMenuItem>((item) {
+                                    return DropdownMenuItem(
+                                      value: item['value'],
+                                      child: Text(item['text']),
+                                    );
+                                  }).toList(),
+                                  onChanged: (val) {
+                                    print(val);
+                                    FocusScope.of(context).requestFocus(new FocusNode());
+                                    setState(() {
+                                      useStatus = val;
+                                    });
+                                  },
+                                )
+                              ],
+                            )
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 30.0,),
+                  ],
+                ),
               ),
-              SizedBox(height: 18.0,),
-              Row(
-                children: <Widget>[
-                  SizedBox(width: 16.0,),
-                  Text('类型', style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.w600),)
-                ],
-              ),
-              SizedBox(height: 6.0,),
-              Row(
-                children: <Widget>[
-                  SizedBox(width: 16.0,),
-                  Container(
-                      width: 230.0,
-                      height: 40.0,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(5.0),
-                        color: Color(0xfff2f2f2),
-                      ),
-                      child: Row(
-                        children: <Widget>[
-                          SizedBox(width: 6.0,),
-                          DropdownButton(
-                            value: supplierId,
-                            underline: Container(),
-                            items: supplierList.map<DropdownMenuItem>((item) {
-                              return DropdownMenuItem(
-                                value: item['value'],
-                                child: Text(item['text']),
-                              );
-                            }).toList(),
-                            onChanged: (val) {
-                              print(val);
-                              FocusScope.of(context).requestFocus(new FocusNode());
-                              setState(() {
-                                supplierId = val;
-                              });
-                            },
-                          )
-                        ],
-                      )
-                  ),
-                ],
-              ),
-              SizedBox(height: 18.0,),
-              Row(
-                children: <Widget>[
-                  SizedBox(width: 16.0,),
-                  Text('状态', style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.w600),)
-                ],
-              ),
-              SizedBox(height: 6.0,),
-              Row(
-                children: <Widget>[
-                  SizedBox(width: 16.0,),
-                  Container(
-                      width: 230.0,
-                      height: 40.0,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(5.0),
-                        color: Color(0xfff2f2f2),
-                      ),
-                      child: Row(
-                        children: <Widget>[
-                          SizedBox(width: 6.0,),
-                          DropdownButton(
-                            value: useStatus,
-                            underline: Container(),
-                            items: useList.map<DropdownMenuItem>((item) {
-                              return DropdownMenuItem(
-                                value: item['value'],
-                                child: Text(item['text']),
-                              );
-                            }).toList(),
-                            onChanged: (val) {
-                              print(val);
-                              FocusScope.of(context).requestFocus(new FocusNode());
-                              setState(() {
-                                useStatus = val;
-                              });
-                            },
-                          )
-                        ],
-                      )
-                  ),
-                ],
-              ),
-              SizedBox(height: 30.0,),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: <Widget>[
@@ -509,7 +516,16 @@ class _VendorsListState extends State<VendorsList> {
         onPressed: () {
           Navigator.of(context).push(new MaterialPageRoute(builder: (_) {
             return new VendorDetail(editable: true,);
-          })).then((result) => getVendors());
+          })).then((result) {
+            setState(() {
+              offset = 0;
+              _vendors.clear();
+              _loading = true;
+            });
+            getVendors().then((result) =>
+                setState(() {
+              _loading = false;
+            }));});
         },
         child: Icon(Icons.add_circle),
         backgroundColor: Colors.blue,

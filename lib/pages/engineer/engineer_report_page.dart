@@ -772,7 +772,7 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
               _edit?buildField('错误代码:', _code, maxLength: 20, focusNode: _focusReport[1], required: true):BuildWidget.buildRow('错误代码', _code.text),
               BuildWidget.buildRow('设备状态（报修）', _dispatch['MachineStatus']['Name']),
               _edit?BuildWidget.buildDropdownLeft('设备状态（离场）:', _currentStatus, _dropDownMenuStatus, changedStatus, focusNode: _focusReport[11], context: context, required: true):BuildWidget.buildRow('设备状态（离场）', _currentStatus??''),
-              _edit?buildField('详细故障描述:', _description, focusNode: _focusReport[2], required: true):BuildWidget.buildRow('详细故障描述', _description.text),
+              _edit?buildField('详细故障描述:', _description, focusNode: _focusReport[2], required: false):BuildWidget.buildRow('详细故障描述', _description.text),
               _edit?buildField('分析原因:', _analysis, focusNode: _focusReport[5], required: true):BuildWidget.buildRow('分析原因', _analysis.text),
               _edit?buildField('详细处理方法:', _solution, focusNode: _focusReport[4], required: true):BuildWidget.buildRow('详细处理方法', _solution.text),
               _edit?buildField('结果:', _result, focusNode: _focusReport[6], required: true):BuildWidget.buildRow('结果', _result.text),
@@ -946,6 +946,7 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
               padding: EdgeInsets.symmetric(vertical: 5.0),
               child: new Row(
                 children: <Widget>[
+                  ((_dispatch['RequestType']['ID'] == 3 && _currentPrivate == '是' && _imageList == null) || (_dispatch['RequestType']['ID'] == 2 && _currentResult == '待第三方支持' && _currentProvider != '管理方' && _imageList == null))?new Text('*', style: TextStyle(color: Colors.red),):Container(),
                   new Text(
                     '添加附件：',
                     style: new TextStyle(

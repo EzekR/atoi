@@ -789,7 +789,7 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
               BuildWidget.buildRow('请求人', _request['RequestUser']['Name']),
               BuildWidget.buildRow('请求状态', _request['Status']['Name']),
               _request['RequestType']['ID']==1?BuildWidget.buildDropdown('机器状态', _currentStatusReq, _dropDownMenuStatusesReq, changedDropDownStatusReq, context: context):new Container(),
-              BuildWidget.buildInput(model.Remark[_request['RequestType']['ID']], _desc, maxLength: 200),
+              BuildWidget.buildInput(model.Remark[_request['RequestType']['ID']], _desc, maxLength: 200, required: true),
               _request['RequestType']['ID']==2?BuildWidget.buildDropdown('保养类型', _currentMaintain, _dropDownMenuMaintain, changedDropDownMaintain, context: context):new Container(),
               _request['RequestType']['ID']==3?BuildWidget.buildDropdown('强检原因', _currentMandatory, _dropDownMenuMandatory, changedDropDownMandatory, context: context):new Container(),
               _request['RequestType']['ID']==7?BuildWidget.buildDropdown('来源', _currentSource, _dropDownMenuSource, changedDropDownSource, context: context):new Container(),

@@ -21,6 +21,7 @@ import 'package:atoi/utils/event_bus.dart';
 import 'package:multi_image_picker/multi_image_picker.dart';
 import 'dart:typed_data';
 import 'package:uuid/uuid.dart';
+import 'package:atoi/widgets/search_lazy.dart';
 
 /// 设备合同页面类
 class EquipmentContract extends StatefulWidget {
@@ -596,10 +597,10 @@ Future getImage() async {
                               children: <Widget>[
                                 BuildWidget.buildRow('系统编号', OID),
                                 widget.editable?BuildWidget.buildInput('合同编号', contractNum, maxLength: 20, focusNode: _focusContract[0], required: true):BuildWidget.buildRow('合同编号', contractNum.text),
-                                widget.editable?BuildWidget.buildInput('项目编号', projectNum, maxLength: 20, focusNode: _focusContract[9], required: true):BuildWidget.buildRow('项目编号', projectNum.text),
+                                widget.editable?BuildWidget.buildInput('项目编号', projectNum, maxLength: 20, focusNode: _focusContract[9]):BuildWidget.buildRow('项目编号', projectNum.text),
                                 widget.editable?BuildWidget.buildInput('金额', amount, inputType: TextInputType.numberWithOptions(decimal: true), maxLength: 11, focusNode: _focusContract[1], required: true):BuildWidget.buildRow('金额', amount.text),
                                 widget.editable?BuildWidget.buildInput('名称', name, maxLength: 50, focusNode: _focusContract[2], required: true):BuildWidget.buildRow('名称', name.text),
-                                widget.editable?BuildWidget.buildDropdown('类型', currentType, dropdownType, changeType):BuildWidget.buildRow('类型', currentType),
+                                widget.editable?BuildWidget.buildDropdown('类型', currentType, dropdownType, changeType, required: true):BuildWidget.buildRow('类型', currentType),
                                 widget.editable?new Padding(
                                   padding: EdgeInsets.symmetric(vertical: 5.0),
                                   child: new Row(
@@ -653,12 +654,7 @@ Future getImage() async {
                                               focusNode: _focusContract[7],
                                               icon: Icon(Icons.search),
                                               onPressed: () async {
-                                                final _searchResult =
-                                                await showSearch(
-                                                    context: context,
-                                                    delegate:
-                                                    SearchBarVendor(),
-                                                    hintText: '请输厂商名称');
+                                                final _searchResult = await Navigator.of(context).push(new MaterialPageRoute(builder: (_) => SearchLazy(searchType: SearchType.MANUFACTURER,)));
                                                 print(_searchResult);
                                                 if (_searchResult != null &&
                                                     _searchResult != 'null') {

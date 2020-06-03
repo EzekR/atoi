@@ -357,14 +357,14 @@ class _VendorDetailState extends State<VendorDetail> {
                               children: <Widget>[
                                 BuildWidget.buildRow('系统编号', oid),
                                 widget.editable?BuildWidget.buildInput('名称', name, maxLength: 50, focusNode: _focusVendor[0], required: true):BuildWidget.buildRow('名称', name.text),
-                                widget.editable?BuildWidget.buildDropdown('类型', currentType, dropdownType, changeType):BuildWidget.buildRow('类型', currentType),
+                                widget.editable?BuildWidget.buildDropdown('类型', currentType, dropdownType, changeType, required: true):BuildWidget.buildRow('类型', currentType),
                                 widget.editable?BuildWidget.buildDropdown('省份', currentProvince, dropdownProvince, changeProvince, required: true):BuildWidget.buildRow('省份', currentProvince),
                                 widget.editable?BuildWidget.buildInput('电话', mobile, maxLength: 20, focusNode: _focusVendor[3]):BuildWidget.buildRow('电话', mobile.text),
                                 widget.editable?BuildWidget.buildInput('地址', address, maxLength: 255, focusNode: _focusVendor[4]):BuildWidget.buildRow('地址', address.text),
                                 widget.editable?BuildWidget.buildInput('联系人', contact, focusNode: _focusVendor[2], required: true):BuildWidget.buildRow('联系人', contact.text),
                                 widget.editable?BuildWidget.buildInput('联系人电话', contactMobile, maxLength: 20, focusNode: _focusVendor[5]):BuildWidget.buildRow('联系人电话', contactMobile.text),
                                 widget.editable?BuildWidget.buildRadio('供应商经营状态', vendorStatus,
-                                    currentStatus, changeStatus):BuildWidget.buildRow('供应商经营状态', currentStatus),
+                                    currentStatus, changeStatus, required: true):BuildWidget.buildRow('供应商经营状态', currentStatus),
                                 new Divider(),
                                 new Padding(
                                     padding:
