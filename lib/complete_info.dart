@@ -88,6 +88,7 @@ class _CompleteInfoState extends State<CompleteInfo> {
 
   /// 选择下拉菜单
   void changedDropDownMethod(String selectedMethod) {
+    FocusScope.of(context).requestFocus(new FocusNode());
     setState(() {
       currentDepart = selectedMethod;
     });
@@ -102,6 +103,12 @@ class _CompleteInfoState extends State<CompleteInfo> {
             alignment: WrapAlignment.start,
             crossAxisAlignment: WrapCrossAlignment.center,
             children: <Widget>[
+              new Text(
+                '*',
+                style: TextStyle(
+                  color: Colors.red
+                ),
+              ),
               new Text(
                 title,
                 style: new TextStyle(
@@ -138,6 +145,14 @@ class _CompleteInfoState extends State<CompleteInfo> {
 
   /// 提交用户信息
   Future<Null> submit() async {
+    if (_name.text.isEmpty) {
+      showDialog(context: context,
+          builder: (context) => CupertinoAlertDialog(
+            title: new Text('姓名不可为空'),
+          )
+      );
+      return;
+    }
     var _depart = departments.firstWhere((depart) => depart['Description']==currentDepart, orElse: () => null);
     print(_depart);
     var _data = {
@@ -194,16 +209,20 @@ class _CompleteInfoState extends State<CompleteInfo> {
     }
   }
 
+  List<FocusNode> _focusInfo = new List(10).map((item) {
+    return new FocusNode();
+  }).toList();
+
   List<Widget> buildInfo() {
     List<Widget> _list = [
       new SizedBox(height: 16.0,),
       BuildWidget.buildRow('用户名/手机号', userInfo['LoginID']),
       new Divider(),
-      BuildWidget.buildInput('姓名', _name, lines: 1),
-      BuildWidget.buildInput('电话', _mobile, lines: 1),
-      BuildWidget.buildInput('邮箱', _email, lines: 1),
-      BuildWidget.buildInput('地址', _addr, lines: 1),
-      BuildWidget.buildInput('新密码', _newPass, lines: 1),
+      BuildWidget.buildInput('姓名', _name, lines: 1, required: true, focusNode: _focusInfo[0]),
+      BuildWidget.buildInput('电话', _mobile, lines: 1, focusNode: _focusInfo[1]),
+      BuildWidget.buildInput('邮箱', _email, lines: 1, focusNode: _focusInfo[2]),
+      BuildWidget.buildInput('地址', _addr, lines: 1, focusNode: _focusInfo[3]),
+      BuildWidget.buildInput('新密码', _newPass, lines: 1, focusNode: _focusInfo[4]),
       new Divider(),
       userInfo['Role']['ID']==4&&currentDepart!=null?buildDropdown('科室', currentDepart, dropdownItems, changedDropDownMethod):new Container(),
       new SizedBox(height: 16.0,),
@@ -214,6 +233,7 @@ class _CompleteInfoState extends State<CompleteInfo> {
         children: <Widget>[
           new RaisedButton(
             onPressed: () {
+              FocusScope.of(context).requestFocus(new FocusNode());
               submit();
             },
             shape: RoundedRectangleBorder(

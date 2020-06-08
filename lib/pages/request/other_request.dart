@@ -59,9 +59,7 @@ Future getImage() async {
   );
   if (image != null) {
     image.forEach((_image) async {
-      print(_image.identifier);
-      if (_imageIdentifiers.indexOf(_image.identifier) < 0) {
-        _imageIdentifiers.add(_image.identifier);
+      if (!_imageList.any((item) => item['identity'] == _image.identifier)) {
         var _data = await _image.getByteData();
         var compressed = await FlutterImageCompress.compressWithList(
           _data.buffer.asUint8List(),
@@ -69,7 +67,12 @@ Future getImage() async {
           minWidth: 600,
         );
         setState(() {
-          _imageList.add(Uint8List.fromList(compressed));
+          _imageList.add(
+            {
+              'identity': _image.identifier,
+              'content': Uint8List.fromList(compressed)
+            }
+          );
         });
       }
     });
@@ -88,11 +91,12 @@ Future getImage() async {
               children: <Widget>[
                 new Container(
                   width: 100.0,
-                  child: BuildWidget.buildPhotoPageList(context, image),
+                  child: BuildWidget.buildPhotoPageList(context, image['content']),
                 ),
                 new Padding(
                   padding: EdgeInsets.symmetric(horizontal: 0.0),
                   child: new IconButton(icon: Icon(Icons.cancel), color: Colors.blue,  onPressed: (){
+
                     imageList.remove(image);
                     setState(() {
                       _imageList = imageList;
@@ -144,7 +148,7 @@ Future getImage() async {
       var userID = prefs.getInt('userID');
       var fileList = [];
       for (var image in _imageList) {
-        var fileContent = base64Encode(image);
+        var fileContent = base64Encode(image['content']);
         var file = {
           'FileContent': fileContent,
           'FileName': 'other_${Uuid().v1()}.jpg',

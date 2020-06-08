@@ -642,9 +642,7 @@ class _ManagerCompletePageState extends State<ManagerCompletePage> {
                   ),
                 ],
               ),
-              _journal['FujiComments'] != ''
-                  ? BuildWidget.buildRow('审批备注', _journal['FujiComments'])
-                  : new Container()
+              BuildWidget.buildRow('审批备注', _journal['FujiComments'])
             ],
           ),
         ),

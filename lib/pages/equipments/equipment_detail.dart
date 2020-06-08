@@ -166,30 +166,35 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
   }
 
   void changeValue(value) {
+    FocusScope.of(context).requestFocus(new FocusNode());
     setState(() {
       currentFixed = value;
     });
   }
 
   void changeServiceScope(value) {
+    FocusScope.of(context).requestFocus(new FocusNode());
     setState(() {
       currentServiceScope = value;
     });
   }
 
   void changeOrigin(value) {
+    FocusScope.of(context).requestFocus(new FocusNode());
     setState(() {
       currentOrigin = value;
     });
   }
 
   void changeCheck(value) {
+    FocusScope.of(context).requestFocus(new FocusNode());
     setState(() {
       currentCheck = value;
     });
   }
 
   void changeRecall(value) {
+    FocusScope.of(context).requestFocus(new FocusNode());
     setState(() {
       currentRecall = value;
     });
@@ -219,12 +224,14 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
   }
 
   void changeLevel(String selectedMethod) {
+    FocusScope.of(context).requestFocus(new FocusNode());
     setState(() {
       currentLevel = selectedMethod;
     });
   }
 
   void changeDepartment(String selectedMethod) {
+    FocusScope.of(context).requestFocus(new FocusNode());
     setState(() {
       currentDepartment = selectedMethod;
     });
@@ -457,7 +464,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
                     color: Colors.blue,
                     onPressed: () {
                       setState(() {
-                        imageList.remove(image);
+                    imageList.remove(image);
                         if (image['id'] != null) {
                           deleteFile(image['id']);
                         }
@@ -887,7 +894,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
           builder: (context) => CupertinoAlertDialog(
             title: new Text('安装日期不可为空'),
           )
-      ).then((result) => FocusScope.of(context).requestFocus(_focusOther[4]));
+      ).then((result) => _scrollController.jumpTo(2200.0));
       return;
     }
     //var _iStart = DateTime.parse(installStartDate);

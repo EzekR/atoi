@@ -63,6 +63,7 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
   String _currentScope = '是';
 
   void changeType(value) {
+    FocusScope.of(context).requestFocus(new FocusNode());
     setState(() {
       _analysis.clear();
       _result.clear();
@@ -946,7 +947,7 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
               padding: EdgeInsets.symmetric(vertical: 5.0),
               child: new Row(
                 children: <Widget>[
-                  ((_dispatch['RequestType']['ID'] == 3 && _currentPrivate == '是' && _imageList == null) || (_dispatch['RequestType']['ID'] == 2 && _currentResult == '待第三方支持' && _currentProvider != '管理方' && _imageList == null))?new Text('*', style: TextStyle(color: Colors.red),):Container(),
+                  ((_dispatch['RequestType']['ID'] == 3 && _currentPrivate == '是') || (_dispatch['RequestType']['ID'] == 2 && _currentResult == '待第三方支持' && _currentProvider != '管理方'))?new Text('*', style: TextStyle(color: Colors.red),):Container(),
                   new Text(
                     '添加附件：',
                     style: new TextStyle(

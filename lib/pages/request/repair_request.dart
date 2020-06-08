@@ -91,18 +91,14 @@ class _RepairRequestState extends State<RepairRequest> {
     super.initState();
   }
 
-  List<String> _imageIdentifiers = [];
-
   Future getImage() async {
     List<Asset> image = await MultiImagePicker.pickImages(
-        maxImages: 3,
-        enableCamera: true,
+      maxImages: 3,
+      enableCamera: true,
     );
     if (image != null) {
       image.forEach((_image) async {
-        print(_image.identifier);
-        if (_imageIdentifiers.indexOf(_image.identifier) < 0) {
-          _imageIdentifiers.add(_image.identifier);
+        if (!_imageList.any((item) => item['identity'] == _image.identifier)) {
           var _data = await _image.getByteData();
           var compressed = await FlutterImageCompress.compressWithList(
             _data.buffer.asUint8List(),
@@ -110,7 +106,12 @@ class _RepairRequestState extends State<RepairRequest> {
             minWidth: 600,
           );
           setState(() {
-            _imageList.add(Uint8List.fromList(compressed));
+            _imageList.add(
+                {
+                  'identity': _image.identifier,
+                  'content': Uint8List.fromList(compressed)
+                }
+            );
           });
         }
       });
@@ -139,7 +140,7 @@ class _RepairRequestState extends State<RepairRequest> {
       var userID = prefs.getInt('userID');
       var fileList = [];
       for (var image in _imageList) {
-        var fileContent = base64Encode(image);
+        var fileContent = base64Encode(image['content']);
         var file = {
           'FileContent': fileContent,
           'FileName': 'repair_${Uuid().v1()}.jpg',
@@ -200,11 +201,12 @@ class _RepairRequestState extends State<RepairRequest> {
               children: <Widget>[
                 new Container(
                   width: 150.0,
-                  child: BuildWidget.buildPhotoPageList(context, image),
+                  child: BuildWidget.buildPhotoPageList(context, image['content']),
                 ),
                 new Padding(
                   padding: EdgeInsets.symmetric(horizontal: 0.0),
                   child: new IconButton(icon: Icon(Icons.cancel), color: Colors.blue,  onPressed: (){
+
                     imageList.remove(image);
                     setState(() {
                       _imageList = imageList;
@@ -245,6 +247,7 @@ class _RepairRequestState extends State<RepairRequest> {
   }
 
   void changedDropDownMethod(String selectedMethod) {
+    FocusScope.of(context).requestFocus(new FocusNode());
     setState(() {
       _currentResult = selectedMethod;
     });

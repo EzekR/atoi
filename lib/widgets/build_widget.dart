@@ -181,7 +181,7 @@ class BuildWidget {
             flex: 4,
             child: new Wrap(
               alignment: WrapAlignment.end,
-              crossAxisAlignment: WrapCrossAlignment.center,
+              crossAxisAlignment: WrapCrossAlignment.start,
               children: <Widget>[
                 required?new Text(
                   '*',

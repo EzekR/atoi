@@ -75,12 +75,14 @@ class _EngineerReportAccessoryState extends State<EngineerReportAccessory> {
   }
 
   void changedDropDownSource(String selectedMethod) {
+    FocusScope.of(context).requestFocus(new FocusNode());
     setState(() {
       _currentSource = selectedMethod;
     });
   }
 
   void changedDropDownVendor(String selectedMethod) {
+    FocusScope.of(context).requestFocus(new FocusNode());
     setState(() {
       _currentVendor = selectedMethod;
     });
@@ -427,20 +429,51 @@ class _EngineerReportAccessoryState extends State<EngineerReportAccessory> {
                   _currentSource=='外部供应商'?buildRowVendor('外部供应商', _vendor==null?'':_vendor['Name']):new Container(),
                   BuildWidget.buildInput('新装编号', _newCode, focusNode: _focusAcc[1], lines: 1, required: true),
                   new Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 110.0),
+                    padding: EdgeInsets.symmetric(vertical: 5.0),
                     child: new Row(
                       children: <Widget>[
-                        new Text('附件：',
-                          style: new TextStyle(
-                              fontSize: 16.0,
-                              fontWeight: FontWeight.w600
+                        new Expanded(
+                          flex: 4,
+                          child: new Wrap(
+                            alignment: WrapAlignment.end,
+                            crossAxisAlignment: WrapCrossAlignment.center,
+                            children: <Widget>[
+                              new Text(
+                                '附件',
+                                style: new TextStyle(
+                                    fontSize: 16.0,
+                                    fontWeight: FontWeight.w600
+                                ),
+                              )
+                            ],
                           ),
                         ),
-                        new IconButton(icon: Icon(Icons.add_a_photo), onPressed: () async {
-                          getImage('new');
-                        }),
+                        new Expanded(
+                          flex: 1,
+                          child: new Text(
+                            '：',
+                            style: new TextStyle(
+                              fontSize: 16.0,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                        new Expanded(
+                          flex: 6,
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            children: <Widget>[
+                              new IconButton(
+                                  icon: Icon(Icons.add_a_photo),
+                                  onPressed: () {
+                                    FocusScope.of(context).requestFocus(new FocusNode());
+                                    getImage('new');
+                                  })
+                            ],
+                          ),
+                        )
                       ],
-                    )
+                    ),
                   ),
                   new Row(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -465,27 +498,118 @@ class _EngineerReportAccessoryState extends State<EngineerReportAccessory> {
                       )
                     ],
                   ),
-                  BuildWidget.buildInput('新装部件金额（元/件）', _amount, inputType: TextInputType.numberWithOptions(
-                    decimal: true,
-                    signed: false
-                  ), maxLength: 11, focusNode: _focusAcc[3], lines: 1, required: true),
+                  new Padding(
+                    padding: EdgeInsets.symmetric(vertical: 5.0),
+                    child: new Row(
+                      children: <Widget>[
+                        new Expanded(
+                          flex: 4,
+                          child: new Wrap(
+                            alignment: WrapAlignment.end,
+                            crossAxisAlignment: WrapCrossAlignment.center,
+                            children: <Widget>[
+                              RichText(
+                                softWrap: true,
+                                textAlign: TextAlign.end,
+                                text: TextSpan(
+                                  text: '*',
+                                  style: TextStyle(
+                                    color: Colors.red
+                                  ),
+                                  children: [
+                                    new TextSpan(
+                                      text: '新装部件金额（元/件）',
+                                      style: new TextStyle(
+                                          fontSize: 16.0,
+                                          color: Colors.black,
+                                          fontWeight: FontWeight.w600
+                                      ),
+                                    )
+                                  ]
+                                )
+                              )
+                            ],
+                          ),
+                        ),
+                        new Expanded(
+                          flex: 1,
+                          child: new Text(
+                            '：',
+                            style: new TextStyle(
+                              fontSize: 16.0,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                        new Expanded(
+                          flex: 6,
+                          child: new TextField(
+                            controller: _amount,
+                            maxLines: 1,
+                            maxLength: 11,
+                            keyboardType: TextInputType.numberWithOptions(
+                              decimal: true,
+                              signed: false
+                            ),
+                            focusNode: _focusAcc[3],
+                            //textInputAction: TextInputAction.next,
+                            decoration: InputDecoration(
+                              fillColor: Color(0xfff0f0f0),
+                              filled: true,
+                            ),
+                          ),
+                        )
+                      ],
+                    ),
+                  ),
                   BuildWidget.buildInput('数量', _qty, inputType: TextInputType.number, maxLength: 9, focusNode: _focusAcc[4], lines: 1, required: true),
                   BuildWidget.buildInput('拆下编号', _oldCode, focusNode: _focusAcc[2], lines: 1, required: true),
                   new Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 95.0),
+                    padding: EdgeInsets.symmetric(vertical: 5.0),
                     child: new Row(
                       children: <Widget>[
-                        new Text('附件：',
-                          style: new TextStyle(
-                              fontSize: 16.0,
-                              fontWeight: FontWeight.w600
+                        new Expanded(
+                          flex: 4,
+                          child: new Wrap(
+                            alignment: WrapAlignment.end,
+                            crossAxisAlignment: WrapCrossAlignment.center,
+                            children: <Widget>[
+                              new Text(
+                                '附件',
+                                style: new TextStyle(
+                                    fontSize: 16.0,
+                                    fontWeight: FontWeight.w600
+                                ),
+                              )
+                            ],
                           ),
                         ),
-                        new IconButton(icon: Icon(Icons.add_a_photo), onPressed: () async {
-                          getImage('old');
-                        }),
+                        new Expanded(
+                          flex: 1,
+                          child: new Text(
+                            '：',
+                            style: new TextStyle(
+                              fontSize: 16.0,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                        new Expanded(
+                          flex: 6,
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            children: <Widget>[
+                              new IconButton(
+                                  icon: Icon(Icons.add_a_photo),
+                                  onPressed: () {
+                                    FocusScope.of(context).requestFocus(new FocusNode());
+                                    getImage('old');
+                                  })
+                            ],
+                          ),
+                        )
                       ],
-                    )
+                    ),
                   ),
                   new Row(
                     mainAxisAlignment: MainAxisAlignment.center,

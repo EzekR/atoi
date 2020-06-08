@@ -26,7 +26,7 @@ class ManagerModel extends Model {
   int _statusId = 98;
   int _typeId =0;
   bool _recall = false;
-  int _departmentId = 0;
+  int _departmentId = -1;
   int _urgencyId = 0;
   bool _overDue = false;
   int _dispatchStatusId = 3;

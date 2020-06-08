@@ -103,7 +103,7 @@ class _EquipmentContractState extends State<EquipmentContract> {
     }
   }
 
-  List<FocusNode> _focusContract = new List(10).map((item) {
+  List<FocusNode> _focusContract = new List(20).map((item) {
     return new FocusNode();
   }).toList();
 
@@ -654,6 +654,7 @@ Future getImage() async {
                                               focusNode: _focusContract[7],
                                               icon: Icon(Icons.search),
                                               onPressed: () async {
+                                                FocusScope.of(context).requestFocus(new FocusNode());
                                                 final _searchResult = await Navigator.of(context).push(new MaterialPageRoute(builder: (_) => SearchLazy(searchType: SearchType.MANUFACTURER,)));
                                                 print(_searchResult);
                                                 if (_searchResult != null &&
@@ -724,6 +725,7 @@ Future getImage() async {
                                                       focusNode: _focusContract[6],
                                                       icon: Icon(Icons.calendar_today, color: AppConstants.AppColors['btn_main'],),
                                                       onPressed: () async {
+                                                        FocusScope.of(context).requestFocus(new FocusNode());
                                                         await pickDate('start', initialTime: startDate);
                                                       }
                                                   ),
@@ -748,6 +750,7 @@ Future getImage() async {
                                                   child: new IconButton(
                                                       icon: Icon(Icons.calendar_today, color: AppConstants.AppColors['btn_main'],),
                                                       onPressed: () async {
+                                                        FocusScope.of(context).requestFocus(new FocusNode());
                                                         await pickDate('end', initialTime: endDate);
                                                       }
                                                   ),
@@ -762,9 +765,9 @@ Future getImage() async {
                                 ):BuildWidget.buildRow('起止日期', '$startDate\n$endDate'),
                                 //BuildWidget.buildRow('状态', _contractStatus),
                                 widget.editable?BuildWidget.buildDropdown('服务范围', currentScope, dropdownScope, changeScope):BuildWidget.buildRow('服务范围', currentScope),
-                                widget.editable&&currentScope=='其他'?BuildWidget.buildInput('其他范围', scopeComments, maxLength: 50):new Container(),
+                                widget.editable&&currentScope=='其他'?BuildWidget.buildInput('其他范围', scopeComments, maxLength: 50, focusNode: _focusContract[18]):new Container(),
                                 !widget.editable&&currentScope=='其他'?BuildWidget.buildRow('其他范围', scopeComments.text):new Container(),
-                                widget.editable?BuildWidget.buildInput('备注', comments, maxLength: 500):BuildWidget.buildRow('备注', comments.text),
+                                widget.editable?BuildWidget.buildInput('备注', comments, maxLength: 500, focusNode: _focusContract[19]):BuildWidget.buildRow('备注', comments.text),
                                 new Divider(),
                                 new Padding(
                                     padding:

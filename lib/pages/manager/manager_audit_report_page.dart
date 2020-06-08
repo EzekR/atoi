@@ -62,6 +62,7 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
   List _serviceScope = ['是', '否'];
 
   void changeScope(value) {
+    FocusScope.of(context).requestFocus(new FocusNode());
     setState(() {
       _currentScope = value;
     });

@@ -31,7 +31,7 @@ class _UserRepairPageState extends State<UserRepairPage> {
   //增加操作状态
   bool _stunned = false;
 
-  List<Uint8List> _imageList = [];
+  List<dynamic> _imageList = [];
 
   TextEditingController _describe = new TextEditingController();
   TextEditingController _category = new TextEditingController();
@@ -150,7 +150,7 @@ class _UserRepairPageState extends State<UserRepairPage> {
     }
     List<dynamic> Files = [];
     for (var image in _imageList) {
-      var content = base64Encode(image);
+      var content = base64Encode(image['content']);
       Map _json = {
         'FileContent': content,
         'FileName': 'repair_${Uuid().v1()}.jpg',
@@ -276,9 +276,7 @@ Future getImage() async {
   );
   if (image != null) {
     image.forEach((_image) async {
-      print(_image.identifier);
-      if (_imageIdentifiers.indexOf(_image.identifier) < 0) {
-        _imageIdentifiers.add(_image.identifier);
+      if (!_imageList.any((item) => item['identity'] == _image.identifier)) {
         var _data = await _image.getByteData();
         var compressed = await FlutterImageCompress.compressWithList(
           _data.buffer.asUint8List(),
@@ -286,7 +284,12 @@ Future getImage() async {
           minWidth: 600,
         );
         setState(() {
-          _imageList.add(Uint8List.fromList(compressed));
+          _imageList.add(
+            {
+              'identity': _image.identifier,
+              'content': Uint8List.fromList(compressed)
+            }
+          );
         });
       }
     });
@@ -304,7 +307,7 @@ Future getImage() async {
           children: <Widget>[
             new Container(
               width: 100.0,
-              child: BuildWidget.buildPhotoPageList(context, image),
+              child: BuildWidget.buildPhotoPageList(context, image['content']),
             ),
             new Padding(
               padding: EdgeInsets.symmetric(horizontal: 0.0),
@@ -312,6 +315,7 @@ Future getImage() async {
                   icon: Icon(Icons.cancel, color: Colors.blue,),
                   color: Colors.white,
                   onPressed: () {
+
                     imageList.remove(image);
                     setState(() {
                       _imageList = imageList;
@@ -442,9 +446,9 @@ Future getImage() async {
                         mainAxisSize: MainAxisSize.max,
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: <Widget>[
-                          BuildWidget.buildDropdown('机器状态:', _currentResult,
+                          BuildWidget.buildDropdown('机器状态', _currentResult,
                               _dropDownMenuItems, changedDropDownMethod, context: context, required: true),
-                          BuildWidget.buildInput('故障描述:', _describe, maxLength: 200, required: true),
+                          BuildWidget.buildInput('故障描述', _describe, maxLength: 200, required: true),
                           new Padding(
                             padding: EdgeInsets.symmetric(vertical: 5.0),
                             child: new Row(

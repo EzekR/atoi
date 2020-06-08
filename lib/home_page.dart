@@ -43,7 +43,7 @@ class _HomePageState extends State<HomePage>
   int typeId = 0;
   int statusId = 0;
   bool recall = false;
-  int departmentId = 0;
+  int departmentId = -1;
   int urgencyId = 0;
   int dispatchStatusId = 3;
   bool overDue = false;
@@ -116,7 +116,7 @@ class _HomePageState extends State<HomePage>
     model.recall = false;
     model.overDue = false;
     model.urgencyId = 0;
-    model.departmentId = 0;
+    model.departmentId = -1;
     model.offset = 10;
     model.dispatchStatusId = 3;
     model.offset = 10;

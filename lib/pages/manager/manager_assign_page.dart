@@ -709,6 +709,10 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
     }
   }
 
+  List<FocusNode> _focusAssign = new List(10).map((item) {
+    return new FocusNode();
+  }).toList();
+
   List<Widget> buildEquipment() {
     if (_request.isNotEmpty) {
       var _equipments = _request['Equipments'];
@@ -788,18 +792,18 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
               BuildWidget.buildRow('主题', _request['SubjectName']),
               BuildWidget.buildRow('请求人', _request['RequestUser']['Name']),
               BuildWidget.buildRow('请求状态', _request['Status']['Name']),
-              _request['RequestType']['ID']==1?BuildWidget.buildDropdown('机器状态', _currentStatusReq, _dropDownMenuStatusesReq, changedDropDownStatusReq, context: context):new Container(),
-              BuildWidget.buildInput(model.Remark[_request['RequestType']['ID']], _desc, maxLength: 200, required: true),
-              _request['RequestType']['ID']==2?BuildWidget.buildDropdown('保养类型', _currentMaintain, _dropDownMenuMaintain, changedDropDownMaintain, context: context):new Container(),
-              _request['RequestType']['ID']==3?BuildWidget.buildDropdown('强检原因', _currentMandatory, _dropDownMenuMandatory, changedDropDownMandatory, context: context):new Container(),
-              _request['RequestType']['ID']==7?BuildWidget.buildDropdown('来源', _currentSource, _dropDownMenuSource, changedDropDownSource, context: context):new Container(),
+              _request['RequestType']['ID']==1?BuildWidget.buildDropdown('机器状态', _currentStatusReq, _dropDownMenuStatusesReq, changedDropDownStatusReq, context: context, required: true):new Container(),
+              BuildWidget.buildInput(model.Remark[_request['RequestType']['ID']], _desc, maxLength: 200, required: true, focusNode: _focusAssign[0]),
+              _request['RequestType']['ID']==2?BuildWidget.buildDropdown('保养类型', _currentMaintain, _dropDownMenuMaintain, changedDropDownMaintain, context: context, required: true):new Container(),
+              _request['RequestType']['ID']==3?BuildWidget.buildDropdown('强检原因', _currentMandatory, _dropDownMenuMandatory, changedDropDownMandatory, context: context, required: true):new Container(),
+              _request['RequestType']['ID']==7?BuildWidget.buildDropdown('来源', _currentSource, _dropDownMenuSource, changedDropDownSource, context: context, required: true):new Container(),
               _request['RequestType']['ID']==3?BuildWidget.buildRow('是否召回', _request['IsRecall']?'是':'否'):new Container(),
               BuildWidget.buildRow('请求附件', ''),
               buildImageColumn(),
               //imageBytes.isNotEmpty?ShouldRebuild<BuildImageColumn>(shouldRebuild: (_old, _new) => _old.imageList!=_new.imageList, child: BuildImageColumn(imageList: imageBytes,),):Container(),
               buildFileName(),
               new Divider(),
-              BuildWidget.buildDropdown('处理方式', _currentMethod, _dropDownMenuItems, changedDropDownMethod, context: context),
+              BuildWidget.buildDropdown('处理方式', _currentMethod, _dropDownMenuItems, changedDropDownMethod, context: context, required: true),
               //BuildWidget.buildDropdown('紧急程度', _currentPriority, _dropDownMenuPris, changedDropDownPri),
             ],
           ),
@@ -829,9 +833,9 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
           mainAxisSize: MainAxisSize.max,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
-            BuildWidget.buildDropdown('派工类型', _currentType, _dropDownMenuTypes, changedDropDownType, context: context),
-            _currentType!='其他服务'?BuildWidget.buildDropdown('机器状态', _currentStatus, _dropDownMenuStatuses, changedDropDownStatus, context: context):new Container(),
-            BuildWidget.buildDropdown('紧急程度', _currentLevel, _dropDownMenuLevels, changedDropDownLevel, context: context),
+            BuildWidget.buildDropdown('派工类型', _currentType, _dropDownMenuTypes, changedDropDownType, context: context, required: true),
+            _currentType!='其他服务'?BuildWidget.buildDropdown('机器状态', _currentStatus, _dropDownMenuStatuses, changedDropDownStatus, context: context, required: true):new Container(),
+            BuildWidget.buildDropdown('紧急程度', _currentLevel, _dropDownMenuLevels, changedDropDownLevel, context: context, required: true),
             new Padding(
               padding: EdgeInsets.symmetric(vertical: 5.0),
               child: new Row(
@@ -842,6 +846,10 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
                       alignment: WrapAlignment.end,
                       crossAxisAlignment: WrapCrossAlignment.center,
                       children: <Widget>[
+                        new Text(
+                          '*',
+                          style: TextStyle(color: Colors.red),
+                        ),
                         new Text(
                           '出发时间',
                           style: new TextStyle(
@@ -879,6 +887,7 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
                       color: AppConstants.AppColors['btn_main'],
                       icon: Icon(Icons.calendar_today),
                       onPressed: () {
+                        FocusScope.of(context).requestFocus(new FocusNode());
                         var _initTime = DateTime.tryParse(dispatchDate)??DateTime.now();
                         DatePicker.showDatePicker(
                           context,
@@ -927,21 +936,34 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
                 ],
               ),
             ),
-            _engineerNames.isEmpty?new Container():BuildWidget.buildDropdown('工程师姓名', _currentName, _dropDownMenuNames, changedDropDownName, context: context),
+            _engineerNames.isEmpty?new Container():BuildWidget.buildDropdown('工程师姓名', _currentName, _dropDownMenuNames, changedDropDownName, context: context, required: true),
             new Padding(
               padding: EdgeInsets.symmetric(vertical: 5.0),
               child: new Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
-                  new Align(
-                    alignment: Alignment(-0.62, 0),
-                    child: new Text(
-                      '主管备注：',
-                      style: new TextStyle(
-                          fontSize: 16.0,
-                          fontWeight: FontWeight.w600
+                  new Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: <Widget>[
+                      Expanded(
+                        flex: 4,
+                        child: Wrap(
+                          alignment: WrapAlignment.end,
+                          children: <Widget>[
+                            new Text(
+                              '主管备注：',
+                              style: new TextStyle(
+                                  fontSize: 16.0,
+                                  fontWeight: FontWeight.w600
+                              ),
+                            ),
+                          ],
+                        )
                       ),
-                    ),
+                      Expanded(
+                        flex: 6,
+                        child: Container()
+                      )
+                    ],
                   ),
                   new TextField(
                     controller: _leaderComment,

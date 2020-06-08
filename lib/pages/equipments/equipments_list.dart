@@ -84,6 +84,10 @@ class _EquipmentsListState extends State<EquipmentsList> {
 
   void setFilter() async {
     //do some stuff
+    setState(() {
+      offset = 0;
+      _equipments.clear();
+    });
     await getEquipments();
   }
 
@@ -188,6 +192,7 @@ class _EquipmentsListState extends State<EquipmentsList> {
                                   ),
                                 ],
                                 onChanged: (val) {
+                                  FocusScope.of(context).requestFocus(new FocusNode());
                                   setState(() {
                                     searchFilter = val;
                                   });
@@ -364,6 +369,7 @@ class _EquipmentsListState extends State<EquipmentsList> {
                           child: Center(
                             child: IconButton(
                                 onPressed: () {
+                                  FocusScope.of(context).requestFocus(new FocusNode());
                                   showSearch(context: context, delegate: SearchBarDepartment(), hintText: '请输入科室名称/拼音/ID').then((result) {
                                     if (result != null) {
                                       var _result = jsonDecode(result);
@@ -885,7 +891,7 @@ class _EquipmentsListState extends State<EquipmentsList> {
           ),
         ),
         body: _loading?new Center(child: new SpinKitThreeBounce(color: Colors.blue,),):(_equipments.length==0?Center(child: Text('无设备'),):new ListView.builder(
-          itemCount: _equipments.length+1,
+          itemCount: _equipments.length>10?_equipments.length+1:_equipments.length,
           controller: _scrollController,
           itemBuilder: (context, i) {
             if (i != _equipments.length) {

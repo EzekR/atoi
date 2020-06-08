@@ -39,6 +39,10 @@ class _VendorsListState extends State<VendorsList> {
   }
 
   void setFilter() {
+    setState(() {
+      offset = 0;
+      _vendors.clear();
+    });
     getVendors();
   }
 
@@ -504,7 +508,7 @@ class _VendorsListState extends State<VendorsList> {
         ),
       ),
       body: _loading?new Center(child: new SpinKitThreeBounce(color: Colors.blue,),):(_vendors.length==0?Center(child: Text('无供应商'),):new ListView.builder(
-        itemCount: _vendors.length+1,
+        itemCount: _vendors.length>10?_vendors.length+1:_vendors.length,
         controller: _scrollController,
         itemBuilder: (context, i) {
           if (i !=_vendors.length) {

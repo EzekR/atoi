@@ -39,6 +39,10 @@ class _ContractListState extends State<ContractList> {
   }
 
   void setFilter() async {
+    setState(() {
+      offset = 0;
+      _contracts.clear();
+    });
     getContracts();
   }
 
@@ -185,6 +189,7 @@ class _ContractListState extends State<ContractList> {
                                   ),
                                 ],
                                 onChanged: (val) {
+                                  FocusScope.of(context).requestFocus(new FocusNode());
                                   setState(() {
                                     field = val;
                                   });
@@ -458,7 +463,7 @@ class _ContractListState extends State<ContractList> {
         ),
       ),
       body: _loading?new Center(child: new SpinKitThreeBounce(color: Colors.blue,),):(_contracts.length==0?Center(child: Text('无合同'),):new ListView.builder(
-        itemCount: _contracts.length+1,
+        itemCount: _contracts.length>10?_contracts.length+1:_contracts.length,
         controller: _scrollController,
         itemBuilder: (context, i) {
           if (i != _contracts.length) {
