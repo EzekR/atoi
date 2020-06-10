@@ -832,6 +832,7 @@ class FullScreenWrapper extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(),
       body: Container(
         constraints: BoxConstraints.expand(
           height: MediaQuery.of(context).size.height,

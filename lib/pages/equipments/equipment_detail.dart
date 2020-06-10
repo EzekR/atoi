@@ -733,6 +733,11 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
   }).toList();
 
   Future<Null> saveEquipment() async {
+    setState(() {
+      expansionList = expansionList.map((item) {
+        return true;
+      }).toList();
+    });
     if (name.text.isEmpty) {
       showDialog(
         context: context,
@@ -766,7 +771,9 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
           builder: (context) => CupertinoAlertDialog(
             title: new Text('设备厂商不可为空'),
           )
-      ).then((result) => _scrollController.jumpTo(200.0));
+      ).then((result) {
+        _scrollController.jumpTo(200.0);
+      });
       return;
     }
     if (responseTime.text.isEmpty || responseTime.text == "0" || responseTime.text == "") {
@@ -786,7 +793,9 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
           builder: (context) => CupertinoAlertDialog(
             title: new Text('有效日期格式有误'),
           )
-      ).then((result) => _scrollController.jumpTo(1000.0));
+      ).then((result) {
+        _scrollController.jumpTo(1000.0);
+      }) ;
       return;
     }
     if (assetCode.text.isEmpty && !autoAssetCode) {
@@ -804,7 +813,9 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
           builder: (context) => CupertinoAlertDialog(
             title: new Text('采购日期不可为空'),
           )
-      ).then((result) => _scrollController.jumpTo(1600.0));
+      ).then((result) {
+       _scrollController.jumpTo(1600.0);
+      });
       return;
     }
     if (double.tryParse(purchaseAmount.text.toString()) !=null && double.tryParse(purchaseAmount.text.toString()) > 99999999.99) {
@@ -822,7 +833,9 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
           builder: (context) => CupertinoAlertDialog(
             title: new Text('报废时间不可为空'),
           )
-      ).then((result) => _scrollController.jumpTo(2000.0));
+      ).then((result) {
+        _scrollController.jumpTo(2200.0);
+      });
       return;
     }
     if (currentPatrolPeriod != '无' && patrolPeriod.text.isEmpty) {
@@ -894,7 +907,9 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
           builder: (context) => CupertinoAlertDialog(
             title: new Text('安装日期不可为空'),
           )
-      ).then((result) => _scrollController.jumpTo(2200.0));
+      ).then((result) {
+        _scrollController.jumpTo(2200.0);
+      });
       return;
     }
     //var _iStart = DateTime.parse(installStartDate);
