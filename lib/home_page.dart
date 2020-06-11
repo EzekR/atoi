@@ -57,6 +57,8 @@ class _HomePageState extends State<HomePage>
   List urgencyList = [];
   List dispatchList = [];
   EventBus bus = new EventBus();
+  bool showEquip = false;
+  bool showTable = false;
 
   Future<Null> getRole() async {
     var _prefs = await prefs;
@@ -842,55 +844,160 @@ class _HomePageState extends State<HomePage>
                     ),
                     ListTile(
                       leading: Icon(Icons.list),
-                      title: Text('设备列表',
+                      title: Text('资产管理',
                         style: new TextStyle(
                             color: Colors.blue
                         ),
                       ),
+                      trailing: showEquip?Icon(Icons.keyboard_arrow_down):Icon(Icons.keyboard_arrow_right),
                       onTap: () {
-                        Navigator.of(context).push(new MaterialPageRoute(builder: (_) {
-                          return new EquipmentsList();
-                        }));
+                        setState(() {
+                          showEquip = !showEquip;
+                        });
                       },
                     ),
-                    ListTile(
-                      leading: Icon(Icons.event_note),
-                      title: Text('合同列表',
-                        style: new TextStyle(
-                            color: Colors.blue
-                        ),
+                    AnimatedContainer(
+                      height: showEquip?120.0:0.0,
+                      duration: Duration(milliseconds: 200),
+                      child: Column(
+                        children: <Widget>[
+                          Container(
+                            height: 40.0,
+                            child: FlatButton(
+                              onPressed: () {
+                                Navigator.of(context).push(new MaterialPageRoute(builder: (_) {
+                                  return new EquipmentsList();
+                                }));
+                              },
+                              child: Row(
+                                children: <Widget>[
+                                  SizedBox(
+                                    width: 60.0,
+                                  ),
+                                  Icon(Icons.computer, color: Colors.grey, size: 16.0,),
+                                  SizedBox(
+                                    width: 10.0,
+                                  ),
+                                  Text(
+                                      '设备',
+                                    style: TextStyle(
+                                      fontSize: 14.0,
+                                      color: Colors.black54
+                                    ),
+                                  )
+                                ],
+                              ),
+                            ),
+                          ),
+                          Container(
+                            height: 40.0,
+                            child: FlatButton(
+                              onPressed: () {
+                                Navigator.of(context).push(new MaterialPageRoute(builder: (_) {
+                                  return new ContractList();
+                                }));
+                              },
+                              child: Row(
+                                children: <Widget>[
+                                  SizedBox(
+                                    width: 60.0,
+                                  ),
+                                  Icon(Icons.event_note, color: Colors.grey, size: 16.0,),
+                                  SizedBox(
+                                    width: 10.0,
+                                  ),
+                                  Text('合同',
+                                    style: TextStyle(
+                                        fontSize: 14.0,
+                                        color: Colors.black54
+                                    ),
+                                  )
+                                ],
+                              ),
+                            ),
+                          ),
+                          Container(
+                            height: 40.0,
+                            child: FlatButton(
+                              onPressed: () {
+                                Navigator.of(context).push(new MaterialPageRoute(builder: (_) {
+                                  return new VendorsList();
+                                }));
+                              },
+                              child: Row(
+                                children: <Widget>[
+                                  SizedBox(
+                                    width: 60.0,
+                                  ),
+                                  Icon(Icons.store, color: Colors.grey, size: 16.0,),
+                                  SizedBox(
+                                    width: 10.0,
+                                  ),
+                                  Text('供应商',
+                                    style: TextStyle(
+                                        fontSize: 14.0,
+                                        color: Colors.black54
+                                    ),
+                                  )
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
-                      onTap: () {
-                        Navigator.of(context).push(new MaterialPageRoute(builder: (_) {
-                          return new ContractList();
-                        }));
-                      },
-                    ),
-                    ListTile(
-                      leading: Icon(Icons.store),
-                      title: Text('供应商列表',
-                        style: new TextStyle(
-                            color: Colors.blue
-                        ),
-                      ),
-                      onTap: () {
-                        Navigator.of(context).push(new MaterialPageRoute(builder: (_) {
-                          return new VendorsList();
-                        }));
-                      },
                     ),
                     ListTile(
                       leading: Icon(Icons.insert_chart),
-                      title: Text('报表',
+                      title: Text('报表管理',
                         style: new TextStyle(
                             color: Colors.blue
                         ),
                       ),
+                      trailing: showTable?Icon(Icons.keyboard_arrow_down):Icon(Icons.keyboard_arrow_right),
                       onTap: () {
-                        Navigator.of(context).push(new MaterialPageRoute(builder: (_) {
-                          return new ReportList();
-                        }));
+                        //Navigator.of(context).push(new MaterialPageRoute(builder: (_) {
+                        //  return new ReportList();
+                        //}));
+                        setState(() {
+                          showTable = !showTable;
+                        });
                       },
+                    ),
+                    AnimatedContainer(
+                      height: showTable?40.0:0.0,
+                      duration: Duration(milliseconds: 200),
+                      child: Column(
+                        children: <Widget>[
+                          Container(
+                            height: 40.0,
+                            child: FlatButton(
+                              onPressed: () {
+                                Navigator.of(context).push(new MaterialPageRoute(builder: (_) {
+                                  return new ReportList();
+                                }));
+                              },
+                              child: Row(
+                                children: <Widget>[
+                                  SizedBox(
+                                    width: 60.0,
+                                  ),
+                                  Icon(Icons.insert_chart, color: Colors.grey, size: 16.0,),
+                                  SizedBox(
+                                    width: 10.0,
+                                  ),
+                                  Text(
+                                    '报表',
+                                    style: TextStyle(
+                                        fontSize: 14.0,
+                                        color: Colors.black54
+                                    ),
+                                  )
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                     ListTile(
                       leading: Icon(Icons.exit_to_app),
