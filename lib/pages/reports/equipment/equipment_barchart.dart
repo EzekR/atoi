@@ -45,7 +45,6 @@ class _EquipmentBarchartState extends State<EquipmentBarchart> {
   void initState() {
     super.initState();
     initDimension();
-    print(_years);
     _currentDimension = _dim1;
     getChartData(_dim1, _dim2);
   }
