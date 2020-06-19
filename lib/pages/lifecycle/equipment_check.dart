@@ -107,6 +107,10 @@ Future getImage() async {
   }
 
   Future<Null> submit() async {
+    setState(() {
+      _isExpandedBasic = true;
+      _isExpandedDetail = true;
+    });
     if (_equipments == null) {
       showDialog(
           context: context,
@@ -498,6 +502,7 @@ Future getImage() async {
                       children: <Widget>[
                         new RaisedButton(
                           onPressed: () {
+                            FocusScope.of(context).requestFocus(new FocusNode());
                             return hold ? null : submit();
                           },
                           shape: RoundedRectangleBorder(

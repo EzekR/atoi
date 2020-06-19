@@ -35,6 +35,7 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
   ConstantsModel model;
   var _unsolved = new TextEditingController();
   int _attachId;
+  ScrollController _scrollController = new ScrollController();
 
   List _serviceResults = [
     '待分配',
@@ -349,6 +350,11 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
   }).toList();
 
   Future<Null> approveReport() async {
+    setState(() {
+      _expandList = _expandList.map((item) {
+        return true;
+      }).toList();
+    });
     if (_currentResult == '问题升级' && _unsolved.text.isEmpty) {
       showDialog(context: context,
           builder: (context) => CupertinoAlertDialog(
@@ -363,7 +369,7 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
             builder: (context) => CupertinoAlertDialog(
               title: new Text('附件不可为空'),
             )
-        ).then((result) => FocusScope.of(context).requestFocus(_focusReport[1]));
+        ).then((result) => _scrollController.jumpTo(1400));
         return;
       }
     }
@@ -443,6 +449,12 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
   }
 
   Future<Null> rejectReport() async {
+    setState(() {
+      _expandList = _expandList.map((item) {
+        return true;
+      }).toList();
+    });
+    
     if (_currentResult == '问题升级' && _unsolved.text.isEmpty) {
       showDialog(context: context,
           builder: (context) => CupertinoAlertDialog(
@@ -456,7 +468,10 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
         builder: (context) => CupertinoAlertDialog(
           title: new Text('审批备注不可为空'),
         )
-      ).then((result) => FocusScope.of(context).requestFocus(_focusReport[3]));
+      ).then((result) {
+        _scrollController.jumpTo(1800.0);
+        _focusReport[3].requestFocus();
+      });
       return;
     }
     if ((_dispatch['RequestType']['ID'] == 2 && _currentProvider != '管理方' && _report['Type']['ID'] == 201 && _currentResult == '待第三方支持') || (_dispatch['RequestType']['ID'] == 3 && _report['Type']['ID'] != 1 && _report['IsPrivate'])) {
@@ -465,7 +480,7 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
             builder: (context) => CupertinoAlertDialog(
               title: new Text('附件不可为空'),
             )
-        ).then((result) => FocusScope.of(context).requestFocus(_focusReport[1]));
+        ).then((result) => _scrollController.jumpTo(1400));
         return;
       }
     }
@@ -982,6 +997,7 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
         padding: EdgeInsets.symmetric(vertical: 5.0),
         child: new Card(
           child: new ListView(
+            controller: _scrollController,
             children: <Widget>[
               new ExpansionPanelList(
                 animationDuration: Duration(milliseconds: 200),
@@ -1004,6 +1020,7 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
                 children: <Widget>[
                   new RaisedButton(
                     onPressed: () {
+                      FocusScope.of(context).requestFocus(new FocusNode());
                       approveReport();
                     },
                     shape: RoundedRectangleBorder(
@@ -1015,6 +1032,7 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
                   ),
                   new RaisedButton(
                     onPressed: () {
+                      FocusScope.of(context).requestFocus(new FocusNode());
                       rejectReport();
                     },
                     shape: RoundedRectangleBorder(

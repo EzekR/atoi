@@ -44,6 +44,7 @@ class _EngineerVoucherPageState extends State<EngineerVoucherPage> {
   ConstantsModel model;
   bool hold = false;
   Map test;
+  ScrollController _scrollController = new ScrollController();
 
   List _serviceResults = [
     '完成',
@@ -130,6 +131,11 @@ class _EngineerVoucherPageState extends State<EngineerVoucherPage> {
   }).toList();
 
   Future<Null> uploadJournal() async {
+    setState(() {
+      _expandList = _expandList.map((item) {
+        return true;
+      }).toList();
+    });
     if (_customerNumber.text.isEmpty) {
       showDialog(context: context,
           builder: (context) => CupertinoAlertDialog(
@@ -151,7 +157,7 @@ class _EngineerVoucherPageState extends State<EngineerVoucherPage> {
           builder: (context) => CupertinoAlertDialog(
           title: new Text('签名不可为空'),
         )
-      ).then((result) => FocusScope.of(context).requestFocus(_focusJournal[5]));
+      ).then((result) => _scrollController.jumpTo(1800));
       return;
     }
     if (_jobContent.text.isEmpty) {
@@ -651,6 +657,7 @@ class _EngineerVoucherPageState extends State<EngineerVoucherPage> {
         padding: EdgeInsets.symmetric(vertical: 5.0),
         child: new Card(
           child: new ListView(
+            controller: _scrollController,
             children: <Widget>[
               new ExpansionPanelList(
                 animationDuration: Duration(milliseconds: 200),
@@ -671,6 +678,7 @@ class _EngineerVoucherPageState extends State<EngineerVoucherPage> {
                 children: <Widget>[
                   widget.status==0||widget.status==1?new RaisedButton(
                     onPressed: () {
+                      FocusScope.of(context).requestFocus(new FocusNode());
                       return hold?null:uploadJournal();
                     },
                     shape: RoundedRectangleBorder(

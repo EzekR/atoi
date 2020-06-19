@@ -116,7 +116,7 @@ class _SignaturePageState extends State<SignaturePage> {
                     final sign = _sign.currentState;
                     debugPrint('${sign.points.length} points in the signature');
                   },
-                  backgroundPainter: _WatermarkPaint("2.0", "2.0"),
+                  backgroundPainter: _WatermarkPaint("1.0", "1.0"),
                   strokeWidth: strokeWidth,
                 ),
               ),

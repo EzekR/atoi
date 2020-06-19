@@ -149,6 +149,10 @@ Future getImage() async {
   }
 
   Future<Null> submit() async {
+    setState(() {
+      _isExpandedBasic = true;
+      _isExpandedDetail = true;
+    });
     if (_equipments.isEmpty) {
       showDialog(context: context,
           builder: (context) => CupertinoAlertDialog(
@@ -481,6 +485,7 @@ Future getImage() async {
                       children: <Widget>[
                         new RaisedButton(
                           onPressed: () {
+                            FocusScope.of(context).requestFocus(new FocusNode());
                             return hold?null:submit();
                           },
                           shape: RoundedRectangleBorder(

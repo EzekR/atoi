@@ -777,7 +777,7 @@ class BuildWidget {
             ),
           ),
           new Expanded(
-              flex: 4,
+              flex: 5,
               child: new GestureDetector(
                 onTap: () {
                 },
@@ -796,7 +796,7 @@ class BuildWidget {
               )
           ),
           new Expanded(
-              flex: 2,
+              flex: 1,
               child: IconButton(
                   icon: Icon(Icons.search),
                   onPressed: () {

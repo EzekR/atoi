@@ -33,7 +33,7 @@ class _ManagerAuditVoucherPageState extends State<ManagerAuditVoucherPage> {
   TextEditingController _comment = new TextEditingController();
   TextEditingController _follow = new TextEditingController();
   ConstantsModel model;
-
+  ScrollController _scrollController = new ScrollController();
   Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
 
   List _serviceResults = [
@@ -252,6 +252,11 @@ class _ManagerAuditVoucherPageState extends State<ManagerAuditVoucherPage> {
   FocusNode _focusFollow = new FocusNode();
 
   Future<Null> approveJournal() async {
+    setState(() {
+      _expandList = _expandList.map((item) {
+        return true;
+      }).toList();
+    });
     final SharedPreferences prefs = await _prefs;
     var UserId = await prefs.getInt('userID');
     if (_currentResult == '待跟进' && _follow.text.isEmpty) {
@@ -305,6 +310,11 @@ class _ManagerAuditVoucherPageState extends State<ManagerAuditVoucherPage> {
   FocusNode _focusComment = new FocusNode();
 
   Future<Null> rejectJournal() async {
+    setState(() {
+      _expandList = _expandList.map((item) {
+        return true;
+      }).toList();
+    });
     final SharedPreferences prefs = await _prefs;
     var UserId = await prefs.getInt('userID');
     print(widget.journalId);
@@ -313,7 +323,10 @@ class _ManagerAuditVoucherPageState extends State<ManagerAuditVoucherPage> {
           builder: (context) => CupertinoAlertDialog(
               title: new Text('审批备注不可为空')
           )
-      ).then((result) => FocusScope.of(context).requestFocus(_focusComment));
+      ).then((result) {
+        _scrollController.jumpTo(1800);
+        FocusScope.of(context).requestFocus(_focusComment);
+      });
       return;
     }
     if (_currentResult =='待跟进' && _follow.text.isEmpty) {
@@ -570,6 +583,7 @@ class _ManagerAuditVoucherPageState extends State<ManagerAuditVoucherPage> {
         padding: EdgeInsets.symmetric(vertical: 5.0),
         child: new Card(
           child: new ListView(
+            controller: _scrollController,
             children: <Widget>[
               new ExpansionPanelList(
                 animationDuration: Duration(milliseconds: 200),
@@ -592,6 +606,7 @@ class _ManagerAuditVoucherPageState extends State<ManagerAuditVoucherPage> {
                 children: <Widget>[
                   new RaisedButton(
                     onPressed: () {
+                      FocusScope.of(context).requestFocus(new FocusNode());
                       approveJournal();
                     },
                     shape: RoundedRectangleBorder(
@@ -603,6 +618,7 @@ class _ManagerAuditVoucherPageState extends State<ManagerAuditVoucherPage> {
                   ),
                   new RaisedButton(
                     onPressed: () {
+                      FocusScope.of(context).requestFocus(new FocusNode());
                       rejectJournal();
                     },
                     shape: RoundedRectangleBorder(

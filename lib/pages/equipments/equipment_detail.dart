@@ -213,12 +213,17 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
     for (String method in list) {
       items.add(new DropdownMenuItem(
           value: method,
-          child: new Text(
-            method,
-            style: new TextStyle(
-                fontSize: 16.0,
+          child: Container(
+            width: 120.0,
+            child: Text(
+              method,
+              style: TextStyle(
+                fontSize: 14.0
+              ),
             ),
-          )));
+          )
+        )
+      );
     }
     return items;
   }
@@ -1966,7 +1971,6 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
                       flex: 2,
                       child: new IconButton(
                           icon: Icon(Icons.calendar_today, color: AppConstants.AppColors['btn_main'],),
-                          focusNode: _focusOther[3],
                           onPressed: () async {
                             FocusScope.of(context).requestFocus(new FocusNode());
                             var _time = DateTime.tryParse(scrapDate)??DateTime.now();

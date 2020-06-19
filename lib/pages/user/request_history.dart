@@ -186,7 +186,10 @@ class _RequestHistoryState extends State<RequestHistory> {
                                   items: statusList.map<DropdownMenuItem>((item) {
                                     return DropdownMenuItem(
                                       value: item['value'],
-                                      child: Text(item['text']),
+                                      child: Container(
+                                        width: 200,
+                                        child: Text(item['text']),
+                                      ),
                                     );
                                   }).toList(),
                                   onChanged: (val) {

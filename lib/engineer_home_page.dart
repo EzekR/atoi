@@ -262,7 +262,10 @@ class _EngineerHomePageState extends State<EngineerHomePage>
                                   items: dispatchTypeList.map<DropdownMenuItem>((item) {
                                     return DropdownMenuItem(
                                       value: item['value'],
-                                      child: Text(item['text']),
+                                      child: Container(
+                                        width: 160.0,
+                                        child: Text(item['text']),
+                                      ),
                                     );
                                   }).toList(),
                                   onChanged: (val) {
@@ -305,7 +308,10 @@ class _EngineerHomePageState extends State<EngineerHomePage>
                                   items: dispatchStatusList.map<DropdownMenuItem>((item) {
                                     return DropdownMenuItem(
                                       value: item['value'],
-                                      child: Text(item['text']),
+                                      child: Container(
+                                        width: 160.0,
+                                        child: Text(item['text']),
+                                      ),
                                     );
                                   }).toList(),
                                   onChanged: (val) {
@@ -348,7 +354,10 @@ class _EngineerHomePageState extends State<EngineerHomePage>
                                   items: urgencyList.map<DropdownMenuItem>((item) {
                                     return DropdownMenuItem(
                                       value: item['value'],
-                                      child: Text(item['text']),
+                                      child: Container(
+                                        width: 160.0,
+                                        child: Text(item['text']),
+                                      ),
                                     );
                                   }).toList(),
                                   onChanged: (val) {

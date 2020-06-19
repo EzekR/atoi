@@ -227,7 +227,10 @@ class _ContractListState extends State<ContractList> {
                                   items: contractStatusList.map<DropdownMenuItem>((item) {
                                     return DropdownMenuItem(
                                       value: item['value'],
-                                      child: Text(item['text']),
+                                      child: Container(
+                                        width: 200.0,
+                                        child: Text(item['text']),
+                                      ),
                                     );
                                   }).toList(),
                                   onChanged: (val) {

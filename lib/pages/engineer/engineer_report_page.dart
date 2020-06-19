@@ -46,6 +46,7 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
   bool _edit = true;
   String _acceptDate = 'YY-MM-DD';
   EventBus bus = new EventBus();
+  ScrollController _scrollController = new ScrollController();
 
   List _serviceResults = [];
   List _sources = [];
@@ -298,12 +299,17 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
   }).toList();
 
   Future<Null> uploadReport(int statusId) async {
+    setState(() {
+      _expandList = _expandList.map((item) {
+        return true;
+      }).toList();
+    });
     if (_dispatch['RequestType']['ID'] == 9 && _acceptDate == 'YY-MM-DD' && _currentType != '通用作业报告' && statusId == 2) {
       showDialog(
           context: context,
           builder: (context) => CupertinoAlertDialog(
             title: new Text('验收日期不可为空'),
-          )).then((result) => FocusScope.of(context).requestFocus(_focusReport[9]));
+          )).then((result) => _scrollController.jumpTo(1400.0));
       return;
     }
     if (statusId == 2 && _currentType != '通用作业报告') {
@@ -320,7 +326,7 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
             context: context,
             builder: (context) => CupertinoAlertDialog(
               title: new Text('附件不可为空'),
-            )).then((result) => FocusScope.of(context).requestFocus(_focusReport[10]));
+            )).then((result) => _scrollController.jumpTo(1800.0));
         return;
       }
       if (_dispatch['RequestType']['ID'] == 1 && _code.text.isEmpty) {
@@ -1293,6 +1299,7 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
               padding: EdgeInsets.symmetric(vertical: 5.0),
               child: new Card(
                 child: new ListView(
+                  controller: _scrollController,
                   children: <Widget>[
                     new ExpansionPanelList(
                       animationDuration: Duration(milliseconds: 200),
@@ -1314,6 +1321,7 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
                             children: <Widget>[
                               new RaisedButton(
                                 onPressed: () {
+                                  FocusScope.of(context).requestFocus(new FocusNode());
                                   return hold?null:uploadReport(2);
                                 },
                                 shape: RoundedRectangleBorder(
@@ -1326,6 +1334,7 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
                               ),
                               new RaisedButton(
                                 onPressed: () {
+                                  FocusScope.of(context).requestFocus(new FocusNode());
                                   return hold?null:uploadReport(1);
                                 },
                                 shape: RoundedRectangleBorder(

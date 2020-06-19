@@ -161,6 +161,9 @@ class _VendorDetailState extends State<VendorDetail> {
   }).toList();
 
   Future<Null> saveVendor() async {
+    setState(() {
+      _isExpandedDetail = true;
+    });
     if (name.text.isEmpty) {
       showDialog(context: context, builder: (context) => CupertinoAlertDialog(
         title: new Text('供应商名称不可为空'),
@@ -384,6 +387,7 @@ class _VendorDetailState extends State<VendorDetail> {
                       children: <Widget>[
                         widget.editable?new RaisedButton(
                           onPressed: () {
+                            FocusScope.of(context).requestFocus(new FocusNode());
                             saveVendor();
                           },
                           shape: RoundedRectangleBorder(

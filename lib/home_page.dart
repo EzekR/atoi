@@ -418,7 +418,10 @@ class _HomePageState extends State<HomePage>
                                   items: statusList.map<DropdownMenuItem>((item) {
                                     return DropdownMenuItem(
                                       value: item['value'],
-                                      child: Text(item['text']),
+                                      child: Container(
+                                        width: 200.0,
+                                        child: Text(item['text']),
+                                      ),
                                     );
                                   }).toList(),
                                   onChanged: (val) {
@@ -461,7 +464,10 @@ class _HomePageState extends State<HomePage>
                                   items: typeList.map<DropdownMenuItem>((item) {
                                     return DropdownMenuItem(
                                       value: item['value'],
-                                      child: Text(item['text']),
+                                      child: Container(
+                                        width: 200,
+                                        child: Text(item['text']),
+                                      ),
                                     );
                                   }).toList(),
                                   onChanged: (val) {
@@ -535,7 +541,10 @@ class _HomePageState extends State<HomePage>
                                   items: departmentList.map<DropdownMenuItem>((item) {
                                     return DropdownMenuItem(
                                       value: item['value'],
-                                      child: Text(item['text']),
+                                      child: Container(
+                                        width: 160.0,
+                                        child: Text(item['text']),
+                                      ),
                                     );
                                   }).toList(),
                                   onChanged: (val) {
@@ -597,7 +606,10 @@ class _HomePageState extends State<HomePage>
                                   items: urgencyList.map<DropdownMenuItem>((item) {
                                     return DropdownMenuItem(
                                       value: item['value'],
-                                      child: Text(item['text']),
+                                      child: Container(
+                                        width: 160.0,
+                                        child: Text(item['text']),
+                                      ),
                                     );
                                   }).toList(),
                                   onChanged: (val) {
@@ -670,7 +682,7 @@ class _HomePageState extends State<HomePage>
                           field = _currentTabIndex==2?'d.ID':'r.ID';
                           recall = false;
                           overDue = false;
-                          startDate = formatDate(DateTime.now().add(new Duration(days: -30)), [yyyy, '-', mm, '-', dd]);
+                          startDate = formatDate(DateTime.now().add(new Duration(days: -90)), [yyyy, '-', mm, '-', dd]);
                           endDate = formatDate(DateTime.now(), [yyyy, '-', mm, '-', dd]);
                           typeId = typeList[0]['value'];
                           dispatchStatusId = 3;

@@ -140,6 +140,10 @@ class _UserRepairPageState extends State<UserRepairPage> {
   //}
 
   Future<Null> submit() async {
+    setState(() {
+      _isExpandedDetail = true;
+      _isExpandedBasic = true;
+    });
     if (_describe.text.isEmpty) {
       showDialog(
           context: context,
@@ -512,6 +516,7 @@ Future getImage() async {
                   new RaisedButton(
                     onPressed: () {
                       //根据stunned状态判断按钮是否可用
+                      FocusScope.of(context).requestFocus(new FocusNode());
                       return _stunned?null:submit();
                     },
                     shape: RoundedRectangleBorder(

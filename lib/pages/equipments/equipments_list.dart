@@ -306,7 +306,10 @@ class _EquipmentsListState extends State<EquipmentsList> {
                                   items: machineStatusList.map<DropdownMenuItem>((item) {
                                     return DropdownMenuItem(
                                       value: item['value'],
-                                      child: Text(item['text']),
+                                      child: Container(
+                                        width: 200,
+                                        child: Text(item['text']),
+                                      ),
                                     );
                                   }).toList(),
                                   onChanged: (val) {
@@ -349,7 +352,10 @@ class _EquipmentsListState extends State<EquipmentsList> {
                                   items: departmentList.map<DropdownMenuItem>((item) {
                                     return DropdownMenuItem(
                                       value: item['value'],
-                                      child: Text(item['text']),
+                                      child: Container(
+                                        width: 200,
+                                        child: Text(item['text']),
+                                      ),
                                     );
                                   }).toList(),
                                   onChanged: (val) {
@@ -412,15 +418,24 @@ class _EquipmentsListState extends State<EquipmentsList> {
                                   items: <DropdownMenuItem>[
                                     DropdownMenuItem(
                                       value: 0,
-                                      child: Text('全部'),
+                                      child: Container(
+                                        width: 200.0,
+                                        child: Text('全部'),
+                                      ),
                                     ),
                                     DropdownMenuItem(
                                       value: 1,
-                                      child: Text('保外'),
+                                      child: Container(
+                                        width: 200.0,
+                                        child: Text('保外'),
+                                      ),
                                     ),
                                     DropdownMenuItem(
                                       value: 2,
-                                      child: Text('保内'),
+                                      child: Container(
+                                        width: 200.0,
+                                        child: Text('保内'),
+                                      ),
                                     ),
                                   ],
                                   onChanged: (val) {

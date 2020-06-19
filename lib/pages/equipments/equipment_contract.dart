@@ -49,6 +49,7 @@ class _EquipmentContractState extends State<EquipmentContract> {
   String OID = '系统自动生成';
   String _contractStatus = '生效';
   EventBus bus = new EventBus();
+  ScrollController _scrollController = new ScrollController();
 
   ConstantsModel model;
 
@@ -108,6 +109,10 @@ class _EquipmentContractState extends State<EquipmentContract> {
   }).toList();
 
   Future<Null> saveContract() async {
+    setState(() {
+      _isExpandedBasic = true;
+      _isExpandedDetail = true;
+    });
     if (_equipments == null || _equipments.isEmpty) {
       showDialog(context: context, builder: (context) => CupertinoAlertDialog(
         title: new Text('请选择设备'),
@@ -136,7 +141,7 @@ class _EquipmentContractState extends State<EquipmentContract> {
     if (startDate == 'YY-MM-DD' || endDate == 'YY-MM-DD') {
       showDialog(context: context, builder: (context) => CupertinoAlertDialog(
         title: new Text('起始日期不可为空'),
-      )).then((result) => FocusScope.of(context).requestFocus(_focusContract[6]));
+      )).then((result) => _scrollController.jumpTo(1300.0));
       return;
     }
     var _start = DateTime.parse(startDate);
@@ -144,13 +149,13 @@ class _EquipmentContractState extends State<EquipmentContract> {
     if (_end.isBefore(_start)) {
       showDialog(context: context, builder: (context) => CupertinoAlertDialog(
         title: new Text('起止日期格式有误'),
-      )).then((result) => FocusScope.of(context).requestFocus(_focusContract[6]));
+      )).then((result) => _scrollController.jumpTo(1300.0));
       return;
     }
     if (supplier == null) {
       showDialog(context: context, builder: (context) => CupertinoAlertDialog(
         title: new Text('供应商不可为空'),
-      )).then((result) => FocusScope.of(context).requestFocus(_focusContract[7]));
+      )).then((result) => _scrollController.jumpTo(1200.0));
       return;
     }
     var _equipList = _equipments.map((item) => {'ID': item['ID']}).toList();
@@ -222,6 +227,7 @@ class _EquipmentContractState extends State<EquipmentContract> {
   }
 
   void changeType(String selected) {
+    print('change type');
     FocusScope.of(context).requestFocus(new FocusNode());
     setState(() {
       currentType = selected;
@@ -538,10 +544,12 @@ Future getImage() async {
               padding: EdgeInsets.symmetric(vertical: 5.0),
               child: new Card(
                 child: new ListView(
+                  controller: _scrollController,
                   children: <Widget>[
                     new ExpansionPanelList(
                       animationDuration: Duration(milliseconds: 200),
                       expansionCallback: (index, isExpanded) {
+                        FocusScope.of(context).unfocus();
                         setState(() {
                           if (index == 0) {
                             _isExpandedBasic = !isExpanded;
@@ -651,7 +659,6 @@ Future getImage() async {
                                       new Expanded(
                                           flex: 3,
                                           child: new IconButton(
-                                              focusNode: _focusContract[7],
                                               icon: Icon(Icons.search),
                                               onPressed: () async {
                                                 FocusScope.of(context).requestFocus(new FocusNode());
@@ -722,7 +729,6 @@ Future getImage() async {
                                                 new Expanded(
                                                   flex: 2,
                                                   child: new IconButton(
-                                                      focusNode: _focusContract[6],
                                                       icon: Icon(Icons.calendar_today, color: AppConstants.AppColors['btn_main'],),
                                                       onPressed: () async {
                                                         FocusScope.of(context).requestFocus(new FocusNode());
@@ -787,6 +793,7 @@ Future getImage() async {
                       children: <Widget>[
                         widget.editable?new RaisedButton(
                           onPressed: () {
+                            FocusScope.of(context).requestFocus(new FocusNode());
                             saveContract();
                           },
                           shape: RoundedRectangleBorder(

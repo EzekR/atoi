@@ -634,13 +634,14 @@ class _EngineerReportAccessoryState extends State<EngineerReportAccessory> {
                       )
                     ],
                   ),
-                  ButtonTheme.bar( // make buttons use the appropriate styles for cards
+                  Container( // make buttons use the appropriate styles for cards
                     child: ButtonBar(
                       children: <Widget>[
                         RaisedButton(
                           child: const Text('保存', style: TextStyle(color: Colors.white),),
                           color: AppConstants.AppColors['btn_main'],
                           onPressed: () {
+                            FocusScope.of(context).requestFocus(new FocusNode());
                             saveAccessory();
                           },
                         ),

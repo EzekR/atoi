@@ -35,6 +35,7 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
   String departureDate = 'YY-MM-DD';
   String dispatchDate = 'YY-MM-DD';
   var _desc = new TextEditingController();
+  ScrollController _scrollController = new ScrollController();
 
   Map<String, dynamic> _request = {};
   ConstantsModel model;
@@ -1007,6 +1008,7 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
             padding: EdgeInsets.symmetric(vertical: 5.0),
             child: new Card(
               child: new ListView(
+                controller: _scrollController,
                 children: <Widget>[
                   new ExpansionPanelList(
                     animationDuration: Duration(milliseconds: 200),
@@ -1043,12 +1045,18 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
                         padding: EdgeInsets.symmetric(horizontal: 5.0),
                         child: new RaisedButton(
                           onPressed: () {
+                            FocusScope.of(context).requestFocus(new FocusNode());
+                            setState(() {
+                              _isExpandedBasic = true;
+                              _isExpandedDetail = true;
+                              _isExpandedAssign = true;
+                            });
                             if (_currentName == '--请选择--') {
                               showDialog(context: context,
                                   builder: (context) => CupertinoAlertDialog(
                                     title: new Text('请选择工程师'),
                                   )
-                              );
+                              ).then((result) => _scrollController.jumpTo(_scrollController.position.maxScrollExtent));
                               return;
                             }
                             if (_desc.text.isEmpty) {
@@ -1058,7 +1066,9 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
                                         '${model.Remark[_request['RequestType']['ID']]}不可为空'
                                     ),
                                   )
-                              );
+                              ).then((result) {
+                                _focusAssign[0].requestFocus();
+                              });
                               return;
                             }
                             if (dispatches.length > 0) {
