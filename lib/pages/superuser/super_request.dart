@@ -10,10 +10,13 @@ import 'package:flutter_cupertino_date_picker/flutter_cupertino_date_picker.dart
 import 'package:atoi/models/constants_model.dart';
 import 'package:atoi/widgets/search_lazy.dart';
 import 'dart:convert';
+import 'package:atoi/pages/manager/manager_complete_page.dart';
 
 class SuperRequest extends StatefulWidget {
   final PageType pageType;
-  SuperRequest({Key key, this.pageType}):super(key: key);
+  final String filter;
+  final String field;
+  SuperRequest({Key key, this.pageType, this.field, this.filter}):super(key: key);
   _SuperRequestState createState() => new _SuperRequestState();
 }
 
@@ -72,24 +75,43 @@ class _SuperRequestState extends State<SuperRequest> {
     setState(() {
       _loading = true;
     });
+    String _url;
+    Map<String, dynamic> _param;
+    switch (widget.pageType) {
+      case PageType.REQUEST:
+        _url = '/Request/GetRequests';
+        _param = {
+          'userID': _userId,
+          'PageSize': 10,
+          'CurRowNum': offset,
+          'statusID': _status,
+          'typeID': _type,
+          'isRecall': _recall,
+          'department': _depart,
+          'urgency': _urgency,
+          'overDue': _overDue,
+          'startDate': _startDate,
+          'endDate': _endDate,
+          'filterField': _field,
+          'filterText': _filter.text
+        };
+        break;
+      case PageType.DISPATCH:
+        _url = '/Dispatch/GetDispatchs?statusIDs=2&statusIDs=3';
+        _param = {
+          'userID': _userId,
+          'urgency': _urgency,
+          'type': _type,
+          'pageSize': 10,
+          'curRowNum': offset,
+          'filterField': _field,
+          'filterText': _filter.text
+        };
+    }
     var resp = await HttpRequest.request(
-      '//Request/GetRequests',
+      _url,
       method: HttpRequest.GET,
-      params: {
-        'userID': _userId,
-        'PageSize': 10,
-        'CurRowNum': offset,
-        'statusID': _status,
-        'typeID': _type,
-        'isRecall': _recall,
-        'department': _depart,
-        'urgency': _urgency,
-        'overDue': _overDue,
-        'startDate': _startDate,
-        'endDate': _endDate,
-        'filterField': _field,
-        'filterText': _filter.text
-      }
+      params: _param
     );
     if (resp['ResultCode'] == '00') {
       offset += 10;
@@ -110,8 +132,9 @@ class _SuperRequestState extends State<SuperRequest> {
       _depart = -1;
       _recall = false;
       _overDue = false;
-      _field = widget.pageType==PageType.REQUEST?'r.ID':'d.ID';
+      _field = widget.field??widget.pageType==PageType.REQUEST?'r.ID':'d.ID';
       _filter = new TextEditingController();
+      _filter.text = widget.filter??'';
       _urgency = 0;
       _startDate = formatDate(_start, [yyyy, '-', mm, '-', dd]);
       _endDate = formatDate(_end, [yyyy, '-', mm, '-', dd]);
@@ -159,27 +182,32 @@ class _SuperRequestState extends State<SuperRequest> {
               color: Color(0xff14BD98),
               size: 36.0,
             ),
-            title: new Row(
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: <Widget>[
-                Text(
-                  "请求编号：",
-                  style: new TextStyle(
-                      fontSize: 18.0,
-                      color: Theme.of(context).primaryColor,
-                      fontWeight: FontWeight.w500
-                  ),
+            title: new FlatButton(
+                onPressed: () {
+                  Navigator.of(context).push(new MaterialPageRoute(builder: (_) => ManagerCompletePage(requestId: requestId,)));
+                },
+                child: new Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: <Widget>[
+                    Text(
+                      "请求编号：",
+                      style: new TextStyle(
+                          fontSize: 18.0,
+                          color: Theme.of(context).primaryColor,
+                          fontWeight: FontWeight.w500
+                      ),
+                    ),
+                    Text(
+                      taskNo,
+                      style: new TextStyle(
+                          fontSize: 18.0,
+                          color: Colors.red,
+                          //color: new Color(0xffD25565),
+                          fontWeight: FontWeight.w400
+                      ),
+                    ),
+                  ],
                 ),
-                Text(
-                  taskNo,
-                  style: new TextStyle(
-                      fontSize: 18.0,
-                      color: Colors.red,
-                      //color: new Color(0xffD25565),
-                      fontWeight: FontWeight.w400
-                  ),
-                )
-              ],
             ),
             subtitle: Text(
               "请求时间：${AppConstants.TimeForm(time, 'hh:mm')}",
@@ -207,7 +235,7 @@ class _SuperRequestState extends State<SuperRequest> {
                   mainAxisAlignment: MainAxisAlignment.end,
                   mainAxisSize: MainAxisSize.max,
                   children: <Widget>[
-                    new RaisedButton(
+                    task['Status']['ID']>1?new RaisedButton(
                       onPressed: (){
                         //Navigator.of(context).push(new MaterialPageRoute(builder: (_) {
                         //  return new ManagerAssignPage(request: task);
@@ -224,7 +252,126 @@ class _SuperRequestState extends State<SuperRequest> {
                             color: Colors.white,
                           ),
                           new Text(
-                            '派工',
+                            '派工单',
+                            style: new TextStyle(
+                                color: Colors.white
+                            ),
+                          )
+                        ],
+                      ),
+                    ):new Container(),
+                    new Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 5.0),
+                    ),
+                  ],
+                )
+              ],
+            ),
+          )
+        ],
+      ),
+    );
+  }
+
+  Color iconColor(int statusId) {
+    switch (statusId) {
+      case 0:
+        return Colors.grey;
+        break;
+      case 1:
+        return Colors.grey;
+        break;
+      case 2:
+        return AppConstants.AppColors['btn_main'];
+        break;
+      case 3:
+        return AppConstants.AppColors['btn_success'];
+        break;
+      default:
+        return Colors.grey;
+        break;
+    }
+  }
+  
+  Card buildCardDispatch(Map dispatch) {
+    return new Card(
+      child: Column(
+        mainAxisSize: MainAxisSize.max,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          ListTile(
+            leading: Icon(
+              Icons.visibility,
+              color: Color(0xff14BD98),
+              size: 40.0,
+            ),
+            title: new Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: <Widget>[
+                Text(
+                  "派工单编号：",
+                  style: new TextStyle(
+                      fontSize: 18.0,
+                      color: Theme.of(context).primaryColor,
+                      fontWeight: FontWeight.w500
+                  ),
+                ),
+                Text(
+                  dispatch['OID'],
+                  style: new TextStyle(
+                      fontSize: 18.0,
+                      color: Colors.red,
+                      //color: new Color(0xffD25565),
+                      fontWeight: FontWeight.w400
+                  ),
+                )
+              ],
+            ),
+            subtitle: Text(
+              "派工时间：${AppConstants.TimeForm(dispatch['ScheduleDate'].toString(), 'hh:mm')}",
+              style: new TextStyle(
+                  color: Theme.of(context).accentColor
+              ),
+            ),
+          ),
+          new Padding(
+            padding: EdgeInsets.symmetric(horizontal: 8.0),
+            child: new Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.start,
+              mainAxisSize: MainAxisSize.max,
+              children: <Widget>[
+                dispatch['Request']['Equipments'].length>0?BuildWidget.buildCardRow('设备编号', dispatch['Request']['EquipmentOID']):new Container(),
+                dispatch['Request']['Equipments'].length>0?BuildWidget.buildCardRow('设备名称', dispatch['Request']['EquipmentName']):new Container(),
+                BuildWidget.buildCardRow('派工类型', dispatch['RequestType']['Name']),
+                BuildWidget.buildCardRow('紧急程度', dispatch['Urgency']['Name']),
+                BuildWidget.buildCardRow('请求编号', dispatch['Request']['OID']),
+                BuildWidget.buildCardRow('请求状态', dispatch['Status']['Name']),
+                new Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  mainAxisSize: MainAxisSize.max,
+                  children: <Widget>[
+                    new RaisedButton(
+                      onPressed: (){
+                        //dispatch['DispatchJournal']['Status']['ID']==0||dispatch['DispatchJournal']['Status']['ID']==1?null:
+                        //Navigator.of(context).push(
+                        //    new MaterialPageRoute(builder: (_) {
+                        //      return new ManagerAuditVoucherPage(
+                        //        journalId: dispatch['DispatchJournal']['ID'], request: dispatch, status: dispatch['DispatchJournal']['Status']['ID'],);
+                        //    })).then((result) => refresh());
+                      },
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      color: iconColor(dispatch['DispatchJournal']['Status']['ID']),
+                      child: new Row(
+                        children: <Widget>[
+                          new Icon(
+                            dispatch['DispatchJournal']['Status']['ID'] == 3?Icons.check:Icons.fingerprint,
+                            color: Colors.white,
+                          ),
+                          new Text(
+                            '凭证',
                             style: new TextStyle(
                                 color: Colors.white
                             ),
@@ -235,6 +382,31 @@ class _SuperRequestState extends State<SuperRequest> {
                     new Padding(
                       padding: EdgeInsets.symmetric(horizontal: 5.0),
                     ),
+                    new RaisedButton(
+                      onPressed: (){
+                        //dispatch['DispatchReport']['Status']['ID']==0||dispatch['DispatchReport']['Status']['ID']==1?null:Navigator.of(context).push(new MaterialPageRoute(builder: (_){
+                        //  return new ManagerAuditReportPage(reportId: dispatch['DispatchReport']['ID'], request: dispatch, status: dispatch['DispatchReport']['Status']['ID'],);
+                        //})).then((result) => refresh());
+                      },
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      color: iconColor(dispatch['DispatchReport']['Status']['ID']),
+                      child: new Row(
+                        children: <Widget>[
+                          new Icon(
+                            dispatch['DispatchReport']['Status']['ID'] == 3?Icons.check:Icons.work,
+                            color: Colors.white,
+                          ),
+                          new Text(
+                            '报告',
+                            style: new TextStyle(
+                                color: Colors.white
+                            ),
+                          )
+                        ],
+                      ),
+                    )
                   ],
                 )
               ],
@@ -746,9 +918,11 @@ class _SuperRequestState extends State<SuperRequest> {
                       color: Color(0xff3394B9),
                     ),
                     child: Center(
-                      child: FlatButton(onPressed: () {
+                      child: FlatButton(onPressed: () async {
                         //setFilter();
-                        getRequests();
+                        _requests.clear();
+                        offset = 0;
+                        await getRequests();
                         Navigator.of(context).pop();
                       }, child: Text('确认', style: TextStyle(color: Colors.white),)),
                     ),
@@ -767,7 +941,7 @@ class _SuperRequestState extends State<SuperRequest> {
     return new Scaffold(
       appBar: new AppBar(
         backgroundColor: Color(0xff4e8faf),
-        title: Text('客户请求列表'),
+        title: Text(widget.pageType==PageType.REQUEST?'客户请求列表':'派工单列表'),
       ),
       body: new RefreshIndicator(
           child: _requests.length == 0?ListView(padding: const EdgeInsets.symmetric(vertical: 150.0), children: <Widget>[new Center(child: _loading?SpinKitThreeBounce(color: Colors.blue):new Text('没有待派工请求'),)],):
@@ -777,7 +951,7 @@ class _SuperRequestState extends State<SuperRequest> {
               controller: _scrollController,
               itemBuilder: (context, i) {
                 if (i != _requests.length) {
-                  return buildCardItem(_requests[i], _requests[i]['ID'], _requests[i]['OID'], _requests[i]['RequestDate'], _requests[i]['EquipmentOID'], _requests[i]['EquipmentName'], _requests[i]['DepartmentName'], _requests[i]['RequestUser']['Name'], _requests[i]['RequestType']['Name'], _requests[i]['Status']['Name'], _requests[i]['FaultDesc'], _requests[i]['Equipments']);
+                  return widget.pageType==PageType.REQUEST?buildCardItem(_requests[i], _requests[i]['ID'], _requests[i]['OID'], _requests[i]['RequestDate'], _requests[i]['EquipmentOID'], _requests[i]['EquipmentName'], _requests[i]['DepartmentName'], _requests[i]['RequestUser']['Name'], _requests[i]['RequestType']['Name'], _requests[i]['Status']['Name'], _requests[i]['FaultDesc'], _requests[i]['Equipments']):buildCardDispatch(_requests[i]);
                 } else {
                   return new Row(
                     mainAxisAlignment: MainAxisAlignment.center,
