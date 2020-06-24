@@ -27,13 +27,23 @@ class _ManagerToAssignState extends State<ManagerToAssign> {
 
   bool _loading = false;
   bool _noMore = false;
+  int _role = 1;
 
   ScrollController _scrollController = ScrollController();
+
+  Future<Null> getRole() async {
+    var prefs = await _prefs;
+    var _roleId = prefs.getInt('role');
+    setState(() {
+      _role = _roleId;
+    });
+  }
 
   void initState() {
     //getData();
     refresh();
     super.initState();
+    getRole();
 
     ManagerModel model = MainModel.of(context);
     _scrollController.addListener(() {

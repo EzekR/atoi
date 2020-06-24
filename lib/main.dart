@@ -35,6 +35,8 @@ import 'dart:async';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:atoi/utils/event_bus.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:atoi/pages/superuser/superuser_home.dart';
+import 'package:atoi/models/constants_model.dart';
 
 class AtoiApp extends StatefulWidget{
   _AtoiAppState createState() => _AtoiAppState();
@@ -120,7 +122,7 @@ class _AtoiAppState extends State<AtoiApp> {
                 accentColor: new Color(0xff2c5c85),
                 buttonColor: new Color(0xff2E94B9)
             ),
-            home: new LoginPage(),
+            home: new SuperHome(),
             routes: routes,
             localizationsDelegates: [
               GlobalMaterialLocalizations.delegate,
