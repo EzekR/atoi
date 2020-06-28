@@ -8,6 +8,7 @@ import 'package:atoi/models/models.dart';
 import 'package:atoi/widgets/build_widget.dart';
 import 'package:atoi/utils/constants.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:atoi/pages/equipments/equipments_list.dart';
 
 /// 工程师待上传报告列表页面类
 class EngineerToReport extends StatefulWidget{
@@ -157,7 +158,7 @@ class _EngineerToReportState extends State<EngineerToReport> {
                 mainAxisAlignment: MainAxisAlignment.start,
                 mainAxisSize: MainAxisSize.max,
                 children: <Widget>[
-                  deviceName==''?new Container():BuildWidget.buildCardRow('设备名称', task['Request']['Equipments'].length>1?'多设备':deviceName),
+                  deviceName==''?new Container():BuildWidget.buildCardRow('设备名称', task['Request']['Equipments'].length>1?'多设备':deviceName, onTap: task['Request']['Equipments'].length>1?null:() => Navigator.of(context).push(new MaterialPageRoute(builder: (_) => new EquipmentsList(equipmentId: task['Request']['Equipments'][0]['OID'],)))),
                   deviceNo==''?new Container():BuildWidget.buildCardRow('序列号', task['Request']['Equipments'].length>1?'多设备':deviceNo),
                   location==''?new Container():BuildWidget.buildCardRow('使用科室', location),
                   BuildWidget.buildCardRow('请求类型', requestType),

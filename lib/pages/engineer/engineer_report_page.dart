@@ -17,6 +17,7 @@ import 'package:atoi/utils/event_bus.dart';
 import 'package:multi_image_picker/multi_image_picker.dart';
 import 'dart:typed_data';
 import 'package:uuid/uuid.dart';
+import 'package:atoi/pages/equipments/equipments_list.dart';
 
 /// 工程师报告页面
 class EngineerReportPage extends StatefulWidget {
@@ -1086,7 +1087,7 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
     List<ExpansionPanel> _list = [];
     if (_dispatch['Request']['RequestType']['ID'] != 14) {
       _list.add(
-        new ExpansionPanel(
+        new ExpansionPanel(canTapOnHeader: true,
           headerBuilder: (context, isExpanded) {
             return ListTile(
               leading: new Icon(
@@ -1112,7 +1113,7 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
       );
     }
     _list.add(
-      new ExpansionPanel(
+      new ExpansionPanel(canTapOnHeader: true,
         headerBuilder: (context, isExpanded) {
           return ListTile(
             leading: new Icon(
@@ -1157,7 +1158,7 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
       ),
     );
     _list.addAll([
-      new ExpansionPanel(
+      new ExpansionPanel(canTapOnHeader: true,
         headerBuilder: (context, isExpanded) {
           return ListTile(
             leading: new Icon(
@@ -1189,7 +1190,7 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
         ),
         isExpanded: _expandList[2],
       ),
-      new ExpansionPanel(
+      new ExpansionPanel(canTapOnHeader: true,
         headerBuilder: (context, isExpanded) {
           return ListTile(
             leading: new Icon(
@@ -1215,7 +1216,7 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
     ]);
     if (_dispatch['RequestType']['ID'] != 4 && _dispatch['RequestType']['ID'] != 12 && _dispatch['RequestType']['ID'] != 14) {
       _list.add(
-        new ExpansionPanel(
+        new ExpansionPanel(canTapOnHeader: true,
           headerBuilder: (context, isExpanded) {
             return ListTile(
               leading: new Icon(
@@ -1253,7 +1254,7 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
       var equipList = [
         BuildWidget.buildRow('系统编号', _equipment['OID'] ?? ''),
         BuildWidget.buildRow('资产编号', _equipment['AssetCode']??''),
-        BuildWidget.buildRow('名称', _equipment['Name'] ?? ''),
+        BuildWidget.buildRow('名称', _equipment['Name']??'', onTap: () => Navigator.of(context).push(new MaterialPageRoute(builder: (_) => new EquipmentsList(equipmentId: _equipment['OID'],)))),
         BuildWidget.buildRow('型号', _equipment['EquipmentCode'] ?? ''),
         BuildWidget.buildRow('序列号', _equipment['SerialCode'] ?? ''),
         BuildWidget.buildRow('设备厂商', _equipment['Manufacturer']['Name'] ?? ''),

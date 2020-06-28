@@ -12,6 +12,7 @@ import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_cupertino_date_picker/flutter_cupertino_date_picker.dart';
 import 'package:date_format/date_format.dart';
+import 'package:atoi/pages/equipments/equipments_list.dart';
 
 /// 超管待派工列表页面类
 class ManagerToAssign extends StatefulWidget {
@@ -194,7 +195,7 @@ class _ManagerToAssignState extends State<ManagerToAssign> {
                 mainAxisSize: MainAxisSize.max,
                 children: <Widget>[
                   equipmentNo.isNotEmpty?BuildWidget.buildCardRow('设备编号', equipmentNo):new Container(),
-                  equipmentName.isNotEmpty?BuildWidget.buildCardRow('设备名称', equipmentName):new Container(),
+                  equipmentName.isNotEmpty?BuildWidget.buildCardRow('设备名称', equipmentName, onTap: () => Navigator.of(context).push(new MaterialPageRoute(builder: (_) => new EquipmentsList(equipmentId: equipmentNo,)))):new Container(),
                   departmentName.isNotEmpty?BuildWidget.buildCardRow('使用科室', departmentName):new Container(),
                   BuildWidget.buildCardRow('请求人', requestPerson),
                   BuildWidget.buildCardRow('类型', requestType),

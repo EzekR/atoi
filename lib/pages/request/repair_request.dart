@@ -359,7 +359,7 @@ class _RepairRequestState extends State<RepairRequest> {
                         });
                       },
                       children: [
-                        new ExpansionPanel(
+                        new ExpansionPanel(canTapOnHeader: true,
                           headerBuilder: (context, isExpanded) {
                             return ListTile(
                                 leading: new Icon(Icons.info,
@@ -394,7 +394,7 @@ class _RepairRequestState extends State<RepairRequest> {
                           ),
                           isExpanded: _isExpandedBasic,
                         ),
-                        new ExpansionPanel(
+                        new ExpansionPanel(canTapOnHeader: true,
                           headerBuilder: (context, isExpanded) {
                             return ListTile(
                                 leading: new Icon(Icons.description,

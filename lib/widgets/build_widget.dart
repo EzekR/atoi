@@ -9,93 +9,99 @@ class BuildWidget {
 
 
   /// 构建页面信息行
-  static Padding buildRow(String labelText, String defaultText) {
-    return new Padding(
-      padding: EdgeInsets.symmetric(vertical: 5.0),
-      child: new Row(
-        children: <Widget>[
-          new Expanded(
-            flex: 4,
-            child: new Wrap(
-              alignment: WrapAlignment.end,
-              crossAxisAlignment: WrapCrossAlignment.center,
-              children: <Widget>[
-                new Text(
-                  labelText,
-                  style: new TextStyle(
-                      fontSize: 16.0,
-                      fontWeight: FontWeight.w600
-                  ),
-                )
-              ],
-            ),
-          ),
-          new Expanded(
-            flex: 1,
-            child: new Text(
-              '：',
-              style: new TextStyle(
-                fontSize: 16.0,
-                fontWeight: FontWeight.w600,
+  static GestureDetector buildRow(String labelText, String defaultText, {Function onTap}) {
+    return GestureDetector(
+      onTap: onTap,
+      child: new Padding(
+        padding: EdgeInsets.symmetric(vertical: 5.0),
+        child: new Row(
+          children: <Widget>[
+            new Expanded(
+              flex: 4,
+              child: new Wrap(
+                alignment: WrapAlignment.end,
+                crossAxisAlignment: WrapCrossAlignment.center,
+                children: <Widget>[
+                  new Text(
+                    labelText,
+                    style: new TextStyle(
+                        fontSize: 16.0,
+                        fontWeight: FontWeight.w600
+                    ),
+                  )
+                ],
               ),
             ),
-          ),
-          new Expanded(
-            flex: 6,
-            child: new Text(
-              defaultText,
-              style: new TextStyle(
+            new Expanded(
+              flex: 1,
+              child: new Text(
+                '：',
+                style: new TextStyle(
                   fontSize: 16.0,
-                  fontWeight: FontWeight.w400,
-                  color: Colors.black54
+                  fontWeight: FontWeight.w600,
+                ),
               ),
             ),
-          )
-        ],
+            new Expanded(
+              flex: 6,
+              child: new Text(
+                defaultText,
+                style: new TextStyle(
+                    fontSize: 16.0,
+                    fontWeight: FontWeight.w400,
+                    color: Colors.black54
+                ),
+              ),
+            )
+          ],
+        ),
       ),
     );
   }
 
   /// 构建列表信息行
-  static Row buildCardRow(String leading, String content) {
-    return new Row(
-      children: <Widget>[
-        new Expanded(
-          flex: 3,
-          child: new Row(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: <Widget>[
-              new Text(
-                leading,
+  static GestureDetector buildCardRow(String leading, String content, {Function onTap}) {
+    return new GestureDetector(
+      onTap: onTap,
+      child: new Row(
+        children: <Widget>[
+          new Expanded(
+              flex: 3,
+              child: new Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: <Widget>[
+                  new Text(
+                    leading,
+                    style: new TextStyle(
+                        fontSize: 16.0,
+                        fontWeight: FontWeight.w600
+                    ),
+                  ),
+                ],
+              )
+          ),
+          new Expanded(
+              flex: 1,
+              child: new Text(':',
                 style: new TextStyle(
                     fontSize: 16.0,
                     fontWeight: FontWeight.w600
                 ),
-              ),
-            ],
-          )
-        ),
-        new Expanded(
-          flex: 1,
-          child: new Text(':',
-            style: new TextStyle(
-              fontSize: 16.0,
-              fontWeight: FontWeight.w600
-            ),
-          )
-        ),
-        new Expanded(
-          flex: 7,
-          child: new Text(
-            content,
-            style: new TextStyle(
-                fontSize: 16.0,
-                fontWeight: FontWeight.w400,
-                color: Colors.grey
-            ),
+              )
           ),
-        )
-      ],
+          new Expanded(
+            flex: 7,
+            child: new Text(
+              content,
+              style: new TextStyle(
+                  fontSize: 16.0,
+                  fontWeight: FontWeight.w400,
+                  color: Colors.grey
+              ),
+            ),
+          )
+        ],
+      ),
     );
   }
 

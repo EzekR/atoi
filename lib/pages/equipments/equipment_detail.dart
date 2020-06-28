@@ -1102,7 +1102,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
   List<ExpansionPanel> buildExpansion(BuildContext context) {
     List<ExpansionPanel> _list = [];
     //device info
-    _list.add(ExpansionPanel(
+    _list.add(ExpansionPanel(canTapOnHeader: true,
         headerBuilder: (context, isExpanded) {
           return ListTile(
               leading: new Icon(
@@ -1335,7 +1335,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
         ),
         isExpanded: expansionList[0]));
     //asset info
-    _list.add(ExpansionPanel(
+    _list.add(ExpansionPanel(canTapOnHeader: true,
         headerBuilder: (context, isExpanded) {
           return ListTile(
               leading: new Icon(
@@ -1510,7 +1510,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
         ),
         isExpanded: expansionList[1]));
     //purchasing info
-    _list.add(ExpansionPanel(
+    _list.add(ExpansionPanel(canTapOnHeader: true,
         headerBuilder: (context, isExpanded) {
           return ListTile(
               leading: new Icon(
@@ -1673,7 +1673,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
         ),
         isExpanded: expansionList[2]));
     //status info
-    _list.add(ExpansionPanel(
+    _list.add(ExpansionPanel(canTapOnHeader: true,
         headerBuilder: (context, isExpanded) {
           return ListTile(
               leading: new Icon(
@@ -2173,7 +2173,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
         ),
         isExpanded: expansionList[3]));
     //equipment photos
-    _list.add(ExpansionPanel(
+    _list.add(ExpansionPanel(canTapOnHeader: true,
         headerBuilder: (context, isExpanded) {
           return ListTile(
               leading: new Icon(

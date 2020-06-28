@@ -8,6 +8,7 @@ import 'package:atoi/utils/constants.dart';
 import 'package:atoi/widgets/build_widget.dart';
 import 'package:atoi/models/models.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:atoi/pages/equipments/equipments_list.dart';
 
 /// 超管审核凭证页面类
 class ManagerAuditVoucherPage extends StatefulWidget {
@@ -381,7 +382,7 @@ class _ManagerAuditVoucherPageState extends State<ManagerAuditVoucherPage> {
     List<ExpansionPanel> _list = [];
     if (_dispatch.isNotEmpty&&_dispatch['Request']['RequestType']['ID'] != 14) {
       _list.add(
-        new ExpansionPanel(
+        new ExpansionPanel(canTapOnHeader: true,
           headerBuilder: (context, isExpanded) {
             return ListTile(
               leading: new Icon(Icons.info,
@@ -402,7 +403,7 @@ class _ManagerAuditVoucherPageState extends State<ManagerAuditVoucherPage> {
               children: _equipments.map((_equipment) => [
                 BuildWidget.buildRow('系统编号', _equipment['OID']??''),
                 BuildWidget.buildRow('资产编号', _equipment['AssetCode']??''),
-                BuildWidget.buildRow('名称', _equipment['Name']??''),
+                BuildWidget.buildRow('名称', _equipment['Name']??'', onTap: () => Navigator.of(context).push(new MaterialPageRoute(builder: (_) => new EquipmentsList(equipmentId: _equipment['OID'],)))),
                 BuildWidget.buildRow('型号', _equipment['EquipmentCode']??''),
                 BuildWidget.buildRow('序列号', _equipment['SerialCode']??''),
                 BuildWidget.buildRow('设备厂商', _equipment['Manufacturer']['Name']??''),
@@ -423,7 +424,7 @@ class _ManagerAuditVoucherPageState extends State<ManagerAuditVoucherPage> {
     }
 
     _list.add(
-      new ExpansionPanel(
+      new ExpansionPanel(canTapOnHeader: true,
         headerBuilder: (context, isExpanded) {
           return ListTile(
             leading: new Icon(
@@ -469,7 +470,7 @@ class _ManagerAuditVoucherPageState extends State<ManagerAuditVoucherPage> {
     );
 
     _list.addAll([
-      new ExpansionPanel(
+      new ExpansionPanel(canTapOnHeader: true,
         headerBuilder: (context, isExpanded) {
           return ListTile(
             leading: new Icon(Icons.description,
@@ -501,7 +502,7 @@ class _ManagerAuditVoucherPageState extends State<ManagerAuditVoucherPage> {
         ),
         isExpanded: _expandList[2],
       ),
-      new ExpansionPanel(
+      new ExpansionPanel(canTapOnHeader: true,
         headerBuilder: (context, isExpanded) {
           return ListTile(
               leading: new Icon(Icons.perm_contact_calendar,

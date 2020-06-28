@@ -14,6 +14,8 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:multi_image_picker/multi_image_picker.dart';
 import 'package:uuid/uuid.dart';
+import 'dart:io';
+import 'package:atoi/pages/equipments/equipments_list.dart';
 
 /// 超管审核报告页面类
 class ManagerAuditReportPage extends StatefulWidget {
@@ -454,7 +456,6 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
         return true;
       }).toList();
     });
-    
     if (_currentResult == '问题升级' && _unsolved.text.isEmpty) {
       showDialog(context: context,
           builder: (context) => CupertinoAlertDialog(
@@ -468,8 +469,8 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
         builder: (context) => CupertinoAlertDialog(
           title: new Text('审批备注不可为空'),
         )
-      ).then((result) {
-        _scrollController.jumpTo(1800.0);
+      ).then((result) async {
+        _scrollController.jumpTo(2000.0);
         _focusReport[3].requestFocus();
       });
       return;
@@ -793,7 +794,7 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
     List<ExpansionPanel> _list = [];
     if (_dispatch['Request']['RequestType']['ID'] != 14) {
       _list.add(
-        new ExpansionPanel(
+        new ExpansionPanel(canTapOnHeader: true,
           headerBuilder: (context, isExpanded) {
             return ListTile(
               leading: new Icon(Icons.info,
@@ -814,7 +815,7 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
               children: _equipments.map((_equipment) => [
                 BuildWidget.buildRow('系统编号', _equipment['OID']??''),
                 BuildWidget.buildRow('资产编号', _equipment['AssetCode']??''),
-                BuildWidget.buildRow('名称', _equipment['Name']??''),
+                BuildWidget.buildRow('名称', _equipment['Name']??'', onTap: () => Navigator.of(context).push(new MaterialPageRoute(builder: (_) => new EquipmentsList(equipmentId: _equipment['OID'],)))),
                 BuildWidget.buildRow('型号', _equipment['EquipmentCode']??''),
                 BuildWidget.buildRow('序列号', _equipment['SerialCode']??''),
                 BuildWidget.buildRow('设备厂商', _equipment['Manufacturer']['Name']??''),
@@ -835,7 +836,7 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
     }
 
     _list.add(
-      new ExpansionPanel(
+      new ExpansionPanel(canTapOnHeader: true,
         headerBuilder: (context, isExpanded) {
           return ListTile(
             leading: new Icon(
@@ -881,7 +882,7 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
     );
 
     _list.addAll([
-      new ExpansionPanel(
+      new ExpansionPanel(canTapOnHeader: true,
         headerBuilder: (context, isExpanded) {
           return ListTile(
             leading: new Icon(Icons.description,
@@ -913,7 +914,7 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
         ),
         isExpanded: _expandList[2],
       ),
-      new ExpansionPanel(
+      new ExpansionPanel(canTapOnHeader: true,
         headerBuilder: (context, isExpanded) {
           return ListTile(
             leading: new Icon(Icons.perm_contact_calendar,
@@ -941,7 +942,7 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
 
     if (_dispatch['Request']['RequestType']['ID'] != 14 && _dispatch['Request']['RequestType']['ID'] != 12 && _dispatch['Request']['RequestType']['ID'] != 4) {
       _list.add(
-        new ExpansionPanel(
+        new ExpansionPanel(canTapOnHeader: true,
           headerBuilder: (context, isExpanded) {
             return ListTile(
               leading: new Icon(Icons.settings,
