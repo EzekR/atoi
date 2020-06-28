@@ -9,6 +9,7 @@ import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:atoi/widgets/build_widget.dart';
 import 'package:atoi/utils/constants.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:atoi/pages/equipments/equipments_list.dart';
 
 /// 超管待完成列表页面类
 class ManagerToComplete extends StatefulWidget {
@@ -239,7 +240,7 @@ class _ManagerToCompleteState extends State<ManagerToComplete> {
                 mainAxisSize: MainAxisSize.max,
                 children: <Widget>[
                   equipmentName==''?new Container():BuildWidget.buildCardRow('设备编号', equipmentName),
-                  equipmentNo==''?new Container():BuildWidget.buildCardRow('设备名称', equipmentNo),
+                  equipmentNo==''?new Container():BuildWidget.buildCardRow('设备名称', equipmentNo, onTap: () => Navigator.of(context).push(new MaterialPageRoute(builder: (_) => new EquipmentsList(equipmentId: equipmentName,)))),
                   departmentName==''?new Container():BuildWidget.buildCardRow('使用科室', departmentName),
                   BuildWidget.buildCardRow('请求人', requestPerson),
                   BuildWidget.buildCardRow('请求类型', requestType),

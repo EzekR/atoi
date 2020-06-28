@@ -15,6 +15,8 @@ import 'package:atoi/widgets/search_department.dart';
 
 /// 设备列表页面类
 class EquipmentsList extends StatefulWidget{
+  final String equipmentId;
+  EquipmentsList({Key key, this.equipmentId}):super(key: key);
   _EquipmentsListState createState() => _EquipmentsListState();
 }
 
@@ -75,6 +77,9 @@ class _EquipmentsListState extends State<EquipmentsList> {
       departmentId = departmentList[0]['value'];
       warrantyId = 0;
       _keywords.clear();
+      if (widget.equipmentId != null) {
+        _keywords.text = widget.equipmentId;
+      }
       _deviceCode.clear();
       _deviceName.clear();
       usageStatus = false;

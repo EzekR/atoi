@@ -338,7 +338,7 @@ class _VendorDetailState extends State<VendorDetail> {
                         });
                       },
                       children: [
-                        new ExpansionPanel(
+                        new ExpansionPanel(canTapOnHeader: true,
                           headerBuilder: (context, isExpanded) {
                             return ListTile(
                               leading: new Icon(

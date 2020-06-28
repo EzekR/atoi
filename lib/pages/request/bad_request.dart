@@ -354,7 +354,7 @@ Future getImage() async {
                         });
                       },
                       children: [
-                        new ExpansionPanel(
+                        new ExpansionPanel(canTapOnHeader: true,
                           headerBuilder: (context, isExpanded) {
                             return ListTile(
                               leading: new Icon(
@@ -409,7 +409,7 @@ Future getImage() async {
                           ),
                           isExpanded: _isExpandedBasic,
                         ),
-                        new ExpansionPanel(
+                        new ExpansionPanel(canTapOnHeader: true,
                           headerBuilder: (context, isExpanded) {
                             return ListTile(
                                 leading: new Icon(

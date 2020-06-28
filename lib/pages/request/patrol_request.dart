@@ -377,7 +377,7 @@ Future getImage() async {
                         });
                       },
                       children: [
-                        new ExpansionPanel(
+                        new ExpansionPanel(canTapOnHeader: true,
                           headerBuilder: (context, isExpanded) {
                             return ListTile(
                                 leading: new Icon(Icons.info,
@@ -395,7 +395,7 @@ Future getImage() async {
                           body: _equipments.length==0?new Center(child: new Text('请选择设备')):buildEquip(),
                           isExpanded: _isExpandedBasic,
                         ),
-                        new ExpansionPanel(
+                        new ExpansionPanel(canTapOnHeader: true,
                           headerBuilder: (context, isExpanded) {
                             return ListTile(
                                 leading: new Icon(Icons.description,

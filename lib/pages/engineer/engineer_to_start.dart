@@ -6,6 +6,7 @@ import 'package:scoped_model/scoped_model.dart';
 import 'package:atoi/models/models.dart';
 import 'package:atoi/widgets/build_widget.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:atoi/pages/equipments/equipments_list.dart';
 
 /// 工程师待开始工单页面类
 class EngineerToStart extends StatefulWidget {
@@ -113,7 +114,7 @@ class _EngineerToStartState extends State<EngineerToStart> {
                           '设备名称',
                           deviceName.length > 1
                               ? '多设备'
-                              : deviceName[0]['Name']),
+                              : deviceName[0]['Name'], onTap: deviceName.length>1?null:() => Navigator.of(context).push(new MaterialPageRoute(builder: (_) => new EquipmentsList(equipmentId: deviceName[0]['OID'],)))),
                   location == ''
                       ? new Container()
                       : BuildWidget.buildCardRow('使用科室', location),

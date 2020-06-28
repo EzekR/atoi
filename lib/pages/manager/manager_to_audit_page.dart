@@ -8,6 +8,7 @@ import 'package:scoped_model/scoped_model.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:atoi/widgets/build_widget.dart';
 import 'package:atoi/utils/constants.dart';
+import 'package:atoi/pages/equipments/equipments_list.dart';
 
 /// 超管待审核列表页面类
 class ManagerToAuditPage extends StatefulWidget {
@@ -146,7 +147,7 @@ class _ManagerToAuditPageState extends State<ManagerToAuditPage> {
                 mainAxisSize: MainAxisSize.max,
                 children: <Widget>[
                   dispatch['Request']['Equipments'].length>0?BuildWidget.buildCardRow('设备编号', dispatch['Request']['EquipmentOID']):new Container(),
-                  dispatch['Request']['Equipments'].length>0?BuildWidget.buildCardRow('设备名称', dispatch['Request']['EquipmentName']):new Container(),
+                  dispatch['Request']['Equipments'].length>0?BuildWidget.buildCardRow('设备名称', dispatch['Request']['EquipmentName'], onTap: () => Navigator.of(context).push(new MaterialPageRoute(builder: (_) => new EquipmentsList(equipmentId: dispatch['Request']['EquipmentOID'],)))):new Container(),
                   BuildWidget.buildCardRow('派工类型', dispatch['RequestType']['Name']),
                   BuildWidget.buildCardRow('紧急程度', dispatch['Urgency']['Name']),
                   BuildWidget.buildCardRow('请求编号', dispatch['Request']['OID']),

@@ -15,6 +15,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter_cupertino_date_picker/flutter_cupertino_date_picker.dart';
 import 'package:date_format/date_format.dart';
 import 'package:should_rebuild/should_rebuild.dart';
+import 'package:atoi/pages/equipments/equipments_list.dart';
 
 /// 超管派工页面类
 class ManagerAssignPage extends StatefulWidget {
@@ -722,7 +723,7 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
         var _list = [
           BuildWidget.buildRow('系统编号', _equipment['OID']??''),
           BuildWidget.buildRow('资产编号', _equipment['AssetCode']??''),
-          BuildWidget.buildRow('名称', _equipment['Name']??''),
+          BuildWidget.buildRow('名称', _equipment['Name']??'', onTap: () => Navigator.of(context).push(new MaterialPageRoute(builder: (_) => new EquipmentsList(equipmentId: _equipment['OID'],)))),
           BuildWidget.buildRow('型号', _equipment['EquipmentCode']??''),
           BuildWidget.buildRow('序列号', _equipment['SerialCode']??''),
           BuildWidget.buildRow('设备厂商', _equipment['Manufacturer']['Name']??''),
@@ -743,7 +744,7 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
   List<dynamic> _buildExpansion(BuildContext context) {
     List<ExpansionPanel> _list = [];
     if (_request['RequestType']['ID'] != 14) {
-      _list.add(new ExpansionPanel(
+      _list.add(new ExpansionPanel(canTapOnHeader: true,
         headerBuilder: (context, isExpanded) {
           return ListTile(
               leading: new Icon(Icons.info,
@@ -767,7 +768,7 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
         isExpanded: _isExpandedBasic,
       ));
     }
-    _list.add(new ExpansionPanel(
+    _list.add(new ExpansionPanel(canTapOnHeader: true,
         headerBuilder: (context, isExpanded) {
           return ListTile(
               leading: new Icon(Icons.description,
@@ -812,7 +813,7 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
         isExpanded: _isExpandedDetail,
       ),
     );
-    _list.add(new ExpansionPanel(
+    _list.add(new ExpansionPanel(canTapOnHeader: true,
       headerBuilder: (context, isExpanded) {
         return ListTile(
             leading: new Icon(Icons.perm_contact_calendar,

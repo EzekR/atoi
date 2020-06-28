@@ -8,6 +8,7 @@ import 'dart:convert';
 import 'package:atoi/widgets/build_widget.dart';
 import 'package:atoi/models/models.dart';
 import 'dart:typed_data';
+import 'package:atoi/pages/equipments/equipments_list.dart';
 
 /// 超管未完成页面类
 class ManagerCompletePage extends StatefulWidget {
@@ -414,7 +415,7 @@ class _ManagerCompletePageState extends State<ManagerCompletePage> {
         var _list = [
           BuildWidget.buildRow('系统编号', _equipment['OID'] ?? ''),
           BuildWidget.buildRow('资产编号', _equipment['AssetCode']??''),
-          BuildWidget.buildRow('名称', _equipment['Name'] ?? ''),
+          BuildWidget.buildRow('名称', _equipment['Name']??'', onTap: () => Navigator.of(context).push(new MaterialPageRoute(builder: (_) => new EquipmentsList(equipmentId: _equipment['OID'],)))),
           BuildWidget.buildRow('型号', _equipment['EquipmentCode'] ?? ''),
           BuildWidget.buildRow('序列号', _equipment['SerialCode'] ?? ''),
           BuildWidget.buildRow('设备厂商', _equipment['Manufacturer']['Name'] ?? ''),
@@ -487,7 +488,7 @@ class _ManagerCompletePageState extends State<ManagerCompletePage> {
     List<ExpansionPanel> _list = [];
     if (_request['RequestType']['ID'] != 14) {
       _list.add(
-        new ExpansionPanel(
+        new ExpansionPanel(canTapOnHeader: true,
           headerBuilder: (context, isExpanded) {
             return ListTile(
               leading: new Icon(
@@ -513,7 +514,7 @@ class _ManagerCompletePageState extends State<ManagerCompletePage> {
       );
     }
     _list.add(
-      new ExpansionPanel(
+      new ExpansionPanel(canTapOnHeader: true,
         headerBuilder: (context, isExpanded) {
           return ListTile(
             leading: new Icon(
@@ -562,7 +563,7 @@ class _ManagerCompletePageState extends State<ManagerCompletePage> {
       ),
     );
     if (_dispatch != null) {
-      _list.add(new ExpansionPanel(
+      _list.add(new ExpansionPanel(canTapOnHeader: true,
         headerBuilder: (context, isExpanded) {
           return ListTile(
             leading: new Icon(
@@ -598,7 +599,7 @@ class _ManagerCompletePageState extends State<ManagerCompletePage> {
       ));
     }
     if (_journal != null) {
-      _list.add(new ExpansionPanel(
+      _list.add(new ExpansionPanel(canTapOnHeader: true,
         headerBuilder: (context, isExpanded) {
           return ListTile(
               leading: new Icon(
@@ -650,7 +651,7 @@ class _ManagerCompletePageState extends State<ManagerCompletePage> {
       ));
     }
     if (_report != null) {
-      _list.add(new ExpansionPanel(
+      _list.add(new ExpansionPanel(canTapOnHeader: true,
         headerBuilder: (context, isExpanded) {
           return ListTile(
             leading: new Icon(
@@ -677,7 +678,7 @@ class _ManagerCompletePageState extends State<ManagerCompletePage> {
       ));
     }
     if (_report != null && _report['ReportAccessories'].isNotEmpty) {
-      _list.add(new ExpansionPanel(
+      _list.add(new ExpansionPanel(canTapOnHeader: true,
         headerBuilder: (context, isExpanded) {
           return ListTile(
               leading: new Icon(
