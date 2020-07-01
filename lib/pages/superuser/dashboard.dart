@@ -14,10 +14,25 @@ class _DashboardState extends State<Dashboard> {
 
   List<IncomeData> incomeData = [
     IncomeData(1, 100.0, -80.0, 0),
-    IncomeData(2, 80.0, -80.0, -20),
-    IncomeData(3, 50, -50.0, -10),
-    IncomeData(4, 40, -40.0, -40),
+    IncomeData(2, 100.0, -80.0, 0),
+    IncomeData(3, 80.0, -80.0, -20),
+    IncomeData(4, 50, -50.0, -10),
     IncomeData(5, 100.0, -80.0, 0),
+    IncomeData(6, 80.0, -80.0, -20),
+    IncomeData(7, 50, -50.0, -10),
+    IncomeData(8, 100.0, -80.0, 0),
+    IncomeData(9, 80.0, -80.0, -20),
+    IncomeData(10, 50, -50.0, -10),
+    IncomeData(11, 40, -40.0, -40),
+    IncomeData(12, 100.0, -80.0, 0),
+    IncomeData(13, 40, -40.0, -40),
+    IncomeData(14, 100.0, -80.0, 0),
+    IncomeData(15, 40, -40.0, -40),
+    IncomeData(16, 100.0, -80.0, 0),
+    IncomeData(17, 80.0, -80.0, -20),
+    IncomeData(18, 50, -50.0, -10),
+    IncomeData(19, 40, -40.0, -40),
+    IncomeData(20, 100.0, -80.0, 0),
   ];
 
   List<RequestData> requestData = [
@@ -1133,6 +1148,140 @@ class _DashboardState extends State<Dashboard> {
   }
 
   //key index
+  Container buildProgressBar(String title) {
+    return Container(
+        height: 90,
+        child: Column(
+          children: <Widget>[
+            Row(
+              children: <Widget>[
+                Container(
+                  width: 60,
+                  child: Text(
+                    '校准率',
+                    style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w600,
+                        color: Color(0xff1e1e1e)
+                    ),
+                  ),
+                ),
+                SizedBox(
+                  width: 27,
+                ),
+                Container(
+                  height: 18,
+                  width: 250,
+                  color: Color(0xffE7EDF6),
+                  child: Row(
+                    children: <Widget>[
+                      Container(
+                        width: 80,
+                        decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                                colors: [
+                                  Color(0xff3FA6CC),
+                                  Color(0xff39629B)
+                                ]
+                            )
+                        ),
+                      ),
+                      Container(
+                        width: 150,
+                        decoration: BoxDecoration(
+                            border: Border(
+                                right: BorderSide(
+                                  width: 1.0,
+                                  color: Color(0xffCD6750),
+                                )
+                            )
+                        ),
+                      )
+                    ],
+                  ),
+                )
+              ],
+            ),
+            Row(
+              children: <Widget>[
+                Container(
+                  width: 60,
+                  child: Row(
+                    children: <Widget>[
+                      Text(
+                        '35',
+                        style: TextStyle(
+                            color: Color(0xffD64040),
+                            fontWeight: FontWeight.w600,
+                            fontSize: 25
+                        ),
+                      ),
+                      Text(
+                        '%',
+                        style: TextStyle(
+                            color: Color(0xffD64040),
+                            fontWeight: FontWeight.w600,
+                            fontSize: 15
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                SizedBox(
+                  width: 27,
+                ),
+                Text(
+                  '已完成',
+                  style: TextStyle(
+                      color: Color(0xff333333),
+                      fontSize: 13
+                  ),
+                ),
+                Text(
+                  '35',
+                  style: TextStyle(
+                      color: Color(0xff1e1e1e),
+                      fontSize: 22
+                  ),
+                ),
+                Text(
+                  '件',
+                  style: TextStyle(
+                      color: Color(0xff333333),
+                      fontSize: 13
+                  ),
+                ),
+                SizedBox(
+                  width: 50,
+                ),
+                Text(
+                  '本月计划',
+                  style: TextStyle(
+                      color: Color(0xff333333),
+                      fontSize: 13
+                  ),
+                ),
+                Text(
+                  '100',
+                  style: TextStyle(
+                      color: Color(0xff1e1e1e),
+                      fontSize: 22
+                  ),
+                ),
+                Text(
+                  '件',
+                  style: TextStyle(
+                      color: Color(0xff333333),
+                      fontSize: 13
+                  ),
+                ),
+              ],
+            )
+          ],
+        ),
+      );
+  }
+
   Padding buildKeyIndex() {
     return Padding(
       padding: EdgeInsets.fromLTRB(24, 19, 24, 19),
@@ -1144,140 +1293,12 @@ class _DashboardState extends State<Dashboard> {
               child: buildGauge(),
             ),
             Container(
-              height: 400.0,
+              height: 300.0,
               child: Column(
                 children: <Widget>[
-                  Container(
-                    height: 90,
-                    child: Column(
-                      children: <Widget>[
-                        Row(
-                          children: <Widget>[
-                            Container(
-                              width: 60,
-                              child: Text(
-                                '校准率',
-                                style: TextStyle(
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.w600,
-                                    color: Color(0xff1e1e1e)
-                                ),
-                              ),
-                            ),
-                            SizedBox(
-                              width: 27,
-                            ),
-                            Container(
-                              height: 18,
-                              width: 250,
-                              color: Color(0xffE7EDF6),
-                              child: Row(
-                                children: <Widget>[
-                                  Container(
-                                    width: 80,
-                                    decoration: BoxDecoration(
-                                      gradient: LinearGradient(
-                                          colors: [
-                                            Color(0xff3FA6CC),
-                                            Color(0xff39629B)
-                                          ]
-                                      )
-                                    ),
-                                  ),
-                                  Container(
-                                    width: 150,
-                                    decoration: BoxDecoration(
-                                      border: Border(
-                                          right: BorderSide(
-                                            width: 1.0,
-                                            color: Color(0xffCD6750),
-                                          )
-                                      )
-                                    ),
-                                  )
-                                ],
-                              ),
-                            )
-                          ],
-                        ),
-                        Row(
-                          children: <Widget>[
-                            Container(
-                              width: 60,
-                              child: Row(
-                                children: <Widget>[
-                                  Text(
-                                    '35',
-                                    style: TextStyle(
-                                        color: Color(0xffD64040),
-                                        fontWeight: FontWeight.w600,
-                                        fontSize: 25
-                                    ),
-                                  ),
-                                  Text(
-                                    '%',
-                                    style: TextStyle(
-                                        color: Color(0xffD64040),
-                                        fontWeight: FontWeight.w600,
-                                        fontSize: 15
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            SizedBox(
-                              width: 27,
-                            ),
-                            Text(
-                              '已完成',
-                              style: TextStyle(
-                                  color: Color(0xff333333),
-                                  fontSize: 13
-                              ),
-                            ),
-                            Text(
-                              '35',
-                              style: TextStyle(
-                                  color: Color(0xff1e1e1e),
-                                  fontSize: 22
-                              ),
-                            ),
-                            Text(
-                              '件',
-                              style: TextStyle(
-                                  color: Color(0xff333333),
-                                  fontSize: 13
-                              ),
-                            ),
-                            SizedBox(
-                              width: 50,
-                            ),
-                            Text(
-                              '本月计划',
-                              style: TextStyle(
-                                  color: Color(0xff333333),
-                                  fontSize: 13
-                              ),
-                            ),
-                            Text(
-                              '100',
-                              style: TextStyle(
-                                  color: Color(0xff1e1e1e),
-                                  fontSize: 22
-                              ),
-                            ),
-                            Text(
-                              '件',
-                              style: TextStyle(
-                                  color: Color(0xff333333),
-                                  fontSize: 13
-                              ),
-                            ),
-                          ],
-                        )
-                      ],
-                    ),
-                  )
+                  buildProgressBar(),
+                  buildProgressBar(),
+                  buildProgressBar(),
                 ],
               ),
             )
