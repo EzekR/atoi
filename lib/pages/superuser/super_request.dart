@@ -132,7 +132,7 @@ class _SuperRequestState extends State<SuperRequest> {
       _depart = -1;
       _recall = false;
       _overDue = false;
-      _field = widget.field??widget.pageType==PageType.REQUEST?'r.ID':'d.ID';
+      _field = widget.field!=null?widget.field:(widget.pageType==PageType.REQUEST?'r.ID':'d.ID');
       _filter = new TextEditingController();
       _filter.text = widget.filter??'';
       _urgency = 0;
@@ -182,32 +182,32 @@ class _SuperRequestState extends State<SuperRequest> {
               color: Color(0xff14BD98),
               size: 36.0,
             ),
-            title: new FlatButton(
-                onPressed: () {
-                  Navigator.of(context).push(new MaterialPageRoute(builder: (_) => ManagerCompletePage(requestId: requestId,)));
-                },
-                child: new Row(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  children: <Widget>[
-                    Text(
-                      "请求编号：",
-                      style: new TextStyle(
-                          fontSize: 18.0,
-                          color: Theme.of(context).primaryColor,
-                          fontWeight: FontWeight.w500
-                      ),
+            title: new GestureDetector(
+              onTap: () {
+                Navigator.of(context).push(new MaterialPageRoute(builder: (_) => ManagerCompletePage(requestId: requestId,)));
+              },
+              child: new Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: <Widget>[
+                  Text(
+                    "请求编号：",
+                    style: new TextStyle(
+                        fontSize: 18.0,
+                        color: Theme.of(context).primaryColor,
+                        fontWeight: FontWeight.w500
                     ),
-                    Text(
-                      taskNo,
-                      style: new TextStyle(
-                          fontSize: 18.0,
-                          color: Colors.red,
-                          //color: new Color(0xffD25565),
-                          fontWeight: FontWeight.w400
-                      ),
+                  ),
+                  Text(
+                    taskNo,
+                    style: new TextStyle(
+                        fontSize: 18.0,
+                        color: Colors.red,
+                        //color: new Color(0xffD25565),
+                        fontWeight: FontWeight.w400
                     ),
-                  ],
-                ),
+                  ),
+                ],
+              ),
             ),
             subtitle: Text(
               "请求时间：${AppConstants.TimeForm(time, 'hh:mm')}",
@@ -237,9 +237,7 @@ class _SuperRequestState extends State<SuperRequest> {
                   children: <Widget>[
                     task['Status']['ID']>1?new RaisedButton(
                       onPressed: (){
-                        //Navigator.of(context).push(new MaterialPageRoute(builder: (_) {
-                        //  return new ManagerAssignPage(request: task);
-                        //})).then((result) => refresh());
+                        Navigator.of(context).push(new MaterialPageRoute(builder: (_) => new SuperRequest(pageType: PageType.DISPATCH, filter: taskNo, field: 'd.RequestID')));
                       },
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(6),
@@ -259,10 +257,7 @@ class _SuperRequestState extends State<SuperRequest> {
                           )
                         ],
                       ),
-                    ):new Container(),
-                    new Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 5.0),
-                    ),
+                    ):new SizedBox(height: 40.0,),
                   ],
                 )
               ],
@@ -305,27 +300,32 @@ class _SuperRequestState extends State<SuperRequest> {
               color: Color(0xff14BD98),
               size: 40.0,
             ),
-            title: new Row(
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: <Widget>[
-                Text(
-                  "派工单编号：",
-                  style: new TextStyle(
-                      fontSize: 18.0,
-                      color: Theme.of(context).primaryColor,
-                      fontWeight: FontWeight.w500
+            title: new GestureDetector(
+              onTap: () {
+                Navigator.of(context).push(new MaterialPageRoute(builder: (_) => ManagerCompletePage(requestId: dispatch['Request']['ID'],)));
+              },
+              child: new Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: <Widget>[
+                  Text(
+                    "派工单编号：",
+                    style: new TextStyle(
+                        fontSize: 18.0,
+                        color: Theme.of(context).primaryColor,
+                        fontWeight: FontWeight.w500
+                    ),
                   ),
-                ),
-                Text(
-                  dispatch['OID'],
-                  style: new TextStyle(
-                      fontSize: 18.0,
-                      color: Colors.red,
-                      //color: new Color(0xffD25565),
-                      fontWeight: FontWeight.w400
-                  ),
-                )
-              ],
+                  Text(
+                    dispatch['OID'],
+                    style: new TextStyle(
+                        fontSize: 18.0,
+                        color: Colors.red,
+                        //color: new Color(0xffD25565),
+                        fontWeight: FontWeight.w400
+                    ),
+                  )
+                ],
+              ),
             ),
             subtitle: Text(
               "派工时间：${AppConstants.TimeForm(dispatch['ScheduleDate'].toString(), 'hh:mm')}",
@@ -351,62 +351,7 @@ class _SuperRequestState extends State<SuperRequest> {
                   mainAxisAlignment: MainAxisAlignment.end,
                   mainAxisSize: MainAxisSize.max,
                   children: <Widget>[
-                    new RaisedButton(
-                      onPressed: (){
-                        //dispatch['DispatchJournal']['Status']['ID']==0||dispatch['DispatchJournal']['Status']['ID']==1?null:
-                        //Navigator.of(context).push(
-                        //    new MaterialPageRoute(builder: (_) {
-                        //      return new ManagerAuditVoucherPage(
-                        //        journalId: dispatch['DispatchJournal']['ID'], request: dispatch, status: dispatch['DispatchJournal']['Status']['ID'],);
-                        //    })).then((result) => refresh());
-                      },
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(6),
-                      ),
-                      color: iconColor(dispatch['DispatchJournal']['Status']['ID']),
-                      child: new Row(
-                        children: <Widget>[
-                          new Icon(
-                            dispatch['DispatchJournal']['Status']['ID'] == 3?Icons.check:Icons.fingerprint,
-                            color: Colors.white,
-                          ),
-                          new Text(
-                            '凭证',
-                            style: new TextStyle(
-                                color: Colors.white
-                            ),
-                          )
-                        ],
-                      ),
-                    ),
-                    new Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 5.0),
-                    ),
-                    new RaisedButton(
-                      onPressed: (){
-                        //dispatch['DispatchReport']['Status']['ID']==0||dispatch['DispatchReport']['Status']['ID']==1?null:Navigator.of(context).push(new MaterialPageRoute(builder: (_){
-                        //  return new ManagerAuditReportPage(reportId: dispatch['DispatchReport']['ID'], request: dispatch, status: dispatch['DispatchReport']['Status']['ID'],);
-                        //})).then((result) => refresh());
-                      },
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(6),
-                      ),
-                      color: iconColor(dispatch['DispatchReport']['Status']['ID']),
-                      child: new Row(
-                        children: <Widget>[
-                          new Icon(
-                            dispatch['DispatchReport']['Status']['ID'] == 3?Icons.check:Icons.work,
-                            color: Colors.white,
-                          ),
-                          new Text(
-                            '报告',
-                            style: new TextStyle(
-                                color: Colors.white
-                            ),
-                          )
-                        ],
-                      ),
-                    )
+                    SizedBox(height: 40.0,)
                   ],
                 )
               ],

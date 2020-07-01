@@ -58,6 +58,7 @@ dependencies:
     git: https://github.com/EzekR/floating_search.git
   # atoi_picker:
   #     git: https://github.com/EzekR/atoi_picker.git
+  syncfusion_flutter_gauges: ^18.1.59
 
 
 dev_dependencies:
