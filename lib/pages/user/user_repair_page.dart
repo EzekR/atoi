@@ -30,6 +30,7 @@ class _UserRepairPageState extends State<UserRepairPage> {
   ConstantsModel model;
   //增加操作状态
   bool _stunned = false;
+  FocusNode _focusNode = new FocusNode();
 
   List<dynamic> _imageList = [];
 
@@ -149,7 +150,7 @@ class _UserRepairPageState extends State<UserRepairPage> {
           context: context,
           builder: (context) => CupertinoAlertDialog(
                 title: new Text('故障描述不可为空'),
-              ));
+              )).then((result) => _focusNode.requestFocus());
       return;
     }
     List<dynamic> Files = [];
@@ -452,7 +453,7 @@ Future getImage() async {
                         children: <Widget>[
                           BuildWidget.buildDropdown('机器状态', _currentResult,
                               _dropDownMenuItems, changedDropDownMethod, context: context, required: true),
-                          BuildWidget.buildInput('故障描述', _describe, maxLength: 200, required: true),
+                          BuildWidget.buildInput('故障描述', _describe, maxLength: 200, required: true, focusNode: _focusNode),
                           new Padding(
                             padding: EdgeInsets.symmetric(vertical: 5.0),
                             child: new Row(

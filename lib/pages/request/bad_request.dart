@@ -476,6 +476,7 @@ Future getImage() async {
                                             new IconButton(
                                                 icon: Icon(Icons.add_a_photo),
                                                 onPressed: () {
+                                                  FocusScope.of(context).requestFocus(new FocusNode());
                                                   getImage();
                                                 })
                                           ],

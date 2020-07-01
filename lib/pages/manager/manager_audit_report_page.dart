@@ -16,6 +16,7 @@ import 'package:multi_image_picker/multi_image_picker.dart';
 import 'package:uuid/uuid.dart';
 import 'dart:io';
 import 'package:atoi/pages/equipments/equipments_list.dart';
+import 'dart:async';
 
 /// 超管审核报告页面类
 class ManagerAuditReportPage extends StatefulWidget {
@@ -469,9 +470,12 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
         builder: (context) => CupertinoAlertDialog(
           title: new Text('审批备注不可为空'),
         )
-      ).then((result) async {
+      ).then((result) {
         _scrollController.jumpTo(2000.0);
-        _focusReport[3].requestFocus();
+        Timer(const Duration(milliseconds: 500), () {
+          FocusScope.of(context).unfocus();
+          _focusReport[3].requestFocus();
+        });
       });
       return;
     }

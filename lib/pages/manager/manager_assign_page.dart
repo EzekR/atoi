@@ -41,6 +41,7 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
   Map<String, dynamic> _request = {};
   ConstantsModel model;
   List dispatches = [];
+  bool hold = false;
 
   String _userName = '';
   String _mobile = '';
@@ -688,11 +689,17 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
           'ID': _request['FaultType']['ID']
         };
     }
+    setState(() {
+      hold = true;
+    });
     var resp = await HttpRequest.request(
       '/Request/CreateDispatch',
       method: HttpRequest.POST,
       data: _data
     );
+    setState(() {
+      hold = false;
+    });
     print(resp);
     if (resp['ResultCode'] == '00') {
       showDialog(context: context,
@@ -1046,6 +1053,9 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
                         padding: EdgeInsets.symmetric(horizontal: 5.0),
                         child: new RaisedButton(
                           onPressed: () {
+                            if (hold) {
+                              return null;
+                            }
                             FocusScope.of(context).requestFocus(new FocusNode());
                             setState(() {
                               _isExpandedBasic = true;
@@ -1057,7 +1067,7 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
                                   builder: (context) => CupertinoAlertDialog(
                                     title: new Text('请选择工程师'),
                                   )
-                              ).then((result) => _scrollController.jumpTo(_scrollController.position.maxScrollExtent));
+                              ).then((result) => _scrollController.jumpTo(2000));
                               return;
                             }
                             if (_desc.text.isEmpty) {
