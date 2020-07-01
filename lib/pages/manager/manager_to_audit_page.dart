@@ -147,7 +147,7 @@ class _ManagerToAuditPageState extends State<ManagerToAuditPage> {
                 mainAxisSize: MainAxisSize.max,
                 children: <Widget>[
                   dispatch['Request']['Equipments'].length>0?BuildWidget.buildCardRow('设备编号', dispatch['Request']['EquipmentOID']):new Container(),
-                  dispatch['Request']['Equipments'].length>0?BuildWidget.buildCardRow('设备名称', dispatch['Request']['EquipmentName'], onTap: () => dispatch['Request']['EquipmentName']=='多设备'?null:Navigator.of(context).push(new MaterialPageRoute(builder: (_) => new EquipmentsList(equipmentId: dispatch['Request']['EquipmentOID'],)))):new Container(),
+                  dispatch['Request']['Equipments'].length>0?BuildWidget.buildCardRow('设备名称', dispatch['Request']['EquipmentName'], onTap: dispatch['Request']['EquipmentName']=='多设备'?null:() => Navigator.of(context).push(new MaterialPageRoute(builder: (_) => new EquipmentsList(equipmentId: dispatch['Request']['EquipmentOID'],)))):new Container(),
                   BuildWidget.buildCardRow('派工类型', dispatch['RequestType']['Name']),
                   BuildWidget.buildCardRow('紧急程度', dispatch['Urgency']['Name']),
                   BuildWidget.buildCardRow('请求编号', dispatch['Request']['OID']),
