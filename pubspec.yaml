@@ -56,9 +56,12 @@ dependencies:
       git: https://github.com/EzekR/atoi_charts.git
   floating_search_bar:
     git: https://github.com/EzekR/floating_search.git
+  spider_chart:
+    git: https://github.com/EzekR/flutter-spider-chart.git
   # atoi_picker:
   #     git: https://github.com/EzekR/atoi_picker.git
   syncfusion_flutter_gauges: ^18.1.59
+  timeline_tile: ^0.1.2
 
 
 dev_dependencies:

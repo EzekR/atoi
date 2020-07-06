@@ -3,6 +3,9 @@ import 'package:flutter/cupertino.dart';
 import 'package:atoi_charts/charts.dart';
 import 'package:badges/badges.dart';
 import 'package:syncfusion_flutter_gauges/gauges.dart';
+import 'package:spider_chart/spider_chart.dart';
+import 'package:timeline_tile/timeline_tile.dart';
+
 class Dashboard extends StatefulWidget {
   _DashboardState createState() => new _DashboardState();
 }
@@ -11,6 +14,7 @@ class _DashboardState extends State<Dashboard> {
 
   int currentTab = 0;
   int currentEvent = 0;
+  bool isDetailPage = false;
 
   List<IncomeData> incomeData = [
     IncomeData(1, 100.0, -80.0, 0),
@@ -726,9 +730,18 @@ class _DashboardState extends State<Dashboard> {
           ],
           tooltipBehavior: TooltipBehavior(
               enable: true,
+              activationMode: ActivationMode.singleTap,
+              elevation: 100.0,
+              shouldAlwaysShow: true,
               builder: (dynamic data, dynamic point, dynamic series,
                   int pointIndex, int seriesIndex) {
-                return Container(
+                return GestureDetector(
+                  onTap: () {
+                    setState(() {
+                      isDetailPage = true;
+                    });
+                  },
+                  child: Container(
                     height: 90,
                     width: 350,
                     decoration: BoxDecoration(
@@ -743,8 +756,8 @@ class _DashboardState extends State<Dashboard> {
                           Text(
                             '影像科',
                             style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 16.0
+                                color: Colors.white,
+                                fontSize: 16.0
                             ),
                           ),
                           SizedBox(
@@ -757,8 +770,8 @@ class _DashboardState extends State<Dashboard> {
                                 child: Text(
                                   '设备数量：20',
                                   style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 11.0
+                                      color: Colors.white,
+                                      fontSize: 11.0
                                   ),
                                 ),
                               ),
@@ -804,6 +817,7 @@ class _DashboardState extends State<Dashboard> {
                         ],
                       ),
                     ),
+                  ),
                 );
               }
           ),
@@ -1148,7 +1162,7 @@ class _DashboardState extends State<Dashboard> {
   }
 
   //key index
-  Container buildProgressBar(String title) {
+  Container buildProgressBar(String title, int planned, int finished, String percent) {
     return Container(
         height: 90,
         child: Column(
@@ -1158,7 +1172,7 @@ class _DashboardState extends State<Dashboard> {
                 Container(
                   width: 60,
                   child: Text(
-                    '校准率',
+                    title,
                     style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.w600,
@@ -1209,7 +1223,7 @@ class _DashboardState extends State<Dashboard> {
                   child: Row(
                     children: <Widget>[
                       Text(
-                        '35',
+                        percent,
                         style: TextStyle(
                             color: Color(0xffD64040),
                             fontWeight: FontWeight.w600,
@@ -1238,7 +1252,7 @@ class _DashboardState extends State<Dashboard> {
                   ),
                 ),
                 Text(
-                  '35',
+                  finished.toString(),
                   style: TextStyle(
                       color: Color(0xff1e1e1e),
                       fontSize: 22
@@ -1262,7 +1276,7 @@ class _DashboardState extends State<Dashboard> {
                   ),
                 ),
                 Text(
-                  '100',
+                  planned.toString(),
                   style: TextStyle(
                       color: Color(0xff1e1e1e),
                       fontSize: 22
@@ -1296,9 +1310,9 @@ class _DashboardState extends State<Dashboard> {
               height: 300.0,
               child: Column(
                 children: <Widget>[
-                  buildProgressBar(),
-                  buildProgressBar(),
-                  buildProgressBar(),
+                  buildProgressBar('校准率', 100, 35, '35'),
+                  buildProgressBar('保养率', 100, 35, '35'),
+                  buildProgressBar('巡检率', 100, 35, '35'),
                 ],
               ),
             )
@@ -1381,37 +1395,518 @@ class _DashboardState extends State<Dashboard> {
       ),
     );
   }
+  
+  // department detail
+  GestureDetector buildDetail() {
+    return GestureDetector(
+      child: Padding(
+        padding: EdgeInsets.fromLTRB(24, 14, 24, 14),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            GestureDetector(
+              onTap: () {
+                setState(() {
+                  isDetailPage = false;
+                });
+              },
+              child: Container(
+                child: Text(
+                  '设备收支概览',
+                  style: TextStyle(
+                      color: Color(0xff1e1e1e),
+                      fontSize: 17.0,
+                      fontWeight: FontWeight.w600
+                  ),
+                ),
+              ),
+            ),
+            SizedBox(
+              height: 9.0,
+            ),
+            Container(
+              child: Row(
+                children: <Widget>[
+                  Container(
+                    height: 9.0,
+                    width: 9.0,
+                    color: Color(0xff86C7E6),
+                  ),
+                  SizedBox(
+                    width: 4.0,
+                  ),
+                  Text(
+                    '收入',
+                    style: TextStyle(
+                        color: Color(0xff666666),
+                        fontSize: 10.0
+                    ),
+                  ),
+                  SizedBox(
+                    width: 15.0,
+                  ),
+                  Container(
+                    height: 9.0,
+                    width: 9.0,
+                    color: Color(0xff39649C),
+                  ),
+                  SizedBox(
+                    width: 4.0,
+                  ),
+                  Text(
+                    '支出',
+                    style: TextStyle(
+                        color: Color(0xff666666),
+                        fontSize: 10.0
+                    ),
+                  ),
+                  SizedBox(
+                    width: 15.0,
+                  ),
+                  Container(
+                    height: 9.0,
+                    width: 9.0,
+                    color: Color(0xffD64040),
+                  ),
+                  SizedBox(
+                    width: 4.0,
+                  ),
+                  Text(
+                    '亏损',
+                    style: TextStyle(
+                        color: Color(0xff666666),
+                        fontSize: 10.0
+                    ),
+                  ),
+                  SizedBox(
+                    width: 15.0,
+                  ),
+                ],
+              ),
+            ),
+            Container(
+              child: Row(
+                children: <Widget>[
+                  Expanded(
+                    flex: 3,
+                    child: Container(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: <Widget>[
+                          Text(
+                            '2,698',
+                            style: TextStyle(
+                                color: Color(0xff1e1e1e),
+                                fontSize: 15.0,
+                                fontWeight: FontWeight.w600
+                            ),
+                          ),
+                          SizedBox(
+                            height: 4.0,
+                          ),
+                          Text(
+                            '总收入(万元)',
+                            style: TextStyle(
+                                color: Color(0xff666666),
+                                fontSize: 10.0
+                            ),
+                          )
+                        ],
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    flex: 3,
+                    child: Container(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: <Widget>[
+                          Text(
+                            '+23.2%',
+                            style: TextStyle(
+                                color: Color(0xffD64040),
+                                fontSize: 15.0,
+                                fontWeight: FontWeight.w600
+                            ),
+                          ),
+                          SizedBox(
+                            height: 4.0,
+                          ),
+                          Text(
+                            '同比',
+                            style: TextStyle(
+                                color: Color(0xff666666),
+                                fontSize: 10.0
+                            ),
+                          )
+                        ],
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    flex: 3,
+                    child: Container(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: <Widget>[
+                          Text(
+                            '2,698.22',
+                            style: TextStyle(
+                                color: Color(0xff1e1e1e),
+                                fontSize: 15.0,
+                                fontWeight: FontWeight.w600
+                            ),
+                          ),
+                          SizedBox(
+                            height: 4.0,
+                          ),
+                          Text(
+                            '总支出(万元)',
+                            style: TextStyle(
+                                color: Color(0xff666666),
+                                fontSize: 10.0
+                            ),
+                          )
+                        ],
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    flex: 3,
+                    child: Container(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: <Widget>[
+                          Text(
+                            '-12.33%',
+                            style: TextStyle(
+                                color: Color(0xff33B850),
+                                fontSize: 15.0,
+                                fontWeight: FontWeight.w600
+                            ),
+                          ),
+                          SizedBox(
+                            height: 4.0,
+                          ),
+                          Text(
+                            '同比',
+                            style: TextStyle(
+                                color: Color(0xff666666),
+                                fontSize: 10.0
+                            ),
+                          )
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Container(
+              height: 200,
+              child: buildIncomeChart(),
+            )
+          ],
+        ),
+      ),
+    );
+  }
+
+  // equipment radar
+  Padding buildRadar() {
+    return Padding(
+      padding: EdgeInsets.fromLTRB(24, 13, 24, 13),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          Row(
+            children: <Widget>[
+              Container(
+                height: 18,
+                width: 33,
+                color: Color(0xff33B850),
+                child: Center(
+                  child: Text(
+                    '正常',
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Colors.white,
+                    ),
+                  ),
+                )
+              ),
+              Text(
+                '医用磁共振成像系统-奥林巴斯-飞利浦',
+                softWrap: true,
+                style: TextStyle(
+                  fontSize: 17,
+                  color: Color(0xff1e1e1e),
+                  fontWeight: FontWeight.w600
+                ),
+              ),
+            ],
+          ),
+          Text(
+            '781- -296 -资产编号20200107',
+            style: TextStyle(
+                fontSize: 17,
+                color: Color(0xff1e1e1e),
+                fontWeight: FontWeight.w600
+            ),
+          ),
+          SizedBox(
+            height: 14.0,
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: <Widget>[
+              Text(
+                '安装位置：放射科',
+                style: TextStyle(
+                  color: Colors.black,
+                  fontWeight: FontWeight.w600,
+                  fontSize: 17
+                ),
+              ),
+              Text(
+                '安装日期: 2020-01-07',
+                style: TextStyle(
+                  fontSize: 13,
+                  color: Color(0xff666666)
+                ),
+              ),
+            ],
+          ),
+          SizedBox(
+            height: 50,
+          ),
+          Container(
+            height: 200,
+            child: buildSpiderChart(),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Container buildSpiderChart() {
+    return Container(
+      child: SpiderChart(
+        data: [
+          7,
+          5,
+          10,
+          7,
+          4,
+        ],
+        labels: [
+          '维修',
+          '保养',
+          '巡检',
+          '强检',
+          '校正'
+        ],
+        maxValue: 10,
+        colors: <Color>[
+          Colors.red,
+          Colors.green,
+          Colors.blue,
+          Colors.yellow,
+          Colors.indigo,
+        ],
+      ),
+    );
+  }
+
+  Padding buildTimeline() {
+    return Padding(
+      padding: EdgeInsets.fromLTRB(23, 25, 23, 25),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          Text(
+            '医用磁共振成像系统-奥林巴斯-飞利浦781- -296 -资产编号20200107',
+            style: TextStyle(
+                fontSize: 17,
+                color: Color(0xff1e1e1e),
+                fontWeight: FontWeight.w600
+            ),
+            softWrap: true,
+          ),
+          SizedBox(
+            height: 14,
+          ),
+          Container(
+            height: 300,
+            child: ListView(
+              children: <Widget>[
+                TimelineTile(
+                  alignment: TimelineAlign.left,
+                  isFirst: true,
+                  indicatorStyle: const IndicatorStyle(
+                    width: 9,
+                    color: Color(0xffD64040),
+                    indicatorY: 0.3,
+                  ),
+                  bottomLineStyle: const LineStyle(
+                    color: Color(0xffebebeb),
+                    width: 4,
+                  ),
+                  rightChild: Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 13),
+                    child: Container(
+                      constraints: const BoxConstraints(
+                        minHeight: 40,
+                      ),
+                      child: Text(
+                        '2020-02-17 维修; 000000336; 详细处理方法是处理方法',
+                        style: TextStyle(
+                            color: Color(0xff1e1e1e),
+                            fontSize: 14
+                        ),
+                      ),
+                    ),
+                  )
+                ),
+                TimelineTile(
+                    alignment: TimelineAlign.left,
+                    indicatorStyle: const IndicatorStyle(
+                      width: 9,
+                      color: Color(0xffD64040),
+                      indicatorY: 0.3,
+                    ),
+                    topLineStyle: const LineStyle(
+                      color: Color(0xffebebeb),
+                      width: 4,
+                    ),
+                    bottomLineStyle: const LineStyle(
+                      color: Color(0xffebebeb),
+                      width: 4,
+                    ),
+                    rightChild: Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 13),
+                      child: Container(
+                        constraints: const BoxConstraints(
+                          minHeight: 40,
+                        ),
+                        child: Text(
+                          '2020-02-17 维修; 000000336; 详细处理方法是处理方法',
+                          style: TextStyle(
+                              color: Color(0xff1e1e1e),
+                              fontSize: 14
+                          ),
+                        ),
+                      ),
+                    )
+                ),
+                TimelineTile(
+                    alignment: TimelineAlign.left,
+                    indicatorStyle: const IndicatorStyle(
+                      width: 9,
+                      color: Color(0xffD64040),
+                      indicatorY: 0.3,
+                    ),
+                    topLineStyle: const LineStyle(
+                      color: Color(0xffebebeb),
+                      width: 4,
+                    ),
+                    bottomLineStyle: const LineStyle(
+                      color: Color(0xffebebeb),
+                      width: 4,
+                    ),
+                    rightChild: Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 13),
+                      child: Container(
+                        constraints: const BoxConstraints(
+                          minHeight: 40,
+                        ),
+                        child: Text(
+                          '2020-02-17 维修; 000000336; 详细处理方法是处理方法',
+                          style: TextStyle(
+                              color: Color(0xff1e1e1e),
+                              fontSize: 14
+                          ),
+                        ),
+                      ),
+                    )
+                ),
+                TimelineTile(
+                    alignment: TimelineAlign.left,
+                    indicatorStyle: const IndicatorStyle(
+                      width: 9,
+                      color: Color(0xffD64040),
+                      indicatorY: 0.3,
+                    ),
+                    isLast: true,
+                    topLineStyle: const LineStyle(
+                      color: Color(0xffebebeb),
+                      width: 4,
+                    ),
+                    bottomLineStyle: const LineStyle(
+                      color: Color(0xffebebeb),
+                      width: 4,
+                    ),
+                    rightChild: Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 13),
+                      child: Container(
+                        constraints: const BoxConstraints(
+                          minHeight: 40,
+                        ),
+                        child: Text(
+                          '2020-02-17 维修; 000000336; 详细处理方法是处理方法',
+                          style: TextStyle(
+                              color: Color(0xff1e1e1e),
+                              fontSize: 14
+                          ),
+                        ),
+                      ),
+                    )
+                ),
+              ],
+            ),
+          )
+        ],
+      ),
+    );
+  }
 
   List<Widget> listBuilder() {
     List<Widget> _list = [];
-    _list.add(
-      SizedBox(
-        height: 50.0,
-      ),
-    );
-    switch (currentTab) {
-      case 0:
-        _list.addAll([
-          buildCard(buildAsset()),
-          buildCard(buildIncome()),
-        ]);
-        break;
-      case 1:
-        _list.add(
-          buildCard(buildRequest())
-        );
-        break;
-      case 2:
-        _list.add(
-          buildCard(buildEventType())
-        );
-        _list.add(
-          buildCard(buildEventList())
-        );
-        break;
-      case 3:
-        _list.add(buildCard(buildKeyIndex()));
-        break;
+    // department detail
+    if (!isDetailPage) {
+      _list.add(
+        SizedBox(
+          height: 50.0,
+        ),
+      );
+      switch (currentTab) {
+        case 0:
+          _list.addAll([
+            buildCard(buildAsset()),
+            buildCard(buildIncome()),
+          ]);
+          break;
+        case 1:
+          _list.add(
+              buildCard(buildRequest())
+          );
+          break;
+        case 2:
+          _list.add(
+              buildCard(buildEventType())
+          );
+          _list.add(
+              buildCard(buildEventList())
+          );
+          break;
+        case 3:
+          _list.add(buildCard(buildKeyIndex()));
+          break;
+      }
+    } else {
+      _list.add(buildCard(buildDetail()));
+      _list.add(buildCard(buildRadar()));
+      _list.add(buildCard(buildTimeline()));
     }
     _list.add(
       Center(
@@ -1448,7 +1943,7 @@ class _DashboardState extends State<Dashboard> {
             ListView(
               children: listBuilder()
             ),
-            Row(
+            !isDetailPage?Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: <Widget>[
                 buildTab('资产概览', 0),
@@ -1456,7 +1951,7 @@ class _DashboardState extends State<Dashboard> {
                 buildTab('关键事件', 2),
                 buildTab('关键指标', 3),
               ],
-            ),
+            ):Container(),
           ],
         ),
       ),
