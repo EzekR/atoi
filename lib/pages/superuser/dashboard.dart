@@ -5,6 +5,7 @@ import 'package:badges/badges.dart';
 import 'package:syncfusion_flutter_gauges/gauges.dart';
 import 'package:spider_chart/spider_chart.dart';
 import 'package:timeline_tile/timeline_tile.dart';
+import 'package:atoi/pages/superuser/superuser_home.dart';
 
 class Dashboard extends StatefulWidget {
   _DashboardState createState() => new _DashboardState();
@@ -1684,6 +1685,19 @@ class _DashboardState extends State<Dashboard> {
             height: 200,
             child: buildSpiderChart(),
           ),
+          Container(
+            height: 50,
+            child: Row(
+              children: <Widget>[
+                IconButton(
+                  icon: Icon(Icons.photo_library),
+                  onPressed: () {
+                    print('equipment pics');
+                  },
+                )
+              ],
+            ),
+          ),
         ],
       ),
     );
@@ -1929,6 +1943,18 @@ class _DashboardState extends State<Dashboard> {
         elevation: 0.0,
         title: Text('Dashboard'),
         backgroundColor: Color(0xff385A95),
+        actions: <Widget>[
+          GestureDetector(
+            onTap: () {
+              Navigator.of(context).push(new MaterialPageRoute(builder: (_) => SuperHome()));
+            },
+            child: Center(
+              child: Text(
+                'Super',
+              ),
+            ),
+          )
+        ],
       ),
       body: Container(
         color: Color(0xffd8e0ee),
@@ -1941,7 +1967,7 @@ class _DashboardState extends State<Dashboard> {
               ),
             ),
             ListView(
-              children: listBuilder()
+                children: listBuilder()
             ),
             !isDetailPage?Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
