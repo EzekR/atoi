@@ -240,7 +240,7 @@ class _ManagerToCompleteState extends State<ManagerToComplete> {
                 mainAxisSize: MainAxisSize.max,
                 children: <Widget>[
                   equipmentName==''?new Container():BuildWidget.buildCardRow('设备编号', equipmentName),
-                  equipmentNo==''?new Container():BuildWidget.buildCardRow('设备名称', equipmentNo, onTap: () => Navigator.of(context).push(new MaterialPageRoute(builder: (_) => new EquipmentsList(equipmentId: equipmentName,)))),
+                  equipmentNo==''?new Container():BuildWidget.buildCardRow('设备名称', equipmentNo, onTap: equipmentNo=='多设备'?null:() => Navigator.of(context).push(new MaterialPageRoute(builder: (_) => new EquipmentsList(equipmentId: equipmentName,)))),
                   departmentName==''?new Container():BuildWidget.buildCardRow('使用科室', departmentName),
                   BuildWidget.buildCardRow('请求人', requestPerson),
                   BuildWidget.buildCardRow('请求类型', requestType),
@@ -259,7 +259,7 @@ class _ManagerToCompleteState extends State<ManagerToComplete> {
                                   title: new Text('派工历史'),
                                   children: <Widget>[
                                     new Container(
-                                      width: 300.0,
+                                      width: 330.0,
                                       height: 600.0,
                                       child: new Stepper(
                                         currentStep: _dispatches.length-1,

@@ -9,6 +9,7 @@ import 'package:atoi/widgets/build_widget.dart';
 import 'package:atoi/models/models.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:atoi/pages/equipments/equipments_list.dart';
+import 'dart:async';
 
 /// 超管审核凭证页面类
 class ManagerAuditVoucherPage extends StatefulWidget {
@@ -325,8 +326,11 @@ class _ManagerAuditVoucherPageState extends State<ManagerAuditVoucherPage> {
               title: new Text('审批备注不可为空')
           )
       ).then((result) {
-        _scrollController.jumpTo(1800);
-        FocusScope.of(context).requestFocus(_focusComment);
+        _scrollController.jumpTo(2000.0);
+        Timer(const Duration(milliseconds: 500), () {
+          FocusScope.of(context).unfocus();
+          _focusComment.requestFocus();
+        });
       });
       return;
     }

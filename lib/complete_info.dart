@@ -150,7 +150,7 @@ class _CompleteInfoState extends State<CompleteInfo> {
           builder: (context) => CupertinoAlertDialog(
             title: new Text('姓名不可为空'),
           )
-      );
+      ).then((result) => _focusInfo[0].requestFocus());
       return;
     }
     var _depart = departments.firstWhere((depart) => depart['Description']==currentDepart, orElse: () => null);

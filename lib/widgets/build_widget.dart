@@ -49,7 +49,7 @@ class BuildWidget {
                 style: new TextStyle(
                     fontSize: 16.0,
                     fontWeight: FontWeight.w400,
-                    color: Colors.black54
+                    color: onTap==null?Colors.black54:Color(0xff2c5c85)
                 ),
               ),
             )
@@ -96,7 +96,7 @@ class BuildWidget {
               style: new TextStyle(
                   fontSize: 16.0,
                   fontWeight: FontWeight.w400,
-                  color: Colors.grey
+                  color: onTap==null?Colors.grey:Color(0xff2c5c85)
               ),
             ),
           )

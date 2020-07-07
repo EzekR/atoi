@@ -194,7 +194,7 @@ class EngineerModel extends Model {
       _params['filterField'] = _engineerField;
     }
     var resp = await HttpRequest.request(
-        _engineerDispatchStatusId==0?'/Dispatch/GetDispatchs?userID=${userID}&pageSize=10&curRowNum=0&statusIDs=2&statusIDs=3':'/Dispatch/GetDispatchs?userID=${userID}&pageSize=10&curRowNum=0&statusIDs=$_engineerDispatchStatusId',
+        _engineerDispatchStatusId==0?'/Dispatch/GetDispatchs?userID=${userID}&pageSize=10&curRowNum=$_offsetReport&statusIDs=2&statusIDs=3':'/Dispatch/GetDispatchs?userID=${userID}&pageSize=10&curRowNum=$_offsetReport&statusIDs=$_engineerDispatchStatusId',
       method: HttpRequest.GET,
       params: _params
     );

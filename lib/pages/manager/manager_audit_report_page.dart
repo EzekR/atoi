@@ -16,6 +16,7 @@ import 'package:multi_image_picker/multi_image_picker.dart';
 import 'package:uuid/uuid.dart';
 import 'dart:io';
 import 'package:atoi/pages/equipments/equipments_list.dart';
+import 'dart:async';
 
 /// 超管审核报告页面类
 class ManagerAuditReportPage extends StatefulWidget {
@@ -380,12 +381,14 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
           builder: (context) => CupertinoAlertDialog(
             title: new Text('整包范围不可为空'),
           )
-      ).then((result) => FocusScope.of(context).requestFocus(_focusReport[2]));
+      ).then((result) {
+        _scrollController.jumpTo(1200);
+      });
       return;
     }
     final SharedPreferences prefs = await _prefs;
     var UserId = await prefs.getInt('userID');
-    var _body = _report;
+    var _body = new Map<String, dynamic>.from(_report);
     if (imageAttach.isNotEmpty) {
       var content = base64Encode(imageAttach[0]);
       var _json = {
@@ -469,9 +472,12 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
         builder: (context) => CupertinoAlertDialog(
           title: new Text('审批备注不可为空'),
         )
-      ).then((result) async {
+      ).then((result) {
         _scrollController.jumpTo(2000.0);
-        _focusReport[3].requestFocus();
+        Timer(const Duration(milliseconds: 500), () {
+          FocusScope.of(context).unfocus();
+          _focusReport[3].requestFocus();
+        });
       });
       return;
     }
