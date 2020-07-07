@@ -259,7 +259,7 @@ class _ManagerToCompleteState extends State<ManagerToComplete> {
                                   title: new Text('派工历史'),
                                   children: <Widget>[
                                     new Container(
-                                      width: 300.0,
+                                      width: 330.0,
                                       height: 600.0,
                                       child: new Stepper(
                                         currentStep: _dispatches.length-1,

@@ -381,12 +381,14 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
           builder: (context) => CupertinoAlertDialog(
             title: new Text('整包范围不可为空'),
           )
-      ).then((result) => FocusScope.of(context).requestFocus(_focusReport[2]));
+      ).then((result) {
+        _scrollController.jumpTo(1200);
+      });
       return;
     }
     final SharedPreferences prefs = await _prefs;
     var UserId = await prefs.getInt('userID');
-    var _body = _report;
+    var _body = new Map<String, dynamic>.from(_report);
     if (imageAttach.isNotEmpty) {
       var content = base64Encode(imageAttach[0]);
       var _json = {

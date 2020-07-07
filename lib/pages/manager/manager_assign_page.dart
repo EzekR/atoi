@@ -1067,7 +1067,11 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
                                   builder: (context) => CupertinoAlertDialog(
                                     title: new Text('请选择工程师'),
                                   )
-                              ).then((result) => _scrollController.jumpTo(2000));
+                              ).then((result) {
+                                Timer(const Duration(milliseconds: 200), () {
+                                  _scrollController.jumpTo(2200);
+                                });
+                              });
                               return;
                             }
                             if (_desc.text.isEmpty) {
