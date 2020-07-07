@@ -39,6 +39,7 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
   var _unsolved = new TextEditingController();
   int _attachId;
   ScrollController _scrollController = new ScrollController();
+  final scopeKey = new GlobalKey();
 
   List _serviceResults = [
     '待分配',
@@ -382,7 +383,7 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
             title: new Text('整包范围不可为空'),
           )
       ).then((result) {
-        _scrollController.jumpTo(1200);
+        Scrollable.ensureVisible(scopeKey.currentContext);
       });
       return;
     }
@@ -707,7 +708,10 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
         _list.addAll([
           BuildWidget.buildRow('资产金额', _report['PurchaseAmount'].toString()),
           //BuildWidget.buildRow('整包范围', _report['ServiceScope']?'是':'否'),
-          widget.status!=3?BuildWidget.buildRadio('整包范围', _serviceScope, _currentScope, changeScope, required: true):BuildWidget.buildRow('整包范围', _report['ServiceScope']?'是':'否'),
+          Container(
+            key: scopeKey,
+            child: widget.status!=3?BuildWidget.buildRadio('整包范围', _serviceScope, _currentScope, changeScope, required: true):BuildWidget.buildRow('整包范围', _report['ServiceScope']?'是':'否'),
+          ),
           BuildWidget.buildRow('报告明细', _report['SolutionCauseAnalysis']),
           BuildWidget.buildRow('结果', _report['Result']),
         ]);
