@@ -1943,6 +1943,19 @@ class _DashboardState extends State<Dashboard> {
         elevation: 0.0,
         title: Text('Dashboard'),
         backgroundColor: Color(0xff385A95),
+        // linear gradient decoration
+        //flexibleSpace: Container(
+        //  decoration: BoxDecoration(
+        //    gradient: LinearGradient(
+        //      begin: Alignment.centerLeft,
+        //      end: Alignment.centerRight,
+        //      colors: [
+        //        const Color(0xFF385A95),
+        //        const Color(0xFF3FA5CC)
+        //      ],
+        //    ),
+        //  ),
+        //),
         actions: <Widget>[
           GestureDetector(
             onTap: () {
@@ -1988,9 +2001,17 @@ class _DashboardState extends State<Dashboard> {
 class CurvePainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
+    var gradient = LinearGradient(
+      colors: [
+        const Color(0xFF385A95),
+        const Color(0xFF3FA5CC)
+      ],
+    );
+    var rect = Offset.zero & size;
     var paint = Paint();
     paint.color = Color(0xff385A95);
-    paint.style = PaintingStyle.fill; // Change this to fill
+    paint.style = PaintingStyle.fill;
+    //paint.shader = gradient.createShader(rect);
 
     var path = Path();
 
