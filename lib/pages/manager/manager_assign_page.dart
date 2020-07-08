@@ -37,6 +37,7 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
   String dispatchDate = 'YY-MM-DD';
   var _desc = new TextEditingController();
   ScrollController _scrollController = new ScrollController();
+  final engineerKey = new GlobalKey();
 
   Map<String, dynamic> _request = {};
   ConstantsModel model;
@@ -945,7 +946,11 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
                 ],
               ),
             ),
-            _engineerNames.isEmpty?new Container():BuildWidget.buildDropdown('工程师姓名', _currentName, _dropDownMenuNames, changedDropDownName, context: context, required: true),
+            _engineerNames.isEmpty?new Container():
+                Container(
+                  key: engineerKey,
+                  child: BuildWidget.buildDropdown('工程师姓名', _currentName, _dropDownMenuNames, changedDropDownName, context: context, required: true),
+                ),
             new Padding(
               padding: EdgeInsets.symmetric(vertical: 5.0),
               child: new Column(
@@ -1069,7 +1074,7 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
                                   )
                               ).then((result) {
                                 Timer(const Duration(milliseconds: 200), () {
-                                  _scrollController.jumpTo(2200);
+                                  Scrollable.ensureVisible(engineerKey.currentContext);
                                 });
                               });
                               return;

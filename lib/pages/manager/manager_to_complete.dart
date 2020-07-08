@@ -177,7 +177,11 @@ class _ManagerToCompleteState extends State<ManagerToComplete> {
         subtitle: new Wrap(
           alignment: WrapAlignment.start,
           children: <Widget>[
-            new Text('派工单状态：${step['Status']['Name']}   工程师：${step['Engineer']['Name']}')
+            new Text('派工单状态：${step['Status']['Name']}   工程师：${step['Engineer']['Name']}',
+              style: TextStyle(
+                fontSize: 11.0
+              ),
+            )
           ],
         ),
         content: new Text(''),
@@ -259,7 +263,7 @@ class _ManagerToCompleteState extends State<ManagerToComplete> {
                                   title: new Text('派工历史'),
                                   children: <Widget>[
                                     new Container(
-                                      width: 330.0,
+                                      width: 350.0,
                                       height: 600.0,
                                       child: new Stepper(
                                         currentStep: _dispatches.length-1,
