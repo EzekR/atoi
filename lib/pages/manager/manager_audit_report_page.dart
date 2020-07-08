@@ -474,7 +474,7 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
           title: new Text('审批备注不可为空'),
         )
       ).then((result) {
-        _scrollController.jumpTo(2000.0);
+        _scrollController.jumpTo(3000);
         Timer(const Duration(milliseconds: 500), () {
           FocusScope.of(context).unfocus();
           _focusReport[3].requestFocus();
@@ -1022,7 +1022,9 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
                 children: buildExpansion(),
               ),
               SizedBox(height: 20.0),
-              widget.status==3?new Container():buildTextField('审批备注', _comment, true),
+              widget.status==3?new Container():Container(
+                child: buildTextField('审批备注', _comment, true),
+              ),
               SizedBox(height: 20.0),
               widget.status==3?new Container():new Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
