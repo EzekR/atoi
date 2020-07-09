@@ -739,7 +739,7 @@ class _DashboardState extends State<Dashboard> {
                 return GestureDetector(
                   onTap: () {
                     setState(() {
-                      isDetailPage = true;
+                      isDetailPage = !isDetailPage;
                     });
                   },
                   child: Container(
@@ -824,16 +824,25 @@ class _DashboardState extends State<Dashboard> {
           ),
           series: <ChartSeries<IncomeData, double>>[
             StackedColumnSeries<IncomeData, double>(
+                selectionSettings: SelectionSettings(
+                  enable: true
+                ),
                 dataSource: incomeData,
                 xValueMapper: (IncomeData sales, _) => sales.x,
                 yValueMapper: (IncomeData sales, _) => sales.income
             ),
             StackedColumnSeries<IncomeData, double>(
+                selectionSettings: SelectionSettings(
+                    enable: true
+                ),
                 dataSource: incomeData,
                 xValueMapper: (IncomeData sales, _) => sales.x,
                 yValueMapper: (IncomeData sales, _) => sales.expense
             ),
             StackedColumnSeries<IncomeData, double>(
+                selectionSettings: SelectionSettings(
+                    enable: true
+                ),
                 dataSource: incomeData,
                 xValueMapper: (IncomeData sales, _) => sales.x,
                 yValueMapper: (IncomeData sales, _) => sales.net
@@ -1396,10 +1405,17 @@ class _DashboardState extends State<Dashboard> {
       ),
     );
   }
+
+  void slideToMain(DragEndDetails detail) {
+    setState(() {
+      isDetailPage = false;
+    });
+  }
   
   // department detail
   GestureDetector buildDetail() {
     return GestureDetector(
+      onHorizontalDragEnd: slideToMain,
       child: Padding(
         padding: EdgeInsets.fromLTRB(24, 14, 24, 14),
         child: Column(
@@ -1412,14 +1428,23 @@ class _DashboardState extends State<Dashboard> {
                 });
               },
               child: Container(
-                child: Text(
-                  '设备收支概览',
-                  style: TextStyle(
-                      color: Color(0xff1e1e1e),
-                      fontSize: 17.0,
-                      fontWeight: FontWeight.w600
-                  ),
-                ),
+                child: Row(
+                  children: <Widget>[
+                    Icon(
+                      Icons.arrow_back_ios,
+                      size: 13,
+                      color: Colors.grey,
+                    ),
+                    Text(
+                      '设备收支概览',
+                      style: TextStyle(
+                          color: Color(0xff1e1e1e),
+                          fontSize: 17.0,
+                          fontWeight: FontWeight.w600
+                      ),
+                    ),
+                  ],
+                )
               ),
             ),
             SizedBox(
