@@ -204,7 +204,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
     print(model.DepartmentsList);
     departments = model.DepartmentsList;
     dropdownDepartments = getDropDownMenuItems(departments);
-    currentDepartment = '其他';
+    currentDepartment = '其它';
     print(currentDepartment);
   }
 

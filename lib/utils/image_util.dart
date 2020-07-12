@@ -7,6 +7,12 @@ import 'dart:typed_data';
 /// 图片压缩类
 class ImageUtil {
 
+  static bool isImageFile(String fileName) {
+    List<String> _list = fileName.split('.');
+    String _suffix = _list[_list.length-1].toLowerCase();
+    return (_suffix=='jpg' || _suffix=='jpeg' || _suffix=='bmp' || _suffix=='png')?true:false;
+  }
+
   /// 压缩图片文件返回二进制数组
   Future<List<int>> CompressFileGetList(File file, {minWidth, minHeight, quality, rotate}) async {
     minWidth??480;

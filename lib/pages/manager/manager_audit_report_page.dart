@@ -17,6 +17,7 @@ import 'package:uuid/uuid.dart';
 import 'dart:io';
 import 'package:atoi/pages/equipments/equipments_list.dart';
 import 'dart:async';
+import 'package:atoi/utils/image_util.dart';
 
 /// 超管审核报告页面类
 class ManagerAuditReportPage extends StatefulWidget {
@@ -38,6 +39,7 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
   ConstantsModel model;
   var _unsolved = new TextEditingController();
   int _attachId;
+  String _attachFile;
   ScrollController _scrollController = new ScrollController();
   final scopeKey = new GlobalKey();
 
@@ -280,12 +282,21 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
       setState(() {
         _accessory = _accessory;
       });
-      var attachImage = await getAttachFile(resp['Data']['FileInfo']['ID']);
-      if (attachImage.isNotEmpty) {
-        setState(() {
-          var decoded = base64Decode(attachImage);
-          imageAttach.add(decoded);
-        });
+      if (resp['Data']['FileInfo']['ID'] != 0) {
+        _attachId = resp['Data']['FileInfo']['ID'];
+        if (ImageUtil.isImageFile(resp['Data']['FileInfo']['FileName'])) {
+          var attachImage = await getAttachFile(resp['Data']['FileInfo']['ID']);
+          if (attachImage.isNotEmpty) {
+            setState(() {
+              var decoded = base64Decode(attachImage);
+              imageAttach.add(decoded);
+            });
+          }
+        } else {
+          setState(() {
+            _attachFile = resp['Data']['FileInfo']['FileName'];
+          });
+        }
       }
     }
   }
@@ -390,18 +401,17 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
     final SharedPreferences prefs = await _prefs;
     var UserId = await prefs.getInt('userID');
     var _body = new Map<String, dynamic>.from(_report);
+    Map _json = {};
+    _json['ID'] = _attachId??0;
     if (imageAttach.isNotEmpty) {
       var content = base64Encode(imageAttach[0]);
-      var _json = {
+      _json = {
         'FileContent': content,
         'FileName': 'report_${_report['ID']}_report_attachment.jpg',
-        'ID': 0,
         'FileType': 1
       };
-      _body['FileInfo'] = _json;
-    } else {
-      _body['FileInfo'] = null;
     }
+    _body['FileInfo'] = _json;
     _body['Dispatch'] = {
       'ID': _dispatch['ID']
     };
@@ -497,24 +507,25 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
           builder: (context) => CupertinoAlertDialog(
             title: new Text('整包范围不可为空'),
           )
-      ).then((result) => FocusScope.of(context).requestFocus(_focusReport[2]));
+      ).then((result) {
+        Scrollable.ensureVisible(scopeKey.currentContext);
+      });
       return;
     }
     final SharedPreferences prefs = await _prefs;
     var UserId = await prefs.getInt('userID');
     var _body = _report;
+    Map _json = {};
+    _json['ID'] = _attachId??0;
     if (imageAttach.isNotEmpty) {
       var content = base64Encode(imageAttach[0]);
-      var _json = {
+      _json = {
         'FileContent': content,
         'FileName': 'report_${_report['ID']}_report_attachment.jpg',
-        'ID': 0,
         'FileType': 1
       };
-      _body['FileInfo'] = _json;
-    } else {
-      _body['FileInfo'] = null;
     }
+    _body['FileInfo'] = _json;
     //_body['Dispatch'] = {
     //  'ID': _dispatch['ID']
     //};
@@ -588,6 +599,21 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
   }
 
   Column buildImageColumn() {
+    if (_attachFile != null) {
+      return new Column(
+        children: <Widget>[
+          Center(
+            child: Text(
+              _attachFile,
+              style: TextStyle(
+                color: Colors.blue,
+                fontSize: 14
+              ),
+            ),
+          )
+        ],
+      );
+    }
     if (imageAttach == null) {
       return new Column();
     } else {

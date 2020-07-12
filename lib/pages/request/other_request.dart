@@ -14,7 +14,7 @@ import 'package:multi_image_picker/multi_image_picker.dart';
 import 'dart:typed_data';
 import 'package:uuid/uuid.dart';
 
-/// 其他服务页面类
+/// 其它服务页面类
 class OtherRequest extends StatefulWidget{
   static String tag = 'other-request';
 
@@ -229,7 +229,7 @@ Future getImage() async {
       builder: (context, child, mainModel) {
         return new Scaffold(
             appBar: new AppBar(
-              title: new Text('新建请求--其他服务'),
+              title: new Text('新建请求--其它服务'),
               elevation: 0.7,
               flexibleSpace: Container(
                 decoration: BoxDecoration(
@@ -282,8 +282,8 @@ Future getImage() async {
                             padding: EdgeInsets.symmetric(horizontal: 12.0),
                             child: new Column(
                               children: <Widget>[
-                                BuildWidget.buildRow('类型', '其他服务'),
-                                BuildWidget.buildRow('主题', '其他服务'),
+                                BuildWidget.buildRow('类型', '其它服务'),
+                                BuildWidget.buildRow('主题', '其它服务'),
                                 BuildWidget.buildRow('请求人', _roleName==null?'':_roleName),
                                 new Divider(),
                                 BuildWidget.buildInput('备注', _fault, focusNode: _focus, maxLength: 200, lines: 3, required: true),

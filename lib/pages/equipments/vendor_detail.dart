@@ -24,7 +24,7 @@ class _VendorDetailState extends State<VendorDetail> {
   var _isExpandedDetail = true;
   Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
   var _fault = new TextEditingController();
-  List serviceType = ['厂商', '代理商', '经销商', '其他供应商'];
+  List serviceType = ['厂商', '代理商', '经销商', '其它供应商'];
   List province = [
     "北京",
     "天津",
@@ -61,7 +61,7 @@ class _VendorDetailState extends State<VendorDetail> {
     "香港",
     "澳门"
   ];
-  List serviceScope = ['全保', '技术保', '其他保'];
+  List serviceScope = ['全保', '技术保', '其它保'];
   List<DropdownMenuItem<String>> dropdownType;
   List<DropdownMenuItem<String>> dropdownScope;
   List<DropdownMenuItem<String>> dropdownProvince;

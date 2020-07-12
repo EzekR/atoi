@@ -81,7 +81,7 @@ class ManagerMenu extends StatelessWidget {
               children: <Widget>[
                 Expanded(
                   flex: 4,
-                  child: buildIconColumn(Icons.bookmark, '其他服务', 'other-request'),
+                  child: buildIconColumn(Icons.bookmark, '其它服务', 'other-request'),
                 ),
                 Expanded(
                   flex: 3,
