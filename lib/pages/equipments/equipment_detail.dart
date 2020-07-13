@@ -18,6 +18,7 @@ import 'package:multi_image_picker/multi_image_picker.dart';
 import 'package:uuid/uuid.dart';
 import 'package:atoi/widgets/search_department.dart';
 import 'package:atoi/widgets/search_lazy.dart';
+import 'package:atoi/utils/image_util.dart';
 
 
 /// 设备详情页面类
@@ -448,13 +449,11 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
     }
   }
 
-  GridView buildImageRow(List imageList) {
+  GridView buildImageRow(List imageList, String defaultPic) {
     List<Widget> _list = [];
     if (imageList.length > 0) {
       for (var image in imageList) {
-        var _suffix = image['fileName'].split('.');
-        _suffix = _suffix.reversed.toList();
-        if (_suffix[0].toLowerCase() == 'jpg' || _suffix[0].toLowerCase() == 'jpeg' || _suffix[0].toLowerCase() == 'bmp' || _suffix[0].toLowerCase() == 'png') {
+        if (ImageUtil.isImageFile(image['fileName'])) {
           _list.add(new Stack(
             alignment: FractionalOffset(1.0, 0),
             children: <Widget>[
@@ -505,6 +504,16 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
           );
         }
       }
+    } else {
+      _list.add(
+        Container(
+          width: 150,
+          height: 150,
+          child: Image.asset(
+            defaultPic
+          ),
+        )
+      );
     }
     return new GridView.count(
         shrinkWrap: true,
@@ -2209,7 +2218,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
                   ],
                 ),
               ),
-              buildImageRow(equipmentPlaques),
+              buildImageRow(equipmentPlaques, 'assets/plaque.png'),
               new Padding(
                 padding: EdgeInsets.symmetric(vertical: 5.0),
                 child: new Row(
@@ -2227,7 +2236,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
                   ],
                 ),
               ),
-              buildImageRow(equipmentAppearance),
+              buildImageRow(equipmentAppearance, 'assets/appearance.png'),
               new Padding(
                 padding: EdgeInsets.symmetric(vertical: 5.0),
                 child: new Row(
@@ -2245,7 +2254,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
                   ],
                 ),
               ),
-              buildImageRow(equipmentLabel),
+              buildImageRow(equipmentLabel, 'assets/label.png'),
             ],
           ),
         ),
