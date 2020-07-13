@@ -33,7 +33,7 @@ class AppConstants {
   //static Map<String, int> ContractScope = {
   //  '全保': 1,
   //  '技术保': 2,
-  //  '其他': 3
+  //  '其它': 3
   //};
 
   //static Map<String, int> ReportType = {
@@ -78,7 +78,7 @@ class AppConstants {
   //  '借用': 11,
   //  '盘点': 12,
   //  '报废': 13,
-  //  '其他服务': 14
+  //  '其它服务': 14
   //};
 
   //static Map<String, int> RequestStatus = {
@@ -181,7 +181,7 @@ class AppConstants {
   //  '借用备注' ,
   //  '盘点备注' ,
   //  '报废备注' ,
-  //  '其他服务备注'
+  //  '其它服务备注'
   //];
 
   //static List<String> RemarkType = [

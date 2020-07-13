@@ -68,6 +68,7 @@ class _UserRepairPageState extends State<UserRepairPage> {
   }
 
   void changedDropDownMethod(String selectedMethod) {
+    FocusScope.of(context).requestFocus(new FocusNode());
     setState(() {
       _currentResult = selectedMethod;
     });

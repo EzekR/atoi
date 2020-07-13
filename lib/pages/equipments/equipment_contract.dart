@@ -38,7 +38,7 @@ class _EquipmentContractState extends State<EquipmentContract> {
   var _isExpandedDetail = false;
   Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
   List serviceType = ['原厂服务合同', '采购服务合同'];
-  List serviceScope = ['全保', '技术保', '其他'];
+  List serviceScope = ['全保', '技术保', '其它'];
   List<DropdownMenuItem<String>> dropdownType;
   List<DropdownMenuItem<String>> dropdownScope;
   String currentType;
@@ -771,8 +771,8 @@ Future getImage() async {
                                 ):BuildWidget.buildRow('起止日期', '$startDate\n$endDate'),
                                 //BuildWidget.buildRow('状态', _contractStatus),
                                 widget.editable?BuildWidget.buildDropdown('服务范围', currentScope, dropdownScope, changeScope):BuildWidget.buildRow('服务范围', currentScope),
-                                widget.editable&&currentScope=='其他'?BuildWidget.buildInput('其他范围', scopeComments, maxLength: 50, focusNode: _focusContract[18]):new Container(),
-                                !widget.editable&&currentScope=='其他'?BuildWidget.buildRow('其他范围', scopeComments.text):new Container(),
+                                widget.editable&&currentScope=='其它'?BuildWidget.buildInput('其它范围', scopeComments, maxLength: 50, focusNode: _focusContract[18]):new Container(),
+                                !widget.editable&&currentScope=='其它'?BuildWidget.buildRow('其它范围', scopeComments.text):new Container(),
                                 widget.editable?BuildWidget.buildInput('备注', comments, maxLength: 500, focusNode: _focusContract[19]):BuildWidget.buildRow('备注', comments.text),
                                 new Divider(),
                                 new Padding(

@@ -264,7 +264,7 @@ class _ManagerToCompleteState extends State<ManagerToComplete> {
                                   children: <Widget>[
                                     new Container(
                                       width: 350.0,
-                                      height: 600.0,
+                                      height: 400.0,
                                       child: new Stepper(
                                         currentStep: _dispatches.length-1,
                                         controlsBuilder: (BuildContext context, {VoidCallback onStepContinue, VoidCallback onStepCancel}) {

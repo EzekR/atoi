@@ -91,6 +91,9 @@ flutter:
     - assets/bg_01.jpg
     - assets/bg.jpg
     - assets/loading-1.gif
+    - assets/plaque.png
+    - assets/appearance.png
+    - assets/label.png
   fonts:
     - family: Nunito
       fonts:

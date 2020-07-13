@@ -18,6 +18,7 @@ import 'package:multi_image_picker/multi_image_picker.dart';
 import 'dart:typed_data';
 import 'package:uuid/uuid.dart';
 import 'package:atoi/pages/equipments/equipments_list.dart';
+import 'package:atoi/utils/image_util.dart';
 
 /// 工程师报告页面
 class EngineerReportPage extends StatefulWidget {
@@ -113,6 +114,8 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
   var _comments = new TextEditingController();
   //List<dynamic> _imageList = [];
   var _imageList;
+  String _attachFile;
+  int _attachId;
   var _fujiComments = "";
   String _reportStatus = '新建';
   String _reportOID;
@@ -150,6 +153,9 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
   }
 
   Future getImage() async {
+    setState(() {
+      _attachFile = null;
+    });
     List<Asset> image = await MultiImagePicker.pickImages(
         maxImages: 1,
         enableCamera: true
@@ -235,7 +241,16 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
           _comments.text = data['Comments'];
           _currentProvider = data['ServiceProvider']['ID']==0?_currentProvider:data['ServiceProvider']['Name'];
         });
-        await getImageFile(resp['Data']['FileInfo']['ID']);
+        if (resp['Data']['FileInfo']['ID'] != 0) {
+          _attachId = resp['Data']['FileInfo']['ID'];
+          if (ImageUtil.isImageFile(resp['Data']['FileInfo']['FileName'])) {
+            await getImageFile(resp['Data']['FileInfo']['ID']);
+          } else {
+            setState(() {
+              _attachFile = resp['Data']['FileInfo']['FileName'];
+            });
+          }
+        }
         for (var _acc in _accessory) {
           var _imageNew = _acc['FileInfos']
               .firstWhere((info) => info['FileType'] == 1, orElse: () => null);
@@ -429,13 +444,17 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
         return;
       }
     }
-    Map _json;
+    Map _json = {};
+    if (_attachId != null) {
+      _json['ID'] = _attachId;
+    } else {
+      _json['ID'] = 0;
+    }
     if (_imageList != null) {
       var content = base64Encode(_imageList);
       _json = {
         'FileContent': content,
         'FileName': 'dispatch_${widget.dispatchId}_report_attachment.jpg',
-        'ID': 0,
         'FileType': 1
       };
     }
@@ -736,6 +755,20 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
       ));
     } else {
       _list.add(new Container());
+    }
+
+    if (_attachFile != null) {
+      _list.add(
+        Container(
+          child: Text(
+            _attachFile,
+            style: TextStyle(
+              color: Colors.blue,
+              fontSize: 14
+            ),
+          ),
+        )
+      );
     }
 
     return new Row(

@@ -87,7 +87,7 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
     '借用',
     '盘点',
     '报废',
-    '其他服务'
+    '其它服务'
   ];
 
   List _levels = [
@@ -844,7 +844,7 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
             BuildWidget.buildDropdown('派工类型', _currentType, _dropDownMenuTypes, changedDropDownType, context: context, required: true),
-            _currentType!='其他服务'?BuildWidget.buildDropdown('机器状态', _currentStatus, _dropDownMenuStatuses, changedDropDownStatus, context: context, required: true):new Container(),
+            _currentType!='其它服务'?BuildWidget.buildDropdown('机器状态', _currentStatus, _dropDownMenuStatuses, changedDropDownStatus, context: context, required: true):new Container(),
             BuildWidget.buildDropdown('紧急程度', _currentLevel, _dropDownMenuLevels, changedDropDownLevel, context: context, required: true),
             new Padding(
               padding: EdgeInsets.symmetric(vertical: 5.0),

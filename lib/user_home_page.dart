@@ -99,13 +99,13 @@ class _UserHomePageState extends State<UserHomePage> {
           icon: new Icon(icon,),
           onPressed: () {
             //Navigator.of(context).push(new MaterialPageRoute(builder: (context) {
-            //  return label=='其他服务'?OtherRequest():RequestHistory();
+            //  return label=='其它服务'?OtherRequest():RequestHistory();
             //}));
             switch (label) {
               case '扫码报修':
                 scan();
                 break;
-              case '其他服务':
+              case '其它服务':
                 Navigator.of(context).push(new MaterialPageRoute(builder: (context) {
                   return OtherRequest();
                 }));
@@ -186,7 +186,7 @@ class _UserHomePageState extends State<UserHomePage> {
                     ),
                     new Expanded(
                       flex: 4,
-                      child: buildIconColumn(Icons.extension, '其他服务'),
+                      child: buildIconColumn(Icons.extension, '其它服务'),
                     ),
                     new Expanded(
                       flex: 4,
