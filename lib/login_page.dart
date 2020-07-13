@@ -15,6 +15,7 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:flutter/services.dart';
 import 'package:atoi/utils/event_bus.dart';
 import 'package:dio/dio.dart';
+import 'package:atoi/pages/superuser/dashboard.dart';
 
 /// 登录注册类
 class LoginPage extends StatefulWidget {
@@ -219,6 +220,9 @@ class _LoginPageState extends State<LoginPage> {
           break;
         case 2:
           Navigator.of(context).pushNamed(EngineerHomePage.tag);
+          break;
+        case 3:
+          Navigator.of(context).push(new MaterialPageRoute(builder: (_) => new Dashboard()));
           break;
         case 4:
           Navigator.of(context).pushNamed(UserHomePage.tag);
