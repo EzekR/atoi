@@ -7,6 +7,7 @@ import 'package:atoi/pages/reports/report_list.dart';
 import 'package:atoi/pages/superuser/super_request.dart';
 import 'package:atoi/models/main_model.dart';
 import 'package:atoi/models/constants_model.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class SuperHome extends StatefulWidget {
   _SuperHomeState createState() => _SuperHomeState();
@@ -16,9 +17,19 @@ class _SuperHomeState extends State<SuperHome> with SingleTickerProviderStateMix
 
   TabController _tabController;
   ConstantsModel model;
+  Future<SharedPreferences> prefs = SharedPreferences.getInstance();
+  String userName;
+
+  void getUserName() async {
+    SharedPreferences _prefs = await prefs;
+    setState(() {
+      userName = _prefs.getString('userName');
+    });
+  }
 
   void initState() {
     super.initState();
+    getUserName();
     model = MainModel.of(context);
     model.getConstants();
     _tabController = new TabController(length: 3, vsync: this, initialIndex: 0);
@@ -40,7 +51,7 @@ class _SuperHomeState extends State<SuperHome> with SingleTickerProviderStateMix
         actions: <Widget>[
           new Center(
             child: new Text(
-              'Superuser',
+              userName??'Superuser',
               style: new TextStyle(fontSize: 16.0),
             ),
           ),

@@ -12,6 +12,7 @@ import 'package:atoi/pages/manager/manager_complete_page.dart';
 import 'package:atoi/models/models.dart';
 import 'dart:convert';
 import 'package:atoi/widgets/search_department.dart';
+import 'package:atoi/pages/superuser/dashboard.dart';
 
 /// 设备列表页面类
 class EquipmentsList extends StatefulWidget{
@@ -816,26 +817,27 @@ class _EquipmentsListState extends State<EquipmentsList> {
               ),
               new RaisedButton(
                 onPressed: () async {
-                  List<TimelineModel> _steps = await getTimeline(item['ID']);
-                  if (_steps.length > 0) {
-                    showDialog(context: context,
-                        builder: (context) => SimpleDialog(
-                          title: new Text('生命周期'),
-                          children: <Widget>[
-                            new Container(
-                              width: 300.0,
-                              height: _steps.length*80.0,
-                              child: Timeline(
-                                children: _steps,
-                                position: TimelinePosition.Left,
-                              )
-                            ),
-                          ],
-                        )
-                    );
-                  } else {
-                    showDialog(context: context, builder: (context) => CupertinoAlertDialog(title: new Text('暂无事件'),));
-                  }
+                  //List<TimelineModel> _steps = await getTimeline(item['ID']);
+                  //if (_steps.length > 0) {
+                  //  showDialog(context: context,
+                  //      builder: (context) => SimpleDialog(
+                  //        title: new Text('生命周期'),
+                  //        children: <Widget>[
+                  //          new Container(
+                  //            width: 300.0,
+                  //            height: _steps.length*80.0,
+                  //            child: Timeline(
+                  //              children: _steps,
+                  //              position: TimelinePosition.Left,
+                  //            )
+                  //          ),
+                  //        ],
+                  //      )
+                  //  );
+                  //} else {
+                  //  showDialog(context: context, builder: (context) => CupertinoAlertDialog(title: new Text('暂无事件'),));
+                  //}
+                  Navigator.of(context).push(new MaterialPageRoute(builder: (_) => new Dashboard(equipmentId: item['ID'],)));
                 },
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(6),

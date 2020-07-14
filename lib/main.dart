@@ -123,7 +123,7 @@ class _AtoiAppState extends State<AtoiApp> {
                 accentColor: new Color(0xff2c5c85),
                 buttonColor: new Color(0xff2E94B9)
             ),
-            home: new Dashboard(),
+            home: new LoginPage(),
             routes: routes,
             localizationsDelegates: [
               GlobalMaterialLocalizations.delegate,

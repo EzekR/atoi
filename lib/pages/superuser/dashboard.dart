@@ -6,8 +6,13 @@ import 'package:syncfusion_flutter_gauges/gauges.dart';
 import 'package:spider_chart/spider_chart.dart';
 import 'package:timeline_tile/timeline_tile.dart';
 import 'package:atoi/pages/superuser/superuser_home.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:atoi/utils/http_request.dart';
+import 'package:atoi/pages/manager/manager_complete_page.dart';
 
 class Dashboard extends StatefulWidget {
+  final int equipmentId;
+  Dashboard({Key key, this.equipmentId}):super(key: key);
   _DashboardState createState() => new _DashboardState();
 }
 
@@ -16,6 +21,8 @@ class _DashboardState extends State<Dashboard> {
   int currentTab = 0;
   int currentEvent = 0;
   bool isDetailPage = false;
+  Future<SharedPreferences> prefs = SharedPreferences.getInstance();
+  String userName;
 
   List<IncomeData> incomeData = [
     IncomeData(1, 100.0, -80.0, 0),
@@ -48,8 +55,35 @@ class _DashboardState extends State<Dashboard> {
     RequestData('5', 3, Color(0xff3aab64)),
   ];
 
+  Map equipmentTimeline;
+
+  void getUserName() async {
+    SharedPreferences _prefs = await prefs;
+    setState(() {
+      userName = _prefs.getString('userName');
+    });
+  }
+
+  void getTimeline({int equipmentId}) async {
+    equipmentId = equipmentId??widget.equipmentId;
+    Map resp = await HttpRequest.request(
+      '/Equipment/GetTimeline4APP',
+      method: HttpRequest.POST,
+      data: {
+        'id': equipmentId
+      }
+    );
+    if (resp['ResultCode'] == '00') {
+      setState(() {
+        equipmentTimeline = resp['Data'];
+      });
+    }
+  }
+
   void initState() {
     super.initState();
+    getUserName();
+    getTimeline();
   }
 
   void showBottomSheet() {
@@ -1757,14 +1791,26 @@ class _DashboardState extends State<Dashboard> {
     );
   }
 
+  Color timelineColor(int requestType) {
+    Color _color = Colors.grey;
+    if (requestType == 1 || requestType == 3) {
+      _color = Color(0xffD64040);
+    }
+    if (requestType == 2 || requestType == 4 || requestType ==5) {
+      _color = Colors.green;
+    }
+    return _color;
+  }
+
   Padding buildTimeline() {
+    List _timeline = equipmentTimeline!=null?equipmentTimeline['Dispatches']:[];
     return Padding(
       padding: EdgeInsets.fromLTRB(23, 25, 23, 25),
-      child: Column(
+      child: equipmentTimeline!=null?Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           Text(
-            '医用磁共振成像系统-奥林巴斯-飞利浦781- -296 -资产编号20200107',
+            equipmentTimeline['Name'],
             style: TextStyle(
                 fontSize: 17,
                 color: Color(0xff1e1e1e),
@@ -1778,173 +1824,95 @@ class _DashboardState extends State<Dashboard> {
           Container(
             height: 300,
             child: ListView(
-              children: <Widget>[
-                TimelineTile(
-                  alignment: TimelineAlign.left,
-                  isFirst: true,
-                  indicatorStyle: const IndicatorStyle(
-                    width: 9,
-                    color: Color(0xffD64040),
-                    indicatorY: 0.3,
+              children: _timeline.asMap().keys.map<Widget>((index) {
+                return GestureDetector(
+                  onTap: () {
+                    if (_timeline[index]['RequestType']['ID'] != 0) {
+                      Navigator.of(context).push(new MaterialPageRoute(builder: (_) => new ManagerCompletePage(requestId: _timeline[index]['RequestID'],)));
+                    }
+                  },
+                  child: TimelineTile(
+                      alignment: TimelineAlign.left,
+                      isFirst: index==0?true:false,
+                      isLast: index==_timeline.length-1?true:false,
+                      indicatorStyle: IndicatorStyle(
+                        width: 9,
+                        color: timelineColor(_timeline[index]['RequestType']['ID']),
+                        indicatorY: 0.3,
+                      ),
+                      bottomLineStyle: const LineStyle(
+                        color: Color(0xffebebeb),
+                        width: 4,
+                      ),
+                      topLineStyle: const LineStyle(
+                        color: Color(0xffebebeb),
+                        width: 4,
+                      ),
+                      rightChild: Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 13),
+                        child: Container(
+                          constraints: const BoxConstraints(
+                            minHeight: 40,
+                          ),
+                          child: Text(
+                            '${_timeline[index]['EndDate'].split('T')[0]} ${_timeline[index]['TimelineDesc']}',
+                            style: TextStyle(
+                                color: Color(0xff1e1e1e),
+                                fontSize: 14
+                            ),
+                          ),
+                        ),
+                      )
                   ),
-                  bottomLineStyle: const LineStyle(
-                    color: Color(0xffebebeb),
-                    width: 4,
-                  ),
-                  rightChild: Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 13),
-                    child: Container(
-                      constraints: const BoxConstraints(
-                        minHeight: 40,
-                      ),
-                      child: Text(
-                        '2020-02-17 维修; 000000336; 详细处理方法是处理方法',
-                        style: TextStyle(
-                            color: Color(0xff1e1e1e),
-                            fontSize: 14
-                        ),
-                      ),
-                    ),
-                  )
-                ),
-                TimelineTile(
-                    alignment: TimelineAlign.left,
-                    indicatorStyle: const IndicatorStyle(
-                      width: 9,
-                      color: Color(0xffD64040),
-                      indicatorY: 0.3,
-                    ),
-                    topLineStyle: const LineStyle(
-                      color: Color(0xffebebeb),
-                      width: 4,
-                    ),
-                    bottomLineStyle: const LineStyle(
-                      color: Color(0xffebebeb),
-                      width: 4,
-                    ),
-                    rightChild: Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 13),
-                      child: Container(
-                        constraints: const BoxConstraints(
-                          minHeight: 40,
-                        ),
-                        child: Text(
-                          '2020-02-17 维修; 000000336; 详细处理方法是处理方法',
-                          style: TextStyle(
-                              color: Color(0xff1e1e1e),
-                              fontSize: 14
-                          ),
-                        ),
-                      ),
-                    )
-                ),
-                TimelineTile(
-                    alignment: TimelineAlign.left,
-                    indicatorStyle: const IndicatorStyle(
-                      width: 9,
-                      color: Color(0xffD64040),
-                      indicatorY: 0.3,
-                    ),
-                    topLineStyle: const LineStyle(
-                      color: Color(0xffebebeb),
-                      width: 4,
-                    ),
-                    bottomLineStyle: const LineStyle(
-                      color: Color(0xffebebeb),
-                      width: 4,
-                    ),
-                    rightChild: Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 13),
-                      child: Container(
-                        constraints: const BoxConstraints(
-                          minHeight: 40,
-                        ),
-                        child: Text(
-                          '2020-02-17 维修; 000000336; 详细处理方法是处理方法',
-                          style: TextStyle(
-                              color: Color(0xff1e1e1e),
-                              fontSize: 14
-                          ),
-                        ),
-                      ),
-                    )
-                ),
-                TimelineTile(
-                    alignment: TimelineAlign.left,
-                    indicatorStyle: const IndicatorStyle(
-                      width: 9,
-                      color: Color(0xffD64040),
-                      indicatorY: 0.3,
-                    ),
-                    isLast: true,
-                    topLineStyle: const LineStyle(
-                      color: Color(0xffebebeb),
-                      width: 4,
-                    ),
-                    bottomLineStyle: const LineStyle(
-                      color: Color(0xffebebeb),
-                      width: 4,
-                    ),
-                    rightChild: Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 13),
-                      child: Container(
-                        constraints: const BoxConstraints(
-                          minHeight: 40,
-                        ),
-                        child: Text(
-                          '2020-02-17 维修; 000000336; 详细处理方法是处理方法',
-                          style: TextStyle(
-                              color: Color(0xff1e1e1e),
-                              fontSize: 14
-                          ),
-                        ),
-                      ),
-                    )
-                ),
-              ],
+                );
+              }).toList(),
             ),
           )
         ],
-      ),
+      ):Container(),
     );
   }
 
   List<Widget> listBuilder() {
     List<Widget> _list = [];
     // department detail
-    if (!isDetailPage) {
-      _list.add(
-        SizedBox(
-          height: 50.0,
-        ),
-      );
-      switch (currentTab) {
-        case 0:
-          _list.addAll([
-            buildCard(buildAsset()),
-            buildCard(buildIncome()),
-          ]);
-          break;
-        case 1:
-          _list.add(
-              buildCard(buildRequest())
-          );
-          break;
-        case 2:
-          _list.add(
-              buildCard(buildEventType())
-          );
-          _list.add(
-              buildCard(buildEventList())
-          );
-          break;
-        case 3:
-          _list.add(buildCard(buildKeyIndex()));
-          break;
+    if (widget.equipmentId == null) {
+      if (!isDetailPage) {
+        _list.add(
+          SizedBox(
+            height: 50.0,
+          ),
+        );
+        switch (currentTab) {
+          case 0:
+            _list.addAll([
+              buildCard(buildAsset()),
+              buildCard(buildIncome()),
+            ]);
+            break;
+          case 1:
+            _list.add(
+                buildCard(buildRequest())
+            );
+            break;
+          case 2:
+            _list.add(
+                buildCard(buildEventType())
+            );
+            _list.add(
+                buildCard(buildEventList())
+            );
+            break;
+          case 3:
+            _list.add(buildCard(buildKeyIndex()));
+            break;
+        }
+      } else {
+        _list.add(buildCard(buildDetail()));
+        _list.add(buildCard(buildRadar()));
+        _list.add(buildCard(buildTimeline()));
       }
     } else {
-      _list.add(buildCard(buildDetail()));
-      _list.add(buildCard(buildRadar()));
       _list.add(buildCard(buildTimeline()));
     }
     _list.add(
@@ -1988,7 +1956,7 @@ class _DashboardState extends State<Dashboard> {
             },
             child: Center(
               child: Text(
-                'Super',
+                userName??'superuser',
               ),
             ),
           )
@@ -2007,7 +1975,7 @@ class _DashboardState extends State<Dashboard> {
             ListView(
                 children: listBuilder()
             ),
-            !isDetailPage?Row(
+            !isDetailPage&&widget.equipmentId==null?Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: <Widget>[
                 buildTab('资产概览', 0),
