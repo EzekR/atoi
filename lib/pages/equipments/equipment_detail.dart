@@ -449,32 +449,31 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
     }
   }
 
-  GridView buildImageRow(List imageList, String defaultPic) {
+  Column buildImageRow(List imageList, String defaultPic) {
     List<Widget> _list = [];
     if (imageList.length > 0) {
       for (var image in imageList) {
         if (ImageUtil.isImageFile(image['fileName'])) {
           _list.add(new Stack(
-            alignment: FractionalOffset(1.0, 0),
             children: <Widget>[
               new Container(
                 width: 150.0,
                 child: BuildWidget.buildPhotoPageList(context, image['content']),
               ),
               new Padding(
-                padding: EdgeInsets.symmetric(horizontal: 0.0),
+                padding: EdgeInsets.fromLTRB(0, 0, 0, 0),
                 child: widget.editable?new IconButton(
                     icon: Icon(Icons.cancel),
                     color: Colors.blue,
                     onPressed: () {
                       setState(() {
-                    imageList.remove(image);
+                        imageList.remove(image);
                         if (image['id'] != null) {
                           deleteFile(image['id']);
                         }
                       });
                     }):new Container(),
-              )
+              ),
             ],
           ));
         } else {
@@ -507,21 +506,19 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
     } else {
       _list.add(
         Container(
-          width: 150,
-          height: 150,
-          child: Image.asset(
-            defaultPic
-          ),
+          width: 100,
+          height: 100,
+          child: Center(
+            child: Image.asset(
+                defaultPic
+            ),
+          )
         )
       );
     }
-    return new GridView.count(
-        shrinkWrap: true,
-        primary: false,
-        mainAxisSpacing: 5,
-        crossAxisSpacing: 5,
-        crossAxisCount: 2,
-        children: _list);
+    return new Column(
+        children: _list
+    );
   }
 
   Future<String> getDeviceFile(int fileId) async {

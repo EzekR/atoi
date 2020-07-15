@@ -591,6 +591,7 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
           minWidth: 600,
         );
         setState(() {
+          _attachFile = null;
           imageAttach.clear();
           imageAttach.add(Uint8List.fromList(compressed));
         });
@@ -602,14 +603,24 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
     if (_attachFile != null) {
       return new Column(
         children: <Widget>[
-          Center(
-            child: Text(
-              _attachFile,
-              style: TextStyle(
-                color: Colors.blue,
-                fontSize: 14
+          Stack(
+            alignment: FractionalOffset(0.7, 0.7),
+            children: <Widget>[
+              Center(
+                child: Text(
+                  _attachFile,
+                  style: TextStyle(
+                      color: Colors.blue,
+                      fontSize: 14
+                  ),
+                ),
               ),
-            ),
+              widget.status!=3?new IconButton(icon: Icon(Icons.cancel, color: Colors.blue,), onPressed: () {
+                setState(() {
+                  _attachFile = null;
+                });
+              }):new Container(),
+            ],
           )
         ],
       );
