@@ -9,6 +9,7 @@ import 'package:atoi/widgets/build_widget.dart';
 import 'package:atoi/models/models.dart';
 import 'dart:typed_data';
 import 'package:atoi/pages/equipments/equipments_list.dart';
+import 'package:atoi/utils/image_util.dart';
 
 /// 超管未完成页面类
 class ManagerCompletePage extends StatefulWidget {
@@ -33,6 +34,7 @@ class _ManagerCompletePageState extends State<ManagerCompletePage> {
   var _report;
   ConstantsModel model;
   List _fileNames = [];
+  String _reportFile;
 
   Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
 
@@ -127,10 +129,16 @@ class _ManagerCompletePageState extends State<ManagerCompletePage> {
       setState(() {
         _report = resp['Data'];
       });
-      var _reportImage = await getReportFile(resp['Data']['FileInfo']['ID']);
-      if (_reportImage != '') {
+      if (ImageUtil.isImageFile(resp['Data']['FileInfo']['FileName'])) {
+        var _reportImage = await getReportFile(resp['Data']['FileInfo']['ID']);
+        if (_reportImage != '') {
+          setState(() {
+            reportImages.add(base64Decode(_reportImage));
+          });
+        }
+      } else {
         setState(() {
-          reportImages.add(base64Decode(_reportImage));
+          _reportFile = resp['Data']['FileInfo']['FileName'];
         });
       }
       _accessory = resp['Data']['ReportAccessories'];
@@ -183,9 +191,7 @@ class _ManagerCompletePageState extends State<ManagerCompletePage> {
     if (resp['ResultCode'] == '00') {
       var files = resp['Data']['Files'];
       for (var file in files) {
-        var _list = file['FileName'].split('.');
-        _list = _list.reversed.toList();
-        if (_list[0].toLowerCase() == 'jpg' || _list[0].toLowerCase() == 'png' || _list[0].toLowerCase() == 'jpeg' || _list[0].toLowerCase() == 'bmp') {
+        if (ImageUtil.isImageFile(file['FileName'])) {
           getImage(file['ID']);
         } else {
           _fileNames.add(file['FileName']);
@@ -216,8 +222,22 @@ class _ManagerCompletePageState extends State<ManagerCompletePage> {
   }
 
   Column buildReportImageColumn() {
-    if (reportImages == null) {
-      return new Column();
+    if (_reportFile != null) {
+      return new Column(
+        children: <Widget>[
+          Container(
+            child: Center(
+              child: Text(
+                _reportFile,
+                style: TextStyle(
+                  fontSize: 14.0,
+                  color: Colors.blue
+                ),
+              ),
+            ),
+          )
+        ],
+      );
     } else {
       List<Widget> _list = [];
       for (var file in reportImages) {
