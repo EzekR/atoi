@@ -55,7 +55,9 @@ class _DashboardState extends State<Dashboard> {
     RequestData('5', 3, Color(0xff3aab64)),
   ];
 
-  Map equipmentTimeline;
+  Map equipmentTimeline = {};
+  Map equipmentCount = {};
+  List equipmentIncome = [];
 
   void getUserName() async {
     SharedPreferences _prefs = await prefs;
@@ -80,10 +82,51 @@ class _DashboardState extends State<Dashboard> {
     }
   }
 
+  void getCount({int equipmentId}) async {
+    equipmentId = equipmentId??widget.equipmentId;
+    Map resp = await HttpRequest.request(
+      '/Equipment/GetRequestCountByID',
+      method: HttpRequest.GET,
+      params: {
+        'id': equipmentId
+      }
+    );
+    if (resp['ResultCode'] == '00') {
+      setState(() {
+        equipmentCount = resp['Data'];
+      });
+    }
+  }
+
+  void getIncome({int equipmentId}) async {
+    equipmentId = equipmentId??widget.equipmentId;
+    Map resp = await HttpRequest.request(
+      '/Equipment/IncomeExpenseByID',
+      method: HttpRequest.GET,
+      params: {
+        'id': equipmentId
+      }
+    );
+    if (resp['ResultCode'] == '00') {
+      setState(() {
+        equipmentIncome = resp['Data'];
+        incomeData = resp['Data'].asMap().map<IncomeData>((index) {
+          double _income = resp['Data'][index]['item2'];
+          double _expense = resp['Data'][index]['item3'];
+          return new IncomeData(index, _income, 0-_income, _income-_expense>=0?0:(_income-_expense));
+        }).toList();
+      });
+    }
+  }
+
   void initState() {
     super.initState();
     getUserName();
-    getTimeline();
+    if (widget.equipmentId != null) {
+      getTimeline();
+      getCount();
+      getIncome();
+    }
   }
 
   void showBottomSheet() {
@@ -1763,23 +1806,19 @@ class _DashboardState extends State<Dashboard> {
   }
 
   Container buildSpiderChart() {
+    List<double> _data = new List();
+    equipmentCount?.forEach((key, val) {
+      _data.add(val/1.0);
+    });
     return Container(
       child: SpiderChart(
-        data: [
-          7,
-          5,
-          10,
-          7,
-          4,
+        data: _data.isNotEmpty?_data:[
+          1,2,3,4,5
         ],
         labels: [
-          '维修',
-          '保养',
-          '巡检',
-          '强检',
-          '校正'
+          '维修','保养','强检','巡检','校正'
         ],
-        maxValue: 10,
+        maxValue: _data.isNotEmpty?_data.reduce((prev,next) => prev>=next?prev:next):10,
         colors: <Color>[
           Colors.red,
           Colors.green,
@@ -1913,6 +1952,8 @@ class _DashboardState extends State<Dashboard> {
         _list.add(buildCard(buildTimeline()));
       }
     } else {
+      _list.add(buildCard(buildDetail()));
+      _list.add(buildCard(buildRadar()));
       _list.add(buildCard(buildTimeline()));
     }
     _list.add(
@@ -1932,9 +1973,16 @@ class _DashboardState extends State<Dashboard> {
   Widget build(BuildContext context) {
     return new Scaffold(
       appBar: new AppBar(
+        title: new Align(
+          alignment: Alignment(-1.0, 0),
+          child: new Text('ATOI医疗设备管理系统',
+            textAlign: TextAlign.left,
+          ),
+        ),
+        automaticallyImplyLeading: false,
+        centerTitle: false,
+        elevation: 0.7,
         bottomOpacity: 0,
-        elevation: 0.0,
-        title: Text('Dashboard'),
         backgroundColor: Color(0xff385A95),
         // linear gradient decoration
         //flexibleSpace: Container(

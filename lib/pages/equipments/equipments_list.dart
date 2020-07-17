@@ -47,11 +47,12 @@ class _EquipmentsListState extends State<EquipmentsList> {
   ScrollController _scrollController = new ScrollController();
   bool _noMore = false;
   int offset = 0;
+  int role;
 
   Future<Null> getRole() async {
     var _prefs = await prefs;
-    var _role = _prefs.getInt('role');
-    _editable = _role==1?true:false;
+    role = _prefs.getInt('role');
+    _editable = role==1?true:false;
   }
 
   List initList(Map _map, {int valueForAll}) {
@@ -928,7 +929,7 @@ class _EquipmentsListState extends State<EquipmentsList> {
             }
           },
         )),
-        floatingActionButton: FloatingActionButton(
+        floatingActionButton: role==3?Container():FloatingActionButton(
           onPressed: () {
             Navigator.of(context).push(new MaterialPageRoute(builder: (_) {
               return new EquipmentDetail(editable: true,);
