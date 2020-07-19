@@ -449,7 +449,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
     }
   }
 
-  Column buildImageRow(List imageList, String defaultPic) {
+  Center buildImageRow(List imageList, String defaultPic) {
     List<Widget> _list = [];
     if (imageList.length > 0) {
       for (var image in imageList) {
@@ -458,11 +458,13 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
             children: <Widget>[
               new Container(
                 width: 150.0,
-                child: BuildWidget.buildPhotoPageList(context, image['content']),
+                child: Center(
+                  child: BuildWidget.buildPhotoPageList(context, image['content']),
+                )
               ),
-              new Padding(
-                padding: EdgeInsets.fromLTRB(0, 0, 0, 0),
-                child: widget.editable?new IconButton(
+              widget.editable?new Padding(
+                padding: EdgeInsets.fromLTRB(110, 0, 0, 0),
+                child: new IconButton(
                     icon: Icon(Icons.cancel),
                     color: Colors.blue,
                     onPressed: () {
@@ -472,7 +474,11 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
                           deleteFile(image['id']);
                         }
                       });
-                    }):new Container(),
+                    }),
+              ):new Container(
+                child: SizedBox(
+                  width: 1,
+                ),
               ),
             ],
           ));
@@ -516,8 +522,11 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
         )
       );
     }
-    return new Column(
-        children: _list
+    return new Center(
+      child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: _list
+      )
     );
   }
 
