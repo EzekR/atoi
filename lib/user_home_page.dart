@@ -12,6 +12,7 @@ import 'package:atoi/pages/request/other_request.dart';
 import 'package:atoi/pages/user/request_history.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:atoi/models/models.dart';
+import 'package:atoi/utils/event_bus.dart';
 
 /// 用户首页类
 class UserHomePage extends StatefulWidget{
@@ -26,6 +27,7 @@ class _UserHomePageState extends State<UserHomePage> {
 
   Future<SharedPreferences> prefs = SharedPreferences.getInstance();
   var _userName;
+  EventBus bus = new EventBus();
 
   /// 获取用户信息
   Future<Null> getRole() async {
@@ -37,11 +39,28 @@ class _UserHomePageState extends State<UserHomePage> {
     });
   }
 
+  void logout() async {
+    var _prefs = await prefs;
+    var _server = await _prefs.getString('serverUrl');
+    await _prefs.clear();
+    await _prefs.setString('serverUrl', _server);
+    Navigator.of(context).push(new MaterialPageRoute(builder: (_) {
+      return new LoginPage();
+    }
+    ));
+  }
+
   void initState() {
     getRole();
     ConstantsModel model = MainModel.of(context);
     model.getConstants();
     super.initState();
+    bus.on('invalid_sid', (params) {
+      print('invalid sessionid');
+      showDialog(context: context, builder: (_) => CupertinoAlertDialog(
+        title: Text('用户已在其他设备登陆'),
+      )).then((result) => logout());
+    });
   }
 
   /// 扫描二维码
@@ -224,14 +243,7 @@ class _UserHomePageState extends State<UserHomePage> {
                   leading: new Icon(Icons.exit_to_app),
                   title: Text('登出'),
                   onTap: () async {
-                    var _prefs = await prefs;
-                    var _server = await _prefs.getString('serverUrl');
-                    await _prefs.clear();
-                    await _prefs.setString('serverUrl', _server);
-                    Navigator.of(context).push(new MaterialPageRoute(builder: (_) {
-                      return new LoginPage();
-                    }
-                    ));
+                    logout();
                   },
                 ),
               ],

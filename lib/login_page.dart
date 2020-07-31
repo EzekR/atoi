@@ -214,6 +214,7 @@ class _LoginPageState extends State<LoginPage> {
       await _prefs.setString('roleName', _data['Data']['Role']['Name']);
       await _prefs.setString('userName', _data['Data']['Name']);
       await _prefs.setString('mobile', _data['Data']['Mobile']);
+      await _prefs.setString('sessionId', _data['Data']['SessionID']);
       switch (_data['Data']['Role']['ID']) {
         case 1:
           Navigator.of(context).pushNamed(HomePage.tag);

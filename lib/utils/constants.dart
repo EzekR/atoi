@@ -216,6 +216,7 @@ class AppConstants {
     }
   }
 
+
   /// app配色设置
   static Map<String, Color> AppColors = {
     'appbar_prime_m': Color(0xff2c5c85),

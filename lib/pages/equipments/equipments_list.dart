@@ -99,6 +99,8 @@ class _EquipmentsListState extends State<EquipmentsList> {
   }
 
   Future<Null> getEquipments({String filterText}) async {
+    SharedPreferences _prefs = await SharedPreferences.getInstance();
+    int userId = _prefs.getInt('userID');
     filterText = filterText??'';
     var resp = await HttpRequest.request(
       '/Equipment/Getdevices',
@@ -113,7 +115,8 @@ class _EquipmentsListState extends State<EquipmentsList> {
         'filterField': searchFilter,
         'useStatus': usageStatus,
         'PageSize': 10,
-        'CurRowNum': offset
+        'CurRowNum': offset,
+        'userID': userId
       }
     );
     if (resp['ResultCode'] == '00') {

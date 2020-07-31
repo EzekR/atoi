@@ -9,7 +9,6 @@ import 'package:atoi/utils/http_request.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'dart:typed_data';
-import 'dart:convert';
 import 'package:atoi/utils/constants.dart';
 import 'package:flutter_cupertino_date_picker/flutter_cupertino_date_picker.dart';
 import 'package:date_format/date_format.dart';
@@ -19,6 +18,7 @@ import 'package:uuid/uuid.dart';
 import 'package:atoi/widgets/search_department.dart';
 import 'package:atoi/widgets/search_lazy.dart';
 import 'package:atoi/utils/image_util.dart';
+import 'package:timeline_tile/timeline_tile.dart';
 
 
 /// 设备详情页面类
@@ -55,6 +55,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
   Map equipmentLevel = {'1类': 1, '2类': 2, '3类': 3};
   Map periodType = {'无': 1, '天/次': 2, '月/次': 3, '年/次': 4};
   Map mandatoryFlagType = {'无': 0, '待强检': 1, '已强检': 2};
+  List<dynamic> periodList = [];
   List<bool> expansionList = [
     true, false, false, false, false
   ];
@@ -449,33 +450,116 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
     }
   }
 
+  void getCheckPeriod(int typeId) async {
+    Map resp = await HttpRequest.request(
+      '/equipment/getsysrequestlist',
+      method: HttpRequest.GET,
+      params: {
+        'equipmentid': widget.equipment['ID'],
+        'typeid': typeId
+      }
+    );
+    if (resp['ResultCode'] == '00') {
+      setState(() {
+        periodList = resp['Data'];
+      });
+    }
+  }
+
+  void showPeriodSheet(String title) async {
+    showDialog(context: context,
+        builder: (context) => SimpleDialog(
+          title: new Text(title),
+          children: <Widget>[
+            new Container(
+              width: 300.0,
+              height: periodList.length==0?80:periodList.length*80.0,
+              child: Padding(
+                padding: EdgeInsets.fromLTRB(60, 20, 20, 20),
+                child: periodList.length==0?Center(
+                  child: Text(
+                    '暂无计划服务生成时间'
+                  ),
+                ):ListView(
+                  controller: new ScrollController(),
+                  children: periodList.asMap().keys.map<Widget>((index) {
+                    return TimelineTile(
+                        alignment: TimelineAlign.left,
+                        isFirst: index==0?true:false,
+                        isLast: index==periodList.length-1?true:false,
+                        indicatorStyle: IndicatorStyle(
+                          width: 9,
+                          color: Colors.blue,
+                          indicatorY: 0.3,
+                        ),
+                        bottomLineStyle: const LineStyle(
+                          color: Color(0xffebebeb),
+                          width: 4,
+                        ),
+                        topLineStyle: const LineStyle(
+                          color: Color(0xffebebeb),
+                          width: 4,
+                        ),
+                        rightChild: Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 13),
+                          child: Container(
+                            constraints: const BoxConstraints(
+                              minHeight: 40,
+                            ),
+                            child: Text(
+                              '${periodList[index].split('T')[0]}',
+                              style: TextStyle(
+                                  color: Color(0xff1e1e1e),
+                                  fontSize: 14
+                              ),
+                            ),
+                          ),
+                        )
+                    );
+                  }).toList(),
+                ),
+              )
+            )
+          ],
+        )
+    );
+  }
+
   Column buildImageRow(List imageList, String defaultPic) {
     List<Widget> _list = [];
     if (imageList.length > 0) {
       for (var image in imageList) {
         if (ImageUtil.isImageFile(image['fileName'])) {
-          _list.add(new Stack(
-            children: <Widget>[
-              new Container(
-                width: 150.0,
-                child: BuildWidget.buildPhotoPageList(context, image['content']),
+          _list.add(
+            Center(
+              child: new Stack(
+                children: <Widget>[
+                  new Container(
+                    width: 150.0,
+                    child: BuildWidget.buildPhotoPageList(context, image['content']),
+                  ),
+                  new Padding(
+                    padding: EdgeInsets.fromLTRB(0, 0, 0, 0),
+                    child: widget.editable?new IconButton(
+                        icon: Icon(Icons.cancel),
+                        color: Colors.blue,
+                        onPressed: () {
+                          setState(() {
+                            imageList.remove(image);
+                            if (image['id'] != null) {
+                              deleteFile(image['id']);
+                            }
+                          });
+                        }):new Container(
+                      child: SizedBox(
+                        width: 1,
+                      ),
+                    ),
+                  ),
+                ],
               ),
-              new Padding(
-                padding: EdgeInsets.fromLTRB(0, 0, 0, 0),
-                child: widget.editable?new IconButton(
-                    icon: Icon(Icons.cancel),
-                    color: Colors.blue,
-                    onPressed: () {
-                      setState(() {
-                        imageList.remove(image);
-                        if (image['id'] != null) {
-                          deleteFile(image['id']);
-                        }
-                      });
-                    }):new Container(),
-              ),
-            ],
-          ));
+            )
+          );
         } else {
           _list.add(
             new Row(
@@ -505,14 +589,19 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
       }
     } else {
       _list.add(
-        Container(
-          width: 100,
-          height: 100,
-          child: Center(
-            child: Image.asset(
-                defaultPic
-            ),
-          )
+        Center(
+          child: Container(
+              width: 100,
+              height: 100,
+              child: Center(
+                child: Opacity(
+                  opacity: 0.2,
+                  child: Image.asset(
+                      defaultPic
+                  ),
+                )
+              )
+          ),
         )
       );
     }
@@ -2159,21 +2248,165 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
                   ],
                 ),
               ):BuildWidget.buildRow('召回时间', displayDate(recallDate)),
-              widget.editable?BuildWidget.buildDropdownWithInput('巡检周期', patrolPeriod, currentPatrolPeriod, dropdownPatrolPeriod, changePatrolPeriod, inputType: TextInputType.number, focusNode: _focusEquip[6], context: context):BuildWidget.buildRow('巡检周期', currentPatrolPeriod=='无'?'无巡检':'${patrolPeriod.text} $currentPatrolPeriod'),
+              widget.editable?BuildWidget.buildDropdownWithInput('巡检周期', patrolPeriod, currentPatrolPeriod, dropdownPatrolPeriod, changePatrolPeriod, inputType: TextInputType.number, focusNode: _focusEquip[6], context: context):Row(
+                children: <Widget>[
+                  new Expanded(
+                    flex: 4,
+                    child: new Wrap(
+                      alignment: WrapAlignment.end,
+                      crossAxisAlignment: WrapCrossAlignment.center,
+                      children: <Widget>[
+                        new Text(
+                          '巡检周期',
+                          style: new TextStyle(
+                              fontSize: 16.0,
+                              fontWeight: FontWeight.w600
+                          ),
+                        )
+                      ],
+                    ),
+                  ),
+                  new Expanded(
+                    flex: 1,
+                    child: new Text(
+                      '：',
+                      style: new TextStyle(
+                        fontSize: 16.0,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                  new Expanded(
+                    flex: 4,
+                    child: new Text(
+                      currentPatrolPeriod=='无'?'无巡检':'${patrolPeriod.text} $currentPatrolPeriod',
+                      style: new TextStyle(
+                          fontSize: 16.0,
+                          fontWeight: FontWeight.w400,
+                          color: Colors.black54
+                      ),
+                    ),
+                  ),
+                  new Expanded(
+                    flex: 2,
+                    child: currentPatrolPeriod=='无'?Container():IconButton(icon: Icon(Icons.calendar_today), onPressed: () async {
+                      print('check period');
+                      await getCheckPeriod(4);
+                      showPeriodSheet('一年内计划巡检');
+                    }),
+                  )
+                ],
+              ),
               widget.editable?BuildWidget.buildDropdownWithInput(
                   '保养周期',
                   maintainPeriod,
                   currentMaintainPeriod,
                   dropdownMandatoryPeriod,
                   changeMandatoryPeriod,
-                  inputType: TextInputType.number, focusNode: _focusEquip[7], context: context):BuildWidget.buildRow('保养周期', currentMaintainPeriod=='无'?'无保养':'${maintainPeriod.text} $currentMaintainPeriod'),
+                  inputType: TextInputType.number, focusNode: _focusEquip[7], context: context):Row(
+                children: <Widget>[
+                  new Expanded(
+                    flex: 4,
+                    child: new Wrap(
+                      alignment: WrapAlignment.end,
+                      crossAxisAlignment: WrapCrossAlignment.center,
+                      children: <Widget>[
+                        new Text(
+                          '保养周期',
+                          style: new TextStyle(
+                              fontSize: 16.0,
+                              fontWeight: FontWeight.w600
+                          ),
+                        )
+                      ],
+                    ),
+                  ),
+                  new Expanded(
+                    flex: 1,
+                    child: new Text(
+                      '：',
+                      style: new TextStyle(
+                        fontSize: 16.0,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                  new Expanded(
+                    flex: 4,
+                    child: new Text(
+                      currentMaintainPeriod=='无'?'无保养':'${maintainPeriod.text} $currentMaintainPeriod',
+                      style: new TextStyle(
+                          fontSize: 16.0,
+                          fontWeight: FontWeight.w400,
+                          color: Colors.black54
+                      ),
+                    ),
+                  ),
+                  new Expanded(
+                    flex: 2,
+                    child: currentMaintainPeriod=='无'?Container():IconButton(icon: Icon(Icons.calendar_today), onPressed: () async {
+                      print('check period');
+                      await getCheckPeriod(2);
+                      showPeriodSheet('一年内计划保养');
+                    }),
+                  )
+                ],
+              ),
               widget.editable?BuildWidget.buildDropdownWithInput(
                   '校准周期',
                   correctionPeriod,
                   currentCorrectionPeriod,
                   dropdownCorrectionPeriod,
                   changeCorrectionPeriod,
-                  inputType: TextInputType.number, focusNode: _focusEquip[8], context: context):BuildWidget.buildRow('校准周期', currentCorrectionPeriod=='无'?'无校准':'${correctionPeriod.text} $currentCorrectionPeriod'),
+                  inputType: TextInputType.number, focusNode: _focusEquip[8], context: context):Row(
+                children: <Widget>[
+                  new Expanded(
+                    flex: 4,
+                    child: new Wrap(
+                      alignment: WrapAlignment.end,
+                      crossAxisAlignment: WrapCrossAlignment.center,
+                      children: <Widget>[
+                        new Text(
+                          '校准周期',
+                          style: new TextStyle(
+                              fontSize: 16.0,
+                              fontWeight: FontWeight.w600
+                          ),
+                        )
+                      ],
+                    ),
+                  ),
+                  new Expanded(
+                    flex: 1,
+                    child: new Text(
+                      '：',
+                      style: new TextStyle(
+                        fontSize: 16.0,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                  new Expanded(
+                    flex: 4,
+                    child: new Text(
+                      currentCorrectionPeriod=='无'?'无校准':'${correctionPeriod.text} $currentCorrectionPeriod',
+                      style: new TextStyle(
+                          fontSize: 16.0,
+                          fontWeight: FontWeight.w400,
+                          color: Colors.black54
+                      ),
+                    ),
+                  ),
+                  new Expanded(
+                    flex: 2,
+                    child: currentCorrectionPeriod=='无'?Container():IconButton(icon: Icon(Icons.calendar_today), onPressed: () async {
+                      print('check period');
+                      await getCheckPeriod(5);
+                      showPeriodSheet('一年内计划校准');
+                    }),
+                  )
+                ],
+              ),
             ],
           ),
         ),

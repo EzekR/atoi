@@ -1,5 +1,6 @@
 import 'package:scoped_model/scoped_model.dart';
 import 'package:atoi/utils/http_request.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 /// 常量模型类
 class ConstantsModel extends Model {
@@ -33,6 +34,8 @@ class ConstantsModel extends Model {
   Map<String, int> _ContractType = {};
   Map<String, int> _Departments = {};
   Map<String, int> _ServiceProviders = {};
+  Map<String, int> _Sources = {};
+
   List<String> _DepartmentsList = [];
   List<String> _ContractTypeList = [];
   List<String> _ContractScopeList = [];
@@ -108,12 +111,18 @@ class ConstantsModel extends Model {
   get ContractScopeList => _ContractScopeList;
   get PeriodTypeList => _PeriodTypeList;
   get ReportDimensions => _ReportDimensions;
+  Map<String, int> get Sources => _Sources;
 
   /// 获取常量
   Future<Null> getConstants() async {
+    SharedPreferences _prefs = await SharedPreferences.getInstance();
+    int _userId  = await _prefs.getInt('userID');
     var resp = await HttpRequest.request(
       '/User/GetConstants',
-      method: HttpRequest.GET
+      method: HttpRequest.GET,
+      params: <String, dynamic> {
+        'userID': _userId
+      }
     );
     if (resp['ResultCode'] == '00') {
       _Constants = resp['Data'];
@@ -196,6 +205,9 @@ class ConstantsModel extends Model {
       for(var _item in resp['Data']['UsageStatus']) {
         _UsageStatus.putIfAbsent(_item['Name'], () => _item['ID']);
       }
+      for(var _item in resp['Data']['Source']) {
+        _Sources.putIfAbsent(_item['Name'], () => _item['ID']);
+      }
       _PeriodType['无'] = 0;
       _PeriodTypeList = [];
       _PeriodTypeList.add('无');
@@ -224,7 +236,10 @@ class ConstantsModel extends Model {
 
     var _departments = await HttpRequest.request(
       '/User/GetDepartments',
-      method: HttpRequest.GET
+      method: HttpRequest.GET,
+      params: <String, dynamic> {
+        'userID': _userId
+      }
     );
     if (_departments['ResultCode'] == '00') {
       for(var _item in _departments['Data']) {

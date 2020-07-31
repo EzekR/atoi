@@ -30,6 +30,13 @@ class ManagerModel extends Model {
   int _urgencyId = 0;
   bool _overDue = false;
   int _dispatchStatusId = 3;
+  int _source = 0;
+
+  set source(int value) {
+    _source = value;
+  }
+
+  int get source => _source;
 
   int get dispatchStatusId => _dispatchStatusId;
 
@@ -111,9 +118,15 @@ class ManagerModel extends Model {
   }
   /// 获取任务数量
   Future<Null> getCount() async {
+    Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
+    var prefs = await _prefs;
+    var userID = await prefs.getInt('userID');
     var resp = await HttpRequest.request(
       '/User/GetAdminCount',
       method: HttpRequest.GET,
+      params: <String, dynamic> {
+        'userID': userID
+      }
     );
     print(resp);
     if (resp['ResultCode'] == '00') {
@@ -130,7 +143,7 @@ class ManagerModel extends Model {
     var prefs = await _prefs;
     var userID = await prefs.getInt('userID');
     var resp = await HttpRequest.request(
-      '/Request/GetRequests?userID=${userID}&PageSize=10&CurRowNum=0&statusID=$_statusId&typeID=$_typeId&isRecall=$_recall&department=$_departmentId&urgency=$_urgencyId&overDue=$_overDue&startDate=$_startDate&endDate=$_endDate&filterField=$_field&filterText=$_text',
+      '/Request/GetRequests?userID=${userID}&PageSize=10&CurRowNum=0&statusID=$_statusId&typeID=$_typeId&isRecall=$_recall&department=$_departmentId&urgency=$_urgencyId&overDue=$_overDue&startDate=$_startDate&endDate=$_endDate&filterField=$_field&filterText=$_text&source=$_source',
       method: HttpRequest.GET,
     );
     print(resp);
@@ -149,7 +162,7 @@ class ManagerModel extends Model {
     var prefs = await _prefs;
     var userID = await prefs.getInt('userID');
     var resp = await HttpRequest.request(
-      '/Request/GetRequests?userID=${userID}&PageSize=10&CurRowNum=$_offset&statusID=$_statusId&typeID=$_typeId&isRecall=$_recall&department=$_departmentId&urgency=$_urgencyId&overDue=$_overDue&startDate=$_startDate&endDate=$_endDate&filterField=$_field&filterText=$_text',
+      '/Request/GetRequests?userID=${userID}&PageSize=10&CurRowNum=$_offset&statusID=$_statusId&typeID=$_typeId&isRecall=$_recall&department=$_departmentId&urgency=$_urgencyId&overDue=$_overDue&startDate=$_startDate&endDate=$_endDate&filterField=$_field&filterText=$_text&source=$_source',
       method: HttpRequest.GET,
     );
     print(resp);
@@ -238,7 +251,8 @@ class ManagerModel extends Model {
       'startDate': _startDate,
       'endDate': _endDate,
       'filterField': _field,
-      'filterText': _text
+      'filterText': _text,
+      'source': _source
     };
     var resp = await HttpRequest.request(
         '/Request/GetRequests',
@@ -272,7 +286,8 @@ class ManagerModel extends Model {
       'startDate': _startDate,
       'endDate': _endDate,
       'filterField': _field,
-      'filterText': _text
+      'filterText': _text,
+      'source': _source
     };
     var resp = await HttpRequest.request(
         '/Request/GetRequests',
