@@ -473,15 +473,19 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
           children: <Widget>[
             new Container(
               width: 300.0,
-              height: periodList.length==0?80:periodList.length*80.0,
-              child: Padding(
+              height: periodList.length<=2?80:periodList.length*40.5,
+              child: periodList.length==0?Center(
+                child: Text(
+                    '暂无计划服务生成时间',
+                    style: TextStyle(
+                      color: Colors.black54
+                    ),
+                ),
+              ):Padding(
                 padding: EdgeInsets.fromLTRB(60, 20, 20, 20),
-                child: periodList.length==0?Center(
-                  child: Text(
-                    '暂无计划服务生成时间'
-                  ),
-                ):ListView(
+                child: ListView(
                   controller: new ScrollController(),
+                  shrinkWrap: true,
                   children: periodList.asMap().keys.map<Widget>((index) {
                     return TimelineTile(
                         alignment: TimelineAlign.left,

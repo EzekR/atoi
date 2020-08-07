@@ -42,11 +42,12 @@ class HttpRequest {
   /// request method
   static Future<Map> request (
       String url,
-      { params, data, method }) async {
+      { params, data, method, bool isBoard }) async {
 
     data = data ?? new Map<String, dynamic>();
     params = params ?? new Map<String, dynamic>();
     method = method ?? 'GET';
+    isBoard = isBoard??false;
 
     Map<String, dynamic> _params = Map.from(params);
     Map<String, dynamic> _data = Map.from(data);
@@ -70,7 +71,9 @@ class HttpRequest {
     print('请求params：'+_params.toString());
     print('服务器地址：'+serverUrl);
 
-    Dio dio = createInstance(serverUrl+'/APP');
+    serverUrl = isBoard?serverUrl:(serverUrl+'/APP');
+    Dio dio = createInstance(serverUrl);
+    print(dio.toString());
     var result;
 
     try {
@@ -92,7 +95,7 @@ class HttpRequest {
         bus.emit('timeout', url);
       }
     }
-
+    clear();
     return result;
   }
 

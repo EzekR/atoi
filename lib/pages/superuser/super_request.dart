@@ -16,7 +16,8 @@ class SuperRequest extends StatefulWidget {
   final PageType pageType;
   final String filter;
   final String field;
-  SuperRequest({Key key, this.pageType, this.field, this.filter}):super(key: key);
+  final int type;
+  SuperRequest({Key key, this.pageType, this.field, this.filter, this.type}):super(key: key);
   _SuperRequestState createState() => new _SuperRequestState();
 }
 
@@ -123,12 +124,12 @@ class _SuperRequestState extends State<SuperRequest> {
   }
 
   Future<Null> initFilter() async {
-    var _start = new DateTime.now().add(new Duration(days: -4));
+    var _start = new DateTime.now().add(new Duration(days: widget.type==null?-4:-365));
     var _end = new DateTime.now();
     await cModel.getConstants();
     setState(() {
       _status = 98;
-      _type = 0;
+      _type = widget.type!=null?widget.type:0;
       _depart = -1;
       _recall = false;
       _overDue = false;

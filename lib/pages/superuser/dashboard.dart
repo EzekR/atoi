@@ -12,6 +12,7 @@ import 'package:atoi/pages/manager/manager_complete_page.dart';
 import 'package:atoi/utils/common.dart';
 import 'package:atoi/pages/superuser/equipment_carousel.dart';
 import 'package:atoi/utils/constants.dart';
+import 'package:atoi/pages/superuser/super_request.dart';
 
 class Dashboard extends StatefulWidget {
   final int equipmentId;
@@ -41,6 +42,21 @@ class _DashboardState extends State<Dashboard> {
     'expense': 0.0,
     'expense_rate': 0.0
   };
+  // dashboard data
+  Map overview;
+  Map departmentAll = {
+    'income': 0.0,
+    'income_rate': 0.0,
+    'expense': 0.0,
+    'expense_rate': 0.0
+  };
+  List departmentData;
+  int sortBy = 0;
+  String sortName = '科室';
+  int filter = 0;
+  String filterName = '所有科室';
+  List requestList;
+  int totalRequest;
 
   List<IncomeData> incomeData = [
     IncomeData(1, 100.0, -80.0, 0),
@@ -85,6 +101,128 @@ class _DashboardState extends State<Dashboard> {
     });
   }
 
+  // get dashboard data
+  void getOverview() async {
+    Map resp = await HttpRequest.request(
+      '/Equipment/QueryOverview',
+      method: HttpRequest.GET,
+      isBoard: true
+    );
+    if (resp['ResultCode'] == '00') {
+      setState(() {
+        overview = resp['Data'];
+      });
+    }
+  }
+
+  void sortIncome(int sortId) {
+    List _data = List.from(departmentData);
+    switch (sortId) {
+      case 0:
+        _data.sort((prev, next) => prev['Department']['ID'].compareTo(next['Department']['ID']));
+        break;
+      case 1:
+        _data.sort((prev, next) => next['Incomes'].compareTo(prev['Incomes']));
+        break;
+      case 2:
+        _data.sort((prev, next) => next['Expenses'].compareTo(prev['Expenses']));
+        break;
+    }
+    incomeData = _data.asMap().keys.map((index) {
+      double _income = _data[index]['Incomes'];
+      double _expense = _data[index]['Expenses'];
+      double _net = _income-_expense>=0?0:(_income-_expense);
+      if (_income == 0.0) {
+        _net = 0.0;
+      }
+      return new IncomeData(index/1.0, _income, _net==0.0?(0.0-_expense):(0.0-_income), _net);
+    }).toList();
+    setState(() {
+      incomeData = incomeData;
+    });
+  }
+
+  void filterIncome(int filter) {
+    List _data = List.from(departmentData);
+    switch (filter) {
+      case 1:
+        _data.retainWhere((item) => item['Department']['DepartmentType']['ID'] == 1);
+        break;
+      case 2:
+        _data.retainWhere((item) => item['Department']['DepartmentType']['ID'] == 2);
+        break;
+      case 3:
+        _data.retainWhere((item) => item['Department']['DepartmentType']['ID'] == 9);
+        break;
+    }
+    incomeData = _data.asMap().keys.map((index) {
+      double _income = _data[index]['Incomes'];
+      double _expense = _data[index]['Expenses'];
+      double _net = _income-_expense>=0?0:(_income-_expense);
+      if (_income == 0.0) {
+        _net = 0.0;
+      }
+      return new IncomeData(index/1.0, _income, _net==0.0?(0.0-_expense):(0.0-_income), _net);
+    }).toList();
+    setState(() {
+      incomeData = incomeData;
+    });
+  }
+
+  void getDepartmentIncome() async {
+    Map resp = await HttpRequest.request(
+      '/Equipment/IncomeExpenseByDepartment',
+      method: HttpRequest.GET,
+      isBoard: true
+    );
+    if (resp['ResultCode'] == '00') {
+      List _data = resp['Data'];
+      departmentData = resp['Data'];
+      incomeData = _data.asMap().keys.map((index) {
+        double _income = _data[index]['Incomes'];
+        double _expense = _data[index]['Expenses'];
+        double _net = _income-_expense>=0?0:(_income-_expense);
+        if (_income == 0.0) {
+          _net = 0.0;
+        }
+        return new IncomeData(index/1.0, _income, _net==0.0?(0.0-_expense):(0.0-_income), _net);
+      }).toList();
+      double income_last = 0.0;
+      double expense_last = 0.0;
+      _data.forEach((item) {
+        departmentAll['income'] += item['Incomes'];
+        income_last += item['LastIncomes'];
+        departmentAll['expense'] += item['Expenses'];
+        expense_last += item['LastExpenses'];
+      });
+      departmentAll['income_rate'] = (departmentAll['income']-income_last)/income_last*100;
+      departmentAll['expense_rate'] = (departmentAll['expense']-expense_last)/expense_last*100;
+      setState(() {
+        incomeData = incomeData;
+        incomeAll = departmentAll;
+      });
+    }
+  }
+
+  void getRequestToday() async {
+    Map resp = await HttpRequest.request(
+      '/Request/Todays',
+      method: HttpRequest.GET,
+      isBoard: true
+    );
+    if (resp['ResultCode'] == '00') {
+      requestList = resp['Data'];
+      totalRequest = requestList.length;
+      if (requestList.length == 0) {
+        requestData.clear();
+        requestData.add(RequestData('1', 1, Color(0xff385A95)));
+      }
+      setState(() {
+        requestData = requestData;
+      });
+    }
+  }
+
   void getTimeline({int equipmentId}) async {
     equipmentId = equipmentId??widget.equipmentId;
     Map resp = await HttpRequest.request(
@@ -98,7 +236,7 @@ class _DashboardState extends State<Dashboard> {
       setState(() {
         equipmentTimeline = resp['Data'];
         equipmentName = resp['Data']['Name']+'-'+resp['Data']['Manufacturer']['Name']+'-'+resp['Data']['EquipmentCode']+'-'+resp['Data']['AssetCode'];
-        equipmentTimelineName = resp['Data']['Name']+'-'+resp['Data']['Manufacturer']['Name']+'-'+resp['Data']['EquipmentCode'];
+        equipmentTimelineName = resp['Data']['Name']+'-'+resp['Data']['EquipmentCode'];
         equipmentStatus = resp['Data']['EquipmentStatus']['Name'];
         warrantyStatus = resp['Data']['WarrantyStatus'];
         equipmentFiles = resp['Data']['EquipmentFile'];
@@ -144,143 +282,398 @@ class _DashboardState extends State<Dashboard> {
         incomeData = resp['Data']['detail'].asMap().keys.map<IncomeData>((index) {
           double _income = resp['Data']['detail'][index]['Item2'];
           double _expense = resp['Data']['detail'][index]['Item3'];
-          return new IncomeData(index/1.0, _income, 0.0-_income, _income-_expense>=0?0:(_income-_expense));
+          double _net = _income-_expense>=0?0:(_income-_expense);
+          if (_income == 0.0) {
+            _net = 0.0;
+          }
+          return new IncomeData(index/1.0, _income, _net==0.0?(0.0-_expense):(0.0-_income), _net);
         }).toList();
       });
     }
   }
 
+  void getEquipmentInfo() async {
+    await getTimeline();
+    await getCount();
+    await getIncome();
+  }
+
   void initState() {
     super.initState();
     getUserName();
+    getOverview();
+    getDepartmentIncome();
+    getRequestToday();
     if (widget.equipmentId != null) {
-      getTimeline();
-      getCount();
-      getIncome();
+      getEquipmentInfo();
     }
   }
 
   void showBottomSheet() {
     showModalBottomSheet(context: context, builder: (context) {
-      return Container(
-        height: 400,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.all(Radius.circular(12.0)),
-          color: Colors.white
-        ),
-        child: Padding(
-          padding: EdgeInsets.symmetric(horizontal: 22.0),
-          child: Column(
-            children: <Widget>[
-              Container(
-                height: 300,
-                child: ListView(
-                  children: <Widget>[
-                    Container(
-                      height: 64.0,
-                      decoration: BoxDecoration(
-                          border: Border(
-                              bottom: BorderSide(
-                                  color: Color.fromRGBO(0, 0, 0, 0.1),
-                                  width: 1.0
-                              )
-                          )
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        children: <Widget>[
-                          Text(
-                            '科室',
-                            style: TextStyle(
-                                fontSize: 17.0,
-                                color: Colors.black
+      return StatefulBuilder(builder: (context, setState) {
+        return Container(
+          height: 400,
+          decoration: BoxDecoration(
+              borderRadius: BorderRadius.all(Radius.circular(12.0)),
+              color: Colors.white
+          ),
+          child: Padding(
+              padding: EdgeInsets.symmetric(horizontal: 22.0),
+              child: Column(
+                children: <Widget>[
+                  Container(
+                    height: 300,
+                    child: ListView(
+                      children: <Widget>[
+                        GestureDetector(
+                          onTap: () {
+                            setState(() {
+                              sortBy = 0;
+                              sortName = '科室';
+                            });
+                          },
+                          child: Container(
+                            height: 64.0,
+                            decoration: BoxDecoration(
+                                border: Border(
+                                    bottom: BorderSide(
+                                        color: Color.fromRGBO(0, 0, 0, 0.1),
+                                        width: 1.0
+                                    )
+                                )
                             ),
-                          )
-                        ],
-                      ),
-                    ),
-                    Container(
-                      height: 64.0,
-                      decoration: BoxDecoration(
-                          border: Border(
-                              bottom: BorderSide(
-                                  color: Color.fromRGBO(0, 0, 0, 0.1),
-                                  width: 1.0
-                              )
-                          )
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: <Widget>[
-                          Text(
-                            '收入',
-                            style: TextStyle(
-                                fontSize: 17.0,
-                                color: Colors.black
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: <Widget>[
+                                Text(
+                                  '科室',
+                                  style: TextStyle(
+                                      fontSize: 17.0,
+                                      color: Colors.black
+                                  ),
+                                ),
+                                sortBy==0?Icon(
+                                  Icons.check,
+                                  color: Color(0xff39649C),
+                                  size: 18.0,
+                                ):Container()
+                              ],
                             ),
                           ),
-                          Icon(
-                            Icons.check,
-                            color: Color(0xff39649C),
-                            size: 18.0,
-                          )
-                        ],
-                      ),
-                    ),
-                    Container(
-                      height: 64.0,
-                      decoration: BoxDecoration(
-                          border: Border(
-                              bottom: BorderSide(
-                                  color: Color.fromRGBO(0, 0, 0, 0.1),
-                                  width: 1.0
-                              )
-                          )
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        children: <Widget>[
-                          Text(
-                            '支出',
-                            style: TextStyle(
-                                fontSize: 17.0,
-                                color: Colors.black
+                        ),
+                        GestureDetector(
+                          onTap: () {
+                            setState(() {
+                              sortBy = 1;
+                              sortName = '收入';
+                            });
+                          },
+                          child: Container(
+                            height: 64.0,
+                            decoration: BoxDecoration(
+                                border: Border(
+                                    bottom: BorderSide(
+                                        color: Color.fromRGBO(0, 0, 0, 0.1),
+                                        width: 1.0
+                                    )
+                                )
                             ),
-                          )
-                        ],
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: <Widget>[
+                                Text(
+                                  '收入',
+                                  style: TextStyle(
+                                      fontSize: 17.0,
+                                      color: Colors.black
+                                  ),
+                                ),
+                                sortBy==1?Icon(
+                                  Icons.check,
+                                  color: Color(0xff39649C),
+                                  size: 18.0,
+                                ):Container()
+                              ],
+                            ),
+                          ),
+                        ),
+                        GestureDetector(
+                          onTap: () {
+                            setState(() {
+                              sortBy = 2;
+                              sortName = '支出';
+                            });
+                          },
+                          child: Container(
+                            height: 64.0,
+                            decoration: BoxDecoration(
+                                border: Border(
+                                    bottom: BorderSide(
+                                        color: Color.fromRGBO(0, 0, 0, 0.1),
+                                        width: 1.0
+                                    )
+                                )
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: <Widget>[
+                                Text(
+                                  '支出',
+                                  style: TextStyle(
+                                      fontSize: 17.0,
+                                      color: Colors.black
+                                  ),
+                                ),
+                                sortBy==2?Icon(
+                                  Icons.check,
+                                  color: Color(0xff39649C),
+                                  size: 18.0,
+                                ):Container()
+                              ],
+                            ),
+                          ),
+                        )
+                      ],
+                    ),
+                  ),
+                  GestureDetector(
+                    onTap: () {
+                      sortIncome(sortBy);
+                      Navigator.of(context).pop();
+                    },
+                    child: Container(
+                      height: 50.0,
+                      child: Container(
+                        width: 322.0,
+                        height: 40.0,
+                        decoration: BoxDecoration(
+                            borderRadius: BorderRadius.all(Radius.circular(4.0)),
+                            color: Color(0xff39649C)
+                        ),
+                        child: Center(
+                          child: Text(
+                            '确定',
+                            style: TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.w600,
+                                fontSize: 16.0
+                            ),
+                          ),
+                        ),
                       ),
                     ),
-                  ],
-                ),
-              ),
-              Container(
-                height: 50.0,
-                child: Container(
-                  width: 322.0,
-                  height: 40.0,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.all(Radius.circular(4.0)),
-                    color: Color(0xff39649C)
                   ),
-                  child: Center(
-                    child: Text(
-                      '确定',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w600,
-                        fontSize: 16.0
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-              SizedBox(
-                height: 24,
+                  SizedBox(
+                    height: 24,
+                  )
+                ],
               )
-            ],
-          )
-        ),
-      );
+          ),
+        );
+      });
+    });
+  }
+
+  void showFilter() {
+    showModalBottomSheet(context: context, builder: (context) {
+      return StatefulBuilder(builder: (context, setState) {
+        return Container(
+          height: 400,
+          decoration: BoxDecoration(
+              borderRadius: BorderRadius.all(Radius.circular(12.0)),
+              color: Colors.white
+          ),
+          child: Padding(
+              padding: EdgeInsets.symmetric(horizontal: 22.0),
+              child: Column(
+                children: <Widget>[
+                  Container(
+                    height: 300,
+                    child: ListView(
+                      children: <Widget>[
+                        GestureDetector(
+                          onTap: () {
+                            setState(() {
+                              filter = 0;
+                              filterName = '所有科室';
+                            });
+                          },
+                          child: Container(
+                            height: 64.0,
+                            decoration: BoxDecoration(
+                                border: Border(
+                                    bottom: BorderSide(
+                                        color: Color.fromRGBO(0, 0, 0, 0.1),
+                                        width: 1.0
+                                    )
+                                )
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: <Widget>[
+                                Text(
+                                  '所有科室',
+                                  style: TextStyle(
+                                      fontSize: 17.0,
+                                      color: Colors.black
+                                  ),
+                                ),
+                                filter==0?Icon(
+                                  Icons.check,
+                                  color: Color(0xff39649C),
+                                  size: 18.0,
+                                ):Container()
+                              ],
+                            ),
+                          ),
+                        ),
+                        GestureDetector(
+                          onTap: () {
+                            setState(() {
+                              filter = 1;
+                              filterName = '医技科室';
+                            });
+                          },
+                          child: Container(
+                            height: 64.0,
+                            decoration: BoxDecoration(
+                                border: Border(
+                                    bottom: BorderSide(
+                                        color: Color.fromRGBO(0, 0, 0, 0.1),
+                                        width: 1.0
+                                    )
+                                )
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: <Widget>[
+                                Text(
+                                  '医技科室',
+                                  style: TextStyle(
+                                      fontSize: 17.0,
+                                      color: Colors.black
+                                  ),
+                                ),
+                                filter==1?Icon(
+                                  Icons.check,
+                                  color: Color(0xff39649C),
+                                  size: 18.0,
+                                ):Container()
+                              ],
+                            ),
+                          ),
+                        ),
+                        GestureDetector(
+                          onTap: () {
+                            setState(() {
+                              filter = 2;
+                              filterName = '临床科室';
+                            });
+                          },
+                          child: Container(
+                            height: 64.0,
+                            decoration: BoxDecoration(
+                                border: Border(
+                                    bottom: BorderSide(
+                                        color: Color.fromRGBO(0, 0, 0, 0.1),
+                                        width: 1.0
+                                    )
+                                )
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: <Widget>[
+                                Text(
+                                  '临床科室',
+                                  style: TextStyle(
+                                      fontSize: 17.0,
+                                      color: Colors.black
+                                  ),
+                                ),
+                                filter==2?Icon(
+                                  Icons.check,
+                                  color: Color(0xff39649C),
+                                  size: 18.0,
+                                ):Container()
+                              ],
+                            ),
+                          ),
+                        ),
+                        GestureDetector(
+                          onTap: () {
+                            setState(() {
+                              filter = 3;
+                              filterName = '其他科室';
+                            });
+                          },
+                          child: Container(
+                            height: 64.0,
+                            decoration: BoxDecoration(
+                                border: Border(
+                                    bottom: BorderSide(
+                                        color: Color.fromRGBO(0, 0, 0, 0.1),
+                                        width: 1.0
+                                    )
+                                )
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: <Widget>[
+                                Text(
+                                  '其他科室',
+                                  style: TextStyle(
+                                      fontSize: 17.0,
+                                      color: Colors.black
+                                  ),
+                                ),
+                                filter==3?Icon(
+                                  Icons.check,
+                                  color: Color(0xff39649C),
+                                  size: 18.0,
+                                ):Container()
+                              ],
+                            ),
+                          ),
+                        )
+                      ],
+                    ),
+                  ),
+                  GestureDetector(
+                    onTap: () {
+                      filterIncome(filter);
+                      Navigator.of(context).pop();
+                    },
+                    child: Container(
+                      height: 50.0,
+                      child: Container(
+                        width: 322.0,
+                        height: 40.0,
+                        decoration: BoxDecoration(
+                            borderRadius: BorderRadius.all(Radius.circular(4.0)),
+                            color: Color(0xff39649C)
+                        ),
+                        child: Center(
+                          child: Text(
+                            '确定',
+                            style: TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.w600,
+                                fontSize: 16.0
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  SizedBox(
+                    height: 24,
+                  )
+                ],
+              )
+          ),
+        );
+      });
     });
   }
 
@@ -368,7 +761,7 @@ class _DashboardState extends State<Dashboard> {
                             height: 8.0,
                           ),
                           Text(
-                            '2,698',
+                            overview!=null?overview['EquipmentCount'].toString():'0',
                             style: TextStyle(
                               color: Color(0xff385A95),
                               fontSize: 24.0,
@@ -398,7 +791,7 @@ class _DashboardState extends State<Dashboard> {
                               height: 8.0,
                             ),
                             Text(
-                              '26,983.45',
+                              overview!=null?CommonUtil.CurrencyForm(overview['EquipmentAmount']):'0',
                               style: TextStyle(
                                   color: Color(0xff385A95),
                                   fontSize: 24.0,
@@ -446,7 +839,7 @@ class _DashboardState extends State<Dashboard> {
                             height: 8.0,
                           ),
                           Text(
-                            '67.96%',
+                            overview!=null?'${overview['DepreciationRate']*100}%':'0.00%',
                             style: TextStyle(
                                 color: Color(0xff385A95),
                                 fontSize: 24.0,
@@ -476,7 +869,7 @@ class _DashboardState extends State<Dashboard> {
                               height: 8.0,
                             ),
                             Text(
-                              '232.11',
+                              overview!=null?'${overview['ServiceCount']/10000}':'',
                               style: TextStyle(
                                   color: Color(0xff385A95),
                                   fontSize: 24.0,
@@ -532,35 +925,40 @@ class _DashboardState extends State<Dashboard> {
                             fontSize: 11.0
                           ),
                         ),
-                        Container(
-                          height: 24.0,
-                          width: 95.0,
-                          decoration: BoxDecoration(
-                            border: Border.all(
-                              color: Color(0xff7597D3)
-                            ),
-                            borderRadius: BorderRadius.all(Radius.circular(2.0))
-                          ),
-                          child: Padding(
-                            padding: EdgeInsets.fromLTRB(8.0, 0, 8.0, 0),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: <Widget>[
-                                Text(
-                                  '科室',
-                                  style: TextStyle(
-                                      color: Color(0xff666666),
-                                      fontSize: 11.0
+                        GestureDetector(
+                          onTap: () {
+                            showBottomSheet();
+                          },
+                          child: Container(
+                              height: 24.0,
+                              width: 90.0,
+                              decoration: BoxDecoration(
+                                  border: Border.all(
+                                      color: Color(0xff7597D3)
                                   ),
+                                  borderRadius: BorderRadius.all(Radius.circular(2.0))
+                              ),
+                              child: Padding(
+                                padding: EdgeInsets.fromLTRB(8.0, 0, 8.0, 0),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: <Widget>[
+                                    Text(
+                                      sortName,
+                                      style: TextStyle(
+                                          color: Color(0xff666666),
+                                          fontSize: 11.0
+                                      ),
+                                    ),
+                                    Icon(
+                                      Icons.keyboard_arrow_down,
+                                      color: Color(0xff666666),
+                                      size: 14.0,
+                                    )
+                                  ],
                                 ),
-                                Icon(
-                                  Icons.keyboard_arrow_down,
-                                  color: Color(0xff666666),
-                                  size: 14.0,
-                                )
-                              ],
-                            ),
-                          )
+                              )
+                          ),
                         )
                       ],
                     ),
@@ -578,11 +976,11 @@ class _DashboardState extends State<Dashboard> {
                         ),
                         GestureDetector(
                           onTap: () {
-                            showBottomSheet();
+                            showFilter();
                           },
                           child: Container(
                               height: 24.0,
-                              width: 95.0,
+                              width: 90.0,
                               decoration: BoxDecoration(
                                   border: Border.all(
                                       color: Color(0xff7597D3)
@@ -595,7 +993,7 @@ class _DashboardState extends State<Dashboard> {
                                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                   children: <Widget>[
                                     Text(
-                                      '科室',
+                                      filterName,
                                       style: TextStyle(
                                           color: Color(0xff666666),
                                           fontSize: 11.0
@@ -721,7 +1119,7 @@ class _DashboardState extends State<Dashboard> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: <Widget>[
                           Text(
-                            '${incomeAll['income_rate']>=0?'+':'-'} ${incomeAll['income_rate']}%',
+                            '${incomeAll['income_rate']>=0?'+':''} ${(incomeAll['income_rate']).toStringAsFixed(2)}%',
                             style: TextStyle(
                                 color: incomeAll['income_rate']>=0?Color(0xffD64040):Color(0xff33B850),
                                 fontSize: 15.0,
@@ -777,7 +1175,7 @@ class _DashboardState extends State<Dashboard> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: <Widget>[
                           Text(
-                            '${incomeAll['expense_rate']>=0?'+':'-'} ${incomeAll['expense_rate']}%',
+                            '${incomeAll['expense_rate']>=0?'+':''} ${(incomeAll['expense_rate']).toStringAsFixed(2)}%',
                             style: TextStyle(
                                 color: incomeAll['expense_rate']>=0?Color(0xffD64040):Color(0xff33B850),
                                 fontSize: 15.0,
@@ -835,7 +1233,7 @@ class _DashboardState extends State<Dashboard> {
           palette: <Color>[
             Color(0xff86C7E6),
             Color(0xff39649C),
-            incomeData.any((item) => item.income==0)?Color(0xff39649C):Color(0xffD64040)
+            Color(0xffD64040)
           ],
           tooltipBehavior: TooltipBehavior(
               enable: true,
@@ -851,7 +1249,7 @@ class _DashboardState extends State<Dashboard> {
                     });
                   },
                   child: Container(
-                    height: 120,
+                    height: widget.equipmentId!=null?120:250,
                     width: 350,
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.all(Radius.circular(8.0)),
@@ -861,7 +1259,7 @@ class _DashboardState extends State<Dashboard> {
                       padding: EdgeInsets.fromLTRB(12, 5, 5, 12),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
-                        children: <Widget>[
+                        children: widget.equipmentId!=null?<Widget>[
                           Text(
                             equipmentName??'',
                             style: TextStyle(
@@ -923,6 +1321,152 @@ class _DashboardState extends State<Dashboard> {
                               ),
                             ],
                           ),
+                        ]:<Widget>[
+                          Text(
+                            departmentData[pointIndex]['Department']['Description']??'',
+                            style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 16.0
+                            ),
+                          ),
+                          SizedBox(
+                            height: 8.0,
+                          ),
+                          Row(
+                            children: <Widget>[
+                              Expanded(
+                                flex: 4,
+                                child: Text(
+                                  '设备数量：${departmentData[pointIndex]['EquipmentCount']}台',
+                                  style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 11.0
+                                  ),
+                                ),
+                              ),
+                              Expanded(
+                                flex: 6,
+                                child: Text(
+                                  '',
+                                  style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 11.0
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          SizedBox(
+                            height: 8.0,
+                          ),
+                          Row(
+                            children: <Widget>[
+                              Expanded(
+                                flex: 10,
+                                child: Text(
+                                  '设备价值：${CommonUtil.CurrencyForm(departmentData[pointIndex]['EquipmentAmount'])}万元',
+                                  style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 11.0
+                                  ),
+                                ),
+                              ),
+                              Expanded(
+                                flex: 1,
+                                child: Text(
+                                  '',
+                                  style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 11.0
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          SizedBox(
+                            height: 8.0,
+                          ),
+                          Row(
+                            children: <Widget>[
+                              Expanded(
+                                flex: 10,
+                                child: Text(
+                                  '服务人次：${departmentData[pointIndex]['ServiceCount']}',
+                                  style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 11.0
+                                  ),
+                                ),
+                              ),
+                              Expanded(
+                                flex: 1,
+                                child: Text(
+                                  '',
+                                  style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 11.0
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          SizedBox(
+                            height: 8.0,
+                          ),
+                          Row(
+                            children: <Widget>[
+                              Expanded(
+                                flex: 10,
+                                child: Text(
+                                  '收入：${CommonUtil.CurrencyForm(departmentData[pointIndex]['Incomes'])}万元',
+                                  style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 11.0
+                                  ),
+                                ),
+                              ),
+                              Expanded(
+                                flex: 1,
+                                child: Text(
+                                  '',
+                                  style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 11.0
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          SizedBox(
+                            height: 8.0,
+                          ),
+                          Row(
+                            children: <Widget>[
+                              Expanded(
+                                flex: 10,
+                                child: Text(
+                                  '支出：${CommonUtil.CurrencyForm(departmentData[pointIndex]['Expenses'])}万元',
+                                  style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 11.0
+                                  ),
+                                ),
+                              ),
+                              Expanded(
+                                flex: 1,
+                                child: Text(
+                                  '',
+                                  style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 11.0
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          SizedBox(
+                            height: 8.0,
+                          ),
                         ],
                       ),
                     ),
@@ -981,7 +1525,7 @@ class _DashboardState extends State<Dashboard> {
                             width: 20.0,
                           ),
                           Text(
-                            '40',
+                            totalRequest.toString(),
                             style: TextStyle(
                               color: Colors.black,
                               fontSize: 39.0,
@@ -1049,7 +1593,7 @@ class _DashboardState extends State<Dashboard> {
             Container(
               child: Center(
                 child: Text(
-                  '放射科 今日报修数：10',
+                  '',
                   style: TextStyle(
                     color: Color(0xff1e1e1e),
                     fontSize: 13.0
@@ -1062,8 +1606,16 @@ class _DashboardState extends State<Dashboard> {
             ),
             Container(
               height: 300.0,
-              child: ListView(
-                children: new List(10).map((val) {
+              child: requestList.length==0?Center(
+                child: Text(
+                  '暂无报修',
+                  style: TextStyle(
+                    fontSize: 16.0,
+                    fontWeight: FontWeight.w600
+                  ),
+                ),
+              ):ListView(
+                children: requestList.map<Widget>((item) {
                   return Column(
                     children: <Widget>[
                       Row(
@@ -1081,7 +1633,7 @@ class _DashboardState extends State<Dashboard> {
                           Expanded(
                             flex: 8,
                             child: Text(
-                              '超声诊断仪【ZC00001】请求维修···',
+                              '${item['EquipmentName']} 【${item['EquipmentOID']}】${item['FaultDesc']}',
                               style: TextStyle(
                                   color: Color(0xff1e1e1e),
                                   fontSize: 14.0
@@ -1099,7 +1651,7 @@ class _DashboardState extends State<Dashboard> {
                               ),
                               child: Center(
                                 child: Text(
-                                  '待派工',
+                                  '${item['Status']['Name']}',
                                   style: TextStyle(
                                       color: Colors.white,
                                       fontSize: 10.0
@@ -1755,10 +2307,11 @@ class _DashboardState extends State<Dashboard> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
               Container(
                 height: 18,
-                width: 33,
+                width: 30,
                 color: Color(0xff33B850),
                 child: Center(
                   child: Text(
@@ -1771,8 +2324,8 @@ class _DashboardState extends State<Dashboard> {
                 )
               ),
               Container(
-                height: 50,
-                width: 317,
+                height: 80,
+                width: 280,
                 child: Text(
                   equipmentName??'',
                   softWrap: true,
@@ -1809,6 +2362,7 @@ class _DashboardState extends State<Dashboard> {
             ],
           ),
           Row(
+            mainAxisAlignment: MainAxisAlignment.end,
             children: <Widget>[
               Text(
                 '维保状态：$warrantyStatus',
@@ -1845,28 +2399,102 @@ class _DashboardState extends State<Dashboard> {
     );
   }
 
-  Container buildSpiderChart() {
+  Stack buildSpiderChart() {
     List<double> _data = new List();
     equipmentCount?.forEach((key, val) {
       _data.add(val/1.0);
     });
-    return Container(
-      child: SpiderChart(
-        data: _data.isNotEmpty?_data:[
-          1,2,3,4,5
-        ],
-        labels: [
-          '维修','保养','强检','巡检','校准'
-        ],
-        maxValue: _data.isEmpty||_data.every((elem) => elem == 0)?10:_data.reduce((prev,next) => prev>=next?prev:next),
-        colors: <Color>[
-          Colors.red,
-          Colors.green,
-          Colors.blue,
-          Colors.yellow,
-          Colors.indigo,
-        ],
-      ),
+    return Stack(
+      children: <Widget>[
+        Container(
+          child: SpiderChart(
+            data: _data.isNotEmpty?_data:[
+              1,2,3,4,5
+            ],
+            labels: [
+              '维修','保养','强检','巡检','校准'
+            ],
+            maxValue: _data.isEmpty||_data.every((elem) => elem == 0)?10:_data.reduce((prev,next) => prev>=next?prev:next),
+            colors: <Color>[
+              Colors.red,
+              Colors.green,
+              Colors.blue,
+              Colors.yellow,
+              Colors.indigo,
+            ],
+          ),
+        ),
+        Padding(
+          padding: EdgeInsets.fromLTRB(140, 0, 0, 0),
+          child: GestureDetector(
+            onTap: () {
+              print('1 tab');
+              Navigator.of(context).push(new MaterialPageRoute(builder: (_) => new SuperRequest(type: 1, field: 'e.ID', filter: equipmentTimeline['ID'].toString(), pageType: PageType.REQUEST,)));
+            },
+            child: Container(
+              width: 80,
+              height: 80,
+              child: Text(' '),
+            ),
+          ),
+        ),
+        Padding(
+          padding: EdgeInsets.fromLTRB(50, 60, 0, 0),
+          child: GestureDetector(
+            onTap: () {
+              print('1 tab');
+              Navigator.of(context).push(new MaterialPageRoute(builder: (_) => new SuperRequest(type: 5, field: 'e.ID', filter: equipmentTimeline['ID'].toString(), pageType: PageType.REQUEST,)));
+            },
+            child: Container(
+              width: 80,
+              height: 80,
+              child: Text(' '),
+            ),
+          ),
+        ),
+        Padding(
+          padding: EdgeInsets.fromLTRB(230, 60, 0, 0),
+          child: GestureDetector(
+            onTap: () {
+              print('1 tab');
+              Navigator.of(context).push(new MaterialPageRoute(builder: (_) => new SuperRequest(type: 2, field: 'e.ID', filter: equipmentTimeline['ID'].toString(), pageType: PageType.REQUEST,)));
+            },
+            child: Container(
+              width: 80,
+              height: 80,
+              child: Text(' '),
+            ),
+          ),
+        ),
+        Padding(
+          padding: EdgeInsets.fromLTRB(80, 160, 0, 0),
+          child: GestureDetector(
+            onTap: () {
+              print('1 tab');
+              Navigator.of(context).push(new MaterialPageRoute(builder: (_) => new SuperRequest(type: 4, field: 'e.ID', filter: equipmentTimeline['ID'].toString(), pageType: PageType.REQUEST,)));
+            },
+            child: Container(
+              width: 80,
+              height: 80,
+              child: Text(' '),
+            ),
+          ),
+        ),
+        Padding(
+          padding: EdgeInsets.fromLTRB(190, 160, 0, 0),
+          child: GestureDetector(
+            onTap: () {
+              print('1 tab');
+              Navigator.of(context).push(new MaterialPageRoute(builder: (_) => new SuperRequest(type: 3, field: 'e.ID', filter: equipmentTimeline['ID'].toString(), pageType: PageType.REQUEST,)));
+            },
+            child: Container(
+              width: 80,
+              height: 80,
+              child: Text(' '),
+            ),
+          ),
+        ),
+      ],
     );
   }
 
@@ -1959,7 +2587,7 @@ class _DashboardState extends State<Dashboard> {
       if (!isDetailPage) {
         _list.add(
           SizedBox(
-            height: 50.0,
+            height: 10.0,
           ),
         );
         switch (currentTab) {
@@ -2053,31 +2681,39 @@ class _DashboardState extends State<Dashboard> {
           )
         ],
       ),
-      body: Container(
-        color: Color(0xffd8e0ee),
-        child: Stack(
-          children: <Widget>[
-            Container(
-              child: CustomPaint(
-                size: Size.infinite,
-                painter: CurvePainter(),
-              ),
-            ),
-            ListView(
-                children: listBuilder()
-            ),
-            !isDetailPage&&widget.equipmentId==null?Row(
+      body: Column(
+        children: <Widget>[
+          Container(
+            color: Color(0xFF385A95),
+            child: !isDetailPage&&widget.equipmentId==null?Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: <Widget>[
+                  buildTab('资产概览', 0),
+                  buildTab('当日报修', 1),
+                  buildTab('关键事件', 2),
+                  buildTab('关键指标', 3),
+                ],
+              ):Container(),
+          ),
+          Container(
+            height: 559.0,
+            color: Color(0xffd8e0ee),
+            child: Stack(
               children: <Widget>[
-                buildTab('资产概览', 0),
-                buildTab('当日报修', 1),
-                buildTab('关键事件', 2),
-                buildTab('关键指标', 3),
+                Container(
+                  child: CustomPaint(
+                    size: Size.infinite,
+                    painter: CurvePainter(),
+                  ),
+                ),
+                ListView(
+                    children: listBuilder()
+                ),
               ],
-            ):Container(),
-          ],
-        ),
-      ),
+            ),
+          ),
+        ],
+      )
     );
   }
 }
@@ -2099,8 +2735,8 @@ class CurvePainter extends CustomPainter {
 
     var path = Path();
 
-    path.moveTo(0, size.height * 0.25);
-    path.quadraticBezierTo(size.width / 2, size.height / 3, size.width, size.height * 0.25);
+    path.moveTo(0, size.height * 0.05);
+    path.quadraticBezierTo(size.width / 2, size.height / 12, size.width, size.height * 0.05);
     path.lineTo(size.width, 0);
     path.lineTo(0, 0);
 
