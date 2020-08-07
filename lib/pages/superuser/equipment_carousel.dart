@@ -97,7 +97,10 @@ class _EquipmentCarouselState extends State<EquipmentCarousel> {
                     ),
                   ),
                 ):Container(
-                  child: Image.asset(item['asset']),
+                  child: Opacity(
+                    opacity: 0.2,
+                    child: Image.asset(item['asset']),
+                  ),
                 ),
                 Center(
                   child: Text(
