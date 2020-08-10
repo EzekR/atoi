@@ -46,6 +46,7 @@ class _HomePageState extends State<HomePage>
   int departmentId = -1;
   int urgencyId = 0;
   int dispatchStatusId = 3;
+  int source = 0;
   bool overDue = false;
   String startDate = '';
   String endDate = '';
@@ -56,6 +57,7 @@ class _HomePageState extends State<HomePage>
   List departmentList = [];
   List urgencyList = [];
   List dispatchList = [];
+  List sourceList = [];
   EventBus bus = new EventBus();
   bool showEquip = false;
   bool showTable = false;
@@ -122,12 +124,15 @@ class _HomePageState extends State<HomePage>
     model.offset = 10;
     model.dispatchStatusId = 3;
     model.offset = 10;
+    model.source = 0;
     setState(() {
       startDate = formatDate(_start, [yyyy, '-', mm, '-', dd]);
       endDate = formatDate(_end, [yyyy, '-', mm, '-', dd]);
       typeList = initList(cModel.RequestType);
       typeId = typeList[0]['value'];
       statusList = initList(cModel.RequestStatus);
+      sourceList = initList(cModel.Sources);
+      source = sourceList[0]['value'];
       statusList.removeWhere((item) => item['value'] == -1 || item['value'] == 99);
       statusId = statusList[0]['value'];
       departmentList = initList(cModel.Departments, valueForAll: -1);
@@ -156,6 +161,7 @@ class _HomePageState extends State<HomePage>
     model.overDue = overDue;
     model.offset = 10;
     model.dispatchStatusId = dispatchStatusId;
+    model.source = source;
     switch (_currentTabIndex) {
       case 1:
         model.getRequests();
@@ -167,6 +173,14 @@ class _HomePageState extends State<HomePage>
         model.getTodos();
         break;
     }
+  }
+
+  void logout() async {
+    var _prefs = await prefs;
+    var _server = await _prefs.getString('serverUrl');
+    await _prefs.clear();
+    await _prefs.setString('serverUrl', _server);
+    Navigator.of(context).pushNamed(LoginPage.tag);
   }
 
   @override
@@ -191,6 +205,13 @@ class _HomePageState extends State<HomePage>
       showDialog(context: context, builder: (_) => CupertinoAlertDialog(
         title: Text('网络超时'),
       ));
+    });
+    bus.on('invalid_sid', (params) {
+      print('invalid session');
+      _timer.cancel();
+      showDialog(context: context, builder: (_) => CupertinoAlertDialog(
+        title: Text('用户已在其他设备登陆'),
+      )).then((result) => logout());
     });
   }
 
@@ -429,6 +450,52 @@ class _HomePageState extends State<HomePage>
                                     FocusScope.of(context).requestFocus(new FocusNode());
                                     setState(() {
                                       statusId = val;
+                                    });
+                                  },
+                                )
+                              ],
+                            )
+                        ),
+                      ],
+                    ),
+                    _currentTabIndex==2?Container():SizedBox(height: 18.0,),
+                    _currentTabIndex==2?Container():Row(
+                      children: <Widget>[
+                        SizedBox(width: 16.0,),
+                        Text('请求来源', style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.w600),)
+                      ],
+                    ),
+                    _currentTabIndex==2?Container():SizedBox(height: 6.0,),
+                    _currentTabIndex==2?Container():Row(
+                      children: <Widget>[
+                        SizedBox(width: 16.0,),
+                        Container(
+                            width: 230.0,
+                            height: 40.0,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(5.0),
+                              color: Color(0xfff2f2f2),
+                            ),
+                            child: Row(
+                              children: <Widget>[
+                                SizedBox(width: 6.0,),
+                                DropdownButton(
+                                  value: source,
+                                  underline: Container(),
+                                  items: sourceList.map<DropdownMenuItem>((item) {
+                                    return DropdownMenuItem(
+                                      value: item['value'],
+                                      child: Container(
+                                        width: 200.0,
+                                        child: Text(item['text']),
+                                      ),
+                                    );
+                                  }).toList(),
+                                  onChanged: (val) {
+                                    print(val);
+                                    FocusScope.of(context).requestFocus(new FocusNode());
+                                    setState(() {
+                                      source = val;
                                     });
                                   },
                                 )
@@ -689,6 +756,7 @@ class _HomePageState extends State<HomePage>
                           statusId = statusList[0]['value'];
                           departmentId = departmentList[0]['value'];
                           urgencyId = urgencyList[0]['value'];
+                          source = sourceList[0]['value'];
                         });
                         initFilter();
                       }, child: Text('重置')),
@@ -1015,11 +1083,7 @@ class _HomePageState extends State<HomePage>
                       leading: Icon(Icons.exit_to_app),
                       title: Text('登出'),
                       onTap: () async {
-                        var _prefs = await prefs;
-                        var _server = await _prefs.getString('serverUrl');
-                        await _prefs.clear();
-                        await _prefs.setString('serverUrl', _server);
-                        Navigator.of(context).pushNamed(LoginPage.tag);
+                        logout();
                       },
                     ),
                   ],

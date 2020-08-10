@@ -12,6 +12,8 @@ PODS:
   - connectivity (0.0.1):
     - Flutter
     - Reachability
+  - connectivity_for_web (0.1.0):
+    - Flutter
   - connectivity_macos (0.0.1):
     - Flutter
   - Flutter (1.0.0)
@@ -40,8 +42,10 @@ PODS:
     - Mantle/extobjc (= 2.1.1)
   - Mantle/extobjc (2.1.1)
   - MTBBarcodeScanner (5.0.11)
-  - multi_image_picker (4.6.7):
+  - multi_image_picker (4.6.9):
     - BSImagePicker (~> 2.10.3)
+    - Flutter
+  - path_provider_linux (0.0.1):
     - Flutter
   - "permission_handler (4.4.0+hotfix.4)":
     - Flutter
@@ -52,6 +56,8 @@ PODS:
     - SDWebImage/Core (~> 5.7)
   - shared_preferences (0.0.1):
     - Flutter
+  - shared_preferences_linux (0.0.1):
+    - Flutter
   - shared_preferences_macos (0.0.1):
     - Flutter
   - shared_preferences_web (0.0.1):
@@ -61,14 +67,17 @@ DEPENDENCIES:
   - barcode_scan (from `.symlinks/plugins/barcode_scan/ios`)
   - brother_printer (from `.symlinks/plugins/brother_printer/ios`)
   - connectivity (from `.symlinks/plugins/connectivity/ios`)
+  - connectivity_for_web (from `.symlinks/plugins/connectivity_for_web/ios`)
   - connectivity_macos (from `.symlinks/plugins/connectivity_macos/ios`)
   - Flutter (from `Flutter`)
   - flutter_image_compress (from `.symlinks/plugins/flutter_image_compress/ios`)
   - flutter_jpush (from `.symlinks/plugins/flutter_jpush/ios`)
   - fluttertoast (from `.symlinks/plugins/fluttertoast/ios`)
   - multi_image_picker (from `.symlinks/plugins/multi_image_picker/ios`)
+  - path_provider_linux (from `.symlinks/plugins/path_provider_linux/ios`)
   - permission_handler (from `.symlinks/plugins/permission_handler/ios`)
   - shared_preferences (from `.symlinks/plugins/shared_preferences/ios`)
+  - shared_preferences_linux (from `.symlinks/plugins/shared_preferences_linux/ios`)
   - shared_preferences_macos (from `.symlinks/plugins/shared_preferences_macos/ios`)
   - shared_preferences_web (from `.symlinks/plugins/shared_preferences_web/ios`)
 
@@ -93,6 +102,8 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/brother_printer/ios"
   connectivity:
     :path: ".symlinks/plugins/connectivity/ios"
+  connectivity_for_web:
+    :path: ".symlinks/plugins/connectivity_for_web/ios"
   connectivity_macos:
     :path: ".symlinks/plugins/connectivity_macos/ios"
   Flutter:
@@ -105,10 +116,14 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/fluttertoast/ios"
   multi_image_picker:
     :path: ".symlinks/plugins/multi_image_picker/ios"
+  path_provider_linux:
+    :path: ".symlinks/plugins/path_provider_linux/ios"
   permission_handler:
     :path: ".symlinks/plugins/permission_handler/ios"
   shared_preferences:
     :path: ".symlinks/plugins/shared_preferences/ios"
+  shared_preferences_linux:
+    :path: ".symlinks/plugins/shared_preferences_linux/ios"
   shared_preferences_macos:
     :path: ".symlinks/plugins/shared_preferences_macos/ios"
   shared_preferences_web:
@@ -121,6 +136,7 @@ SPEC CHECKSUMS:
   BSImagePicker: 07404254f2fcdaf5a2eb403c0f8c337267ce8738
   BSImageView: a149459433a2687157d034c78e059d30ac7f2544
   connectivity: c4130b2985d4ef6fd26f9702e886bd5260681467
+  connectivity_for_web: 2b8584556930d4bd490d82b836bcf45067ce345b
   connectivity_macos: e2e9731b6b22dda39eb1b128f6969d574460e191
   Flutter: 0e3d915762c693b495b44d77113d4970485de6ec
   flutter_image_compress: 082f8daaf6c1b0c9fe798251c750ef0ecd98d7ae
@@ -131,12 +147,14 @@ SPEC CHECKSUMS:
   libwebp: 946cb3063cea9236285f7e9a8505d806d30e07f3
   Mantle: 35238ae6f2e2b2d474fa7b67fee82a59fea71915
   MTBBarcodeScanner: f453b33c4b7dfe545d8c6484ed744d55671788cb
-  multi_image_picker: 7968ace12b658a9ee51be6514473f5ee5501ea80
+  multi_image_picker: dd2ce252f813ccfbc866f5c359606d29ba39a3d4
+  path_provider_linux: 4d630dc393e1f20364f3e3b4a2ff41d9674a84e4
   permission_handler: 8278954f2382902f63f00dd8828769c0bd6d511b
   Reachability: 33e18b67625424e47b6cde6d202dce689ad7af96
   SDWebImage: 84000f962cbfa70c07f19d2234cbfcf5d779b5dc
   SDWebImageWebPCoder: d0dac55073088d24b2ac1b191a71a8f8d0adac21
   shared_preferences: af6bfa751691cdc24be3045c43ec037377ada40d
+  shared_preferences_linux: afefbfe8d921e207f01ede8b60373d9e3b566b78
   shared_preferences_macos: f3f29b71ccbb56bf40c9dd6396c9acf15e214087
   shared_preferences_web: 141cce0c3ed1a1c5bf2a0e44f52d31eeb66e5ea9
 

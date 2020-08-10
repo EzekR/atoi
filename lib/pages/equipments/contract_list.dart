@@ -27,6 +27,7 @@ class _ContractListState extends State<ContractList> {
 
   TextEditingController _keywords = new TextEditingController();
   String field = 'c.ID';
+  int role;
 
   Future<SharedPreferences> prefs = SharedPreferences.getInstance();
 
@@ -34,8 +35,8 @@ class _ContractListState extends State<ContractList> {
 
   Future<Null> getRole() async {
     var _prefs = await prefs;
-    var _role = _prefs.getInt('role');
-    _editable = _role==1?true:false;
+    role = _prefs.getInt('role');
+    _editable = role==1?true:false;
   }
 
   void setFilter() async {
@@ -481,7 +482,7 @@ class _ContractListState extends State<ContractList> {
           }
         },
       )),
-      floatingActionButton: FloatingActionButton(
+      floatingActionButton: role==3?Container():FloatingActionButton(
         onPressed: () {
           Navigator.of(context).push(new MaterialPageRoute(builder: (_) {
             return new EquipmentContract(editable: true,);

@@ -148,11 +148,14 @@ class _ManagerToCompleteState extends State<ManagerToComplete> {
   }
 
   Future<List> getDispatchesByRequestId(int requestId) async {
+    SharedPreferences _prefs = await SharedPreferences.getInstance();
+    int userId = await _prefs.getInt('userID');
     var resp = await HttpRequest.request(
       '/Dispatch/GetDispatchesByRequestID',
       method: HttpRequest.GET,
       params: {
-        'id': requestId
+        'id': requestId,
+        'userId': userId
       }
     );
     if (resp['ResultCode'] == '00') {
@@ -248,6 +251,7 @@ class _ManagerToCompleteState extends State<ManagerToComplete> {
                   departmentName==''?new Container():BuildWidget.buildCardRow('使用科室', departmentName),
                   BuildWidget.buildCardRow('请求人', requestPerson),
                   BuildWidget.buildCardRow('请求类型', requestType),
+                  BuildWidget.buildCardRow('请求来源', task['Source']['Name']),
                   BuildWidget.buildCardRow('请求状态', status),
                   BuildWidget.buildCardRow('请求详情', detail.length>10?'${detail.substring(0,10)}...':detail),
                   new Row(

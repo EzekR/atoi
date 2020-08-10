@@ -28,13 +28,23 @@ class _ManagerToAssignState extends State<ManagerToAssign> {
 
   bool _loading = false;
   bool _noMore = false;
+  int _role = 1;
 
   ScrollController _scrollController = ScrollController();
+
+  Future<Null> getRole() async {
+    var prefs = await _prefs;
+    var _roleId = prefs.getInt('role');
+    setState(() {
+      _role = _roleId;
+    });
+  }
 
   void initState() {
     //getData();
     refresh();
     super.initState();
+    getRole();
 
     ManagerModel model = MainModel.of(context);
     _scrollController.addListener(() {
@@ -198,6 +208,7 @@ class _ManagerToAssignState extends State<ManagerToAssign> {
                   equipmentName.isNotEmpty?BuildWidget.buildCardRow('设备名称', equipmentName, onTap: equipmentName=='多设备'?null:() => Navigator.of(context).push(new MaterialPageRoute(builder: (_) => new EquipmentsList(equipmentId: equipmentNo,)))):new Container(),
                   departmentName.isNotEmpty?BuildWidget.buildCardRow('使用科室', departmentName):new Container(),
                   BuildWidget.buildCardRow('请求人', requestPerson),
+                  BuildWidget.buildCardRow('请求来源', task['Source']['Name']),
                   BuildWidget.buildCardRow('类型', requestType),
                   BuildWidget.buildCardRow('状态', status),
                   BuildWidget.buildCardRow('请求详情', detail.length>10?'${detail.substring(0,10)}...':detail),

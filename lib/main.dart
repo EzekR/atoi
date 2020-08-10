@@ -35,6 +35,9 @@ import 'dart:async';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:atoi/utils/event_bus.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:atoi/pages/superuser/superuser_home.dart';
+import 'package:atoi/models/constants_model.dart';
+import 'package:atoi/pages/superuser/dashboard.dart';
 
 class AtoiApp extends StatefulWidget{
   _AtoiAppState createState() => _AtoiAppState();
@@ -83,16 +86,6 @@ class _AtoiAppState extends State<AtoiApp> {
   @override
   void initState() {
     super.initState();
-    // 全局事件监听
-    bus.on('timeout', (params) {
-      print('catch timeout event');
-      showDialog(context: context, builder: (_) => CupertinoAlertDialog(
-        title: Text('网络超时'),
-      ));
-    });
-    //bus.on('unfocus', (pamras) {
-    //  FocusScope.of(context).unfocus();
-    //});
   }
 
   @override

@@ -42,29 +42,48 @@ class HttpRequest {
   /// request method
   static Future<Map> request (
       String url,
-      { params, data, method }) async {
+      { params, data, method, bool isBoard }) async {
 
-    data ?? {};
-    params ?? {};
+    data = data ?? new Map<String, dynamic>();
+    params = params ?? new Map<String, dynamic>();
     method = method ?? 'GET';
+    isBoard = isBoard??false;
+
+    Map<String, dynamic> _params = Map.from(params);
+    Map<String, dynamic> _data = Map.from(data);
 
     SharedPreferences prefs = await SharedPreferences.getInstance();
     var _url = await prefs.getString('serverUrl');
+    var _userId = await prefs.getInt('userID');
     var serverUrl = _url ?? API_PREFIX;
+    var _sessionId = await prefs.getString('sessionId');
+    if (_sessionId != null) {
+      _params['sessionId'] = _sessionId;
+    }
+    if (_userId != null) {
+      _data.putIfAbsent('userID', () => _userId);
+      _params.putIfAbsent('userID', () => _userId);
+    }
     EventBus bus = new EventBus();
     /// 打印请求相关信息：请求地址、请求方式、请求参数
     print('请求地址：【' + method + '  ' + url + '】');
     print('请求body：' + data.toString());
-    print('请求params：'+params.toString());
+    print('请求params：'+_params.toString());
     print('服务器地址：'+serverUrl);
 
-    Dio dio = createInstance(serverUrl+'/APP');
+    serverUrl = isBoard?serverUrl:(serverUrl+'/APP');
+    Dio dio = createInstance(serverUrl);
+    print(dio.toString());
     var result;
 
     try {
-      Response response = await dio.request(url, queryParameters: params, data: data, options: new Options(method: method));
+      Response response = await dio.request(url, queryParameters: _params, data: data, options: new Options(method: method));
 
       result = response.data;
+
+      if (result['ResultCode'] == '04') {
+        bus.emit('invalid_sid', url);
+      }
 
       /// 打印响应相关信息
       print('响应数据：' + response.toString());
@@ -72,11 +91,11 @@ class HttpRequest {
       /// 打印请求失败相关信息
       print('请求出错：' + e.toString());
       // 网络超时且请求地址非轮询接口时，emit超时事件
-      if (url != '/User/GetEngineerCount' && url !='/User/GetAdminCount') {
+      if (url != '/User/GetEngineerCount' && url !='/User/GetAdminCount' && e == DioErrorType.CONNECT_TIMEOUT) {
         bus.emit('timeout', url);
       }
     }
-
+    clear();
     return result;
   }
 

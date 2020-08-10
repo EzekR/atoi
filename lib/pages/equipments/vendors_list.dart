@@ -31,11 +31,12 @@ class _VendorsListState extends State<VendorsList> {
   ScrollController _scrollController = new ScrollController();
   int offset = 0;
   bool _noMore = false;
+  int role;
 
   Future<Null> getRole() async {
     var _prefs = await prefs;
-    var _role = _prefs.getInt('role');
-    _editable = _role==1?true:false;
+    role = _prefs.getInt('role');
+    _editable = role==1?true:false;
   }
 
   void setFilter() {
@@ -529,7 +530,7 @@ class _VendorsListState extends State<VendorsList> {
           }
         },
       )),
-      floatingActionButton: FloatingActionButton(
+      floatingActionButton: role==3?Container():FloatingActionButton(
         onPressed: () {
           Navigator.of(context).push(new MaterialPageRoute(builder: (_) {
             return new VendorDetail(editable: true,);

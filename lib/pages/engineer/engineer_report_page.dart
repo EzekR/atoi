@@ -831,7 +831,7 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
         case 3:
           _list.addAll(
             [
-              _edit?buildField('强检要求:', _description, hintText: 'FDA, Manufacture, Hospital, Etc...', focusNode: _focusReport[2], required: true):BuildWidget.buildRow('强检要求', _description.text),
+              _edit?buildField('强检要求:', _description, hintText: 'FDA, 厂家要求, 政府要求等', focusNode: _focusReport[2], required: true):BuildWidget.buildRow('强检要求', _description.text),
               _edit?buildField('报告明细:', _analysis, focusNode: _focusReport[5], required: true):BuildWidget.buildRow('报告明细', _analysis.text),
               _edit?buildField('结果:', _result, focusNode: _focusReport[6], required: true):BuildWidget.buildRow('结果', _result.text),
               _edit?BuildWidget.buildRadioLeft('专用报告:', _isPrivate, _currentPrivate, changePrivate, required: true):BuildWidget.buildRow('专用报告', _currentPrivate),
@@ -1172,6 +1172,7 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
               BuildWidget.buildRow('主题', _dispatch['Request']['SubjectName']),
               BuildWidget.buildRow('请求人', _dispatch['Request']['RequestUser']['Name']),
               BuildWidget.buildRow('请求状态', _dispatch['Request']['Status']['Name']),
+              BuildWidget.buildRow('请求来源', _dispatch['Request']['Source']['Name']),
               _dispatch['Request']['RequestType']['ID'] == 1?BuildWidget.buildRow('机器状态', _dispatch['Request']['MachineStatus']['Name']):new Container(),
               BuildWidget.buildRow(model.Remark[_dispatch['Request']['RequestType']['ID']], _dispatch['Request']['FaultDesc']),
               _dispatch['Request']['RequestType']['ID'] == 2 ||

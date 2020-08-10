@@ -559,6 +559,7 @@ class _ManagerCompletePageState extends State<ManagerCompletePage> {
               BuildWidget.buildRow('主题', _request['SubjectName']),
               BuildWidget.buildRow('请求人', _request['RequestUser']['Name']),
               BuildWidget.buildRow('请求状态', _request['Status']['Name']),
+              BuildWidget.buildRow('请求来源', _request['Source']['Name']),
               _request['RequestType']['ID'] == 1?BuildWidget.buildRow('机器状态', _request['MachineStatus']['Name']):new Container(),
               BuildWidget.buildRow(model.Remark[_request['RequestType']['ID']], _request['FaultDesc']),
                       _request['RequestType']['ID'] == 2 ||

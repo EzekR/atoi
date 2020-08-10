@@ -12,6 +12,7 @@ import 'package:atoi/pages/manager/manager_complete_page.dart';
 import 'package:atoi/models/models.dart';
 import 'dart:convert';
 import 'package:atoi/widgets/search_department.dart';
+import 'package:atoi/pages/superuser/dashboard.dart';
 
 /// 设备列表页面类
 class EquipmentsList extends StatefulWidget{
@@ -46,11 +47,12 @@ class _EquipmentsListState extends State<EquipmentsList> {
   ScrollController _scrollController = new ScrollController();
   bool _noMore = false;
   int offset = 0;
+  int role;
 
   Future<Null> getRole() async {
     var _prefs = await prefs;
-    var _role = _prefs.getInt('role');
-    _editable = _role==1?true:false;
+    role = _prefs.getInt('role');
+    _editable = role==1?true:false;
   }
 
   List initList(Map _map, {int valueForAll}) {
@@ -97,6 +99,8 @@ class _EquipmentsListState extends State<EquipmentsList> {
   }
 
   Future<Null> getEquipments({String filterText}) async {
+    SharedPreferences _prefs = await SharedPreferences.getInstance();
+    int userId = _prefs.getInt('userID');
     filterText = filterText??'';
     var resp = await HttpRequest.request(
       '/Equipment/Getdevices',
@@ -111,7 +115,8 @@ class _EquipmentsListState extends State<EquipmentsList> {
         'filterField': searchFilter,
         'useStatus': usageStatus,
         'PageSize': 10,
-        'CurRowNum': offset
+        'CurRowNum': offset,
+        'userID': userId
       }
     );
     if (resp['ResultCode'] == '00') {
@@ -816,26 +821,27 @@ class _EquipmentsListState extends State<EquipmentsList> {
               ),
               new RaisedButton(
                 onPressed: () async {
-                  List<TimelineModel> _steps = await getTimeline(item['ID']);
-                  if (_steps.length > 0) {
-                    showDialog(context: context,
-                        builder: (context) => SimpleDialog(
-                          title: new Text('生命周期'),
-                          children: <Widget>[
-                            new Container(
-                              width: 300.0,
-                              height: _steps.length*80.0,
-                              child: Timeline(
-                                children: _steps,
-                                position: TimelinePosition.Left,
-                              )
-                            ),
-                          ],
-                        )
-                    );
-                  } else {
-                    showDialog(context: context, builder: (context) => CupertinoAlertDialog(title: new Text('暂无事件'),));
-                  }
+                  //List<TimelineModel> _steps = await getTimeline(item['ID']);
+                  //if (_steps.length > 0) {
+                  //  showDialog(context: context,
+                  //      builder: (context) => SimpleDialog(
+                  //        title: new Text('生命周期'),
+                  //        children: <Widget>[
+                  //          new Container(
+                  //            width: 300.0,
+                  //            height: _steps.length*80.0,
+                  //            child: Timeline(
+                  //              children: _steps,
+                  //              position: TimelinePosition.Left,
+                  //            )
+                  //          ),
+                  //        ],
+                  //      )
+                  //  );
+                  //} else {
+                  //  showDialog(context: context, builder: (context) => CupertinoAlertDialog(title: new Text('暂无事件'),));
+                  //}
+                  Navigator.of(context).push(new MaterialPageRoute(builder: (_) => new Dashboard(equipmentId: item['ID'],)));
                 },
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(6),
@@ -926,7 +932,7 @@ class _EquipmentsListState extends State<EquipmentsList> {
             }
           },
         )),
-        floatingActionButton: FloatingActionButton(
+        floatingActionButton: role==3?Container():FloatingActionButton(
           onPressed: () {
             Navigator.of(context).push(new MaterialPageRoute(builder: (_) {
               return new EquipmentDetail(editable: true,);

@@ -100,6 +100,14 @@ class _EngineerHomePageState extends State<EngineerHomePage>
     return _list;
   }
 
+  void logout() async {
+    var _prefs = await prefs;
+    var _server = await _prefs.getString('serverUrl');
+    await _prefs.clear();
+    await _prefs.setString('serverUrl', _server);
+    Navigator.of(context).pushNamed(LoginPage.tag);
+  }
+
   void setFilter() {
     setState(() {
       model.engineerField = field;
@@ -133,6 +141,13 @@ class _EngineerHomePageState extends State<EngineerHomePage>
       showDialog(context: context, builder: (_) => CupertinoAlertDialog(
         title: Text('网络超时'),
       ));
+    });
+    bus.on('invalid_sid', (params) {
+      print('invalid session');
+      _timer.cancel();
+      showDialog(context: context, builder: (_) => CupertinoAlertDialog(
+        title: Text('用户已在其他设备登陆'),
+      )).then((result) => logout());
     });
   }
 
@@ -706,11 +721,7 @@ class _EngineerHomePageState extends State<EngineerHomePage>
                       leading: Icon(Icons.exit_to_app),
                       title: Text('登出'),
                       onTap: () async {
-                        var _prefs = await prefs;
-                        var _server = await _prefs.getString('serverUrl');
-                        await _prefs.clear();
-                        await _prefs.setString('serverUrl', _server);
-                        Navigator.of(context).pushNamed(LoginPage.tag);
+                        logout();
                       },
                     ),
                   ],
