@@ -339,7 +339,7 @@ class BuildWidget {
   }
 
   /// 构建带输入框的下拉菜单
-  static Row buildDropdownWithInput(String title, TextEditingController controller, String currentItem, List dropdownItems, Function changeDropdown, {TextInputType inputType, FocusNode focusNode, BuildContext context, bool required}) {
+  static Row buildDropdownWithInput(String title, TextEditingController controller, String currentItem, List dropdownItems, Function changeDropdown, Function showPeriod, {TextInputType inputType, FocusNode focusNode, BuildContext context, bool required}) {
     inputType??TextInputType.text;
     focusNode = focusNode ?? new FocusNode();
     //if (context != null) {
@@ -375,13 +375,13 @@ class BuildWidget {
           child: new Text(
             '：',
             style: new TextStyle(
-              fontSize: 16.0,
+              fontSize: 14.0,
               fontWeight: FontWeight.w600,
             ),
           ),
         ),
         new Expanded(
-          flex: 3,
+          flex: 2,
           child: new TextField(
             controller: controller,
             keyboardType: inputType,
@@ -394,20 +394,27 @@ class BuildWidget {
           ),
         ),
         new Expanded(
-          flex: 1,
-          child: new Text(' '),
+          flex: 2,
+          child: Row(
+            children: <Widget>[
+              SizedBox(
+                width: 5,
+              ),
+              new DropdownButton(
+                value: currentItem,
+                items: dropdownItems,
+                style: new TextStyle(
+                    fontSize: 10.0,
+                    color: Colors.black
+                ),
+                onChanged: changeDropdown,
+              ),
+            ],
+          )
         ),
         new Expanded(
           flex: 2,
-          child: new DropdownButton(
-            value: currentItem,
-            items: dropdownItems,
-            style: new TextStyle(
-              fontSize: 12.0,
-              color: Colors.black
-            ),
-            onChanged: changeDropdown,
-          ),
+          child: IconButton(icon: Icon(Icons.calendar_today), onPressed: showPeriod),
         )
       ],
     );

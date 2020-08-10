@@ -1161,6 +1161,30 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
     print(value);
   }
 
+  void showPatrol() async {
+    if (widget.equipment == null) {
+      return;
+    }
+    await getCheckPeriod(4);
+    showPeriodSheet('一年内计划巡检');
+  }
+
+  void showMaintain() async {
+    if (widget.equipment == null) {
+      return;
+    }
+    await getCheckPeriod(2);
+    showPeriodSheet('一年内计划保养');
+  }
+
+  void showCorrection() async {
+    if (widget.equipment == null) {
+      return;
+    }
+    await getCheckPeriod(5);
+    showPeriodSheet('一年内计划校准');
+  }
+
   Future<Null> pickDate<T>(BuildContext context, initialTime) async {
     DateTime _time;
     _time = DateTime.tryParse(initialTime)??DateTime.now();
@@ -2252,7 +2276,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
                   ],
                 ),
               ):BuildWidget.buildRow('召回时间', displayDate(recallDate)),
-              widget.editable?BuildWidget.buildDropdownWithInput('巡检周期', patrolPeriod, currentPatrolPeriod, dropdownPatrolPeriod, changePatrolPeriod, inputType: TextInputType.number, focusNode: _focusEquip[6], context: context):Row(
+              widget.editable?BuildWidget.buildDropdownWithInput('巡检周期', patrolPeriod, currentPatrolPeriod, dropdownPatrolPeriod, changePatrolPeriod, showPatrol, inputType: TextInputType.number, focusNode: _focusEquip[6], context: context):Row(
                 children: <Widget>[
                   new Expanded(
                     flex: 4,
@@ -2307,6 +2331,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
                   currentMaintainPeriod,
                   dropdownMandatoryPeriod,
                   changeMandatoryPeriod,
+                  showMaintain,
                   inputType: TextInputType.number, focusNode: _focusEquip[7], context: context):Row(
                 children: <Widget>[
                   new Expanded(
@@ -2362,6 +2387,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
                   currentCorrectionPeriod,
                   dropdownCorrectionPeriod,
                   changeCorrectionPeriod,
+                  showCorrection,
                   inputType: TextInputType.number, focusNode: _focusEquip[8], context: context):Row(
                 children: <Widget>[
                   new Expanded(

@@ -270,6 +270,17 @@ class _DashboardState extends State<Dashboard> {
       if (requestList.length == 0) {
         requestData.clear();
         requestData.add(RequestData('1', 1, Color(0xff385A95)));
+      } else {
+        Map _departs = {};
+        requestList.forEach((item) {
+          if (!_departs.containsKey(item['DepartmentName'])) {
+            _departs[item['DepartmentName']] = 1;
+          } else {
+            _departs[item['DepartmentName']] += _departs[item['DepartmentName']];
+          }
+        });
+        print(_departs.toString());
+        requestData = _departs.keys.map((key) => RequestData(key.toString(), _departs[key])).toList();
       }
       setState(() {
         requestData = requestData;
@@ -945,7 +956,7 @@ class _DashboardState extends State<Dashboard> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: <Widget>[
                             Text(
-                              '当年服务人次(万人)',
+                              '当年服务人次(人)',
                               style: TextStyle(
                                   color: Color(0xff666666),
                                   fontSize: 11.0
@@ -955,7 +966,7 @@ class _DashboardState extends State<Dashboard> {
                               height: 8.0,
                             ),
                             Text(
-                              overview!=null?'${overview['ServiceCount']/10000}':'',
+                              overview!=null?'${overview['ServiceCount']}':'',
                               style: TextStyle(
                                   color: Color(0xff385A95),
                                   fontSize: 24.0,
@@ -1608,6 +1619,10 @@ class _DashboardState extends State<Dashboard> {
   Container buildRequestChart() {
     return Container(
       child: SfCircularChart(
+          tooltipBehavior: TooltipBehavior(
+            enable: true,
+            format: 'point.x\n参报数量: point.y件'
+          ),
           annotations: <CircularChartAnnotation>[
             CircularChartAnnotation(
               widget: Container(
@@ -1622,7 +1637,7 @@ class _DashboardState extends State<Dashboard> {
                       Row(
                         children: <Widget>[
                           SizedBox(
-                            width: 20.0,
+                            width: 30.0,
                           ),
                           Text(
                             totalRequest.toString(),
@@ -1916,22 +1931,27 @@ class _DashboardState extends State<Dashboard> {
   Padding buildEventList() {
     List _data;
     IconData _icon;
+    String _type;
     switch (currentEvent) {
       case 0:
         _data = List.from(repairEvents);
         _icon = Icons.build;
+        _type = '维修';
         break;
       case 1:
         _data = List.from(recallEvents);
         _icon = Icons.local_car_wash;
+        _type = '召回';
         break;
       case 2:
         _data = List.from(mandatoryEvents);
         _icon = Icons.speaker_phone;
+        _type = '强检';
         break;
       case 3:
         _data = List.from(overdueEvents);
         _icon = Icons.calendar_today;
+        _type = '超期';
         break;
     }
     return Padding(
@@ -1940,7 +1960,7 @@ class _DashboardState extends State<Dashboard> {
         height: 400.0,
         child: ListView(
           children: _data.map<Widget>((item) {
-            return buildEventListItem(_icon, '${item['DepartmentName']}: ${item['EquipmentName']} [${item['EquipmentOID']}] 正在等待${item['RequestType']['Name']}，请优先处理', CommonUtil.TimeForm(item['RequestDate'], 'yyyy'));
+            return buildEventListItem(_icon, '${item['DepartmentName']}: ${item['EquipmentName']} [${item['EquipmentOID']}] 正在等待${_type}，请优先处理', CommonUtil.TimeForm(item['RequestDate'], 'yyyy'));
           }).toList(),
         ),
       ),
@@ -1995,12 +2015,6 @@ class _DashboardState extends State<Dashboard> {
                       Container(
                         width: (1-finished/_plan)*220,
                         decoration: BoxDecoration(
-                            border: Border(
-                                right: BorderSide(
-                                  width: 1.0,
-                                  color: Color(0xffCD6750),
-                                )
-                            )
                         ),
                       )
                     ],
@@ -2015,7 +2029,7 @@ class _DashboardState extends State<Dashboard> {
                   child: Row(
                     children: <Widget>[
                       Text(
-                        (finished/_plan*100).toStringAsFixed(1),
+                        (finished/_plan*100).toStringAsFixed(0),
                         style: TextStyle(
                             color: Color(0xffD64040),
                             fontWeight: FontWeight.w600,
