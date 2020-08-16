@@ -464,78 +464,7 @@ class _SuperRequestState extends State<SuperRequest> {
                   mainAxisAlignment: MainAxisAlignment.end,
                   mainAxisSize: MainAxisSize.max,
                   children: <Widget>[
-                    new RaisedButton(
-                      onPressed: () async {
-                        //var _dispatches = await getDispatchesByRequestId(requestId);
-                        //if (_dispatches.length>0) {
-                        //  showDialog(context: context,
-                        //      builder: (context) => SimpleDialog(
-                        //        title: new Text('派工历史'),
-                        //        children: <Widget>[
-                        //          new Container(
-                        //            width: 350.0,
-                        //            height: 400.0,
-                        //            child: new Stepper(
-                        //              currentStep: _dispatches.length-1,
-                        //              controlsBuilder: (BuildContext context, {VoidCallback onStepContinue, VoidCallback onStepCancel}) {
-                        //                return new Container();
-                        //              },
-                        //              steps: buildStep(_dispatches),
-                        //            ),
-                        //          ),
-                        //        ],
-                        //      )
-                        //  );
-                        //} else {
-                        //  showDialog(context: context, builder: (context) => CupertinoAlertDialog(title: new Text('暂无派工历史'),));
-                        //}
-                      },
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(6),
-                      ),
-                      color: AppConstants.AppColors['btn_success'],
-                      child: new Row(
-                        children: <Widget>[
-                          new Icon(
-                            Icons.history,
-                            color: Colors.white,
-                          ),
-                          new Text(
-                            '历史派工',
-                            style: new TextStyle(
-                                color: Colors.white,
-                                fontSize: 12.0
-                            ),
-                          )
-                        ],
-                      ),
-                    ),
-                    new RaisedButton(
-                      onPressed: (){
-                        //Navigator.of(context).push(new MaterialPageRoute(builder: (_) {
-                        //  return new ManagerCompletePage(requestId: requestId);
-                        //})).then((result) => refresh());
-                      },
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(6),
-                      ),
-                      color: AppConstants.AppColors['btn_success'],
-                      child: new Row(
-                        children: <Widget>[
-                          new Icon(
-                            Icons.event_note,
-                            color: Colors.white,
-                          ),
-                          new Text(
-                            '查看详情',
-                            style: new TextStyle(
-                                color: Colors.white,
-                                fontSize: 12.0
-                            ),
-                          )
-                        ],
-                      ),
-                    ),
+                    SizedBox(height: 20,)
                   ],
                 )
               ],

@@ -451,13 +451,34 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
   }
 
   void getCheckPeriod(int typeId) async {
+    Map _data = {
+      'equipmentid': widget.equipment!=null?widget.equipment['ID']:0,
+      'typeid': typeId,
+    };
+    switch (typeId) {
+      case 2:
+        _data['MaintenancePeriod'] = maintainPeriod.text;
+        _data['MaintenanceType'] = {
+          "ID": model.PeriodType[currentMaintainPeriod]
+        };
+        break;
+      case 4:
+        _data['PatrolPeriod'] = patrolPeriod.text;
+        _data['PatrolType'] = {
+          "ID": model.PeriodType[currentPatrolPeriod]
+        };
+        break;
+      case 5:
+        _data['CorrectionPeriod'] = correctionPeriod.text;
+        _data['CorrectionType'] = {
+          "ID": model.PeriodType[currentCorrectionPeriod]
+        };
+        break;
+    }
     Map resp = await HttpRequest.request(
       '/equipment/getsysrequestlist',
-      method: HttpRequest.GET,
-      params: {
-        'equipmentid': widget.equipment['ID'],
-        'typeid': typeId
-      }
+      method: HttpRequest.POST,
+      data: _data
     );
     if (resp['ResultCode'] == '00') {
       setState(() {
@@ -473,7 +494,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
           children: <Widget>[
             new Container(
               width: 300.0,
-              height: periodList.length<=2?80:periodList.length*40.5,
+              height: periodList.length<=5?200:periodList.length*41.0,
               child: periodList.length==0?Center(
                 child: Text(
                     '暂无计划服务生成时间',
@@ -1162,7 +1183,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
   }
 
   void showPatrol() async {
-    if (widget.equipment == null) {
+    if (currentPatrolPeriod == '无' || patrolPeriod.text == null || patrolPeriod.text == '') {
       return;
     }
     await getCheckPeriod(4);
@@ -1170,7 +1191,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
   }
 
   void showMaintain() async {
-    if (widget.equipment == null) {
+    if (currentMaintainPeriod == '无' || maintainPeriod.text == null || maintainPeriod.text == '') {
       return;
     }
     await getCheckPeriod(2);
@@ -1178,7 +1199,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
   }
 
   void showCorrection() async {
-    if (widget.equipment == null) {
+    if (currentCorrectionPeriod == '无' || correctionPeriod.text == null || correctionPeriod.text == '') {
       return;
     }
     await getCheckPeriod(5);
