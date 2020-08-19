@@ -1391,7 +1391,7 @@ class _DashboardState extends State<Dashboard> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: <Widget>[
                           Text(
-                            '${incomeAll['income_rate']>=0?'+':''} ${(incomeAll['income_rate']).toStringAsFixed(2)}%',
+                            '${incomeAll['income_rate']>=0?'+':''} ${(incomeAll['income_rate']).toStringAsFixed(1)}%',
                             style: TextStyle(
                                 color: incomeAll['income_rate']>=0?Color(0xffD64040):Color(0xff33B850),
                                 fontSize: 15.0,
@@ -1447,7 +1447,7 @@ class _DashboardState extends State<Dashboard> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: <Widget>[
                           Text(
-                            '${incomeAll['expense_rate']>=0?'+':''} ${(incomeAll['expense_rate']).toStringAsFixed(2)}%',
+                            '${incomeAll['expense_rate']>=0?'+':''} ${(incomeAll['expense_rate']).toStringAsFixed(1)}%',
                             style: TextStyle(
                                 color: incomeAll['expense_rate']>=0?Color(0xffD64040):Color(0xff33B850),
                                 fontSize: 15.0,
@@ -2204,7 +2204,7 @@ class _DashboardState extends State<Dashboard> {
                   child: Row(
                     children: <Widget>[
                       Text(
-                        (finished/_plan*100).toStringAsFixed(0),
+                        (finished/_plan*100).toStringAsFixed(1),
                         style: TextStyle(
                             color: Color(0xffD64040),
                             fontWeight: FontWeight.w600,
@@ -2233,7 +2233,7 @@ class _DashboardState extends State<Dashboard> {
                   ),
                 ),
                 Text(
-                  finished.toStringAsFixed(0),
+                  finished.toStringAsFixed(1),
                   style: TextStyle(
                       color: Color(0xff1e1e1e),
                       fontSize: 16
@@ -2257,7 +2257,7 @@ class _DashboardState extends State<Dashboard> {
                   ),
                 ),
                 Text(
-                  planned.toStringAsFixed(0),
+                  planned.toStringAsFixed(1),
                   style: TextStyle(
                       color: Color(0xff1e1e1e),
                       fontSize: 16
@@ -2334,7 +2334,7 @@ class _DashboardState extends State<Dashboard> {
                         Row(
                           children: <Widget>[
                             Text(
-                              kpi==null?'':(kpi['BootRate']['Present']*100).toStringAsFixed(0),
+                              kpi==null?'':(kpi['BootRate']['Present']*100).toStringAsFixed(1),
                               style: TextStyle(
                                   color: Color(0xffD64040),
                                   fontSize: 30,
@@ -2710,7 +2710,7 @@ class _DashboardState extends State<Dashboard> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: <Widget>[
                           Text(
-                            '${incomeAll['income_rate']>=0?'+':''} ${incomeAll['income_rate'].toStringAsFixed(2)}%',
+                            '${incomeAll['income_rate']>=0?'+':''} ${incomeAll['income_rate'].toStringAsFixed(1)}%',
                             style: TextStyle(
                                 color: incomeAll['income_rate']>=0?Color(0xffD64040):Color(0xff33B850),
                                 fontSize: 15.0,
@@ -2766,7 +2766,7 @@ class _DashboardState extends State<Dashboard> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: <Widget>[
                           Text(
-                            '${incomeAll['expense_rate']>=0?'+':''} ${incomeAll['expense_rate'].toStringAsFixed(2)}%',
+                            '${incomeAll['expense_rate']>=0?'+':''} ${incomeAll['expense_rate'].toStringAsFixed(1)}%',
                             style: TextStyle(
                                 color: incomeAll['expense_rate']>=0?Color(0xffD64040):Color(0xff33B850),
                                 fontSize: 15.0,

@@ -5,7 +5,7 @@ class CommonUtil {
 
   static String CurrencyForm(double number) {
     double _num = double.tryParse((number/10000).toString());
-    NumberFormat _format = NumberFormat.currency(locale: 'en_US', symbol: '', decimalDigits: 0);
+    NumberFormat _format = NumberFormat.currency(locale: 'en_US', symbol: '', decimalDigits: 1);
     return _format.format(_num);
   }
 
