@@ -7,13 +7,13 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:atoi/models/models.dart';
 
 /// 供应商列表类
-class VendorsList extends StatefulWidget{
-  _VendorsListState createState() => _VendorsListState();
+class ComponentList extends StatefulWidget{
+  _ComponentListState createState() => _ComponentListState();
 }
 
-class _VendorsListState extends State<VendorsList> {
+class _ComponentListState extends State<ComponentList> {
 
-  List<dynamic> _vendors = [];
+  List<dynamic> _components = [];
 
   bool isSearchState = false;
   bool _loading = false;
@@ -89,16 +89,16 @@ class _VendorsListState extends State<VendorsList> {
   Future<Null> getVendors({String filterText}) async {
     filterText = filterText??'';
     var resp = await HttpRequest.request(
-      '/DispatchReport/GetSuppliers',
-      method: HttpRequest.GET,
-      params: {
-        'filterText': _keywords.text,
-        'filterField': field,
-        'typeID': supplierId,
-        'status': useStatus,
-        'CurRowNum': offset,
-        'PageSize': 10
-      }
+        '/DispatchReport/GetSuppliers',
+        method: HttpRequest.GET,
+        params: {
+          'filterText': _keywords.text,
+          'filterField': field,
+          'typeID': supplierId,
+          'status': useStatus,
+          'CurRowNum': offset,
+          'PageSize': 10
+        }
     );
     if (resp['ResultCode'] == '00') {
       setState(() {
@@ -541,8 +541,8 @@ class _VendorsListState extends State<VendorsList> {
             });
             getVendors().then((result) =>
                 setState(() {
-              _loading = false;
-            }));});
+                  _loading = false;
+                }));});
         },
         child: Icon(Icons.add_circle),
         backgroundColor: Colors.blue,

@@ -61,6 +61,7 @@ class _HomePageState extends State<HomePage>
   EventBus bus = new EventBus();
   bool showEquip = false;
   bool showTable = false;
+  bool showWare = false;
 
   Future<Null> getRole() async {
     var _prefs = await prefs;
@@ -1067,6 +1068,199 @@ class _HomePageState extends State<HomePage>
                                   ),
                                   Text(
                                     '报表',
+                                    style: TextStyle(
+                                        fontSize: 14.0,
+                                        color: Colors.black54
+                                    ),
+                                  )
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    ListTile(
+                      leading: Icon(Icons.business),
+                      title: Text('库存管理',
+                        style: new TextStyle(
+                            color: Colors.blue
+                        ),
+                      ),
+                      trailing: showWare?Icon(Icons.keyboard_arrow_down):Icon(Icons.keyboard_arrow_right),
+                      onTap: () {
+                        //Navigator.of(context).push(new MaterialPageRoute(builder: (_) {
+                        //  return new ReportList();
+                        //}));
+                        setState(() {
+                          showWare = !showWare;
+                        });
+                      },
+                    ),
+                    AnimatedContainer(
+                      height: showWare?240.0:0.0,
+                      duration: Duration(milliseconds: 200),
+                      child: Column(
+                        children: <Widget>[
+                          Container(
+                            height: 40.0,
+                            child: FlatButton(
+                              onPressed: () {
+                                Navigator.of(context).push(new MaterialPageRoute(builder: (_) {
+                                  return new ReportList();
+                                }));
+                              },
+                              child: Row(
+                                children: <Widget>[
+                                  SizedBox(
+                                    width: 60.0,
+                                  ),
+                                  Icon(Icons.settings, color: Colors.grey, size: 16.0,),
+                                  SizedBox(
+                                    width: 10.0,
+                                  ),
+                                  Text(
+                                    '零件库',
+                                    style: TextStyle(
+                                        fontSize: 14.0,
+                                        color: Colors.black54
+                                    ),
+                                  )
+                                ],
+                              ),
+                            ),
+                          ),
+                          Container(
+                            height: 40.0,
+                            child: FlatButton(
+                              onPressed: () {
+                                Navigator.of(context).push(new MaterialPageRoute(builder: (_) {
+                                  return new ReportList();
+                                }));
+                              },
+                              child: Row(
+                                children: <Widget>[
+                                  SizedBox(
+                                    width: 60.0,
+                                  ),
+                                  Icon(Icons.store, color: Colors.grey, size: 16.0,),
+                                  SizedBox(
+                                    width: 10.0,
+                                  ),
+                                  Text(
+                                    '耗材库',
+                                    style: TextStyle(
+                                        fontSize: 14.0,
+                                        color: Colors.black54
+                                    ),
+                                  )
+                                ],
+                              ),
+                            ),
+                          ),
+                          Container(
+                            height: 40.0,
+                            child: FlatButton(
+                              onPressed: () {
+                                Navigator.of(context).push(new MaterialPageRoute(builder: (_) {
+                                  return new ReportList();
+                                }));
+                              },
+                              child: Row(
+                                children: <Widget>[
+                                  SizedBox(
+                                    width: 60.0,
+                                  ),
+                                  Icon(Icons.assignment_turned_in, color: Colors.grey, size: 16.0,),
+                                  SizedBox(
+                                    width: 10.0,
+                                  ),
+                                  Text(
+                                    '服务库',
+                                    style: TextStyle(
+                                        fontSize: 14.0,
+                                        color: Colors.black54
+                                    ),
+                                  )
+                                ],
+                              ),
+                            ),
+                          ),
+                          Container(
+                            height: 40.0,
+                            child: FlatButton(
+                              onPressed: () {
+                                Navigator.of(context).push(new MaterialPageRoute(builder: (_) {
+                                  return new ReportList();
+                                }));
+                              },
+                              child: Row(
+                                children: <Widget>[
+                                  SizedBox(
+                                    width: 60.0,
+                                  ),
+                                  Icon(Icons.queue, color: Colors.grey, size: 16.0,),
+                                  SizedBox(
+                                    width: 10.0,
+                                  ),
+                                  Text(
+                                    '备用机库',
+                                    style: TextStyle(
+                                        fontSize: 14.0,
+                                        color: Colors.black54
+                                    ),
+                                  )
+                                ],
+                              ),
+                            ),
+                          ),
+                          Container(
+                            height: 40.0,
+                            child: FlatButton(
+                              onPressed: () {
+                                Navigator.of(context).push(new MaterialPageRoute(builder: (_) {
+                                  return new ReportList();
+                                }));
+                              },
+                              child: Row(
+                                children: <Widget>[
+                                  SizedBox(
+                                    width: 60.0,
+                                  ),
+                                  Icon(Icons.playlist_add_check, color: Colors.grey, size: 16.0,),
+                                  SizedBox(
+                                    width: 10.0,
+                                  ),
+                                  Text(
+                                    '库存盘点',
+                                    style: TextStyle(
+                                        fontSize: 14.0,
+                                        color: Colors.black54
+                                    ),
+                                  )
+                                ],
+                              ),
+                            ),
+                          ),
+                          Container(
+                            height: 40.0,
+                            child: FlatButton(
+                              onPressed: () {
+                                Navigator.of(context).push(new MaterialPageRoute(builder: (_) {
+                                  return new ReportList();
+                                }));
+                              },
+                              child: Row(
+                                children: <Widget>[
+                                  SizedBox(
+                                    width: 60.0,
+                                  ),
+                                  Icon(Icons.note_add, color: Colors.grey, size: 16.0,),
+                                  SizedBox(
+                                    width: 10.0,
+                                  ),
+                                  Text(
+                                    '采购单',
                                     style: TextStyle(
                                         fontSize: 14.0,
                                         color: Colors.black54
