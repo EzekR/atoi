@@ -19,8 +19,8 @@ import 'dart:convert';
 import 'package:date_format/date_format.dart';
 import 'package:flutter_cupertino_date_picker/flutter_cupertino_date_picker.dart';
 import 'package:atoi/utils/event_bus.dart';
-import 'package:atoi/widgets/search_department.dart';
 import 'package:atoi/widgets/search_lazy.dart';
+import 'package:atoi/pages/inventory/component_list.dart';
 
 /// 超管首页类
 class HomePage extends StatefulWidget {
@@ -1107,7 +1107,7 @@ class _HomePageState extends State<HomePage>
                             child: FlatButton(
                               onPressed: () {
                                 Navigator.of(context).push(new MaterialPageRoute(builder: (_) {
-                                  return new ReportList();
+                                  return new ComponentList();
                                 }));
                               },
                               child: Row(

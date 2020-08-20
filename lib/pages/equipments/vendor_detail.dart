@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:atoi/widgets/search_bar.dart';
 import 'package:atoi/models/models.dart';
 import 'package:scoped_model/scoped_model.dart';
 import 'dart:async';
-import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:atoi/utils/http_request.dart';
 import 'package:atoi/widgets/build_widget.dart';
