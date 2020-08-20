@@ -42,7 +42,7 @@ PODS:
     - Mantle/extobjc (= 2.1.1)
   - Mantle/extobjc (2.1.1)
   - MTBBarcodeScanner (5.0.11)
-  - multi_image_picker (4.6.9):
+  - multi_image_picker (4.7.10):
     - BSImagePicker (~> 2.10.3)
     - Flutter
   - path_provider_linux (0.0.1):
@@ -147,7 +147,7 @@ SPEC CHECKSUMS:
   libwebp: 946cb3063cea9236285f7e9a8505d806d30e07f3
   Mantle: 35238ae6f2e2b2d474fa7b67fee82a59fea71915
   MTBBarcodeScanner: f453b33c4b7dfe545d8c6484ed744d55671788cb
-  multi_image_picker: dd2ce252f813ccfbc866f5c359606d29ba39a3d4
+  multi_image_picker: 5b7a578db2e02d12f30098afdff6983f4d69fbe0
   path_provider_linux: 4d630dc393e1f20364f3e3b4a2ff41d9674a84e4
   permission_handler: 8278954f2382902f63f00dd8828769c0bd6d511b
   Reachability: 33e18b67625424e47b6cde6d202dce689ad7af96
