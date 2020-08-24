@@ -6,227 +6,86 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:atoi/models/models.dart';
 import 'package:atoi/pages/inventory/component_detail.dart';
 
-/// 零部件列表类
-class ComponentList extends StatefulWidget{
-  _ComponentListState createState() => _ComponentListState();
+/// 服务列表类
+class ServiceList extends StatefulWidget{
+  _ServiceListState createState() => _ServiceListState();
 }
 
-class _ComponentListState extends State<ComponentList> {
+class _ServiceListState extends State<ServiceList> {
 
   List<dynamic> _components = [
     {
-      "Component": {
-        "FujiClass2": {
-          "ID": 0
-        },
-        "Name": "22211",
-        "Description": "1212",
-        "Type": {
-          "ID": 2,
-          "Name": "一般零件"
-        },
-        "StdPrice": 0,
-        "Usage": 0,
-        "TotalSeconds": 0,
-        "SecondsPer": 0,
-        "IsIncluded": false,
-        "IncludeContract": false,
-        "Method": 0,
-        "LifeTime": 0,
-        "IsActive": false,
-        "AddDate": null,
-        "UpdateDate": null,
-        "FaultRates": [],
-        "OID": "LJ00000121",
-        "ID": 121
-      },
-      "Equipment": {
-        "EquipmentLevel": {
-          "ID": 0
-        },
-        "Name": "电子胃肠镜",
-        "Manufacturer": {
-          "SupplierType": {
-            "ID": 0
-          },
-          "AddDate": null,
-          "IsActive": false,
-          "OID": "GYS00000000",
-          "ID": 0
-        },
-        "EquipmentClass1": {
-          "Level": 0
-        },
-        "EquipmentClass2": {
-          "Level": 0
-        },
-        "EquipmentClass3": {
-          "Level": 0
-        },
-        "ResponseTimeLength": 0,
-        "ServiceScope": false,
-        "ManufacturingDate": null,
-        "FixedAsset": false,
-        "AssetLevel": {
-          "ID": 0
-        },
-        "DepreciationYears": 0,
-        "ValidityStartDate": null,
-        "ValidityEndDate": null,
-        "Supplier": {
-          "SupplierType": {
-            "ID": 0
-          },
-          "AddDate": null,
-          "IsActive": false,
-          "OID": "GYS00000000",
-          "ID": 0
-        },
-        "PurchaseAmount": 0,
-        "PurchaseDate": null,
-        "IsImport": false,
-        "Department": {
-          "ID": 0
-        },
-        "InstalDate": null,
-        "UseageDate": null,
-        "Accepted": false,
-        "AcceptanceDate": null,
-        "UsageStatus": {
-          "ID": 0
-        },
-        "EquipmentStatus": {
-          "ID": 0
-        },
-        "ScrapDate": null,
-        "MaintenancePeriod": 0,
-        "MaintenanceType": {
-          "ID": 0
-        },
-        "LastMaintenanceDate": null,
-        "PatrolPeriod": 0,
-        "PatrolType": {
-          "ID": 0
-        },
-        "LastPatrolDate": null,
-        "CorrectionPeriod": 0,
-        "CorrectionType": {
-          "ID": 0
-        },
-        "LastCorrectionDate": null,
-        "MandatoryTestStatus": {
-          "ID": 0
-        },
-        "MandatoryTestDate": null,
-        "RecallFlag": false,
-        "RecallDate": null,
-        "CreateDate": null,
-        "CreateUser": {
-          "Role": {
-            "ID": 0
-          },
-          "IsActive": false,
-          "LastLoginDate": null,
-          "CreatedDate": null,
-          "VerifyStatus": {
-            "ID": 0
-          },
-          "Department": {
-            "ID": 0
-          },
-          "HasOpenDispatch": false,
-          "ID": 0
-        },
-        "UpdateDate": null,
-        "Incomes": 0,
-        "LastIncomes": 0,
-        "Expenses": 0,
-        "LastExpenses": 0,
-        "ContractScope": {
-          "ID": 0
-        },
-        "OID": "ZC00000007",
-        "OriginType": "国产",
-        "ClassCode": "",
-        "FujiClass2": {
-          "FujiClass1": {
-            "ID": 0,
-            "AddDate": null,
-            "UpdateDate": null,
-            "EquipmentType1": {
-              "Level": 0
-            },
-            "EquipmentType2": {
-              "Level": 0
-            },
-            "FujiClass2Count": 0
-          },
-          "IncludeLabour": false,
-          "PatrolTimes": 0,
-          "PatrolHours": 0,
-          "MaintenanceTimes": 0,
-          "MaintenanceHours": 0,
-          "RepairHours": 0,
-          "IncludeContract": false,
-          "FullCoveragePtg": 0,
-          "TechCoveragePtg": 0,
-          "IncludeSpare": false,
-          "SparePrice": 0,
-          "SpareRentPtg": 0,
-          "IncludeRepair": false,
-          "Usage": 0,
-          "EquipmentType": {
-            "ID": 0
-          },
-          "RepairComponentCost": 0,
-          "Repair3partyRatio": 0,
-          "Repair3partyCost": 0,
-          "RepairCostRatio": 0,
-          "MethodID": 0,
+      "FujiClass2": {
+        "Name": "20200805II类",
+        "FujiClass1": {
+          "ID": 0,
           "AddDate": null,
           "UpdateDate": null,
-          "Repairs": [],
-          "Components": [],
-          "Consumables": [],
-          "hasEdited": false,
+          "EquipmentType1": {
+            "Level": 0
+          },
+          "EquipmentType2": {
+            "Level": 0
+          },
+          "FujiClass2Count": 0
+        },
+        "IncludeLabour": false,
+        "PatrolTimes": 0,
+        "PatrolHours": 0,
+        "MaintenanceTimes": 0,
+        "MaintenanceHours": 0,
+        "RepairHours": 0,
+        "IncludeContract": false,
+        "FullCoveragePtg": 0,
+        "TechCoveragePtg": 0,
+        "IncludeSpare": false,
+        "SparePrice": 0,
+        "SpareRentPtg": 0,
+        "IncludeRepair": false,
+        "Usage": 0,
+        "EquipmentType": {
           "ID": 0
         },
-        "CTUsedSeconds": 0,
-        "HisComponentList": [],
-        "HisConsumableList": [],
-        "ConfigLicenceID": 0,
-        "url": "",
-        "ID": 7
+        "RepairComponentCost": 0,
+        "Repair3partyRatio": 0,
+        "Repair3partyCost": 0,
+        "RepairCostRatio": 0,
+        "MethodID": 0,
+        "AddDate": null,
+        "UpdateDate": null,
+        "Repairs": [],
+        "Components": [],
+        "Consumables": [],
+        "hasEdited": false,
+        "ID": 12
       },
-      "SerialCode": "444",
-      "Specification": "460720",
-      "Model": "654",
+      "Name": "服务名称",
+      "TotalTimes": 100,
+      "Price": 0,
+      "StartDate": "2020-08-07T00:00:00",
+      "EndDate": "2020-08-07T00:00:00",
       "Supplier": {
         "SupplierType": {
           "ID": 0
         },
-        "Name": "好克",
+        "Name": "日立",
         "AddDate": null,
         "IsActive": false,
-        "OID": "GYS00000014",
-        "ID": 14
+        "OID": "GYS00000005",
+        "ID": 5
       },
-      "Price": 64,
-      "PurchaseDate": "2020-08-06T10:19:33",
       "Purchase": {
-        "ID": 42
+        "ID": 0
       },
+      "PurchaseDate": "2020-08-07T00:00:00",
       "Comments": "",
-      "AddDate": "2020-08-06T10:19:17",
-      "UpdateDate": null,
-      "Status": {
-        "ID": 1,
-        "Name": "在库"
-      },
-      "OID": "LJK00000106",
-      "Qty": 0,
-      "InboundQty": 0,
-      "ID": 106
+      "AddDate": "2020-08-07T14:36:59",
+      "AvaibleTimes": 100,
+      "UpdateDate": "2020-08-17T09:42:19",
+      "OID": "WGFW00000001",
+      "Inbounded": false,
+      "Status": "失效",
+      "ID": 1
     }
   ];
 
@@ -309,7 +168,7 @@ class _ComponentListState extends State<ComponentList> {
   Future<Null> getComponents({String filterText}) async {
     filterText = filterText??'';
     var resp = await HttpRequest.request(
-        '/InvComponent/QueryComponentList',
+        '/InvComponent/QueryServiceList',
         method: HttpRequest.GET,
         params: {
           'filterText': _keywords.text,
@@ -544,7 +403,7 @@ class _ComponentListState extends State<ComponentList> {
         children: <Widget>[
           ListTile(
             leading: Icon(
-              Icons.settings_applications,
+              Icons.assignment_turned_in,
               color: Color(0xff14BD98),
               size: 36.0,
             ),
@@ -556,7 +415,7 @@ class _ComponentListState extends State<ComponentList> {
               ),
             ),
             subtitle: Text(
-              "序列号：${item['SerialCode']}",
+              "服务名称：${item['Name']}",
               style: new TextStyle(
                   color: Theme.of(context).accentColor
               ),
@@ -566,16 +425,15 @@ class _ComponentListState extends State<ComponentList> {
             padding: EdgeInsets.symmetric(horizontal: 8.0),
             child: Column(
               children: <Widget>[
-                BuildWidget.buildCardRow('简称', item['Component']['Name']),
-                BuildWidget.buildCardRow('描述', item['Component']['Description']),
-                BuildWidget.buildCardRow('类型', item['Component']['Type']['Name']),
-                BuildWidget.buildCardRow('设备系统编号', item['Equipment']['OID']),
-                BuildWidget.buildCardRow('设备名称', item['Equipment']['Name']),
+                BuildWidget.buildCardRow('关联富士II类', item['FujiClass2']['Name']),
                 BuildWidget.buildCardRow('供应商', item['Supplier']['Name']),
-                BuildWidget.buildCardRow('单价（元）', item['Price'].toString()),
-                BuildWidget.buildCardRow('购入日期', item['PurchaseDate'].split('T')[0]),
+                BuildWidget.buildCardRow('服务次数', item['TotalTimes'].toString()),
+                BuildWidget.buildCardRow('购入日期', item['StartDate'].split('T')[0]),
+                BuildWidget.buildCardRow('购入日期', item['EndDate'].split('T')[0]),
+                BuildWidget.buildCardRow('金额', item['Price'].toString()),
+                BuildWidget.buildCardRow('剩余服务次数', item['AvaibleTimes'].toString()),
                 BuildWidget.buildCardRow('采购单号', item['Purchase']['ID'].toString()),
-                BuildWidget.buildCardRow('状态', item['Status']['Name']),
+                BuildWidget.buildCardRow('状态', item['Status']),
                 //BuildWidget.buildCardRow('状态', item['IsActive']?'启用':'停用'),
               ],
             ),
@@ -646,7 +504,7 @@ class _ComponentListState extends State<ComponentList> {
           onChanged: (val) {
             getComponents(filterText: val);
           },
-        ):Text('零件列表'),
+        ):Text('服务列表'),
         elevation: 0.7,
         actions: <Widget>[
           isSearchState?IconButton(

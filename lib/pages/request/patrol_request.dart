@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:atoi/widgets/search_bar_checkbox.dart';
-import 'package:atoi/widgets/search_bar.dart';
 import 'package:atoi/models/models.dart';
 import 'package:scoped_model/scoped_model.dart';
 import 'package:barcode_scan/barcode_scan.dart';
@@ -11,7 +9,6 @@ import 'dart:typed_data';
 import 'package:multi_image_picker/multi_image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:atoi/utils/http_request.dart';
-import 'package:atoi/utils/constants.dart';
 import 'package:atoi/widgets/build_widget.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:atoi/widgets/search_page.dart';

@@ -21,6 +21,10 @@ import 'package:flutter_cupertino_date_picker/flutter_cupertino_date_picker.dart
 import 'package:atoi/utils/event_bus.dart';
 import 'package:atoi/widgets/search_lazy.dart';
 import 'package:atoi/pages/inventory/component_list.dart';
+import 'package:atoi/pages/inventory/consumable_list.dart';
+import 'package:atoi/pages/inventory/po_list.dart';
+import 'package:atoi/pages/inventory/service_list.dart';
+import 'package:atoi/pages/inventory/spare_list.dart';
 
 /// 超管首页类
 class HomePage extends StatefulWidget {
@@ -1135,7 +1139,7 @@ class _HomePageState extends State<HomePage>
                             child: FlatButton(
                               onPressed: () {
                                 Navigator.of(context).push(new MaterialPageRoute(builder: (_) {
-                                  return new ReportList();
+                                  return new ConsumableList();
                                 }));
                               },
                               child: Row(
@@ -1163,7 +1167,7 @@ class _HomePageState extends State<HomePage>
                             child: FlatButton(
                               onPressed: () {
                                 Navigator.of(context).push(new MaterialPageRoute(builder: (_) {
-                                  return new ReportList();
+                                  return new ServiceList();
                                 }));
                               },
                               child: Row(
@@ -1191,7 +1195,7 @@ class _HomePageState extends State<HomePage>
                             child: FlatButton(
                               onPressed: () {
                                 Navigator.of(context).push(new MaterialPageRoute(builder: (_) {
-                                  return new ReportList();
+                                  return new SpareList();
                                 }));
                               },
                               child: Row(
@@ -1247,7 +1251,7 @@ class _HomePageState extends State<HomePage>
                             child: FlatButton(
                               onPressed: () {
                                 Navigator.of(context).push(new MaterialPageRoute(builder: (_) {
-                                  return new ReportList();
+                                  return new POList();
                                 }));
                               },
                               child: Row(
