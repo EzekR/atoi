@@ -75,6 +75,36 @@ class ConstantsModel extends Model {
     ''
   ];
 
+  // fuji class2
+  List<Map> _FujiClass2 = [];
+  List<Map> _POStatus = [];
+  List<Map> _InvService = [];
+  List<Map> _InvSpare = [];
+
+  List<Map> get InvSpare => _InvSpare;
+
+  set InvSpare(List<Map> value) {
+    _InvSpare = value;
+  }
+
+  List<Map> get InvService => _InvService;
+
+  set InvService(List<Map> value) {
+    _InvService = value;
+  }
+
+  List<Map> get POStatus => _POStatus;
+
+  set POStatus(List<Map> value) {
+    _POStatus = value;
+  }
+
+  List<Map> get FujiClass2 => _FujiClass2;
+
+  set FujiClass2(List<Map> value) {
+    _FujiClass2 = value;
+  }
+
   get Constants => _Constants;
   get UserRole => _UserRole;
   get AssetsLevel => _AssetsLevel;
@@ -232,6 +262,12 @@ class ConstantsModel extends Model {
       for(var _item in resp['Data']['ServiceProviders']) {
         _ServiceProviders.putIfAbsent(_item['Name'], () => _item['ID']);
       }
+      // po status
+      _POStatus = resp['Data']['PurchaseOrderStatus'];
+
+      _InvService = resp['Data']['InvServiceStatus'];
+
+      _InvSpare = resp['Data']['InvSpareStatus'];
     }
 
     var _departments = await HttpRequest.request(
@@ -249,6 +285,19 @@ class ConstantsModel extends Model {
         }
       }
     }
+
+    // get fuji class2
+    Map _class2 = await HttpRequest.request(
+      '/fujiClass2/getFujiClass2',
+      method: HttpRequest.GET,
+      params: {
+        'userID': _userId
+      }
+    );
+    if (_class2['ResultCode'] == '00') {
+      _FujiClass2 = _class2['Data'];
+    }
+
     notifyListeners();
   }
 

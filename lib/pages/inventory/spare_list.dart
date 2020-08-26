@@ -4,7 +4,7 @@ import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:atoi/widgets/build_widget.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:atoi/models/models.dart';
-import 'package:atoi/pages/inventory/component_detail.dart';
+import 'package:atoi/pages/inventory/spare_detail.dart';
 
 /// 备件列表类
 class SpareList extends StatefulWidget{
@@ -13,7 +13,7 @@ class SpareList extends StatefulWidget{
 
 class _SpareListState extends State<SpareList> {
 
-  List<dynamic> _components = [
+  List<dynamic> _spare = [
     {
       "FujiClass2": {
         "Name": "有源微波II类",
@@ -75,11 +75,9 @@ class _SpareListState extends State<SpareList> {
   bool _editable = true;
 
   TextEditingController _keywords = new TextEditingController();
-  String field = 'c.Name';
-  int useStatus = 1;
-  List useList = [];
-  int supplierId = 0;
-  List supplierList = [];
+  String field = 'sp.ID';
+  int _status = 0;
+  List _statusList = [];
   Future<SharedPreferences> prefs = SharedPreferences.getInstance();
   ConstantsModel cModel;
   ScrollController _scrollController = new ScrollController();
@@ -96,9 +94,9 @@ class _SpareListState extends State<SpareList> {
   void setFilter() {
     setState(() {
       offset = 0;
-      _components.clear();
+      _spare.clear();
     });
-    getComponents();
+    getSpares();
   }
 
   List initList(Map _map) {
@@ -118,35 +116,24 @@ class _SpareListState extends State<SpareList> {
 
   void initFilter() async {
     await cModel.getConstants();
+    List _list = cModel.InvSpare.map((item) {
+      return {
+        'value': item['ID'],
+        'text': item['Name']
+      };
+    }).toList();
+    _list.add({
+      'value': 0,
+      'text': '全部'
+    });
     setState(() {
-      useStatus = 1;
       field = 's.ID';
       _keywords.clear();
-      useList = [
-        {
-          'value': 0,
-          'text': '全部'
-        },
-        {
-          'value': 1,
-          'text': '在库'
-        },
-        {
-          'value': 2,
-          'text': '已用'
-        },
-        {
-          'value': 3,
-          'text': '报废'
-        },
-
-      ];
-      supplierList = initList(cModel.SupplierType);
-      supplierId = supplierList[0]['value'];
+      _statusList = _list;
     });
   }
 
-  Future<Null> getComponents({String filterText}) async {
+  Future<Null> getSpares({String filterText}) async {
     filterText = filterText??'';
     var resp = await HttpRequest.request(
         '/InvComponent/QuerySpareList',
@@ -154,14 +141,14 @@ class _SpareListState extends State<SpareList> {
         params: {
           'filterText': _keywords.text,
           'filterField': field,
-          'statusID': useStatus,
+          'statusID': _status,
           'CurRowNum': offset,
           'PageSize': 10
         }
     );
     if (resp['ResultCode'] == '00') {
       setState(() {
-        _components.addAll(resp['Data']);
+        _spare.addAll(resp['Data']);
       });
     }
   }
@@ -228,12 +215,12 @@ class _SpareListState extends State<SpareList> {
                                 underline: Container(),
                                 items: <DropdownMenuItem>[
                                   DropdownMenuItem(
-                                    value: 'c.Name',
-                                    child: Text('简称'),
+                                    value: 'sp.ID',
+                                    child: Text('系统编号'),
                                   ),
                                   DropdownMenuItem(
-                                    value: 'c.Description',
-                                    child: Text('描述'),
+                                    value: 'sp.SerialCode',
+                                    child: Text('序列号'),
                                   ),
                                 ],
                                 onChanged: (val) {
@@ -270,9 +257,9 @@ class _SpareListState extends State<SpareList> {
                               children: <Widget>[
                                 SizedBox(width: 6.0,),
                                 DropdownButton(
-                                  value: useStatus,
+                                  value: _status,
                                   underline: Container(),
-                                  items: useList.map<DropdownMenuItem>((item) {
+                                  items: _statusList.map<DropdownMenuItem>((item) {
                                     return DropdownMenuItem(
                                       value: item['value'],
                                       child: Container(
@@ -285,7 +272,7 @@ class _SpareListState extends State<SpareList> {
                                     print(val);
                                     FocusScope.of(context).requestFocus(new FocusNode());
                                     setState(() {
-                                      useStatus = val;
+                                      _status = val;
                                     });
                                   },
                                 )
@@ -315,7 +302,7 @@ class _SpareListState extends State<SpareList> {
                     child: Center(
                       child: FlatButton(onPressed: () {
                         setState((){
-                          useStatus = -1;
+                          _status = 0;
                           field = 'c.Name';
                           _keywords.clear();
                         });
@@ -353,16 +340,16 @@ class _SpareListState extends State<SpareList> {
     //setState(() {
     //  _loading = true;
     //});
-    //getComponents().then((result) => setState(() {
+    //getSpares().then((result) => setState(() {
     //  _loading = false;
     //}));
     getRole();
     _scrollController.addListener(() {
       if (_scrollController.position.pixels == _scrollController.position.maxScrollExtent) {
-        var _length = _components.length;
+        var _length = _spare.length;
         offset += 10;
-        getComponents().then((result) {
-          if (_components.length == _length) {
+        getSpares().then((result) {
+          if (_spare.length == _length) {
             setState(() {
               _noMore = true;
             });
@@ -417,14 +404,14 @@ class _SpareListState extends State<SpareList> {
               new RaisedButton(
                 onPressed: (){
                   Navigator.of(context).push(new MaterialPageRoute(builder: (_) {
-                    return new ComponentDetail(component: item, editable: _editable,);
+                    return new SpareDetail(component: item, editable: _editable,);
                   })).then((result) {
                     setState(() {
                       _loading = true;
-                      _components.clear();
+                      _spare.clear();
                       offset = 0;
                     });
-                    getComponents().then((result) {
+                    getSpares().then((result) {
                       setState(() {
                         _loading = false;
                       });
@@ -474,7 +461,7 @@ class _SpareListState extends State<SpareList> {
               hintStyle: new TextStyle(color: Colors.white)
           ),
           onChanged: (val) {
-            getComponents(filterText: val);
+            getSpares(filterText: val);
           },
         ):Text('备件列表'),
         elevation: 0.7,
@@ -507,17 +494,17 @@ class _SpareListState extends State<SpareList> {
           ),
         ),
       ),
-      body: _loading?new Center(child: new SpinKitThreeBounce(color: Colors.blue,),):(_components.length==0?Center(child: Text('无供应商'),):new ListView.builder(
-        itemCount: _components.length>10?_components.length+1:_components.length,
+      body: _loading?new Center(child: new SpinKitThreeBounce(color: Colors.blue,),):(_spare.length==0?Center(child: Text('无备件'),):new ListView.builder(
+        itemCount: _spare.length>10?_spare.length+1:_spare.length,
         controller: _scrollController,
         itemBuilder: (context, i) {
-          if (i !=_components.length) {
-            return buildEquipmentCard(_components[i]);
+          if (i !=_spare.length) {
+            return buildEquipmentCard(_spare[i]);
           } else {
             return new Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
-                _noMore?new Center(child: new Text('没有更多供应商'),):new SpinKitChasingDots(color: Colors.blue,)
+                _noMore?new Center(child: new Text('没有更多备件'),):new SpinKitChasingDots(color: Colors.blue,)
               ],
             );
           }
@@ -526,14 +513,14 @@ class _SpareListState extends State<SpareList> {
       floatingActionButton: role==3?Container():FloatingActionButton(
         onPressed: () {
           Navigator.of(context).push(new MaterialPageRoute(builder: (_) {
-            return new ComponentDetail(editable: true,);
+            return new SpareDetail(editable: true,);
           })).then((result) {
             setState(() {
               offset = 0;
-              _components.clear();
+              _spare.clear();
               _loading = true;
             });
-            getComponents().then((result) =>
+            getSpares().then((result) =>
                 setState(() {
                   _loading = false;
                 }));});
@@ -549,3 +536,4 @@ enum ListType {
   COMPONENT,
   CONSUMABLE,
 }
+

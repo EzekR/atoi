@@ -677,7 +677,7 @@ class _ComponentListState extends State<ComponentList> {
           ),
         ),
       ),
-      body: _loading?new Center(child: new SpinKitThreeBounce(color: Colors.blue,),):(_components.length==0?Center(child: Text('无供应商'),):new ListView.builder(
+      body: _loading?new Center(child: new SpinKitThreeBounce(color: Colors.blue,),):(_components.length==0?Center(child: Text('无零件'),):new ListView.builder(
         itemCount: _components.length>10?_components.length+1:_components.length,
         controller: _scrollController,
         itemBuilder: (context, i) {
@@ -687,7 +687,7 @@ class _ComponentListState extends State<ComponentList> {
             return new Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
-                _noMore?new Center(child: new Text('没有更多供应商'),):new SpinKitChasingDots(color: Colors.blue,)
+                _noMore?new Center(child: new Text('没有更多零件'),):new SpinKitChasingDots(color: Colors.blue,)
               ],
             );
           }

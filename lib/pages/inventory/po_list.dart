@@ -4,7 +4,7 @@ import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:atoi/widgets/build_widget.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:atoi/models/models.dart';
-import 'package:atoi/pages/inventory/component_detail.dart';
+import 'package:atoi/pages/inventory/po_detail.dart';
 
 /// 采购单列表类
 class POList extends StatefulWidget{
@@ -13,7 +13,7 @@ class POList extends StatefulWidget{
 
 class _POListState extends State<POList> {
 
-  List<dynamic> _components = [
+  List<dynamic> _purchaseOrders = [
     {
       "User": {
         "Name": "杨",
@@ -61,11 +61,9 @@ class _POListState extends State<POList> {
   bool _editable = true;
 
   TextEditingController _keywords = new TextEditingController();
-  String field = 'c.Name';
-  int useStatus = 1;
-  List useList = [];
-  int supplierId = 0;
-  List supplierList = [];
+  String field = 'po.ID';
+  int _poStatus = 0;
+  List _poList = [];
   Future<SharedPreferences> prefs = SharedPreferences.getInstance();
   ConstantsModel cModel;
   ScrollController _scrollController = new ScrollController();
@@ -82,9 +80,9 @@ class _POListState extends State<POList> {
   void setFilter() {
     setState(() {
       offset = 0;
-      _components.clear();
+      _purchaseOrders.clear();
     });
-    getComponents();
+    getPurchaseOrder();
   }
 
   List initList(Map _map) {
@@ -104,50 +102,39 @@ class _POListState extends State<POList> {
 
   void initFilter() async {
     await cModel.getConstants();
+    List _list = cModel.POStatus.map((item) {
+      return {
+        'value': item['ID'],
+        'text': item['Name']
+      };
+    }).toList();
+    _list.add({
+      'value': 0,
+      'text': '全部'
+    });
     setState(() {
-      useStatus = 1;
       field = 's.ID';
       _keywords.clear();
-      useList = [
-        {
-          'value': 0,
-          'text': '全部'
-        },
-        {
-          'value': 1,
-          'text': '在库'
-        },
-        {
-          'value': 2,
-          'text': '已用'
-        },
-        {
-          'value': 3,
-          'text': '报废'
-        },
-
-      ];
-      supplierList = initList(cModel.SupplierType);
-      supplierId = supplierList[0]['value'];
+      _poList = _list;
     });
   }
 
-  Future<Null> getComponents({String filterText}) async {
+  Future<Null> getPurchaseOrder({String filterText}) async {
     filterText = filterText??'';
     var resp = await HttpRequest.request(
-        '/InvComponent/QueryPOList',
+        '/InvComponent/QueryPurchaseOrderList',
         method: HttpRequest.GET,
         params: {
           'filterText': _keywords.text,
           'filterField': field,
-          'statusID': useStatus,
+          'statusID': _poStatus,
           'CurRowNum': offset,
           'PageSize': 10
         }
     );
     if (resp['ResultCode'] == '00') {
       setState(() {
-        _components.addAll(resp['Data']);
+        _purchaseOrders.addAll(resp['Data']);
       });
     }
   }
@@ -214,12 +201,8 @@ class _POListState extends State<POList> {
                                 underline: Container(),
                                 items: <DropdownMenuItem>[
                                   DropdownMenuItem(
-                                    value: 'c.Name',
-                                    child: Text('简称'),
-                                  ),
-                                  DropdownMenuItem(
-                                    value: 'c.Description',
-                                    child: Text('描述'),
+                                    value: 'po.ID',
+                                    child: Text('系统编号'),
                                   ),
                                 ],
                                 onChanged: (val) {
@@ -256,9 +239,9 @@ class _POListState extends State<POList> {
                               children: <Widget>[
                                 SizedBox(width: 6.0,),
                                 DropdownButton(
-                                  value: useStatus,
+                                  value: _poStatus,
                                   underline: Container(),
-                                  items: useList.map<DropdownMenuItem>((item) {
+                                  items: _poList.map<DropdownMenuItem>((item) {
                                     return DropdownMenuItem(
                                       value: item['value'],
                                       child: Container(
@@ -271,7 +254,7 @@ class _POListState extends State<POList> {
                                     print(val);
                                     FocusScope.of(context).requestFocus(new FocusNode());
                                     setState(() {
-                                      useStatus = val;
+                                      _poStatus = val;
                                     });
                                   },
                                 )
@@ -301,8 +284,8 @@ class _POListState extends State<POList> {
                     child: Center(
                       child: FlatButton(onPressed: () {
                         setState((){
-                          useStatus = -1;
-                          field = 'c.Name';
+                          _poStatus = 0;
+                          field = 'po.ID';
                           _keywords.clear();
                         });
                         initFilter();
@@ -339,16 +322,16 @@ class _POListState extends State<POList> {
     //setState(() {
     //  _loading = true;
     //});
-    //getComponents().then((result) => setState(() {
+    //getPurchaseOrder().then((result) => setState(() {
     //  _loading = false;
     //}));
     getRole();
     _scrollController.addListener(() {
       if (_scrollController.position.pixels == _scrollController.position.maxScrollExtent) {
-        var _length = _components.length;
+        var _length = _purchaseOrders.length;
         offset += 10;
-        getComponents().then((result) {
-          if (_components.length == _length) {
+        getPurchaseOrder().then((result) {
+          if (_purchaseOrders.length == _length) {
             setState(() {
               _noMore = true;
             });
@@ -407,14 +390,14 @@ class _POListState extends State<POList> {
               new RaisedButton(
                 onPressed: (){
                   Navigator.of(context).push(new MaterialPageRoute(builder: (_) {
-                    return new ComponentDetail(component: item, editable: _editable,);
+                    return new PODetail(component: item, editable: _editable,);
                   })).then((result) {
                     setState(() {
                       _loading = true;
-                      _components.clear();
+                      _purchaseOrders.clear();
                       offset = 0;
                     });
-                    getComponents().then((result) {
+                    getPurchaseOrder().then((result) {
                       setState(() {
                         _loading = false;
                       });
@@ -464,7 +447,7 @@ class _POListState extends State<POList> {
               hintStyle: new TextStyle(color: Colors.white)
           ),
           onChanged: (val) {
-            getComponents(filterText: val);
+            getPurchaseOrder(filterText: val);
           },
         ):Text('采购单列表'),
         elevation: 0.7,
@@ -497,17 +480,17 @@ class _POListState extends State<POList> {
           ),
         ),
       ),
-      body: _loading?new Center(child: new SpinKitThreeBounce(color: Colors.blue,),):(_components.length==0?Center(child: Text('无供应商'),):new ListView.builder(
-        itemCount: _components.length>10?_components.length+1:_components.length,
+      body: _loading?new Center(child: new SpinKitThreeBounce(color: Colors.blue,),):(_purchaseOrders.length==0?Center(child: Text('无采购单'),):new ListView.builder(
+        itemCount: _purchaseOrders.length>10?_purchaseOrders.length+1:_purchaseOrders.length,
         controller: _scrollController,
         itemBuilder: (context, i) {
-          if (i !=_components.length) {
-            return buildEquipmentCard(_components[i]);
+          if (i !=_purchaseOrders.length) {
+            return buildEquipmentCard(_purchaseOrders[i]);
           } else {
             return new Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
-                _noMore?new Center(child: new Text('没有更多供应商'),):new SpinKitChasingDots(color: Colors.blue,)
+                _noMore?new Center(child: new Text('没有更多采购单'),):new SpinKitChasingDots(color: Colors.blue,)
               ],
             );
           }
@@ -516,14 +499,14 @@ class _POListState extends State<POList> {
       floatingActionButton: role==3?Container():FloatingActionButton(
         onPressed: () {
           Navigator.of(context).push(new MaterialPageRoute(builder: (_) {
-            return new ComponentDetail(editable: true,);
+            return new PODetail(editable: true,);
           })).then((result) {
             setState(() {
               offset = 0;
-              _components.clear();
+              _purchaseOrders.clear();
               _loading = true;
             });
-            getComponents().then((result) =>
+            getPurchaseOrder().then((result) =>
                 setState(() {
                   _loading = false;
                 }));});
@@ -533,9 +516,4 @@ class _POListState extends State<POList> {
       ),
     );
   }
-}
-
-enum ListType {
-  COMPONENT,
-  CONSUMABLE,
 }

@@ -4,7 +4,7 @@ import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:atoi/widgets/build_widget.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:atoi/models/models.dart';
-import 'package:atoi/pages/inventory/component_detail.dart';
+import 'package:atoi/pages/inventory/consumable_detail.dart';
 
 /// 耗材列表类
 class ConsumableList extends StatefulWidget{
@@ -13,7 +13,7 @@ class ConsumableList extends StatefulWidget{
 
 class _ConsumableListState extends State<ConsumableList> {
 
-  List<dynamic> _components = [
+  List<dynamic> _consumable = [
     {
       "Consumable": {
         "FujiClass2": {
@@ -172,10 +172,8 @@ class _ConsumableListState extends State<ConsumableList> {
 
   TextEditingController _keywords = new TextEditingController();
   String field = 'c.Name';
-  int useStatus = 1;
-  List useList = [];
-  int supplierId = 0;
-  List supplierList = [];
+  int _fujiClass2 = 0;
+  List _fujiList = [];
   Future<SharedPreferences> prefs = SharedPreferences.getInstance();
   ConstantsModel cModel;
   ScrollController _scrollController = new ScrollController();
@@ -192,9 +190,9 @@ class _ConsumableListState extends State<ConsumableList> {
   void setFilter() {
     setState(() {
       offset = 0;
-      _components.clear();
+      _consumable.clear();
     });
-    getComponents();
+    getConsumable();
   }
 
   List initList(Map _map) {
@@ -214,35 +212,25 @@ class _ConsumableListState extends State<ConsumableList> {
 
   void initFilter() async {
     await cModel.getConstants();
+    List _list = cModel.FujiClass2.map((item) {
+      return {
+        'value': item['ID'],
+        'text': item['Name']
+      };
+    }).toList();
+    _list.add({
+      'value': 0,
+      'text': '全部'
+    });
     setState(() {
-      useStatus = 1;
+      _fujiClass2 = 0;
+      _fujiList = _list;
       field = 's.ID';
       _keywords.clear();
-      useList = [
-        {
-          'value': 0,
-          'text': '全部'
-        },
-        {
-          'value': 1,
-          'text': '在库'
-        },
-        {
-          'value': 2,
-          'text': '已用'
-        },
-        {
-          'value': 3,
-          'text': '报废'
-        },
-
-      ];
-      supplierList = initList(cModel.SupplierType);
-      supplierId = supplierList[0]['value'];
     });
   }
 
-  Future<Null> getComponents({String filterText}) async {
+  Future<Null> getConsumable({String filterText}) async {
     filterText = filterText??'';
     var resp = await HttpRequest.request(
         '/InvComponent/QueryConsumableList',
@@ -250,18 +238,33 @@ class _ConsumableListState extends State<ConsumableList> {
         params: {
           'filterText': _keywords.text,
           'filterField': field,
-          'statusID': useStatus,
           'CurRowNum': offset,
           'PageSize': 10
         }
     );
     if (resp['ResultCode'] == '00') {
       setState(() {
-        _components.addAll(resp['Data']);
+        _consumable.addAll(resp['Data']);
       });
     }
   }
 
+  Future<Null> getConsumableByFuji({String filterText}) async {
+    filterText = filterText??'';
+    var resp = await HttpRequest.request(
+        '/InvComponent/QueryConsumableList',
+        method: HttpRequest.GET,
+        params: {
+          'ID': _fujiClass2
+        }
+    );
+    if (resp['ResultCode'] == '00') {
+      _consumable.clear();
+      setState(() {
+        _consumable.addAll(resp['Data']);
+      });
+    }
+  }
   void showSheet(BuildContext context) {
     showModalBottomSheet(context: context, builder: (context) {
       return StatefulBuilder(
@@ -348,7 +351,7 @@ class _ConsumableListState extends State<ConsumableList> {
                     Row(
                       children: <Widget>[
                         SizedBox(width: 16.0,),
-                        Text('状态', style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.w600),)
+                        Text('富士二类', style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.w600),)
                       ],
                     ),
                     SizedBox(height: 6.0,),
@@ -366,9 +369,9 @@ class _ConsumableListState extends State<ConsumableList> {
                               children: <Widget>[
                                 SizedBox(width: 6.0,),
                                 DropdownButton(
-                                  value: useStatus,
+                                  value: _fujiClass2,
                                   underline: Container(),
-                                  items: useList.map<DropdownMenuItem>((item) {
+                                  items: _fujiList.map<DropdownMenuItem>((item) {
                                     return DropdownMenuItem(
                                       value: item['value'],
                                       child: Container(
@@ -378,11 +381,11 @@ class _ConsumableListState extends State<ConsumableList> {
                                     );
                                   }).toList(),
                                   onChanged: (val) {
-                                    print(val);
                                     FocusScope.of(context).requestFocus(new FocusNode());
                                     setState(() {
-                                      useStatus = val;
+                                      _fujiClass2 = val;
                                     });
+                                    getConsumableByFuji();
                                   },
                                 )
                               ],
@@ -411,7 +414,7 @@ class _ConsumableListState extends State<ConsumableList> {
                     child: Center(
                       child: FlatButton(onPressed: () {
                         setState((){
-                          useStatus = -1;
+                          _fujiClass2 = 0;
                           field = 'c.Name';
                           _keywords.clear();
                         });
@@ -449,16 +452,16 @@ class _ConsumableListState extends State<ConsumableList> {
     //setState(() {
     //  _loading = true;
     //});
-    //getComponents().then((result) => setState(() {
+    //getConsumable().then((result) => setState(() {
     //  _loading = false;
     //}));
     getRole();
     _scrollController.addListener(() {
       if (_scrollController.position.pixels == _scrollController.position.maxScrollExtent) {
-        var _length = _components.length;
+        var _length = _consumable.length;
         offset += 10;
-        getComponents().then((result) {
-          if (_components.length == _length) {
+        getConsumable().then((result) {
+          if (_consumable.length == _length) {
             setState(() {
               _noMore = true;
             });
@@ -521,14 +524,14 @@ class _ConsumableListState extends State<ConsumableList> {
               new RaisedButton(
                 onPressed: (){
                   Navigator.of(context).push(new MaterialPageRoute(builder: (_) {
-                    return new ComponentDetail(component: item, editable: _editable,);
+                    return new ConsumableDetail(component: item, editable: _editable,);
                   })).then((result) {
                     setState(() {
                       _loading = true;
-                      _components.clear();
+                      _consumable.clear();
                       offset = 0;
                     });
-                    getComponents().then((result) {
+                    getConsumable().then((result) {
                       setState(() {
                         _loading = false;
                       });
@@ -578,7 +581,7 @@ class _ConsumableListState extends State<ConsumableList> {
               hintStyle: new TextStyle(color: Colors.white)
           ),
           onChanged: (val) {
-            getComponents(filterText: val);
+            getConsumable(filterText: val);
           },
         ):Text('耗材列表'),
         elevation: 0.7,
@@ -611,17 +614,17 @@ class _ConsumableListState extends State<ConsumableList> {
           ),
         ),
       ),
-      body: _loading?new Center(child: new SpinKitThreeBounce(color: Colors.blue,),):(_components.length==0?Center(child: Text('无供应商'),):new ListView.builder(
-        itemCount: _components.length>10?_components.length+1:_components.length,
+      body: _loading?new Center(child: new SpinKitThreeBounce(color: Colors.blue,),):(_consumable.length==0?Center(child: Text('无耗材'),):new ListView.builder(
+        itemCount: _consumable.length>10?_consumable.length+1:_consumable.length,
         controller: _scrollController,
         itemBuilder: (context, i) {
-          if (i !=_components.length) {
-            return buildEquipmentCard(_components[i]);
+          if (i !=_consumable.length) {
+            return buildEquipmentCard(_consumable[i]);
           } else {
             return new Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
-                _noMore?new Center(child: new Text('没有更多供应商'),):new SpinKitChasingDots(color: Colors.blue,)
+                _noMore?new Center(child: new Text('没有更多耗材'),):new SpinKitChasingDots(color: Colors.blue,)
               ],
             );
           }
@@ -630,14 +633,14 @@ class _ConsumableListState extends State<ConsumableList> {
       floatingActionButton: role==3?Container():FloatingActionButton(
         onPressed: () {
           Navigator.of(context).push(new MaterialPageRoute(builder: (_) {
-            return new ComponentDetail(editable: true,);
+            return new ConsumableDetail(editable: true,);
           })).then((result) {
             setState(() {
               offset = 0;
-              _components.clear();
+              _consumable.clear();
               _loading = true;
             });
-            getComponents().then((result) =>
+            getConsumable().then((result) =>
                 setState(() {
                   _loading = false;
                 }));});
@@ -647,9 +650,4 @@ class _ConsumableListState extends State<ConsumableList> {
       ),
     );
   }
-}
-
-enum ListType {
-  COMPONENT,
-  CONSUMABLE,
 }

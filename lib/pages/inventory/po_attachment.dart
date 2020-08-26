@@ -14,34 +14,63 @@ import 'package:atoi/utils/constants.dart';
 import 'package:date_format/date_format.dart';
 
 /// 耗材详情页
-class PODetail extends StatefulWidget {
-  PODetail({Key key, this.component, this.editable}) : super(key: key);
+class POAttachment extends StatefulWidget {
+  POAttachment({Key key, this.component, this.editable}) : super(key: key);
   final Map component;
   final bool editable;
-  _PODetailState createState() => new _PODetailState();
+  _POAttachmentState createState() => new _POAttachmentState();
 }
 
-class _PODetailState extends State<PODetail> {
+class _POAttachmentState extends State<POAttachment> {
   var _isExpandedDetail = true;
   Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
   String oid = '系统自动生成';
   EventBus bus = new EventBus();
   Map manufacturer;
   Map supplier;
-  Map _accessory;
-  String startDate = 'YYYY-MM-DD';
-  String endDate = 'YYYY-MM-DD';
+  Map _equipment;
+  String purchaseDate = 'YYYY-MM-DD';
+  int _fujiClass2 = 0;
+  String _fujiClass2Name;
+  List _fujiList = [];
+
+  int _consumable = 0;
+  List _consumableList = [];
+
   ConstantsModel cModel;
 
-  List _accs = [];
-  List _consumable = [];
-  List _services = [];
-
-  TextEditingController comments = new TextEditingController();
+  TextEditingController lotNum, spec, model, price, quantity, comments = new TextEditingController();
 
   void initState() {
     super.initState();
+    if (widget.component != null) {
+      getComponent();
+    }
     cModel = MainModel.of(context);
+  }
+
+  void initFuji() {
+    cModel.getConstants();
+    List _list = cModel.FujiClass2.map((item) {
+      return {
+        'value': item['ID'],
+        'text': item['Name']
+      };
+    }).toList();
+    _list.add({
+      'value': 0,
+      'text': ''
+    });
+    setState(() {
+      _fujiList = _list;
+    });
+  }
+
+  void changeFuji(value) {
+    FocusScope.of(context).requestFocus(new FocusNode());
+    setState(() {
+      _fujiClass2 = value;
+    });
   }
 
   Future<Null> getComponent() async {
@@ -209,50 +238,12 @@ class _PODetailState extends State<PODetail> {
     );
   }
 
-  Card buildCard(Map item) {
-    return Card(
-      child: Padding(
-        padding: EdgeInsets.all(8.0),
-        child: Column(
-          children: item.keys.map<Widget>((key) {
-            return BuildWidget.buildRow(key, item[key]);
-          }).toList(),
-        ),
-      ),
-    );
-  }
-
-  List<Widget> buildList(List targetList) {
-    List<Widget> _list = [];
-    if (targetList.length == 0) {
-      _list.add(Center(child: Text('暂无数据'),));
-    } else {
-      _list.addAll(
-        targetList.map((_acc) => buildCard(_acc)).toList()
-      );
-    }
-    _list.add(
-      Row(
-        mainAxisAlignment: MainAxisAlignment.end,
-        children: <Widget>[
-          IconButton(
-            icon: Icon(Icons.add_circle),
-            onPressed: () {
-
-            },
-          )
-        ],
-      )
-    );
-    return _list;
-  }
-
   Widget build(BuildContext context) {
     return ScopedModelDescendant<MainModel>(
       builder: (context, child, mainModel) {
         return new Scaffold(
             appBar: new AppBar(
-              title: widget.editable?Text(widget.component==null?'新增服务':'修改服务'):Text('查看服务'),
+              title: widget.editable?Text(widget.component==null?'新增耗材':'修改耗材'):Text('查看耗材'),
               elevation: 0.7,
               flexibleSpace: Container(
                 decoration: BoxDecoration(
@@ -283,8 +274,7 @@ class _PODetailState extends State<PODetail> {
                         });
                       },
                       children: [
-                        new ExpansionPanel(
-                          canTapOnHeader: true,
+                        new ExpansionPanel(canTapOnHeader: true,
                           headerBuilder: (context, isExpanded) {
                             return ListTile(
                               leading: new Icon(
@@ -293,7 +283,7 @@ class _PODetailState extends State<PODetail> {
                                 color: Colors.blue,
                               ),
                               title: Text(
-                                '服务基本信息',
+                                '供应商基本信息',
                                 style: new TextStyle(
                                     fontSize: 20.0,
                                     fontWeight: FontWeight.w400),
@@ -304,156 +294,11 @@ class _PODetailState extends State<PODetail> {
                             padding: EdgeInsets.symmetric(horizontal: 12.0),
                             child: new Column(
                               children: <Widget>[
-                                BuildWidget.buildRow('系统编号', oid),
-                                BuildWidget.buildRow('请求人', '系统管理员'),
-                                widget.editable?new Padding(
-                                  padding: EdgeInsets.symmetric(vertical: 5.0),
-                                  child: new Row(
-                                    children: <Widget>[
-                                      new Expanded(
-                                        flex: 4,
-                                        child: new Wrap(
-                                          alignment: WrapAlignment.end,
-                                          crossAxisAlignment: WrapCrossAlignment.center,
-                                          children: <Widget>[
-                                            new Text(
-                                              '采购日期',
-                                              style: new TextStyle(
-                                                  fontSize: 16.0, fontWeight: FontWeight.w600),
-                                            )
-                                          ],
-                                        ),
-                                      ),
-                                      new Expanded(
-                                        flex: 1,
-                                        child: new Text(
-                                          '：',
-                                          style: new TextStyle(
-                                            fontSize: 16.0,
-                                            fontWeight: FontWeight.w600,
-                                          ),
-                                        ),
-                                      ),
-                                      new Expanded(
-                                        flex: 4,
-                                        child: new Text(
-                                          startDate,
-                                          style: new TextStyle(
-                                              fontSize: 16.0,
-                                              fontWeight: FontWeight.w400,
-                                              color: Colors.black54
-                                          ),
-                                        ),
-                                      ),
-                                      new Expanded(
-                                        flex: 2,
-                                        child: new IconButton(
-                                            icon: Icon(Icons.calendar_today, color: AppConstants.AppColors['btn_main'],),
-                                            onPressed: () async {
-                                              FocusScope.of(context).requestFocus(new FocusNode());
-                                              var _time = DateTime.tryParse(startDate)??DateTime.now();
-                                              DatePicker.showDatePicker(
-                                                context,
-                                                pickerTheme: DateTimePickerTheme(
-                                                  showTitle: true,
-                                                  confirm: Text('确认', style: TextStyle(color: Colors.blueAccent)),
-                                                  cancel: Text('取消', style: TextStyle(color: Colors.redAccent)),
-                                                ),
-                                                minDateTime: DateTime.now().add(Duration(days: -7300)),
-                                                maxDateTime: DateTime.parse('2030-01-01'),
-                                                initialDateTime: _time,
-                                                dateFormat: 'yyyy-MM-dd',
-                                                locale: DateTimePickerLocale.en_us,
-                                                onClose: () => print(""),
-                                                onCancel: () => print('onCancel'),
-                                                onChange: (dateTime, List<int> index) {
-                                                },
-                                                onConfirm: (dateTime, List<int> index) {
-                                                  var _date = formatDate(dateTime, [yyyy, '-', mm, '-', dd]);
-                                                  setState(() {
-                                                    startDate = _date;
-                                                  });
-                                                },
-                                              );
-                                            }),
-                                      ),
-                                    ],
-                                  ),
-                                ):BuildWidget.buildRow('开始日期', startDate),
-                                widget.editable?new Padding(
-                                  padding: EdgeInsets.symmetric(vertical: 5.0),
-                                  child: new Row(
-                                    children: <Widget>[
-                                      new Expanded(
-                                        flex: 4,
-                                        child: new Wrap(
-                                          alignment: WrapAlignment.end,
-                                          crossAxisAlignment: WrapCrossAlignment.center,
-                                          children: <Widget>[
-                                            new Text(
-                                              '到货日期',
-                                              style: new TextStyle(
-                                                  fontSize: 16.0, fontWeight: FontWeight.w600),
-                                            )
-                                          ],
-                                        ),
-                                      ),
-                                      new Expanded(
-                                        flex: 1,
-                                        child: new Text(
-                                          '：',
-                                          style: new TextStyle(
-                                            fontSize: 16.0,
-                                            fontWeight: FontWeight.w600,
-                                          ),
-                                        ),
-                                      ),
-                                      new Expanded(
-                                        flex: 4,
-                                        child: new Text(
-                                          endDate,
-                                          style: new TextStyle(
-                                              fontSize: 16.0,
-                                              fontWeight: FontWeight.w400,
-                                              color: Colors.black54
-                                          ),
-                                        ),
-                                      ),
-                                      new Expanded(
-                                        flex: 2,
-                                        child: new IconButton(
-                                            icon: Icon(Icons.calendar_today, color: AppConstants.AppColors['btn_main'],),
-                                            onPressed: () async {
-                                              FocusScope.of(context).requestFocus(new FocusNode());
-                                              var _time = DateTime.tryParse(endDate)??DateTime.now();
-                                              DatePicker.showDatePicker(
-                                                context,
-                                                pickerTheme: DateTimePickerTheme(
-                                                  showTitle: true,
-                                                  confirm: Text('确认', style: TextStyle(color: Colors.blueAccent)),
-                                                  cancel: Text('取消', style: TextStyle(color: Colors.redAccent)),
-                                                ),
-                                                minDateTime: DateTime.now().add(Duration(days: -7300)),
-                                                maxDateTime: DateTime.parse('2030-01-01'),
-                                                initialDateTime: _time,
-                                                dateFormat: 'yyyy-MM-dd',
-                                                locale: DateTimePickerLocale.en_us,
-                                                onClose: () => print(""),
-                                                onCancel: () => print('onCancel'),
-                                                onChange: (dateTime, List<int> index) {
-                                                },
-                                                onConfirm: (dateTime, List<int> index) {
-                                                  var _date = formatDate(dateTime, [yyyy, '-', mm, '-', dd]);
-                                                  setState(() {
-                                                    endDate = _date;
-                                                  });
-                                                },
-                                              );
-                                            }),
-                                      ),
-                                    ],
-                                  ),
-                                ):BuildWidget.buildRow('结束日期', endDate),
+                                widget.editable?buildDropdown('富士二类', _fujiClass2, _fujiList, changeFuji, required: true):BuildWidget.buildRow('富士二类', _fujiClass2Name),
+                                widget.editable?buildDropdown('选择耗材', _consumable, _consumableList, changeFuji, required: true):BuildWidget.buildRow('选择耗材', _fujiClass2Name),
+                                widget.editable?BuildWidget.buildInput('批次号', lotNum, maxLength: 20, focusNode: _focusComponent[3]):BuildWidget.buildRow('批次号', lotNum.text),
+                                widget.editable?BuildWidget.buildInput('规格', spec, maxLength: 20, focusNode: _focusComponent[4]):BuildWidget.buildRow('地址', spec.text),
+                                widget.editable?BuildWidget.buildInput('型号', model, focusNode: _focusComponent[2], required: true):BuildWidget.buildRow('联系人', model.text),
                                 widget.editable?new Padding(
                                   padding: EdgeInsets.symmetric(vertical: 5.0),
                                   child: new Row(
@@ -517,6 +362,82 @@ class _PODetailState extends State<PODetail> {
                                     ],
                                   ),
                                 ):BuildWidget.buildRow('供应商', supplier==null?'':supplier['Name']),
+                                widget.editable?BuildWidget.buildInput('单价', price, maxLength: 20, focusNode: _focusComponent[5]):BuildWidget.buildRow('联系人电话', price.text),
+                                widget.editable?BuildWidget.buildInput('入库数量', quantity, focusNode: _focusComponent[2], required: true):BuildWidget.buildRow('入库数量', quantity.text),
+                                widget.editable?new Padding(
+                                  padding: EdgeInsets.symmetric(vertical: 5.0),
+                                  child: new Row(
+                                    children: <Widget>[
+                                      new Expanded(
+                                        flex: 4,
+                                        child: new Wrap(
+                                          alignment: WrapAlignment.end,
+                                          crossAxisAlignment: WrapCrossAlignment.center,
+                                          children: <Widget>[
+                                            new Text(
+                                              '购入日期',
+                                              style: new TextStyle(
+                                                  fontSize: 16.0, fontWeight: FontWeight.w600),
+                                            )
+                                          ],
+                                        ),
+                                      ),
+                                      new Expanded(
+                                        flex: 1,
+                                        child: new Text(
+                                          '：',
+                                          style: new TextStyle(
+                                            fontSize: 16.0,
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                        ),
+                                      ),
+                                      new Expanded(
+                                        flex: 4,
+                                        child: new Text(
+                                          purchaseDate,
+                                          style: new TextStyle(
+                                              fontSize: 16.0,
+                                              fontWeight: FontWeight.w400,
+                                              color: Colors.black54
+                                          ),
+                                        ),
+                                      ),
+                                      new Expanded(
+                                        flex: 2,
+                                        child: new IconButton(
+                                            icon: Icon(Icons.calendar_today, color: AppConstants.AppColors['btn_main'],),
+                                            onPressed: () async {
+                                              FocusScope.of(context).requestFocus(new FocusNode());
+                                              var _time = DateTime.tryParse(purchaseDate)??DateTime.now();
+                                              DatePicker.showDatePicker(
+                                                context,
+                                                pickerTheme: DateTimePickerTheme(
+                                                  showTitle: true,
+                                                  confirm: Text('确认', style: TextStyle(color: Colors.blueAccent)),
+                                                  cancel: Text('取消', style: TextStyle(color: Colors.redAccent)),
+                                                ),
+                                                minDateTime: DateTime.now().add(Duration(days: -7300)),
+                                                maxDateTime: DateTime.parse('2030-01-01'),
+                                                initialDateTime: _time,
+                                                dateFormat: 'yyyy-MM-dd',
+                                                locale: DateTimePickerLocale.en_us,
+                                                onClose: () => print(""),
+                                                onCancel: () => print('onCancel'),
+                                                onChange: (dateTime, List<int> index) {
+                                                },
+                                                onConfirm: (dateTime, List<int> index) {
+                                                  var _date = formatDate(dateTime, [yyyy, '-', mm, '-', dd]);
+                                                  setState(() {
+                                                    purchaseDate = _date;
+                                                  });
+                                                },
+                                              );
+                                            }),
+                                      ),
+                                    ],
+                                  ),
+                                ):BuildWidget.buildRow('购入日期', purchaseDate),
                                 widget.editable?BuildWidget.buildInput('备注', comments, maxLength: 100, focusNode: _focusComponent[5]):BuildWidget.buildRow('备注', comments.text),
                                 new Divider(),
                                 new Padding(
@@ -526,90 +447,6 @@ class _PODetailState extends State<PODetail> {
                             ),
                           ),
                           isExpanded: _isExpandedDetail,
-                        ),
-                        new ExpansionPanel(
-                          canTapOnHeader: true,
-                          isExpanded: true,
-                          headerBuilder: (context, isExpanded) {
-                            return ListTile(
-                              leading: new Icon(
-                                Icons.description,
-                                size: 24.0,
-                                color: Colors.blue,
-                              ),
-                              title: Text(
-                                '零件',
-                                style: new TextStyle(
-                                    fontSize: 20.0,
-                                    fontWeight: FontWeight.w400),
-                              ),
-                            );
-                          },
-                          body: new Padding(
-                            padding: EdgeInsets.symmetric(horizontal: 12.0),
-                            child: new Padding(
-                              padding: EdgeInsets.symmetric(vertical: 5.0),
-                              child: Column(
-                                children: buildList(_accs),
-                              ),
-                            ),
-                          )
-                        ),
-                        new ExpansionPanel(
-                            canTapOnHeader: true,
-                            isExpanded: true,
-                            headerBuilder: (context, isExpanded) {
-                              return ListTile(
-                                leading: new Icon(
-                                  Icons.description,
-                                  size: 24.0,
-                                  color: Colors.blue,
-                                ),
-                                title: Text(
-                                  '耗材',
-                                  style: new TextStyle(
-                                      fontSize: 20.0,
-                                      fontWeight: FontWeight.w400),
-                                ),
-                              );
-                            },
-                            body: new Padding(
-                              padding: EdgeInsets.symmetric(horizontal: 12.0),
-                              child: new Padding(
-                                padding: EdgeInsets.symmetric(vertical: 5.0),
-                                child: Column(
-                                  children: buildList(_consumable),
-                                ),
-                              ),
-                            )
-                        ),
-                        new ExpansionPanel(
-                            canTapOnHeader: true,
-                            isExpanded: true,
-                            headerBuilder: (context, isExpanded) {
-                              return ListTile(
-                                leading: new Icon(
-                                  Icons.description,
-                                  size: 24.0,
-                                  color: Colors.blue,
-                                ),
-                                title: Text(
-                                  '服务',
-                                  style: new TextStyle(
-                                      fontSize: 20.0,
-                                      fontWeight: FontWeight.w400),
-                                ),
-                              );
-                            },
-                            body: new Padding(
-                              padding: EdgeInsets.symmetric(horizontal: 12.0),
-                              child: new Padding(
-                                padding: EdgeInsets.symmetric(vertical: 5.0),
-                                child: Column(
-                                  children: buildList(_services),
-                                ),
-                              ),
-                            )
                         ),
                       ],
                     ),
@@ -651,85 +488,6 @@ class _PODetailState extends State<PODetail> {
               ),
             ));
       },
-    );
-  }
-}
-
-class AddAccessory extends StatelessWidget {
-
-  Map _accessory;
-
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('添加零件'),
-      ),
-      body: Column(
-        children: <Widget>[
-          new Padding(
-            padding: EdgeInsets.symmetric(vertical: 5.0),
-            child: new Row(
-              children: <Widget>[
-                new Expanded(
-                  flex: 4,
-                  child: new Wrap(
-                    alignment: WrapAlignment.end,
-                    crossAxisAlignment: WrapCrossAlignment.center,
-                    children: <Widget>[
-                      new Text(
-                        '*',
-                        style: new TextStyle(
-                            color: Colors.red
-                        ),
-                      ),
-                      new Text(
-                        '供应商',
-                        style: new TextStyle(
-                            fontSize: 16.0, fontWeight: FontWeight.w600),
-                      )
-                    ],
-                  ),
-                ),
-                new Expanded(
-                  flex: 1,
-                  child: new Text(
-                    '：',
-                    style: new TextStyle(
-                      fontSize: 16.0,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ),
-                new Expanded(
-                  flex: 4,
-                  child: new Text(
-                    _accessory == null ? '' : _accessory['Name'],
-                    style: new TextStyle(
-                        fontSize: 16.0,
-                        fontWeight: FontWeight.w400,
-                        color: Colors.black54),
-                  ),
-                ),
-                new Expanded(
-                    flex: 2,
-                    child: new IconButton(
-                        icon: Icon(Icons.search),
-                        onPressed: () async {
-                          FocusScope.of(context).requestFocus(new FocusNode());
-                          final _searchResult = await Navigator.of(context).push(new MaterialPageRoute(builder: (_) => SearchLazy(searchType: SearchType.DEVICE,)));
-                          print(_searchResult);
-                          if (_searchResult != null &&
-                              _searchResult != 'null') {
-                            _accessory = jsonDecode(_searchResult);
-                          }
-                        })
-                ),
-              ],
-            ),
-          ),
-
-        ],
-      ),
     );
   }
 }

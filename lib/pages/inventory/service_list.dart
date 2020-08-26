@@ -4,7 +4,7 @@ import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:atoi/widgets/build_widget.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:atoi/models/models.dart';
-import 'package:atoi/pages/inventory/component_detail.dart';
+import 'package:atoi/pages/inventory/service_detail.dart';
 
 /// 服务列表类
 class ServiceList extends StatefulWidget{
@@ -13,7 +13,7 @@ class ServiceList extends StatefulWidget{
 
 class _ServiceListState extends State<ServiceList> {
 
-  List<dynamic> _components = [
+  List<dynamic> _services = [
     {
       "FujiClass2": {
         "Name": "20200805II类",
@@ -94,11 +94,9 @@ class _ServiceListState extends State<ServiceList> {
   bool _editable = true;
 
   TextEditingController _keywords = new TextEditingController();
-  String field = 'c.Name';
-  int useStatus = 1;
-  List useList = [];
-  int supplierId = 0;
-  List supplierList = [];
+  String field = 'se.ID';
+  int _service = 0;
+  List _serviceList = [];
   Future<SharedPreferences> prefs = SharedPreferences.getInstance();
   ConstantsModel cModel;
   ScrollController _scrollController = new ScrollController();
@@ -115,9 +113,9 @@ class _ServiceListState extends State<ServiceList> {
   void setFilter() {
     setState(() {
       offset = 0;
-      _components.clear();
+      _services.clear();
     });
-    getComponents();
+    getServices();
   }
 
   List initList(Map _map) {
@@ -137,35 +135,24 @@ class _ServiceListState extends State<ServiceList> {
 
   void initFilter() async {
     await cModel.getConstants();
+    List _list = cModel.InvService.map((item) {
+      return {
+        'value': item['ID'],
+        'text': item['Name']
+      };
+    }).toList();
+    _list.add({
+      'value': 0,
+      'text': '全部'
+    });
     setState(() {
-      useStatus = 1;
-      field = 's.ID';
+      field = 'se.ID';
       _keywords.clear();
-      useList = [
-        {
-          'value': 0,
-          'text': '全部'
-        },
-        {
-          'value': 1,
-          'text': '在库'
-        },
-        {
-          'value': 2,
-          'text': '已用'
-        },
-        {
-          'value': 3,
-          'text': '报废'
-        },
-
-      ];
-      supplierList = initList(cModel.SupplierType);
-      supplierId = supplierList[0]['value'];
+      _serviceList = _list;
     });
   }
 
-  Future<Null> getComponents({String filterText}) async {
+  Future<Null> getServices({String filterText}) async {
     filterText = filterText??'';
     var resp = await HttpRequest.request(
         '/InvComponent/QueryServiceList',
@@ -173,14 +160,14 @@ class _ServiceListState extends State<ServiceList> {
         params: {
           'filterText': _keywords.text,
           'filterField': field,
-          'statusID': useStatus,
+          'statusID': _service,
           'CurRowNum': offset,
           'PageSize': 10
         }
     );
     if (resp['ResultCode'] == '00') {
       setState(() {
-        _components.addAll(resp['Data']);
+        _services.addAll(resp['Data']);
       });
     }
   }
@@ -247,12 +234,12 @@ class _ServiceListState extends State<ServiceList> {
                                 underline: Container(),
                                 items: <DropdownMenuItem>[
                                   DropdownMenuItem(
-                                    value: 'c.Name',
-                                    child: Text('简称'),
+                                    value: 'se.ID',
+                                    child: Text('系统编号'),
                                   ),
                                   DropdownMenuItem(
-                                    value: 'c.Description',
-                                    child: Text('描述'),
+                                    value: 'se.Name',
+                                    child: Text('服务名称'),
                                   ),
                                 ],
                                 onChanged: (val) {
@@ -289,9 +276,9 @@ class _ServiceListState extends State<ServiceList> {
                               children: <Widget>[
                                 SizedBox(width: 6.0,),
                                 DropdownButton(
-                                  value: useStatus,
+                                  value: _service,
                                   underline: Container(),
-                                  items: useList.map<DropdownMenuItem>((item) {
+                                  items: _serviceList.map<DropdownMenuItem>((item) {
                                     return DropdownMenuItem(
                                       value: item['value'],
                                       child: Container(
@@ -304,7 +291,7 @@ class _ServiceListState extends State<ServiceList> {
                                     print(val);
                                     FocusScope.of(context).requestFocus(new FocusNode());
                                     setState(() {
-                                      useStatus = val;
+                                      _service = val;
                                     });
                                   },
                                 )
@@ -334,8 +321,8 @@ class _ServiceListState extends State<ServiceList> {
                     child: Center(
                       child: FlatButton(onPressed: () {
                         setState((){
-                          useStatus = -1;
-                          field = 'c.Name';
+                          _service = 0;
+                          field = 'se.ID';
                           _keywords.clear();
                         });
                         initFilter();
@@ -372,16 +359,16 @@ class _ServiceListState extends State<ServiceList> {
     //setState(() {
     //  _loading = true;
     //});
-    //getComponents().then((result) => setState(() {
+    //getServices().then((result) => setState(() {
     //  _loading = false;
     //}));
     getRole();
     _scrollController.addListener(() {
       if (_scrollController.position.pixels == _scrollController.position.maxScrollExtent) {
-        var _length = _components.length;
+        var _length = _services.length;
         offset += 10;
-        getComponents().then((result) {
-          if (_components.length == _length) {
+        getServices().then((result) {
+          if (_services.length == _length) {
             setState(() {
               _noMore = true;
             });
@@ -445,14 +432,14 @@ class _ServiceListState extends State<ServiceList> {
               new RaisedButton(
                 onPressed: (){
                   Navigator.of(context).push(new MaterialPageRoute(builder: (_) {
-                    return new ComponentDetail(component: item, editable: _editable,);
+                    return new ServiceDetail(component: item, editable: _editable,);
                   })).then((result) {
                     setState(() {
                       _loading = true;
-                      _components.clear();
+                      _services.clear();
                       offset = 0;
                     });
-                    getComponents().then((result) {
+                    getServices().then((result) {
                       setState(() {
                         _loading = false;
                       });
@@ -502,7 +489,7 @@ class _ServiceListState extends State<ServiceList> {
               hintStyle: new TextStyle(color: Colors.white)
           ),
           onChanged: (val) {
-            getComponents(filterText: val);
+            getServices(filterText: val);
           },
         ):Text('服务列表'),
         elevation: 0.7,
@@ -535,17 +522,17 @@ class _ServiceListState extends State<ServiceList> {
           ),
         ),
       ),
-      body: _loading?new Center(child: new SpinKitThreeBounce(color: Colors.blue,),):(_components.length==0?Center(child: Text('无供应商'),):new ListView.builder(
-        itemCount: _components.length>10?_components.length+1:_components.length,
+      body: _loading?new Center(child: new SpinKitThreeBounce(color: Colors.blue,),):(_services.length==0?Center(child: Text('无服务'),):new ListView.builder(
+        itemCount: _services.length>10?_services.length+1:_services.length,
         controller: _scrollController,
         itemBuilder: (context, i) {
-          if (i !=_components.length) {
-            return buildEquipmentCard(_components[i]);
+          if (i !=_services.length) {
+            return buildEquipmentCard(_services[i]);
           } else {
             return new Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
-                _noMore?new Center(child: new Text('没有更多供应商'),):new SpinKitChasingDots(color: Colors.blue,)
+                _noMore?new Center(child: new Text('没有更多服务'),):new SpinKitChasingDots(color: Colors.blue,)
               ],
             );
           }
@@ -554,14 +541,14 @@ class _ServiceListState extends State<ServiceList> {
       floatingActionButton: role==3?Container():FloatingActionButton(
         onPressed: () {
           Navigator.of(context).push(new MaterialPageRoute(builder: (_) {
-            return new ComponentDetail(editable: true,);
+            return new ServiceDetail(editable: true,);
           })).then((result) {
             setState(() {
               offset = 0;
-              _components.clear();
+              _services.clear();
               _loading = true;
             });
-            getComponents().then((result) =>
+            getServices().then((result) =>
                 setState(() {
                   _loading = false;
                 }));});
@@ -571,9 +558,4 @@ class _ServiceListState extends State<ServiceList> {
       ),
     );
   }
-}
-
-enum ListType {
-  COMPONENT,
-  CONSUMABLE,
 }
