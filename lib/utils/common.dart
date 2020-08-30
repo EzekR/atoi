@@ -3,8 +3,9 @@ import 'package:date_format/date_format.dart';
 
 class CommonUtil {
 
-  static String CurrencyForm(double number) {
-    double _num = double.tryParse((number/10000).toString());
+  static String CurrencyForm(double number, {int times}) {
+    times = times??10000;
+    double _num = double.tryParse((number/times).toString());
     NumberFormat _format = NumberFormat.currency(locale: 'en_US', symbol: '', decimalDigits: 1);
     return _format.format(_num);
   }

@@ -1480,7 +1480,7 @@ class _DashboardState extends State<Dashboard> {
                 scrollDirection: Axis.horizontal,
                 controller: new ScrollController(),
                 children: <Widget>[
-                  buildIncomeChart()
+                  incomeData.length>0?buildIncomeChart():Container()
                 ],
               ),
             )
@@ -1561,7 +1561,7 @@ class _DashboardState extends State<Dashboard> {
                               Expanded(
                                 flex: 4,
                                 child: Text(
-                                  '月份：${equipmentIncome['detail'][pointIndex]['Item1']}月',
+                                  '$timeType份：${equipmentIncome['detail'][pointIndex]['Item1']} $timeType',
                                   style: TextStyle(
                                       color: Colors.white,
                                       fontSize: 11.0
@@ -1588,7 +1588,7 @@ class _DashboardState extends State<Dashboard> {
                               Expanded(
                                 flex: 4,
                                 child: Text(
-                                  '收入：${CommonUtil.CurrencyForm(equipmentIncome['detail'][pointIndex]['Item2'])}万元',
+                                  '收入：${CommonUtil.CurrencyForm(equipmentIncome['detail'][pointIndex]['Item2'], times: 1)}元',
                                   style: TextStyle(
                                       color: Colors.white,
                                       fontSize: 11.0
@@ -1598,7 +1598,7 @@ class _DashboardState extends State<Dashboard> {
                               Expanded(
                                 flex: 6,
                                 child: Text(
-                                  '支出：${CommonUtil.CurrencyForm(equipmentIncome['detail'][pointIndex]['Item3'])}万元',
+                                  '支出：${CommonUtil.CurrencyForm(equipmentIncome['detail'][pointIndex]['Item3'], times: 1)}元',
                                   style: TextStyle(
                                       color: Colors.white,
                                       fontSize: 11.0
@@ -1623,7 +1623,7 @@ class _DashboardState extends State<Dashboard> {
                               Expanded(
                                 flex: 4,
                                 child: Text(
-                                  isDetailPage?'设备价值：${CommonUtil.CurrencyForm(equipmentData[pointIndex]['PurchaseAmount'])}':'设备数量：${departmentData[pointIndex]['EquipmentCount']}台',
+                                  isDetailPage?'设备价值：${CommonUtil.CurrencyForm(equipmentData[pointIndex]['PurchaseAmount'], times: 1)}':'设备数量：${departmentData[pointIndex]['EquipmentCount']}台',
                                   style: TextStyle(
                                       color: Colors.white,
                                       fontSize: 11.0
@@ -1650,7 +1650,7 @@ class _DashboardState extends State<Dashboard> {
                               Expanded(
                                 flex: 10,
                                 child: Text(
-                                  isDetailPage?'型号：${equipmentData[pointIndex]['EquipmentCode']}':'设备价值：${CommonUtil.CurrencyForm(departmentData[pointIndex]['EquipmentAmount'])}万元',
+                                  isDetailPage?'型号：${equipmentData[pointIndex]['EquipmentCode']}':'设备价值：${CommonUtil.CurrencyForm(departmentData[pointIndex]['EquipmentAmount'], times: 1)}元',
                                   style: TextStyle(
                                       color: Colors.white,
                                       fontSize: 11.0
@@ -1704,7 +1704,7 @@ class _DashboardState extends State<Dashboard> {
                               Expanded(
                                 flex: 10,
                                 child: Text(
-                                  '收入：${CommonUtil.CurrencyForm(isDetailPage?equipmentData[pointIndex]['Incomes']:departmentData[pointIndex]['Incomes'])}万元',
+                                  '收入：${CommonUtil.CurrencyForm(isDetailPage?equipmentData[pointIndex]['Incomes']:departmentData[pointIndex]['Incomes'], times: 1)}元',
                                   style: TextStyle(
                                       color: Colors.white,
                                       fontSize: 11.0
@@ -1731,7 +1731,7 @@ class _DashboardState extends State<Dashboard> {
                               Expanded(
                                 flex: 10,
                                 child: Text(
-                                  '支出：${CommonUtil.CurrencyForm(isDetailPage?equipmentData[pointIndex]['Expenses']:departmentData[pointIndex]['Expenses'])}万元',
+                                  '支出：${CommonUtil.CurrencyForm(isDetailPage?equipmentData[pointIndex]['Expenses']:departmentData[pointIndex]['Expenses'], times: 1)}元',
                                   style: TextStyle(
                                       color: Colors.white,
                                       fontSize: 11.0
@@ -2586,6 +2586,7 @@ class _DashboardState extends State<Dashboard> {
                                 padding: EdgeInsets.fromLTRB(8.0, 0, 8.0, 0),
                                 child: DropdownButton(
                                   value: currentYear,
+                                  underline: Container(),
                                   items: years.map<DropdownMenuItem>((item) {
                                     return new DropdownMenuItem(
                                       value: item,
@@ -2682,7 +2683,7 @@ class _DashboardState extends State<Dashboard> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: <Widget>[
                           Text(
-                            CommonUtil.CurrencyForm(incomeAll['income']),
+                            CommonUtil.CurrencyForm(incomeAll['income'], times: 1),
                             style: TextStyle(
                                 color: Color(0xff1e1e1e),
                                 fontSize: 15.0,
@@ -2693,7 +2694,7 @@ class _DashboardState extends State<Dashboard> {
                             height: 4.0,
                           ),
                           Text(
-                            '总收入(万元)',
+                            '总收入(元)',
                             style: TextStyle(
                                 color: Color(0xff666666),
                                 fontSize: 10.0
@@ -2738,7 +2739,7 @@ class _DashboardState extends State<Dashboard> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: <Widget>[
                           Text(
-                            CommonUtil.CurrencyForm(incomeAll['expense']),
+                            CommonUtil.CurrencyForm(incomeAll['expense'], times: 1),
                             style: TextStyle(
                                 color: Color(0xff1e1e1e),
                                 fontSize: 15.0,
@@ -2749,7 +2750,7 @@ class _DashboardState extends State<Dashboard> {
                             height: 4.0,
                           ),
                           Text(
-                            '总支出(万元)',
+                            '总支出(元)',
                             style: TextStyle(
                                 color: Color(0xff666666),
                                 fontSize: 10.0
@@ -2821,7 +2822,7 @@ class _DashboardState extends State<Dashboard> {
                 padding: EdgeInsets.fromLTRB(0, 25, 0, 0),
                 child: Container(
                     height: 18,
-                    width: 30,
+                    width: 45,
                     color: Color(0xff33B850),
                     child: Center(
                       child: Text(
@@ -2839,7 +2840,7 @@ class _DashboardState extends State<Dashboard> {
               ),
               Container(
                 height: 80,
-                width: 275,
+                width: 260,
                 child: Text(
                   equipmentName??'',
                   softWrap: true,
