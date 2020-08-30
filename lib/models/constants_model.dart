@@ -76,10 +76,10 @@ class ConstantsModel extends Model {
   ];
 
   // fuji class2
-  List<Map> _FujiClass2 = [];
-  List<Map> _POStatus = [];
-  List<Map> _InvService = [];
-  List<Map> _InvSpare = [];
+  List _FujiClass2 = [];
+  List _POStatus = [];
+  List _InvService = [];
+  List _InvSpare = [];
 
   List<Map> get InvSpare => _InvSpare;
 

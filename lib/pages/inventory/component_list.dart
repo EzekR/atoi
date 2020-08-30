@@ -13,222 +13,7 @@ class ComponentList extends StatefulWidget{
 
 class _ComponentListState extends State<ComponentList> {
 
-  List<dynamic> _components = [
-    {
-      "Component": {
-        "FujiClass2": {
-          "ID": 0
-        },
-        "Name": "22211",
-        "Description": "1212",
-        "Type": {
-          "ID": 2,
-          "Name": "一般零件"
-        },
-        "StdPrice": 0,
-        "Usage": 0,
-        "TotalSeconds": 0,
-        "SecondsPer": 0,
-        "IsIncluded": false,
-        "IncludeContract": false,
-        "Method": 0,
-        "LifeTime": 0,
-        "IsActive": false,
-        "AddDate": null,
-        "UpdateDate": null,
-        "FaultRates": [],
-        "OID": "LJ00000121",
-        "ID": 121
-      },
-      "Equipment": {
-        "EquipmentLevel": {
-          "ID": 0
-        },
-        "Name": "电子胃肠镜",
-        "Manufacturer": {
-          "SupplierType": {
-            "ID": 0
-          },
-          "AddDate": null,
-          "IsActive": false,
-          "OID": "GYS00000000",
-          "ID": 0
-        },
-        "EquipmentClass1": {
-          "Level": 0
-        },
-        "EquipmentClass2": {
-          "Level": 0
-        },
-        "EquipmentClass3": {
-          "Level": 0
-        },
-        "ResponseTimeLength": 0,
-        "ServiceScope": false,
-        "ManufacturingDate": null,
-        "FixedAsset": false,
-        "AssetLevel": {
-          "ID": 0
-        },
-        "DepreciationYears": 0,
-        "ValidityStartDate": null,
-        "ValidityEndDate": null,
-        "Supplier": {
-          "SupplierType": {
-            "ID": 0
-          },
-          "AddDate": null,
-          "IsActive": false,
-          "OID": "GYS00000000",
-          "ID": 0
-        },
-        "PurchaseAmount": 0,
-        "PurchaseDate": null,
-        "IsImport": false,
-        "Department": {
-          "ID": 0
-        },
-        "InstalDate": null,
-        "UseageDate": null,
-        "Accepted": false,
-        "AcceptanceDate": null,
-        "UsageStatus": {
-          "ID": 0
-        },
-        "EquipmentStatus": {
-          "ID": 0
-        },
-        "ScrapDate": null,
-        "MaintenancePeriod": 0,
-        "MaintenanceType": {
-          "ID": 0
-        },
-        "LastMaintenanceDate": null,
-        "PatrolPeriod": 0,
-        "PatrolType": {
-          "ID": 0
-        },
-        "LastPatrolDate": null,
-        "CorrectionPeriod": 0,
-        "CorrectionType": {
-          "ID": 0
-        },
-        "LastCorrectionDate": null,
-        "MandatoryTestStatus": {
-          "ID": 0
-        },
-        "MandatoryTestDate": null,
-        "RecallFlag": false,
-        "RecallDate": null,
-        "CreateDate": null,
-        "CreateUser": {
-          "Role": {
-            "ID": 0
-          },
-          "IsActive": false,
-          "LastLoginDate": null,
-          "CreatedDate": null,
-          "VerifyStatus": {
-            "ID": 0
-          },
-          "Department": {
-            "ID": 0
-          },
-          "HasOpenDispatch": false,
-          "ID": 0
-        },
-        "UpdateDate": null,
-        "Incomes": 0,
-        "LastIncomes": 0,
-        "Expenses": 0,
-        "LastExpenses": 0,
-        "ContractScope": {
-          "ID": 0
-        },
-        "OID": "ZC00000007",
-        "OriginType": "国产",
-        "ClassCode": "",
-        "FujiClass2": {
-          "FujiClass1": {
-            "ID": 0,
-            "AddDate": null,
-            "UpdateDate": null,
-            "EquipmentType1": {
-              "Level": 0
-            },
-            "EquipmentType2": {
-              "Level": 0
-            },
-            "FujiClass2Count": 0
-          },
-          "IncludeLabour": false,
-          "PatrolTimes": 0,
-          "PatrolHours": 0,
-          "MaintenanceTimes": 0,
-          "MaintenanceHours": 0,
-          "RepairHours": 0,
-          "IncludeContract": false,
-          "FullCoveragePtg": 0,
-          "TechCoveragePtg": 0,
-          "IncludeSpare": false,
-          "SparePrice": 0,
-          "SpareRentPtg": 0,
-          "IncludeRepair": false,
-          "Usage": 0,
-          "EquipmentType": {
-            "ID": 0
-          },
-          "RepairComponentCost": 0,
-          "Repair3partyRatio": 0,
-          "Repair3partyCost": 0,
-          "RepairCostRatio": 0,
-          "MethodID": 0,
-          "AddDate": null,
-          "UpdateDate": null,
-          "Repairs": [],
-          "Components": [],
-          "Consumables": [],
-          "hasEdited": false,
-          "ID": 0
-        },
-        "CTUsedSeconds": 0,
-        "HisComponentList": [],
-        "HisConsumableList": [],
-        "ConfigLicenceID": 0,
-        "url": "",
-        "ID": 7
-      },
-      "SerialCode": "444",
-      "Specification": "460720",
-      "Model": "654",
-      "Supplier": {
-        "SupplierType": {
-          "ID": 0
-        },
-        "Name": "好克",
-        "AddDate": null,
-        "IsActive": false,
-        "OID": "GYS00000014",
-        "ID": 14
-      },
-      "Price": 64,
-      "PurchaseDate": "2020-08-06T10:19:33",
-      "Purchase": {
-        "ID": 42
-      },
-      "Comments": "",
-      "AddDate": "2020-08-06T10:19:17",
-      "UpdateDate": null,
-      "Status": {
-        "ID": 1,
-        "Name": "在库"
-      },
-      "OID": "LJK00000106",
-      "Qty": 0,
-      "InboundQty": 0,
-      "ID": 106
-    }
-  ];
+  List<dynamic> _components = [];
 
   bool isSearchState = false;
   bool _loading = false;
@@ -250,7 +35,7 @@ class _ComponentListState extends State<ComponentList> {
   Future<Null> getRole() async {
     var _prefs = await prefs;
     role = _prefs.getInt('role');
-    _editable = role==1?true:false;
+    _editable = role==1;
   }
 
   void setFilter() {
@@ -280,7 +65,7 @@ class _ComponentListState extends State<ComponentList> {
     await cModel.getConstants();
     setState(() {
       useStatus = 1;
-      field = 's.ID';
+      field = 'c.Name';
       _keywords.clear();
       useList = [
         {
@@ -510,12 +295,12 @@ class _ComponentListState extends State<ComponentList> {
     super.initState();
     cModel = MainModel.of(context);
     initFilter();
-    //setState(() {
-    //  _loading = true;
-    //});
-    //getComponents().then((result) => setState(() {
-    //  _loading = false;
-    //}));
+    setState(() {
+      _loading = true;
+    });
+    getComponents().then((result) => setState(() {
+      _loading = false;
+    }));
     getRole();
     _scrollController.addListener(() {
       if (_scrollController.position.pixels == _scrollController.position.maxScrollExtent) {

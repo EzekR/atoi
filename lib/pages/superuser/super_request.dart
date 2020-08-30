@@ -80,7 +80,7 @@ class _SuperRequestState extends State<SuperRequest> {
     Map<String, dynamic> _param;
     switch (widget.pageType) {
       case PageType.REQUEST:
-        _url = '/Request/GetRequests';
+        _url = '/Request/GetRequests?statusID=99';
         _param = {
           'userID': _userId,
           'PageSize': 10,
@@ -98,7 +98,7 @@ class _SuperRequestState extends State<SuperRequest> {
         };
         break;
       case PageType.DISPATCH:
-        _url = '/Dispatch/GetDispatchs?statusIDs=2&statusIDs=3';
+        _url = '/Dispatch/GetDispatchs?statusIDs=2&statusIDs=3&statusIDs=1&statusIDs=4';
         _param = {
           'userID': _userId,
           'urgency': _urgency,
@@ -998,7 +998,7 @@ class _SuperRequestState extends State<SuperRequest> {
   Widget build(BuildContext context) {
     return new Scaffold(
       appBar: new AppBar(
-        backgroundColor: Color(0xff4e8faf),
+        backgroundColor: Color(0xFF385A95),
         title: Text(widget.pageType==PageType.REQUEST?'客户请求列表':'派工单列表'),
       ),
       body: new RefreshIndicator(

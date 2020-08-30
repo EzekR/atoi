@@ -26,7 +26,8 @@ class _ComponentDetailState extends State<ComponentDetail> {
   Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
   String oid = '系统自动生成';
   EventBus bus = new EventBus();
-  Map manufacturer;
+  Map relatedEquipment;
+  Map componentDefinition;
   Map supplier;
   String purchaseDate = 'YYYY-MM-DD';
   List statusList = [
@@ -45,10 +46,11 @@ class _ComponentDetailState extends State<ComponentDetail> {
   ];
   String currentComponent;
   List equipmentComponents;
+  List<DropdownMenuItem<String>> componentsDropdown;
   String currentStatus;
   List statusItems;
 
-  TextEditingController serialCode, spec, model, price, comment = new TextEditingController();
+  TextEditingController serialCode = new TextEditingController(), spec = new TextEditingController(), model = new TextEditingController(), price = new TextEditingController(), comment = new TextEditingController();
 
   void initState() {
     super.initState();
@@ -70,16 +72,52 @@ class _ComponentDetailState extends State<ComponentDetail> {
     FocusScope.of(context).requestFocus(new FocusNode());
     setState(() {
       currentComponent = value;
+      componentDefinition = equipmentComponents.firstWhere((item) => item['Name']==value);
     });
+  }
+  
+  void getComponentsByFujiClass2(int fujiId) async {
+    Map resp = await HttpRequest.request('/InvComponent/QueryComponentsByFujiClass2ID',
+      method: HttpRequest.GET,
+      params: {
+        'fujiClass2ID': fujiId
+      }
+    );
+    if (resp['ResultCode'] == '00') {
+      setState(() {
+        equipmentComponents = resp['Data'];
+        componentsDropdown = resp['Data'].map<DropdownMenuItem<String>>((item) {
+          return DropdownMenuItem<String>(
+            value: item['Name'],
+            child: Center(
+              child: Text(
+                  item['Name']
+              ),
+            ),
+          );
+        }).toList();
+        //currentComponent = resp['Data'][0]['Name'];
+      });
+    }
   }
 
   Future<Null> getComponent() async {
-    var resp = await HttpRequest.request('/Supplier/GetSupplierById',
-        method: HttpRequest.GET, params: {'id': widget.component['ID']});
+    var resp = await HttpRequest.request('/InvComponent/GetComponentByID',
+        method: HttpRequest.GET, params: {'componentId': widget.component['ID']});
     if (resp['ResultCode'] == '00') {
       var _data = resp['Data'];
       setState(() {
         oid = _data['OID'];
+        serialCode.text = _data['SerialCode'];
+        spec.text = _data['Specification'];
+        model.text = _data['Model'];
+        price.text = _data['Price'].toString();
+        comment.text = _data['Comments'];
+        supplier = _data['Supplier'];
+        relatedEquipment = _data['Equipment'];
+        componentDefinition  =_data['Component'];
+        currentComponent = _data['Component']['Name'];
+        purchaseDate = _data['PurchaseDate'].toString().split('T')[0];
       });
     }
   }
@@ -88,67 +126,100 @@ class _ComponentDetailState extends State<ComponentDetail> {
     return new FocusNode();
   }).toList();
 
-  //Future<Null> saveComponent() async {
-  //  setState(() {
-  //    _isExpandedDetail = true;
-  //  });
-  //  if (name.text.isEmpty) {
-  //    showDialog(context: context, builder: (context) => CupertinoAlertDialog(
-  //      title: new Text('供应商名称不可为空'),
-  //    )).then((result) => FocusScope.of(context).requestFocus(_focusComponent[0]));
-  //    return;
-  //  }
-  //  if (province == "") {
-  //    showDialog(context: context, builder: (context) => CupertinoAlertDialog(
-  //      title: new Text('供应商省份不可为空'),
-  //    )).then((result) => FocusScope.of(context).requestFocus(_focusComponent[1]));
-  //    return;
-  //  }
-  //  if (contact.text.isEmpty) {
-  //    showDialog(context: context, builder: (context) => CupertinoAlertDialog(
-  //      title: new Text('供应商联系人不可为空'),
-  //    )).then((result) => FocusScope.of(context).requestFocus(_focusComponent[2]));
-  //    return;
-  //  }
-  //  var prefs = await _prefs;
-  //  var _info = {
-  //    "SupplierType": {
-  //      "ID": model.SupplierType[currentType],
-  //    },
-  //    "Name": name.text,
-  //    "Province": currentProvince,
-  //    "Mobile": mobile.text,
-  //    "Address": address.text,
-  //    "Contact": contact.text,
-  //    "ContactMobile": contactMobile.text,
-  //    "IsActive": currentStatus=='启用'?true:false,
-  //  };
-  //  if (widget.component != null) {
-  //    _info['ID'] = widget.component['ID'];
-  //  }
-  //  var _data = {
-  //    "userID": prefs.getInt('userID'),
-  //    "info": _info
-  //  };
-  //  var resp = await HttpRequest.request(
-  //      '/Supplier/SaveSupplier',
-  //      method: HttpRequest.POST,
-  //      data: _data
-  //  );
-  //  if (resp['ResultCode'] == '00') {
-  //    showDialog(context: context, builder: (context) {
-  //      return CupertinoAlertDialog(
-  //        title: new Text('保存成功'),
-  //      );
-  //    }).then((result) => Navigator.of(context).pop());
-  //  } else {
-  //    showDialog(context: context, builder: (context) {
-  //      return CupertinoAlertDialog(
-  //        title: new Text(resp['ResultMessage']),
-  //      );
-  //    });
-  //  }
-  //}
+  Future<Null> saveComponent() async {
+    setState(() {
+      _isExpandedDetail = true;
+    });
+    if (serialCode.text.isEmpty) {
+      showDialog(context: context, builder: (context) => CupertinoAlertDialog(
+        title: new Text('序列号不可为空'),
+      )).then((result) => FocusScope.of(context).requestFocus(_focusComponent[0]));
+      return;
+    }
+    if (spec.text.isEmpty) {
+      showDialog(context: context, builder: (context) => CupertinoAlertDialog(
+        title: new Text('规格不可为空'),
+      )).then((result) => FocusScope.of(context).requestFocus(_focusComponent[1]));
+      return;
+    }
+    if (model.text.isEmpty) {
+      showDialog(context: context, builder: (context) => CupertinoAlertDialog(
+        title: new Text('型号不可为空'),
+      )).then((result) => FocusScope.of(context).requestFocus(_focusComponent[2]));
+      return;
+    }
+    if (price.text.isEmpty) {
+      showDialog(context: context, builder: (context) => CupertinoAlertDialog(
+        title: new Text('单价不可为空'),
+      )).then((result) => FocusScope.of(context).requestFocus(_focusComponent[3]));
+      return;
+    }
+    if (purchaseDate == 'YYYY-MM-DD') {
+      showDialog(context: context, builder: (context) => CupertinoAlertDialog(
+        title: new Text('购入日期不可为空'),
+      )).then((result) => FocusScope.of(context).requestFocus(_focusComponent[8]));
+      return;
+    }
+    if (componentDefinition == null) {
+      showDialog(context: context, builder: (context) => CupertinoAlertDialog(
+        title: new Text('零件不可为空'),
+      )).then((result) => FocusScope.of(context).requestFocus(_focusComponent[8]));
+      return;
+    }
+    if (relatedEquipment == null) {
+      showDialog(context: context, builder: (context) => CupertinoAlertDialog(
+        title: new Text('关联设备不可为空'),
+      )).then((result) => FocusScope.of(context).requestFocus(_focusComponent[9]));
+      return;
+    }
+    var prefs = await _prefs;
+    Map _status = statusList.firstWhere((item) => item['text'] == currentStatus, orElse: null);
+    var _info = {
+      'Equipment': {
+        'ID': relatedEquipment['ID']
+      },
+      'Component': {
+        'ID': componentDefinition['ID']
+      },
+      'Supplier': {
+        'ID': supplier['ID']
+      },
+      'SerialCode': serialCode.text,
+      'Specification': spec.text,
+      'Model': model.text,
+      'Price': price.text,
+      'PurchaseDate': purchaseDate,
+      'Comments': comment.text,
+      'Status': {
+        'ID': _status['value']
+      }
+    };
+    if (widget.component != null) {
+      _info['ID'] = widget.component['ID'];
+    }
+    var _data = {
+      "userID": prefs.getInt('userID'),
+      "info": _info
+    };
+    var resp = await HttpRequest.request(
+        '/InvComponent/SaveComponent',
+        method: HttpRequest.POST,
+        data: _data
+    );
+    if (resp['ResultCode'] == '00') {
+      showDialog(context: context, builder: (context) {
+        return CupertinoAlertDialog(
+          title: new Text('保存成功'),
+        );
+      }).then((result) => Navigator.of(context).pop());
+    } else {
+      showDialog(context: context, builder: (context) {
+        return CupertinoAlertDialog(
+          title: new Text(resp['ResultMessage']),
+        );
+      });
+    }
+  }
 
   Padding buildRow(String labelText, String defaultText) {
     return new Padding(
@@ -222,7 +293,7 @@ class _ComponentDetailState extends State<ComponentDetail> {
                                 color: Colors.blue,
                               ),
                               title: Text(
-                                '供应商基本信息',
+                                '零件基本信息',
                                 style: new TextStyle(
                                     fontSize: 20.0,
                                     fontWeight: FontWeight.w400),
@@ -270,7 +341,7 @@ class _ComponentDetailState extends State<ComponentDetail> {
                                   new Expanded(
                                     flex: 4,
                                     child: new Text(
-                                      manufacturer == null ? '' : manufacturer['Name'],
+                                      relatedEquipment == null ? '' : relatedEquipment['Name'],
                                       style: new TextStyle(
                                           fontSize: 16.0,
                                           fontWeight: FontWeight.w400,
@@ -289,16 +360,17 @@ class _ComponentDetailState extends State<ComponentDetail> {
                                             if (_searchResult != null &&
                                                 _searchResult != 'null') {
                                               setState(() {
-                                                manufacturer = jsonDecode(_searchResult);
+                                                relatedEquipment = jsonDecode(_searchResult);
                                               });
+                                              getComponentsByFujiClass2(relatedEquipment['FujiClass2']['ID']);
                                             }
                                           })),
                                     ],
                                   ),
-                                ):BuildWidget.buildRow('关联设备', manufacturer==null?'':manufacturer['Name']),
-                                widget.editable?BuildWidget.buildDropdown('选择零件', currentComponent, equipmentComponents, changeComponent, required: true):BuildWidget.buildRow('选择零件', currentComponent),
-                                widget.editable?BuildWidget.buildInput('序列号', serialCode, maxLength: 20, focusNode: _focusComponent[3]):BuildWidget.buildRow('电话', serialCode.text),
-                                widget.editable?BuildWidget.buildInput('规格', spec, maxLength: 20, focusNode: _focusComponent[4]):BuildWidget.buildRow('地址', spec.text),
+                                ):BuildWidget.buildRow('关联设备', relatedEquipment==null?'':relatedEquipment['Name']),
+                                widget.editable&&widget.component==null?BuildWidget.buildDropdown('选择零件', currentComponent, componentsDropdown, changeComponent, required: true):BuildWidget.buildRow('选择零件', currentComponent??''),
+                                widget.editable?BuildWidget.buildInput('序列号', serialCode, maxLength: 20, focusNode: _focusComponent[0], required: true):BuildWidget.buildRow('电话', serialCode.text),
+                                widget.editable?BuildWidget.buildInput('规格', spec, maxLength: 20, focusNode: _focusComponent[1], required: true):BuildWidget.buildRow('地址', spec.text),
                                 widget.editable?BuildWidget.buildInput('型号', model, focusNode: _focusComponent[2], required: true):BuildWidget.buildRow('联系人', model.text),
                                 widget.editable?new Padding(
                                   padding: EdgeInsets.symmetric(vertical: 5.0),
@@ -363,7 +435,7 @@ class _ComponentDetailState extends State<ComponentDetail> {
                                     ],
                                   ),
                                 ):BuildWidget.buildRow('供应商', supplier==null?'':supplier['Name']),
-                                widget.editable?BuildWidget.buildInput('单价', price, maxLength: 20, focusNode: _focusComponent[5]):BuildWidget.buildRow('联系人电话', price.text),
+                                widget.editable?BuildWidget.buildInput('单价', price, maxLength: 20, focusNode: _focusComponent[3], required: true):BuildWidget.buildRow('联系人电话', price.text),
                                 widget.editable?new Padding(
                                   padding: EdgeInsets.symmetric(vertical: 5.0),
                                   child: new Row(
@@ -438,7 +510,7 @@ class _ComponentDetailState extends State<ComponentDetail> {
                                     ],
                                   ),
                                 ):BuildWidget.buildRow('购入日期', purchaseDate),
-                                widget.editable?BuildWidget.buildInput('备注', comment, maxLength: 20, focusNode: _focusComponent[5]):BuildWidget.buildRow('备注', comment.text),
+                                widget.editable?BuildWidget.buildInput('备注', comment, maxLength: 20, focusNode: _focusComponent[4]):BuildWidget.buildRow('备注', comment.text),
                                 widget.editable?BuildWidget.buildDropdown('状态', currentStatus, statusItems, changeComponent, required: true):BuildWidget.buildRow('状态', currentStatus),
                                 new Divider(),
                                 new Padding(
@@ -460,7 +532,7 @@ class _ComponentDetailState extends State<ComponentDetail> {
                         widget.editable?new RaisedButton(
                           onPressed: () {
                             FocusScope.of(context).requestFocus(new FocusNode());
-                            //saveComponent();
+                            saveComponent();
                           },
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(6),

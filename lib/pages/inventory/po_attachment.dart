@@ -491,3 +491,9 @@ class _POAttachmentState extends State<POAttachment> {
     );
   }
 }
+
+enum AttachmentType {
+  COMPONENT,
+  CONSUMABLE,
+  SERVICE
+}
