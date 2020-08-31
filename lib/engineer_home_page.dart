@@ -45,12 +45,14 @@ class _EngineerHomePageState extends State<EngineerHomePage>
   EventBus bus = new EventBus();
   bool showEquip = false;
   bool showTable = false;
+  bool limited = false;
 
   /// 获取用户信息
   Future<Null> getRole() async {
     var _prefs = await prefs;
     var userInfo = _prefs.getString('userInfo');
     var decoded = jsonDecode(userInfo);
+    limited = _prefs.getBool('limitEngineer');
     setState(() {
       _userName = decoded['Name'];
     });
@@ -522,7 +524,7 @@ class _EngineerHomePageState extends State<EngineerHomePage>
                   children: <Widget>[
                     new EngineerToStart(),
                     new EngineerToReport(),
-                    new EngineerMenu(),
+                    new EngineerMenu(limited: limited),
                   ],
                 ),
               floatingActionButton: currentTabIndex==2?Container():FloatingActionButton(
