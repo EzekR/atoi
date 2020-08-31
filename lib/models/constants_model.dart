@@ -99,7 +99,7 @@ class ConstantsModel extends Model {
     _POStatus = value;
   }
 
-  List<Map> get FujiClass2 => _FujiClass2;
+  List get FujiClass2 => _FujiClass2;
 
   set FujiClass2(List<Map> value) {
     _FujiClass2 = value;

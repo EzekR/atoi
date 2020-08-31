@@ -15,8 +15,8 @@ import 'package:date_format/date_format.dart';
 
 /// 耗材详情页
 class ConsumableDetail extends StatefulWidget {
-  ConsumableDetail({Key key, this.component, this.editable}) : super(key: key);
-  final Map component;
+  ConsumableDetail({Key key, this.consumable, this.editable}) : super(key: key);
+  final Map consumable;
   final bool editable;
   _ConsumableDetailState createState() => new _ConsumableDetailState();
 }
@@ -34,18 +34,20 @@ class _ConsumableDetailState extends State<ConsumableDetail> {
   List _fujiList = [];
 
   int _consumable = 0;
+  String _consumableName;
   List _consumableList = [];
 
   ConstantsModel cModel;
 
-  TextEditingController lotNum, spec, model, price, quantity, comments = new TextEditingController();
+  TextEditingController lotNum = new TextEditingController(), spec = new TextEditingController(), model = new TextEditingController(), price = new TextEditingController(), quantity = new TextEditingController(), comments = new TextEditingController();
 
   void initState() {
     super.initState();
-    if (widget.component != null) {
-      getComponent();
+    if (widget.consumable != null) {
+      getConsumable();
     }
     cModel = MainModel.of(context);
+    initFuji();
   }
 
   void initFuji() {
@@ -72,13 +74,25 @@ class _ConsumableDetailState extends State<ConsumableDetail> {
     });
   }
 
-  Future<Null> getComponent() async {
-    var resp = await HttpRequest.request('/Supplier/GetSupplierById',
-        method: HttpRequest.GET, params: {'id': widget.component['ID']});
+  Future<Null> getConsumable() async {
+    var resp = await HttpRequest.request('/InvConsumable/GetConsumableByID',
+        method: HttpRequest.GET, params: {'consumableID': widget.consumable['ID']});
     if (resp['ResultCode'] == '00') {
       var _data = resp['Data'];
       setState(() {
         oid = _data['OID'];
+        _fujiClass2 = _data['Consumable']['FujiClass2']['ID'];
+        _fujiClass2Name = _data['Consumable']['FujiClass2']['Name'];
+        _consumable = _data['Consumable']['ID'];
+        _consumableName = _data['Consumable']['Name'];
+        lotNum.text = _data['LotNum'];
+        spec.text = _data['Specification'];
+        model.text = _data['Model'];
+        price.text = _data['Price'].toString();
+        quantity.text = _data['Qty'].toString();
+        comments.text = _data['Comments'];
+        purchaseDate = _data['PurchaseDate'].toString().split('T')[0];
+        supplier = _data['Supplier'];
       });
     }
   }
@@ -87,67 +101,82 @@ class _ConsumableDetailState extends State<ConsumableDetail> {
     return new FocusNode();
   }).toList();
 
-  //Future<Null> saveComponent() async {
-  //  setState(() {
-  //    _isExpandedDetail = true;
-  //  });
-  //  if (name.text.isEmpty) {
-  //    showDialog(context: context, builder: (context) => CupertinoAlertDialog(
-  //      title: new Text('供应商名称不可为空'),
-  //    )).then((result) => FocusScope.of(context).requestFocus(_focusComponent[0]));
-  //    return;
-  //  }
-  //  if (province == "") {
-  //    showDialog(context: context, builder: (context) => CupertinoAlertDialog(
-  //      title: new Text('供应商省份不可为空'),
-  //    )).then((result) => FocusScope.of(context).requestFocus(_focusComponent[1]));
-  //    return;
-  //  }
-  //  if (contact.text.isEmpty) {
-  //    showDialog(context: context, builder: (context) => CupertinoAlertDialog(
-  //      title: new Text('供应商联系人不可为空'),
-  //    )).then((result) => FocusScope.of(context).requestFocus(_focusComponent[2]));
-  //    return;
-  //  }
-  //  var prefs = await _prefs;
-  //  var _info = {
-  //    "SupplierType": {
-  //      "ID": model.SupplierType[currentType],
-  //    },
-  //    "Name": name.text,
-  //    "Province": currentProvince,
-  //    "Mobile": mobile.text,
-  //    "Address": address.text,
-  //    "Contact": contact.text,
-  //    "ContactMobile": contactMobile.text,
-  //    "IsActive": currentStatus=='启用'?true:false,
-  //  };
-  //  if (widget.component != null) {
-  //    _info['ID'] = widget.component['ID'];
-  //  }
-  //  var _data = {
-  //    "userID": prefs.getInt('userID'),
-  //    "info": _info
-  //  };
-  //  var resp = await HttpRequest.request(
-  //      '/Supplier/SaveSupplier',
-  //      method: HttpRequest.POST,
-  //      data: _data
-  //  );
-  //  if (resp['ResultCode'] == '00') {
-  //    showDialog(context: context, builder: (context) {
-  //      return CupertinoAlertDialog(
-  //        title: new Text('保存成功'),
-  //      );
-  //    }).then((result) => Navigator.of(context).pop());
-  //  } else {
-  //    showDialog(context: context, builder: (context) {
-  //      return CupertinoAlertDialog(
-  //        title: new Text(resp['ResultMessage']),
-  //      );
-  //    });
-  //  }
-  //}
+  Future<Null> saveConsumable() async {
+    setState(() {
+      _isExpandedDetail = true;
+    });
+    if (lotNum.text.isEmpty) {
+      showDialog(context: context, builder: (context) => CupertinoAlertDialog(
+        title: new Text('批次号不可为空'),
+      )).then((result) => FocusScope.of(context).requestFocus(_focusComponent[0]));
+      return;
+    }
+    if (spec.text.isEmpty) {
+      showDialog(context: context, builder: (context) => CupertinoAlertDialog(
+        title: new Text('规格不可为空'),
+      )).then((result) => FocusScope.of(context).requestFocus(_focusComponent[1]));
+      return;
+    }
+    if (model.text.isEmpty) {
+      showDialog(context: context, builder: (context) => CupertinoAlertDialog(
+        title: new Text('型号不可为空'),
+      )).then((result) => FocusScope.of(context).requestFocus(_focusComponent[2]));
+      return;
+    }
+    if (price.text.isEmpty) {
+      showDialog(context: context, builder: (context) => CupertinoAlertDialog(
+        title: new Text('单价不可为空'),
+      )).then((result) => FocusScope.of(context).requestFocus(_focusComponent[2]));
+      return;
+    }
+    if (quantity.text.isEmpty) {
+      showDialog(context: context, builder: (context) => CupertinoAlertDialog(
+        title: new Text('可用数量不可为空'),
+      )).then((result) => FocusScope.of(context).requestFocus(_focusComponent[2]));
+      return;
+    }
+    var prefs = await _prefs;
+    var _info = {
+      "Consumable": {
+        "ID": _consumable,
+      },
+      "LotNum": lotNum.text,
+      "Specification": spec.text,
+      "Model": model.text,
+      "Price": price.text,
+      "ReceiveQty": quantity.text,
+      "Supplier": {
+        "ID": supplier['ID']
+      },
+      "PurchaseDate": purchaseDate,
+      "Comments": comments.text
+    };
+    if (widget.consumable != null) {
+      _info['ID'] = widget.consumable['ID'];
+    }
+    var _data = {
+      "userID": prefs.getInt('userID'),
+      "info": _info
+    };
+    var resp = await HttpRequest.request(
+        '/InvConsumable/SaveConsumable',
+        method: HttpRequest.POST,
+        data: _data
+    );
+    if (resp['ResultCode'] == '00') {
+      showDialog(context: context, builder: (context) {
+        return CupertinoAlertDialog(
+          title: new Text('保存成功'),
+        );
+      }).then((result) => Navigator.of(context).pop());
+    } else {
+      showDialog(context: context, builder: (context) {
+        return CupertinoAlertDialog(
+          title: new Text(resp['ResultMessage']),
+        );
+      });
+    }
+  }
 
   Row buildDropdown(String title, int currentItem, List dropdownItems, Function changeDropdown, {bool required}) {
     return new Row(
@@ -242,7 +271,7 @@ class _ConsumableDetailState extends State<ConsumableDetail> {
       builder: (context, child, mainModel) {
         return new Scaffold(
             appBar: new AppBar(
-              title: widget.editable?Text(widget.component==null?'新增耗材':'修改耗材'):Text('查看耗材'),
+              title: widget.editable?Text(widget.consumable==null?'新增耗材':'修改耗材'):Text('查看耗材'),
               elevation: 0.7,
               flexibleSpace: Container(
                 decoration: BoxDecoration(
@@ -282,7 +311,7 @@ class _ConsumableDetailState extends State<ConsumableDetail> {
                                 color: Colors.blue,
                               ),
                               title: Text(
-                                '供应商基本信息',
+                                widget.consumable!=null?'修改耗材':'新增耗材',
                                 style: new TextStyle(
                                     fontSize: 20.0,
                                     fontWeight: FontWeight.w400),
@@ -293,11 +322,12 @@ class _ConsumableDetailState extends State<ConsumableDetail> {
                             padding: EdgeInsets.symmetric(horizontal: 12.0),
                             child: new Column(
                               children: <Widget>[
-                                widget.editable?buildDropdown('富士二类', _fujiClass2, _fujiList, changeFuji, required: true):BuildWidget.buildRow('富士二类', _fujiClass2Name),
-                                widget.editable?buildDropdown('选择耗材', _consumable, _consumableList, changeFuji, required: true):BuildWidget.buildRow('选择耗材', _fujiClass2Name),
-                                widget.editable?BuildWidget.buildInput('批次号', lotNum, maxLength: 20, focusNode: _focusComponent[3]):BuildWidget.buildRow('批次号', lotNum.text),
-                                widget.editable?BuildWidget.buildInput('规格', spec, maxLength: 20, focusNode: _focusComponent[4]):BuildWidget.buildRow('地址', spec.text),
-                                widget.editable?BuildWidget.buildInput('型号', model, focusNode: _focusComponent[2], required: true):BuildWidget.buildRow('联系人', model.text),
+                                widget.consumable!=null?BuildWidget.buildRow('系统编号', oid):Container(),
+                                widget.editable&&widget.consumable==null?buildDropdown('富士二类', _fujiClass2, _fujiList, changeFuji, required: true):BuildWidget.buildRow('富士二类', _fujiClass2Name??''),
+                                widget.editable&&widget.consumable==null?buildDropdown('选择耗材', _consumable, _consumableList, changeFuji, required: true):BuildWidget.buildRow('选择耗材', _consumableName??''),
+                                widget.editable?BuildWidget.buildInput('批次号', lotNum, maxLength: 20, focusNode: _focusComponent[1], required: true):BuildWidget.buildRow('批次号', lotNum.text),
+                                widget.editable?BuildWidget.buildInput('规格', spec, maxLength: 20, focusNode: _focusComponent[2], required: true):BuildWidget.buildRow('地址', spec.text),
+                                widget.editable?BuildWidget.buildInput('型号', model, focusNode: _focusComponent[3], required: true):BuildWidget.buildRow('联系人', model.text),
                                 widget.editable?new Padding(
                                   padding: EdgeInsets.symmetric(vertical: 5.0),
                                   child: new Row(
@@ -361,8 +391,8 @@ class _ConsumableDetailState extends State<ConsumableDetail> {
                                     ],
                                   ),
                                 ):BuildWidget.buildRow('供应商', supplier==null?'':supplier['Name']),
-                                widget.editable?BuildWidget.buildInput('单价', price, maxLength: 20, focusNode: _focusComponent[5]):BuildWidget.buildRow('联系人电话', price.text),
-                                widget.editable?BuildWidget.buildInput('入库数量', quantity, focusNode: _focusComponent[2], required: true):BuildWidget.buildRow('入库数量', quantity.text),
+                                widget.editable?BuildWidget.buildInput('单价', price, maxLength: 20, focusNode: _focusComponent[4], required: true):BuildWidget.buildRow('联系人电话', price.text),
+                                widget.editable?BuildWidget.buildInput('入库数量', quantity, focusNode: _focusComponent[5], required: true):BuildWidget.buildRow('入库数量', quantity.text),
                                 widget.editable?new Padding(
                                   padding: EdgeInsets.symmetric(vertical: 5.0),
                                   child: new Row(
@@ -437,7 +467,7 @@ class _ConsumableDetailState extends State<ConsumableDetail> {
                                     ],
                                   ),
                                 ):BuildWidget.buildRow('购入日期', purchaseDate),
-                                widget.editable?BuildWidget.buildInput('备注', comments, maxLength: 100, focusNode: _focusComponent[5]):BuildWidget.buildRow('备注', comments.text),
+                                widget.editable?BuildWidget.buildInput('备注', comments, maxLength: 100, focusNode: _focusComponent[6]):BuildWidget.buildRow('备注', comments.text),
                                 new Divider(),
                                 new Padding(
                                     padding:
@@ -458,7 +488,7 @@ class _ConsumableDetailState extends State<ConsumableDetail> {
                         widget.editable?new RaisedButton(
                           onPressed: () {
                             FocusScope.of(context).requestFocus(new FocusNode());
-                            //saveComponent();
+                            saveConsumable();
                           },
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(6),

@@ -233,7 +233,7 @@ class _ConsumableListState extends State<ConsumableList> {
   Future<Null> getConsumable({String filterText}) async {
     filterText = filterText??'';
     var resp = await HttpRequest.request(
-        '/InvComponent/QueryConsumableList',
+        '/InvConsumable/QueryConsumableList',
         method: HttpRequest.GET,
         params: {
           'filterText': _keywords.text,
@@ -245,6 +245,7 @@ class _ConsumableListState extends State<ConsumableList> {
     if (resp['ResultCode'] == '00') {
       setState(() {
         _consumable.addAll(resp['Data']);
+        _loading = false;
       });
     }
   }
@@ -524,18 +525,14 @@ class _ConsumableListState extends State<ConsumableList> {
               new RaisedButton(
                 onPressed: (){
                   Navigator.of(context).push(new MaterialPageRoute(builder: (_) {
-                    return new ConsumableDetail(component: item, editable: _editable,);
+                    return new ConsumableDetail(consumable: item, editable: _editable,);
                   })).then((result) {
                     setState(() {
                       _loading = true;
                       _consumable.clear();
                       offset = 0;
                     });
-                    getConsumable().then((result) {
-                      setState(() {
-                        _loading = false;
-                      });
-                    });
+                    getConsumable();
                   });
                 },
                 shape: RoundedRectangleBorder(
