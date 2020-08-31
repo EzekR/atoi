@@ -24,7 +24,15 @@ class ManagerModel extends Model {
   String _startDate = '';
   String _endDate = '';
   int _statusId = 98;
-  int _typeId =0;
+  int _typeId = 0;
+  List _typeList = [];
+
+  List get typeList => _typeList;
+
+  set typeList(List value) {
+    _typeList = value;
+  }
+
   bool _recall = false;
   int _departmentId = -1;
   int _urgencyId = 0;
@@ -142,8 +150,12 @@ class ManagerModel extends Model {
     Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
     var prefs = await _prefs;
     var userID = await prefs.getInt('userID');
+    String _urlType = 'typeID=$_typeId';
+    if (_typeList.isNotEmpty) {
+      _urlType = _typeList.map((item) => 'typeID=$item').join('&');
+    }
     var resp = await HttpRequest.request(
-      '/Request/GetRequests?userID=${userID}&PageSize=10&CurRowNum=0&statusID=$_statusId&typeID=$_typeId&isRecall=$_recall&department=$_departmentId&urgency=$_urgencyId&overDue=$_overDue&startDate=$_startDate&endDate=$_endDate&filterField=$_field&filterText=$_text&source=$_source',
+      '/Request/GetRequests?userID=${userID}&PageSize=10&CurRowNum=0&statusID=$_statusId&isRecall=$_recall&department=$_departmentId&urgency=$_urgencyId&overDue=$_overDue&startDate=$_startDate&endDate=$_endDate&filterField=$_field&filterText=$_text&source=$_source&$_urlType',
       method: HttpRequest.GET,
     );
     print(resp);
@@ -161,8 +173,12 @@ class ManagerModel extends Model {
     Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
     var prefs = await _prefs;
     var userID = await prefs.getInt('userID');
+    String _urlType = 'typeID=$_typeId';
+    if (_typeList.isNotEmpty) {
+      _urlType = _typeList.map((item) => 'typeID=$item').join('&');
+    }
     var resp = await HttpRequest.request(
-      '/Request/GetRequests?userID=${userID}&PageSize=10&CurRowNum=$_offset&statusID=$_statusId&typeID=$_typeId&isRecall=$_recall&department=$_departmentId&urgency=$_urgencyId&overDue=$_overDue&startDate=$_startDate&endDate=$_endDate&filterField=$_field&filterText=$_text&source=$_source',
+      '/Request/GetRequests?userID=${userID}&PageSize=10&CurRowNum=0&statusID=$_statusId&isRecall=$_recall&department=$_departmentId&urgency=$_urgencyId&overDue=$_overDue&startDate=$_startDate&endDate=$_endDate&filterField=$_field&filterText=$_text&source=$_source&$_urlType',
       method: HttpRequest.GET,
     );
     print(resp);
