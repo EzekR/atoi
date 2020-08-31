@@ -97,6 +97,8 @@ class _LoginPageState extends State<LoginPage> {
       method: HttpRequest.GET,
     );
     if (resp['ResultCode'] == '00') {
+      SharedPreferences _prefs = await prefs;
+      _prefs.setBool('limitEngineer', resp['LimitEngineer']);
       var _version = resp['Data']['AppValidVersion'].split('.');
       var _currentVersion = HttpRequest.APP_VERSION.split('.');
       if (_version.length>1&&(int.tryParse(_version[0]) >int.parse(_currentVersion[0]) || int.tryParse(_version[1])>int.parse(_currentVersion[1]))) {

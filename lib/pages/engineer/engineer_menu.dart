@@ -2,6 +2,11 @@ import 'package:flutter/material.dart';
 
 /// 工程师菜单类
 class EngineerMenu extends StatelessWidget {
+
+  final bool limited;
+
+  EngineerMenu({Key key, this.limited}):super();
+
   @override
   Widget build(BuildContext context) {
     // TODO: implement build
@@ -16,7 +21,7 @@ class EngineerMenu extends StatelessWidget {
           new IconButton(
             icon: new Icon(icon),
             onPressed: () {
-              Navigator.of(context).pushNamed(type);
+              limited?null:Navigator.of(context).pushNamed(type);
             },
             color: color,
             iconSize: 50.0,

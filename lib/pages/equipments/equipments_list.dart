@@ -5,7 +5,6 @@ import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:atoi/pages/equipments/print_qrcode.dart';
 import 'package:atoi/widgets/build_widget.dart';
 import 'package:atoi/pages/equipments/equipment_detail.dart';
-import 'package:timeline_list/timeline.dart';
 import 'package:timeline_list/timeline_model.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:atoi/pages/manager/manager_complete_page.dart';
@@ -48,10 +47,12 @@ class _EquipmentsListState extends State<EquipmentsList> {
   bool _noMore = false;
   int offset = 0;
   int role;
+  bool limited = false;
 
   Future<Null> getRole() async {
     var _prefs = await prefs;
     role = _prefs.getInt('role');
+    limited = _prefs.getBool('limitEngineer');
     _editable = role==1?true:false;
   }
 
@@ -841,7 +842,7 @@ class _EquipmentsListState extends State<EquipmentsList> {
                   //} else {
                   //  showDialog(context: context, builder: (context) => CupertinoAlertDialog(title: new Text('暂无事件'),));
                   //}
-                  Navigator.of(context).push(new MaterialPageRoute(builder: (_) => new Dashboard(equipmentId: item['ID'],)));
+                  limited?null:Navigator.of(context).push(new MaterialPageRoute(builder: (_) => new Dashboard(equipmentId: item['ID'],)));
                 },
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(6),
