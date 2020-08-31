@@ -61,6 +61,7 @@ class _HomePageState extends State<HomePage>
   EventBus bus = new EventBus();
   bool showEquip = false;
   bool showTable = false;
+  List selectedTypes = [];
 
   Future<Null> getRole() async {
     var _prefs = await prefs;
@@ -114,6 +115,7 @@ class _HomePageState extends State<HomePage>
     model.startDate = formatDate(_start, [yyyy, '-', mm, '-', dd]);
     model.endDate = formatDate(_end, [yyyy, '-', mm, '-', dd]);
     model.typeId = 0;
+    model.typeList = [];
     model.statusId = 98;
     model.field = 'r.ID';
     model.text = '';
@@ -130,6 +132,7 @@ class _HomePageState extends State<HomePage>
       endDate = formatDate(_end, [yyyy, '-', mm, '-', dd]);
       typeList = initList(cModel.RequestType);
       typeId = typeList[0]['value'];
+      selectedTypes = [];
       statusList = initList(cModel.RequestStatus);
       sourceList = initList(cModel.Sources);
       source = sourceList[0]['value'];
@@ -162,6 +165,7 @@ class _HomePageState extends State<HomePage>
     model.offset = 10;
     model.dispatchStatusId = dispatchStatusId;
     model.source = source;
+    model.typeList = selectedTypes;
     switch (_currentTabIndex) {
       case 1:
         model.getRequests();
@@ -233,6 +237,148 @@ class _HomePageState extends State<HomePage>
                 height: 300.0,
                 child: ListView(
                   children: <Widget>[
+                    Row(
+                      children: <Widget>[
+                        SizedBox(width: 16.0,),
+                        Text('快速筛选', style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.w600),)
+                      ],
+                    ),
+                    SizedBox(height: 6.0,),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: <Widget>[
+                        Container(
+                          width: 50.0,
+                          height: 30.0,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(5.0),
+                            border: Border.all(
+                                color: Color(0xff3394B9),
+                                width: 1.0
+                            ),
+                            color: selectedTypes.contains(1)?Color(0xff3394B9):Color(0xffEBF9FF),
+                          ),
+                          child: GestureDetector(
+                            onTap: () {
+                              setState(() {
+                                selectedTypes.contains(1)?selectedTypes.remove(1):selectedTypes.add(1);
+                              });
+                            },
+                            child: Center(
+                              child: Text('维修',
+                                style: TextStyle(
+                                  color: selectedTypes.contains(1)?Colors.white:Colors.black54,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                        Container(
+                          width: 50.0,
+                          height: 30.0,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(5.0),
+                            border: Border.all(
+                                color: Color(0xff3394B9),
+                                width: 1.0
+                            ),
+                            color: selectedTypes.contains(2)?Color(0xff3394B9):Color(0xffEBF9FF),
+                          ),
+                          child: GestureDetector(
+                            onTap: () {
+                              setState(() {
+                                selectedTypes.contains(2)?selectedTypes.remove(2):selectedTypes.add(2);
+                              });
+                            },
+                            child: Center(
+                              child: Text('保养',
+                                style: TextStyle(
+                                  color: selectedTypes.contains(2)?Colors.white:Colors.black54,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                        Container(
+                          width: 50.0,
+                          height: 30.0,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(5.0),
+                            border: Border.all(
+                                color: Color(0xff3394B9),
+                                width: 1.0
+                            ),
+                            color: selectedTypes.contains(4)?Color(0xff3394B9):Color(0xffEBF9FF),
+                          ),
+                          child: GestureDetector(
+                            onTap: () {
+                              setState(() {
+                                selectedTypes.contains(4)?selectedTypes.remove(4):selectedTypes.add(4);
+                              });
+                            },
+                            child: Center(
+                              child: Text('巡检',
+                                style: TextStyle(
+                                  color: selectedTypes.contains(4)?Colors.white:Colors.black54,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                        Container(
+                          width: 50.0,
+                          height: 30.0,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(5.0),
+                            border: Border.all(
+                                color: Color(0xff3394B9),
+                                width: 1.0
+                            ),
+                            color: selectedTypes.contains(3)?Color(0xff3394B9):Color(0xffEBF9FF),
+                          ),
+                          child: GestureDetector(
+                            onTap: () {
+                              setState(() {
+                                selectedTypes.contains(3)?selectedTypes.remove(3):selectedTypes.add(3);
+                              });
+                            },
+                            child: Center(
+                              child: Text('强检',
+                                style: TextStyle(
+                                  color: selectedTypes.contains(3)?Colors.white:Colors.black54,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                        Container(
+                          width: 50.0,
+                          height: 30.0,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(5.0),
+                            border: Border.all(
+                                color: Color(0xff3394B9),
+                                width: 1.0
+                            ),
+                            color: selectedTypes.contains(5)?Color(0xff3394B9):Color(0xffEBF9FF),
+                          ),
+                          child: GestureDetector(
+                            onTap: () {
+                              setState(() {
+                                selectedTypes.contains(5)?selectedTypes.remove(5):selectedTypes.add(5);
+                              });
+                            },
+                            child: Center(
+                              child: Text('校准',
+                                style: TextStyle(
+                                  color: selectedTypes.contains(5)?Colors.white:Colors.black54,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                     SizedBox(height: 18.0,),
                     Row(
                       children: <Widget>[
@@ -538,10 +684,12 @@ class _HomePageState extends State<HomePage>
                                     );
                                   }).toList(),
                                   onChanged: (val) {
-                                    FocusScope.of(context).requestFocus(new FocusNode());
-                                    setState(() {
-                                      typeId = val;
-                                    });
+                                    if (selectedTypes.length == 0) {
+                                      FocusScope.of(context).requestFocus(new FocusNode());
+                                      setState(() {
+                                        typeId = val;
+                                      });
+                                    }
                                   },
                                 )
                               ],
@@ -745,6 +893,7 @@ class _HomePageState extends State<HomePage>
                     child: Center(
                       child: FlatButton(onPressed: () {
                         setState(() {
+                          selectedTypes.clear();
                           filterText.clear();
                           field = _currentTabIndex==2?'d.ID':'r.ID';
                           recall = false;
