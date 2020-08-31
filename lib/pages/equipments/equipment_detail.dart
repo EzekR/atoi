@@ -494,7 +494,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
           children: <Widget>[
             new Container(
               width: 300.0,
-              height: periodList.length<=5?200:periodList.length*41.0,
+              height: periodList.length<=5?200:periodList.length*41.5,
               child: periodList.length==0?Center(
                 child: Text(
                     '暂无计划服务生成时间',
