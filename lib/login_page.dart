@@ -98,7 +98,7 @@ class _LoginPageState extends State<LoginPage> {
     );
     if (resp['ResultCode'] == '00') {
       SharedPreferences _prefs = await prefs;
-      _prefs.setBool('limitEngineer', resp['LimitEngineer']);
+      _prefs.setBool('limitEngineer', resp['Data']['LimitEngineer']);
       var _version = resp['Data']['AppValidVersion'].split('.');
       var _currentVersion = HttpRequest.APP_VERSION.split('.');
       if (_version.length>1&&(int.tryParse(_version[0]) >int.parse(_currentVersion[0]) || int.tryParse(_version[1])>int.parse(_currentVersion[1]))) {
@@ -110,6 +110,17 @@ class _LoginPageState extends State<LoginPage> {
         );
         return;
       }
+    }
+  }
+
+  void getLimited() async {
+    Map resp = await HttpRequest.request(
+      '/User/GetSystemSetting',
+      method: HttpRequest.GET,
+    );
+    if (resp['ResultCode'] == '00') {
+      SharedPreferences _prefs = await prefs;
+      _prefs.setBool('limitEngineer', resp['Data']['LimitEngineer']);
     }
   }
 
@@ -193,6 +204,7 @@ class _LoginPageState extends State<LoginPage> {
     setState(() {
       _loading = !_loading;
     });
+    getLimited();
     var _data = await HttpRequest.request(
       '/User/Login',
       method: HttpRequest.POST,

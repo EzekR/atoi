@@ -3216,7 +3216,7 @@ class _DashboardState extends State<Dashboard> {
             ),
           ),
           Container(
-            height: MediaQuery.of(context).size.height-100,
+            height: MediaQuery.of(context).size.height-110,
             color: Color(0xffd8e0ee),
             child: Stack(
               children: <Widget>[
