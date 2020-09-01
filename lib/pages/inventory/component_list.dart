@@ -328,6 +328,9 @@ class _ComponentListState extends State<ComponentList> {
         mainAxisSize: MainAxisSize.max,
         children: <Widget>[
           ListTile(
+            onTap:() {
+              Navigator.of(context).push(new MaterialPageRoute(builder: (context) => new ComponentDetail(component: item, editable: false,)));
+            },
             leading: Icon(
               Icons.settings_applications,
               color: Color(0xff14BD98),

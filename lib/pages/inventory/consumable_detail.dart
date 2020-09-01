@@ -33,7 +33,7 @@ class _ConsumableDetailState extends State<ConsumableDetail> {
   String _fujiClass2Name;
   List _fujiList = [];
 
-  int _consumable = 0;
+  int _consumable;
   String _consumableName;
   List _consumableList = [];
 
@@ -72,6 +72,36 @@ class _ConsumableDetailState extends State<ConsumableDetail> {
     setState(() {
       _fujiClass2 = value;
     });
+    getConsumableByFuji(value);
+  }
+
+  void changeConsumable(value) {
+    FocusScope.of(context).requestFocus(new FocusNode());
+    setState(() {
+      _consumable = value;
+    });
+  }
+
+  void getConsumableByFuji(int fujiClass) async {
+    Map resp = await HttpRequest.request(
+      '/InvConsumable/QueryConsumablesByFujiClass2ID',
+      method: HttpRequest.GET,
+      params: {
+        'fujiClass2Id': fujiClass
+      }
+    );
+    if (resp['ResultCode'] == '00') {
+      List _data = resp['Data'];
+      _consumableList = _data.map((item) {
+        return {
+          'value': item['ID'],
+          'text': item['Name']
+        };
+      }).toList();
+      setState(() {
+        _consumableList = _consumableList;
+      });
+    }
   }
 
   Future<Null> getConsumable() async {
@@ -324,10 +354,10 @@ class _ConsumableDetailState extends State<ConsumableDetail> {
                               children: <Widget>[
                                 widget.consumable!=null?BuildWidget.buildRow('系统编号', oid):Container(),
                                 widget.editable&&widget.consumable==null?buildDropdown('富士二类', _fujiClass2, _fujiList, changeFuji, required: true):BuildWidget.buildRow('富士二类', _fujiClass2Name??''),
-                                widget.editable&&widget.consumable==null?buildDropdown('选择耗材', _consumable, _consumableList, changeFuji, required: true):BuildWidget.buildRow('选择耗材', _consumableName??''),
+                                widget.editable&&widget.consumable==null?buildDropdown('选择耗材', _consumable, _consumableList, changeConsumable, required: true):BuildWidget.buildRow('选择耗材', _consumableName??''),
                                 widget.editable?BuildWidget.buildInput('批次号', lotNum, maxLength: 20, focusNode: _focusComponent[1], required: true):BuildWidget.buildRow('批次号', lotNum.text),
-                                widget.editable?BuildWidget.buildInput('规格', spec, maxLength: 20, focusNode: _focusComponent[2], required: true):BuildWidget.buildRow('地址', spec.text),
-                                widget.editable?BuildWidget.buildInput('型号', model, focusNode: _focusComponent[3], required: true):BuildWidget.buildRow('联系人', model.text),
+                                widget.editable?BuildWidget.buildInput('规格', spec, maxLength: 20, focusNode: _focusComponent[2], required: true):BuildWidget.buildRow('规格', spec.text),
+                                widget.editable?BuildWidget.buildInput('型号', model, focusNode: _focusComponent[3], required: true):BuildWidget.buildRow('型号', model.text),
                                 widget.editable?new Padding(
                                   padding: EdgeInsets.symmetric(vertical: 5.0),
                                   child: new Row(
@@ -391,7 +421,7 @@ class _ConsumableDetailState extends State<ConsumableDetail> {
                                     ],
                                   ),
                                 ):BuildWidget.buildRow('供应商', supplier==null?'':supplier['Name']),
-                                widget.editable?BuildWidget.buildInput('单价', price, maxLength: 20, focusNode: _focusComponent[4], required: true):BuildWidget.buildRow('联系人电话', price.text),
+                                widget.editable?BuildWidget.buildInput('单价', price, maxLength: 20, focusNode: _focusComponent[4], required: true):BuildWidget.buildRow('单价', price.text),
                                 widget.editable?BuildWidget.buildInput('入库数量', quantity, focusNode: _focusComponent[5], required: true):BuildWidget.buildRow('入库数量', quantity.text),
                                 widget.editable?new Padding(
                                   padding: EdgeInsets.symmetric(vertical: 5.0),

@@ -13,48 +13,7 @@ class POList extends StatefulWidget{
 
 class _POListState extends State<POList> {
 
-  List<dynamic> _purchaseOrders = [
-    {
-      "User": {
-        "Name": "杨",
-        "Role": {
-          "ID": 0
-        },
-        "IsActive": false,
-        "LastLoginDate": null,
-        "CreatedDate": null,
-        "VerifyStatus": {
-          "ID": 0
-        },
-        "Department": {
-          "ID": 0
-        },
-        "HasOpenDispatch": false,
-        "ID": 41
-      },
-      "Supplier": {
-        "SupplierType": {
-          "ID": 0
-        },
-        "Name": "terk",
-        "AddDate": null,
-        "IsActive": false,
-        "OID": "GYS00000001",
-        "ID": 1
-      },
-      "OrderDate": "2020-08-14T00:00:00",
-      "DueDate": "2020-08-14T00:00:00",
-      "Comments": "",
-      "Status": {
-        "ID": 1,
-        "Name": "新建"
-      },
-      "AddDate": "2020-08-14T16:14:00",
-      "UpdateDate": "2020-08-17T09:42:41",
-      "OID": "CGD00000001",
-      "ID": 1
-    }
-  ];
+  List<dynamic> _purchaseOrders = [];
 
   bool isSearchState = false;
   bool _loading = false;
@@ -122,7 +81,7 @@ class _POListState extends State<POList> {
   Future<Null> getPurchaseOrder({String filterText}) async {
     filterText = filterText??'';
     var resp = await HttpRequest.request(
-        '/InvComponent/QueryPurchaseOrderList',
+        '/PurchaseOrder/QueryPurchaseOrderList',
         method: HttpRequest.GET,
         params: {
           'filterText': _keywords.text,
@@ -319,12 +278,12 @@ class _POListState extends State<POList> {
     super.initState();
     cModel = MainModel.of(context);
     initFilter();
-    //setState(() {
-    //  _loading = true;
-    //});
-    //getPurchaseOrder().then((result) => setState(() {
-    //  _loading = false;
-    //}));
+    setState(() {
+      _loading = true;
+    });
+    getPurchaseOrder().then((result) => setState(() {
+      _loading = false;
+    }));
     getRole();
     _scrollController.addListener(() {
       if (_scrollController.position.pixels == _scrollController.position.maxScrollExtent) {

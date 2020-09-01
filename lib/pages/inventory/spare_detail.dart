@@ -13,8 +13,8 @@ import 'package:date_format/date_format.dart';
 
 /// 备件详情页
 class SpareDetail extends StatefulWidget {
-  SpareDetail({Key key, this.component, this.editable}) : super(key: key);
-  final Map component;
+  SpareDetail({Key key, this.spare, this.editable}) : super(key: key);
+  final Map spare;
   final bool editable;
   _SpareDetailState createState() => new _SpareDetailState();
 }
@@ -34,11 +34,13 @@ class _SpareDetailState extends State<SpareDetail> {
 
   ConstantsModel cModel;
 
-  TextEditingController serialCode, price = new TextEditingController();
+  TextEditingController serialCode = new TextEditingController(), price = new TextEditingController();
 
   void initState() {
     super.initState();
     cModel = MainModel.of(context);
+    initFuji();
+    getSpare();
   }
 
   void initFuji() {
@@ -65,13 +67,19 @@ class _SpareDetailState extends State<SpareDetail> {
     });
   }
 
-  Future<Null> getComponent() async {
-    var resp = await HttpRequest.request('/Supplier/GetSupplierById',
-        method: HttpRequest.GET, params: {'id': widget.component['ID']});
+  Future<Null> getSpare() async {
+    var resp = await HttpRequest.request('/InvSpare/GetSpareByID',
+        method: HttpRequest.GET, params: {'spareId': widget.spare['ID']});
     if (resp['ResultCode'] == '00') {
       var _data = resp['Data'];
       setState(() {
         oid = _data['OID'];
+        _fujiClass2 = _data['FujiClass2']['ID'];
+        _fujiClass2Name = _data['FujiClass2']['Name'];
+        serialCode.text = _data['SerialCode'];
+        price.text = _data['Price'].toString();
+        startDate = _data['StartDate'].toString().split('T')[0];
+        endDate = _data['EndDate'].toString().split('T')[0];
       });
     }
   }
@@ -80,67 +88,70 @@ class _SpareDetailState extends State<SpareDetail> {
     return new FocusNode();
   }).toList();
 
-  //Future<Null> saveComponent() async {
-  //  setState(() {
-  //    _isExpandedDetail = true;
-  //  });
-  //  if (name.text.isEmpty) {
-  //    showDialog(context: context, builder: (context) => CupertinoAlertDialog(
-  //      title: new Text('供应商名称不可为空'),
-  //    )).then((result) => FocusScope.of(context).requestFocus(_focusComponent[0]));
-  //    return;
-  //  }
-  //  if (province == "") {
-  //    showDialog(context: context, builder: (context) => CupertinoAlertDialog(
-  //      title: new Text('供应商省份不可为空'),
-  //    )).then((result) => FocusScope.of(context).requestFocus(_focusComponent[1]));
-  //    return;
-  //  }
-  //  if (contact.text.isEmpty) {
-  //    showDialog(context: context, builder: (context) => CupertinoAlertDialog(
-  //      title: new Text('供应商联系人不可为空'),
-  //    )).then((result) => FocusScope.of(context).requestFocus(_focusComponent[2]));
-  //    return;
-  //  }
-  //  var prefs = await _prefs;
-  //  var _info = {
-  //    "SupplierType": {
-  //      "ID": model.SupplierType[currentType],
-  //    },
-  //    "Name": name.text,
-  //    "Province": currentProvince,
-  //    "Mobile": mobile.text,
-  //    "Address": address.text,
-  //    "Contact": contact.text,
-  //    "ContactMobile": contactMobile.text,
-  //    "IsActive": currentStatus=='启用'?true:false,
-  //  };
-  //  if (widget.component != null) {
-  //    _info['ID'] = widget.component['ID'];
-  //  }
-  //  var _data = {
-  //    "userID": prefs.getInt('userID'),
-  //    "info": _info
-  //  };
-  //  var resp = await HttpRequest.request(
-  //      '/Supplier/SaveSupplier',
-  //      method: HttpRequest.POST,
-  //      data: _data
-  //  );
-  //  if (resp['ResultCode'] == '00') {
-  //    showDialog(context: context, builder: (context) {
-  //      return CupertinoAlertDialog(
-  //        title: new Text('保存成功'),
-  //      );
-  //    }).then((result) => Navigator.of(context).pop());
-  //  } else {
-  //    showDialog(context: context, builder: (context) {
-  //      return CupertinoAlertDialog(
-  //        title: new Text(resp['ResultMessage']),
-  //      );
-  //    });
-  //  }
-  //}
+  Future<Null> saveSpare() async {
+    setState(() {
+      _isExpandedDetail = true;
+    });
+    if (serialCode.text.isEmpty) {
+      showDialog(context: context, builder: (context) => CupertinoAlertDialog(
+        title: new Text('序列号不可为空'),
+      )).then((result) => FocusScope.of(context).requestFocus(_focusComponent[0]));
+      return;
+    }
+    if (price.text.isEmpty) {
+      showDialog(context: context, builder: (context) => CupertinoAlertDialog(
+        title: new Text('月租不可为空'),
+      )).then((result) => FocusScope.of(context).requestFocus(_focusComponent[1]));
+      return;
+    }
+    if (startDate == 'YYYY-MM-DD') {
+      showDialog(context: context, builder: (context) => CupertinoAlertDialog(
+        title: new Text('开始日期不可为空'),
+      )).then((result) => FocusScope.of(context).requestFocus(_focusComponent[2]));
+      return;
+    }
+    if (endDate == 'YYYY-MM-DD') {
+      showDialog(context: context, builder: (context) => CupertinoAlertDialog(
+        title: new Text('结束日期不可为空'),
+      )).then((result) => FocusScope.of(context).requestFocus(_focusComponent[2]));
+      return;
+    }
+    var prefs = await _prefs;
+    var _info = {
+      'FujiClass2': {
+        'ID': _fujiClass2,
+      },
+      'SerialCode': serialCode.text,
+      'Price': price.text,
+      'StartDate': startDate,
+      'EndDate': endDate
+    };
+    if (widget.spare != null) {
+      _info['ID'] = widget.spare['ID'];
+    }
+    var _data = {
+      "userID": prefs.getInt('userID'),
+      "info": _info
+    };
+    var resp = await HttpRequest.request(
+        '/InvSpare/SaveSpare',
+        method: HttpRequest.POST,
+        data: _data
+    );
+    if (resp['ResultCode'] == '00') {
+      showDialog(context: context, builder: (context) {
+        return CupertinoAlertDialog(
+          title: new Text('保存成功'),
+        );
+      }).then((result) => Navigator.of(context).pop());
+    } else {
+      showDialog(context: context, builder: (context) {
+        return CupertinoAlertDialog(
+          title: new Text(resp['ResultMessage']),
+        );
+      });
+    }
+  }
 
   Row buildDropdown(String title, int currentItem, List dropdownItems, Function changeDropdown, {bool required}) {
     return new Row(
@@ -235,7 +246,7 @@ class _SpareDetailState extends State<SpareDetail> {
       builder: (context, child, mainModel) {
         return new Scaffold(
             appBar: new AppBar(
-              title: widget.editable?Text(widget.component==null?'新增备件':'修改备件'):Text('查看备件'),
+              title: widget.editable?Text(widget.spare==null?'新增备件':'修改备件'):Text('查看备件'),
               elevation: 0.7,
               flexibleSpace: Container(
                 decoration: BoxDecoration(
@@ -286,8 +297,8 @@ class _SpareDetailState extends State<SpareDetail> {
                             padding: EdgeInsets.symmetric(horizontal: 12.0),
                             child: new Column(
                               children: <Widget>[
-                                widget.editable?buildDropdown('富士二类', _fujiClass2, _fujiList, changeFuji, required: true):BuildWidget.buildRow('富士二类', _fujiClass2Name),
-                                widget.editable?BuildWidget.buildInput('序列号', serialCode, maxLength: 20, focusNode: _focusComponent[3]):BuildWidget.buildRow('序列号', serialCode.text),
+                                widget.editable&&widget.spare==null?buildDropdown('富士二类', _fujiClass2, _fujiList, changeFuji, required: true):BuildWidget.buildRow('富士二类', _fujiClass2Name??''),
+                                widget.editable?BuildWidget.buildInput('序列号', serialCode, maxLength: 20, focusNode: _focusComponent[2]):BuildWidget.buildRow('序列号', serialCode.text),
                                 widget.editable?BuildWidget.buildInput('月租', price, maxLength: 20, focusNode: _focusComponent[3]):BuildWidget.buildRow('月租', price.text),
                                 widget.editable?new Padding(
                                   padding: EdgeInsets.symmetric(vertical: 5.0),
@@ -457,7 +468,7 @@ class _SpareDetailState extends State<SpareDetail> {
                         widget.editable?new RaisedButton(
                           onPressed: () {
                             FocusScope.of(context).requestFocus(new FocusNode());
-                            //saveComponent();
+                            saveSpare();
                           },
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(6),
@@ -484,7 +495,8 @@ class _SpareDetailState extends State<SpareDetail> {
                   ],
                 ),
               ),
-            ));
+            )
+        );
       },
     );
   }

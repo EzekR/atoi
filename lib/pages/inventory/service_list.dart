@@ -155,7 +155,7 @@ class _ServiceListState extends State<ServiceList> {
   Future<Null> getServices({String filterText}) async {
     filterText = filterText??'';
     var resp = await HttpRequest.request(
-        '/InvComponent/QueryServiceList',
+        '/InvService/QueryServiceList',
         method: HttpRequest.GET,
         params: {
           'filterText': _keywords.text,
@@ -356,12 +356,12 @@ class _ServiceListState extends State<ServiceList> {
     super.initState();
     cModel = MainModel.of(context);
     initFilter();
-    //setState(() {
-    //  _loading = true;
-    //});
-    //getServices().then((result) => setState(() {
-    //  _loading = false;
-    //}));
+    setState(() {
+      _loading = true;
+    });
+    getServices().then((result) => setState(() {
+      _loading = false;
+    }));
     getRole();
     _scrollController.addListener(() {
       if (_scrollController.position.pixels == _scrollController.position.maxScrollExtent) {
@@ -389,6 +389,9 @@ class _ServiceListState extends State<ServiceList> {
         mainAxisSize: MainAxisSize.max,
         children: <Widget>[
           ListTile(
+            onTap: () {
+              Navigator.of(context).push(new MaterialPageRoute(builder: (context) => ServiceDetail(service: item, editable: false,)));
+            },
             leading: Icon(
               Icons.assignment_turned_in,
               color: Color(0xff14BD98),
@@ -432,7 +435,7 @@ class _ServiceListState extends State<ServiceList> {
               new RaisedButton(
                 onPressed: (){
                   Navigator.of(context).push(new MaterialPageRoute(builder: (_) {
-                    return new ServiceDetail(component: item, editable: _editable,);
+                    return new ServiceDetail(service: item, editable: _editable,);
                   })).then((result) {
                     setState(() {
                       _loading = true;

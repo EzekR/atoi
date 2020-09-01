@@ -13,62 +13,7 @@ class SpareList extends StatefulWidget{
 
 class _SpareListState extends State<SpareList> {
 
-  List<dynamic> _spare = [
-    {
-      "FujiClass2": {
-        "Name": "有源微波II类",
-        "FujiClass1": {
-          "ID": 0,
-          "AddDate": null,
-          "UpdateDate": null,
-          "EquipmentType1": {
-            "Level": 0
-          },
-          "EquipmentType2": {
-            "Level": 0
-          },
-          "FujiClass2Count": 0
-        },
-        "IncludeLabour": false,
-        "PatrolTimes": 0,
-        "PatrolHours": 0,
-        "MaintenanceTimes": 0,
-        "MaintenanceHours": 0,
-        "RepairHours": 0,
-        "IncludeContract": false,
-        "FullCoveragePtg": 0,
-        "TechCoveragePtg": 0,
-        "IncludeSpare": false,
-        "SparePrice": 0,
-        "SpareRentPtg": 0,
-        "IncludeRepair": false,
-        "Usage": 0,
-        "EquipmentType": {
-          "ID": 0
-        },
-        "RepairComponentCost": 0,
-        "Repair3partyRatio": 0,
-        "Repair3partyCost": 0,
-        "RepairCostRatio": 0,
-        "MethodID": 0,
-        "AddDate": null,
-        "UpdateDate": null,
-        "Repairs": [],
-        "Components": [],
-        "Consumables": [],
-        "hasEdited": false,
-        "ID": 10
-      },
-      "SerialCode": "1",
-      "Price": 1000000000,
-      "StartDate": "2020-08-07T00:00:00",
-      "EndDate": "2020-08-31T00:00:00",
-      "AddDate": "2020-08-07T14:33:03",
-      "UpdateDate": "2020-08-17T09:42:29",
-      "OID": "BYJ00000001",
-      "ID": 1
-    }
-  ];
+  List<dynamic> _spare = [];
 
   bool isSearchState = false;
   bool _loading = false;
@@ -136,7 +81,7 @@ class _SpareListState extends State<SpareList> {
   Future<Null> getSpares({String filterText}) async {
     filterText = filterText??'';
     var resp = await HttpRequest.request(
-        '/InvComponent/QuerySpareList',
+        '/InvSpare/QuerySpareList',
         method: HttpRequest.GET,
         params: {
           'filterText': _keywords.text,
@@ -337,12 +282,12 @@ class _SpareListState extends State<SpareList> {
     super.initState();
     cModel = MainModel.of(context);
     initFilter();
-    //setState(() {
-    //  _loading = true;
-    //});
-    //getSpares().then((result) => setState(() {
-    //  _loading = false;
-    //}));
+    setState(() {
+      _loading = true;
+    });
+    getSpares().then((result) => setState(() {
+      _loading = false;
+    }));
     getRole();
     _scrollController.addListener(() {
       if (_scrollController.position.pixels == _scrollController.position.maxScrollExtent) {
@@ -370,6 +315,9 @@ class _SpareListState extends State<SpareList> {
         mainAxisSize: MainAxisSize.max,
         children: <Widget>[
           ListTile(
+            onTap: () {
+              Navigator.of(context).push(new MaterialPageRoute(builder: (context) => SpareDetail(spare: item, editable: false,)));
+            },
             leading: Icon(
               Icons.add_to_photos,
               color: Color(0xff14BD98),
@@ -404,7 +352,7 @@ class _SpareListState extends State<SpareList> {
               new RaisedButton(
                 onPressed: (){
                   Navigator.of(context).push(new MaterialPageRoute(builder: (_) {
-                    return new SpareDetail(component: item, editable: _editable,);
+                    return new SpareDetail(spare: item, editable: _editable,);
                   })).then((result) {
                     setState(() {
                       _loading = true;

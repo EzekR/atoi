@@ -81,9 +81,9 @@ class ConstantsModel extends Model {
   List _InvService = [];
   List _InvSpare = [];
 
-  List<Map> get InvSpare => _InvSpare;
+  List get InvSpare => _InvSpare;
 
-  set InvSpare(List<Map> value) {
+  set InvSpare(List value) {
     _InvSpare = value;
   }
 
@@ -93,7 +93,7 @@ class ConstantsModel extends Model {
     _InvService = value;
   }
 
-  List<Map> get POStatus => _POStatus;
+  List get POStatus => _POStatus;
 
   set POStatus(List<Map> value) {
     _POStatus = value;

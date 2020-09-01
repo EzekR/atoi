@@ -483,6 +483,9 @@ class _ConsumableListState extends State<ConsumableList> {
         mainAxisSize: MainAxisSize.max,
         children: <Widget>[
           ListTile(
+            onTap: () {
+              Navigator.of(context).push(new MaterialPageRoute(builder: (context) => new ConsumableDetail(consumable: item, editable: false,)));
+            },
             leading: Icon(
               Icons.battery_alert,
               color: Color(0xff14BD98),

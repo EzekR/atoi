@@ -42,15 +42,19 @@ class _PODetailState extends State<PODetail> {
   void initState() {
     super.initState();
     cModel = MainModel.of(context);
+    getPurchaseOrder();
   }
 
-  Future<Null> getComponent() async {
-    var resp = await HttpRequest.request('/Supplier/GetSupplierById',
-        method: HttpRequest.GET, params: {'id': widget.component['ID']});
+  Future<Null> getPurchaseOrder() async {
+    var resp = await HttpRequest.request('/PurchaseOrder/GetPurchaseOrderByID',
+        method: HttpRequest.GET, params: {'purchaseOrderID': widget.component['ID']});
     if (resp['ResultCode'] == '00') {
       var _data = resp['Data'];
       setState(() {
         oid = _data['OID'];
+        startDate = _data['OrderDate'].toString().split('T')[0];
+        endDate = _data['DueDate'].toString().split('T')[0];
+        supplier = _data['Supplier'];
       });
     }
   }
@@ -59,67 +63,51 @@ class _PODetailState extends State<PODetail> {
     return new FocusNode();
   }).toList();
 
-  //Future<Null> saveComponent() async {
-  //  setState(() {
-  //    _isExpandedDetail = true;
-  //  });
-  //  if (name.text.isEmpty) {
-  //    showDialog(context: context, builder: (context) => CupertinoAlertDialog(
-  //      title: new Text('供应商名称不可为空'),
-  //    )).then((result) => FocusScope.of(context).requestFocus(_focusComponent[0]));
-  //    return;
-  //  }
-  //  if (province == "") {
-  //    showDialog(context: context, builder: (context) => CupertinoAlertDialog(
-  //      title: new Text('供应商省份不可为空'),
-  //    )).then((result) => FocusScope.of(context).requestFocus(_focusComponent[1]));
-  //    return;
-  //  }
-  //  if (contact.text.isEmpty) {
-  //    showDialog(context: context, builder: (context) => CupertinoAlertDialog(
-  //      title: new Text('供应商联系人不可为空'),
-  //    )).then((result) => FocusScope.of(context).requestFocus(_focusComponent[2]));
-  //    return;
-  //  }
-  //  var prefs = await _prefs;
-  //  var _info = {
-  //    "SupplierType": {
-  //      "ID": model.SupplierType[currentType],
-  //    },
-  //    "Name": name.text,
-  //    "Province": currentProvince,
-  //    "Mobile": mobile.text,
-  //    "Address": address.text,
-  //    "Contact": contact.text,
-  //    "ContactMobile": contactMobile.text,
-  //    "IsActive": currentStatus=='启用'?true:false,
-  //  };
-  //  if (widget.component != null) {
-  //    _info['ID'] = widget.component['ID'];
-  //  }
-  //  var _data = {
-  //    "userID": prefs.getInt('userID'),
-  //    "info": _info
-  //  };
-  //  var resp = await HttpRequest.request(
-  //      '/Supplier/SaveSupplier',
-  //      method: HttpRequest.POST,
-  //      data: _data
-  //  );
-  //  if (resp['ResultCode'] == '00') {
-  //    showDialog(context: context, builder: (context) {
-  //      return CupertinoAlertDialog(
-  //        title: new Text('保存成功'),
-  //      );
-  //    }).then((result) => Navigator.of(context).pop());
-  //  } else {
-  //    showDialog(context: context, builder: (context) {
-  //      return CupertinoAlertDialog(
-  //        title: new Text(resp['ResultMessage']),
-  //      );
-  //    });
-  //  }
-  //}
+  Future<Null> saveComponent() async {
+    setState(() {
+      _isExpandedDetail = true;
+    });
+    if (supplier == null) {
+      showDialog(context: context, builder: (context) => CupertinoAlertDialog(
+        title: new Text('供应商不可为空'),
+      )).then((result) => FocusScope.of(context).requestFocus(_focusComponent[0]));
+      return;
+    }
+    if (startDate == 'YYYY-MM-DD' || endDate == 'YYYY-MM-DD') {
+      showDialog(context: context, builder: (context) => CupertinoAlertDialog(
+        title: new Text('起止日期不可为空'),
+      )).then((result) => FocusScope.of(context).requestFocus(_focusComponent[0]));
+      return;
+    }
+    var prefs = await _prefs;
+    var _info = {
+    };
+    if (widget.component != null) {
+      _info['ID'] = widget.component['ID'];
+    }
+    var _data = {
+      "userID": prefs.getInt('userID'),
+      "info": _info
+    };
+    var resp = await HttpRequest.request(
+        '/Supplier/SaveSupplier',
+        method: HttpRequest.POST,
+        data: _data
+    );
+    if (resp['ResultCode'] == '00') {
+      showDialog(context: context, builder: (context) {
+        return CupertinoAlertDialog(
+          title: new Text('保存成功'),
+        );
+      }).then((result) => Navigator.of(context).pop());
+    } else {
+      showDialog(context: context, builder: (context) {
+        return CupertinoAlertDialog(
+          title: new Text(resp['ResultMessage']),
+        );
+      });
+    }
+  }
 
   Row buildDropdown(String title, int currentItem, List dropdownItems, Function changeDropdown, {bool required}) {
     return new Row(

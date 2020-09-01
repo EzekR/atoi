@@ -15,8 +15,8 @@ import 'package:date_format/date_format.dart';
 
 /// 耗材详情页
 class ServiceDetail extends StatefulWidget {
-  ServiceDetail({Key key, this.component, this.editable}) : super(key: key);
-  final Map component;
+  ServiceDetail({Key key, this.service, this.editable}) : super(key: key);
+  final Map service;
   final bool editable;
   _ServiceDetailState createState() => new _ServiceDetailState();
 }
@@ -36,11 +36,13 @@ class _ServiceDetailState extends State<ServiceDetail> {
 
   ConstantsModel cModel;
 
-  TextEditingController serviceName, totalTimes, availableTimes, price, comments = new TextEditingController();
+  TextEditingController serviceName = new TextEditingController(), totalTimes = new TextEditingController(), availableTimes = new TextEditingController(), price = new TextEditingController(), comments = new TextEditingController();
 
   void initState() {
     super.initState();
     cModel = MainModel.of(context);
+    initFuji();
+    getService();
   }
 
   void initFuji() {
@@ -67,13 +69,23 @@ class _ServiceDetailState extends State<ServiceDetail> {
     });
   }
 
-  Future<Null> getComponent() async {
-    var resp = await HttpRequest.request('/Supplier/GetSupplierById',
-        method: HttpRequest.GET, params: {'id': widget.component['ID']});
+  Future<Null> getService() async {
+    var resp = await HttpRequest.request('/InvService/GetServiceByID',
+        method: HttpRequest.GET, params: {'serviceId': widget.service['ID']});
     if (resp['ResultCode'] == '00') {
       var _data = resp['Data'];
       setState(() {
         oid = _data['OID'];
+        serviceName.text = _data['Name'];
+        totalTimes.text = _data['TotalTimes'].toString();
+        availableTimes.text = _data['AvaibleTimes'].toString();
+        price.text = _data['Price'].toString();
+        comments.text = _data['Comments'];
+        supplier = _data['Supplier'];
+        startDate = _data['StartDate'].toString().split('T')[0];
+        endDate = _data['EndDate'].toString().split('T')[0];
+        _fujiClass2 = _data['FujiClass2']['ID'];
+        _fujiClass2Name = _data['FujiClass2']['Name'];
       });
     }
   }
@@ -82,67 +94,94 @@ class _ServiceDetailState extends State<ServiceDetail> {
     return new FocusNode();
   }).toList();
 
-  //Future<Null> saveComponent() async {
-  //  setState(() {
-  //    _isExpandedDetail = true;
-  //  });
-  //  if (name.text.isEmpty) {
-  //    showDialog(context: context, builder: (context) => CupertinoAlertDialog(
-  //      title: new Text('供应商名称不可为空'),
-  //    )).then((result) => FocusScope.of(context).requestFocus(_focusComponent[0]));
-  //    return;
-  //  }
-  //  if (province == "") {
-  //    showDialog(context: context, builder: (context) => CupertinoAlertDialog(
-  //      title: new Text('供应商省份不可为空'),
-  //    )).then((result) => FocusScope.of(context).requestFocus(_focusComponent[1]));
-  //    return;
-  //  }
-  //  if (contact.text.isEmpty) {
-  //    showDialog(context: context, builder: (context) => CupertinoAlertDialog(
-  //      title: new Text('供应商联系人不可为空'),
-  //    )).then((result) => FocusScope.of(context).requestFocus(_focusComponent[2]));
-  //    return;
-  //  }
-  //  var prefs = await _prefs;
-  //  var _info = {
-  //    "SupplierType": {
-  //      "ID": model.SupplierType[currentType],
-  //    },
-  //    "Name": name.text,
-  //    "Province": currentProvince,
-  //    "Mobile": mobile.text,
-  //    "Address": address.text,
-  //    "Contact": contact.text,
-  //    "ContactMobile": contactMobile.text,
-  //    "IsActive": currentStatus=='启用'?true:false,
-  //  };
-  //  if (widget.component != null) {
-  //    _info['ID'] = widget.component['ID'];
-  //  }
-  //  var _data = {
-  //    "userID": prefs.getInt('userID'),
-  //    "info": _info
-  //  };
-  //  var resp = await HttpRequest.request(
-  //      '/Supplier/SaveSupplier',
-  //      method: HttpRequest.POST,
-  //      data: _data
-  //  );
-  //  if (resp['ResultCode'] == '00') {
-  //    showDialog(context: context, builder: (context) {
-  //      return CupertinoAlertDialog(
-  //        title: new Text('保存成功'),
-  //      );
-  //    }).then((result) => Navigator.of(context).pop());
-  //  } else {
-  //    showDialog(context: context, builder: (context) {
-  //      return CupertinoAlertDialog(
-  //        title: new Text(resp['ResultMessage']),
-  //      );
-  //    });
-  //  }
-  //}
+  Future<Null> saveComponent() async {
+    setState(() {
+      _isExpandedDetail = true;
+    });
+    if (serviceName.text.isEmpty) {
+      showDialog(context: context, builder: (context) => CupertinoAlertDialog(
+        title: new Text('服务名称不可为空'),
+      )).then((result) => FocusScope.of(context).requestFocus(_focusComponent[0]));
+      return;
+    }
+    if (price.text.isEmpty) {
+      showDialog(context: context, builder: (context) => CupertinoAlertDialog(
+        title: new Text('服务金额不可为空'),
+      )).then((result) => FocusScope.of(context).requestFocus(_focusComponent[1]));
+      return;
+    }
+    if (totalTimes.text.isEmpty) {
+      showDialog(context: context, builder: (context) => CupertinoAlertDialog(
+        title: new Text('服务总数不可为空'),
+      )).then((result) => FocusScope.of(context).requestFocus(_focusComponent[2]));
+      return;
+    }
+    if (availableTimes.text.isEmpty) {
+      showDialog(context: context, builder: (context) => CupertinoAlertDialog(
+        title: new Text('可用次数不可为空'),
+      )).then((result) => FocusScope.of(context).requestFocus(_focusComponent[2]));
+      return;
+    }
+    if (startDate == 'YYYY-MM-DD') {
+      showDialog(context: context, builder: (context) => CupertinoAlertDialog(
+        title: new Text('开始日期不可为空'),
+      )).then((result) => FocusScope.of(context).requestFocus(_focusComponent[2]));
+      return;
+    }
+    if (endDate == 'YYYY-MM-DD') {
+      showDialog(context: context, builder: (context) => CupertinoAlertDialog(
+        title: new Text('结束日期不可为空'),
+      )).then((result) => FocusScope.of(context).requestFocus(_focusComponent[2]));
+      return;
+    }
+    if (supplier == null) {
+      showDialog(context: context, builder: (context) => CupertinoAlertDialog(
+        title: new Text('供应商不可为空'),
+      )).then((result) => FocusScope.of(context).requestFocus(_focusComponent[2]));
+      return;
+    }
+    var prefs = await _prefs;
+    var _info = {
+      'FujiClass2': {
+        'ID': _fujiClass2
+      },
+      'Name': serviceName.text,
+      'TotalTimes': totalTimes.text,
+      'Price': price.text,
+      'AvaibleTimes': availableTimes.text,
+      'StartDate': startDate,
+      'EndDate': endDate,
+      'Comments': comments.text,
+      'Supplier': {
+        'ID': supplier['ID']
+      }
+    };
+    if (widget.service != null) {
+      _info['ID'] = widget.service['ID'];
+    }
+    var _data = {
+      "userID": prefs.getInt('userID'),
+      "info": _info
+    };
+    var resp = await HttpRequest.request(
+        '/InvService/SaveService',
+        method: HttpRequest.POST,
+        data: _data
+    );
+    if (resp['ResultCode'] == '00') {
+      showDialog(context: context, builder: (context) {
+        return CupertinoAlertDialog(
+          title: new Text('保存成功'),
+        );
+      }).then((result) => Navigator.of(context).pop());
+    } else {
+      showDialog(context: context, builder: (context) {
+        return CupertinoAlertDialog(
+          title: new Text(resp['ResultMessage']),
+        );
+      });
+    }
+  }
 
   Row buildDropdown(String title, int currentItem, List dropdownItems, Function changeDropdown, {bool required}) {
     return new Row(
@@ -237,7 +276,7 @@ class _ServiceDetailState extends State<ServiceDetail> {
       builder: (context, child, mainModel) {
         return new Scaffold(
             appBar: new AppBar(
-              title: widget.editable?Text(widget.component==null?'新增服务':'修改服务'):Text('查看服务'),
+              title: widget.editable?Text(widget.service==null?'新增服务':'修改服务'):Text('查看服务'),
               elevation: 0.7,
               flexibleSpace: Container(
                 decoration: BoxDecoration(
@@ -289,10 +328,10 @@ class _ServiceDetailState extends State<ServiceDetail> {
                             child: new Column(
                               children: <Widget>[
                                 BuildWidget.buildRow('系统编号', oid),
-                                widget.editable?BuildWidget.buildInput('服务名称', serviceName, maxLength: 20, focusNode: _focusComponent[3]):BuildWidget.buildRow('服务名称', serviceName.text),
-                                widget.editable?BuildWidget.buildInput('金额', price, maxLength: 20, focusNode: _focusComponent[3]):BuildWidget.buildRow('批次号', price.text),
-                                widget.editable?BuildWidget.buildInput('服务次数', totalTimes, maxLength: 20, focusNode: _focusComponent[4]):BuildWidget.buildRow('服务次数', totalTimes.text),
-                                widget.editable?BuildWidget.buildInput('服务剩余次数', availableTimes, focusNode: _focusComponent[2], required: true):BuildWidget.buildRow('服务剩余次数', availableTimes.text),
+                                widget.editable?BuildWidget.buildInput('服务名称', serviceName, maxLength: 20, focusNode: _focusComponent[1], required: true):BuildWidget.buildRow('服务名称', serviceName.text),
+                                widget.editable?BuildWidget.buildInput('金额', price, maxLength: 20, focusNode: _focusComponent[2], required: true):BuildWidget.buildRow('批次号', price.text),
+                                widget.editable?BuildWidget.buildInput('服务次数', totalTimes, maxLength: 20, focusNode: _focusComponent[3], required: true):BuildWidget.buildRow('服务次数', totalTimes.text),
+                                widget.editable?BuildWidget.buildInput('服务剩余次数', availableTimes, focusNode: _focusComponent[4], required: true):BuildWidget.buildRow('服务剩余次数', availableTimes.text),
                                 widget.editable?new Padding(
                                   padding: EdgeInsets.symmetric(vertical: 5.0),
                                   child: new Row(
@@ -441,7 +480,7 @@ class _ServiceDetailState extends State<ServiceDetail> {
                                     ],
                                   ),
                                 ):BuildWidget.buildRow('结束日期', endDate),
-                                widget.editable?buildDropdown('富士二类', _fujiClass2, _fujiList, changeFuji, required: true):BuildWidget.buildRow('富士二类', _fujiClass2Name),
+                                widget.editable?buildDropdown('富士二类', _fujiClass2, _fujiList, changeFuji, required: true):BuildWidget.buildRow('富士二类', _fujiClass2Name??''),
                                 widget.editable?new Padding(
                                   padding: EdgeInsets.symmetric(vertical: 5.0),
                                   child: new Row(
@@ -526,7 +565,7 @@ class _ServiceDetailState extends State<ServiceDetail> {
                         widget.editable?new RaisedButton(
                           onPressed: () {
                             FocusScope.of(context).requestFocus(new FocusNode());
-                            //saveComponent();
+                            saveComponent();
                           },
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(6),

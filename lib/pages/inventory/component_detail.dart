@@ -369,9 +369,9 @@ class _ComponentDetailState extends State<ComponentDetail> {
                                   ),
                                 ):BuildWidget.buildRow('关联设备', relatedEquipment==null?'':relatedEquipment['Name']),
                                 widget.editable&&widget.component==null?BuildWidget.buildDropdown('选择零件', currentComponent, componentsDropdown, changeComponent, required: true):BuildWidget.buildRow('选择零件', currentComponent??''),
-                                widget.editable?BuildWidget.buildInput('序列号', serialCode, maxLength: 20, focusNode: _focusComponent[0], required: true):BuildWidget.buildRow('电话', serialCode.text),
-                                widget.editable?BuildWidget.buildInput('规格', spec, maxLength: 20, focusNode: _focusComponent[1], required: true):BuildWidget.buildRow('地址', spec.text),
-                                widget.editable?BuildWidget.buildInput('型号', model, focusNode: _focusComponent[2], required: true):BuildWidget.buildRow('联系人', model.text),
+                                widget.editable?BuildWidget.buildInput('序列号', serialCode, maxLength: 20, focusNode: _focusComponent[0], required: true):BuildWidget.buildRow('序列号', serialCode.text),
+                                widget.editable?BuildWidget.buildInput('规格', spec, maxLength: 20, focusNode: _focusComponent[1], required: true):BuildWidget.buildRow('规格', spec.text),
+                                widget.editable?BuildWidget.buildInput('型号', model, focusNode: _focusComponent[2], required: true):BuildWidget.buildRow('型号', model.text),
                                 widget.editable?new Padding(
                                   padding: EdgeInsets.symmetric(vertical: 5.0),
                                   child: new Row(
@@ -435,7 +435,7 @@ class _ComponentDetailState extends State<ComponentDetail> {
                                     ],
                                   ),
                                 ):BuildWidget.buildRow('供应商', supplier==null?'':supplier['Name']),
-                                widget.editable?BuildWidget.buildInput('单价', price, maxLength: 20, focusNode: _focusComponent[3], required: true):BuildWidget.buildRow('联系人电话', price.text),
+                                widget.editable?BuildWidget.buildInput('单价', price, maxLength: 20, focusNode: _focusComponent[3], required: true):BuildWidget.buildRow('单价', price.text),
                                 widget.editable?new Padding(
                                   padding: EdgeInsets.symmetric(vertical: 5.0),
                                   child: new Row(
@@ -511,7 +511,7 @@ class _ComponentDetailState extends State<ComponentDetail> {
                                   ),
                                 ):BuildWidget.buildRow('购入日期', purchaseDate),
                                 widget.editable?BuildWidget.buildInput('备注', comment, maxLength: 20, focusNode: _focusComponent[4]):BuildWidget.buildRow('备注', comment.text),
-                                widget.editable?BuildWidget.buildDropdown('状态', currentStatus, statusItems, changeComponent, required: true):BuildWidget.buildRow('状态', currentStatus),
+                                widget.editable?BuildWidget.buildDropdown('状态', currentStatus, statusItems, changeStatus, required: true):BuildWidget.buildRow('状态', currentStatus),
                                 new Divider(),
                                 new Padding(
                                     padding:
