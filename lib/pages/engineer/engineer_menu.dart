@@ -136,7 +136,7 @@ class EngineerMenu extends StatelessWidget {
                                             ),
                                           ),
                                           onTap: () {
-                                            Navigator.of(context).pushNamed('equipment-archive');
+                                            limited?null:Navigator.of(context).pushNamed('equipment-archive');
                                           },
                                         ),
                                       ),
@@ -152,7 +152,7 @@ class EngineerMenu extends StatelessWidget {
                                             ),
                                           ),
                                           onTap: () {
-                                            Navigator.of(context).pushNamed('equipment-install');
+                                            limited?null:Navigator.of(context).pushNamed('equipment-install');
                                           },
                                         ),
                                       ),
@@ -168,7 +168,7 @@ class EngineerMenu extends StatelessWidget {
                                             ),
                                           ),
                                           onTap: () {
-                                            Navigator.of(context).pushNamed('equipment-transfer');
+                                            limited?null:Navigator.of(context).pushNamed('equipment-transfer');
                                           },
                                         ),
                                       ),
@@ -184,7 +184,7 @@ class EngineerMenu extends StatelessWidget {
                                             ),
                                           ),
                                           onTap: () {
-                                            Navigator.of(context).pushNamed('equipment-lending');
+                                            limited?null:Navigator.of(context).pushNamed('equipment-lending');
                                           },
                                         ),
                                       ),
@@ -200,7 +200,7 @@ class EngineerMenu extends StatelessWidget {
                                             ),
                                           ),
                                           onTap: () {
-                                            Navigator.of(context).pushNamed('equipment-check');
+                                            limited?null:Navigator.of(context).pushNamed('equipment-check');
                                           },
                                         ),
                                       ),
@@ -216,7 +216,7 @@ class EngineerMenu extends StatelessWidget {
                                             ),
                                           ),
                                           onTap: () {
-                                            Navigator.of(context).pushNamed('equipment-scrap');
+                                            limited?null:Navigator.of(context).pushNamed('equipment-scrap');
                                           },
                                         ),
                                       ),

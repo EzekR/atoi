@@ -195,10 +195,13 @@ class ManagerModel extends Model {
     Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
     var prefs = await _prefs;
     var userID = await prefs.getInt('userID');
+    String _urlType = 'typeIDs=$_typeId';
+    if (_typeList.isNotEmpty) {
+      _urlType = _typeList.map((item) => 'typeIDs=$item').join('&');
+    }
     Map<String, dynamic> _params = {
       'userID': userID,
       'urgency': _urgencyId,
-      'type': _typeId,
       'pageSize': 10,
       'curRowNum': 0,
     };
@@ -207,7 +210,7 @@ class ManagerModel extends Model {
       _params['filterField'] = _field;
     }
     var resp = await HttpRequest.request(
-      _dispatchStatusId==0?'/Dispatch/GetDispatchs?statusIDs=2&statusIDs=3':'/Dispatch/GetDispatchs?statusIDs=$_dispatchStatusId',
+      _dispatchStatusId==0?'/Dispatch/GetDispatchs?statusIDs=2&statusIDs=3&$_urlType':'/Dispatch/GetDispatchs?statusIDs=$_dispatchStatusId&$_urlType',
       method: HttpRequest.GET,
       params: _params
     );
@@ -224,10 +227,13 @@ class ManagerModel extends Model {
     Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
     var prefs = await _prefs;
     var userID = await prefs.getInt('userID');
+    String _urlType = 'typeIDs=$_typeId';
+    if (_typeList.isNotEmpty) {
+      _urlType = _typeList.map((item) => 'typeIDs=$item').join('&');
+    }
     Map<String, dynamic> _params = {
       'userID': userID,
       'urgency': _urgencyId,
-      'type': _typeId,
       'pageSize': 10,
       'curRowNum': _offsetDispatch,
     };
@@ -236,7 +242,7 @@ class ManagerModel extends Model {
       _params['filterField'] = _field;
     }
     var resp = await HttpRequest.request(
-        _dispatchStatusId==0?'/Dispatch/GetDispatchs?statusIDs=2&statusIDs=3':'/Dispatch/GetDispatchs?statusIDs=$_dispatchStatusId',
+        _dispatchStatusId==0?'/Dispatch/GetDispatchs?statusIDs=2&statusIDs=3&$_urlType':'/Dispatch/GetDispatchs?statusIDs=$_dispatchStatusId&$_urlType',
         method: HttpRequest.GET,
         params: _params
     );
@@ -253,13 +259,15 @@ class ManagerModel extends Model {
     Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
     var prefs = await _prefs;
     var userID = await prefs.getInt('userID');
+    String _urlType = 'typeID=$_typeId';
+    if (_typeList.isNotEmpty) {
+      _urlType = _typeList.map((item) => 'typeID=$item').join('&');
+    }
     Map<String, dynamic> params = {
       'userID': userID,
       'statusID': _statusId,
-      'typeID': 0,
       'pageSize': 10,
       'curRowNum': 0,
-      'typeID': _typeId,
       'isRecall': _recall,
       'department': _departmentId,
       'urgency': _urgencyId,
@@ -271,7 +279,7 @@ class ManagerModel extends Model {
       'source': _source
     };
     var resp = await HttpRequest.request(
-        '/Request/GetRequests',
+        '/Request/GetRequests?$_urlType',
         method: HttpRequest.GET,
         params: params
     );
@@ -288,13 +296,16 @@ class ManagerModel extends Model {
     Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
     var prefs = await _prefs;
     var userID = await prefs.getInt('userID');
+    String _urlType = 'typeID=$_typeId';
+    if (_typeList.isNotEmpty) {
+      _urlType = _typeList.map((item) => 'typeID=$item').join('&');
+    }
     Map<String, dynamic> params = {
       'userID': userID,
       'statusID': _statusId,
       'typeID': 0,
       'pageSize': 10,
       'curRowNum': _offsetTodo,
-      'typeID': _typeId,
       'isRecall': _recall,
       'department': _departmentId,
       'urgency': _urgencyId,
@@ -306,7 +317,7 @@ class ManagerModel extends Model {
       'source': _source
     };
     var resp = await HttpRequest.request(
-        '/Request/GetRequests',
+        '/Request/GetRequests?$_urlType',
         method: HttpRequest.GET,
         params: params
     );
