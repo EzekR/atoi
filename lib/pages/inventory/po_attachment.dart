@@ -13,11 +13,12 @@ import 'package:flutter_cupertino_date_picker/flutter_cupertino_date_picker.dart
 import 'package:atoi/utils/constants.dart';
 import 'package:date_format/date_format.dart';
 
-/// 耗材详情页
+/// 采购单附件类
 class POAttachment extends StatefulWidget {
-  POAttachment({Key key, this.component, this.editable}) : super(key: key);
-  final Map component;
+  POAttachment({Key key, this.po, this.editable, this.attachType}) : super(key: key);
+  final Map po;
   final bool editable;
+  final AttachmentType attachType;
   _POAttachmentState createState() => new _POAttachmentState();
 }
 
@@ -33,6 +34,14 @@ class _POAttachmentState extends State<POAttachment> {
   int _fujiClass2 = 0;
   String _fujiClass2Name;
   List _fujiList = [];
+  String title;
+
+  String _fujiComponentName;
+  int _fujiComponent;
+  List _fujiComponentsList = [];
+
+  int _component;
+  List _componentsList = [];
 
   int _consumable = 0;
   List _consumableList = [];
@@ -43,10 +52,25 @@ class _POAttachmentState extends State<POAttachment> {
 
   void initState() {
     super.initState();
-    if (widget.component != null) {
+    if (widget.po != null) {
       getComponent();
     }
     cModel = MainModel.of(context);
+    initPageType();
+  }
+
+  void initPageType() {
+    switch (widget.attachType) {
+      case AttachmentType.COMPONENT:
+        title = '零件';
+        break;
+      case AttachmentType.CONSUMABLE:
+        title = '耗材';
+        break;
+      case AttachmentType.SERVICE:
+        title = '服务';
+        break;
+    }
   }
 
   void initFuji() {
@@ -66,20 +90,54 @@ class _POAttachmentState extends State<POAttachment> {
     });
   }
 
-  void changeFuji(value) {
+  void changeComponent(value) {
     FocusScope.of(context).requestFocus(new FocusNode());
     setState(() {
-      _fujiClass2 = value;
+      _component = value;
     });
   }
 
   Future<Null> getComponent() async {
     var resp = await HttpRequest.request('/Supplier/GetSupplierById',
-        method: HttpRequest.GET, params: {'id': widget.component['ID']});
+        method: HttpRequest.GET, params: {'id': widget.po['ID']});
     if (resp['ResultCode'] == '00') {
       var _data = resp['Data'];
       setState(() {
         oid = _data['OID'];
+      });
+    }
+  }
+
+  void getEquipment(int equipmentId) async {
+    Map resp = await HttpRequest.request(
+      '/Equipment/GetDeviceByID',
+      method: HttpRequest.GET,
+      params: {
+        'id': equipmentId
+      }
+    );
+    if (resp['ResultCode'] == '00') {
+      _equipment = resp['Data'];
+      _fujiClass2Name = resp['Data']['FujiClass2']['Name'];
+    }
+  }
+
+  void getFujiComponents(int fujiId) async {
+    Map resp = await HttpRequest.request(
+      '/InvComponent/QueryComponentsByFujiClass2ID',
+      params: {
+        'fujiClass2ID': fujiId
+      }
+    );
+    if (resp['ResultCode'] == '00') {
+      _componentsList = resp['Data'].map((item) {
+        return {
+          'value': item['ID'],
+          'text': item['Name']
+        };
+      }).toList();
+      setState(() {
+        _componentsList = _componentsList;
       });
     }
   }
@@ -186,7 +244,7 @@ class _POAttachmentState extends State<POAttachment> {
           ),
         ),
         new Expanded(
-          flex: 6,
+          flex: 4,
           child: new DropdownButton(
             value: currentItem,
             items: dropdownItems.map<DropdownMenuItem>((item) {
@@ -206,9 +264,33 @@ class _POAttachmentState extends State<POAttachment> {
               fontSize: 12.0,
             ),
           ),
+        ),
+        new Expanded(
+          flex: 2,
+          child: Center(
+            child: IconButton(
+              icon: Icon(Icons.add),
+              onPressed: () {
+                addComponent();
+              },
+            ),
+          ),
         )
       ],
     );
+  }
+
+  void addComponent() {
+    showDialog(context: context, builder: (context) => SimpleDialog(
+      title: Text('新增零件'),
+      children: <Widget>[
+        BuildWidget.buildCardRow('富士二类', _fujiClass2Name??''),
+        BuildWidget.buildCardInput('简称', new TextEditingController(), required: true),
+        BuildWidget.buildCardInput('描述', new TextEditingController(), required: true),
+        BuildWidget.buildCardDropdown('类型', _fujiClass2, _fujiList, changeComponent, required: true),
+        BuildWidget.buildCardInput('标准单价', new TextEditingController()),
+      ],
+    ));
   }
 
   Padding buildRow(String labelText, String defaultText) {
@@ -243,7 +325,7 @@ class _POAttachmentState extends State<POAttachment> {
       builder: (context, child, mainModel) {
         return new Scaffold(
             appBar: new AppBar(
-              title: widget.editable?Text(widget.component==null?'新增耗材':'修改耗材'):Text('查看耗材'),
+              title: widget.editable?Text(widget.po==null?'新增$title':'修改$title'):Text('查看$title'),
               elevation: 0.7,
               flexibleSpace: Container(
                 decoration: BoxDecoration(
@@ -283,7 +365,7 @@ class _POAttachmentState extends State<POAttachment> {
                                 color: Colors.blue,
                               ),
                               title: Text(
-                                '供应商基本信息',
+                                '$title基本信息',
                                 style: new TextStyle(
                                     fontSize: 20.0,
                                     fontWeight: FontWeight.w400),
@@ -294,11 +376,6 @@ class _POAttachmentState extends State<POAttachment> {
                             padding: EdgeInsets.symmetric(horizontal: 12.0),
                             child: new Column(
                               children: <Widget>[
-                                widget.editable?buildDropdown('富士二类', _fujiClass2, _fujiList, changeFuji, required: true):BuildWidget.buildRow('富士二类', _fujiClass2Name),
-                                widget.editable?buildDropdown('选择耗材', _consumable, _consumableList, changeFuji, required: true):BuildWidget.buildRow('选择耗材', _fujiClass2Name),
-                                widget.editable?BuildWidget.buildInput('批次号', lotNum, maxLength: 20, focusNode: _focusComponent[3]):BuildWidget.buildRow('批次号', lotNum.text),
-                                widget.editable?BuildWidget.buildInput('规格', spec, maxLength: 20, focusNode: _focusComponent[4]):BuildWidget.buildRow('地址', spec.text),
-                                widget.editable?BuildWidget.buildInput('型号', model, focusNode: _focusComponent[2], required: true):BuildWidget.buildRow('联系人', model.text),
                                 widget.editable?new Padding(
                                   padding: EdgeInsets.symmetric(vertical: 5.0),
                                   child: new Row(
@@ -316,7 +393,7 @@ class _POAttachmentState extends State<POAttachment> {
                                               ),
                                             ),
                                             new Text(
-                                              '供应商',
+                                              '关联设备',
                                               style: new TextStyle(
                                                   fontSize: 16.0, fontWeight: FontWeight.w600),
                                             )
@@ -336,7 +413,7 @@ class _POAttachmentState extends State<POAttachment> {
                                       new Expanded(
                                         flex: 4,
                                         child: new Text(
-                                          supplier == null ? '' : supplier['Name'],
+                                          _equipment == null ? '' : _equipment['Name'],
                                           style: new TextStyle(
                                               fontSize: 16.0,
                                               fontWeight: FontWeight.w400,
@@ -350,94 +427,99 @@ class _POAttachmentState extends State<POAttachment> {
                                               icon: Icon(Icons.search),
                                               onPressed: () async {
                                                 FocusScope.of(context).requestFocus(new FocusNode());
-                                                final _searchResult = await Navigator.of(context).push(new MaterialPageRoute(builder: (_) => SearchLazy(searchType: SearchType.VENDOR,)));
+                                                final _searchResult = await Navigator.of(context).push(new MaterialPageRoute(builder: (_) => SearchLazy(searchType: SearchType.DEVICE,)));
                                                 print(_searchResult);
                                                 if (_searchResult != null &&
                                                     _searchResult != 'null') {
                                                   setState(() {
-                                                    supplier = jsonDecode(_searchResult);
+                                                    _equipment = jsonDecode(_searchResult);
                                                   });
+                                                  await getEquipment(_equipment['ID']);
+                                                  await getFujiComponents(_equipment['FujiClass2']['ID']);
                                                 }
                                               })),
                                     ],
                                   ),
-                                ):BuildWidget.buildRow('供应商', supplier==null?'':supplier['Name']),
+                                ):BuildWidget.buildRow('关联设备', _equipment==null?'':_equipment['Name']),
+                                widget.editable?buildDropdown('选择零件', _component, _componentsList, changeComponent, required: true):BuildWidget.buildRow('零件', _fujiClass2Name),
+                                widget.editable?BuildWidget.buildInput('规格', spec, maxLength: 20, focusNode: _focusComponent[4]):BuildWidget.buildRow('地址', spec.text),
+                                widget.editable?BuildWidget.buildInput('型号', model, focusNode: _focusComponent[2], required: true):BuildWidget.buildRow('联系人', model.text),
                                 widget.editable?BuildWidget.buildInput('单价', price, maxLength: 20, focusNode: _focusComponent[5]):BuildWidget.buildRow('联系人电话', price.text),
-                                widget.editable?BuildWidget.buildInput('入库数量', quantity, focusNode: _focusComponent[2], required: true):BuildWidget.buildRow('入库数量', quantity.text),
-                                widget.editable?new Padding(
-                                  padding: EdgeInsets.symmetric(vertical: 5.0),
-                                  child: new Row(
-                                    children: <Widget>[
-                                      new Expanded(
-                                        flex: 4,
-                                        child: new Wrap(
-                                          alignment: WrapAlignment.end,
-                                          crossAxisAlignment: WrapCrossAlignment.center,
-                                          children: <Widget>[
-                                            new Text(
-                                              '购入日期',
-                                              style: new TextStyle(
-                                                  fontSize: 16.0, fontWeight: FontWeight.w600),
-                                            )
-                                          ],
-                                        ),
-                                      ),
-                                      new Expanded(
-                                        flex: 1,
-                                        child: new Text(
-                                          '：',
-                                          style: new TextStyle(
-                                            fontSize: 16.0,
-                                            fontWeight: FontWeight.w600,
-                                          ),
-                                        ),
-                                      ),
-                                      new Expanded(
-                                        flex: 4,
-                                        child: new Text(
-                                          purchaseDate,
-                                          style: new TextStyle(
-                                              fontSize: 16.0,
-                                              fontWeight: FontWeight.w400,
-                                              color: Colors.black54
-                                          ),
-                                        ),
-                                      ),
-                                      new Expanded(
-                                        flex: 2,
-                                        child: new IconButton(
-                                            icon: Icon(Icons.calendar_today, color: AppConstants.AppColors['btn_main'],),
-                                            onPressed: () async {
-                                              FocusScope.of(context).requestFocus(new FocusNode());
-                                              var _time = DateTime.tryParse(purchaseDate)??DateTime.now();
-                                              DatePicker.showDatePicker(
-                                                context,
-                                                pickerTheme: DateTimePickerTheme(
-                                                  showTitle: true,
-                                                  confirm: Text('确认', style: TextStyle(color: Colors.blueAccent)),
-                                                  cancel: Text('取消', style: TextStyle(color: Colors.redAccent)),
-                                                ),
-                                                minDateTime: DateTime.now().add(Duration(days: -7300)),
-                                                maxDateTime: DateTime.parse('2030-01-01'),
-                                                initialDateTime: _time,
-                                                dateFormat: 'yyyy-MM-dd',
-                                                locale: DateTimePickerLocale.en_us,
-                                                onClose: () => print(""),
-                                                onCancel: () => print('onCancel'),
-                                                onChange: (dateTime, List<int> index) {
-                                                },
-                                                onConfirm: (dateTime, List<int> index) {
-                                                  var _date = formatDate(dateTime, [yyyy, '-', mm, '-', dd]);
-                                                  setState(() {
-                                                    purchaseDate = _date;
-                                                  });
-                                                },
-                                              );
-                                            }),
-                                      ),
-                                    ],
-                                  ),
-                                ):BuildWidget.buildRow('购入日期', purchaseDate),
+                                widget.editable?BuildWidget.buildInput('数量', quantity, focusNode: _focusComponent[2], required: true):BuildWidget.buildRow('入库数量', quantity.text),
+                                //widget.editable?new Padding(
+                                //  padding: EdgeInsets.symmetric(vertical: 5.0),
+                                //  child: new Row(
+                                //    children: <Widget>[
+                                //      new Expanded(
+                                //        flex: 4,
+                                //        child: new Wrap(
+                                //          alignment: WrapAlignment.end,
+                                //          crossAxisAlignment: WrapCrossAlignment.center,
+                                //          children: <Widget>[
+                                //            new Text(
+                                //              '购入日期',
+                                //              style: new TextStyle(
+                                //                  fontSize: 16.0, fontWeight: FontWeight.w600),
+                                //            )
+                                //          ],
+                                //        ),
+                                //      ),
+                                //      new Expanded(
+                                //        flex: 1,
+                                //        child: new Text(
+                                //          '：',
+                                //          style: new TextStyle(
+                                //            fontSize: 16.0,
+                                //            fontWeight: FontWeight.w600,
+                                //          ),
+                                //        ),
+                                //      ),
+                                //      new Expanded(
+                                //        flex: 4,
+                                //        child: new Text(
+                                //          purchaseDate,
+                                //          style: new TextStyle(
+                                //              fontSize: 16.0,
+                                //              fontWeight: FontWeight.w400,
+                                //              color: Colors.black54
+                                //          ),
+                                //        ),
+                                //      ),
+                                //      new Expanded(
+                                //        flex: 2,
+                                //        child: new IconButton(
+                                //            icon: Icon(Icons.calendar_today, color: AppConstants.AppColors['btn_main'],),
+                                //            onPressed: () async {
+                                //              FocusScope.of(context).requestFocus(new FocusNode());
+                                //              var _time = DateTime.tryParse(purchaseDate)??DateTime.now();
+                                //              DatePicker.showDatePicker(
+                                //                context,
+                                //                pickerTheme: DateTimePickerTheme(
+                                //                  showTitle: true,
+                                //                  confirm: Text('确认', style: TextStyle(color: Colors.blueAccent)),
+                                //                  cancel: Text('取消', style: TextStyle(color: Colors.redAccent)),
+                                //                ),
+                                //                minDateTime: DateTime.now().add(Duration(days: -7300)),
+                                //                maxDateTime: DateTime.parse('2030-01-01'),
+                                //                initialDateTime: _time,
+                                //                dateFormat: 'yyyy-MM-dd',
+                                //                locale: DateTimePickerLocale.en_us,
+                                //                onClose: () => print(""),
+                                //                onCancel: () => print('onCancel'),
+                                //                onChange: (dateTime, List<int> index) {
+                                //                },
+                                //                onConfirm: (dateTime, List<int> index) {
+                                //                  var _date = formatDate(dateTime, [yyyy, '-', mm, '-', dd]);
+                                //                  setState(() {
+                                //                    purchaseDate = _date;
+                                //                  });
+                                //                },
+                                //              );
+                                //            }),
+                                //      ),
+                                //    ],
+                                //  ),
+                                //):BuildWidget.buildRow('购入日期', purchaseDate),
                                 widget.editable?BuildWidget.buildInput('备注', comments, maxLength: 100, focusNode: _focusComponent[5]):BuildWidget.buildRow('备注', comments.text),
                                 new Divider(),
                                 new Padding(

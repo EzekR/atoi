@@ -72,7 +72,7 @@ class _POListState extends State<POList> {
       'text': '全部'
     });
     setState(() {
-      field = 's.ID';
+      field = 'po.ID';
       _keywords.clear();
       _poList = _list;
     });

@@ -105,6 +105,116 @@ class BuildWidget {
     );
   }
 
+  static GestureDetector buildCardInput(String leading, TextEditingController content, {Function onTap, bool required}) {
+    required = required??false;
+    return new GestureDetector(
+      onTap: onTap,
+      child: new Row(
+        children: <Widget>[
+          new Expanded(
+              flex: 3,
+              child: new Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: <Widget>[
+                  required?new Text(
+                    '*',
+                    style: TextStyle(
+                      color: Colors.red
+                    ),
+                  ):Container(),
+                  new Text(
+                    leading,
+                    style: new TextStyle(
+                        fontSize: 16.0,
+                        fontWeight: FontWeight.w600
+                    ),
+                  ),
+                ],
+              )
+          ),
+          new Expanded(
+              flex: 1,
+              child: new Text(':',
+                style: new TextStyle(
+                    fontSize: 16.0,
+                    fontWeight: FontWeight.w600
+                ),
+              )
+          ),
+          new Expanded(
+            flex: 7,
+            child: new TextField(
+              controller: content,
+              maxLength: 20,
+              maxLines: 1,
+            ),
+          )
+        ],
+      ),
+    );
+  }
+
+  static Row buildCardDropdown(String title, int currentItem, List dropdownItems, Function changeDropdown, {bool required}) {
+    return new Row(
+      children: <Widget>[
+        new Expanded(
+          flex: 3,
+          child: new Wrap(
+            alignment: WrapAlignment.end,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            children: <Widget>[
+              required?new Text(
+                '*',
+                style: new TextStyle(
+                    color: Colors.red
+                ),
+              ):Container(),
+              new Text(
+                title,
+                style: new TextStyle(
+                    fontSize: 16.0,
+                    fontWeight: FontWeight.w600
+                ),
+              )
+            ],
+          ),
+        ),
+        new Expanded(
+          flex: 1,
+          child: new Text(
+            '：',
+            style: new TextStyle(
+              fontSize: 16.0,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ),
+        new Expanded(
+          flex: 7,
+          child: new DropdownButton(
+            value: currentItem,
+            items: dropdownItems.map<DropdownMenuItem>((item) {
+              return DropdownMenuItem(
+                value: item['value'],
+                child: Text(
+                  item['text'],
+                  style: TextStyle(
+                      fontSize: 12.0
+                  ),
+                ),
+              );
+            }).toList(),
+            onChanged: changeDropdown,
+            style: new TextStyle(
+              color: Colors.black54,
+              fontSize: 12.0,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
   /// 构建常用下拉菜单（4、6分）
   static GestureDetector buildDropdown(String title, String currentItem, List dropdownItems, Function changeDropdown, {FocusNode focusNode, BuildContext context, bool required}) {
     //if (context != null) {

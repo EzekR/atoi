@@ -12,6 +12,7 @@ import 'dart:convert';
 import 'package:flutter_cupertino_date_picker/flutter_cupertino_date_picker.dart';
 import 'package:atoi/utils/constants.dart';
 import 'package:date_format/date_format.dart';
+import 'package:atoi/pages/inventory/po_attachment.dart';
 
 /// 耗材详情页
 class PODetail extends StatefulWidget {
@@ -226,7 +227,7 @@ class _PODetailState extends State<PODetail> {
           IconButton(
             icon: Icon(Icons.add_circle),
             onPressed: () {
-
+              Navigator.of(context).push(new MaterialPageRoute(builder: (context) => new POAttachment(editable: true, attachType: AttachmentType.COMPONENT,)));
             },
           )
         ],
