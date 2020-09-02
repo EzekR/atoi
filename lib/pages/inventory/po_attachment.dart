@@ -43,12 +43,18 @@ class _POAttachmentState extends State<POAttachment> {
   int _component;
   List _componentsList = [];
 
+  int _componentStatus;
+  List _componentStatusList = [];
+
   int _consumable = 0;
   List _consumableList = [];
 
   ConstantsModel cModel;
 
   TextEditingController lotNum, spec, model, price, quantity, comments = new TextEditingController();
+  TextEditingController componentName = new TextEditingController();
+  TextEditingController componentDesc = new TextEditingController();
+  TextEditingController componentPrice = new TextEditingController();
 
   void initState() {
     super.initState();
@@ -87,6 +93,27 @@ class _POAttachmentState extends State<POAttachment> {
     });
     setState(() {
       _fujiList = _list;
+    });
+  }
+
+  void initComponentStatus() {
+    List _list = cModel.ComponentStatus.map((item) {
+      return {
+        'value': item['ID'],
+        'text': item['Name']
+      };
+    }).toList();
+    setState(() {
+      _componentStatusList = _list;
+      _componentStatus = _list[0]['value'];
+    });
+  }
+
+  void changeComponentStatus(value) {
+    print(value);
+    FocusScope.of(context).requestFocus(new FocusNode());
+    setState(() {
+      _componentStatus = value;
     });
   }
 
@@ -280,16 +307,151 @@ class _POAttachmentState extends State<POAttachment> {
     );
   }
 
+  Future<String> saveComponent() async {
+    if (componentName.text.isEmpty) {
+      showDialog(context: context, builder: (context) => CupertinoAlertDialog(
+        title: new Text('零件名称不可为空'),
+      )).then((result) => FocusScope.of(context).requestFocus(_focusComponent[0]));
+      return 'fail';
+    }
+    if (componentDesc.text.isEmpty) {
+      showDialog(context: context, builder: (context) => CupertinoAlertDialog(
+        title: new Text('零件描述不可为空'),
+      )).then((result) => FocusScope.of(context).requestFocus(_focusComponent[0]));
+      return 'fail';
+    }
+    Map resp = await HttpRequest.request(
+      '/PurchaseOrder/SaveComponent',
+      method: HttpRequest.POST,
+      data: {
+        'info': {
+          'FujiClass2': {
+            'ID': _equipment['FujiClass2']['ID']
+          },
+          'Name': componentName.text,
+          'Description': componentDesc.text,
+          'Type': {
+            'ID': _componentStatus
+          },
+          'StdPrice': componentPrice.text
+        }
+      }
+    );
+    if (resp['ResultCode'] == '00') {
+      return 'ok';
+    }
+  }
+
   void addComponent() {
-    showDialog(context: context, builder: (context) => SimpleDialog(
-      title: Text('新增零件'),
-      children: <Widget>[
-        BuildWidget.buildCardRow('富士二类', _fujiClass2Name??''),
-        BuildWidget.buildCardInput('简称', new TextEditingController(), required: true),
-        BuildWidget.buildCardInput('描述', new TextEditingController(), required: true),
-        BuildWidget.buildCardDropdown('类型', _fujiClass2, _fujiList, changeComponent, required: true),
-        BuildWidget.buildCardInput('标准单价', new TextEditingController()),
-      ],
+    initComponentStatus();
+    showDialog(context: context, builder: (context) => StatefulBuilder(
+      builder: (context, setState) => SimpleDialog(
+        title: Text('新增零件'),
+        children: <Widget>[
+          BuildWidget.buildCardRow('富士二类', _fujiClass2Name??''),
+          BuildWidget.buildCardInput('简称', componentName, required: true),
+          BuildWidget.buildCardInput('描述', componentDesc, required: true),
+          new Row(
+            children: <Widget>[
+              new Expanded(
+                flex: 3,
+                child: new Wrap(
+                  alignment: WrapAlignment.end,
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  children: <Widget>[
+                    new Text(
+                      '*',
+                      style: new TextStyle(
+                          color: Colors.red
+                      ),
+                    ),
+                    new Text(
+                      '类型',
+                      style: new TextStyle(
+                          fontSize: 16.0,
+                          fontWeight: FontWeight.w600
+                      ),
+                    )
+                  ],
+                ),
+              ),
+              new Expanded(
+                flex: 1,
+                child: new Text(
+                  '：',
+                  style: new TextStyle(
+                    fontSize: 16.0,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+              new Expanded(
+                flex: 7,
+                child: new DropdownButton(
+                  value: _componentStatus,
+                  items: _componentStatusList.map<DropdownMenuItem>((item) {
+                    return DropdownMenuItem(
+                      value: item['value'],
+                      child: Text(
+                        item['text'],
+                        style: TextStyle(
+                            fontSize: 12.0
+                        ),
+                      ),
+                    );
+                  }).toList(),
+                  onChanged: (value) {
+                    setState(() {
+                      _componentStatus = value;
+                    });
+                  },
+                  style: new TextStyle(
+                    color: Colors.black54,
+                    fontSize: 12.0,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          BuildWidget.buildCardInput('标准单价', componentPrice),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: <Widget>[
+              RaisedButton(
+                color: Colors.redAccent,
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                child: Center(
+                  child: Text('取消',
+                    style: TextStyle(
+                      color: Colors.white
+                    ),
+                  ),
+                ),
+              ),
+              RaisedButton(
+                color: Colors.blueAccent,
+                onPressed: () {
+                  saveComponent().then((result) {
+                    if (result == 'ok') {
+                      getFujiComponents(_equipment['FujiClass2']['ID']);
+                      Navigator.of(context).pop();
+                    }
+                  });
+                },
+                child: Center(
+                  child: Text('保存',
+                    style: TextStyle(
+                        color: Colors.white
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          )
+        ],
+      ),
     ));
   }
 
@@ -520,7 +682,7 @@ class _POAttachmentState extends State<POAttachment> {
                                 //    ],
                                 //  ),
                                 //):BuildWidget.buildRow('购入日期', purchaseDate),
-                                widget.editable?BuildWidget.buildInput('备注', comments, maxLength: 100, focusNode: _focusComponent[5]):BuildWidget.buildRow('备注', comments.text),
+                                //widget.editable?BuildWidget.buildInput('备注', comments, maxLength: 100, focusNode: _focusComponent[5]):BuildWidget.buildRow('备注', comments.text),
                                 new Divider(),
                                 new Padding(
                                     padding:

@@ -105,6 +105,14 @@ class ConstantsModel extends Model {
     _FujiClass2 = value;
   }
 
+  List _ComponentStatus = [];
+
+  List get ComponentStatus => _ComponentStatus;
+
+  set ComponentStatus(List value) {
+    _ComponentStatus = value;
+  }
+
   get Constants => _Constants;
   get UserRole => _UserRole;
   get AssetsLevel => _AssetsLevel;
@@ -268,6 +276,8 @@ class ConstantsModel extends Model {
       _InvService = resp['Data']['InvServiceStatus'];
 
       _InvSpare = resp['Data']['InvSpareStatus'];
+
+      _ComponentStatus = resp['Data']['ComponentStatus'];
     }
 
     var _departments = await HttpRequest.request(
