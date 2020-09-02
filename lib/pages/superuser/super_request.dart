@@ -80,12 +80,12 @@ class _SuperRequestState extends State<SuperRequest> {
     Map<String, dynamic> _param;
     switch (widget.pageType) {
       case PageType.REQUEST:
-        _url = '/Request/GetRequests?statusID=99';
+        _url = '/Request/GetRequests';
         _param = {
+          'statusID': _status,
           'userID': _userId,
           'PageSize': 10,
           'CurRowNum': offset,
-          'statusID': _status,
           'typeID': _type,
           'isRecall': _recall,
           'department': _depart,
@@ -94,7 +94,8 @@ class _SuperRequestState extends State<SuperRequest> {
           'startDate': _startDate,
           'endDate': _endDate,
           'filterField': _field,
-          'filterText': _filter.text
+          'filterText': _filter.text,
+          'sortField': 'r.RequestDate'
         };
         break;
       case PageType.DISPATCH:
@@ -128,7 +129,7 @@ class _SuperRequestState extends State<SuperRequest> {
     var _end = new DateTime.now();
     await cModel.getConstants();
     setState(() {
-      _status = 98;
+      _status = 0;
       _type = widget.type!=null?widget.type:0;
       _depart = -1;
       _recall = false;
@@ -137,11 +138,11 @@ class _SuperRequestState extends State<SuperRequest> {
       _filter = new TextEditingController();
       _filter.text = widget.filter??'';
       _urgency = 0;
-      _startDate = formatDate(_start, [yyyy, '-', mm, '-', dd]);
+      _startDate = '';
       _endDate = formatDate(_end, [yyyy, '-', mm, '-', dd]);
       _typeList = initList(cModel.RequestType);
-      _statusList = initList(cModel.RequestStatus, valueForAll: 98);
-      _statusList.removeWhere((item) => item['value'] == -1 || item['value'] == 99);
+      _statusList = initList(cModel.RequestStatus, valueForAll: 0);
+      _statusList.removeWhere((item) => item['value'] == -1);
       _departmentList = initList(cModel.Departments, valueForAll: -1);
       _urgencyList = initList(cModel.UrgencyID);
       _dispatchList = initList(cModel.DispatchStatus);
