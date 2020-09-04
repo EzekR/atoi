@@ -346,7 +346,7 @@ class _POListState extends State<POList> {
             mainAxisAlignment: MainAxisAlignment.end,
             mainAxisSize: MainAxisSize.max,
             children: <Widget>[
-              item['Status']['ID']<3?new RaisedButton(
+              item['Status']['ID']==1?new RaisedButton(
                 onPressed: (){
                   Navigator.of(context).push(new MaterialPageRoute(builder: (_) {
                     return new PODetail(purchaseOrder: item, editable: _editable,);

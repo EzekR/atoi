@@ -92,6 +92,12 @@ class _SpareDetailState extends State<SpareDetail> {
     setState(() {
       _isExpandedDetail = true;
     });
+    if (_fujiClass2 == null) {
+      showDialog(context: context, builder: (context) => CupertinoAlertDialog(
+        title: new Text('富士II类不可为空'),
+      )).then((result) => FocusScope.of(context).requestFocus(_focusComponent[0]));
+      return;
+    }
     if (serialCode.text.isEmpty) {
       showDialog(context: context, builder: (context) => CupertinoAlertDialog(
         title: new Text('序列号不可为空'),
@@ -297,9 +303,9 @@ class _SpareDetailState extends State<SpareDetail> {
                             padding: EdgeInsets.symmetric(horizontal: 12.0),
                             child: new Column(
                               children: <Widget>[
-                                widget.editable&&widget.spare==null?buildDropdown('富士二类', _fujiClass2, _fujiList, changeFuji, required: true):BuildWidget.buildRow('富士二类', _fujiClass2Name??''),
-                                widget.editable?BuildWidget.buildInput('序列号', serialCode, maxLength: 20, focusNode: _focusComponent[2]):BuildWidget.buildRow('序列号', serialCode.text),
-                                widget.editable?BuildWidget.buildInput('月租', price, maxLength: 20, focusNode: _focusComponent[3]):BuildWidget.buildRow('月租', price.text),
+                                widget.editable?buildDropdown('富士二类', _fujiClass2, _fujiList, changeFuji, required: true):BuildWidget.buildRow('富士二类', _fujiClass2Name??''),
+                                widget.editable?BuildWidget.buildInput('序列号', serialCode, maxLength: 30, focusNode: _focusComponent[2]):BuildWidget.buildRow('序列号', serialCode.text),
+                                widget.editable?BuildWidget.buildInput('月租', price, maxLength: 13, inputType: TextInputType.numberWithOptions(decimal: true), focusNode: _focusComponent[3]):BuildWidget.buildRow('月租', price.text),
                                 widget.editable?new Padding(
                                   padding: EdgeInsets.symmetric(vertical: 5.0),
                                   child: new Row(

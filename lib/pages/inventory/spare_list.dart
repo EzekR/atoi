@@ -29,6 +29,7 @@ class _SpareListState extends State<SpareList> {
   int offset = 0;
   bool _noMore = false;
   int role;
+  DateTime today = new DateTime.now();
 
   Future<Null> getRole() async {
     var _prefs = await prefs;
@@ -309,6 +310,7 @@ class _SpareListState extends State<SpareList> {
   }
 
   Card buildEquipmentCard(Map item) {
+    DateTime _start = DateTime.tryParse(item['StartDate']);
     return new Card(
       child: new Column(
         mainAxisAlignment: MainAxisAlignment.start,
@@ -340,7 +342,7 @@ class _SpareListState extends State<SpareList> {
                 BuildWidget.buildCardRow('月租', item['Price'].toString()),
                 BuildWidget.buildCardRow('开始日期', item['StartDate'].split('T')[0]),
                 BuildWidget.buildCardRow('结束日期', item['EndDate'].split('T')[0]),
-                BuildWidget.buildCardRow('状态', '当前在用'),
+                BuildWidget.buildCardRow('状态', today.isBefore(_start)?'未使用':'当前在用'),
                 //BuildWidget.buildCardRow('状态', item['IsActive']?'启用':'停用'),
               ],
             ),

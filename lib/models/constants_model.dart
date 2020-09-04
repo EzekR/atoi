@@ -87,9 +87,9 @@ class ConstantsModel extends Model {
     _InvSpare = value;
   }
 
-  List<Map> get InvService => _InvService;
+  List get InvService => _InvService;
 
-  set InvService(List<Map> value) {
+  set InvService(List value) {
     _InvService = value;
   }
 

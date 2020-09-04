@@ -455,7 +455,12 @@ class _POAttachmentState extends State<POAttachment> {
     }
 
     if (widget.attachType == AttachmentType.SERVICE) {
-
+      if (_fujiClass2 == null) {
+        showDialog(context: context, builder: (context) => CupertinoAlertDialog(
+          title: new Text('富士II类不可为空'),
+        )).then((result) => FocusScope.of(context).requestFocus(_focusComponent[0]));
+        return;
+      }
       if (serviceName.text.isEmpty) {
         showDialog(context: context, builder: (context) => CupertinoAlertDialog(
           title: new Text('服务名称不可为空'),
@@ -689,7 +694,7 @@ class _POAttachmentState extends State<POAttachment> {
           widget.editable?BuildWidget.buildInput('规格', spec, maxLength: 20, focusNode: _focusComponent[1], required: true):BuildWidget.buildRow('规格', spec.text),
           widget.editable?BuildWidget.buildInput('型号', model, focusNode: _focusComponent[2], required: true):BuildWidget.buildRow('型号', model.text),
           widget.editable?BuildWidget.buildInput('单价', price, maxLength: 20, focusNode: _focusComponent[3], required: true):BuildWidget.buildRow('单价', price.text),
-          widget.editable?BuildWidget.buildInput('数量', quantity, focusNode: _focusComponent[4], required: true):BuildWidget.buildRow('数量', quantity.text),
+          widget.editable?BuildWidget.buildInput('数量', quantity, inputType: TextInputType.number, focusNode: _focusComponent[4], required: true):BuildWidget.buildRow('数量', quantity.text),
         ]);
         break;
       case AttachmentType.SERVICE:

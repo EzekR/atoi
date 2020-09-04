@@ -119,13 +119,13 @@ class _ServiceDetailState extends State<ServiceDetail> {
     if (availableTimes.text.isEmpty) {
       showDialog(context: context, builder: (context) => CupertinoAlertDialog(
         title: new Text('可用次数不可为空'),
-      )).then((result) => FocusScope.of(context).requestFocus(_focusComponent[2]));
+      )).then((result) => FocusScope.of(context).requestFocus(_focusComponent[3]));
       return;
     }
     if (startDate == 'YYYY-MM-DD') {
       showDialog(context: context, builder: (context) => CupertinoAlertDialog(
         title: new Text('开始日期不可为空'),
-      )).then((result) => FocusScope.of(context).requestFocus(_focusComponent[2]));
+      )).then((result) => FocusScope.of(context).requestFocus(_focusComponent[3]));
       return;
     }
     if (endDate == 'YYYY-MM-DD') {
@@ -134,10 +134,18 @@ class _ServiceDetailState extends State<ServiceDetail> {
       )).then((result) => FocusScope.of(context).requestFocus(_focusComponent[2]));
       return;
     }
+    DateTime _start = DateTime.tryParse(startDate);
+    DateTime _end = DateTime.tryParse(endDate);
+    if (_end.isBefore(_start)) {
+      showDialog(context: context, builder: (context) => CupertinoAlertDialog(
+        title: new Text('结束日期不可早于开始日期'),
+      )).then((result) => FocusScope.of(context).requestFocus(_focusComponent[2]));
+      return;
+    }
     if (supplier == null) {
       showDialog(context: context, builder: (context) => CupertinoAlertDialog(
         title: new Text('供应商不可为空'),
-      )).then((result) => FocusScope.of(context).requestFocus(_focusComponent[2]));
+      )).then((result) => FocusScope.of(context).requestFocus(_focusComponent[4]));
       return;
     }
     var prefs = await _prefs;
@@ -328,10 +336,10 @@ class _ServiceDetailState extends State<ServiceDetail> {
                             child: new Column(
                               children: <Widget>[
                                 BuildWidget.buildRow('系统编号', oid),
-                                widget.editable?BuildWidget.buildInput('服务名称', serviceName, maxLength: 20, focusNode: _focusComponent[1], required: true):BuildWidget.buildRow('服务名称', serviceName.text),
-                                widget.editable?BuildWidget.buildInput('金额', price, maxLength: 20, focusNode: _focusComponent[2], required: true):BuildWidget.buildRow('批次号', price.text),
-                                widget.editable?BuildWidget.buildInput('服务次数', totalTimes, maxLength: 20, focusNode: _focusComponent[3], required: true):BuildWidget.buildRow('服务次数', totalTimes.text),
-                                widget.editable?BuildWidget.buildInput('服务剩余次数', availableTimes, focusNode: _focusComponent[4], required: true):BuildWidget.buildRow('服务剩余次数', availableTimes.text),
+                                widget.editable?BuildWidget.buildInput('服务名称', serviceName, maxLength: 50, focusNode: _focusComponent[1], required: true):BuildWidget.buildRow('服务名称', serviceName.text),
+                                widget.editable?BuildWidget.buildInput('金额', price, maxLength: 13, inputType: TextInputType.numberWithOptions(decimal: true), focusNode: _focusComponent[2], required: true):BuildWidget.buildRow('批次号', price.text),
+                                widget.editable?BuildWidget.buildInput('服务次数', totalTimes, maxLength: 9, inputType: TextInputType.number, focusNode: _focusComponent[3], required: true):BuildWidget.buildRow('服务次数', totalTimes.text),
+                                widget.editable?BuildWidget.buildInput('服务剩余次数', availableTimes, maxLength: 9, inputType: TextInputType.number, focusNode: _focusComponent[4], required: true):BuildWidget.buildRow('服务剩余次数', availableTimes.text),
                                 widget.editable?new Padding(
                                   padding: EdgeInsets.symmetric(vertical: 5.0),
                                   child: new Row(
@@ -342,6 +350,12 @@ class _ServiceDetailState extends State<ServiceDetail> {
                                           alignment: WrapAlignment.end,
                                           crossAxisAlignment: WrapCrossAlignment.center,
                                           children: <Widget>[
+                                            new Text(
+                                              '*',
+                                              style: new TextStyle(
+                                                  color: Colors.red
+                                              ),
+                                            ),
                                             new Text(
                                               '开始日期',
                                               style: new TextStyle(
@@ -416,6 +430,12 @@ class _ServiceDetailState extends State<ServiceDetail> {
                                           alignment: WrapAlignment.end,
                                           crossAxisAlignment: WrapCrossAlignment.center,
                                           children: <Widget>[
+                                            new Text(
+                                              '*',
+                                              style: new TextStyle(
+                                                  color: Colors.red
+                                              ),
+                                            ),
                                             new Text(
                                               '结束日期',
                                               style: new TextStyle(
@@ -544,7 +564,7 @@ class _ServiceDetailState extends State<ServiceDetail> {
                                     ],
                                   ),
                                 ):BuildWidget.buildRow('供应商', supplier==null?'':supplier['Name']),
-                                widget.editable?BuildWidget.buildInput('备注', comments, maxLength: 100, focusNode: _focusComponent[5]):BuildWidget.buildRow('备注', comments.text),
+                                widget.editable?BuildWidget.buildInput('备注', comments, maxLength: 500, focusNode: _focusComponent[5]):BuildWidget.buildRow('备注', comments.text),
                                 new Divider(),
                                 new Padding(
                                     padding:
