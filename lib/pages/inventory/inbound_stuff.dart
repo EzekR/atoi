@@ -172,6 +172,10 @@ class _InboundStuffState extends State<InboundStuff> {
       showDialog(context: context, builder: (context) => CupertinoAlertDialog(
         title: new Text('入库成功'),
       )).then((result) => Navigator.of(context, rootNavigator: true).pop());
+    } else {
+      showDialog(context: context, builder: (context) => CupertinoAlertDialog(
+        title: new Text(resp['ResultMessage']),
+      ));
     }
   }
 
