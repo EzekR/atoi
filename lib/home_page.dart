@@ -247,23 +247,23 @@ class _HomePageState extends State<HomePage>
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: <Widget>[
-                        Container(
-                          width: 50.0,
-                          height: 30.0,
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(5.0),
-                            border: Border.all(
-                                color: Color(0xff3394B9),
-                                width: 1.0
-                            ),
-                            color: selectedTypes.contains(1)?Color(0xff3394B9):Color(0xffEBF9FF),
-                          ),
-                          child: GestureDetector(
+                        GestureDetector(
                             onTap: () {
                               setState(() {
                                 selectedTypes.contains(1)?selectedTypes.remove(1):selectedTypes.add(1);
                               });
                             },
+                            child: Container(
+                            width: 50.0,
+                            height: 30.0,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(5.0),
+                              border: Border.all(
+                                  color: Color(0xff3394B9),
+                                  width: 1.0
+                              ),
+                              color: selectedTypes.contains(1)?Color(0xff3394B9):Color(0xffEBF9FF),
+                            ),
                             child: Center(
                               child: Text('维修',
                                 style: TextStyle(
@@ -273,23 +273,23 @@ class _HomePageState extends State<HomePage>
                             ),
                           ),
                         ),
-                        Container(
-                          width: 50.0,
-                          height: 30.0,
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(5.0),
-                            border: Border.all(
-                                color: Color(0xff3394B9),
-                                width: 1.0
+                        GestureDetector(
+                          onTap: () {
+                            setState(() {
+                              selectedTypes.contains(2)?selectedTypes.remove(2):selectedTypes.add(2);
+                            });
+                          },
+                          child: Container(
+                            width: 50.0,
+                            height: 30.0,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(5.0),
+                              border: Border.all(
+                                  color: Color(0xff3394B9),
+                                  width: 1.0
+                              ),
+                              color: selectedTypes.contains(2)?Color(0xff3394B9):Color(0xffEBF9FF),
                             ),
-                            color: selectedTypes.contains(2)?Color(0xff3394B9):Color(0xffEBF9FF),
-                          ),
-                          child: GestureDetector(
-                            onTap: () {
-                              setState(() {
-                                selectedTypes.contains(2)?selectedTypes.remove(2):selectedTypes.add(2);
-                              });
-                            },
                             child: Center(
                               child: Text('保养',
                                 style: TextStyle(
@@ -299,23 +299,23 @@ class _HomePageState extends State<HomePage>
                             ),
                           ),
                         ),
-                        Container(
-                          width: 50.0,
-                          height: 30.0,
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(5.0),
-                            border: Border.all(
-                                color: Color(0xff3394B9),
-                                width: 1.0
+                        GestureDetector(
+                          onTap: () {
+                            setState(() {
+                              selectedTypes.contains(4)?selectedTypes.remove(4):selectedTypes.add(4);
+                            });
+                          },
+                          child: Container(
+                            width: 50.0,
+                            height: 30.0,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(5.0),
+                              border: Border.all(
+                                  color: Color(0xff3394B9),
+                                  width: 1.0
+                              ),
+                              color: selectedTypes.contains(4)?Color(0xff3394B9):Color(0xffEBF9FF),
                             ),
-                            color: selectedTypes.contains(4)?Color(0xff3394B9):Color(0xffEBF9FF),
-                          ),
-                          child: GestureDetector(
-                            onTap: () {
-                              setState(() {
-                                selectedTypes.contains(4)?selectedTypes.remove(4):selectedTypes.add(4);
-                              });
-                            },
                             child: Center(
                               child: Text('巡检',
                                 style: TextStyle(
@@ -325,23 +325,23 @@ class _HomePageState extends State<HomePage>
                             ),
                           ),
                         ),
-                        Container(
-                          width: 50.0,
-                          height: 30.0,
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(5.0),
-                            border: Border.all(
-                                color: Color(0xff3394B9),
-                                width: 1.0
+                        GestureDetector(
+                          onTap: () {
+                            setState(() {
+                              selectedTypes.contains(3)?selectedTypes.remove(3):selectedTypes.add(3);
+                            });
+                          },
+                          child: Container(
+                            width: 50.0,
+                            height: 30.0,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(5.0),
+                              border: Border.all(
+                                  color: Color(0xff3394B9),
+                                  width: 1.0
+                              ),
+                              color: selectedTypes.contains(3)?Color(0xff3394B9):Color(0xffEBF9FF),
                             ),
-                            color: selectedTypes.contains(3)?Color(0xff3394B9):Color(0xffEBF9FF),
-                          ),
-                          child: GestureDetector(
-                            onTap: () {
-                              setState(() {
-                                selectedTypes.contains(3)?selectedTypes.remove(3):selectedTypes.add(3);
-                              });
-                            },
                             child: Center(
                               child: Text('强检',
                                 style: TextStyle(
@@ -351,23 +351,23 @@ class _HomePageState extends State<HomePage>
                             ),
                           ),
                         ),
-                        Container(
-                          width: 50.0,
-                          height: 30.0,
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(5.0),
-                            border: Border.all(
-                                color: Color(0xff3394B9),
-                                width: 1.0
+                        GestureDetector(
+                          onTap: () {
+                            setState(() {
+                              selectedTypes.contains(5)?selectedTypes.remove(5):selectedTypes.add(5);
+                            });
+                          },
+                          child: Container(
+                            width: 50.0,
+                            height: 30.0,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(5.0),
+                              border: Border.all(
+                                  color: Color(0xff3394B9),
+                                  width: 1.0
+                              ),
+                              color: selectedTypes.contains(5)?Color(0xff3394B9):Color(0xffEBF9FF),
                             ),
-                            color: selectedTypes.contains(5)?Color(0xff3394B9):Color(0xffEBF9FF),
-                          ),
-                          child: GestureDetector(
-                            onTap: () {
-                              setState(() {
-                                selectedTypes.contains(5)?selectedTypes.remove(5):selectedTypes.add(5);
-                              });
-                            },
                             child: Center(
                               child: Text('校准',
                                 style: TextStyle(
@@ -376,7 +376,7 @@ class _HomePageState extends State<HomePage>
                               ),
                             ),
                           ),
-                        ),
+                        )
                       ],
                     ),
                     SizedBox(height: 18.0,),

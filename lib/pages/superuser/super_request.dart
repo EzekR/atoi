@@ -607,7 +607,7 @@ class _SuperRequestState extends State<SuperRequest> {
                                     ),
                                     minDateTime: DateTime.parse('2000-01-01'),
                                     maxDateTime: DateTime.parse('2030-01-01'),
-                                    initialDateTime: DateTime.parse(_startDate),
+                                    initialDateTime: _startDate==''?DateTime.now().add(new Duration(days: -365)):DateTime.parse(_startDate),
                                     dateFormat: 'yyyy-MM-dd',
                                     locale: DateTimePickerLocale.en_us,
                                     onClose: () => print(""),

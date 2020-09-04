@@ -178,7 +178,7 @@ class ManagerModel extends Model {
       _urlType = _typeList.map((item) => 'typeID=$item').join('&');
     }
     var resp = await HttpRequest.request(
-      '/Request/GetRequests?userID=${userID}&PageSize=10&CurRowNum=0&statusID=$_statusId&isRecall=$_recall&department=$_departmentId&urgency=$_urgencyId&overDue=$_overDue&startDate=$_startDate&endDate=$_endDate&filterField=$_field&filterText=$_text&source=$_source&$_urlType',
+      '/Request/GetRequests?userID=${userID}&PageSize=10&CurRowNum=$_offset&statusID=$_statusId&isRecall=$_recall&department=$_departmentId&urgency=$_urgencyId&overDue=$_overDue&startDate=$_startDate&endDate=$_endDate&filterField=$_field&filterText=$_text&source=$_source&$_urlType',
       method: HttpRequest.GET,
     );
     print(resp);
@@ -303,7 +303,6 @@ class ManagerModel extends Model {
     Map<String, dynamic> params = {
       'userID': userID,
       'statusID': _statusId,
-      'typeID': 0,
       'pageSize': 10,
       'curRowNum': _offsetTodo,
       'isRecall': _recall,
