@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:atoi/utils/http_request.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
@@ -8,163 +9,14 @@ import 'package:atoi/pages/inventory/consumable_detail.dart';
 
 /// 耗材列表类
 class ConsumableList extends StatefulWidget{
+  final bool optional;
+  ConsumableList({Key key, this.optional}):super(key: key);
   _ConsumableListState createState() => _ConsumableListState();
 }
 
 class _ConsumableListState extends State<ConsumableList> {
 
-  List<dynamic> _consumable = [
-    {
-      "Consumable": {
-        "FujiClass2": {
-          "ID": 0,
-          "Name": "frank_有源超声"
-        },
-        "Name": "其他耗材23",
-        "Description": "123",
-        "Type": {
-          "ID": 0
-        },
-        "ReplaceTimes": 0,
-        "CostPer": 0,
-        "StdPrice": 0,
-        "IsIncluded": false,
-        "IncludeContract": false,
-        "IsActive": false,
-        "AddDate": null,
-        "UpdateDate": null,
-        "OID": "HC00000015",
-        "ID": 15
-      },
-      "LotNum": "12314-7689",
-      "Specification": "75555554",
-      "Model": "54754444444",
-      "Supplier": {
-        "SupplierType": {
-          "ID": 0
-        },
-        "Name": "卡尔史托斯1",
-        "AddDate": null,
-        "IsActive": false,
-        "OID": "GYS00000007",
-        "ID": 7
-      },
-      "Price": 6886,
-      "ReceiveQty": 100000,
-      "PurchaseDate": "2020-07-15T00:00:00",
-      "Purchase": {
-        "ID": 0
-      },
-      "Comments": "yumnutrbbbbbbbbbbbyut",
-      "AddDate": "2020-07-16T11:27:32",
-      "AvaibleQty": 20000,
-      "UpdateDate": "2020-07-16T11:38:07",
-      "OID": "HCK00000015",
-      "Qty": 0,
-      "InboundQty": 0,
-      "ID": 15
-    },
-    {
-      "Consumable": {
-        "FujiClass2": {
-          "ID": 0,
-          "Name": "骨科2"
-        },
-        "Name": "其他耗材23",
-        "Description": "123",
-        "Type": {
-          "ID": 0
-        },
-        "ReplaceTimes": 0,
-        "CostPer": 0,
-        "StdPrice": 0,
-        "IsIncluded": false,
-        "IncludeContract": false,
-        "IsActive": false,
-        "AddDate": null,
-        "UpdateDate": null,
-        "OID": "HC00000006",
-        "ID": 6
-      },
-      "LotNum": "9862-58-0716",
-      "Specification": "9862-58-07162",
-      "Model": "9862-58-0716321",
-      "Supplier": {
-        "SupplierType": {
-          "ID": 0
-        },
-        "Name": "日立",
-        "AddDate": null,
-        "IsActive": false,
-        "OID": "GYS00000005",
-        "ID": 5
-      },
-      "Price": 33333,
-      "ReceiveQty": 8895889.2,
-      "PurchaseDate": "2019-10-17T00:00:00",
-      "Purchase": {
-        "ID": 0
-      },
-      "Comments": "xaafewf",
-      "AddDate": "2020-07-16T11:23:56",
-      "AvaibleQty": 100000,
-      "UpdateDate": "2020-07-16T11:25:11",
-      "OID": "HCK00000014",
-      "Qty": 0,
-      "InboundQty": 0,
-      "ID": 14
-    },
-    {
-      "Consumable": {
-        "FujiClass2": {
-          "ID": 0,
-          "Name": "骨科2"
-        },
-        "Name": "其他耗材23",
-        "Description": "123",
-        "Type": {
-          "ID": 0
-        },
-        "ReplaceTimes": 0,
-        "CostPer": 0,
-        "StdPrice": 0,
-        "IsIncluded": false,
-        "IncludeContract": false,
-        "IsActive": false,
-        "AddDate": null,
-        "UpdateDate": null,
-        "OID": "HC00000006",
-        "ID": 6
-      },
-      "LotNum": "0709-1",
-      "Specification": "0709-2",
-      "Model": "0709-3",
-      "Supplier": {
-        "SupplierType": {
-          "ID": 0
-        },
-        "Name": "史托斯",
-        "AddDate": null,
-        "IsActive": false,
-        "OID": "GYS00000010",
-        "ID": 10
-      },
-      "Price": 70.9,
-      "ReceiveQty": 100,
-      "PurchaseDate": "2020-07-31T00:00:00",
-      "Purchase": {
-        "ID": 0
-      },
-      "Comments": "2569840ssssssssssssssssssssssssssssssssssssssssssssss\nssssssssssssssssss",
-      "AddDate": "2020-07-09T14:56:57",
-      "AvaibleQty": 1000,
-      "UpdateDate": "2020-07-09T16:31:09",
-      "OID": "HCK00000002",
-      "Qty": 0,
-      "InboundQty": 0,
-      "ID": 2
-    }
-  ];
+  List<dynamic> _consumable = [];
 
   bool isSearchState = false;
   bool _loading = false;
@@ -266,6 +118,7 @@ class _ConsumableListState extends State<ConsumableList> {
       });
     }
   }
+
   void showSheet(BuildContext context) {
     showModalBottomSheet(context: context, builder: (context) {
       return StatefulBuilder(
@@ -450,12 +303,12 @@ class _ConsumableListState extends State<ConsumableList> {
     super.initState();
     cModel = MainModel.of(context);
     initFilter();
-    //setState(() {
-    //  _loading = true;
-    //});
-    //getConsumable().then((result) => setState(() {
-    //  _loading = false;
-    //}));
+    setState(() {
+      _loading = true;
+    });
+    getConsumable().then((result) => setState(() {
+      _loading = false;
+    }));
     getRole();
     _scrollController.addListener(() {
       if (_scrollController.position.pixels == _scrollController.position.maxScrollExtent) {
@@ -525,7 +378,31 @@ class _ConsumableListState extends State<ConsumableList> {
             mainAxisAlignment: MainAxisAlignment.end,
             mainAxisSize: MainAxisSize.max,
             children: <Widget>[
-              new RaisedButton(
+              widget.optional!=null?Container(
+                child: RaisedButton(
+                  onPressed: () {
+                    Navigator.of(context).pop(jsonEncode(item['Consumable']));
+                  },
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  color: new Color(0xff2E94B9),
+                  child: new Row(
+                    children: <Widget>[
+                      new Icon(
+                        Icons.check,
+                        color: Colors.white,
+                      ),
+                      new Text(
+                        '选择',
+                        style: new TextStyle(
+                            color: Colors.white
+                        ),
+                      )
+                    ],
+                  ),
+                ),
+              ):new RaisedButton(
                 onPressed: (){
                   Navigator.of(context).push(new MaterialPageRoute(builder: (_) {
                     return new ConsumableDetail(consumable: item, editable: _editable,);
@@ -651,3 +528,4 @@ class _ConsumableListState extends State<ConsumableList> {
     );
   }
 }
+

@@ -346,10 +346,10 @@ class _POListState extends State<POList> {
             mainAxisAlignment: MainAxisAlignment.end,
             mainAxisSize: MainAxisSize.max,
             children: <Widget>[
-              new RaisedButton(
+              item['Status']['ID']<3?new RaisedButton(
                 onPressed: (){
                   Navigator.of(context).push(new MaterialPageRoute(builder: (_) {
-                    return new PODetail(component: item, editable: _editable,);
+                    return new PODetail(purchaseOrder: item, editable: _editable,);
                   })).then((result) {
                     setState(() {
                       _loading = true;
@@ -381,12 +381,48 @@ class _POListState extends State<POList> {
                     )
                   ],
                 ),
-              ),
-              new SizedBox(
+              ):Container(),
+              item['Status']['ID']==2||item['Status']['ID']==3?SizedBox(
                 width: 60,
-              )
+              ):Container(),
+              item['Status']['ID']==2||item['Status']['ID']==3?new RaisedButton(
+                onPressed: (){
+                  Navigator.of(context).push(new MaterialPageRoute(builder: (_) {
+                    return new PODetail(purchaseOrder: item, editable: false, operation: item['Status']['ID']==2?PurchaseOrderOperation.APPROVE:PurchaseOrderOperation.INBOUND,);
+                  })).then((result) {
+                    setState(() {
+                      _loading = true;
+                      _purchaseOrders.clear();
+                      offset = 0;
+                    });
+                    getPurchaseOrder().then((result) {
+                      setState(() {
+                        _loading = false;
+                      });
+                    });
+                  });
+                },
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                color: new Color(0xff2E94B9),
+                child: new Row(
+                  children: <Widget>[
+                    new Icon(
+                      Icons.remove_red_eye,
+                      color: Colors.white,
+                    ),
+                    new Text(
+                      item['Status']['ID']==2?'审批':'入库',
+                      style: new TextStyle(
+                          color: Colors.white
+                      ),
+                    )
+                  ],
+                ),
+              ):Container(),
             ],
-          )
+          ),
         ],
       ),
     );
