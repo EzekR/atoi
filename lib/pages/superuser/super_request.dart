@@ -103,7 +103,7 @@ class _SuperRequestState extends State<SuperRequest> {
         _param = {
           'userID': _userId,
           'urgency': _urgency,
-          'type': _type,
+          'typeIDs': _type,
           'pageSize': 10,
           'curRowNum': offset,
           'filterField': _field,
@@ -124,19 +124,20 @@ class _SuperRequestState extends State<SuperRequest> {
     }
   }
 
-  Future<Null> initFilter() async {
+  Future<Null> initFilter({bool resetAll}) async {
     var _start = new DateTime.now().add(new Duration(days: widget.type==null?-4:-365));
     var _end = new DateTime.now();
+    resetAll = resetAll ?? false;
     await cModel.getConstants();
     setState(() {
       _status = 0;
-      _type = widget.type!=null?widget.type:0;
+      _type = resetAll?0:widget.type;
       _depart = -1;
       _recall = false;
       _overDue = false;
-      _field = widget.field!=null?widget.field:(widget.pageType==PageType.REQUEST?'r.ID':'d.ID');
+      _field = !resetAll?widget.field:(widget.pageType==PageType.REQUEST?'r.ID':'d.ID');
       _filter = new TextEditingController();
-      _filter.text = widget.filter??'';
+      _filter.text = resetAll?'':widget.filter;
       _urgency = 0;
       _startDate = '';
       _endDate = formatDate(_end, [yyyy, '-', mm, '-', dd]);
@@ -965,7 +966,7 @@ class _SuperRequestState extends State<SuperRequest> {
                           _depart = _departmentList[0]['value'];
                           _urgency = _urgencyList[0]['value'];
                         });
-                        initFilter();
+                        initFilter(resetAll: true);
                       }, child: Text('重置')),
                     ),
                   ),

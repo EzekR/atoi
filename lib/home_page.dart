@@ -251,6 +251,7 @@ class _HomePageState extends State<HomePage>
                             onTap: () {
                               setState(() {
                                 selectedTypes.contains(1)?selectedTypes.remove(1):selectedTypes.add(1);
+                                typeId = 0;
                               });
                             },
                             child: Container(
@@ -277,6 +278,7 @@ class _HomePageState extends State<HomePage>
                           onTap: () {
                             setState(() {
                               selectedTypes.contains(2)?selectedTypes.remove(2):selectedTypes.add(2);
+                              typeId = 0;
                             });
                           },
                           child: Container(
@@ -303,6 +305,7 @@ class _HomePageState extends State<HomePage>
                           onTap: () {
                             setState(() {
                               selectedTypes.contains(4)?selectedTypes.remove(4):selectedTypes.add(4);
+                              typeId = 0;
                             });
                           },
                           child: Container(
@@ -329,6 +332,7 @@ class _HomePageState extends State<HomePage>
                           onTap: () {
                             setState(() {
                               selectedTypes.contains(3)?selectedTypes.remove(3):selectedTypes.add(3);
+                              typeId = 0;
                             });
                           },
                           child: Container(
@@ -355,6 +359,7 @@ class _HomePageState extends State<HomePage>
                           onTap: () {
                             setState(() {
                               selectedTypes.contains(5)?selectedTypes.remove(5):selectedTypes.add(5);
+                              typeId = 0;
                             });
                           },
                           child: Container(
