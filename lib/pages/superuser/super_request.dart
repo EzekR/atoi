@@ -135,7 +135,7 @@ class _SuperRequestState extends State<SuperRequest> {
       _depart = -1;
       _recall = false;
       _overDue = false;
-      _field = !resetAll?widget.field:(widget.pageType==PageType.REQUEST?'r.ID':'d.ID');
+      _field = widget.field;
       _filter = new TextEditingController();
       _filter.text = resetAll?'':widget.filter;
       _urgency = 0;
@@ -352,7 +352,7 @@ class _SuperRequestState extends State<SuperRequest> {
                     ),
                     new RaisedButton(
                       onPressed: (){
-                        task['Status']['ID']>1?Navigator.of(context).push(new MaterialPageRoute(builder: (_) => new SuperRequest(pageType: PageType.DISPATCH, filter: taskNo, field: 'd.RequestID'))):showDialog(context: (context), builder: (context) => CupertinoAlertDialog(title: Text('暂无派工单'),));
+                        task['Status']['ID']>1?Navigator.of(context).push(new MaterialPageRoute(builder: (_) => new SuperRequest(pageType: PageType.DISPATCH, type: task['RequestType']['ID'], filter: taskNo, field: 'd.RequestID'))):showDialog(context: (context), builder: (context) => CupertinoAlertDialog(title: Text('暂无派工单'),));
                       },
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(6),
@@ -954,19 +954,19 @@ class _SuperRequestState extends State<SuperRequest> {
                     child: Center(
                       child: FlatButton(onPressed: () {
                         setState(() {
-                          _filter.clear();
-                          _field = widget.pageType==PageType.DISPATCH?'d.ID':'r.ID';
+                          _filter.text = widget.filter;
+                          _field = widget.field;
                           _recall = false;
                           _overDue = false;
-                          _startDate = formatDate(DateTime.now().add(new Duration(days: -90)), [yyyy, '-', mm, '-', dd]);
+                          _startDate = '';
                           _endDate = formatDate(DateTime.now(), [yyyy, '-', mm, '-', dd]);
-                          _type = _typeList[0]['value'];
+                          _type = widget.type;
                           //_dispatchStatusId = 3;
                           _status = _statusList[0]['value'];
                           _depart = _departmentList[0]['value'];
                           _urgency = _urgencyList[0]['value'];
                         });
-                        initFilter(resetAll: true);
+                        initFilter(resetAll: false);
                       }, child: Text('重置')),
                     ),
                   ),
