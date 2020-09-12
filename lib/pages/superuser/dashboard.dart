@@ -34,6 +34,7 @@ class _DashboardState extends State<Dashboard> {
   String equipmentName;
   String equipmentTimelineName;
   String equipmentStatus;
+  int equipmentStatusId;
   List equipmentFiles;
   String installDate;
   String installSite;
@@ -52,8 +53,8 @@ class _DashboardState extends State<Dashboard> {
     'expense': 0.0,
     'expense_rate': 0.0
   };
-  List departmentData;
-  List equipmentData;
+  List departmentData = [];
+  List equipmentData = [];
   int sortBy = 0;
   String sortName;
   int filter = 0;
@@ -70,26 +71,7 @@ class _DashboardState extends State<Dashboard> {
   int currentYear;
 
   List<IncomeData> incomeData = [
-    IncomeData(1, 100.0, -80.0, 0),
-    IncomeData(2, 100.0, -80.0, 0),
-    IncomeData(3, 80.0, -80.0, -20),
-    IncomeData(4, 50, -50.0, -10),
-    IncomeData(5, 100.0, -80.0, 0),
-    IncomeData(6, 80.0, -80.0, -20),
-    IncomeData(7, 50, -50.0, -10),
-    IncomeData(8, 100.0, -80.0, 0),
-    IncomeData(9, 80.0, -80.0, -20),
-    IncomeData(10, 50, -50.0, -10),
-    IncomeData(11, 40, -40.0, -40),
-    IncomeData(12, 100.0, -80.0, 0),
-    IncomeData(13, 40, -40.0, -40),
-    IncomeData(14, 100.0, -80.0, 0),
-    IncomeData(15, 40, -40.0, -40),
-    IncomeData(16, 100.0, -80.0, 0),
-    IncomeData(17, 80.0, -80.0, -20),
-    IncomeData(18, 50, -50.0, -10),
-    IncomeData(19, 40, -40.0, -40),
-    IncomeData(20, 100.0, -80.0, 0),
+    IncomeData(1.0, 0, 0, 0, "1月")
   ];
 
   List<RequestData> requestData = [
@@ -368,6 +350,7 @@ class _DashboardState extends State<Dashboard> {
         equipmentName = resp['Data']['Name']+'-'+resp['Data']['Manufacturer']['Name']+'-'+resp['Data']['EquipmentCode']+'-'+resp['Data']['AssetCode'];
         equipmentTimelineName = resp['Data']['Name']+'-'+resp['Data']['EquipmentCode'];
         equipmentStatus = resp['Data']['EquipmentStatus']['Name'];
+        equipmentStatusId = resp['Data']['EquipmentStatus']['ID'];
         warrantyStatus = resp['Data']['WarrantyStatus'];
         equipmentFiles = resp['Data']['EquipmentFile'];
         installDate = AppConstants.TimeForm(resp['Data']['InstalDate'], 'yyyy-mm-dd');
@@ -419,14 +402,14 @@ class _DashboardState extends State<Dashboard> {
         incomeData = resp['Data']['detail'].asMap().keys.map<IncomeData>((index) {
           double _income = resp['Data']['detail'][index]['Item2'];
           double _expense = resp['Data']['detail'][index]['Item3'];
-          double _net = _income-_expense>=0?0:(_income-_expense);
+          double _net = _income-_expense>=0?0.0:(_income-_expense);
           if (_income == 0.0) {
             _net = 0.0;
           }
           return new IncomeData(index/1.0, _income, _net==0.0?(0.0-_expense):(0.0-_income), _net, '${resp['Data']['detail'][index]['Item1']}$timeType');
         }).toList();
       });
-      sortIncome(sortBy);
+      //sortIncome(sortBy);
     }
   }
 
@@ -1480,7 +1463,7 @@ class _DashboardState extends State<Dashboard> {
                 scrollDirection: Axis.horizontal,
                 controller: new ScrollController(),
                 children: <Widget>[
-                  incomeData.length>0?buildIncomeChart():Container()
+                  buildIncomeChart()
                 ],
               ),
             )
@@ -2466,7 +2449,7 @@ class _DashboardState extends State<Dashboard> {
                     child: Row(
                       children: <Widget>[
                         Text(
-                          '收支类型：',
+                          '类型：',
                           style: TextStyle(
                               color: Color(0xff666666),
                               fontSize: 11.0
@@ -2478,7 +2461,7 @@ class _DashboardState extends State<Dashboard> {
                           },
                           child: Container(
                               height: 24.0,
-                              width: 50.0,
+                              width: 55.0,
                               decoration: BoxDecoration(
                                   border: Border.all(
                                       color: Color(0xff7597D3)
@@ -2515,7 +2498,7 @@ class _DashboardState extends State<Dashboard> {
                     child: Row(
                       children: <Widget>[
                         Text(
-                          '时间类型：',
+                          '维度：',
                           style: TextStyle(
                               color: Color(0xff666666),
                               fontSize: 11.0
@@ -2575,7 +2558,7 @@ class _DashboardState extends State<Dashboard> {
                           },
                           child: Container(
                               height: 24.0,
-                              width: 50.0,
+                              width: 55.0,
                               decoration: BoxDecoration(
                                   border: Border.all(
                                       color: Color(0xff7597D3)
@@ -2809,6 +2792,22 @@ class _DashboardState extends State<Dashboard> {
   }
 
   // equipment radar
+  Color statusColor(int statusId) {
+    Color _color;
+    switch (statusId) {
+      case 1:
+        _color = Color(0xff33B850);
+        break;
+      case 2:
+        _color = Colors.red;
+        break;
+      case 3:
+        _color = Colors.grey;
+        break;
+    }
+    return _color;
+  }
+
   Padding buildRadar() {
     return Padding(
       padding: EdgeInsets.fromLTRB(24, 13, 24, 13),
@@ -2823,7 +2822,7 @@ class _DashboardState extends State<Dashboard> {
                 child: Container(
                     height: 18,
                     width: 45,
-                    color: Color(0xff33B850),
+                    color: statusColor(equipmentStatusId),
                     child: Center(
                       child: Text(
                         equipmentStatus??'正常',
@@ -3216,7 +3215,7 @@ class _DashboardState extends State<Dashboard> {
             ),
           ),
           Container(
-            height: MediaQuery.of(context).size.height-100,
+            height: MediaQuery.of(context).size.height-110,
             color: Color(0xffd8e0ee),
             child: Stack(
               children: <Widget>[

@@ -53,7 +53,7 @@ class _EquipmentsListState extends State<EquipmentsList> {
     var _prefs = await prefs;
     role = _prefs.getInt('role');
     limited = _prefs.getBool('limitEngineer');
-    _editable = role==1?true:false;
+    _editable = role==1;
   }
 
   List initList(Map _map, {int valueForAll}) {
@@ -842,7 +842,10 @@ class _EquipmentsListState extends State<EquipmentsList> {
                   //} else {
                   //  showDialog(context: context, builder: (context) => CupertinoAlertDialog(title: new Text('暂无事件'),));
                   //}
-                  limited?null:Navigator.of(context).push(new MaterialPageRoute(builder: (_) => new Dashboard(equipmentId: item['ID'],)));
+                  if (limited&&role!=1) {
+                    return;
+                  }
+                  Navigator.of(context).push(new MaterialPageRoute(builder: (_) => new Dashboard(equipmentId: item['ID'],)));
                 },
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(6),

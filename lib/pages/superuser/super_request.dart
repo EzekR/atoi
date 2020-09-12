@@ -80,12 +80,12 @@ class _SuperRequestState extends State<SuperRequest> {
     Map<String, dynamic> _param;
     switch (widget.pageType) {
       case PageType.REQUEST:
-        _url = '/Request/GetRequests?statusID=99';
+        _url = '/Request/GetRequests';
         _param = {
+          'statusID': _status,
           'userID': _userId,
           'PageSize': 10,
           'CurRowNum': offset,
-          'statusID': _status,
           'typeID': _type,
           'isRecall': _recall,
           'department': _depart,
@@ -94,7 +94,8 @@ class _SuperRequestState extends State<SuperRequest> {
           'startDate': _startDate,
           'endDate': _endDate,
           'filterField': _field,
-          'filterText': _filter.text
+          'filterText': _filter.text,
+          'sortField': 'r.RequestDate'
         };
         break;
       case PageType.DISPATCH:
@@ -102,7 +103,7 @@ class _SuperRequestState extends State<SuperRequest> {
         _param = {
           'userID': _userId,
           'urgency': _urgency,
-          'type': _type,
+          'typeIDs': _type,
           'pageSize': 10,
           'curRowNum': offset,
           'filterField': _field,
@@ -123,25 +124,26 @@ class _SuperRequestState extends State<SuperRequest> {
     }
   }
 
-  Future<Null> initFilter() async {
+  Future<Null> initFilter({bool resetAll}) async {
     var _start = new DateTime.now().add(new Duration(days: widget.type==null?-4:-365));
     var _end = new DateTime.now();
+    resetAll = resetAll ?? false;
     await cModel.getConstants();
     setState(() {
-      _status = 98;
-      _type = widget.type!=null?widget.type:0;
+      _status = 0;
+      _type = resetAll?0:widget.type;
       _depart = -1;
       _recall = false;
       _overDue = false;
-      _field = widget.field!=null?widget.field:(widget.pageType==PageType.REQUEST?'r.ID':'d.ID');
+      _field = widget.field;
       _filter = new TextEditingController();
-      _filter.text = widget.filter??'';
+      _filter.text = resetAll?'':widget.filter;
       _urgency = 0;
-      _startDate = formatDate(_start, [yyyy, '-', mm, '-', dd]);
+      _startDate = '';
       _endDate = formatDate(_end, [yyyy, '-', mm, '-', dd]);
       _typeList = initList(cModel.RequestType);
-      _statusList = initList(cModel.RequestStatus, valueForAll: 98);
-      _statusList.removeWhere((item) => item['value'] == -1 || item['value'] == 99);
+      _statusList = initList(cModel.RequestStatus, valueForAll: 0);
+      _statusList.removeWhere((item) => item['value'] == -1);
       _departmentList = initList(cModel.Departments, valueForAll: -1);
       _urgencyList = initList(cModel.UrgencyID);
       _dispatchList = initList(cModel.DispatchStatus);
@@ -350,7 +352,7 @@ class _SuperRequestState extends State<SuperRequest> {
                     ),
                     new RaisedButton(
                       onPressed: (){
-                        task['Status']['ID']>1?Navigator.of(context).push(new MaterialPageRoute(builder: (_) => new SuperRequest(pageType: PageType.DISPATCH, filter: taskNo, field: 'd.RequestID'))):showDialog(context: (context), builder: (context) => CupertinoAlertDialog(title: Text('暂无派工单'),));
+                        task['Status']['ID']>1?Navigator.of(context).push(new MaterialPageRoute(builder: (_) => new SuperRequest(pageType: PageType.DISPATCH, type: task['RequestType']['ID'], filter: taskNo, field: 'd.RequestID'))):showDialog(context: (context), builder: (context) => CupertinoAlertDialog(title: Text('暂无派工单'),));
                       },
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(6),
@@ -606,7 +608,7 @@ class _SuperRequestState extends State<SuperRequest> {
                                     ),
                                     minDateTime: DateTime.parse('2000-01-01'),
                                     maxDateTime: DateTime.parse('2030-01-01'),
-                                    initialDateTime: DateTime.parse(_startDate),
+                                    initialDateTime: _startDate==''?DateTime.now().add(new Duration(days: -365)):DateTime.parse(_startDate),
                                     dateFormat: 'yyyy-MM-dd',
                                     locale: DateTimePickerLocale.en_us,
                                     onClose: () => print(""),
@@ -952,19 +954,19 @@ class _SuperRequestState extends State<SuperRequest> {
                     child: Center(
                       child: FlatButton(onPressed: () {
                         setState(() {
-                          _filter.clear();
-                          _field = widget.pageType==PageType.DISPATCH?'d.ID':'r.ID';
+                          _filter.text = widget.filter;
+                          _field = widget.field;
                           _recall = false;
                           _overDue = false;
-                          _startDate = formatDate(DateTime.now().add(new Duration(days: -90)), [yyyy, '-', mm, '-', dd]);
+                          _startDate = '';
                           _endDate = formatDate(DateTime.now(), [yyyy, '-', mm, '-', dd]);
-                          _type = _typeList[0]['value'];
+                          _type = widget.type;
                           //_dispatchStatusId = 3;
                           _status = _statusList[0]['value'];
                           _depart = _departmentList[0]['value'];
                           _urgency = _urgencyList[0]['value'];
                         });
-                        initFilter();
+                        initFilter(resetAll: false);
                       }, child: Text('重置')),
                     ),
                   ),

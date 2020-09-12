@@ -204,6 +204,7 @@ class _LoginPageState extends State<LoginPage> {
     setState(() {
       _loading = !_loading;
     });
+    getLimited();
     var _data = await HttpRequest.request(
       '/User/Login',
       method: HttpRequest.POST,
