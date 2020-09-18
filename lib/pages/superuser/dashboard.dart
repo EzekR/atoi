@@ -56,7 +56,7 @@ class _DashboardState extends State<Dashboard> {
   List departmentData = [];
   List equipmentData = [];
   int sortBy = 0;
-  String sortName;
+  String sortName = "科室";
   int filter = 0;
   String filterName = '所有科室';
   List requestList;
@@ -209,7 +209,7 @@ class _DashboardState extends State<Dashboard> {
         if (_income == 0.0) {
           _net = 0.0;
         }
-        return new IncomeData(index/1.0, _income, _net==0.0?(0.0-_expense):(0.0-_income), _net);
+        return new IncomeData(index/1.0, _income, _net==0.0?(0.0-_expense):(0.0-_income), _net, "");
       }).toList();
       double income_last = 0.0;
       double expense_last = 0.0;
@@ -253,7 +253,7 @@ class _DashboardState extends State<Dashboard> {
         if (_income == 0.0) {
           _net = 0.0;
         }
-        return new IncomeData(index/1.0, _income, _net==0.0?(0.0-_expense):(0.0-_income), _net);
+        return new IncomeData(index/1.0, _income, _net==0.0?(0.0-_expense):(0.0-_income), _net, "");
       }).toList();
       print(incomeData.length);
       double income_last = 0.0;
@@ -1463,7 +1463,7 @@ class _DashboardState extends State<Dashboard> {
                 scrollDirection: Axis.horizontal,
                 controller: new ScrollController(),
                 children: <Widget>[
-                  buildIncomeChart()
+                  incomeData.length==0?Container():buildIncomeChart()
                 ],
               ),
             )
@@ -1476,7 +1476,7 @@ class _DashboardState extends State<Dashboard> {
   // income chart
   Container buildIncomeChart() {
     return Container(
-      width: incomeData.length<20?400.0:incomeData.length*20.0,
+      width: incomeData.length*20.0,
       child: SfCartesianChart(
           borderWidth: 0,
           plotAreaBorderWidth: 0.0,

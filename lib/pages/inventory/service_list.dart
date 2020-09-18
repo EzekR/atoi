@@ -135,16 +135,17 @@ class _ServiceListState extends State<ServiceList> {
 
   void initFilter() async {
     await cModel.getConstants();
-    List _list = cModel.InvService.map((item) {
-      return {
-        'value': item['ID'],
-        'text': item['Name']
-      };
-    }).toList();
+    List _list= [];
     _list.add({
       'value': 0,
       'text': '全部'
     });
+    _list.addAll(cModel.InvService.map((item) {
+      return {
+        'value': item['ID'],
+        'text': item['Name']
+      };
+    }).toList());
     setState(() {
       field = 'se.ID';
       _keywords.clear();
@@ -418,8 +419,8 @@ class _ServiceListState extends State<ServiceList> {
                 BuildWidget.buildCardRow('关联富士II类', item['FujiClass2']['Name']),
                 BuildWidget.buildCardRow('供应商', item['Supplier']['Name']),
                 BuildWidget.buildCardRow('服务次数', item['TotalTimes'].toString()),
-                BuildWidget.buildCardRow('购入日期', item['StartDate'].split('T')[0]),
-                BuildWidget.buildCardRow('购入日期', item['EndDate'].split('T')[0]),
+                BuildWidget.buildCardRow('开始日期', item['StartDate'].split('T')[0]),
+                BuildWidget.buildCardRow('结束日期', item['EndDate'].split('T')[0]),
                 BuildWidget.buildCardRow('金额', item['Price'].toString()),
                 BuildWidget.buildCardRow('剩余服务次数', item['AvaibleTimes'].toString()),
                 BuildWidget.buildCardRow('采购单号', item['Purchase']['ID'].toString()),

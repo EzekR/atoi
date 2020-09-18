@@ -81,8 +81,8 @@ class _POAttachmentState extends State<POAttachment> {
           _component = _selectedComponent['ID'];
           spec.text = widget.po['Specification'];
           model.text = widget.po['Model'];
-          price.text = widget.po['Price'];
-          quantity.text = widget.po['Qty'];
+          price.text = widget.po['Price'].toString();
+          quantity.text = widget.po['Qty'].toString();
         }
         break;
       case AttachmentType.CONSUMABLE:
@@ -91,8 +91,8 @@ class _POAttachmentState extends State<POAttachment> {
           _consumableDetail = widget.po['Consumable'];
           spec.text = widget.po['Specification'];
           model.text = widget.po['Model'];
-          price.text = widget.po['Price'];
-          quantity.text = widget.po['Qty'];
+          price.text = widget.po['Price'].toString();
+          quantity.text = widget.po['Qty'].toString();
         }
         break;
       case AttachmentType.SERVICE:
@@ -100,11 +100,11 @@ class _POAttachmentState extends State<POAttachment> {
         initFuji();
         if (widget.po != null) {
           _fujiClass2 = widget.po['FujiClass2']['ID'];
-          serviceTimes.text = widget.po['TotalTimes'];
-          price.text = widget.po['Price'];
+          serviceTimes.text = widget.po['TotalTimes'].toString();
+          price.text = widget.po['Price'].toString();
           serviceName.text = widget.po['Name'];
-          startDate = widget.po['StartDate'];
-          endDate = widget.po['EndDate'];
+          startDate = widget.po['StartDate'].toString().split('T')[0];
+          endDate = widget.po['EndDate'].toString().split('T')[0];
         }
         break;
     }
@@ -258,7 +258,14 @@ class _POAttachmentState extends State<POAttachment> {
             child: IconButton(
               icon: Icon(Icons.add),
               onPressed: () {
-                addComponent();
+                if (_equipment == null) {
+                  showDialog(context: context, builder: (context) => CupertinoAlertDialog(
+                    title: new Text('请先选择关联设备'),
+                  )).then((result) => FocusScope.of(context).requestFocus(_focusComponent[0]));
+                  return;
+                } else {
+                  addComponent();
+                }
               },
             ),
           ),
@@ -310,107 +317,120 @@ class _POAttachmentState extends State<POAttachment> {
       builder: (context, setState) => SimpleDialog(
         title: Text('新增零件'),
         children: <Widget>[
-          BuildWidget.buildCardRow('富士二类', _fujiClass2Name??''),
-          BuildWidget.buildCardInput('简称', componentName, required: true),
-          BuildWidget.buildCardInput('描述', componentDesc, required: true),
-          new Row(
-            children: <Widget>[
-              new Expanded(
-                flex: 3,
-                child: new Wrap(
-                  alignment: WrapAlignment.end,
-                  crossAxisAlignment: WrapCrossAlignment.center,
+          Padding(
+            padding: EdgeInsets.fromLTRB(8, 0, 8, 0),
+            child: Column(
+              children: <Widget>[
+                BuildWidget.buildCardRow('富士二类', _fujiClass2Name??''),
+                BuildWidget.buildCardInput('简称', componentName, required: true),
+                BuildWidget.buildCardInput('描述', componentDesc, required: true),
+                new Row(
                   children: <Widget>[
-                    new Text(
-                      '*',
-                      style: new TextStyle(
-                          color: Colors.red
+                    new Expanded(
+                      flex: 3,
+                      child: new Wrap(
+                        alignment: WrapAlignment.end,
+                        crossAxisAlignment: WrapCrossAlignment.center,
+                        children: <Widget>[
+                          new Text(
+                            '*',
+                            style: new TextStyle(
+                                color: Colors.red
+                            ),
+                          ),
+                          new Text(
+                            '类型',
+                            style: new TextStyle(
+                                fontSize: 16.0,
+                                fontWeight: FontWeight.w600
+                            ),
+                          )
+                        ],
                       ),
                     ),
-                    new Text(
-                      '类型',
-                      style: new TextStyle(
+                    new Expanded(
+                      flex: 1,
+                      child: new Text(
+                        '：',
+                        style: new TextStyle(
                           fontSize: 16.0,
-                          fontWeight: FontWeight.w600
-                      ),
-                    )
-                  ],
-                ),
-              ),
-              new Expanded(
-                flex: 1,
-                child: new Text(
-                  '：',
-                  style: new TextStyle(
-                    fontSize: 16.0,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ),
-              new Expanded(
-                flex: 7,
-                child: new DropdownButton(
-                  value: _componentStatus,
-                  items: _componentStatusList.map<DropdownMenuItem>((item) {
-                    return DropdownMenuItem(
-                      value: item['value'],
-                      child: Text(
-                        item['text'],
-                        style: TextStyle(
-                            fontSize: 12.0
+                          fontWeight: FontWeight.w600,
                         ),
                       ),
-                    );
-                  }).toList(),
-                  onChanged: (value) {
-                    setState(() {
-                      _componentStatus = value;
-                    });
-                  },
-                  style: new TextStyle(
-                    color: Colors.black54,
-                    fontSize: 12.0,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          BuildWidget.buildCardInput('标准单价', componentPrice),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: <Widget>[
-              RaisedButton(
-                color: Colors.redAccent,
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-                child: Center(
-                  child: Text('取消',
-                    style: TextStyle(
-                      color: Colors.white
                     ),
-                  ),
-                ),
-              ),
-              RaisedButton(
-                color: Colors.blueAccent,
-                onPressed: () {
-                  saveComponent().then((result) {
-                    if (result == 'ok') {
-                      getFujiComponents(_equipment['FujiClass2']['ID']);
-                      Navigator.of(context).pop();
-                    }
-                  });
-                },
-                child: Center(
-                  child: Text('保存',
-                    style: TextStyle(
-                        color: Colors.white
+                    new Expanded(
+                      flex: 7,
+                      child: new DropdownButton(
+                        value: _componentStatus,
+                        items: _componentStatusList.map<DropdownMenuItem>((item) {
+                          return DropdownMenuItem(
+                            value: item['value'],
+                            child: Text(
+                              item['text'],
+                              style: TextStyle(
+                                  fontSize: 12.0
+                              ),
+                            ),
+                          );
+                        }).toList(),
+                        onChanged: (value) {
+                          setState(() {
+                            _componentStatus = value;
+                          });
+                        },
+                        style: new TextStyle(
+                          color: Colors.black54,
+                          fontSize: 12.0,
+                        ),
+                      ),
                     ),
-                  ),
+                  ],
                 ),
-              ),
-            ],
+                BuildWidget.buildCardInput('标准单价', componentPrice),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: <Widget>[
+                    RaisedButton(
+                      color: Color(0xffD25565),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                      },
+                      child: Center(
+                        child: Text('取消',
+                          style: TextStyle(
+                              color: Colors.white
+                          ),
+                        ),
+                      ),
+                    ),
+                    RaisedButton(
+                      color: Color(0xff2E94B9),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      onPressed: () {
+                        saveComponent().then((result) {
+                          if (result == 'ok') {
+                            getFujiComponents(_equipment['FujiClass2']['ID']);
+                            Navigator.of(context).pop();
+                          }
+                        });
+                      },
+                      child: Center(
+                        child: Text('保存',
+                          style: TextStyle(
+                              color: Colors.white
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                )
+              ],
+            ),
           )
         ],
       ),

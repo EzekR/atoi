@@ -64,7 +64,7 @@ class _ComponentListState extends State<ComponentList> {
   void initFilter() async {
     await cModel.getConstants();
     setState(() {
-      useStatus = 1;
+      useStatus = 0;
       field = 'c.Name';
       _keywords.clear();
       useList = [
@@ -260,7 +260,7 @@ class _ComponentListState extends State<ComponentList> {
                     child: Center(
                       child: FlatButton(onPressed: () {
                         setState((){
-                          useStatus = -1;
+                          useStatus = 0;
                           field = 'c.Name';
                           _keywords.clear();
                         });
@@ -362,7 +362,7 @@ class _ComponentListState extends State<ComponentList> {
                 BuildWidget.buildCardRow('供应商', item['Supplier']['Name']),
                 BuildWidget.buildCardRow('单价（元）', item['Price'].toString()),
                 BuildWidget.buildCardRow('购入日期', item['PurchaseDate'].split('T')[0]),
-                BuildWidget.buildCardRow('采购单号', item['Purchase']['ID'].toString()),
+                BuildWidget.buildCardRow('采购单号', item['Purchase']['ID']==0?'':'${item['Purchase']['Name']}${item['Purchase']['ID']}'),
                 BuildWidget.buildCardRow('状态', item['Status']['Name']),
                 //BuildWidget.buildCardRow('状态', item['IsActive']?'启用':'停用'),
               ],

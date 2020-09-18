@@ -64,20 +64,21 @@ class _ConsumableListState extends State<ConsumableList> {
 
   void initFilter() async {
     await cModel.getConstants();
-    List _list = cModel.FujiClass2.map((item) {
-      return {
-        'value': item['ID'],
-        'text': item['Name']
-      };
-    }).toList();
+    List _list = [];
     _list.add({
       'value': 0,
       'text': '全部'
     });
+    _list.addAll(cModel.FujiClass2.map((item) {
+      return {
+        'value': item['ID'],
+        'text': item['Name']
+      };
+    }).toList());
     setState(() {
       _fujiClass2 = 0;
       _fujiList = _list;
-      field = 's.ID';
+      field = 'c.Name';
       _keywords.clear();
     });
   }
@@ -91,6 +92,7 @@ class _ConsumableListState extends State<ConsumableList> {
           'filterText': _keywords.text,
           'filterField': field,
           'CurRowNum': offset,
+          'FujiClass2ID': _fujiClass2,
           'PageSize': 10
         }
     );
@@ -205,7 +207,7 @@ class _ConsumableListState extends State<ConsumableList> {
                     Row(
                       children: <Widget>[
                         SizedBox(width: 16.0,),
-                        Text('富士二类', style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.w600),)
+                        Text('富士II类', style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.w600),)
                       ],
                     ),
                     SizedBox(height: 6.0,),
@@ -340,7 +342,7 @@ class _ConsumableListState extends State<ConsumableList> {
               Navigator.of(context).push(new MaterialPageRoute(builder: (context) => new ConsumableDetail(consumable: item, editable: false,)));
             },
             leading: Icon(
-              Icons.battery_alert,
+              Icons.battery_full,
               color: Color(0xff14BD98),
               size: 36.0,
             ),
@@ -352,7 +354,7 @@ class _ConsumableListState extends State<ConsumableList> {
               ),
             ),
             subtitle: Text(
-              "序列号：${item['LotNum']}",
+              "批次号：${item['LotNum']}",
               style: new TextStyle(
                   color: Theme.of(context).accentColor
               ),
@@ -365,7 +367,7 @@ class _ConsumableListState extends State<ConsumableList> {
                 BuildWidget.buildCardRow('简称', item['Consumable']['Name']),
                 BuildWidget.buildCardRow('描述', item['Consumable']['Description']),
                 BuildWidget.buildCardRow('供应商', item['Supplier']['Name']),
-                BuildWidget.buildCardRow('富士2类', item['Consumable']['FujiClass2']['Name']),
+                BuildWidget.buildCardRow('富士II类', item['Consumable']['FujiClass2']['Name']),
                 BuildWidget.buildCardRow('单价（元）', item['Price'].toString()),
                 BuildWidget.buildCardRow('购入日期', item['PurchaseDate'].split('T')[0]),
                 BuildWidget.buildCardRow('采购单号', item['Purchase']['ID'].toString()),

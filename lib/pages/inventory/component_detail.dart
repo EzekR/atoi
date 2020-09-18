@@ -29,7 +29,9 @@ class _ComponentDetailState extends State<ComponentDetail> {
   Map relatedEquipment;
   Map componentDefinition;
   Map supplier;
+  int fujiClass2;
   String purchaseDate = 'YYYY-MM-DD';
+  ScrollController controller = new ScrollController();
   List statusList = [
     {
       'value': 1,
@@ -117,7 +119,9 @@ class _ComponentDetailState extends State<ComponentDetail> {
         relatedEquipment = _data['Equipment'];
         componentDefinition  =_data['Component'];
         currentComponent = _data['Component']['Name'];
+        currentStatus = _data['Status']['Name'];
         purchaseDate = _data['PurchaseDate'].toString().split('T')[0];
+        fujiClass2 = _data['Component']['FujiClass2']['ID'];
       });
     }
   }
@@ -130,6 +134,12 @@ class _ComponentDetailState extends State<ComponentDetail> {
     setState(() {
       _isExpandedDetail = true;
     });
+    if (relatedEquipment == null) {
+      showDialog(context: context, builder: (context) => CupertinoAlertDialog(
+        title: new Text('关联设备不可为空'),
+      )).then((result) => controller.jumpTo(0));
+      return;
+    }
     if (serialCode.text.isEmpty) {
       showDialog(context: context, builder: (context) => CupertinoAlertDialog(
         title: new Text('序列号不可为空'),
@@ -154,10 +164,16 @@ class _ComponentDetailState extends State<ComponentDetail> {
       )).then((result) => FocusScope.of(context).requestFocus(_focusComponent[3]));
       return;
     }
+    if (double.parse(price.text) > 9999999999.99) {
+      showDialog(context: context, builder: (context) => CupertinoAlertDialog(
+        title: new Text('单价过高'),
+      )).then((result) => FocusScope.of(context).requestFocus(_focusComponent[3]));
+      return;
+    }
     if (purchaseDate == 'YYYY-MM-DD') {
       showDialog(context: context, builder: (context) => CupertinoAlertDialog(
         title: new Text('购入日期不可为空'),
-      )).then((result) => FocusScope.of(context).requestFocus(_focusComponent[8]));
+      )).then((result) => controller.jumpTo(800));
       return;
     }
     if (componentDefinition == null) {
@@ -166,10 +182,10 @@ class _ComponentDetailState extends State<ComponentDetail> {
       )).then((result) => FocusScope.of(context).requestFocus(_focusComponent[8]));
       return;
     }
-    if (relatedEquipment == null) {
+    if (supplier == null) {
       showDialog(context: context, builder: (context) => CupertinoAlertDialog(
-        title: new Text('关联设备不可为空'),
-      )).then((result) => FocusScope.of(context).requestFocus(_focusComponent[9]));
+        title: new Text('供应商不可为空'),
+      )).then((result) => controller.jumpTo(800));
       return;
     }
     var prefs = await _prefs;
@@ -217,6 +233,10 @@ class _ComponentDetailState extends State<ComponentDetail> {
         return CupertinoAlertDialog(
           title: new Text(resp['ResultMessage']),
         );
+      }).then((result) {
+        if (resp['ResultMessage'] == '序列号已存在') {
+          FocusScope.of(context).requestFocus(_focusComponent[0]);
+        }
       });
     }
   }
@@ -273,6 +293,7 @@ class _ComponentDetailState extends State<ComponentDetail> {
               padding: EdgeInsets.symmetric(vertical: 5.0),
               child: new Card(
                 child: new ListView(
+                  controller: controller,
                   children: <Widget>[
                     new ExpansionPanelList(
                       animationDuration: Duration(milliseconds: 200),
@@ -305,7 +326,7 @@ class _ComponentDetailState extends State<ComponentDetail> {
                             child: new Column(
                               children: <Widget>[
                                 widget.component!=null?BuildWidget.buildRow('系统编号', oid):Container(),
-                                widget.component!=null?BuildWidget.buildRow('采购单号', widget.component['Purchase']['ID'].toString()):Container(),
+                                widget.component!=null?BuildWidget.buildRow('采购单号', widget.component['Purchase']['ID']==0?'':'${widget.component['Purchase']['Name']}${widget.component['Purchase']['ID']}'):Container(),
                               widget.editable?new Padding(
                               padding: EdgeInsets.symmetric(vertical: 5.0),
                               child: new Row(
@@ -357,7 +378,7 @@ class _ComponentDetailState extends State<ComponentDetail> {
                                           icon: Icon(Icons.search),
                                           onPressed: () async {
                                             FocusScope.of(context).requestFocus(new FocusNode());
-                                            final _searchResult = await Navigator.of(context).push(new MaterialPageRoute(builder: (_) => SearchLazy(searchType: SearchType.DEVICE,)));
+                                            final _searchResult = await Navigator.of(context).push(new MaterialPageRoute(builder: (_) => SearchLazy(searchType: SearchType.DEVICE, fujiClass2: fujiClass2,)));
                                             print(_searchResult);
                                             if (_searchResult != null &&
                                                 _searchResult != 'null') {
@@ -437,7 +458,7 @@ class _ComponentDetailState extends State<ComponentDetail> {
                                     ],
                                   ),
                                 ):BuildWidget.buildRow('供应商', supplier==null?'':supplier['Name']),
-                                widget.editable?BuildWidget.buildInput('单价', price, maxLength: 13, inputType: TextInputType.numberWithOptions(decimal: true), focusNode: _focusComponent[3], required: true):BuildWidget.buildRow('单价', price.text),
+                                widget.editable?BuildWidget.buildInput('单价(元)', price, maxLength: 13, inputType: TextInputType.numberWithOptions(decimal: true), focusNode: _focusComponent[3], required: true):BuildWidget.buildRow('单价', price.text),
                                 widget.editable&&widget.component==null?new Padding(
                                   padding: EdgeInsets.symmetric(vertical: 5.0),
                                   child: new Row(

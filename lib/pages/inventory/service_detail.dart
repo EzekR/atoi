@@ -101,37 +101,37 @@ class _ServiceDetailState extends State<ServiceDetail> {
     if (serviceName.text.isEmpty) {
       showDialog(context: context, builder: (context) => CupertinoAlertDialog(
         title: new Text('服务名称不可为空'),
-      )).then((result) => FocusScope.of(context).requestFocus(_focusComponent[0]));
+      )).then((result) => FocusScope.of(context).requestFocus(_focusComponent[1]));
       return;
     }
     if (price.text.isEmpty) {
       showDialog(context: context, builder: (context) => CupertinoAlertDialog(
         title: new Text('服务金额不可为空'),
-      )).then((result) => FocusScope.of(context).requestFocus(_focusComponent[1]));
+      )).then((result) => FocusScope.of(context).requestFocus(_focusComponent[2]));
       return;
     }
     if (totalTimes.text.isEmpty) {
       showDialog(context: context, builder: (context) => CupertinoAlertDialog(
         title: new Text('服务总数不可为空'),
-      )).then((result) => FocusScope.of(context).requestFocus(_focusComponent[2]));
+      )).then((result) => FocusScope.of(context).requestFocus(_focusComponent[3]));
       return;
     }
     if (availableTimes.text.isEmpty) {
       showDialog(context: context, builder: (context) => CupertinoAlertDialog(
         title: new Text('可用次数不可为空'),
-      )).then((result) => FocusScope.of(context).requestFocus(_focusComponent[3]));
+      )).then((result) => FocusScope.of(context).requestFocus(_focusComponent[4]));
       return;
     }
     if (startDate == 'YYYY-MM-DD') {
       showDialog(context: context, builder: (context) => CupertinoAlertDialog(
         title: new Text('开始日期不可为空'),
-      )).then((result) => FocusScope.of(context).requestFocus(_focusComponent[3]));
+      )).then((result) => FocusScope.of(context).requestFocus(_focusComponent[9]));
       return;
     }
     if (endDate == 'YYYY-MM-DD') {
       showDialog(context: context, builder: (context) => CupertinoAlertDialog(
         title: new Text('结束日期不可为空'),
-      )).then((result) => FocusScope.of(context).requestFocus(_focusComponent[2]));
+      )).then((result) => FocusScope.of(context).requestFocus(_focusComponent[9]));
       return;
     }
     DateTime _start = DateTime.tryParse(startDate);
@@ -139,13 +139,13 @@ class _ServiceDetailState extends State<ServiceDetail> {
     if (_end.isBefore(_start)) {
       showDialog(context: context, builder: (context) => CupertinoAlertDialog(
         title: new Text('结束日期不可早于开始日期'),
-      )).then((result) => FocusScope.of(context).requestFocus(_focusComponent[2]));
+      )).then((result) => FocusScope.of(context).requestFocus(_focusComponent[9]));
       return;
     }
     if (supplier == null) {
       showDialog(context: context, builder: (context) => CupertinoAlertDialog(
         title: new Text('供应商不可为空'),
-      )).then((result) => FocusScope.of(context).requestFocus(_focusComponent[4]));
+      )).then((result) => FocusScope.of(context).requestFocus(_focusComponent[9]));
       return;
     }
     var prefs = await _prefs;
@@ -159,6 +159,7 @@ class _ServiceDetailState extends State<ServiceDetail> {
       'AvaibleTimes': availableTimes.text,
       'StartDate': startDate,
       'EndDate': endDate,
+      'PurchaseDate': endDate,
       'Comments': comments.text,
       'Supplier': {
         'ID': supplier['ID']
@@ -339,7 +340,7 @@ class _ServiceDetailState extends State<ServiceDetail> {
                                 widget.editable?BuildWidget.buildInput('服务名称', serviceName, maxLength: 50, focusNode: _focusComponent[1], required: true):BuildWidget.buildRow('服务名称', serviceName.text),
                                 widget.editable?BuildWidget.buildInput('金额', price, maxLength: 13, inputType: TextInputType.numberWithOptions(decimal: true), focusNode: _focusComponent[2], required: true):BuildWidget.buildRow('批次号', price.text),
                                 widget.editable?BuildWidget.buildInput('服务次数', totalTimes, maxLength: 9, inputType: TextInputType.number, focusNode: _focusComponent[3], required: true):BuildWidget.buildRow('服务次数', totalTimes.text),
-                                widget.editable?BuildWidget.buildInput('服务剩余次数', availableTimes, maxLength: 9, inputType: TextInputType.number, focusNode: _focusComponent[4], required: true):BuildWidget.buildRow('服务剩余次数', availableTimes.text),
+                                widget.editable?BuildWidget.buildInput('剩余服务次数', availableTimes, maxLength: 9, inputType: TextInputType.number, focusNode: _focusComponent[4], required: true):BuildWidget.buildRow('服务剩余次数', availableTimes.text),
                                 widget.editable?new Padding(
                                   padding: EdgeInsets.symmetric(vertical: 5.0),
                                   child: new Row(
@@ -500,7 +501,7 @@ class _ServiceDetailState extends State<ServiceDetail> {
                                     ],
                                   ),
                                 ):BuildWidget.buildRow('结束日期', endDate),
-                                widget.editable?buildDropdown('富士二类', _fujiClass2, _fujiList, changeFuji, required: true):BuildWidget.buildRow('富士二类', _fujiClass2Name??''),
+                                widget.editable?buildDropdown('富士II类', _fujiClass2, _fujiList, changeFuji, required: true):BuildWidget.buildRow('富士二类', _fujiClass2Name??''),
                                 widget.editable?new Padding(
                                   padding: EdgeInsets.symmetric(vertical: 5.0),
                                   child: new Row(

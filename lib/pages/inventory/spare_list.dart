@@ -62,18 +62,19 @@ class _SpareListState extends State<SpareList> {
 
   void initFilter() async {
     await cModel.getConstants();
-    List _list = cModel.InvSpare.map((item) {
-      return {
-        'value': item['ID'],
-        'text': item['Name']
-      };
-    }).toList();
+    List _list= [];
     _list.add({
       'value': 0,
       'text': '全部'
     });
+    _list.addAll(cModel.InvSpare.map((item) {
+      return {
+        'value': item['ID'],
+        'text': item['Name']
+      };
+    }).toList());
     setState(() {
-      field = 's.ID';
+      field = 'sp.ID';
       _keywords.clear();
       _statusList = _list;
     });
@@ -249,7 +250,7 @@ class _SpareListState extends State<SpareList> {
                       child: FlatButton(onPressed: () {
                         setState((){
                           _status = 0;
-                          field = 'c.Name';
+                          field = 'sp.ID';
                           _keywords.clear();
                         });
                         initFilter();
@@ -339,7 +340,7 @@ class _SpareListState extends State<SpareList> {
               children: <Widget>[
                 BuildWidget.buildCardRow('富士II类', item['FujiClass2']['Name']),
                 BuildWidget.buildCardRow('序列号', item['SerialCode']),
-                BuildWidget.buildCardRow('月租', item['Price'].toString()),
+                BuildWidget.buildCardRow('月租(元)', item['Price'].toString()),
                 BuildWidget.buildCardRow('开始日期', item['StartDate'].split('T')[0]),
                 BuildWidget.buildCardRow('结束日期', item['EndDate'].split('T')[0]),
                 BuildWidget.buildCardRow('状态', today.isBefore(_start)?'未使用':'当前在用'),
@@ -413,7 +414,7 @@ class _SpareListState extends State<SpareList> {
           onChanged: (val) {
             getSpares(filterText: val);
           },
-        ):Text('备件列表'),
+        ):Text('备用机列表'),
         elevation: 0.7,
         actions: <Widget>[
           isSearchState?IconButton(

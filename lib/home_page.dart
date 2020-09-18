@@ -1301,7 +1301,7 @@ class _HomePageState extends State<HomePage>
                                   SizedBox(
                                     width: 60.0,
                                   ),
-                                  Icon(Icons.store, color: Colors.grey, size: 16.0,),
+                                  Icon(Icons.battery_full, color: Colors.grey, size: 16.0,),
                                   SizedBox(
                                     width: 10.0,
                                   ),

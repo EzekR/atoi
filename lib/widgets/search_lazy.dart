@@ -6,9 +6,10 @@ import 'dart:convert';
 
 class SearchLazy extends StatefulWidget {
 
-  SearchLazy({Key key, this.searchType}):super(key: key);
+  SearchLazy({Key key, this.searchType, this.fujiClass2}):super(key: key);
 
   final SearchType searchType;
+  final int fujiClass2;
 
   _SearchLazyState createState() => _SearchLazyState();
 }
@@ -83,6 +84,9 @@ class _SearchLazyState extends State<SearchLazy> {
           'CurRowNum': offset,
           'PageSize': 20
         };
+        if (widget.fujiClass2 != null) {
+          _params['fujiClass2ID'] = widget.fujiClass2;
+        }
         break;
       case SearchType.DEPARTMENT:
         _url = '/User/GetDepartments';

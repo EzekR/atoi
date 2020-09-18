@@ -61,16 +61,17 @@ class _POListState extends State<POList> {
 
   void initFilter() async {
     await cModel.getConstants();
-    List _list = cModel.POStatus.map((item) {
-      return {
-        'value': item['ID'],
-        'text': item['Name']
-      };
-    }).toList();
+    List _list = [];
     _list.add({
       'value': 0,
       'text': '全部'
     });
+    _list.addAll(cModel.POStatus.map((item) {
+      return {
+        'value': item['ID'],
+        'text': item['Name']
+      };
+    }).toList());
     setState(() {
       field = 'po.ID';
       _keywords.clear();
@@ -311,6 +312,9 @@ class _POListState extends State<POList> {
         mainAxisSize: MainAxisSize.max,
         children: <Widget>[
           ListTile(
+            onTap: () {
+              Navigator.of(context).push(new MaterialPageRoute(builder: (_) => new PODetail(purchaseOrder: item, editable: false,)));
+            },
             leading: Icon(
               Icons.note_add,
               color: Color(0xff14BD98),

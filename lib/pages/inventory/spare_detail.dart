@@ -101,25 +101,37 @@ class _SpareDetailState extends State<SpareDetail> {
     if (serialCode.text.isEmpty) {
       showDialog(context: context, builder: (context) => CupertinoAlertDialog(
         title: new Text('序列号不可为空'),
-      )).then((result) => FocusScope.of(context).requestFocus(_focusComponent[0]));
+      )).then((result) => FocusScope.of(context).requestFocus(_focusComponent[2]));
       return;
     }
     if (price.text.isEmpty) {
       showDialog(context: context, builder: (context) => CupertinoAlertDialog(
         title: new Text('月租不可为空'),
-      )).then((result) => FocusScope.of(context).requestFocus(_focusComponent[1]));
+      )).then((result) => FocusScope.of(context).requestFocus(_focusComponent[3]));
+      return;
+    }
+    if (double.parse(price.text) > 9999999999.99) {
+      showDialog(context: context, builder: (context) => CupertinoAlertDialog(
+        title: new Text('月租过大'),
+      )).then((result) => FocusScope.of(context).requestFocus(_focusComponent[3]));
       return;
     }
     if (startDate == 'YYYY-MM-DD') {
       showDialog(context: context, builder: (context) => CupertinoAlertDialog(
         title: new Text('开始日期不可为空'),
-      )).then((result) => FocusScope.of(context).requestFocus(_focusComponent[2]));
+      )).then((result) => FocusScope.of(context).requestFocus(_focusComponent[0]));
       return;
     }
     if (endDate == 'YYYY-MM-DD') {
       showDialog(context: context, builder: (context) => CupertinoAlertDialog(
         title: new Text('结束日期不可为空'),
-      )).then((result) => FocusScope.of(context).requestFocus(_focusComponent[2]));
+      )).then((result) => FocusScope.of(context).requestFocus(_focusComponent[0]));
+      return;
+    }
+    if (DateTime.parse(startDate).isAfter(DateTime.parse(endDate))) {
+      showDialog(context: context, builder: (context) => CupertinoAlertDialog(
+        title: new Text('开始日期不可在结束日期之后'),
+      )).then((result) => FocusScope.of(context).requestFocus(_focusComponent[0]));
       return;
     }
     var prefs = await _prefs;
@@ -252,7 +264,7 @@ class _SpareDetailState extends State<SpareDetail> {
       builder: (context, child, mainModel) {
         return new Scaffold(
             appBar: new AppBar(
-              title: widget.editable?Text(widget.spare==null?'新增备件':'修改备件'):Text('查看备件'),
+              title: widget.editable?Text(widget.spare==null?'新增备用机':'修改备用机'):Text('查看备用机'),
               elevation: 0.7,
               flexibleSpace: Container(
                 decoration: BoxDecoration(
@@ -292,7 +304,7 @@ class _SpareDetailState extends State<SpareDetail> {
                                 color: Colors.blue,
                               ),
                               title: Text(
-                                '服务基本信息',
+                                '备用机基本信息',
                                 style: new TextStyle(
                                     fontSize: 20.0,
                                     fontWeight: FontWeight.w400),
@@ -303,9 +315,10 @@ class _SpareDetailState extends State<SpareDetail> {
                             padding: EdgeInsets.symmetric(horizontal: 12.0),
                             child: new Column(
                               children: <Widget>[
+                                widget.spare == null?Container():BuildWidget.buildRow('系统编号', oid),
                                 widget.editable?buildDropdown('富士二类', _fujiClass2, _fujiList, changeFuji, required: true):BuildWidget.buildRow('富士二类', _fujiClass2Name??''),
-                                widget.editable?BuildWidget.buildInput('序列号', serialCode, maxLength: 30, focusNode: _focusComponent[2]):BuildWidget.buildRow('序列号', serialCode.text),
-                                widget.editable?BuildWidget.buildInput('月租', price, maxLength: 13, inputType: TextInputType.numberWithOptions(decimal: true), focusNode: _focusComponent[3]):BuildWidget.buildRow('月租', price.text),
+                                widget.editable?BuildWidget.buildInput('序列号', serialCode, maxLength: 30, focusNode: _focusComponent[2], required: true):BuildWidget.buildRow('序列号', serialCode.text),
+                                widget.editable?BuildWidget.buildInput('月租(元)', price, maxLength: 13, inputType: TextInputType.numberWithOptions(decimal: true), focusNode: _focusComponent[3], required: true):BuildWidget.buildRow('月租', price.text),
                                 widget.editable?new Padding(
                                   padding: EdgeInsets.symmetric(vertical: 5.0),
                                   child: new Row(
@@ -316,6 +329,12 @@ class _SpareDetailState extends State<SpareDetail> {
                                           alignment: WrapAlignment.end,
                                           crossAxisAlignment: WrapCrossAlignment.center,
                                           children: <Widget>[
+                                            new Text(
+                                              '*',
+                                              style: new TextStyle(
+                                                  color: Colors.red
+                                              ),
+                                            ),
                                             new Text(
                                               '开始日期',
                                               style: new TextStyle(
@@ -390,6 +409,12 @@ class _SpareDetailState extends State<SpareDetail> {
                                           alignment: WrapAlignment.end,
                                           crossAxisAlignment: WrapCrossAlignment.center,
                                           children: <Widget>[
+                                            new Text(
+                                              '*',
+                                              style: new TextStyle(
+                                                  color: Colors.red
+                                              ),
+                                            ),
                                             new Text(
                                               '结束日期',
                                               style: new TextStyle(

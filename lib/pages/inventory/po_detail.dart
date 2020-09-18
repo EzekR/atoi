@@ -37,6 +37,8 @@ class _PODetailState extends State<PODetail> {
   String startDate = 'YYYY-MM-DD';
   String endDate = 'YYYY-MM-DD';
   ConstantsModel cModel;
+  ScrollController controller = new ScrollController();
+  FocusNode focusApprove = new FocusNode();
 
   List _accs = [];
   List _consumable = [];
@@ -87,6 +89,8 @@ class _PODetailState extends State<PODetail> {
         startDate = _data['OrderDate'].toString().split('T')[0];
         endDate = _data['DueDate'].toString().split('T')[0];
         supplier = _data['Supplier'];
+        comments.text = _data['Comments'];
+        userName = _data['User']['Name'];
         _componentsList = _data['Components'];
         _accs = _componentsList.map((_data) {
           Map _info = {
@@ -144,13 +148,31 @@ class _PODetailState extends State<PODetail> {
     if (supplier == null) {
       showDialog(context: context, builder: (context) => CupertinoAlertDialog(
         title: new Text('供应商不可为空'),
-      )).then((result) => FocusScope.of(context).requestFocus(_focusComponent[0]));
+      )).then((result) => controller.jumpTo(0.0));
       return;
     }
-    if (startDate == 'YYYY-MM-DD' || endDate == 'YYYY-MM-DD') {
+    if (startDate == 'YYYY-MM-DD') {
       showDialog(context: context, builder: (context) => CupertinoAlertDialog(
-        title: new Text('日期不可为空'),
-      )).then((result) => FocusScope.of(context).requestFocus(_focusComponent[0]));
+        title: new Text('采购日期不可为空'),
+      )).then((result) => controller.jumpTo(0.0));
+      return;
+    }
+    if (endDate == 'YYYY-MM-DD') {
+      showDialog(context: context, builder: (context) => CupertinoAlertDialog(
+        title: new Text('到货日期不可为空'),
+      )).then((result) => controller.jumpTo(0.0));
+      return;
+    }
+    if (DateTime.parse(startDate).isAfter(DateTime.parse(endDate))) {
+      showDialog(context: context, builder: (context) => CupertinoAlertDialog(
+        title: new Text('采购日期不可在到货日期之后'),
+      )).then((result) => controller.jumpTo(0.0));
+      return;
+    }
+    if (statusId == 2 && _consumableList.isEmpty && _componentsList.isEmpty && _servicesList.isEmpty) {
+      showDialog(context: context, builder: (context) => CupertinoAlertDialog(
+        title: new Text('请添加采购内容'),
+      )).then((result) => controller.jumpTo(100.0));
       return;
     }
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -214,6 +236,12 @@ class _PODetailState extends State<PODetail> {
       case 3:
         url = '/PurchaseOrder/EndPurchaseOrder';
         break;
+    }
+    if (operationId == 2 && approveComments.text.isEmpty){
+      showDialog(context: context, builder: (context) => CupertinoAlertDialog(
+        title: new Text('审批备注不可为空'),
+      )).then((result) => FocusScope.of(context).requestFocus(focusApprove));
+      return;
     }
     Map resp = await HttpRequest.request(
       url,
@@ -655,6 +683,7 @@ class _PODetailState extends State<PODetail> {
               padding: EdgeInsets.symmetric(vertical: 5.0),
               child: new Card(
                 child: new ListView(
+                  controller: controller,
                   children: <Widget>[
                     new ExpansionPanelList(
                       animationDuration: Duration(milliseconds: 200),
@@ -697,6 +726,12 @@ class _PODetailState extends State<PODetail> {
                                           alignment: WrapAlignment.end,
                                           crossAxisAlignment: WrapCrossAlignment.center,
                                           children: <Widget>[
+                                            new Text(
+                                              '*',
+                                              style: new TextStyle(
+                                                  color: Colors.red
+                                              ),
+                                            ),
                                             new Text(
                                               '采购日期',
                                               style: new TextStyle(
@@ -771,6 +806,12 @@ class _PODetailState extends State<PODetail> {
                                           alignment: WrapAlignment.end,
                                           crossAxisAlignment: WrapCrossAlignment.center,
                                           children: <Widget>[
+                                            new Text(
+                                              '*',
+                                              style: new TextStyle(
+                                                  color: Colors.red
+                                              ),
+                                            ),
                                             new Text(
                                               '到货日期',
                                               style: new TextStyle(
@@ -898,7 +939,7 @@ class _PODetailState extends State<PODetail> {
                                     ],
                                   ),
                                 ):BuildWidget.buildRow('供应商', supplier==null?'':supplier['Name']),
-                                widget.editable?BuildWidget.buildInput('备注', comments, maxLength: 100, focusNode: _focusComponent[5]):BuildWidget.buildRow('备注', comments.text),
+                                widget.editable?BuildWidget.buildInput('备注', comments, maxLength: 500, focusNode: _focusComponent[5]):BuildWidget.buildRow('备注', comments.text),
                                 new Divider(),
                                 new Padding(
                                     padding:
@@ -995,7 +1036,7 @@ class _PODetailState extends State<PODetail> {
                       ],
                     ),
                     SizedBox(height: 24.0),
-                    widget.operation==PurchaseOrderOperation.APPROVE?BuildWidget.buildInput('审批备注', approveComments):Container(),
+                    widget.operation==PurchaseOrderOperation.APPROVE?BuildWidget.buildInput('审批备注', approveComments, focusNode: focusApprove):Container(),
                     new Row(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       mainAxisSize: MainAxisSize.max,
