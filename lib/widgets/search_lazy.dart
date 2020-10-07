@@ -85,7 +85,7 @@ class _SearchLazyState extends State<SearchLazy> {
           'PageSize': 20
         };
         if (widget.fujiClass2 != null) {
-          _params['fujiClass2ID'] = widget.fujiClass2;
+          _params['fujiclass2ID'] = widget.fujiClass2;
         }
         break;
       case SearchType.DEPARTMENT:

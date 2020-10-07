@@ -13,81 +13,7 @@ class ServiceList extends StatefulWidget{
 
 class _ServiceListState extends State<ServiceList> {
 
-  List<dynamic> _services = [
-    {
-      "FujiClass2": {
-        "Name": "20200805II类",
-        "FujiClass1": {
-          "ID": 0,
-          "AddDate": null,
-          "UpdateDate": null,
-          "EquipmentType1": {
-            "Level": 0
-          },
-          "EquipmentType2": {
-            "Level": 0
-          },
-          "FujiClass2Count": 0
-        },
-        "IncludeLabour": false,
-        "PatrolTimes": 0,
-        "PatrolHours": 0,
-        "MaintenanceTimes": 0,
-        "MaintenanceHours": 0,
-        "RepairHours": 0,
-        "IncludeContract": false,
-        "FullCoveragePtg": 0,
-        "TechCoveragePtg": 0,
-        "IncludeSpare": false,
-        "SparePrice": 0,
-        "SpareRentPtg": 0,
-        "IncludeRepair": false,
-        "Usage": 0,
-        "EquipmentType": {
-          "ID": 0
-        },
-        "RepairComponentCost": 0,
-        "Repair3partyRatio": 0,
-        "Repair3partyCost": 0,
-        "RepairCostRatio": 0,
-        "MethodID": 0,
-        "AddDate": null,
-        "UpdateDate": null,
-        "Repairs": [],
-        "Components": [],
-        "Consumables": [],
-        "hasEdited": false,
-        "ID": 12
-      },
-      "Name": "服务名称",
-      "TotalTimes": 100,
-      "Price": 0,
-      "StartDate": "2020-08-07T00:00:00",
-      "EndDate": "2020-08-07T00:00:00",
-      "Supplier": {
-        "SupplierType": {
-          "ID": 0
-        },
-        "Name": "日立",
-        "AddDate": null,
-        "IsActive": false,
-        "OID": "GYS00000005",
-        "ID": 5
-      },
-      "Purchase": {
-        "ID": 0
-      },
-      "PurchaseDate": "2020-08-07T00:00:00",
-      "Comments": "",
-      "AddDate": "2020-08-07T14:36:59",
-      "AvaibleTimes": 100,
-      "UpdateDate": "2020-08-17T09:42:19",
-      "OID": "WGFW00000001",
-      "Inbounded": false,
-      "Status": "失效",
-      "ID": 1
-    }
-  ];
+  List<dynamic> _services = [];
 
   bool isSearchState = false;
   bool _loading = false;
@@ -423,7 +349,7 @@ class _ServiceListState extends State<ServiceList> {
                 BuildWidget.buildCardRow('结束日期', item['EndDate'].split('T')[0]),
                 BuildWidget.buildCardRow('金额', item['Price'].toString()),
                 BuildWidget.buildCardRow('剩余服务次数', item['AvaibleTimes'].toString()),
-                BuildWidget.buildCardRow('采购单号', item['Purchase']['ID'].toString()),
+                BuildWidget.buildCardRow('采购单号', item['Purchase']['ID']==0?'':'${item['Purchase']['Name']}${item['Purchase']['ID']}'),
                 BuildWidget.buildCardRow('状态', item['Status']),
                 //BuildWidget.buildCardRow('状态', item['IsActive']?'启用':'停用'),
               ],

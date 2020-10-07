@@ -30,6 +30,8 @@ class _SpareListState extends State<SpareList> {
   bool _noMore = false;
   int role;
   DateTime today = new DateTime.now();
+  int fujiClass2;
+  int useStatusId = 0;
 
   Future<Null> getRole() async {
     var _prefs = await prefs;
@@ -90,7 +92,9 @@ class _SpareListState extends State<SpareList> {
           'filterField': field,
           'statusID': _status,
           'CurRowNum': offset,
-          'PageSize': 10
+          'PageSize': 10,
+          'usageStatusID': useStatusId,
+          'fujiClass2ID': fujiClass2
         }
     );
     if (resp['ResultCode'] == '00') {

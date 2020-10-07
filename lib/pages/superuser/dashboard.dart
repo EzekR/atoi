@@ -60,19 +60,19 @@ class _DashboardState extends State<Dashboard> {
   int filter = 0;
   String filterName = '所有科室';
   List requestList;
+  List displayRequest;
   int totalRequest;
-  List repairEvents;
-  List recallEvents;
-  List mandatoryEvents;
-  List overdueEvents;
+  List repairEvents =[];
+  List recallEvents = [];
+  List mandatoryEvents = [];
+  List overdueEvents = [];
   Map kpi;
   String timeType = '月';
   List years;
   int currentYear;
+  int retainDepartmentId;
 
-  List<IncomeData> incomeData = [
-    IncomeData(1.0, 0, 0, 0, "1月")
-  ];
+  List<IncomeData> incomeData = [];
 
   List<RequestData> requestData = [
     RequestData('1', 23, Color(0xff385A95)),
@@ -88,10 +88,8 @@ class _DashboardState extends State<Dashboard> {
 
   void getUserName() async {
     SharedPreferences _prefs = await prefs;
-    setState(() {
-      userName = _prefs.getString('userName');
-      role = _prefs.getInt('role');
-    });
+    userName = _prefs.getString('userName');
+    role = _prefs.getInt('role');
   }
 
   // get dashboard data
@@ -186,7 +184,7 @@ class _DashboardState extends State<Dashboard> {
       if (_income == 0.0) {
         _net = 0.0;
       }
-      return new IncomeData(index/1.0, _income, _net==0.0?(0.0-_expense):(0.0-_income), _net);
+      return new IncomeData(index/1.0, _income, _net==0.0?(0.0-_expense):(0.0-_income), _net, index.toString());
     }).toList();
     setState(() {
       incomeData = incomeData;
@@ -209,7 +207,8 @@ class _DashboardState extends State<Dashboard> {
         if (_income == 0.0) {
           _net = 0.0;
         }
-        return new IncomeData(index/1.0, _income, _net==0.0?(0.0-_expense):(0.0-_income), _net, "");
+        double _tmp = _net==0.0?(0.0-_expense):(0.0-_income);
+        return new IncomeData(index/1.0, _income, _tmp, _net, index.toString());
       }).toList();
       double income_last = 0.0;
       double expense_last = 0.0;
@@ -224,9 +223,9 @@ class _DashboardState extends State<Dashboard> {
       });
       departmentAll['income_rate'] = (departmentAll['income']-income_last)/income_last*100;
       departmentAll['expense_rate'] = (departmentAll['expense']-expense_last)/expense_last*100;
+      incomeAll = departmentAll;
       setState(() {
         incomeData = incomeData;
-        incomeAll = departmentAll;
       });
     }
   }
@@ -253,7 +252,7 @@ class _DashboardState extends State<Dashboard> {
         if (_income == 0.0) {
           _net = 0.0;
         }
-        return new IncomeData(index/1.0, _income, _net==0.0?(0.0-_expense):(0.0-_income), _net, "");
+        return new IncomeData(index/1.0, _income, _net==0.0?(0.0-_expense):(0.0-_income), _net, index.toString());
       }).toList();
       print(incomeData.length);
       double income_last = 0.0;
@@ -269,9 +268,9 @@ class _DashboardState extends State<Dashboard> {
       });
       departmentAll['income_rate'] = income_last==0.0?100:(departmentAll['income']-income_last)/income_last*100;
       departmentAll['expense_rate'] = expense_last==0.0?100:(departmentAll['expense']-expense_last)/expense_last*100;
+      incomeAll = departmentAll;
       setState(() {
         incomeData = incomeData;
-        incomeAll = departmentAll;
       });
     }
   }
@@ -284,6 +283,7 @@ class _DashboardState extends State<Dashboard> {
     );
     if (resp['ResultCode'] == '00') {
       requestList = resp['Data'];
+      displayRequest = List.from(requestList);
       totalRequest = requestList.length;
       if (requestList.length == 0) {
         requestData.clear();
@@ -300,9 +300,6 @@ class _DashboardState extends State<Dashboard> {
         print(_departs.toString());
         requestData = _departs.keys.map((key) => RequestData(key.toString(), _departs[key])).toList();
       }
-      setState(() {
-        requestData = requestData;
-      });
     }
   }
 
@@ -313,12 +310,10 @@ class _DashboardState extends State<Dashboard> {
       isBoard: true
     );
     if (resp['ResultCode'] == '00') {
-      setState(() {
-        repairEvents = resp['Data']['Repair'];
-        recallEvents = resp['Data']['Recall'];
-        mandatoryEvents = resp['Data']['MandatoryTest'];
-        overdueEvents = resp['Data']['OverDue'];
-      });
+      repairEvents = resp['Data']['Repair'];
+      recallEvents = resp['Data']['Recall'];
+      mandatoryEvents = resp['Data']['MandatoryTest'];
+      overdueEvents = resp['Data']['OverDue'];
     }
   }
 
@@ -329,9 +324,7 @@ class _DashboardState extends State<Dashboard> {
       isBoard: true
     );
     if (resp['ResultCode'] == '00') {
-      setState(() {
-        kpi = resp['Data'];
-      });
+      kpi = resp['Data'];
     }
   }
 
@@ -345,17 +338,15 @@ class _DashboardState extends State<Dashboard> {
       }
     );
     if (resp['ResultCode'] == '00') {
-      setState(() {
-        equipmentTimeline = resp['Data'];
-        equipmentName = resp['Data']['Name']+'-'+resp['Data']['Manufacturer']['Name']+'-'+resp['Data']['EquipmentCode']+'-'+resp['Data']['AssetCode'];
-        equipmentTimelineName = resp['Data']['Name']+'-'+resp['Data']['EquipmentCode'];
-        equipmentStatus = resp['Data']['EquipmentStatus']['Name'];
-        equipmentStatusId = resp['Data']['EquipmentStatus']['ID'];
-        warrantyStatus = resp['Data']['WarrantyStatus'];
-        equipmentFiles = resp['Data']['EquipmentFile'];
-        installDate = AppConstants.TimeForm(resp['Data']['InstalDate'], 'yyyy-mm-dd');
-        installSite = resp['Data']['Department']['Name'];
-      });
+      equipmentTimeline = resp['Data'];
+      equipmentName = resp['Data']['Name']+'-'+resp['Data']['Manufacturer']['Name']+'-'+resp['Data']['EquipmentCode']+'-'+resp['Data']['AssetCode'];
+      equipmentTimelineName = resp['Data']['Name']+'-'+resp['Data']['EquipmentCode'];
+      equipmentStatus = resp['Data']['EquipmentStatus']['Name'];
+      equipmentStatusId = resp['Data']['EquipmentStatus']['ID'];
+      warrantyStatus = resp['Data']['WarrantyStatus'];
+      equipmentFiles = resp['Data']['EquipmentFile'];
+      installDate = AppConstants.TimeForm(resp['Data']['InstalDate'], 'yyyy-mm-dd');
+      installSite = resp['Data']['Department']['Name'];
     }
   }
 
@@ -371,9 +362,7 @@ class _DashboardState extends State<Dashboard> {
       params: _params
     );
     if (resp['ResultCode'] == '00') {
-      setState(() {
-        equipmentCount = resp['Data'];
-      });
+      equipmentCount = resp['Data'];
     }
   }
 
@@ -944,6 +933,21 @@ class _DashboardState extends State<Dashboard> {
     );
     return new GestureDetector(
       onTap: () {
+        //switch (index) {
+        //  case 0:
+        //    getOverview();
+        //    getDepartmentIncome();
+        //    break;
+        //  case 1:
+        //    getRequestToday();
+        //    break;
+        //  case 2:
+        //    getKeyEvents();
+        //    break;
+        //  case 3:
+        //    getKpi();
+        //    break;
+        //}
         setState(() {
           currentTab = index;
         });
@@ -1046,7 +1050,7 @@ class _DashboardState extends State<Dashboard> {
                               height: 8.0,
                             ),
                             Text(
-                              overview!=null?CommonUtil.CurrencyForm(overview['EquipmentAmount']):'0',
+                              overview!=null?CommonUtil.CurrencyForm(overview['EquipmentAmount'], digits: 0):'0',
                               style: TextStyle(
                                   color: Color(0xff385A95),
                                   fontSize: 24.0,
@@ -1346,7 +1350,7 @@ class _DashboardState extends State<Dashboard> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: <Widget>[
                           Text(
-                            CommonUtil.CurrencyForm(incomeAll['income']),
+                            CommonUtil.CurrencyForm(incomeAll['income'], digits: 0),
                             style: TextStyle(
                               color: Color(0xff1e1e1e),
                               fontSize: 15.0,
@@ -1374,9 +1378,9 @@ class _DashboardState extends State<Dashboard> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: <Widget>[
                           Text(
-                            '${incomeAll['income_rate']>=0?'+':''} ${(incomeAll['income_rate']).toStringAsFixed(1)}%',
+                            '${(incomeAll['income_rate']).toStringAsFixed(1)}% ${incomeAll['income_rate']>=0?'↑':'↓'} ',
                             style: TextStyle(
-                                color: incomeAll['income_rate']>=0?Color(0xffD64040):Color(0xff33B850),
+                                color: incomeAll['income_rate']>=0?Color(0xff33B850):Color(0xffD64040),
                                 fontSize: 15.0,
                                 fontWeight: FontWeight.w600
                             ),
@@ -1402,7 +1406,7 @@ class _DashboardState extends State<Dashboard> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: <Widget>[
                           Text(
-                            CommonUtil.CurrencyForm(incomeAll['expense']),
+                            CommonUtil.CurrencyForm(incomeAll['expense'], digits: 0),
                             style: TextStyle(
                                 color: Color(0xff1e1e1e),
                                 fontSize: 15.0,
@@ -1432,7 +1436,7 @@ class _DashboardState extends State<Dashboard> {
                           Text(
                             '${incomeAll['expense_rate']>=0?'+':''} ${(incomeAll['expense_rate']).toStringAsFixed(1)}%',
                             style: TextStyle(
-                                color: incomeAll['expense_rate']>=0?Color(0xffD64040):Color(0xff33B850),
+                                color: incomeAll['expense_rate']>=0?Color(0xff33B850):Color(0xffD64040),
                                 fontSize: 15.0,
                                 fontWeight: FontWeight.w600
                             ),
@@ -1463,7 +1467,10 @@ class _DashboardState extends State<Dashboard> {
                 scrollDirection: Axis.horizontal,
                 controller: new ScrollController(),
                 children: <Widget>[
-                  incomeData.length==0?Container():buildIncomeChart()
+                  Container(
+                    width: incomeData.length<10?300:incomeData.length*30.0,
+                    child: buildIncomeChart()
+                  )
                 ],
               ),
             )
@@ -1476,11 +1483,15 @@ class _DashboardState extends State<Dashboard> {
   // income chart
   Container buildIncomeChart() {
     return Container(
-      width: incomeData.length*20.0,
       child: SfCartesianChart(
           borderWidth: 0,
           plotAreaBorderWidth: 0.0,
           borderColor: Colors.white,
+          onPointTapped: (PointTapArgs args) {
+            print(args.pointIndex);
+            getCount(equipmentId: equipmentData[args.pointIndex]['ID']);
+            getTimeline(equipmentId: equipmentData[args.pointIndex]['ID']);
+          },
           primaryXAxis: CategoryAxis(
             isVisible: widget.equipmentId!=null?true:false,
             majorGridLines: MajorGridLines(width: 0.0),
@@ -1571,7 +1582,7 @@ class _DashboardState extends State<Dashboard> {
                               Expanded(
                                 flex: 4,
                                 child: Text(
-                                  '收入：${CommonUtil.CurrencyForm(equipmentIncome['detail'][pointIndex]['Item2'], times: 1)}元',
+                                  '收入：${CommonUtil.CurrencyForm(equipmentIncome['detail'][pointIndex]['Item2'], times: 10000, digits: 0)}万元',
                                   style: TextStyle(
                                       color: Colors.white,
                                       fontSize: 11.0
@@ -1581,7 +1592,7 @@ class _DashboardState extends State<Dashboard> {
                               Expanded(
                                 flex: 6,
                                 child: Text(
-                                  '支出：${CommonUtil.CurrencyForm(equipmentIncome['detail'][pointIndex]['Item3'], times: 1)}元',
+                                  '支出：${CommonUtil.CurrencyForm(equipmentIncome['detail'][pointIndex]['Item3'], times: 10000, digits: 0)}万元',
                                   style: TextStyle(
                                       color: Colors.white,
                                       fontSize: 11.0
@@ -1606,7 +1617,7 @@ class _DashboardState extends State<Dashboard> {
                               Expanded(
                                 flex: 4,
                                 child: Text(
-                                  isDetailPage?'设备价值：${CommonUtil.CurrencyForm(equipmentData[pointIndex]['PurchaseAmount'], times: 1)}':'设备数量：${departmentData[pointIndex]['EquipmentCount']}台',
+                                  isDetailPage?'设备价值：${CommonUtil.CurrencyForm(equipmentData[pointIndex]['PurchaseAmount'], times: 10000, digits: 0)}万元':'设备数量：${departmentData[pointIndex]['EquipmentCount']}台',
                                   style: TextStyle(
                                       color: Colors.white,
                                       fontSize: 11.0
@@ -1633,7 +1644,7 @@ class _DashboardState extends State<Dashboard> {
                               Expanded(
                                 flex: 10,
                                 child: Text(
-                                  isDetailPage?'型号：${equipmentData[pointIndex]['EquipmentCode']}':'设备价值：${CommonUtil.CurrencyForm(departmentData[pointIndex]['EquipmentAmount'], times: 1)}元',
+                                  isDetailPage?'型号：${equipmentData[pointIndex]['EquipmentCode']}':'设备价值：${CommonUtil.CurrencyForm(departmentData[pointIndex]['EquipmentAmount'], times: 10000, digits: 0)}万元',
                                   style: TextStyle(
                                       color: Colors.white,
                                       fontSize: 11.0
@@ -1687,7 +1698,7 @@ class _DashboardState extends State<Dashboard> {
                               Expanded(
                                 flex: 10,
                                 child: Text(
-                                  '收入：${CommonUtil.CurrencyForm(isDetailPage?equipmentData[pointIndex]['Incomes']:departmentData[pointIndex]['Incomes'], times: 1)}元',
+                                  '收入：${CommonUtil.CurrencyForm(isDetailPage?equipmentData[pointIndex]['Incomes']:departmentData[pointIndex]['Incomes'], times: 10000, digits: 0)}万元',
                                   style: TextStyle(
                                       color: Colors.white,
                                       fontSize: 11.0
@@ -1714,7 +1725,7 @@ class _DashboardState extends State<Dashboard> {
                               Expanded(
                                 flex: 10,
                                 child: Text(
-                                  '支出：${CommonUtil.CurrencyForm(isDetailPage?equipmentData[pointIndex]['Expenses']:departmentData[pointIndex]['Expenses'], times: 1)}元',
+                                  '支出：${CommonUtil.CurrencyForm(isDetailPage?equipmentData[pointIndex]['Expenses']:departmentData[pointIndex]['Expenses'], times: 10000, digits: 0)}万元',
                                   style: TextStyle(
                                       color: Colors.white,
                                       fontSize: 11.0
@@ -1779,8 +1790,51 @@ class _DashboardState extends State<Dashboard> {
       child: SfCircularChart(
           tooltipBehavior: TooltipBehavior(
             enable: true,
-            format: 'point.x\n参报数量: point.y件'
+            builder: (dynamic data, dynamic point, dynamic series,
+                int pointIndex, int seriesIndex) {
+              return Container(
+                  width: 100.0,
+                  height: 60.0,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.all(Radius.circular(8.0)),
+                    color: Color.fromRGBO(0, 0, 0, 0.83),
+                  ),
+                  child: Padding(
+                    padding: EdgeInsets.all(8.0),
+                    child: requestList.length==0?Text(
+                      '暂无报修',
+                      style: TextStyle(
+                        color: Colors.white
+                      ),
+                    ):Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        Text(
+                          '${requestData[seriesIndex].x}',
+                          style: TextStyle(
+                            color: Colors.white
+                          ),
+                        ),
+                        Text(
+                          '参报数量：${requestData[seriesIndex].count}',
+                          style: TextStyle(
+                              color: Colors.white
+                          ),
+                        ),
+                      ],
+                    ),
+                  )
+              );
+            }
           ),
+          onPointTapped: (PointTapArgs args) {
+            print(args.pointIndex);
+            displayRequest = List.from(requestList);
+            displayRequest.retainWhere((item) => item['DepartmentName']==requestData[args.pointIndex].x);
+            setState(() {
+              displayRequest = displayRequest;
+            });
+          },
           annotations: <CircularChartAnnotation>[
             CircularChartAnnotation(
               widget: Container(
@@ -1888,7 +1942,7 @@ class _DashboardState extends State<Dashboard> {
                   ),
                 ),
               ):ListView(
-                children: requestList.map<Widget>((item) {
+                children: displayRequest.map<Widget>((item) {
                   return Column(
                     children: <Widget>[
                       Row(
@@ -1896,7 +1950,7 @@ class _DashboardState extends State<Dashboard> {
                           Expanded(
                             flex: 1,
                             child: Text(
-                              '1',
+                              '${displayRequest.indexOf(item)+1}',
                               style: TextStyle(
                                 fontSize: 14.0,
                                 color: Color(0xff1B85E7),
@@ -1914,7 +1968,7 @@ class _DashboardState extends State<Dashboard> {
                             ),
                           ),
                           Expanded(
-                            flex: 2,
+                            flex: 3,
                             child: Container(
                               height: 20,
                               width: 35,
@@ -2021,7 +2075,7 @@ class _DashboardState extends State<Dashboard> {
       child: Container(
         child: Row(
           children: <Widget>[
-            buildEventIcon(Icons.build, recallEvents?.length.toString(), 0, '紧急维修'),
+            buildEventIcon(Icons.build, repairEvents?.length.toString(), 0, '紧急维修'),
             buildEventIcon(Icons.local_car_wash, recallEvents?.length.toString(), 1, '召回事件'),
             buildEventIcon(Icons.speaker_phone, mandatoryEvents?.length.toString(), 2, '强检事件'),
             buildEventIcon(Icons.calendar_today, overdueEvents?.length.toString(), 3, '超期事件'),
@@ -2191,7 +2245,7 @@ class _DashboardState extends State<Dashboard> {
                         style: TextStyle(
                             color: Color(0xffD64040),
                             fontWeight: FontWeight.w600,
-                            fontSize: 25
+                            fontSize: 18
                         ),
                       ),
                       Text(
@@ -2216,7 +2270,7 @@ class _DashboardState extends State<Dashboard> {
                   ),
                 ),
                 Text(
-                  finished.toStringAsFixed(1),
+                  finished.toStringAsFixed(0),
                   style: TextStyle(
                       color: Color(0xff1e1e1e),
                       fontSize: 16
@@ -2240,7 +2294,7 @@ class _DashboardState extends State<Dashboard> {
                   ),
                 ),
                 Text(
-                  planned.toStringAsFixed(1),
+                  planned.toStringAsFixed(0),
                   style: TextStyle(
                       color: Color(0xff1e1e1e),
                       fontSize: 16
@@ -2408,7 +2462,7 @@ class _DashboardState extends State<Dashboard> {
                       ),
                     ),
                     Text(
-                      '设备收支概览',
+                      widget.equipmentId==null?'':'设备收支概览',
                       style: TextStyle(
                           color: Color(0xff1e1e1e),
                           fontSize: 17.0,
@@ -2666,7 +2720,7 @@ class _DashboardState extends State<Dashboard> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: <Widget>[
                           Text(
-                            CommonUtil.CurrencyForm(incomeAll['income'], times: 1),
+                            CommonUtil.CurrencyForm(incomeAll['income'], times: 0),
                             style: TextStyle(
                                 color: Color(0xff1e1e1e),
                                 fontSize: 15.0,
@@ -2694,9 +2748,9 @@ class _DashboardState extends State<Dashboard> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: <Widget>[
                           Text(
-                            '${incomeAll['income_rate']>=0?'+':''} ${incomeAll['income_rate'].toStringAsFixed(1)}%',
+                            '${incomeAll['income_rate'].toStringAsFixed(1)}%',
                             style: TextStyle(
-                                color: incomeAll['income_rate']>=0?Color(0xffD64040):Color(0xff33B850),
+                                color: incomeAll['income_rate']>=0?Color(0xff33B850):Color(0xffD64040),
                                 fontSize: 15.0,
                                 fontWeight: FontWeight.w600
                             ),
@@ -2750,9 +2804,9 @@ class _DashboardState extends State<Dashboard> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: <Widget>[
                           Text(
-                            '${incomeAll['expense_rate']>=0?'+':''} ${incomeAll['expense_rate'].toStringAsFixed(1)}%',
+                            '${incomeAll['expense_rate'].toStringAsFixed(1)}%',
                             style: TextStyle(
-                                color: incomeAll['expense_rate']>=0?Color(0xffD64040):Color(0xff33B850),
+                                color: incomeAll['expense_rate']>=0?Color(0xff33B850):Color(0xffD64040),
                                 fontSize: 15.0,
                                 fontWeight: FontWeight.w600
                             ),
@@ -2776,12 +2830,14 @@ class _DashboardState extends State<Dashboard> {
             ),
             Container(
               height: 200,
-              width: incomeData.length<=20?400.0:incomeData.length*20.0,
               child: ListView(
                 scrollDirection: Axis.horizontal,
                 controller: new ScrollController(),
                 children: <Widget>[
-                  buildIncomeChart()
+                  Container(
+                    width: incomeData.length<10?300.0:incomeData.length*30.0,
+                    child: buildIncomeChart()
+                  ),
                 ],
               ),
             )

@@ -92,7 +92,7 @@ class _SpareDetailState extends State<SpareDetail> {
     setState(() {
       _isExpandedDetail = true;
     });
-    if (_fujiClass2 == null) {
+    if (_fujiClass2 == 0) {
       showDialog(context: context, builder: (context) => CupertinoAlertDialog(
         title: new Text('富士II类不可为空'),
       )).then((result) => FocusScope.of(context).requestFocus(_focusComponent[0]));
@@ -112,7 +112,7 @@ class _SpareDetailState extends State<SpareDetail> {
     }
     if (double.parse(price.text) > 9999999999.99) {
       showDialog(context: context, builder: (context) => CupertinoAlertDialog(
-        title: new Text('月租过大'),
+        title: new Text('月租不可大于1亿'),
       )).then((result) => FocusScope.of(context).requestFocus(_focusComponent[3]));
       return;
     }

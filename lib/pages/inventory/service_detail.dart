@@ -30,6 +30,7 @@ class _ServiceDetailState extends State<ServiceDetail> {
   Map supplier;
   String startDate = 'YYYY-MM-DD';
   String endDate = 'YYYY-MM-DD';
+  String purchaseDate = 'YYYY-MM-DD';
   int _fujiClass2 = 0;
   String _fujiClass2Name;
   List _fujiList = [];
@@ -98,6 +99,12 @@ class _ServiceDetailState extends State<ServiceDetail> {
     setState(() {
       _isExpandedDetail = true;
     });
+    if (_fujiClass2 == 0) {
+      showDialog(context: context, builder: (context) => CupertinoAlertDialog(
+        title: new Text('富士II类不可为空'),
+      )).then((result) => FocusScope.of(context).requestFocus(_focusComponent[1]));
+      return;
+    }
     if (serviceName.text.isEmpty) {
       showDialog(context: context, builder: (context) => CupertinoAlertDialog(
         title: new Text('服务名称不可为空'),
@@ -106,19 +113,31 @@ class _ServiceDetailState extends State<ServiceDetail> {
     }
     if (price.text.isEmpty) {
       showDialog(context: context, builder: (context) => CupertinoAlertDialog(
-        title: new Text('服务金额不可为空'),
+        title: new Text('金额不可为空'),
+      )).then((result) => FocusScope.of(context).requestFocus(_focusComponent[2]));
+      return;
+    }
+    if (double.parse(price.text) > 9999999999.99) {
+      showDialog(context: context, builder: (context) => CupertinoAlertDialog(
+        title: new Text('金额不可大于1亿'),
       )).then((result) => FocusScope.of(context).requestFocus(_focusComponent[2]));
       return;
     }
     if (totalTimes.text.isEmpty) {
       showDialog(context: context, builder: (context) => CupertinoAlertDialog(
-        title: new Text('服务总数不可为空'),
+        title: new Text('服务次数不可为空'),
       )).then((result) => FocusScope.of(context).requestFocus(_focusComponent[3]));
       return;
     }
     if (availableTimes.text.isEmpty) {
       showDialog(context: context, builder: (context) => CupertinoAlertDialog(
-        title: new Text('可用次数不可为空'),
+        title: new Text('剩余服务次数不可为空'),
+      )).then((result) => FocusScope.of(context).requestFocus(_focusComponent[4]));
+      return;
+    }
+    if (double.parse(availableTimes.text) > double.parse(totalTimes.text)) {
+      showDialog(context: context, builder: (context) => CupertinoAlertDialog(
+        title: new Text('剩余服务次数不可大于服务次数'),
       )).then((result) => FocusScope.of(context).requestFocus(_focusComponent[4]));
       return;
     }
@@ -337,10 +356,72 @@ class _ServiceDetailState extends State<ServiceDetail> {
                             child: new Column(
                               children: <Widget>[
                                 BuildWidget.buildRow('系统编号', oid),
+                                widget.editable?buildDropdown('富士II类', _fujiClass2, _fujiList, changeFuji, required: true):BuildWidget.buildRow('富士二类', _fujiClass2Name??''),
                                 widget.editable?BuildWidget.buildInput('服务名称', serviceName, maxLength: 50, focusNode: _focusComponent[1], required: true):BuildWidget.buildRow('服务名称', serviceName.text),
+                                widget.editable?new Padding(
+                                  padding: EdgeInsets.symmetric(vertical: 5.0),
+                                  child: new Row(
+                                    children: <Widget>[
+                                      new Expanded(
+                                        flex: 4,
+                                        child: new Wrap(
+                                          alignment: WrapAlignment.end,
+                                          crossAxisAlignment: WrapCrossAlignment.center,
+                                          children: <Widget>[
+                                            new Text(
+                                              '*',
+                                              style: new TextStyle(
+                                                  color: Colors.red
+                                              ),
+                                            ),
+                                            new Text(
+                                              '供应商',
+                                              style: new TextStyle(
+                                                  fontSize: 16.0, fontWeight: FontWeight.w600),
+                                            )
+                                          ],
+                                        ),
+                                      ),
+                                      new Expanded(
+                                        flex: 1,
+                                        child: new Text(
+                                          '：',
+                                          style: new TextStyle(
+                                            fontSize: 16.0,
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                        ),
+                                      ),
+                                      new Expanded(
+                                        flex: 4,
+                                        child: new Text(
+                                          supplier == null ? '' : supplier['Name'],
+                                          style: new TextStyle(
+                                              fontSize: 16.0,
+                                              fontWeight: FontWeight.w400,
+                                              color: Colors.black54),
+                                        ),
+                                      ),
+                                      new Expanded(
+                                          flex: 2,
+                                          child: new IconButton(
+                                              focusNode: _focusComponent[3],
+                                              icon: Icon(Icons.search),
+                                              onPressed: () async {
+                                                FocusScope.of(context).requestFocus(new FocusNode());
+                                                final _searchResult = await Navigator.of(context).push(new MaterialPageRoute(builder: (_) => SearchLazy(searchType: SearchType.VENDOR,)));
+                                                print(_searchResult);
+                                                if (_searchResult != null &&
+                                                    _searchResult != 'null') {
+                                                  setState(() {
+                                                    supplier = jsonDecode(_searchResult);
+                                                  });
+                                                }
+                                              })),
+                                    ],
+                                  ),
+                                ):BuildWidget.buildRow('供应商', supplier==null?'':supplier['Name']),
                                 widget.editable?BuildWidget.buildInput('金额', price, maxLength: 13, inputType: TextInputType.numberWithOptions(decimal: true), focusNode: _focusComponent[2], required: true):BuildWidget.buildRow('批次号', price.text),
-                                widget.editable?BuildWidget.buildInput('服务次数', totalTimes, maxLength: 9, inputType: TextInputType.number, focusNode: _focusComponent[3], required: true):BuildWidget.buildRow('服务次数', totalTimes.text),
-                                widget.editable?BuildWidget.buildInput('剩余服务次数', availableTimes, maxLength: 9, inputType: TextInputType.number, focusNode: _focusComponent[4], required: true):BuildWidget.buildRow('服务剩余次数', availableTimes.text),
                                 widget.editable?new Padding(
                                   padding: EdgeInsets.symmetric(vertical: 5.0),
                                   child: new Row(
@@ -501,7 +582,8 @@ class _ServiceDetailState extends State<ServiceDetail> {
                                     ],
                                   ),
                                 ):BuildWidget.buildRow('结束日期', endDate),
-                                widget.editable?buildDropdown('富士II类', _fujiClass2, _fujiList, changeFuji, required: true):BuildWidget.buildRow('富士二类', _fujiClass2Name??''),
+                                widget.editable?BuildWidget.buildInput('服务次数', totalTimes, maxLength: 9, inputType: TextInputType.number, focusNode: _focusComponent[3], required: true):BuildWidget.buildRow('服务次数', totalTimes.text),
+                                widget.editable?BuildWidget.buildInput('剩余服务次数', availableTimes, maxLength: 9, inputType: TextInputType.number, focusNode: _focusComponent[4], required: true):BuildWidget.buildRow('服务剩余次数', availableTimes.text),
                                 widget.editable?new Padding(
                                   padding: EdgeInsets.symmetric(vertical: 5.0),
                                   child: new Row(
@@ -519,7 +601,7 @@ class _ServiceDetailState extends State<ServiceDetail> {
                                               ),
                                             ),
                                             new Text(
-                                              '供应商',
+                                              '购入日期',
                                               style: new TextStyle(
                                                   fontSize: 16.0, fontWeight: FontWeight.w600),
                                             )
@@ -539,32 +621,49 @@ class _ServiceDetailState extends State<ServiceDetail> {
                                       new Expanded(
                                         flex: 4,
                                         child: new Text(
-                                          supplier == null ? '' : supplier['Name'],
+                                          purchaseDate,
                                           style: new TextStyle(
                                               fontSize: 16.0,
                                               fontWeight: FontWeight.w400,
-                                              color: Colors.black54),
+                                              color: Colors.black54
+                                          ),
                                         ),
                                       ),
                                       new Expanded(
-                                          flex: 2,
-                                          child: new IconButton(
-                                              focusNode: _focusComponent[3],
-                                              icon: Icon(Icons.search),
-                                              onPressed: () async {
-                                                FocusScope.of(context).requestFocus(new FocusNode());
-                                                final _searchResult = await Navigator.of(context).push(new MaterialPageRoute(builder: (_) => SearchLazy(searchType: SearchType.VENDOR,)));
-                                                print(_searchResult);
-                                                if (_searchResult != null &&
-                                                    _searchResult != 'null') {
+                                        flex: 2,
+                                        child: new IconButton(
+                                            icon: Icon(Icons.calendar_today, color: AppConstants.AppColors['btn_main'],),
+                                            onPressed: () async {
+                                              FocusScope.of(context).requestFocus(new FocusNode());
+                                              var _time = DateTime.tryParse(purchaseDate)??DateTime.now();
+                                              DatePicker.showDatePicker(
+                                                context,
+                                                pickerTheme: DateTimePickerTheme(
+                                                  showTitle: true,
+                                                  confirm: Text('确认', style: TextStyle(color: Colors.blueAccent)),
+                                                  cancel: Text('取消', style: TextStyle(color: Colors.redAccent)),
+                                                ),
+                                                minDateTime: DateTime.now().add(Duration(days: -7300)),
+                                                maxDateTime: DateTime.parse('2030-01-01'),
+                                                initialDateTime: _time,
+                                                dateFormat: 'yyyy-MM-dd',
+                                                locale: DateTimePickerLocale.en_us,
+                                                onClose: () => print(""),
+                                                onCancel: () => print('onCancel'),
+                                                onChange: (dateTime, List<int> index) {
+                                                },
+                                                onConfirm: (dateTime, List<int> index) {
+                                                  var _date = formatDate(dateTime, [yyyy, '-', mm, '-', dd]);
                                                   setState(() {
-                                                    supplier = jsonDecode(_searchResult);
+                                                    purchaseDate = _date;
                                                   });
-                                                }
-                                              })),
+                                                },
+                                              );
+                                            }),
+                                      ),
                                     ],
                                   ),
-                                ):BuildWidget.buildRow('供应商', supplier==null?'':supplier['Name']),
+                                ):BuildWidget.buildRow('购入日期', purchaseDate),
                                 widget.editable?BuildWidget.buildInput('备注', comments, maxLength: 500, focusNode: _focusComponent[5]):BuildWidget.buildRow('备注', comments.text),
                                 new Divider(),
                                 new Padding(

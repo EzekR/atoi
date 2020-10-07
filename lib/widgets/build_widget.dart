@@ -105,8 +105,9 @@ class BuildWidget {
     );
   }
 
-  static GestureDetector buildCardInput(String leading, TextEditingController content, {Function onTap, bool required}) {
+  static GestureDetector buildCardInput(String leading, TextEditingController content, {Function onTap, bool required, FocusNode focus}) {
     required = required??false;
+    focus = focus??new FocusNode();
     return new GestureDetector(
       onTap: onTap,
       child: new Row(
@@ -147,6 +148,7 @@ class BuildWidget {
               controller: content,
               maxLength: 20,
               maxLines: 1,
+              focusNode: focus,
             ),
           )
         ],

@@ -121,7 +121,7 @@ class _ComponentDetailState extends State<ComponentDetail> {
         currentComponent = _data['Component']['Name'];
         currentStatus = _data['Status']['Name'];
         purchaseDate = _data['PurchaseDate'].toString().split('T')[0];
-        fujiClass2 = _data['Component']['FujiClass2']['ID'];
+        fujiClass2 = _data['Equipment']['FujiClass2']['ID'];
       });
     }
   }
@@ -166,7 +166,7 @@ class _ComponentDetailState extends State<ComponentDetail> {
     }
     if (double.parse(price.text) > 9999999999.99) {
       showDialog(context: context, builder: (context) => CupertinoAlertDialog(
-        title: new Text('单价过高'),
+        title: new Text('采购金额需小于1亿'),
       )).then((result) => FocusScope.of(context).requestFocus(_focusComponent[3]));
       return;
     }

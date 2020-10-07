@@ -113,6 +113,15 @@ class ConstantsModel extends Model {
     _ComponentStatus = value;
   }
 
+  List _ConsumableTypes = [];
+
+
+  List get ConsumableTypes => _ConsumableTypes;
+
+  set ConsumableTypes(List value) {
+    _ConsumableTypes = value;
+  }
+
   get Constants => _Constants;
   get UserRole => _UserRole;
   get AssetsLevel => _AssetsLevel;
@@ -277,7 +286,9 @@ class ConstantsModel extends Model {
 
       _InvSpare = resp['Data']['InvSpareStatus'];
 
-      _ComponentStatus = resp['Data']['ComponentStatus'];
+      _ComponentStatus = resp['Data']['ComponentTypes'];
+
+      _ConsumableTypes = resp['Data']['ConsumableTypes'];
     }
 
     var _departments = await HttpRequest.request(

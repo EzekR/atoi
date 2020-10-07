@@ -370,7 +370,7 @@ class _ConsumableListState extends State<ConsumableList> {
                 BuildWidget.buildCardRow('富士II类', item['Consumable']['FujiClass2']['Name']),
                 BuildWidget.buildCardRow('单价（元）', item['Price'].toString()),
                 BuildWidget.buildCardRow('购入日期', item['PurchaseDate'].split('T')[0]),
-                BuildWidget.buildCardRow('采购单号', item['Purchase']['ID'].toString()),
+                BuildWidget.buildCardRow('采购单号', item['Purchase']['ID']==0?'':'${item['Purchase']['Name']}${item['Purchase']['ID']}'),
                 BuildWidget.buildCardRow('可用数量', item['AvaibleQty'].toString()),
                 //BuildWidget.buildCardRow('状态', item['IsActive']?'启用':'停用'),
               ],

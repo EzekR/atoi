@@ -36,6 +36,7 @@ class _ConsumableDetailState extends State<ConsumableDetail> {
   int _consumable;
   String _consumableName;
   List _consumableList = [];
+  ScrollController scrollController = new ScrollController();
 
   ConstantsModel cModel;
 
@@ -120,9 +121,9 @@ class _ConsumableDetailState extends State<ConsumableDetail> {
         spec.text = _data['Specification'];
         model.text = _data['Model'];
         price.text = _data['Price'].toString();
-        quantity.text = _data['Qty'].toString();
+        quantity.text = _data['Qty'].toStringAsFixed(0);
         comments.text = _data['Comments'];
-        availableQty.text = _data['AvaibleQty'].toString();
+        availableQty.text = _data['AvaibleQty'].toStringAsFixed(0);
         purchaseDate = _data['PurchaseDate'].toString().split('T')[0];
         supplier = _data['Supplier'];
       });
@@ -137,10 +138,16 @@ class _ConsumableDetailState extends State<ConsumableDetail> {
     setState(() {
       _isExpandedDetail = true;
     });
-    if (_fujiClass2 == null) {
+    if (_fujiClass2 == 0) {
       showDialog(context: context, builder: (context) => CupertinoAlertDialog(
         title: new Text('富士II类不可为空'),
       )).then((result) => FocusScope.of(context).requestFocus(_focusComponent[0]));
+      return;
+    }
+    if (_consumable == null) {
+      showDialog(context: context, builder: (context) => CupertinoAlertDialog(
+        title: new Text('耗材不可为空'),
+      )).then((result) => scrollController.jumpTo(0));
       return;
     }
     if (lotNum.text.isEmpty) {
@@ -169,7 +176,7 @@ class _ConsumableDetailState extends State<ConsumableDetail> {
     }
     if (double.parse(price.text) > 9999999999.99) {
       showDialog(context: context, builder: (context) => CupertinoAlertDialog(
-        title: new Text('单价过大'),
+        title: new Text('采购金额需小于1亿'),
       )).then((result) => FocusScope.of(context).requestFocus(_focusComponent[4]));
       return;
     }
@@ -178,6 +185,26 @@ class _ConsumableDetailState extends State<ConsumableDetail> {
         title: new Text('入库数量不可为空'),
       )).then((result) => FocusScope.of(context).requestFocus(_focusComponent[5]));
       return;
+    }
+    if (double.parse(quantity.text) > 9999999999.99) {
+      showDialog(context: context, builder: (context) => CupertinoAlertDialog(
+        title: new Text('入库数量不可超过1亿'),
+      )).then((result) => FocusScope.of(context).requestFocus(_focusComponent[5]));
+      return;
+    }
+    if (widget.consumable != null && widget.editable) {
+      if (availableQty.text.isEmpty) {
+        showDialog(context: context, builder: (context) => CupertinoAlertDialog(
+          title: new Text('可用数量不可为空'),
+        )).then((result) => FocusScope.of(context).requestFocus(_focusComponent[5]));
+        return;
+      }
+      if (double.parse(availableQty.text) > 9999999999.99) {
+        showDialog(context: context, builder: (context) => CupertinoAlertDialog(
+          title: new Text('可用数量不可超过1亿'),
+        )).then((result) => FocusScope.of(context).requestFocus(_focusComponent[5]));
+        return;
+      }
     }
     if (supplier == null) {
       showDialog(context: context, builder: (context) => CupertinoAlertDialog(
@@ -188,7 +215,7 @@ class _ConsumableDetailState extends State<ConsumableDetail> {
     if (purchaseDate == 'YYYY-MM-DD') {
       showDialog(context: context, builder: (context) => CupertinoAlertDialog(
         title: new Text('购入日期不可为空'),
-      )).then((result) => FocusScope.of(context).requestFocus(_focusComponent[0]));
+      )).then((result) => scrollController.jumpTo(800));
       return;
     }
     var prefs = await _prefs;
@@ -236,6 +263,19 @@ class _ConsumableDetailState extends State<ConsumableDetail> {
                     method: HttpRequest.POST,
                     data: _data
                 );
+                if (resp['ResultCode'] == '00') {
+                  showDialog(context: context, builder: (context) {
+                    return CupertinoAlertDialog(
+                      title: new Text('保存成功'),
+                    );
+                  }).then((result) => Navigator.of(context).pop());
+                } else {
+                  showDialog(context: context, builder: (context) {
+                    return CupertinoAlertDialog(
+                      title: new Text(resp['ResultMessage']),
+                    );
+                  });
+                }
               },
               child: Text(
                   '确认'
@@ -379,6 +419,7 @@ class _ConsumableDetailState extends State<ConsumableDetail> {
               padding: EdgeInsets.symmetric(vertical: 5.0),
               child: new Card(
                 child: new ListView(
+                  controller: scrollController,
                   children: <Widget>[
                     new ExpansionPanelList(
                       animationDuration: Duration(milliseconds: 200),

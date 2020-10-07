@@ -145,6 +145,11 @@ class _PODetailState extends State<PODetail> {
 
   Future<Null> savePurchaseOrder({int statusId}) async {
     statusId = statusId ?? 1;
+    setState(() {
+      expansionList = expansionList.map((item) {
+        return true;
+      }).toList();
+    });
     if (supplier == null) {
       showDialog(context: context, builder: (context) => CupertinoAlertDialog(
         title: new Text('供应商不可为空'),
@@ -209,7 +214,7 @@ class _PODetailState extends State<PODetail> {
     if (resp['ResultCode'] == '00') {
       showDialog(context: context, builder: (context) {
         return CupertinoAlertDialog(
-          title: new Text('操作成功'),
+          title: new Text(statusId==1?'保存成功':'提交成功'),
         );
       }).then((result) => Navigator.of(context).pop());
     } else {
