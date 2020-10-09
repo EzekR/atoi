@@ -130,8 +130,8 @@ class _PODetailState extends State<PODetail> {
             '服务名称': _data['Name'],
             '关联富士II类': _data['FujiClass2']['Name'],
             '金额': _data['Price'].toString(),
-            '服务开始时间': _data['StartDate'],
-            '服务结束时间': _data['EndDate'],
+            '服务开始时间': _data['StartDate'].toString().split('T')[0],
+            '服务结束时间': _data['EndDate'].toString().split('T')[0],
             '服务次数': _data['TotalTimes'].toString()
           };
         }).toList();
@@ -475,43 +475,6 @@ class _PODetailState extends State<PODetail> {
             children: <Widget>[
               RaisedButton(
                 onPressed: () {
-                  switch (pageType) {
-                    case AttachmentType.COMPONENT:
-                      setState(() {
-                        _componentsList.removeAt(key);
-                        _accs.removeAt(key);
-                      });
-                      break;
-                    case AttachmentType.CONSUMABLE:
-                      setState(() {
-                        _consumableList.removeAt(key);
-                        _consumable.removeAt(key);
-                      });
-                      break;
-                    case AttachmentType.SERVICE:
-                      setState(() {
-                        _servicesList.removeAt(key);
-                        _services.removeAt(key);
-                      });
-                      break;
-                  }
-                },
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(6),
-                ),
-                padding: EdgeInsets.all(12.0),
-                color: new Color(0xffD25565),
-                child: Center(
-                  child: Text(
-                    '删除',
-                    style: TextStyle(
-                        color: Colors.white
-                    ),
-                  ),
-                ),
-              ),
-              RaisedButton(
-                onPressed: () {
                   print(fullItem);
                   Navigator.of(context).push(new MaterialPageRoute(builder: (context) => POAttachment(po: fullItem, editable: true, attachType: pageType,))).then((result) {
                     if (result !=null) {
@@ -555,8 +518,8 @@ class _PODetailState extends State<PODetail> {
                               '服务名称': _data['Name'],
                               '关联富士II类': _data['FujiClass2']['Name'],
                               '金额': _data['Price'],
-                              '服务开始时间': _data['StartDate'],
-                              '服务结束时间': _data['EndDate'],
+                              '服务开始时间': _data['StartDate'].toString().split("T")[0],
+                              '服务结束时间': _data['EndDate'].toString().split("T")[0],
                               '服务次数': _data['TotalTimes']
                             };
                             break;
@@ -573,6 +536,43 @@ class _PODetailState extends State<PODetail> {
                 child: Center(
                   child: Text(
                     '编辑',
+                    style: TextStyle(
+                        color: Colors.white
+                    ),
+                  ),
+                ),
+              ),
+              RaisedButton(
+                onPressed: () {
+                  switch (pageType) {
+                    case AttachmentType.COMPONENT:
+                      setState(() {
+                        _componentsList.removeAt(key);
+                        _accs.removeAt(key);
+                      });
+                      break;
+                    case AttachmentType.CONSUMABLE:
+                      setState(() {
+                        _consumableList.removeAt(key);
+                        _consumable.removeAt(key);
+                      });
+                      break;
+                    case AttachmentType.SERVICE:
+                      setState(() {
+                        _servicesList.removeAt(key);
+                        _services.removeAt(key);
+                      });
+                      break;
+                  }
+                },
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                padding: EdgeInsets.all(12.0),
+                color: new Color(0xffD25565),
+                child: Center(
+                  child: Text(
+                    '删除',
                     style: TextStyle(
                         color: Colors.white
                     ),
@@ -646,8 +646,8 @@ class _PODetailState extends State<PODetail> {
                             '服务名称': _data['Name'],
                             '关联富士II类': _data['FujiClass2']['Name'],
                             '金额': _data['Price'],
-                            '服务开始时间': _data['StartDate'],
-                            '服务结束时间': _data['EndDate'],
+                            '服务开始时间': _data['StartDate'].toString().split('T')[0],
+                            '服务结束时间': _data['EndDate'].toString().split('T')[0],
                             '服务次数': _data['TotalTimes']
                           });
                           break;
