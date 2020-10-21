@@ -105,9 +105,10 @@ class BuildWidget {
     );
   }
 
-  static GestureDetector buildCardInput(String leading, TextEditingController content, {Function onTap, bool required, FocusNode focus}) {
+  static GestureDetector buildCardInput(String leading, TextEditingController content, {Function onTap, bool required, FocusNode focus, int maxLength, Function callback}) {
     required = required??false;
     focus = focus??new FocusNode();
+    maxLength = maxLength??20;
     return new GestureDetector(
       onTap: onTap,
       child: new Row(
@@ -146,9 +147,12 @@ class BuildWidget {
             flex: 7,
             child: new TextField(
               controller: content,
-              maxLength: 20,
+              maxLength: maxLength,
               maxLines: 1,
               focusNode: focus,
+              onChanged: (value) {
+                callback(value);
+              },
             ),
           )
         ],
@@ -156,7 +160,63 @@ class BuildWidget {
     );
   }
 
+  static GestureDetector buildCardInputStock(String leading, String inputValue, {Function onTap, bool required, FocusNode focus, int maxLength, Function callback}) {
+    required = required??false;
+    focus = focus??new FocusNode();
+    maxLength = maxLength??20;
+    inputValue = inputValue??"";
+    return new GestureDetector(
+      onTap: onTap,
+      child: new Row(
+        children: <Widget>[
+          new Expanded(
+              flex: 3,
+              child: new Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: <Widget>[
+                  required?new Text(
+                    '*',
+                    style: TextStyle(
+                        color: Colors.red
+                    ),
+                  ):Container(),
+                  new Text(
+                    leading,
+                    style: new TextStyle(
+                        fontSize: 16.0,
+                        fontWeight: FontWeight.w600
+                    ),
+                  ),
+                ],
+              )
+          ),
+          new Expanded(
+              flex: 1,
+              child: new Text(':',
+                style: new TextStyle(
+                    fontSize: 16.0,
+                    fontWeight: FontWeight.w600
+                ),
+              )
+          ),
+          new Expanded(
+            flex: 7,
+            child: new TextField(
+              controller: new TextEditingController()..text=inputValue,
+              maxLength: maxLength,
+              maxLines: 1,
+              focusNode: focus,
+              onChanged: (value) {
+                callback(value);
+              },
+            ),
+          )
+        ],
+      ),
+    );
+  }
   static Row buildCardDropdown(String title, int currentItem, List dropdownItems, Function changeDropdown, {bool required}) {
+    required = required??false;
     return new Row(
       children: <Widget>[
         new Expanded(
@@ -217,6 +277,53 @@ class BuildWidget {
     );
   }
 
+  static Row buildCardSwitch(String title, Function switchMethod, {bool required, bool initValue}) {
+    required = required??false;
+    initValue = initValue??true;
+    return new Row(
+      children: <Widget>[
+        new Expanded(
+          flex: 3,
+          child: new Wrap(
+            alignment: WrapAlignment.end,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            children: <Widget>[
+              required?new Text(
+                '*',
+                style: new TextStyle(
+                    color: Colors.red
+                ),
+              ):Container(),
+              new Text(
+                title,
+                style: new TextStyle(
+                    fontSize: 16.0,
+                    fontWeight: FontWeight.w600
+                ),
+              )
+            ],
+          ),
+        ),
+        new Expanded(
+          flex: 1,
+          child: new Text(
+            '：',
+            style: new TextStyle(
+              fontSize: 16.0,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ),
+        new Expanded(
+          flex: 7,
+          child: new Switch.adaptive(
+              value: initValue,
+              onChanged: switchMethod
+          )
+        ),
+      ],
+    );
+  }
   /// 构建常用下拉菜单（4、6分）
   static GestureDetector buildDropdown(String title, String currentItem, List dropdownItems, Function changeDropdown, {FocusNode focusNode, BuildContext context, bool required}) {
     //if (context != null) {

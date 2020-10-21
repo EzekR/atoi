@@ -1,0 +1,125 @@
+{
+  "action": "2",//保存= 1,提交=2,通过=3 ,退回=4,
+  "info": {
+    "Comment": "",
+    "CopyComment": "",
+    "CreatedDate": "/Date(1600844230000)/",
+    "FormatHistory": "",
+    "ID": "8",
+    "OID": "PD00000008",
+    "ObjectType": {
+      "ID": "4",
+      "Name": "备用机"
+    },
+    "ScheduledDate": "2020-09-01",
+    "StSpares": [
+      {
+        "AddDate": "/Date(1600666521000)/",
+        "Comments": "",
+        "EndDate": "/Date(1601395200000)/",
+        "FujiClass2": {
+          "ID": "11",
+          "Name": "frank_有源超声"
+        },
+        "ID": "1",
+        "InvSpare": {
+          "ID": "25",
+          "Name": ""
+        },
+        "IsInventory": "true",
+        "LastestStocktakingDate": "/Date(-62135596800000)/",
+        "Manufacturer": "厂家",
+        "Model": "型号",
+        "Name": "设备名称",
+        "OID": "BYJ00000025",
+        "OriginStatus": {
+          "ID": "2",
+          "Name": "备用"
+        },
+        "Price": "1000",
+        "SerialCode": "XLHFT0921",
+        "StartDate": "/Date(1598889600000)/",
+        "Status": {
+          "ID": "2",
+          "Name": "备用"
+        },
+        "StocktakingID": "8",
+        "UpdateDate": "/Date(-62135596800000)/",
+        "UsageStatus": "当前在用"
+      },
+      {
+        "AddDate": "/Date(1600844293000)/",
+        "Comments": "1",
+        "EndDate": "/Date(1601395200000)/",
+        "FujiClass2": {
+          "ID": "14",
+          "Name": "测试"
+        },
+        "ID": "2",
+        "InvSpare": {
+          "ID": "0",
+          "Name": ""
+        },
+        "IsInventory": "true",
+        "LastestStocktakingDate": "/Date(-62135596800000)/",
+        "Manufacturer": "Test厂家",
+        "Model": "RTG-574312",
+        "Name": "Manyee",
+        "OID": "BYJ00000000",
+        "OriginStatus": {
+          "ID": "2",
+          "Name": "备用"
+        },
+        "Price": "45",
+        "SerialCode": "qt-111128723d",
+        "StartDate": "/Date(1598889600000)/",
+        "Status": {
+          "ID": "2",
+          "Name": "备用"
+        },
+        "StocktakingID": "8",
+        "UpdateDate": "/Date(-62135596800000)/",
+        "UsageStatus": "当前在用"
+      }
+    ],
+    "StartDate": "/Date(1600844231000)/",
+    "Status": {
+      "ID": "2",
+      "Name": "待盘点"
+    },
+    "User": {
+      "Address": "",
+      "Comments": "",
+      "CreatedDate": "/Date(-62135596800000)/",
+      "Department": {
+        "ID": "0",
+        "Name": ""
+      },
+      "Email": "",
+      "GroupID": "0",
+      "HasOpenDispatch": "false",
+      "ID": "38",
+      "IsActive": "false",
+      "LastLoginDate": "/Date(-62135596800000)/",
+      "LoginID": "",
+      "LoginPwd": "",
+      "Mobile": "",
+      "Name": "manyee",
+      "OSName": "",
+      "RegistrationID": "",
+      "Role": {
+        "ID": "0",
+        "Name": ""
+      },
+      "SessionID": "",
+      "VerifyStatus": {
+        "ID": "0",
+        "Name": ""
+      },
+      "WebSessionID": ""
+    }
+  },
+  "noRecording": "false",//超管审批时可修改信息，通过时需要先提交一次，该flag控制是否产生审批流信息
+  "userID": "{{userID}}",
+  "sessionID": "{{sessionID}}"
+}

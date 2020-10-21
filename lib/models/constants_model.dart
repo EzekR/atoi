@@ -115,11 +115,34 @@ class ConstantsModel extends Model {
 
   List _ConsumableTypes = [];
 
-
   List get ConsumableTypes => _ConsumableTypes;
 
   set ConsumableTypes(List value) {
     _ConsumableTypes = value;
+  }
+
+  List _SpareUseStatus = [];
+
+  List get SpareUseStatus => _SpareUseStatus;
+
+  set SpareUseStatus(List value) {
+    _SpareUseStatus = value;
+  }
+
+  List _StockingType = [];
+
+  List get StockingType => _StockingType;
+
+  set StockingType(List value) {
+    _StockingType = value;
+  }
+
+  List _StockingStatus = [];
+
+  List get StockingStatus => _StockingStatus;
+
+  set StockingStatus(List value) {
+    _StockingStatus = value;
   }
 
   get Constants => _Constants;
@@ -289,6 +312,12 @@ class ConstantsModel extends Model {
       _ComponentStatus = resp['Data']['ComponentTypes'];
 
       _ConsumableTypes = resp['Data']['ConsumableTypes'];
+
+      _SpareUseStatus = resp['Data']['InvSpareUsageStatus'];
+
+      _StockingType = resp['Data']['StocktakingObjectType'];
+
+      _StockingStatus = resp['Data']['StocktakingStatus'];
     }
 
     var _departments = await HttpRequest.request(

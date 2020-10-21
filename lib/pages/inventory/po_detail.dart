@@ -1097,7 +1097,7 @@ class _PODetailState extends State<PODetail> {
                           child:
                           Text('保存', style: TextStyle(color: Colors.white)),
                         ):new Container(),
-                        new RaisedButton(
+                        widget.editable?new RaisedButton(
                           onPressed: () {
                             widget.operation==PurchaseOrderOperation.INBOUND?handlePO(3):savePurchaseOrder(statusId: 2);
                           },
@@ -1108,7 +1108,19 @@ class _PODetailState extends State<PODetail> {
                           color: new Color(0xffD25565),
                           child:
                           Text(widget.operation==PurchaseOrderOperation.INBOUND?'完成':'提交', style: TextStyle(color: Colors.white)),
-                        ),
+                        ):Container(),
+                        new RaisedButton(
+                          onPressed: () {
+                            Navigator.of(context).pop();
+                          },
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          padding: EdgeInsets.all(12.0),
+                          color: new Color(0xffD25565),
+                          child:
+                          Text("返回", style: TextStyle(color: Colors.white)),
+                        )
                       ],
                     )
                   ],

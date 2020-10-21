@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:atoi/models/models.dart';
@@ -13,9 +15,10 @@ import 'package:date_format/date_format.dart';
 
 /// 备件详情页
 class SpareDetail extends StatefulWidget {
-  SpareDetail({Key key, this.spare, this.editable}) : super(key: key);
+  SpareDetail({Key key, this.spare, this.editable, this.isStock}) : super(key: key);
   final Map spare;
   final bool editable;
+  final bool isStock;
   _SpareDetailState createState() => new _SpareDetailState();
 }
 
@@ -31,10 +34,11 @@ class _SpareDetailState extends State<SpareDetail> {
   int _fujiClass2 = 0;
   String _fujiClass2Name;
   List _fujiList = [];
+  String useStatus = "";
 
   ConstantsModel cModel;
 
-  TextEditingController serialCode = new TextEditingController(), price = new TextEditingController();
+  TextEditingController serialCode = new TextEditingController(), price = new TextEditingController(), comment = new TextEditingController();
 
   void initState() {
     super.initState();
@@ -45,16 +49,17 @@ class _SpareDetailState extends State<SpareDetail> {
 
   void initFuji() {
     cModel.getConstants();
-    List _list = cModel.FujiClass2.map((item) {
-      return {
-        'value': item['ID'],
-        'text': item['Name']
-      };
-    }).toList();
+    List _list = [];
     _list.add({
       'value': 0,
       'text': ''
     });
+    _list.addAll(cModel.FujiClass2.map((item) {
+      return {
+        'value': item['ID'],
+        'text': item['Name']
+      };
+    }).toList());
     setState(() {
       _fujiList = _list;
     });
@@ -80,6 +85,8 @@ class _SpareDetailState extends State<SpareDetail> {
         price.text = _data['Price'].toString();
         startDate = _data['StartDate'].toString().split('T')[0];
         endDate = _data['EndDate'].toString().split('T')[0];
+        comment.text = _data['Comments'];
+        useStatus = _data['UsageStatus'];
       });
     }
   }
@@ -87,6 +94,26 @@ class _SpareDetailState extends State<SpareDetail> {
   List<FocusNode> _focusComponent = new List(10).map((item) {
     return new FocusNode();
   }).toList();
+
+  Future<bool> spareExist(String serialCode) async {
+    Map resp = await HttpRequest.request(
+        '/InvSpare/CheckSpareSerialCode',
+        method: HttpRequest.GET,
+        params: {
+          'invComponentID': 0,
+          'serialCode': serialCode
+        }
+    );
+    if (resp['ResultCode'] == '00') {
+      if (resp['Data']['ID'] == 0) {
+        return false;
+      } else {
+        return true;
+      }
+    } else {
+      return false;
+    }
+  }
 
   Future<Null> saveSpare() async {
     setState(() {
@@ -112,7 +139,7 @@ class _SpareDetailState extends State<SpareDetail> {
     }
     if (double.parse(price.text) > 9999999999.99) {
       showDialog(context: context, builder: (context) => CupertinoAlertDialog(
-        title: new Text('月租不可大于1亿'),
+        title: new Text('月租需小于100亿'),
       )).then((result) => FocusScope.of(context).requestFocus(_focusComponent[3]));
       return;
     }
@@ -142,8 +169,17 @@ class _SpareDetailState extends State<SpareDetail> {
       'SerialCode': serialCode.text,
       'Price': price.text,
       'StartDate': startDate,
-      'EndDate': endDate
+      'EndDate': endDate,
+      'Comments': comment.text
     };
+    if (widget.isStock) {
+      bool exist = await spareExist(serialCode.text);
+      if (exist) {
+        return;
+      } else {
+        Navigator.of(context).pop(jsonEncode(_info));
+      }
+    }
     if (widget.spare != null) {
       _info['ID'] = widget.spare['ID'];
     }
@@ -316,9 +352,9 @@ class _SpareDetailState extends State<SpareDetail> {
                             child: new Column(
                               children: <Widget>[
                                 widget.spare == null?Container():BuildWidget.buildRow('系统编号', oid),
-                                widget.editable?buildDropdown('富士二类', _fujiClass2, _fujiList, changeFuji, required: true):BuildWidget.buildRow('富士二类', _fujiClass2Name??''),
+                                widget.editable?buildDropdown('富士II类', _fujiClass2, _fujiList, changeFuji, required: true):BuildWidget.buildRow('富士II类', _fujiClass2Name??''),
                                 widget.editable?BuildWidget.buildInput('序列号', serialCode, maxLength: 30, focusNode: _focusComponent[2], required: true):BuildWidget.buildRow('序列号', serialCode.text),
-                                widget.editable?BuildWidget.buildInput('月租(元)', price, maxLength: 13, inputType: TextInputType.numberWithOptions(decimal: true), focusNode: _focusComponent[3], required: true):BuildWidget.buildRow('月租', price.text),
+                                widget.editable?BuildWidget.buildInput('月租(元)', price, maxLength: 13, inputType: TextInputType.numberWithOptions(decimal: true), focusNode: _focusComponent[3], required: true):BuildWidget.buildRow('月租(元)', price.text),
                                 widget.editable?new Padding(
                                   padding: EdgeInsets.symmetric(vertical: 5.0),
                                   child: new Row(
@@ -479,6 +515,8 @@ class _SpareDetailState extends State<SpareDetail> {
                                     ],
                                   ),
                                 ):BuildWidget.buildRow('结束日期', endDate),
+                                !widget.editable?BuildWidget.buildRow('状态', useStatus):Container(),
+                                widget.editable?BuildWidget.buildInput('备注', comment, maxLength: 30):BuildWidget.buildRow('备注', comment.text),
                                 new Divider(),
                                 new Padding(
                                     padding:

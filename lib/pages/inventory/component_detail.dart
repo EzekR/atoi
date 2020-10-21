@@ -15,9 +15,10 @@ import 'package:date_format/date_format.dart';
 
 /// 零件详情页
 class ComponentDetail extends StatefulWidget {
-  ComponentDetail({Key key, this.component, this.editable}) : super(key: key);
+  ComponentDetail({Key key, this.component, this.editable, this.isStock}) : super(key: key);
   final Map component;
   final bool editable;
+  final bool isStock;
   _ComponentDetailState createState() => new _ComponentDetailState();
 }
 
@@ -130,6 +131,26 @@ class _ComponentDetailState extends State<ComponentDetail> {
     return new FocusNode();
   }).toList();
 
+  Future<bool> componentExist(String serialCode) async {
+    Map resp = await HttpRequest.request(
+      '/InvComponent/CheckComponentSerialCode',
+      method: HttpRequest.GET,
+      params: {
+        'invComponentID': 0,
+        'serialCode': serialCode
+      }
+    );
+    if (resp['ResultCode'] == '00') {
+      if (resp['Data']['ID'] == 0) {
+        return false;
+      } else {
+        return true;
+      }
+    } else {
+      return false;
+    }
+  }
+
   Future<Null> saveComponent() async {
     setState(() {
       _isExpandedDetail = true;
@@ -166,7 +187,7 @@ class _ComponentDetailState extends State<ComponentDetail> {
     }
     if (double.parse(price.text) > 9999999999.99) {
       showDialog(context: context, builder: (context) => CupertinoAlertDialog(
-        title: new Text('采购金额需小于1亿'),
+        title: new Text('采购金额需小于100亿'),
       )).then((result) => FocusScope.of(context).requestFocus(_focusComponent[3]));
       return;
     }
@@ -217,27 +238,39 @@ class _ComponentDetailState extends State<ComponentDetail> {
       "userID": prefs.getInt('userID'),
       "info": _info
     };
-    var resp = await HttpRequest.request(
-        '/InvComponent/SaveComponent',
-        method: HttpRequest.POST,
-        data: _data
-    );
-    if (resp['ResultCode'] == '00') {
-      showDialog(context: context, builder: (context) {
-        return CupertinoAlertDialog(
-          title: new Text('保存成功'),
-        );
-      }).then((result) => Navigator.of(context).pop());
+    if (widget.isStock) {
+      bool existence = await componentExist(serialCode.text);
+      if (existence) {
+        showDialog(context: context, builder: (context) => CupertinoAlertDialog(
+          title: new Text('零件序列号已存在'),
+        ));
+        return;
+      } else {
+        Navigator.of(context).pop(jsonEncode(_info));
+      }
     } else {
-      showDialog(context: context, builder: (context) {
-        return CupertinoAlertDialog(
-          title: new Text(resp['ResultMessage']),
-        );
-      }).then((result) {
-        if (resp['ResultMessage'] == '序列号已存在') {
-          FocusScope.of(context).requestFocus(_focusComponent[0]);
-        }
-      });
+      var resp = await HttpRequest.request(
+          '/InvComponent/SaveComponent',
+          method: HttpRequest.POST,
+          data: _data
+      );
+      if (resp['ResultCode'] == '00') {
+        showDialog(context: context, builder: (context) {
+          return CupertinoAlertDialog(
+            title: new Text('保存成功'),
+          );
+        }).then((result) => Navigator.of(context).pop());
+      } else {
+        showDialog(context: context, builder: (context) {
+          return CupertinoAlertDialog(
+            title: new Text(resp['ResultMessage']),
+          );
+        }).then((result) {
+          if (resp['ResultMessage'] == '序列号已存在') {
+            FocusScope.of(context).requestFocus(_focusComponent[0]);
+          }
+        });
+      }
     }
   }
 

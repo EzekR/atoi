@@ -1,0 +1,319 @@
+{{
+  "Data": {
+    "User": {
+      "Name": "manyee",
+      "Role": {
+        "ID": 0
+      },
+      "IsActive": false,
+      "LastLoginDate": null,
+      "CreatedDate": null,
+      "VerifyStatus": {
+        "ID": 0
+      },
+      "Department": {
+        "ID": 0
+      },
+      "HasOpenDispatch": false,
+      "ID": 38
+    },
+    "ObjectType": {
+      "ID": 4,
+      "Name": "备用机"
+    },
+    "Status": {
+      "ID": 2,
+      "Name": "待盘点"
+    },
+    "CreatedDate": "2020-09-16T14:58:45",
+    "ScheduledDate": "2020-01-01T00:00:00",
+    "StartDate": "2020-09-16T15:02:54",
+    "Comment": "",
+    "OID": "PD00000001",
+    "StComponents": [],
+    "StConsumables": [],
+    "StServices": [],
+    "StSpares": [
+      {
+        "ObjectID": 1,
+        "Status": {
+          "ID": 2,
+          "Name": "备用"
+        },
+        "IsInventory": true,
+        "Comments": "",
+        "InvSpare": {
+          "FujiClass2": {
+            "Name": "测试",
+            "FujiClass1": {
+              "ID": 0,
+              "AddDate": null,
+              "UpdateDate": null,
+              "EquipmentType1": {
+                "Level": 0
+              },
+              "EquipmentType2": {
+                "Level": 0
+              },
+              "FujiClass2Count": 0
+            },
+            "IncludeLabour": false,
+            "PatrolTimes": 0.0,
+            "PatrolHours": 0.0,
+            "MaintenanceTimes": 0.0,
+            "MaintenanceHours": 0.0,
+            "RepairHours": 0.0,
+            "IncludeContract": false,
+            "FullCoveragePtg": 0.0,
+            "TechCoveragePtg": 0.0,
+            "IncludeSpare": false,
+            "SparePrice": 0.0,
+            "SpareRentPtg": 0.0,
+            "IncludeRepair": false,
+            "Usage": 0,
+            "EquipmentType": {
+              "ID": 0
+            },
+            "RepairComponentCost": 0.0,
+            "Repair3partyRatio": 0.0,
+            "Repair3partyCost": 0.0,
+            "RepairCostRatio": 0.0,
+            "MethodID": 0,
+            "AddDate": null,
+            "UpdateDate": null,
+            "Repairs": [],
+            "Components": [],
+            "Consumables": [],
+            "OID": "FJFL00000014",
+            "hasEdited": false,
+            "ID": 14
+          },
+          "SerialCode": "Test003",
+          "Price": 33333.0,
+          "StartDate": "2014-07-02T00:00:00",
+          "EndDate": "2020-07-01T00:00:00",
+          "AddDate": "2020-07-14T08:16:57",
+          "UpdateDate": "2020-09-10T11:17:00",
+          "Name": "",
+          "Model": "",
+          "Manufacturer": "",
+          "Status": {
+            "ID": 2,
+            "Name": "备用"
+          },
+          "OID": "BYJ00000006",
+          "LastestStocktakingDate": "2020-09-14T16:36:32",
+          "Comments": "",
+          "IsHidden": false,
+          "UsageStatus": "已经过期",
+          "ID": 6
+        }
+      },
+      {
+        "ObjectID": 1,
+        "Status": {
+          "ID": 2,
+          "Name": "备用"
+        },
+        "IsInventory": true,
+        "Comments": "",
+        "InvSpare": {
+          "FujiClass2": {
+            "Name": "测试",
+            "FujiClass1": {
+              "ID": 0,
+              "AddDate": null,
+              "UpdateDate": null,
+              "EquipmentType1": {
+                "Level": 0
+              },
+              "EquipmentType2": {
+                "Level": 0
+              },
+              "FujiClass2Count": 0
+            },
+            "IncludeLabour": false,
+            "PatrolTimes": 0.0,
+            "PatrolHours": 0.0,
+            "MaintenanceTimes": 0.0,
+            "MaintenanceHours": 0.0,
+            "RepairHours": 0.0,
+            "IncludeContract": false,
+            "FullCoveragePtg": 0.0,
+            "TechCoveragePtg": 0.0,
+            "IncludeSpare": false,
+            "SparePrice": 0.0,
+            "SpareRentPtg": 0.0,
+            "IncludeRepair": false,
+            "Usage": 0,
+            "EquipmentType": {
+              "ID": 0
+            },
+            "RepairComponentCost": 0.0,
+            "Repair3partyRatio": 0.0,
+            "Repair3partyCost": 0.0,
+            "RepairCostRatio": 0.0,
+            "MethodID": 0,
+            "AddDate": null,
+            "UpdateDate": null,
+            "Repairs": [],
+            "Components": [],
+            "Consumables": [],
+            "OID": "FJFL00000014",
+            "hasEdited": false,
+            "ID": 14
+          },
+          "SerialCode": "Test23",
+          "Price": 89.0,
+          "StartDate": "2020-09-01T00:00:00",
+          "EndDate": "2020-09-30T00:00:00",
+          "AddDate": "2020-09-15T13:09:29",
+          "UpdateDate": null,
+          "Name": "Manyee",
+          "Model": "RTG-574378",
+          "Manufacturer": "2222222222222",
+          "Status": {
+            "ID": 2,
+            "Name": "备用"
+          },
+          "OID": "BYJ00000022",
+          "LastestStocktakingDate": null,
+          "Comments": "",
+          "IsHidden": true,
+          "UsageStatus": "当前在用",
+          "ID": 22
+        }
+      }
+    ],
+    "Histories": [],
+    "ID": 1
+  },
+  "ResultCode": "00",
+  "ResultMessage": ""
+}}
+
+{
+"action": "2",//保存= 1,提交=2,通过=3 ,退回=4,
+"info": {
+"Comment": "",
+"CopyComment": "",
+"CreatedDate": "/Date(1600844230000)/",
+"FormatHistory": "",
+"ID": "8",
+"OID": "PD00000008",
+"ObjectType": {
+"ID": "4",
+"Name": "备用机"
+},
+"ScheduledDate": "2020-09-01",
+"StSpares": [
+{
+"AddDate": "/Date(1600666521000)/",
+"Comments": "",
+"EndDate": "/Date(1601395200000)/",
+"FujiClass2": {
+"ID": "11",
+"Name": "frank_有源超声"
+},
+"ID": "1",
+"InvSpare": {
+"ID": "25",
+"Name": ""
+},
+"IsInventory": "true",
+"LastestStocktakingDate": "/Date(-62135596800000)/",
+"Manufacturer": "厂家",
+"Model": "型号",
+"Name": "设备名称",
+"OID": "BYJ00000025",
+"OriginStatus": {
+"ID": "2",
+"Name": "备用"
+},
+"Price": "1000",
+"SerialCode": "XLHFT0921",
+"StartDate": "/Date(1598889600000)/",
+"Status": {
+"ID": "2",
+"Name": "备用"
+},
+"StocktakingID": "8",
+"UpdateDate": "/Date(-62135596800000)/",
+"UsageStatus": "当前在用"
+},
+{
+"AddDate": "/Date(1600844293000)/",
+"Comments": "1",
+"EndDate": "/Date(1601395200000)/",
+"FujiClass2": {
+"ID": "14",
+"Name": "测试"
+},
+"ID": "2",
+"InvSpare": {
+"ID": "0",
+"Name": ""
+},
+"IsInventory": "true",
+"LastestStocktakingDate": "/Date(-62135596800000)/",
+"Manufacturer": "Test厂家",
+"Model": "RTG-574312",
+"Name": "Manyee",
+"OID": "BYJ00000000",
+"OriginStatus": {
+"ID": "2",
+"Name": "备用"
+},
+"Price": "45",
+"SerialCode": "qt-111128723d",
+"StartDate": "/Date(1598889600000)/",
+"Status": {
+"ID": "2",
+"Name": "备用"
+},
+"StocktakingID": "8",
+"UpdateDate": "/Date(-62135596800000)/",
+"UsageStatus": "当前在用"
+}
+],
+"StartDate": "/Date(1600844231000)/",
+"Status": {
+"ID": "2",
+"Name": "待盘点"
+},
+"User": {
+"Address": "",
+"Comments": "",
+"CreatedDate": "/Date(-62135596800000)/",
+"Department": {
+"ID": "0",
+"Name": ""
+},
+"Email": "",
+"GroupID": "0",
+"HasOpenDispatch": "false",
+"ID": "38",
+"IsActive": "false",
+"LastLoginDate": "/Date(-62135596800000)/",
+"LoginID": "",
+"LoginPwd": "",
+"Mobile": "",
+"Name": "manyee",
+"OSName": "",
+"RegistrationID": "",
+"Role": {
+"ID": "0",
+"Name": ""
+},
+"SessionID": "",
+"VerifyStatus": {
+"ID": "0",
+"Name": ""
+},
+"WebSessionID": ""
+}
+},
+"noRecording": "false",//超管审批时可修改信息，通过时需要先提交一次，该flag控制是否产生审批流信息
+"userID": "{{userID}}",
+"sessionID": "{{sessionID}}"
+}

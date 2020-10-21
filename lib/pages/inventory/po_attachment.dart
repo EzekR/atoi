@@ -113,16 +113,17 @@ class _POAttachmentState extends State<POAttachment> {
 
   void initFuji() {
     cModel.getConstants();
-    List _list = cModel.FujiClass2.map((item) {
-      return {
-        'value': item['ID'],
-        'text': item['Name']
-      };
-    }).toList();
+    List _list = [];
     _list.add({
       'value': 0,
       'text': ''
     });
+    _list.addAll(cModel.FujiClass2.map((item) {
+      return {
+        'value': item['ID'],
+        'text': item['Name']
+      };
+    }).toList());
     setState(() {
       _fujiList = _list;
     });
@@ -288,6 +289,12 @@ class _POAttachmentState extends State<POAttachment> {
       )).then((result) => FocusScope.of(context).requestFocus(_focusComponentDesc));
       return 'fail';
     }
+    if (double.parse(componentPrice.text) > 9999999999.99) {
+      showDialog(context: context, builder: (context) => CupertinoAlertDialog(
+        title: new Text('标准单价需小于100亿'),
+      )).then((result) => FocusScope.of(context).requestFocus(_focusComponentDesc));
+      return 'fail';
+    }
     Map resp = await HttpRequest.request(
       '/PurchaseOrder/SaveComponent',
       method: HttpRequest.POST,
@@ -308,6 +315,9 @@ class _POAttachmentState extends State<POAttachment> {
     if (resp['ResultCode'] == '00') {
       return 'ok';
     } else {
+      showDialog(context: context, builder: (context) => CupertinoAlertDialog(
+        title: new Text(resp['ResultMessage']),
+      )).then((result) => FocusScope.of(context).requestFocus(_focusComponentName));
       return 'fail';
     }
   }
@@ -325,9 +335,9 @@ class _POAttachmentState extends State<POAttachment> {
             padding: EdgeInsets.fromLTRB(8, 0, 8, 0),
             child: Column(
               children: <Widget>[
-                BuildWidget.buildCardRow('富士二类', _fujiClass2Name??''),
-                BuildWidget.buildCardInput('简称', componentName, required: true, focus: _focusComponentName),
-                BuildWidget.buildCardInput('描述', componentDesc, required: true, focus: _focusComponentDesc),
+                BuildWidget.buildCardRow('富士II类', _fujiClass2Name??''),
+                BuildWidget.buildCardInput('简称', componentName, required: true, maxLength: 50, focus: _focusComponentName),
+                BuildWidget.buildCardInput('描述', componentDesc, required: true, maxLength: 200, focus: _focusComponentDesc),
                 new Row(
                   children: <Widget>[
                     new Expanded(
@@ -390,7 +400,7 @@ class _POAttachmentState extends State<POAttachment> {
                     ),
                   ],
                 ),
-                BuildWidget.buildCardInput('标准单价', componentPrice),
+                BuildWidget.buildCardInput('标准单价', componentPrice, maxLength: 13),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: <Widget>[
@@ -450,7 +460,7 @@ class _POAttachmentState extends State<POAttachment> {
     }
     if (widget.attachType == AttachmentType.COMPONENT && double.parse(price.text) > 9999999999.99 ) {
       showDialog(context: context, builder: (context) => CupertinoAlertDialog(
-        title: new Text('零件单价不可高于1亿'),
+        title: new Text('零件单价需小于100亿'),
       )).then((result) => FocusScope.of(context).requestFocus(_focusComponent[3]));
       return;
     }
@@ -485,7 +495,7 @@ class _POAttachmentState extends State<POAttachment> {
 
       if (double.parse(quantity.text) > 9999999999.99) {
         showDialog(context: context, builder: (context) => CupertinoAlertDialog(
-          title: new Text('数量不可大于1亿'),
+          title: new Text('数量需小于100亿'),
         )).then((result) => FocusScope.of(context).requestFocus(_focusComponent[4]));
         return;
       }

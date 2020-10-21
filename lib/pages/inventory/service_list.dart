@@ -349,7 +349,7 @@ class _ServiceListState extends State<ServiceList> {
                 BuildWidget.buildCardRow('结束日期', item['EndDate'].split('T')[0]),
                 BuildWidget.buildCardRow('金额', item['Price'].toString()),
                 BuildWidget.buildCardRow('剩余服务次数', item['AvaibleTimes'].toString()),
-                BuildWidget.buildCardRow('采购单号', item['Purchase']['ID']==0?'':'${item['Purchase']['Name']}${item['Purchase']['ID']}'),
+                BuildWidget.buildCardRow('采购单号', item['Purchase']['ID']==0?'':'${item['Purchase']['Name']}'),
                 BuildWidget.buildCardRow('状态', item['Status']),
                 //BuildWidget.buildCardRow('状态', item['IsActive']?'启用':'停用'),
               ],

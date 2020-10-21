@@ -15,9 +15,10 @@ import 'package:date_format/date_format.dart';
 
 /// 耗材详情页
 class ServiceDetail extends StatefulWidget {
-  ServiceDetail({Key key, this.service, this.editable}) : super(key: key);
+  ServiceDetail({Key key, this.service, this.editable, this.isStock}) : super(key: key);
   final Map service;
   final bool editable;
+  final bool isStock;
   _ServiceDetailState createState() => new _ServiceDetailState();
 }
 
@@ -34,6 +35,8 @@ class _ServiceDetailState extends State<ServiceDetail> {
   int _fujiClass2 = 0;
   String _fujiClass2Name;
   List _fujiList = [];
+  String purchaseNo = "";
+  ScrollController scrollController = new ScrollController();
 
   ConstantsModel cModel;
 
@@ -48,16 +51,17 @@ class _ServiceDetailState extends State<ServiceDetail> {
 
   void initFuji() {
     cModel.getConstants();
-    List _list = cModel.FujiClass2.map((item) {
-      return {
-        'value': item['ID'],
-        'text': item['Name']
-      };
-    }).toList();
+    List _list = [];
     _list.add({
       'value': 0,
       'text': ''
     });
+    _list.addAll(cModel.FujiClass2.map((item) {
+      return {
+        'value': item['ID'],
+        'text': item['Name']
+      };
+    }).toList());
     setState(() {
       _fujiList = _list;
     });
@@ -85,8 +89,10 @@ class _ServiceDetailState extends State<ServiceDetail> {
         supplier = _data['Supplier'];
         startDate = _data['StartDate'].toString().split('T')[0];
         endDate = _data['EndDate'].toString().split('T')[0];
+        purchaseDate = _data['PurchaseDate'].toString().split('T')[0];
         _fujiClass2 = _data['FujiClass2']['ID'];
         _fujiClass2Name = _data['FujiClass2']['Name'];
+        purchaseNo = _data['Purchase']['ID']==0?"":_data['Purchase']['Name'];
       });
     }
   }
@@ -102,7 +108,7 @@ class _ServiceDetailState extends State<ServiceDetail> {
     if (_fujiClass2 == 0) {
       showDialog(context: context, builder: (context) => CupertinoAlertDialog(
         title: new Text('富士II类不可为空'),
-      )).then((result) => FocusScope.of(context).requestFocus(_focusComponent[1]));
+      )).then((result) => scrollController.jumpTo(0.0));
       return;
     }
     if (serviceName.text.isEmpty) {
@@ -119,7 +125,7 @@ class _ServiceDetailState extends State<ServiceDetail> {
     }
     if (double.parse(price.text) > 9999999999.99) {
       showDialog(context: context, builder: (context) => CupertinoAlertDialog(
-        title: new Text('金额不可大于1亿'),
+        title: new Text('金额需小于100亿'),
       )).then((result) => FocusScope.of(context).requestFocus(_focusComponent[2]));
       return;
     }
@@ -153,6 +159,12 @@ class _ServiceDetailState extends State<ServiceDetail> {
       )).then((result) => FocusScope.of(context).requestFocus(_focusComponent[9]));
       return;
     }
+    if (purchaseDate == 'YYYY-MM-DD') {
+      showDialog(context: context, builder: (context) => CupertinoAlertDialog(
+        title: new Text('购入日期不可为空'),
+      )).then((result) => FocusScope.of(context).requestFocus(_focusComponent[9]));
+      return;
+    }
     DateTime _start = DateTime.tryParse(startDate);
     DateTime _end = DateTime.tryParse(endDate);
     if (_end.isBefore(_start)) {
@@ -178,12 +190,16 @@ class _ServiceDetailState extends State<ServiceDetail> {
       'AvaibleTimes': availableTimes.text,
       'StartDate': startDate,
       'EndDate': endDate,
-      'PurchaseDate': endDate,
+      'PurchaseDate': purchaseDate,
       'Comments': comments.text,
       'Supplier': {
         'ID': supplier['ID']
       }
     };
+    if (widget.isStock) {
+      Navigator.of(context).pop(jsonEncode(_info));
+      return;
+    }
     if (widget.service != null) {
       _info['ID'] = widget.service['ID'];
     }
@@ -324,6 +340,7 @@ class _ServiceDetailState extends State<ServiceDetail> {
               padding: EdgeInsets.symmetric(vertical: 5.0),
               child: new Card(
                 child: new ListView(
+                  controller: scrollController,
                   children: <Widget>[
                     new ExpansionPanelList(
                       animationDuration: Duration(milliseconds: 200),
@@ -356,7 +373,7 @@ class _ServiceDetailState extends State<ServiceDetail> {
                             child: new Column(
                               children: <Widget>[
                                 BuildWidget.buildRow('系统编号', oid),
-                                widget.editable?buildDropdown('富士II类', _fujiClass2, _fujiList, changeFuji, required: true):BuildWidget.buildRow('富士二类', _fujiClass2Name??''),
+                                widget.editable?buildDropdown('富士II类', _fujiClass2, _fujiList, changeFuji, required: true):BuildWidget.buildRow('富士II类', _fujiClass2Name??''),
                                 widget.editable?BuildWidget.buildInput('服务名称', serviceName, maxLength: 50, focusNode: _focusComponent[1], required: true):BuildWidget.buildRow('服务名称', serviceName.text),
                                 widget.editable?new Padding(
                                   padding: EdgeInsets.symmetric(vertical: 5.0),
@@ -421,7 +438,7 @@ class _ServiceDetailState extends State<ServiceDetail> {
                                     ],
                                   ),
                                 ):BuildWidget.buildRow('供应商', supplier==null?'':supplier['Name']),
-                                widget.editable?BuildWidget.buildInput('金额', price, maxLength: 13, inputType: TextInputType.numberWithOptions(decimal: true), focusNode: _focusComponent[2], required: true):BuildWidget.buildRow('批次号', price.text),
+                                widget.editable?BuildWidget.buildInput('金额', price, maxLength: 13, inputType: TextInputType.numberWithOptions(decimal: true), focusNode: _focusComponent[2], required: true):BuildWidget.buildRow('金额', price.text),
                                 widget.editable?new Padding(
                                   padding: EdgeInsets.symmetric(vertical: 5.0),
                                   child: new Row(
@@ -583,8 +600,8 @@ class _ServiceDetailState extends State<ServiceDetail> {
                                   ),
                                 ):BuildWidget.buildRow('结束日期', endDate),
                                 widget.editable?BuildWidget.buildInput('服务次数', totalTimes, maxLength: 9, inputType: TextInputType.number, focusNode: _focusComponent[3], required: true):BuildWidget.buildRow('服务次数', totalTimes.text),
-                                widget.editable?BuildWidget.buildInput('剩余服务次数', availableTimes, maxLength: 9, inputType: TextInputType.number, focusNode: _focusComponent[4], required: true):BuildWidget.buildRow('服务剩余次数', availableTimes.text),
-                                widget.editable?new Padding(
+                                widget.editable?BuildWidget.buildInput('剩余服务次数', availableTimes, maxLength: 9, inputType: TextInputType.number, focusNode: _focusComponent[4], required: true):BuildWidget.buildRow('剩余服务次数', availableTimes.text),
+                                widget.editable&&widget.service==null?new Padding(
                                   padding: EdgeInsets.symmetric(vertical: 5.0),
                                   child: new Row(
                                     children: <Widget>[
@@ -664,6 +681,7 @@ class _ServiceDetailState extends State<ServiceDetail> {
                                     ],
                                   ),
                                 ):BuildWidget.buildRow('购入日期', purchaseDate),
+                                widget.service!=null?BuildWidget.buildRow('采购单号', purchaseNo):Container(),
                                 widget.editable?BuildWidget.buildInput('备注', comments, maxLength: 500, focusNode: _focusComponent[5]):BuildWidget.buildRow('备注', comments.text),
                                 new Divider(),
                                 new Padding(

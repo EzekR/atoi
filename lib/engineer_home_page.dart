@@ -16,6 +16,7 @@ import 'package:atoi/pages/reports/report_list.dart';
 import 'package:atoi/pages/equipments/vendors_list.dart';
 import 'package:atoi/pages/equipments/contract_list.dart';
 import 'package:atoi/utils/event_bus.dart';
+import 'package:atoi/pages/inventory/stocktaking_list.dart';
 
 /// 管理员首页类
 class EngineerHomePage extends StatefulWidget {
@@ -577,7 +578,7 @@ class _EngineerHomePageState extends State<EngineerHomePage>
                       },
                     ),
                     AnimatedContainer(
-                      height: showEquip?120.0:0.0,
+                      height: showEquip?160.0:0.0,
                       duration: Duration(milliseconds: 200),
                       child: Column(
                         children: <Widget>[
@@ -654,6 +655,34 @@ class _EngineerHomePageState extends State<EngineerHomePage>
                                     width: 10.0,
                                   ),
                                   Text('供应商',
+                                    style: TextStyle(
+                                        fontSize: 14.0,
+                                        color: Colors.black54
+                                    ),
+                                  )
+                                ],
+                              ),
+                            ),
+                          ),
+                          Container(
+                            height: 40.0,
+                            child: FlatButton(
+                              onPressed: () {
+                                Navigator.of(context).push(new MaterialPageRoute(builder: (_) {
+                                  return new StocktakingList();
+                                }));
+                              },
+                              child: Row(
+                                children: <Widget>[
+                                  SizedBox(
+                                    width: 60.0,
+                                  ),
+                                  Icon(Icons.playlist_add_check, color: Colors.grey, size: 16.0,),
+                                  SizedBox(
+                                    width: 10.0,
+                                  ),
+                                  Text(
+                                    '库存盘点',
                                     style: TextStyle(
                                         fontSize: 14.0,
                                         color: Colors.black54

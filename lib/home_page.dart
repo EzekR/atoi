@@ -1,3 +1,4 @@
+import 'package:atoi/pages/inventory/stocktaking_list.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:atoi/pages/manager/manager_menu.dart';
@@ -1377,7 +1378,7 @@ class _HomePageState extends State<HomePage>
                             child: FlatButton(
                               onPressed: () {
                                 Navigator.of(context).push(new MaterialPageRoute(builder: (_) {
-                                  return new ReportList();
+                                  return new StocktakingList();
                                 }));
                               },
                               child: Row(

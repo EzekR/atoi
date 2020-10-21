@@ -370,7 +370,7 @@ class _ConsumableListState extends State<ConsumableList> {
                 BuildWidget.buildCardRow('富士II类', item['Consumable']['FujiClass2']['Name']),
                 BuildWidget.buildCardRow('单价（元）', item['Price'].toString()),
                 BuildWidget.buildCardRow('购入日期', item['PurchaseDate'].split('T')[0]),
-                BuildWidget.buildCardRow('采购单号', item['Purchase']['ID']==0?'':'${item['Purchase']['Name']}${item['Purchase']['ID']}'),
+                BuildWidget.buildCardRow('采购单号', item['Purchase']['ID']==0?'':'${item['Purchase']['Name']}'),
                 BuildWidget.buildCardRow('可用数量', item['AvaibleQty'].toString()),
                 //BuildWidget.buildCardRow('状态', item['IsActive']?'启用':'停用'),
               ],
@@ -407,7 +407,7 @@ class _ConsumableListState extends State<ConsumableList> {
               ):new RaisedButton(
                 onPressed: (){
                   Navigator.of(context).push(new MaterialPageRoute(builder: (_) {
-                    return new ConsumableDetail(consumable: item, editable: _editable,);
+                    return new ConsumableDetail(consumable: item, editable: _editable, isStock: false,);
                   })).then((result) {
                     setState(() {
                       _loading = true;
@@ -512,7 +512,7 @@ class _ConsumableListState extends State<ConsumableList> {
       floatingActionButton: role==3?Container():FloatingActionButton(
         onPressed: () {
           Navigator.of(context).push(new MaterialPageRoute(builder: (_) {
-            return new ConsumableDetail(editable: true,);
+            return new ConsumableDetail(editable: true, isStock: false,);
           })).then((result) {
             setState(() {
               offset = 0;

@@ -15,9 +15,10 @@ import 'package:date_format/date_format.dart';
 
 /// 耗材详情页
 class ConsumableDetail extends StatefulWidget {
-  ConsumableDetail({Key key, this.consumable, this.editable}) : super(key: key);
+  ConsumableDetail({Key key, this.consumable, this.editable, this.isStock}) : super(key: key);
   final Map consumable;
   final bool editable;
+  final bool isStock;
   _ConsumableDetailState createState() => new _ConsumableDetailState();
 }
 
@@ -32,6 +33,7 @@ class _ConsumableDetailState extends State<ConsumableDetail> {
   int _fujiClass2 = 0;
   String _fujiClass2Name;
   List _fujiList = [];
+  String purchaseNumber = '';
 
   int _consumable;
   String _consumableName;
@@ -54,16 +56,17 @@ class _ConsumableDetailState extends State<ConsumableDetail> {
 
   void initFuji() {
     cModel.getConstants();
-    List _list = cModel.FujiClass2.map((item) {
-      return {
-        'value': item['ID'],
-        'text': item['Name']
-      };
-    }).toList();
+    List _list = [];
     _list.add({
       'value': 0,
       'text': ''
     });
+    _list.addAll(cModel.FujiClass2.map((item) {
+      return {
+        'value': item['ID'],
+        'text': item['Name']
+      };
+    }).toList());
     setState(() {
       _fujiList = _list;
     });
@@ -121,11 +124,12 @@ class _ConsumableDetailState extends State<ConsumableDetail> {
         spec.text = _data['Specification'];
         model.text = _data['Model'];
         price.text = _data['Price'].toString();
-        quantity.text = _data['Qty'].toStringAsFixed(0);
+        quantity.text = _data['ReceiveQty'].toStringAsFixed(0);
         comments.text = _data['Comments'];
         availableQty.text = _data['AvaibleQty'].toStringAsFixed(0);
         purchaseDate = _data['PurchaseDate'].toString().split('T')[0];
         supplier = _data['Supplier'];
+        purchaseNumber = _data['Purchase']['ID']==0?'':_data['Purchase']['Name'];
       });
     }
   }
@@ -176,7 +180,7 @@ class _ConsumableDetailState extends State<ConsumableDetail> {
     }
     if (double.parse(price.text) > 9999999999.99) {
       showDialog(context: context, builder: (context) => CupertinoAlertDialog(
-        title: new Text('采购金额需小于1亿'),
+        title: new Text('采购金额需小于100亿'),
       )).then((result) => FocusScope.of(context).requestFocus(_focusComponent[4]));
       return;
     }
@@ -188,7 +192,7 @@ class _ConsumableDetailState extends State<ConsumableDetail> {
     }
     if (double.parse(quantity.text) > 9999999999.99) {
       showDialog(context: context, builder: (context) => CupertinoAlertDialog(
-        title: new Text('入库数量不可超过1亿'),
+        title: new Text('入库数量需小于100亿'),
       )).then((result) => FocusScope.of(context).requestFocus(_focusComponent[5]));
       return;
     }
@@ -201,7 +205,7 @@ class _ConsumableDetailState extends State<ConsumableDetail> {
       }
       if (double.parse(availableQty.text) > 9999999999.99) {
         showDialog(context: context, builder: (context) => CupertinoAlertDialog(
-          title: new Text('可用数量不可超过1亿'),
+          title: new Text('可用数量需小于100亿'),
         )).then((result) => FocusScope.of(context).requestFocus(_focusComponent[5]));
         return;
       }
@@ -242,6 +246,10 @@ class _ConsumableDetailState extends State<ConsumableDetail> {
       "userID": prefs.getInt('userID'),
       "info": _info
     };
+    if (widget.isStock) {
+      Navigator.of(context).pop(jsonEncode(_info));
+      return;
+    }
     Map resp;
     if (widget.consumable !=null && widget.editable) {
       if (double.parse(availableQty.text) > double.parse(quantity.text)) {
@@ -523,6 +531,7 @@ class _ConsumableDetailState extends State<ConsumableDetail> {
                                 widget.editable?BuildWidget.buildInput('单价(元)', price, maxLength: 13, inputType: TextInputType.number, focusNode: _focusComponent[4], required: true):BuildWidget.buildRow('单价', price.text),
                                 widget.editable&&widget.consumable==null?BuildWidget.buildInput('入库数量', quantity, maxLength: 13, inputType: TextInputType.number, focusNode: _focusComponent[5], required: true):BuildWidget.buildRow('入库数量', quantity.text),
                                 widget.editable&&widget.consumable!=null?BuildWidget.buildInput('可用数量', availableQty, maxLength: 13, inputType: TextInputType.number, focusNode: _focusComponent[6], required: true):Container(),
+                                !widget.editable?BuildWidget.buildRow("可用数量", availableQty.text):Container(),
                                 widget.editable&&widget.consumable==null?new Padding(
                                   padding: EdgeInsets.symmetric(vertical: 5.0),
                                   child: new Row(
@@ -603,6 +612,7 @@ class _ConsumableDetailState extends State<ConsumableDetail> {
                                     ],
                                   ),
                                 ):BuildWidget.buildRow('购入日期', purchaseDate),
+                                widget.consumable!=null?BuildWidget.buildRow('采购单号', purchaseNumber):Container(),
                                 widget.editable?BuildWidget.buildInput('备注', comments, maxLength: 500, focusNode: _focusComponent[7]):BuildWidget.buildRow('备注', comments.text),
                                 new Divider(),
                                 new Padding(
