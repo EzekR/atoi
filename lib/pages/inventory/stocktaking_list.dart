@@ -690,9 +690,3 @@ class _StocktakingListState extends State<StocktakingList> {
     );
   }
 }
-
-enum ListType {
-  COMPONENT,
-  CONSUMABLE,
-}
-

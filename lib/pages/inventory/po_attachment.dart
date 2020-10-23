@@ -289,10 +289,10 @@ class _POAttachmentState extends State<POAttachment> {
       )).then((result) => FocusScope.of(context).requestFocus(_focusComponentDesc));
       return 'fail';
     }
-    if (double.parse(componentPrice.text) > 9999999999.99) {
+    if (componentPrice.text.isNotEmpty&&double.parse(componentPrice.text) > 9999999999.99) {
       showDialog(context: context, builder: (context) => CupertinoAlertDialog(
         title: new Text('标准单价需小于100亿'),
-      )).then((result) => FocusScope.of(context).requestFocus(_focusComponentDesc));
+      )).then((result) => FocusScope.of(context).requestFocus(_focusComponentPrice));
       return 'fail';
     }
     Map resp = await HttpRequest.request(
@@ -324,6 +324,7 @@ class _POAttachmentState extends State<POAttachment> {
 
   FocusNode _focusComponentName = new FocusNode();
   FocusNode _focusComponentDesc = new FocusNode();
+  FocusNode _focusComponentPrice = new FocusNode();
 
   void addComponent() {
     initComponentStatus();
@@ -400,7 +401,7 @@ class _POAttachmentState extends State<POAttachment> {
                     ),
                   ],
                 ),
-                BuildWidget.buildCardInput('标准单价', componentPrice, maxLength: 13),
+                BuildWidget.buildCardInput('标准单价', componentPrice, maxLength: 13, focus: _focusComponentPrice, inputType: TextInputType.numberWithOptions(decimal: true)),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: <Widget>[
@@ -452,10 +453,16 @@ class _POAttachmentState extends State<POAttachment> {
   }
 
   void saveAttachmentToPO() async {
-    if (widget.attachType == AttachmentType.COMPONENT && _equipment == null) {
+    if (widget.attachType == AttachmentType.COMPONENT && _component == null) {
       showDialog(context: context, builder: (context) => CupertinoAlertDialog(
         title: new Text('设备不可为空'),
       )).then((result) => scrollController.jumpTo(0.0));
+      return;
+    }
+    if (widget.attachType == AttachmentType.COMPONENT && price.text.isEmpty) {
+      showDialog(context: context, builder: (context) => CupertinoAlertDialog(
+        title: new Text('单价不可为空'),
+      )).then((result) => FocusScope.of(context).requestFocus(_focusComponent[3]));
       return;
     }
     if (widget.attachType == AttachmentType.COMPONENT && double.parse(price.text) > 9999999999.99 ) {
@@ -502,7 +509,7 @@ class _POAttachmentState extends State<POAttachment> {
     }
 
     if (widget.attachType == AttachmentType.SERVICE) {
-      if (_fujiClass2 == null) {
+      if (_fujiClass2 == 0) {
         showDialog(context: context, builder: (context) => CupertinoAlertDialog(
           title: new Text('富士II类不可为空'),
         )).then((result) => scrollController.jumpTo(0.0));
@@ -529,14 +536,14 @@ class _POAttachmentState extends State<POAttachment> {
     }
     if (price.text.isEmpty) {
       showDialog(context: context, builder: (context) => CupertinoAlertDialog(
-        title: new Text('单价不可为空'),
+        title: new Text(widget.attachType==AttachmentType.SERVICE?'金额不可为空':'单价不可为空'),
       )).then((result) => FocusScope.of(context).requestFocus(_focusComponent[3]));
       return;
     }
-    Map _component;
+    Map _componentTmp;
     switch (widget.attachType) {
       case AttachmentType.COMPONENT:
-        _component = {
+        _componentTmp = {
           'Component': _selectedComponent,
           'Equipment': _equipment,
           'Specification': spec.text,
@@ -546,7 +553,7 @@ class _POAttachmentState extends State<POAttachment> {
         };
         break;
       case AttachmentType.CONSUMABLE:
-        _component = {
+        _componentTmp = {
           'Consumable': _consumableDetail,
           'Specification': spec.text,
           'Model': model.text,
@@ -556,7 +563,7 @@ class _POAttachmentState extends State<POAttachment> {
         break;
       case AttachmentType.SERVICE:
         Map _selectedFuji = cModel.FujiClass2.firstWhere((item) => item['ID'] == _fujiClass2);
-        _component = {
+        _componentTmp = {
           'FujiClass2': _selectedFuji,
           'Name': serviceName.text,
           'TotalTimes': serviceTimes.text,
@@ -566,7 +573,7 @@ class _POAttachmentState extends State<POAttachment> {
         };
         break;
     }
-    Navigator.of(context).pop(jsonEncode(_component));
+    Navigator.of(context).pop(jsonEncode(_componentTmp));
   }
 
   Padding buildRow(String labelText, String defaultText) {
@@ -740,8 +747,8 @@ class _POAttachmentState extends State<POAttachment> {
           ):BuildWidget.buildRow('关联设备', _equipment==null?'':_equipment['Name']),
           widget.editable?BuildWidget.buildInput('规格', spec, maxLength: 20, focusNode: _focusComponent[1], required: true):BuildWidget.buildRow('规格', spec.text),
           widget.editable?BuildWidget.buildInput('型号', model, focusNode: _focusComponent[2], required: true):BuildWidget.buildRow('型号', model.text),
-          widget.editable?BuildWidget.buildInput('单价', price, maxLength: 20, focusNode: _focusComponent[3], required: true):BuildWidget.buildRow('单价', price.text),
-          widget.editable?BuildWidget.buildInput('数量', quantity, inputType: TextInputType.number, focusNode: _focusComponent[4], required: true):BuildWidget.buildRow('数量', quantity.text),
+          widget.editable?BuildWidget.buildInput('单价（元）', price, maxLength: 13, focusNode: _focusComponent[3], required: true, inputType: TextInputType.numberWithOptions()):BuildWidget.buildRow('单价(元)', price.text),
+          widget.editable?BuildWidget.buildInput('数量', quantity, maxLength: 13, inputType: TextInputType.number, focusNode: _focusComponent[4], required: true):BuildWidget.buildRow('数量', quantity.text),
         ]);
         break;
       case AttachmentType.SERVICE:
@@ -809,7 +816,7 @@ class _POAttachmentState extends State<POAttachment> {
             ],
           ):Container(),
           widget.editable?BuildWidget.buildInput('服务名称', serviceName, maxLength: 20, focusNode: _focusComponent[1], required: true):BuildWidget.buildRow('服务名称', serviceName.text),
-          widget.editable?BuildWidget.buildInput('金额', price, maxLength: 20, focusNode: _focusComponent[2], required: true):BuildWidget.buildRow('金额', price.text),
+          widget.editable?BuildWidget.buildInput('金额', price, maxLength: 13, focusNode: _focusComponent[2], required: true, inputType: TextInputType.numberWithOptions()):BuildWidget.buildRow('金额', price.text),
           widget.editable?new Padding(
             padding: EdgeInsets.symmetric(vertical: 5.0),
             child: new Row(
@@ -970,7 +977,7 @@ class _POAttachmentState extends State<POAttachment> {
               ],
             ),
           ):BuildWidget.buildRow('结束时间', endDate),
-          widget.editable?BuildWidget.buildInput('服务次数', serviceTimes, maxLength: 20, focusNode: _focusComponent[5], required: true):BuildWidget.buildRow('服务次数', serviceTimes.text),
+          widget.editable?BuildWidget.buildInput('服务次数', serviceTimes, maxLength: 9, focusNode: _focusComponent[5], required: true, inputType: TextInputType.numberWithOptions(decimal: false)):BuildWidget.buildRow('服务次数', serviceTimes.text),
         ]);
         break;
     }
@@ -982,7 +989,7 @@ class _POAttachmentState extends State<POAttachment> {
       builder: (context, child, mainModel) {
         return new Scaffold(
             appBar: new AppBar(
-              title: widget.editable?Text(widget.po==null?'新增$title':'修改$title'):Text('查看$title'),
+              title: widget.editable?Text(widget.po==null?'添加$title':'修改$title'):Text('查看$title'),
               elevation: 0.7,
               flexibleSpace: Container(
                 decoration: BoxDecoration(

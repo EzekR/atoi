@@ -1,0 +1,64 @@
+{
+  "Data": [
+    {
+      "Source": {
+        "ID": 0
+      },
+      "RequestType": {
+        "ID": 0
+      },
+      "FaultDesc": "Test",
+      "Status": {
+        "ID": 1,
+        "Name": "新建"
+      },
+      "RequestDate": "2019-07-16T11:37:12.303",
+      "DistributeDate": null,
+      "ResponseDate": null,
+      "CloseDate": null,
+      "IsRecall": false,
+      "SelectiveDate": null,
+      "Equipments": [
+        {
+          "Name": "设备7",
+          "SerialCode": "7416",
+          "ResponseDate": 0,
+          "FixedAsset": false,
+          "DepreciationYears": 0,
+          "ValidityStartDate": null,
+          "ValidityEndDate": null,
+          "PurchaseAmount": 0,
+          "PurchaseDate": null,
+          "Department": {
+            "ID": 1,
+            "Name": "内科"
+          },
+          "InstalStartDate": null,
+          "InstalEndDate": null,
+          "Accepted": false,
+          "AcceptanceDate": null,
+          "MaintenancePeriod": 0,
+          "LastMaintenanceDate": null,
+          "PatrolPeriod": 0,
+          "LastPatrolDate": null,
+          "CorrectionPeriod": 0,
+          "LastCorrectionDate": null,
+          "MandatoryTestDate": null,
+          "RecallFlag": false,
+          "RecallDate": null,
+          "CreateDate": null,
+          "UpdateDate": null,
+          "OID": "ZC00000007",
+          "ID": 7
+        }
+      ],
+      "SourceType": "-",
+      "EquipmentOID": "ZC00000007",
+      "EquipmentName": "设备7",
+      "OID": "C00000204",
+      "ID": 204
+    }
+  ],
+  "ResultCode": "00",
+  "ResultMessage": ""
+}

@@ -187,7 +187,7 @@ class _ComponentDetailState extends State<ComponentDetail> {
     }
     if (double.parse(price.text) > 9999999999.99) {
       showDialog(context: context, builder: (context) => CupertinoAlertDialog(
-        title: new Text('采购金额需小于100亿'),
+        title: new Text('单价需小于100亿'),
       )).then((result) => FocusScope.of(context).requestFocus(_focusComponent[3]));
       return;
     }

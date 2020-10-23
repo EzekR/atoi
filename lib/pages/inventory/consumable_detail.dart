@@ -180,7 +180,7 @@ class _ConsumableDetailState extends State<ConsumableDetail> {
     }
     if (double.parse(price.text) > 9999999999.99) {
       showDialog(context: context, builder: (context) => CupertinoAlertDialog(
-        title: new Text('采购金额需小于100亿'),
+        title: new Text('单价需小于100亿'),
       )).then((result) => FocusScope.of(context).requestFocus(_focusComponent[4]));
       return;
     }
@@ -291,6 +291,25 @@ class _ConsumableDetailState extends State<ConsumableDetail> {
             ),
           ],
         ));
+      } else {
+        resp = await HttpRequest.request(
+            '/InvConsumable/SaveConsumable',
+            method: HttpRequest.POST,
+            data: _data
+        );
+        if (resp['ResultCode'] == '00') {
+          showDialog(context: context, builder: (context) {
+            return CupertinoAlertDialog(
+              title: new Text('保存成功'),
+            );
+          }).then((result) => Navigator.of(context).pop());
+        } else {
+          showDialog(context: context, builder: (context) {
+            return CupertinoAlertDialog(
+              title: new Text(resp['ResultMessage']),
+            );
+          });
+        }
       }
     } else {
       resp = await HttpRequest.request(
@@ -298,19 +317,19 @@ class _ConsumableDetailState extends State<ConsumableDetail> {
           method: HttpRequest.POST,
           data: _data
       );
-    }
-    if (resp['ResultCode'] == '00') {
-      showDialog(context: context, builder: (context) {
-        return CupertinoAlertDialog(
-          title: new Text('保存成功'),
-        );
-      }).then((result) => Navigator.of(context).pop());
-    } else {
-      showDialog(context: context, builder: (context) {
-        return CupertinoAlertDialog(
-          title: new Text(resp['ResultMessage']),
-        );
-      });
+      if (resp['ResultCode'] == '00') {
+        showDialog(context: context, builder: (context) {
+          return CupertinoAlertDialog(
+            title: new Text('保存成功'),
+          );
+        }).then((result) => Navigator.of(context).pop());
+      } else {
+        showDialog(context: context, builder: (context) {
+          return CupertinoAlertDialog(
+            title: new Text(resp['ResultMessage']),
+          );
+        });
+      }
     }
   }
 

@@ -203,7 +203,7 @@ class _SpareListState extends State<SpareList> {
                     Row(
                       children: <Widget>[
                         SizedBox(width: 16.0,),
-                        Text('状态', style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.w600),)
+                        Text('使用状态', style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.w600),)
                       ],
                     ),
                     SizedBox(height: 6.0,),
@@ -249,7 +249,7 @@ class _SpareListState extends State<SpareList> {
                     Row(
                       children: <Widget>[
                         SizedBox(width: 16.0,),
-                        Text('使用状态', style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.w600),)
+                        Text('状态', style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.w600),)
                       ],
                     ),
                     SizedBox(height: 6.0,),

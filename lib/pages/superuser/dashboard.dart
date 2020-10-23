@@ -126,7 +126,7 @@ class _DashboardState extends State<Dashboard> {
       if (_income == 0.0) {
         _net = 0.0;
       }
-      return new IncomeData(index/1.0, _income, _net==0.0?(0.0-_expense):(0.0-_income), _net);
+      return new IncomeData(index/1.0, _income, _net==0.0?(0.0-_expense):(0.0-_income), _net, index.toString());
     }).toList();
     setState(() {
       incomeData = incomeData;
@@ -157,7 +157,7 @@ class _DashboardState extends State<Dashboard> {
       if (_income == 0.0) {
         _net = 0.0;
       }
-      return new IncomeData(index/1.0, _income, _net==0.0?(0.0-_expense):(0.0-_income), _net);
+      return new IncomeData(index/1.0, _income, _net==0.0?(0.0-_expense):(0.0-_income), _net, index.toString());
     }).toList();
     setState(() {
       incomeData = incomeData;
@@ -222,12 +222,16 @@ class _DashboardState extends State<Dashboard> {
         expense_last += item['LastExpenses'];
       });
       departmentAll['income_rate'] = (departmentAll['income']-income_last)/income_last*100;
-      departmentAll['expense_rate'] = (departmentAll['expense']-expense_last)/expense_last*100;
+      departmentAll['expense_rate'] = expense_last==0.0?0.0:(departmentAll['expense']-expense_last)/expense_last*100;
       incomeAll = departmentAll;
       setState(() {
         incomeData = incomeData;
       });
     }
+  }
+
+  double abs(double num) {
+    return num>=0?num:(num*-1.0);
   }
 
   void getEquipmentsIncome(int departmentId) async {
@@ -1434,7 +1438,7 @@ class _DashboardState extends State<Dashboard> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: <Widget>[
                           Text(
-                            '${incomeAll['expense_rate']>=0?'+':''} ${(incomeAll['expense_rate']).toStringAsFixed(1)}%',
+                            '${incomeAll['expense_rate']>=0?'':''} ${(incomeAll['expense_rate']).toStringAsFixed(1)}%',
                             style: TextStyle(
                                 color: incomeAll['expense_rate']>=0?Color(0xff33B850):Color(0xffD64040),
                                 fontSize: 15.0,
@@ -1802,7 +1806,7 @@ class _DashboardState extends State<Dashboard> {
                   child: Padding(
                     padding: EdgeInsets.all(8.0),
                     child: requestList.length==0?Text(
-                      '暂无报修',
+                      '暂无报修\n参报数量：0',
                       style: TextStyle(
                         color: Colors.white
                       ),
@@ -2374,7 +2378,7 @@ class _DashboardState extends State<Dashboard> {
                               kpi==null?'':(kpi['BootRate']['Present']*100).toStringAsFixed(1),
                               style: TextStyle(
                                   color: Color(0xffD64040),
-                                  fontSize: 30,
+                                  fontSize: 20,
                                   fontWeight: FontWeight.w600
                               ),
                             ),
@@ -2720,7 +2724,7 @@ class _DashboardState extends State<Dashboard> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: <Widget>[
                           Text(
-                            CommonUtil.CurrencyForm(incomeAll['income'], times: 0),
+                            CommonUtil.CurrencyForm(incomeAll['income'], digits: 0),
                             style: TextStyle(
                                 color: Color(0xff1e1e1e),
                                 fontSize: 15.0,
@@ -2731,7 +2735,7 @@ class _DashboardState extends State<Dashboard> {
                             height: 4.0,
                           ),
                           Text(
-                            '总收入(元)',
+                            '总收入(万元)',
                             style: TextStyle(
                                 color: Color(0xff666666),
                                 fontSize: 10.0
@@ -2776,7 +2780,7 @@ class _DashboardState extends State<Dashboard> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: <Widget>[
                           Text(
-                            CommonUtil.CurrencyForm(incomeAll['expense'], times: 1),
+                            CommonUtil.CurrencyForm(incomeAll['expense'], digits: 0),
                             style: TextStyle(
                                 color: Color(0xff1e1e1e),
                                 fontSize: 15.0,
@@ -2787,7 +2791,7 @@ class _DashboardState extends State<Dashboard> {
                             height: 4.0,
                           ),
                           Text(
-                            '总支出(元)',
+                            '总支出(万元)',
                             style: TextStyle(
                                 color: Color(0xff666666),
                                 fontSize: 10.0
