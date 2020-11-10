@@ -34,17 +34,12 @@ class EngineerReportPage extends StatefulWidget {
 }
 
 class _EngineerReportPageState extends State<EngineerReportPage> {
-  var _isExpandedBasic = false;
-  var _isExpandedDetail = false;
-  var _isExpandedAssign = true;
-  var _isExpandedComponent = false;
-  List<bool> _expandList = [false, false, false, true, false];
+  List<bool> _expandList = [false, false, false, true, false, false, false];
   bool _isDelayed = false;
   var _accessory = [];
   ConstantsModel model;
   bool hold = false;
   int _reportId;
-  var _report;
   bool _edit = true;
   String _acceptDate = 'YY-MM-DD';
   EventBus bus = new EventBus();
@@ -209,7 +204,6 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
       if (resp['ResultCode'] == '00') {
         var data = resp['Data'];
         setState(() {
-          _report = data;
           _currentType = data['Type']['Name'];
           _frequency.text = data['FaultFrequency'];
           _code.text = data['FaultCode'];
@@ -1005,9 +999,6 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
           : BuildWidget.buildRow('附件', ''),
       buildImageRow()
     ]);
-
-
-
     return _list;
   }
 
@@ -1108,6 +1099,111 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
                         })
                   ],
                 ),
+          new Divider()
+        ];
+        _list.addAll(_accList);
+      }
+    }
+    return _list;
+  }
+
+  List<Widget> buildConsumable() {
+    List<Widget> _list = [];
+
+    void saveAccessory(Map accessory) async {
+      setState(() {
+        _accessory.add(accessory);
+      });
+    }
+
+    _list.add(new Row(
+      mainAxisAlignment: MainAxisAlignment.end,
+      children: <Widget>[
+        widget.status == 0 || widget.status == 1
+            ? new Text('新增耗材')
+            : new Container(),
+        widget.status == 0 || widget.status == 1
+            ? new IconButton(
+            icon: Icon(Icons.add),
+            onPressed: () async {
+              //_addAccessory();
+              final _acc = await Navigator.of(context)
+                  .push(new MaterialPageRoute(builder: (_) {
+                return new EngineerReportAccessory();
+              }));
+              print(_acc);
+              if (_acc != null) {
+                saveAccessory(_acc);
+              }
+            })
+            : new Container()
+      ],
+    ));
+    if (_accessory != null) {
+      for (var _acc in _accessory) {
+        var _imageNew = _acc['FileInfos']
+            .firstWhere((info) => info['FileType'] == 1, orElse: () => null);
+        var _imageOld = _acc['FileInfos']
+            .firstWhere((info) => info['FileType'] == 2, orElse: () => null);
+        if (_imageNew != null) {
+          _acc['ImageNew'] = _imageNew;
+        }
+        if (_imageOld != null) {
+          _acc['ImageOld'] = _imageOld;
+        }
+        var _accList = [
+          BuildWidget.buildRow('名称', _acc['Name']),
+          BuildWidget.buildRow('来源', _acc['Source']['Name']),
+          _acc['Source']['Name'] == '外部供应商'
+              ? BuildWidget.buildRow('外部供应商', _acc['Supplier']['Name'])
+              : new Container(),
+          BuildWidget.buildRow('新装零件编号', _acc['NewSerialCode']),
+          BuildWidget.buildRow('附件', ''),
+          new Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              _acc['ImageNew'] != null &&
+                  _acc['ImageNew']['FileContent'] != null
+                  ? new Container(
+                width: 100.0,
+                child: BuildWidget.buildPhotoPageList(context, base64Decode(_acc['ImageNew']['FileContent'])),
+              )
+                  : new Container()
+            ],
+          ),
+          BuildWidget.buildRow('金额（元/件）', _acc['Amount'].toString()),
+          BuildWidget.buildRow('数量', _acc['Qty'].toString()),
+          BuildWidget.buildRow('拆下零件编号', _acc['OldSerialCode']),
+          BuildWidget.buildRow('附件', ''),
+          new Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              _acc['ImageOld'] != null &&
+                  _acc['ImageOld']['FileContent'] != null
+                  ? new Container(
+                width: 100.0,
+                child: BuildWidget.buildPhotoPageList(context, base64Decode(_acc['ImageOld']['FileContent'])),
+              )
+                  : new Container()
+            ],
+          ),
+          widget.status == 3 || widget.status == 2
+              ? new Container()
+              : new Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: <Widget>[
+              new Text(
+                '删除耗材',
+              ),
+              new IconButton(
+                  icon: Icon(Icons.delete_forever),
+                  onPressed: () {
+                    setState(() {
+                      _accessory.remove(_acc);
+                    });
+                  })
+            ],
+          ),
           new Divider()
         ];
         _list.addAll(_accList);
@@ -1272,6 +1368,56 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
             ),
           ),
           isExpanded: _expandList[4],
+        ),
+      );
+      _list.add(
+        new ExpansionPanel(canTapOnHeader: true,
+          headerBuilder: (context, isExpanded) {
+            return ListTile(
+              leading: new Icon(
+                Icons.battery_charging_full,
+                size: 20.0,
+                color: Colors.blue,
+              ),
+              title: Text(
+                '耗材信息',
+                style:
+                new TextStyle(fontSize: 20.0, fontWeight: FontWeight.w400),
+              ),
+            );
+          },
+          body: new Padding(
+            padding: EdgeInsets.symmetric(horizontal: 8.0),
+            child: new Column(
+              children: buildConsumable(),
+            ),
+          ),
+          isExpanded: _expandList[5],
+        ),
+      );
+      _list.add(
+        new ExpansionPanel(canTapOnHeader: true,
+          headerBuilder: (context, isExpanded) {
+            return ListTile(
+              leading: new Icon(
+                Icons.assignment_turned_in,
+                size: 20.0,
+                color: Colors.blue,
+              ),
+              title: Text(
+                '外购维修服务信息',
+                style:
+                new TextStyle(fontSize: 20.0, fontWeight: FontWeight.w400),
+              ),
+            );
+          },
+          body: new Padding(
+            padding: EdgeInsets.symmetric(horizontal: 8.0),
+            child: new Column(
+              children: buildAccessory(),
+            ),
+          ),
+          isExpanded: _expandList[6],
         ),
       );
     }

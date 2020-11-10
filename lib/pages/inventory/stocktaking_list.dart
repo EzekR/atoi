@@ -120,8 +120,24 @@ class _StocktakingListState extends State<StocktakingList> {
       )).then((result) {
         initFilter();
         offset = 0;
+        _stock.clear();
         getStock();
       });
+    }
+  }
+
+  Future<bool> startStocktaking(int stockID) async {
+    Map resp = await HttpRequest.request(
+        '/Stocktaking/StartStocktaking',
+        method: HttpRequest.POST,
+        data: {
+          'id': stockID
+        }
+    );
+    if (resp['ResultCode'] == '00') {
+      return true;
+    } else {
+      return false;
     }
   }
 
@@ -330,7 +346,7 @@ class _StocktakingListState extends State<StocktakingList> {
                                     ),
                                     minDateTime: DateTime.parse('2000-01-01'),
                                     maxDateTime: DateTime.parse('2030-01-01'),
-                                    initialDateTime: DateTime.parse(beginDate),
+                                    initialDateTime: DateTime.tryParse(beginDate)??DateTime.now(),
                                     dateFormat: 'yyyy-MM-dd',
                                     locale: DateTimePickerLocale.en_us,
                                     onClose: () => print(""),
@@ -369,7 +385,7 @@ class _StocktakingListState extends State<StocktakingList> {
                                     ),
                                     minDateTime: DateTime.parse('2000-01-01'),
                                     maxDateTime: DateTime.parse('2030-01-01'),
-                                    initialDateTime: DateTime.parse(endDate),
+                                    initialDateTime: DateTime.tryParse(endDate)??DateTime.now(),
                                     dateFormat: 'yyyy-MM-dd',
                                     locale: DateTimePickerLocale.en_us,
                                     onClose: () => print(""),
@@ -392,6 +408,7 @@ class _StocktakingListState extends State<StocktakingList> {
                   ],
                 ),
               ),
+              SizedBox(height: 24.0,),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: <Widget>[
@@ -512,8 +529,14 @@ class _StocktakingListState extends State<StocktakingList> {
             mainAxisAlignment: MainAxisAlignment.end,
             mainAxisSize: MainAxisSize.max,
             children: <Widget>[
-              item['Status']['ID']==2&&userID==item['User']['ID']&&role==2?new RaisedButton(
-                onPressed: (){
+              item['Status']['ID']<=2&&userID==item['User']['ID']&&role==2?new RaisedButton(
+                onPressed: () async {
+                  if (item['Status']['ID'] == 1) {
+                    bool res = await startStocktaking(item['ID']);
+                    if (!res) {
+                      return;
+                    }
+                  }
                   Navigator.of(context).push(new MaterialPageRoute(builder: (_) {
                     return new StocktakingDetail(stockID: item['ID'], editable: true,);
                   })).then((result) {
@@ -548,12 +571,42 @@ class _StocktakingListState extends State<StocktakingList> {
               new SizedBox(
                 width: 40,
               ),
+              item['Status']['ID']==1&&role==2?RaisedButton(
+                onPressed: () {
+                  Navigator.of(context).push(new MaterialPageRoute(builder: (_) => new StocktakingDetail(stockID: item['ID'], editable: true,))).then((result) {
+                    beginDate = '';
+                    endDate = '';
+                    offset = 0;
+                    _stock.clear();
+                    getStock();
+                  });
+                },
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                color: new Color(0xff2E94B9),
+                child: new Row(
+                  children: <Widget>[
+                    new Icon(
+                      Icons.edit,
+                      color: Colors.white,
+                    ),
+                    new Text(
+                      '编辑',
+                      style: new TextStyle(
+                          color: Colors.white
+                      ),
+                    ),
+                  ],
+                ),
+              ):Container(),
               item['Status']['ID']==3&&role==1?RaisedButton(
                 onPressed: () {
                   Navigator.of(context).push(new MaterialPageRoute(builder: (_) => new StocktakingDetail(stockID: item['ID'], editable: true,))).then((result) {
                     beginDate = '';
                     endDate = '';
                     offset = 0;
+                    _stock.clear();
                     getStock();
                   });
                 },
@@ -577,9 +630,30 @@ class _StocktakingListState extends State<StocktakingList> {
                 ),
               ):Container(),
               SizedBox(width: 40,),
-              item['Status']['ID']<=3&&role==1?RaisedButton(
+              item['Status']['ID']>=0&&item['Status']['ID']<=3&&role==1?RaisedButton(
                 onPressed: () {
-                  terminateStock(item['ID']);
+                  showDialog(context: context, builder: (context) => CupertinoAlertDialog(
+                    title: Text('是否终止盘点？'),
+                    actions: <Widget>[
+                      CupertinoDialogAction(
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                        },
+                        child: Text(
+                            '取消'
+                        ),
+                      ),
+                      CupertinoDialogAction(
+                        onPressed: () async {
+                          Navigator.of(context).pop();
+                          terminateStock(item['ID']);
+                        },
+                        child: Text(
+                            '确认'
+                        ),
+                      ),
+                    ],
+                  ));
                 },
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(6),

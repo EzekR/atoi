@@ -6,6 +6,7 @@ import 'package:atoi/widgets/build_widget.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:atoi/models/models.dart';
 import 'package:atoi/pages/inventory/consumable_detail.dart';
+import 'package:atoi/utils/common.dart';
 
 /// 耗材列表类
 class ConsumableList extends StatefulWidget{
@@ -372,6 +373,7 @@ class _ConsumableListState extends State<ConsumableList> {
                 BuildWidget.buildCardRow('购入日期', item['PurchaseDate'].split('T')[0]),
                 BuildWidget.buildCardRow('采购单号', item['Purchase']['ID']==0?'':'${item['Purchase']['Name']}'),
                 BuildWidget.buildCardRow('可用数量', item['AvaibleQty'].toString()),
+                BuildWidget.buildCardRow('上次盘点日期', CommonUtil.TimeForm(item['LastestStocktakingDate']??'', 'yyyy-mm-dd')),
                 //BuildWidget.buildCardRow('状态', item['IsActive']?'启用':'停用'),
               ],
             ),

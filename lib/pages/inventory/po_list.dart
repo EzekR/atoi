@@ -17,7 +17,6 @@ class _POListState extends State<POList> {
 
   bool isSearchState = false;
   bool _loading = false;
-  bool _editable = true;
 
   TextEditingController _keywords = new TextEditingController();
   String field = 'po.ID';
@@ -29,11 +28,12 @@ class _POListState extends State<POList> {
   int offset = 0;
   bool _noMore = false;
   int role;
+  int userID;
 
   Future<Null> getRole() async {
     var _prefs = await prefs;
     role = _prefs.getInt('role');
-    _editable = role==1?true:false;
+    userID = _prefs.getInt('userID');
   }
 
   void setFilter() {
@@ -306,6 +306,7 @@ class _POListState extends State<POList> {
   }
 
   Card buildEquipmentCard(Map item) {
+    bool _editable = item['User']['ID']==userID;
     return new Card(
       child: new Column(
         mainAxisAlignment: MainAxisAlignment.start,
@@ -350,7 +351,7 @@ class _POListState extends State<POList> {
             mainAxisAlignment: MainAxisAlignment.end,
             mainAxisSize: MainAxisSize.max,
             children: <Widget>[
-              item['Status']['ID']==1?new RaisedButton(
+              item['Status']['ID']==1&&role==2?new RaisedButton(
                 onPressed: (){
                   Navigator.of(context).push(new MaterialPageRoute(builder: (_) {
                     return new PODetail(purchaseOrder: item, editable: _editable,);
@@ -389,10 +390,10 @@ class _POListState extends State<POList> {
               item['Status']['ID']==2||item['Status']['ID']==3?SizedBox(
                 width: 60,
               ):Container(),
-              item['Status']['ID']==2||item['Status']['ID']==3?new RaisedButton(
+              item['Status']['ID']==2&&role==1?new RaisedButton(
                 onPressed: (){
                   Navigator.of(context).push(new MaterialPageRoute(builder: (_) {
-                    return new PODetail(purchaseOrder: item, editable: false, operation: item['Status']['ID']==2?PurchaseOrderOperation.APPROVE:PurchaseOrderOperation.INBOUND,);
+                    return new PODetail(purchaseOrder: item, editable: false, operation: PurchaseOrderOperation.APPROVE);
                   })).then((result) {
                     setState(() {
                       _loading = true;
@@ -417,7 +418,43 @@ class _POListState extends State<POList> {
                       color: Colors.white,
                     ),
                     new Text(
-                      item['Status']['ID']==2?'审批':'入库',
+                      '审批',
+                      style: new TextStyle(
+                          color: Colors.white
+                      ),
+                    )
+                  ],
+                ),
+              ):Container(),
+              item['Status']['ID']==3&&_editable&&role==2?new RaisedButton(
+                onPressed: (){
+                  Navigator.of(context).push(new MaterialPageRoute(builder: (_) {
+                    return new PODetail(purchaseOrder: item, editable: false, operation: PurchaseOrderOperation.INBOUND,);
+                  })).then((result) {
+                    setState(() {
+                      _loading = true;
+                      _purchaseOrders.clear();
+                      offset = 0;
+                    });
+                    getPurchaseOrder().then((result) {
+                      setState(() {
+                        _loading = false;
+                      });
+                    });
+                  });
+                },
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                color: new Color(0xff2E94B9),
+                child: new Row(
+                  children: <Widget>[
+                    new Icon(
+                      Icons.remove_red_eye,
+                      color: Colors.white,
+                    ),
+                    new Text(
+                      '入库',
                       style: new TextStyle(
                           color: Colors.white
                       ),
@@ -495,7 +532,7 @@ class _POListState extends State<POList> {
           }
         },
       )),
-      floatingActionButton: role==3?Container():FloatingActionButton(
+      floatingActionButton: role!=2?Container():FloatingActionButton(
         onPressed: () {
           Navigator.of(context).push(new MaterialPageRoute(builder: (_) {
             return new PODetail(editable: true,);

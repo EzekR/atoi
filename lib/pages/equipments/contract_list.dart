@@ -435,7 +435,7 @@ class _ContractListState extends State<ContractList> {
           onChanged: (val) {
             getContracts(filterText: val);
           },
-        ):Text('合同列表'),
+        ):Text('服务合同列表'),
         actions: <Widget>[
           isSearchState?IconButton(
             icon: Icon(Icons.cancel),

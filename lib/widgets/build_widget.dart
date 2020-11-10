@@ -162,11 +162,12 @@ class BuildWidget {
     );
   }
 
-  static GestureDetector buildCardInputStock(String leading, String inputValue, {Function onTap, bool required, FocusNode focus, int maxLength, Function callback}) {
+  static GestureDetector buildCardInputStock(String leading, String inputValue, {Function onTap, bool required, FocusNode focus, int maxLength, Function callback, TextInputType inputType}) {
     required = required??false;
     focus = focus??new FocusNode();
     maxLength = maxLength??20;
     inputValue = inputValue??"";
+    inputType = inputType??TextInputType.text;
     return new GestureDetector(
       onTap: onTap,
       child: new Row(
@@ -208,6 +209,11 @@ class BuildWidget {
               maxLength: maxLength,
               maxLines: 1,
               focusNode: focus,
+              keyboardType: inputType,
+              decoration: InputDecoration(
+                fillColor: Color(0xfff0f0f0),
+                filled: true,
+              ),
               onChanged: (value) {
                 callback(value);
               },
@@ -318,9 +324,14 @@ class BuildWidget {
         ),
         new Expanded(
           flex: 7,
-          child: new Switch.adaptive(
-              value: initValue,
-              onChanged: switchMethod
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: <Widget>[
+              new Switch.adaptive(
+                  value: initValue,
+                  onChanged: switchMethod
+              )
+            ],
           )
         ),
       ],
@@ -393,6 +404,78 @@ class BuildWidget {
     );
   }
 
+  static GestureDetector buildDropdownWithList(String title, int currentItem, List dropdownItems, Function changeDropdown, {FocusNode focusNode, BuildContext context, bool required}) {
+    //if (context != null) {
+    //  FocusScope.of(context).requestFocus(new FocusNode());
+    //}
+    required = required??false;
+    return new GestureDetector(
+      onTap: () {
+        print('dropdown tab');
+      },
+      child: new Row(
+        children: <Widget>[
+          new Expanded(
+            flex: 4,
+            child: new Wrap(
+              alignment: WrapAlignment.end,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              children: <Widget>[
+                required?new Text(
+                  '*',
+                  style: new TextStyle(
+                      color: Colors.red
+                  ),
+                ):Container(),
+                new Text(
+                  title,
+                  style: new TextStyle(
+                      fontSize: 16.0,
+                      fontWeight: FontWeight.w600
+                  ),
+                )
+              ],
+            ),
+          ),
+          new Expanded(
+            flex: 1,
+            child: new Text(
+              '：',
+              style: new TextStyle(
+                fontSize: 16.0,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+          new Expanded(
+              flex: 6,
+              child: new GestureDetector(
+                onTap: () {
+                },
+                child: new DropdownButton(
+                  value: currentItem,
+                  items: dropdownItems.map<DropdownMenuItem>((item) {
+                    return DropdownMenuItem(
+                      value: item['value'],
+                      child: Center(
+                        child: Text(item['text']),
+                      ),
+                    );
+                  }).toList(),
+                  onChanged: changeDropdown,
+                  style: new TextStyle(
+                    color: Colors.black54,
+                    fontSize: 12.0,
+                  ),
+                  //isDense: true,
+                  //isExpanded: true,
+                ),
+              )
+          )
+        ],
+      ),
+    );
+  }
   /// 构建常用输入框（4、6分）
   static Padding buildInput(String labelText, TextEditingController controller, {TextInputType inputType, int lines, int maxLength, FocusNode focusNode, Function tapEvent, bool required}) {
     inputType??TextInputType.text;

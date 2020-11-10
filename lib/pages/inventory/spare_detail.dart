@@ -27,7 +27,9 @@ class _SpareDetailState extends State<SpareDetail> {
   Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
   String oid = '系统自动生成';
   EventBus bus = new EventBus();
-  Map manufacturer;
+  TextEditingController manufacturer = new TextEditingController();
+  TextEditingController name = new TextEditingController();
+  TextEditingController model = new TextEditingController();
   Map supplier;
   String startDate = 'YYYY-MM-DD';
   String endDate = 'YYYY-MM-DD';
@@ -35,6 +37,24 @@ class _SpareDetailState extends State<SpareDetail> {
   String _fujiClass2Name;
   List _fujiList = [];
   String useStatus = "";
+  int statusID = 1;
+  String status = '';
+  List statusList = [
+    {
+      "value": 1,
+      "text": "在用"
+    },
+    {
+      "value": 2,
+      "text": "备用"
+    }
+  ];
+
+  void changeStatus(val) {
+    setState(() {
+      statusID = val;
+    });
+  }
 
   ConstantsModel cModel;
 
@@ -87,6 +107,7 @@ class _SpareDetailState extends State<SpareDetail> {
         endDate = _data['EndDate'].toString().split('T')[0];
         comment.text = _data['Comments'];
         useStatus = _data['UsageStatus'];
+        status = _data['Status']['Name'];
       });
     }
   }
@@ -100,8 +121,11 @@ class _SpareDetailState extends State<SpareDetail> {
         '/InvSpare/CheckSpareSerialCode',
         method: HttpRequest.GET,
         params: {
-          'invComponentID': 0,
-          'serialCode': serialCode
+          'FujiClass2': {
+            'ID': _fujiClass2
+          },
+          'serialCode': serialCode,
+          'StartDate': startDate
         }
     );
     if (resp['ResultCode'] == '00') {
@@ -123,6 +147,24 @@ class _SpareDetailState extends State<SpareDetail> {
       showDialog(context: context, builder: (context) => CupertinoAlertDialog(
         title: new Text('富士II类不可为空'),
       )).then((result) => FocusScope.of(context).requestFocus(_focusComponent[0]));
+      return;
+    }
+    if (manufacturer.text.isEmpty) {
+      showDialog(context: context, builder: (context) => CupertinoAlertDialog(
+        title: new Text('厂家不可为空'),
+      )).then((result) => FocusScope.of(context).requestFocus(_focusComponent[7]));
+      return;
+    }
+    if (model.text.isEmpty) {
+      showDialog(context: context, builder: (context) => CupertinoAlertDialog(
+        title: new Text('型号不可为空'),
+      )).then((result) => FocusScope.of(context).requestFocus(_focusComponent[8]));
+      return;
+    }
+    if (name.text.isEmpty) {
+      showDialog(context: context, builder: (context) => CupertinoAlertDialog(
+        title: new Text('名称不可为空'),
+      )).then((result) => FocusScope.of(context).requestFocus(_focusComponent[9]));
       return;
     }
     if (serialCode.text.isEmpty) {
@@ -166,10 +208,16 @@ class _SpareDetailState extends State<SpareDetail> {
       'FujiClass2': {
         'ID': _fujiClass2,
       },
+      'Name': name.text,
+      'Model': model.text,
+      'Manufacturer': manufacturer.text,
       'SerialCode': serialCode.text,
       'Price': price.text,
       'StartDate': startDate,
       'EndDate': endDate,
+      'Status': {
+        'ID': statusID
+      },
       'Comments': comment.text
     };
     if (widget.isStock) {
@@ -353,6 +401,9 @@ class _SpareDetailState extends State<SpareDetail> {
                               children: <Widget>[
                                 widget.spare == null?Container():BuildWidget.buildRow('系统编号', oid),
                                 widget.editable?buildDropdown('富士II类', _fujiClass2, _fujiList, changeFuji, required: true):BuildWidget.buildRow('富士II类', _fujiClass2Name??''),
+                                widget.editable?BuildWidget.buildInput('名称', name, maxLength: 30, focusNode: _focusComponent[9], required: true):BuildWidget.buildRow('序列号', name.text),
+                                widget.editable?BuildWidget.buildInput('型号', model, maxLength: 30, focusNode: _focusComponent[8], required: true):BuildWidget.buildRow('型号', model.text),
+                                widget.editable?BuildWidget.buildInput('厂家', manufacturer, maxLength: 30, focusNode: _focusComponent[7], required: true):BuildWidget.buildRow('厂家', manufacturer.text),
                                 widget.editable?BuildWidget.buildInput('序列号', serialCode, maxLength: 30, focusNode: _focusComponent[2], required: true):BuildWidget.buildRow('序列号', serialCode.text),
                                 widget.editable?BuildWidget.buildInput('月租(元)', price, maxLength: 13, inputType: TextInputType.numberWithOptions(decimal: true), focusNode: _focusComponent[3], required: true):BuildWidget.buildRow('月租(元)', price.text),
                                 widget.editable?new Padding(
@@ -515,6 +566,7 @@ class _SpareDetailState extends State<SpareDetail> {
                                     ],
                                   ),
                                 ):BuildWidget.buildRow('结束日期', endDate),
+                                widget.editable?buildDropdown('使用', statusID, statusList, changeStatus, required: true):BuildWidget.buildRow('使用状态', status??''),
                                 !widget.editable?BuildWidget.buildRow('状态', useStatus):Container(),
                                 widget.editable?BuildWidget.buildInput('备注', comment, maxLength: 30):BuildWidget.buildRow('备注', comment.text),
                                 new Divider(),

@@ -40,6 +40,8 @@ class _EquipmentsListState extends State<EquipmentsList> {
   int warrantyId = 0;
   List departmentList = [];
   int departmentId = -1;
+  List fujiClass2List = [];
+  int fujiClass2 = 0;
   bool usageStatus = false;
   Future<SharedPreferences> prefs = SharedPreferences.getInstance();
 
@@ -73,7 +75,19 @@ class _EquipmentsListState extends State<EquipmentsList> {
   }
   
   void initFilter() async {
+    fujiClass2List.clear();
     setState(() {
+      fujiClass2List.add({
+        'value': 0,
+        'text': '全部'
+      });
+      fujiClass2List.addAll(cModel.FujiClass2.map((item) {
+        return {
+          'value': item['ID'],
+          'text': item['Name']
+        };
+      }).toList()
+      );
       machineStatusList = initList(cModel.EquipmentStatus);
       machineStatusId = machineStatusList[0]['value'];
       departmentList = initList(cModel.Departments, valueForAll: -1);
@@ -117,7 +131,8 @@ class _EquipmentsListState extends State<EquipmentsList> {
         'useStatus': usageStatus,
         'PageSize': 10,
         'CurRowNum': offset,
-        'userID': userId
+        'userID': userId,
+        'fujiClass2ID': fujiClass2
       }
     );
     if (resp['ResultCode'] == '00') {
@@ -493,6 +508,52 @@ class _EquipmentsListState extends State<EquipmentsList> {
                         )
                       ],
                     ),
+                    SizedBox(height: 18.0,),
+                    Row(
+                      children: <Widget>[
+                        SizedBox(width: 16.0,),
+                        Text('富士II类', style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.w600),)
+                      ],
+                    ),
+                    SizedBox(height: 6.0,),
+                    Row(
+                      children: <Widget>[
+                        SizedBox(width: 16.0,),
+                        Container(
+                            width: 230.0,
+                            height: 40.0,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(5.0),
+                              color: Color(0xfff2f2f2),
+                            ),
+                            child: Row(
+                              children: <Widget>[
+                                SizedBox(width: 6.0,),
+                                DropdownButton(
+                                  value: fujiClass2,
+                                  underline: Container(),
+                                  items: fujiClass2List.map<DropdownMenuItem>((item) {
+                                    return DropdownMenuItem(
+                                      value: item['value'],
+                                      child: Container(
+                                        width: 200,
+                                        child: Text(item['text']),
+                                      ),
+                                    );
+                                  }).toList(),
+                                  onChanged: (val) {
+                                    print(val);
+                                    FocusScope.of(context).requestFocus(new FocusNode());
+                                    setState(() {
+                                      fujiClass2 = val;
+                                    });
+                                  },
+                                )
+                              ],
+                            )
+                        ),
+                      ],
+                    ),
                     SizedBox(height: 30.0,),
                   ],
                 ),
@@ -514,6 +575,7 @@ class _EquipmentsListState extends State<EquipmentsList> {
                     child: Center(
                       child: FlatButton(onPressed: () {
                         setState(() {
+                          fujiClass2 = 0;
                           machineStatusId = machineStatusList[0]['value'];
                           departmentId = departmentList[0]['value'];
                           searchFilter = 'e.ID';
@@ -742,6 +804,7 @@ class _EquipmentsListState extends State<EquipmentsList> {
                 BuildWidget.buildCardRow('使用科室', item['Department']['Name']),
                 BuildWidget.buildCardRow('设备状态', item['EquipmentStatus']['Name']),
                 BuildWidget.buildCardRow('维保状态', item['WarrantyStatus']),
+                BuildWidget.buildCardRow('富士II类', item['FujiClass2']['Name']),
               ],
             ),
           ),
@@ -889,7 +952,7 @@ class _EquipmentsListState extends State<EquipmentsList> {
             onChanged: (val) {
               getEquipments(filterText: val);
             },
-          ):Text('设备列表'),
+          ):Text('医疗设备列表'),
           elevation: 0.7,
           actions: <Widget>[
             isSearchState?IconButton(

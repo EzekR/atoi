@@ -43,7 +43,7 @@ class _ConsumableDetailState extends State<ConsumableDetail> {
   ConstantsModel cModel;
 
   TextEditingController lotNum = new TextEditingController(), spec = new TextEditingController(), model = new TextEditingController(), price = new TextEditingController(), quantity = new TextEditingController(), comments = new TextEditingController(),
-  availableQty = new TextEditingController();
+  availableQty = new TextEditingController(), unit = new TextEditingController();
 
   void initState() {
     super.initState();
@@ -123,6 +123,7 @@ class _ConsumableDetailState extends State<ConsumableDetail> {
         lotNum.text = _data['LotNum'];
         spec.text = _data['Specification'];
         model.text = _data['Model'];
+        unit.text = _data['Unit'];
         price.text = _data['Price'].toString();
         quantity.text = _data['ReceiveQty'].toStringAsFixed(0);
         comments.text = _data['Comments'];
@@ -170,6 +171,12 @@ class _ConsumableDetailState extends State<ConsumableDetail> {
       showDialog(context: context, builder: (context) => CupertinoAlertDialog(
         title: new Text('型号不可为空'),
       )).then((result) => FocusScope.of(context).requestFocus(_focusComponent[3]));
+      return;
+    }
+    if (unit.text.isEmpty) {
+      showDialog(context: context, builder: (context) => CupertinoAlertDialog(
+        title: new Text('单位不可为空'),
+      )).then((result) => FocusScope.of(context).requestFocus(_focusComponent[6]));
       return;
     }
     if (price.text.isEmpty) {
@@ -230,6 +237,7 @@ class _ConsumableDetailState extends State<ConsumableDetail> {
       "LotNum": lotNum.text,
       "Specification": spec.text,
       "Model": model.text,
+      "Unit": unit.text,
       "Price": price.text,
       "ReceiveQty": quantity.text,
       "Supplier": {
@@ -484,6 +492,7 @@ class _ConsumableDetailState extends State<ConsumableDetail> {
                                 widget.editable?BuildWidget.buildInput('批次号', lotNum, maxLength: 30, focusNode: _focusComponent[1], required: true):BuildWidget.buildRow('批次号', lotNum.text),
                                 widget.editable?BuildWidget.buildInput('规格', spec, maxLength: 50, focusNode: _focusComponent[2], required: true):BuildWidget.buildRow('规格', spec.text),
                                 widget.editable?BuildWidget.buildInput('型号', model, maxLength: 50, focusNode: _focusComponent[3], required: true):BuildWidget.buildRow('型号', model.text),
+                                widget.editable?BuildWidget.buildInput('单位', unit, maxLength: 50, focusNode: _focusComponent[6], required: true):BuildWidget.buildRow('单位', unit.text),
                                 widget.editable?new Padding(
                                   padding: EdgeInsets.symmetric(vertical: 5.0),
                                   child: new Row(

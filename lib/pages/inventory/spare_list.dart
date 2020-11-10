@@ -5,6 +5,7 @@ import 'package:atoi/widgets/build_widget.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:atoi/models/models.dart';
 import 'package:atoi/pages/inventory/spare_detail.dart';
+import 'package:atoi/utils/common.dart';
 
 /// 备件列表类
 class SpareList extends StatefulWidget{
@@ -30,7 +31,7 @@ class _SpareListState extends State<SpareList> {
   bool _noMore = false;
   int role;
   DateTime today = new DateTime.now();
-  int fujiClass2;
+  int fujiClass2 = 0;
   int useStatusId = 0;
   List useStatusList = [];
 
@@ -407,6 +408,7 @@ class _SpareListState extends State<SpareList> {
                 BuildWidget.buildCardRow('月租(元)', item['Price'].toString()),
                 BuildWidget.buildCardRow('开始日期', item['StartDate'].split('T')[0]),
                 BuildWidget.buildCardRow('结束日期', item['EndDate'].split('T')[0]),
+                BuildWidget.buildCardRow('上次盘点日期', CommonUtil.TimeForm(item['LastestStocktakingDate']??'', 'yyyy-mm-dd')),
                 BuildWidget.buildCardRow('状态', today.isBefore(_start)?'未使用':'当前在用'),
                 //BuildWidget.buildCardRow('状态', item['IsActive']?'启用':'停用'),
               ],

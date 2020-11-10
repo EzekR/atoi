@@ -15,10 +15,11 @@ import 'package:date_format/date_format.dart';
 
 /// 耗材详情页
 class ServiceDetail extends StatefulWidget {
-  ServiceDetail({Key key, this.service, this.editable, this.isStock}) : super(key: key);
+  ServiceDetail({Key key, this.service, this.editable, this.isStock, this.date}) : super(key: key);
   final Map service;
   final bool editable;
   final bool isStock;
+  final String date;
   _ServiceDetailState createState() => new _ServiceDetailState();
 }
 
@@ -197,8 +198,15 @@ class _ServiceDetailState extends State<ServiceDetail> {
       }
     };
     if (widget.isStock) {
-      Navigator.of(context).pop(jsonEncode(_info));
-      return;
+      if (DateTime.tryParse(startDate).isBefore(DateTime.tryParse(widget.date))) {
+        showDialog(context: context, builder: (context) => CupertinoAlertDialog(
+          title: new Text('开始日期不可早于盘点日期'),
+        ));
+        return;
+      } else {
+        Navigator.of(context).pop(jsonEncode(_info));
+        return;
+      }
     }
     if (widget.service != null) {
       _info['ID'] = widget.service['ID'];

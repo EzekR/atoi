@@ -5,6 +5,7 @@ import 'package:atoi/widgets/build_widget.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:atoi/models/models.dart';
 import 'package:atoi/pages/inventory/service_detail.dart';
+import 'package:atoi/utils/common.dart';
 
 /// 服务列表类
 class ServiceList extends StatefulWidget{
@@ -350,6 +351,7 @@ class _ServiceListState extends State<ServiceList> {
                 BuildWidget.buildCardRow('金额', item['Price'].toString()),
                 BuildWidget.buildCardRow('剩余服务次数', item['AvaibleTimes'].toString()),
                 BuildWidget.buildCardRow('采购单号', item['Purchase']['ID']==0?'':'${item['Purchase']['Name']}'),
+                BuildWidget.buildCardRow('上次盘点日期', CommonUtil.TimeForm(item['LastestStocktakingDate']??'', 'yyyy-mm-dd')),
                 BuildWidget.buildCardRow('状态', item['Status']),
                 //BuildWidget.buildCardRow('状态', item['IsActive']?'启用':'停用'),
               ],

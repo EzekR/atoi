@@ -15,6 +15,8 @@ import 'package:uuid/uuid.dart';
 
 /// 报告零配件页面类
 class EngineerReportAccessory extends StatefulWidget {
+  final AccType accType;
+  EngineerReportAccessory({Key key, this.accType}):super(key: key);
   _EngineerReportAccessoryState createState() => _EngineerReportAccessoryState();
 }
 
@@ -663,4 +665,10 @@ class _EngineerReportAccessoryState extends State<EngineerReportAccessory> {
       )
     );
   }
+}
+
+enum AccType {
+  COMPONENT,
+  COMSUMABLE,
+  SERVICE
 }

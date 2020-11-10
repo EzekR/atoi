@@ -497,7 +497,7 @@ Future getImage() async {
       builder: (context, child, mainModel) {
         return new Scaffold(
             appBar: new AppBar(
-              title: widget.editable?Text(widget.contract==null?'新增合同':'更新合同'):Text('查看合同'),
+              title: widget.editable?Text(widget.contract==null?'新增服务合同':'更新服务合同'):Text('查看服务合同'),
               elevation: 0.7,
               flexibleSpace: Container(
                 decoration: BoxDecoration(

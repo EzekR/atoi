@@ -1,4 +1,6 @@
 import 'package:atoi/pages/inventory/stocktaking_list.dart';
+import 'package:atoi/pages/valuation/valuation_condition.dart';
+import 'package:atoi/pages/valuation/valuation_history.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:atoi/pages/manager/manager_menu.dart';
@@ -68,6 +70,7 @@ class _HomePageState extends State<HomePage>
   bool showTable = false;
   List selectedTypes = [];
   bool showWare = false;
+  bool showMeasure = false;
 
   Future<Null> getRole() async {
     var _prefs = await prefs;
@@ -1119,7 +1122,7 @@ class _HomePageState extends State<HomePage>
                                     width: 10.0,
                                   ),
                                   Text(
-                                      '设备',
+                                      '医疗设备',
                                     style: TextStyle(
                                       fontSize: 14.0,
                                       color: Colors.black54
@@ -1146,7 +1149,7 @@ class _HomePageState extends State<HomePage>
                                   SizedBox(
                                     width: 10.0,
                                   ),
-                                  Text('合同',
+                                  Text('服务合同',
                                     style: TextStyle(
                                         fontSize: 14.0,
                                         color: Colors.black54
@@ -1420,6 +1423,87 @@ class _HomePageState extends State<HomePage>
                                   ),
                                   Text(
                                     '采购单',
+                                    style: TextStyle(
+                                        fontSize: 14.0,
+                                        color: Colors.black54
+                                    ),
+                                  )
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    ListTile(
+                      leading: Icon(Icons.computer),
+                      title: Text('估价模块',
+                        style: new TextStyle(
+                            color: Colors.blue
+                        ),
+                      ),
+                      trailing: showMeasure?Icon(Icons.keyboard_arrow_down):Icon(Icons.keyboard_arrow_right),
+                      onTap: () {
+                        //Navigator.of(context).push(new MaterialPageRoute(builder: (_) {
+                        //  return new ReportList();
+                        //}));
+                        setState(() {
+                          showMeasure = !showMeasure;
+                        });
+                      },
+                    ),
+                    AnimatedContainer(
+                      height: showMeasure?80.0:0.0,
+                      duration: Duration(milliseconds: 200),
+                      child: Column(
+                        children: <Widget>[
+                          Container(
+                            height: 40.0,
+                            child: FlatButton(
+                              onPressed: () {
+                                Navigator.of(context).push(new MaterialPageRoute(builder: (_) {
+                                  return new ValuationCondition();
+                                }));
+                              },
+                              child: Row(
+                                children: <Widget>[
+                                  SizedBox(
+                                    width: 60.0,
+                                  ),
+                                  Icon(Icons.gavel, color: Colors.grey, size: 16.0,),
+                                  SizedBox(
+                                    width: 10.0,
+                                  ),
+                                  Text(
+                                    '估价条件',
+                                    style: TextStyle(
+                                        fontSize: 14.0,
+                                        color: Colors.black54
+                                    ),
+                                  )
+                                ],
+                              ),
+                            ),
+                          ),
+                          Container(
+                            height: 40.0,
+                            child: FlatButton(
+                              onPressed: () {
+                                Navigator.of(context).push(new MaterialPageRoute(builder: (_) {
+                                  return new ValuationHistory();
+                                }));
+                              },
+                              child: Row(
+                                children: <Widget>[
+                                  SizedBox(
+                                    width: 60.0,
+                                  ),
+                                  Icon(Icons.history, color: Colors.grey, size: 16.0,),
+                                  SizedBox(
+                                    width: 10.0,
+                                  ),
+                                  Text(
+                                    '执行历史',
                                     style: TextStyle(
                                         fontSize: 14.0,
                                         color: Colors.black54

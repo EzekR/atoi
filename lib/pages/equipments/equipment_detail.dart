@@ -78,6 +78,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
       purchaseWay = new TextEditingController(),
       purchaseAmount = new TextEditingController(),
       installSite = new TextEditingController(),
+      mandatoryInterval = new TextEditingController(),
       maintainPeriod = new TextEditingController(),
       patrolPeriod = new TextEditingController(),
       correctionPeriod = new TextEditingController(),
@@ -100,6 +101,10 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
   List<DropdownMenuItem<String>> dropdownMandatory;
   String currentMandatory;
 
+  List mandatoryPeriod = ['无', '固定日期', '周期'];
+  List<DropdownMenuItem<String>> mandatoryTypes;
+  String currentMandatoryType = '无';
+
   List patrolPeriodList = ['无', '天/次', '月/次', '年/次'];
   List<DropdownMenuItem<String>> dropdownPatrolPeriod;
   String currentPatrolPeriod;
@@ -107,6 +112,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
   List mandatoryPeriodList = ['无', '天/次', '月/次', '年/次'];
   List<DropdownMenuItem<String>> dropdownMandatoryPeriod;
   String currentMaintainPeriod;
+  String currentMandatoryPeriod;
 
   List correctionPeriodList = ['无', '天/次', '月/次', '年/次'];
   List<DropdownMenuItem<String>> dropdownCorrectionPeriod;
@@ -277,6 +283,13 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
     });
   }
 
+  void changeMandatoryType(String selectedMethod) {
+    FocusScope.of(context).requestFocus(new FocusNode());
+    setState(() {
+      currentMandatoryType = selectedMethod;
+    });
+  }
+
   void changePatrolPeriod(String selectedMethod) {
     FocusScope.of(context).requestFocus(new FocusNode());
     if (selectedMethod == '无') {
@@ -288,6 +301,16 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
   }
 
   void changeMandatoryPeriod(String selectedMethod) {
+    FocusScope.of(context).requestFocus(new FocusNode());
+    if (selectedMethod == '无') {
+      maintainPeriod.clear();
+    }
+    setState(() {
+      currentMandatoryPeriod = selectedMethod;
+    });
+  }
+
+  void changeMaintainPeriod(String selectedMethod) {
     FocusScope.of(context).requestFocus(new FocusNode());
     if (selectedMethod == '无') {
       maintainPeriod.clear();
@@ -412,6 +435,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
     currentMachine = dropdownMachine[0].value;
     dropdownMandatory = getDropDownMenuItems(mandatoryFlag);
     currentMandatory = dropdownMandatory[0].value;
+    mandatoryTypes = getDropDownMenuItems(mandatoryPeriod);
     dropdownPatrolPeriod = getDropDownMenuItems(model.PeriodTypeList);
     currentPatrolPeriod = dropdownPatrolPeriod[0].value;
     dropdownMandatoryPeriod = getDropDownMenuItems(model.PeriodTypeList);
@@ -460,6 +484,12 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
         _data['MaintenancePeriod'] = maintainPeriod.text;
         _data['MaintenanceType'] = {
           "ID": model.PeriodType[currentMaintainPeriod]
+        };
+        break;
+      case 3:
+        _data['MandatoryPeriod'] = mandatoryInterval.text;
+        _data['MandatoryType'] = {
+          "ID": model.PeriodType[currentMandatoryPeriod]
         };
         break;
       case 4:
@@ -1180,6 +1210,14 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
 
   void switchAsset(value) {
     print(value);
+  }
+
+  void showMandatory() async {
+    if (currentMandatoryPeriod == '无' || mandatoryInterval.text == null || mandatoryInterval.text == '') {
+      return;
+    }
+    await getCheckPeriod(3);
+    showPeriodSheet('一年内计划巡检');
   }
 
   void showPatrol() async {
@@ -2148,7 +2186,8 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
               ):new Container(),
               !widget.editable&&currentMachine=='已报废'?BuildWidget.buildRow('报废时间', displayDate(scrapDate)):new Container(),
               widget.editable?BuildWidget.buildDropdown('强检标记', currentMandatory, dropdownMandatory, changeMandatory, context: context):BuildWidget.buildRow('强检标记', currentMandatory),
-              widget.editable?new Padding(
+              widget.editable?BuildWidget.buildDropdown('强检周期', currentMandatoryType, mandatoryTypes, changeMandatoryType, context: context):BuildWidget.buildRow('强检周期', currentMandatory),
+              widget.editable&&currentMandatoryType=='固定日期'?new Padding(
                 padding: EdgeInsets.symmetric(vertical: 5.0),
                 child: new Row(
                   children: <Widget>[
@@ -2221,7 +2260,58 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
                     ),
                   ],
                 ),
-              ):BuildWidget.buildRow('强检时间', displayDate(mandatoryDate)),
+              ):Container(),
+              !widget.editable&&currentMandatoryType=="固定周期"?BuildWidget.buildRow('强检时间', displayDate(mandatoryDate)):Container(),
+              widget.editable&&currentMandatoryType=='周期'?BuildWidget.buildDropdownWithInput('强检周期', mandatoryInterval, currentMandatoryPeriod, dropdownMandatoryPeriod, changeMandatoryPeriod, showMandatory, inputType: TextInputType.number, focusNode: _focusEquip[19], context: context):Container(),
+              !widget.editable&&currentMandatoryType=='周期'?Row(
+                children: <Widget>[
+                  new Expanded(
+                    flex: 4,
+                    child: new Wrap(
+                      alignment: WrapAlignment.end,
+                      crossAxisAlignment: WrapCrossAlignment.center,
+                      children: <Widget>[
+                        new Text(
+                          '巡检周期',
+                          style: new TextStyle(
+                              fontSize: 16.0,
+                              fontWeight: FontWeight.w600
+                          ),
+                        )
+                      ],
+                    ),
+                  ),
+                  new Expanded(
+                    flex: 1,
+                    child: new Text(
+                      '：',
+                      style: new TextStyle(
+                        fontSize: 16.0,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                  new Expanded(
+                    flex: 4,
+                    child: new Text(
+                      currentPatrolPeriod=='无'?'无巡检':'${patrolPeriod.text} $currentPatrolPeriod',
+                      style: new TextStyle(
+                          fontSize: 16.0,
+                          fontWeight: FontWeight.w400,
+                          color: Colors.black54
+                      ),
+                    ),
+                  ),
+                  new Expanded(
+                    flex: 2,
+                    child: currentPatrolPeriod=='无'?Container():IconButton(icon: Icon(Icons.calendar_today), onPressed: () async {
+                      print('check period');
+                      await getCheckPeriod(4);
+                      showPeriodSheet('一年内计划巡检');
+                    }),
+                  )
+                ],
+              ):Container(),
               widget.editable?BuildWidget.buildRadio('召回标记', recall, currentRecall, changeRecall):BuildWidget.buildRow('召回标记', currentRecall),
               widget.editable?new Padding(
                 padding: EdgeInsets.symmetric(vertical: 5.0),
@@ -2351,7 +2441,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
                   maintainPeriod,
                   currentMaintainPeriod,
                   dropdownMandatoryPeriod,
-                  changeMandatoryPeriod,
+                  changeMaintainPeriod,
                   showMaintain,
                   inputType: TextInputType.number, focusNode: _focusEquip[7], context: context):Row(
                 children: <Widget>[
@@ -2546,7 +2636,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
   Widget build(BuildContext context) {
     return new Scaffold(
         appBar: new AppBar(
-          title: widget.editable?Text(widget.equipment == null ? '添加设备' : '编辑设备'):Text('查看设备'),
+          title: widget.editable?Text(widget.equipment == null ? '添加医疗设备' : '编辑医疗设备'):Text('查看医疗设备'),
           elevation: 0.7,
           flexibleSpace: Container(
             decoration: BoxDecoration(

@@ -17,6 +17,7 @@ import 'package:atoi/pages/equipments/vendors_list.dart';
 import 'package:atoi/pages/equipments/contract_list.dart';
 import 'package:atoi/utils/event_bus.dart';
 import 'package:atoi/pages/inventory/stocktaking_list.dart';
+import 'package:atoi/pages/inventory/po_list.dart';
 
 /// 管理员首页类
 class EngineerHomePage extends StatefulWidget {
@@ -47,6 +48,7 @@ class _EngineerHomePageState extends State<EngineerHomePage>
   bool showEquip = false;
   bool showTable = false;
   bool limited = false;
+  bool showWare = false;
 
   /// 获取用户信息
   Future<Null> getRole() async {
@@ -578,7 +580,7 @@ class _EngineerHomePageState extends State<EngineerHomePage>
                       },
                     ),
                     AnimatedContainer(
-                      height: showEquip?160.0:0.0,
+                      height: showEquip?120.0:0.0,
                       duration: Duration(milliseconds: 200),
                       child: Column(
                         children: <Widget>[
@@ -600,7 +602,7 @@ class _EngineerHomePageState extends State<EngineerHomePage>
                                     width: 10.0,
                                   ),
                                   Text(
-                                    '设备',
+                                    '医疗设备',
                                     style: TextStyle(
                                         fontSize: 14.0,
                                         color: Colors.black54
@@ -627,7 +629,7 @@ class _EngineerHomePageState extends State<EngineerHomePage>
                                   SizedBox(
                                     width: 10.0,
                                   ),
-                                  Text('合同',
+                                  Text('服务合同',
                                     style: TextStyle(
                                         fontSize: 14.0,
                                         color: Colors.black54
@@ -655,34 +657,6 @@ class _EngineerHomePageState extends State<EngineerHomePage>
                                     width: 10.0,
                                   ),
                                   Text('供应商',
-                                    style: TextStyle(
-                                        fontSize: 14.0,
-                                        color: Colors.black54
-                                    ),
-                                  )
-                                ],
-                              ),
-                            ),
-                          ),
-                          Container(
-                            height: 40.0,
-                            child: FlatButton(
-                              onPressed: () {
-                                Navigator.of(context).push(new MaterialPageRoute(builder: (_) {
-                                  return new StocktakingList();
-                                }));
-                              },
-                              child: Row(
-                                children: <Widget>[
-                                  SizedBox(
-                                    width: 60.0,
-                                  ),
-                                  Icon(Icons.playlist_add_check, color: Colors.grey, size: 16.0,),
-                                  SizedBox(
-                                    width: 10.0,
-                                  ),
-                                  Text(
-                                    '库存盘点',
                                     style: TextStyle(
                                         fontSize: 14.0,
                                         color: Colors.black54
@@ -736,6 +710,87 @@ class _EngineerHomePageState extends State<EngineerHomePage>
                                   ),
                                   Text(
                                     '报表',
+                                    style: TextStyle(
+                                        fontSize: 14.0,
+                                        color: Colors.black54
+                                    ),
+                                  )
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    ListTile(
+                      leading: Icon(Icons.business),
+                      title: Text('库存管理',
+                        style: new TextStyle(
+                            color: Colors.blue
+                        ),
+                      ),
+                      trailing: showWare?Icon(Icons.keyboard_arrow_down):Icon(Icons.keyboard_arrow_right),
+                      onTap: () {
+                        //Navigator.of(context).push(new MaterialPageRoute(builder: (_) {
+                        //  return new ReportList();
+                        //}));
+                        setState(() {
+                          showWare = !showWare;
+                        });
+                      },
+                    ),
+                    AnimatedContainer(
+                      height: showWare?80.0:0.0,
+                      duration: Duration(milliseconds: 200),
+                      child: Column(
+                        children: <Widget>[
+                          Container(
+                            height: 40.0,
+                            child: FlatButton(
+                              onPressed: () {
+                                Navigator.of(context).push(new MaterialPageRoute(builder: (_) {
+                                  return new StocktakingList();
+                                }));
+                              },
+                              child: Row(
+                                children: <Widget>[
+                                  SizedBox(
+                                    width: 60.0,
+                                  ),
+                                  Icon(Icons.playlist_add_check, color: Colors.grey, size: 16.0,),
+                                  SizedBox(
+                                    width: 10.0,
+                                  ),
+                                  Text(
+                                    '库存盘点',
+                                    style: TextStyle(
+                                        fontSize: 14.0,
+                                        color: Colors.black54
+                                    ),
+                                  )
+                                ],
+                              ),
+                            ),
+                          ),
+                          Container(
+                            height: 40.0,
+                            child: FlatButton(
+                              onPressed: () {
+                                Navigator.of(context).push(new MaterialPageRoute(builder: (_) {
+                                  return new POList();
+                                }));
+                              },
+                              child: Row(
+                                children: <Widget>[
+                                  SizedBox(
+                                    width: 60.0,
+                                  ),
+                                  Icon(Icons.note_add, color: Colors.grey, size: 16.0,),
+                                  SizedBox(
+                                    width: 10.0,
+                                  ),
+                                  Text(
+                                    '采购单',
                                     style: TextStyle(
                                         fontSize: 14.0,
                                         color: Colors.black54

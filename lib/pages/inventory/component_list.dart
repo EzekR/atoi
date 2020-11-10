@@ -1,3 +1,5 @@
+import 'package:atoi/utils/common.dart';
+import 'package:date_format/date_format.dart';
 import 'package:flutter/material.dart';
 import 'package:atoi/utils/http_request.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
@@ -363,6 +365,7 @@ class _ComponentListState extends State<ComponentList> {
                 BuildWidget.buildCardRow('单价（元）', item['Price'].toString()),
                 BuildWidget.buildCardRow('购入日期', item['PurchaseDate'].split('T')[0]),
                 BuildWidget.buildCardRow('采购单号', item['Purchase']['ID']==0?'':'${item['Purchase']['Name']}'),
+                BuildWidget.buildCardRow('上次盘点日期', CommonUtil.TimeForm(item['LastestStocktakingDate']??'', 'yyyy-mm-dd')),
                 BuildWidget.buildCardRow('状态', item['Status']['Name']),
                 //BuildWidget.buildCardRow('状态', item['IsActive']?'启用':'停用'),
               ],
