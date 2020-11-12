@@ -1,3 +1,4 @@
+import 'package:atoi/pages/valuation/valuation_analysis.dart';
 import 'package:atoi/pages/valuation/valuation_equipment.dart';
 import 'package:atoi/widgets/build_widget.dart';
 import 'package:flutter/material.dart';
@@ -92,6 +93,9 @@ class _ValuationConditionState extends State<ValuationCondition> {
                 case 1:
                   Navigator.of(context).push(new MaterialPageRoute(builder: (_) => ValuationEquipment()));
                   break;
+                case 2:
+                  Navigator.of(context).push(new MaterialPageRoute(builder: (_) => ValuationAnalysis()));
+                  break;
               }
             },
             icon: Icon(Icons.menu),
@@ -105,7 +109,17 @@ class _ValuationConditionState extends State<ValuationCondition> {
                     Text('设备清单')
                   ],
                 ),
-              )
+              ),
+              PopupMenuItem(
+                value: 2,
+                child: Row(
+                  children: <Widget>[
+                    Icon(Icons.table_chart, color: Colors.blueAccent,),
+                    SizedBox(width: 10.0,),
+                    Text('执行结果')
+                  ],
+                ),
+              ),
             ],
           )
         ],
