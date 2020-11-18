@@ -1,4 +1,7 @@
+import 'package:atoi/pages/valuation/valuation_condition.dart';
+import 'package:atoi/utils/common.dart';
 import 'package:atoi/utils/http_request.dart';
+import 'package:atoi/widgets/build_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:date_format/date_format.dart';
@@ -17,7 +20,7 @@ class _ValuationHistoryState extends State<ValuationHistory> {
   bool _noMore = false;
   bool _loading = false;
   TextEditingController _keywords = new TextEditingController();
-  String field = 'sp.ID';
+  String field = 'vh.Name';
   String startDate;
   String endDate;
 
@@ -26,6 +29,10 @@ class _ValuationHistoryState extends State<ValuationHistory> {
       '/Valuation/QueryValHistory',
       method: HttpRequest.GET,
       params: {
+        'startDate': startDate,
+        'endDate': endDate,
+        'filterField': field,
+        'filterText': _keywords.text,
         'CurRowNum': offset,
         'PageSize': 10
       }
@@ -123,12 +130,16 @@ class _ValuationHistoryState extends State<ValuationHistory> {
                                 underline: Container(),
                                 items: <DropdownMenuItem>[
                                   DropdownMenuItem(
-                                    value: 'sp.ID',
-                                    child: Text('系统编号'),
+                                    value: 'vh.Name',
+                                    child: Text('名称'),
                                   ),
                                   DropdownMenuItem(
-                                    value: 'sp.SerialCode',
-                                    child: Text('序列号'),
+                                    value: 'vh.Comments',
+                                    child: Text('描述'),
+                                  ),
+                                  DropdownMenuItem(
+                                    value: 'u.Name',
+                                    child: Text('添加者'),
                                   ),
                                 ],
                                 onChanged: (val) {
@@ -303,6 +314,49 @@ class _ValuationHistoryState extends State<ValuationHistory> {
               ),
             ),
           ),
+          BuildWidget.buildCardRow("名称", item['Name']),
+          BuildWidget.buildCardRow("描述", item['Comments']),
+          BuildWidget.buildCardRow("添加者", item['User']['Name']),
+          BuildWidget.buildCardRow('添加日期', CommonUtil.TimeForm(item['AddDate'], 'yyyy-mm-dd')),
+          SizedBox(height: 8.0,),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: <Widget>[
+              RaisedButton(
+                onPressed: () {
+                  Navigator.of(context).push(new MaterialPageRoute(builder: (_) => ValuationCondition(condition: item['ValControl'],)));
+                },
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                padding: EdgeInsets.all(12.0),
+                color: new Color(0xff2E94B9),
+                child: Text('查看', style: TextStyle(color: Colors.white)),
+              ),
+              RaisedButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                padding: EdgeInsets.all(12.0),
+                color: new Color(0xff2E94B9),
+                child: Text('导入', style: TextStyle(color: Colors.white)),
+              ),
+              RaisedButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                padding: EdgeInsets.all(12.0),
+                color: Color(0xffD25565),
+                child: Text('删除', style: TextStyle(color: Colors.white)),
+              ),
+            ],
+          )
         ],
       ),
     );

@@ -1,5 +1,6 @@
 import 'package:atoi/pages/valuation/valuation_analysis.dart';
 import 'package:atoi/pages/valuation/valuation_equipment.dart';
+import 'package:atoi/utils/common.dart';
 import 'package:atoi/widgets/build_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:atoi/utils/constants.dart';
@@ -7,12 +8,14 @@ import 'package:flutter_cupertino_date_picker/flutter_cupertino_date_picker.dart
 import 'package:date_format/date_format.dart';
 
 class ValuationCondition extends StatefulWidget {
-
+  final Map condition;
+  ValuationCondition({Key key, this.condition}):super(key:key);
   _ValuationConditionState createState() => new _ValuationConditionState();
 }
 
 class _ValuationConditionState extends State<ValuationCondition> {
 
+  bool editable = false;
   String startDate;
   String contractDate;
   TextEditingController contractYears = new TextEditingController();
@@ -68,6 +71,42 @@ class _ValuationConditionState extends State<ValuationCondition> {
     contractDate =  formatDate(DateTime.now(), [yyyy, '-', mm]);
   }
 
+  List<Widget> buildConditions() {
+    List<Widget> _list = [
+      BuildWidget.buildRow('评估开始月', CommonUtil.TimeForm(widget.condition['AddDate'].toString(), 'yyyy-mm-dd')),
+      BuildWidget.buildRow('合同开始月', CommonUtil.TimeForm(widget.condition['ContractStartDate'].toString(), 'yyyy-mm-dd')),
+      BuildWidget.buildRow('合同年限', widget.condition['Years'].toString()),
+      BuildWidget.buildRow('医院等级', widget.condition['HospitalLevel']['ID'].toString()+'级'),
+      BuildWidget.buildRow('参考系数', widget.condition['HospitalFactor1'].toString()),
+      BuildWidget.buildRow('导入期成本', widget.condition['ImportCost'].toString()),
+      BuildWidget.buildRow('边际利润率', widget.condition['ProfitMargins'].toString()),
+      BuildWidget.buildRow('风险控制度', widget.condition['RiskRatio'].toString()),
+      BuildWidget.buildRow('VaR资产金额比例', widget.condition['VarAmount'].toString()),
+      BuildWidget.buildRow('VaR类型', widget.condition['VaRType']['Name']),
+      BuildWidget.buildRow('预测工程师数量', widget.condition['ComputeEngineer'].toString()),
+      BuildWidget.buildRow('预定工程师数量', widget.condition['ForecastEngineer'].toString()),
+      SizedBox(height: 18.0,),
+      Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: <Widget>[
+          RaisedButton(
+            onPressed: () {
+              Navigator.of(context).push(new MaterialPageRoute(builder: (_) => ValuationAnalysis()));
+            },
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(6),
+            ),
+            padding: EdgeInsets.all(12.0),
+            color: new Color(0xff2E94B9),
+            child: Text('执行结果', style: TextStyle(color: Colors.white)),
+          ),
+        ],
+      )
+    ];
+
+    return _list;
+  }
+
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: new AppBar(
@@ -93,9 +132,6 @@ class _ValuationConditionState extends State<ValuationCondition> {
                 case 1:
                   Navigator.of(context).push(new MaterialPageRoute(builder: (_) => ValuationEquipment()));
                   break;
-                case 2:
-                  Navigator.of(context).push(new MaterialPageRoute(builder: (_) => ValuationAnalysis()));
-                  break;
               }
             },
             icon: Icon(Icons.menu),
@@ -110,23 +146,13 @@ class _ValuationConditionState extends State<ValuationCondition> {
                   ],
                 ),
               ),
-              PopupMenuItem(
-                value: 2,
-                child: Row(
-                  children: <Widget>[
-                    Icon(Icons.table_chart, color: Colors.blueAccent,),
-                    SizedBox(width: 10.0,),
-                    Text('执行结果')
-                  ],
-                ),
-              ),
             ],
           )
         ],
       ),
       body: Card(
         child: ListView(
-          children: <Widget>[
+          children: editable?<Widget>[
             new Padding(
               padding: EdgeInsets.symmetric(vertical: 5.0),
               child: new Row(
@@ -364,11 +390,11 @@ class _ValuationConditionState extends State<ValuationCondition> {
                   padding: EdgeInsets.all(12.0),
                   color: new Color(0xff2E94B9),
                   child:
-                  Text('保存', style: TextStyle(color: Colors.white)),
+                  Text('执行结果', style: TextStyle(color: Colors.white)),
                 ),
               ],
             )
-          ],
+          ]:buildConditions(),
         ),
       ),
     );
