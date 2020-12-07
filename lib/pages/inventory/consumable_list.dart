@@ -7,6 +7,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:atoi/models/models.dart';
 import 'package:atoi/pages/inventory/consumable_detail.dart';
 import 'package:atoi/utils/common.dart';
+import 'package:atoi/pages/equipments/print_qrcode.dart';
 
 /// 耗材列表类
 class ConsumableList extends StatefulWidget{
@@ -382,6 +383,32 @@ class _ConsumableListState extends State<ConsumableList> {
             mainAxisAlignment: MainAxisAlignment.end,
             mainAxisSize: MainAxisSize.max,
             children: <Widget>[
+              new RaisedButton(
+                onPressed: (){
+                  Navigator.of(context).push(new MaterialPageRoute(builder: (_) => PrintQrcode(equipmentId: item['ID'], codeType: CodeType.CONSUMABLE,)));
+                },
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                color: new Color(0xff2E94B9),
+                child: new Row(
+                  children: <Widget>[
+                    new Icon(
+                      Icons.widgets,
+                      color: Colors.white,
+                    ),
+                    new Text(
+                      '二维码',
+                      style: new TextStyle(
+                          color: Colors.white
+                      ),
+                    )
+                  ],
+                ),
+              ),
+              SizedBox(
+                width: 20,
+              ),
               widget.optional!=null?Container(
                 child: RaisedButton(
                   onPressed: () {

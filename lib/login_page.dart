@@ -60,6 +60,9 @@ class _LoginPageState extends State<LoginPage> {
         case 4:
           Navigator.of(context).pushNamed(UserHomePage.tag);
           break;
+        case 5:
+          Navigator.of(context).pushNamed(HomePage.tag);
+          break;
         default:
           return;
       }
@@ -241,6 +244,9 @@ class _LoginPageState extends State<LoginPage> {
           break;
         case 4:
           Navigator.of(context).pushNamed(UserHomePage.tag);
+          break;
+        case 5:
+          Navigator.of(context).pushNamed(HomePage.tag);
           break;
       }
     } else {

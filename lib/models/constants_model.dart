@@ -80,6 +80,20 @@ class ConstantsModel extends Model {
   List _POStatus = [];
   List _InvService = [];
   List _InvSpare = [];
+  List _AssetType = [];
+  List _ComponentTypes = [];
+
+  List get ComponentTypes => _ComponentTypes;
+
+  set ComponentTypes(List value) {
+    _ComponentTypes = value;
+  }
+
+  List get AssetType => _AssetType;
+
+  set AssetType(List value) {
+    _AssetType = value;
+  }
 
   List get InvSpare => _InvSpare;
 
@@ -318,6 +332,10 @@ class ConstantsModel extends Model {
       _StockingType = resp['Data']['StocktakingObjectType'];
 
       _StockingStatus = resp['Data']['StocktakingStatus'];
+
+      _AssetType = resp['Data']['AssetType'];
+
+      _ComponentTypes = resp['Data']['ComponentTypes'];
     }
 
     var _departments = await HttpRequest.request(

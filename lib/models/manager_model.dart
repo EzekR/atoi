@@ -26,6 +26,13 @@ class ManagerModel extends Model {
   int _statusId = 98;
   int _typeId = 0;
   List _typeList = [];
+  int _assetType = 0;
+
+  int get assetType => _assetType;
+
+  set assetType(int value) {
+    _assetType = value;
+  }
 
   List get typeList => _typeList;
 
@@ -155,7 +162,7 @@ class ManagerModel extends Model {
       _urlType = _typeList.map((item) => 'typeID=$item').join('&');
     }
     var resp = await HttpRequest.request(
-      '/Request/GetRequests?userID=${userID}&PageSize=10&CurRowNum=0&statusID=$_statusId&isRecall=$_recall&department=$_departmentId&urgency=$_urgencyId&overDue=$_overDue&startDate=$_startDate&endDate=$_endDate&filterField=$_field&filterText=$_text&source=$_source&$_urlType',
+      '/Request/GetRequests?userID=${userID}&PageSize=10&CurRowNum=0&statusID=$_statusId&isRecall=$_recall&department=$_departmentId&urgency=$_urgencyId&overDue=$_overDue&startDate=$_startDate&endDate=$_endDate&filterField=$_field&filterText=$_text&source=$_source&$_urlType&assetTypeID=$_assetType',
       method: HttpRequest.GET,
     );
     print(resp);
@@ -178,7 +185,7 @@ class ManagerModel extends Model {
       _urlType = _typeList.map((item) => 'typeID=$item').join('&');
     }
     var resp = await HttpRequest.request(
-      '/Request/GetRequests?userID=${userID}&PageSize=10&CurRowNum=$_offset&statusID=$_statusId&isRecall=$_recall&department=$_departmentId&urgency=$_urgencyId&overDue=$_overDue&startDate=$_startDate&endDate=$_endDate&filterField=$_field&filterText=$_text&source=$_source&$_urlType',
+      '/Request/GetRequests?userID=${userID}&PageSize=10&CurRowNum=$_offset&statusID=$_statusId&isRecall=$_recall&department=$_departmentId&urgency=$_urgencyId&overDue=$_overDue&startDate=$_startDate&endDate=$_endDate&filterField=$_field&filterText=$_text&source=$_source&$_urlType&assetTypeID=$_assetType',
       method: HttpRequest.GET,
     );
     print(resp);
@@ -204,6 +211,7 @@ class ManagerModel extends Model {
       'urgency': _urgencyId,
       'pageSize': 10,
       'curRowNum': 0,
+      'assetTypeID': assetType
     };
     if (_text != '') {
       _params['filterText'] = _text;
@@ -236,6 +244,7 @@ class ManagerModel extends Model {
       'urgency': _urgencyId,
       'pageSize': 10,
       'curRowNum': _offsetDispatch,
+      'assetTypeID': _assetType
     };
     if (_text != '') {
       _params['filterText'] = _text;
@@ -276,7 +285,8 @@ class ManagerModel extends Model {
       'endDate': _endDate,
       'filterField': _field,
       'filterText': _text,
-      'source': _source
+      'source': _source,
+      'assetTypeID': _assetType
     };
     var resp = await HttpRequest.request(
         '/Request/GetRequests?$_urlType',
@@ -313,6 +323,7 @@ class ManagerModel extends Model {
       'endDate': _endDate,
       'filterField': _field,
       'filterText': _text,
+      'assetTypeID': _assetType,
       'source': _source
     };
     var resp = await HttpRequest.request(

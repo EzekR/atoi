@@ -246,6 +246,9 @@ Future getImage() async {
           },
           'IsRecall': currentRecall == '是' ? true : false,
           'FaultDesc': _fault.text,
+          'AssetType': {
+            'ID': _equipment['AssetType']
+          },
           'Files': fileList
         }
       };

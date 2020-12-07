@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'dart:async';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:atoi/utils/event_bus.dart';
+import 'dart:developer';
 
 /*
  * 封装 restful 请求
@@ -67,7 +68,7 @@ class HttpRequest {
     EventBus bus = new EventBus();
     /// 打印请求相关信息：请求地址、请求方式、请求参数
     print('请求地址：【' + method + '  ' + url + '】');
-    print('请求body：' + data.toString());
+    log('请求body：'+data.toString());
     print('请求params：'+_params.toString());
     print('服务器地址：'+serverUrl);
 
@@ -85,7 +86,7 @@ class HttpRequest {
       }
 
       /// 打印响应相关信息
-      print('响应数据：' + response.toString());
+      log('响应数据：' + response.toString());
     } on DioError catch (e) {
       /// 打印请求失败相关信息
       print('请求出错：' + e.toString());

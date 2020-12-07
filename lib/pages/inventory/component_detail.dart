@@ -92,10 +92,8 @@ class _ComponentDetailState extends State<ComponentDetail> {
         componentsDropdown = resp['Data'].map<DropdownMenuItem<String>>((item) {
           return DropdownMenuItem<String>(
             value: item['Name'],
-            child: Center(
-              child: Text(
-                  item['Name']
-              ),
+            child: Text(
+                item['Name']
             ),
           );
         }).toList();
@@ -130,6 +128,23 @@ class _ComponentDetailState extends State<ComponentDetail> {
   List<FocusNode> _focusComponent = new List(10).map((item) {
     return new FocusNode();
   }).toList();
+
+  Future<bool> componentIsUsed(int componentID, int type) async {
+    Map resp = await HttpRequest.request(
+      '/DispatchReport/CheckComponent',
+      method: HttpRequest.GET,
+      params: {
+        'dispatchReportID': -1,
+        'invComponentID': componentID,
+        'type': type
+      }
+    );
+    if (resp['ResultCode'] == '00') {
+      return resp['Data'];
+    } else {
+      return true;
+    }
+  }
 
   Future<bool> componentExist(String serialCode) async {
     Map resp = await HttpRequest.request(
@@ -232,6 +247,14 @@ class _ComponentDetailState extends State<ComponentDetail> {
       }
     };
     if (widget.component != null) {
+      bool res1 = await componentIsUsed(widget.component['ID'], 1);
+      bool res2 = await componentIsUsed(widget.component['ID'], 2);
+      if (res1 || res2) {
+        showDialog(context: context, builder: (context) => CupertinoAlertDialog(
+          title: new Text('该零件在作业报告中已被使用无法修改状态'),
+        ));
+        return;
+      }
       _info['ID'] = widget.component['ID'];
     }
     var _data = {
@@ -242,7 +265,7 @@ class _ComponentDetailState extends State<ComponentDetail> {
       bool existence = await componentExist(serialCode.text);
       if (existence) {
         showDialog(context: context, builder: (context) => CupertinoAlertDialog(
-          title: new Text('零件序列号已存在'),
+          title: new Text('该零件状态为在库，不可新增'),
         ));
         return;
       } else {

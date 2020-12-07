@@ -589,7 +589,7 @@ class _EngineerHomePageState extends State<EngineerHomePage>
                             child: FlatButton(
                               onPressed: () {
                                 Navigator.of(context).push(new MaterialPageRoute(builder: (_) {
-                                  return new EquipmentsList();
+                                  return new EquipmentsList(equipmentType: EquipmentType.MEDICAL,);
                                 }));
                               },
                               child: Row(

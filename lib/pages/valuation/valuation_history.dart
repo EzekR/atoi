@@ -324,7 +324,7 @@ class _ValuationHistoryState extends State<ValuationHistory> {
             children: <Widget>[
               RaisedButton(
                 onPressed: () {
-                  Navigator.of(context).push(new MaterialPageRoute(builder: (_) => ValuationCondition(condition: item['ValControl'],)));
+                  Navigator.of(context).push(new MaterialPageRoute(builder: (_) => ValuationCondition(condition: item['ValControl'], historyID: item['ID'],)));
                 },
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(6),

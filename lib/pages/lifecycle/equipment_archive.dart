@@ -147,6 +147,9 @@ Future getImage() async {
             }
           ],
           'FaultDesc': _fault.text,
+          'AssetType': {
+            'ID': _equipment['AssetType']
+          },
           'Files': fileList
         }
       };

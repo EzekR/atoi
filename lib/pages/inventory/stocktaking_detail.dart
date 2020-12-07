@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:developer';
 
 import 'package:atoi/pages/inventory/component_detail.dart';
 import 'package:atoi/pages/inventory/consumable_detail.dart';
@@ -81,7 +82,8 @@ class _StocktakingDetailState extends State<StocktakingDetail> {
   }
 
   Future<int> saveStocktaking(int status) async {
-    bool result = await checkUnique();
+    //bool result = await checkUnique();
+    bool result = true;
     if (result) {
       Map resp = await HttpRequest.request(
         '/Stocktaking/SaveStocktaking',
@@ -284,9 +286,42 @@ class _StocktakingDetailState extends State<StocktakingDetail> {
     }
   }
 
-  void deleteObj(Map item) {
+  void deleteObj(Map item) async {
+    Map resp = await HttpRequest.request(
+      '/Stocktaking/DeleteStocktakingElement',
+      method: HttpRequest.POST,
+      data: {
+        'id': item['ID'],
+        'type': stockType
+      }
+    );
+    if (resp['ResultCode'] == '00') {
+      setState(() {
+        stockItems.remove(item);
+      });
+    } else {
+      showDialog(context: context, builder: (context) => CupertinoAlertDialog(
+        title: new Text('删除失败'),
+      ));
+      return;
+    }
+  }
+
+  void setScanStuff() {
+    Map decoded = jsonDecode(barcode);
+    log('$decoded');
+    int index = stockItems.indexWhere((item) => item['ID'] == decoded['ID']);
+    if (index < 0) {
+      showDialog(context: context, builder: (context) => CupertinoAlertDialog(
+        title: new Text('盘点清单不存在该物件'),
+      ));
+      return;
+    }
+    stockItems.removeAt(index);
+    List reversed = stockItems.reversed.toList();
+    reversed.add(stockItems[index]);
     setState(() {
-      stockItems.remove(item);
+      stockItems = reversed.reversed.toList();
     });
   }
 
@@ -296,6 +331,7 @@ class _StocktakingDetailState extends State<StocktakingDetail> {
       setState(() {
         return this.barcode = barcode;
       });
+      setScanStuff();
     } on PlatformException catch (e) {
       if (e.code == BarcodeScanner.CameraAccessDenied) {
         setState(() {
@@ -517,7 +553,6 @@ class _StocktakingDetailState extends State<StocktakingDetail> {
                           IconButton(
                             icon: Icon(Icons.delete_forever, color: Colors.red,),
                             onPressed: () {
-
                               showDialog(context: context, builder: (context) => CupertinoAlertDialog(
                                 title: Text('是否删除此盘点对象？'),
                                 actions: <Widget>[
@@ -827,6 +862,12 @@ class _StocktakingDetailState extends State<StocktakingDetail> {
                               Navigator.of(context).push(new MaterialPageRoute(builder: (_) => ComponentDetail(editable: true, isStock: true,))).then((result) async {
                                 if (result != null) {
                                   Map _info = jsonDecode(result);
+                                  int index = stockItems.indexWhere((item) => item['SerialCode'] == _info['SerialCode']);
+                                  if (index > -1) {
+                                    showDialog(context: context, builder: (context) => CupertinoAlertDialog(
+                                      title: new Text('相同零件序列号已在盘点列表中'),
+                                    ));
+                                  }
                                   bool save = await saveStuffToStocktaking(_info);
                                   if (save) {
                                     getStockDetailByID();
@@ -872,7 +913,7 @@ class _StocktakingDetailState extends State<StocktakingDetail> {
                               });
                               break;
                             case 4:
-                              Navigator.of(context).push(new MaterialPageRoute(builder: (_) => SpareDetail(editable: true,))).then((result) async {
+                              Navigator.of(context).push(new MaterialPageRoute(builder: (_) => SpareDetail(editable: true, isStock: true,))).then((result) async {
                                 if (result != null) {
                                   Map _info = jsonDecode(result);
                                   int ind = stockItems.indexWhere((item) => item['FujiClass2']['ID']==_info['FujiClass2']['ID']||item['StartDate']==_info['StartDate']);

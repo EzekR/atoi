@@ -1,3 +1,4 @@
+import 'package:atoi/utils/common.dart';
 import 'package:atoi/utils/http_request.dart';
 import 'package:atoi/widgets/build_widget.dart';
 import 'package:flutter/material.dart';
@@ -281,7 +282,7 @@ class _ValuationEquipmentState extends State<ValuationEquipment> {
           BuildWidget.buildCardRow('设备序列号', item['Equipment']['SerialCode']),
           BuildWidget.buildCardRow('厂商', item['Equipment']['Manufacturer']['Name']),
           BuildWidget.buildCardRow('科室', item['Equipment']['Department']['Name']),
-          BuildWidget.buildCardRow('金额', item['Equipment']['PurchaseAmount']),
+          BuildWidget.buildCardRow('金额', CommonUtil.CurrencyForm(item['Equipment']['PurchaseAmount'], times: 0, digits: 0)),
           BuildWidget.buildCardRow('设备类型', item['Equipment']['FujiClass2']['EquipmentType']['Name']),
           BuildWidget.buildCardRow('富士I类', item['Equipment']['FujiClass2']['FujiClass1']['Name']),
           BuildWidget.buildCardRow('富士II类', item['Equipment']['FujiClass2']['Name']),

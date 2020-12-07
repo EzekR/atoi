@@ -16,7 +16,8 @@ import 'package:atoi/pages/superuser/dashboard.dart';
 /// 设备列表页面类
 class EquipmentsList extends StatefulWidget{
   final String equipmentId;
-  EquipmentsList({Key key, this.equipmentId}):super(key: key);
+  final EquipmentType equipmentType;
+  EquipmentsList({Key key, this.equipmentId, this.equipmentType}):super(key: key);
   _EquipmentsListState createState() => _EquipmentsListState();
 }
 
@@ -30,6 +31,7 @@ class _EquipmentsListState extends State<EquipmentsList> {
   bool _loading = false;
   bool _editable = true;
   ConstantsModel cModel;
+  String cardHead;
 
   TextEditingController _keywords = new TextEditingController();
   String searchFilter = 'e.ID';
@@ -44,6 +46,8 @@ class _EquipmentsListState extends State<EquipmentsList> {
   int fujiClass2 = 0;
   bool usageStatus = false;
   Future<SharedPreferences> prefs = SharedPreferences.getInstance();
+  String prefix;
+  String pageTitle;
 
   ScrollController _scrollController = new ScrollController();
   bool _noMore = false;
@@ -100,7 +104,7 @@ class _EquipmentsListState extends State<EquipmentsList> {
       _deviceCode.clear();
       _deviceName.clear();
       usageStatus = false;
-      searchFilter = 'e.ID';
+      searchFilter = '$prefix.ID';
     });
   }
 
@@ -117,13 +121,25 @@ class _EquipmentsListState extends State<EquipmentsList> {
     SharedPreferences _prefs = await SharedPreferences.getInstance();
     int userId = _prefs.getInt('userID');
     filterText = filterText??'';
+    String url;
+    switch (widget.equipmentType) {
+      case EquipmentType.MEDICAL:
+        url = '/Equipment/Getdevices';
+        break;
+      case EquipmentType.MEASURE:
+        url = '/MeasInstrum/QueryMeasInstrums';
+        break;
+      case EquipmentType.OTHER:
+        url = '/OtherEqpt/QueryOtherEqpts';
+        break;
+    }
     var resp = await HttpRequest.request(
-      '/Equipment/Getdevices',
+      url,
       method: HttpRequest.GET,
       params: {
         'filterText': _keywords.text,
         'status': machineStatusId,
-        'warrantyStatus': warrantyId,
+        //'warrantyStatus': warrantyId,
         'departmentID': departmentId,
         'filterTextName': _deviceName.text,
         'filterTextSerialCode': _deviceCode.text,
@@ -131,7 +147,9 @@ class _EquipmentsListState extends State<EquipmentsList> {
         'useStatus': usageStatus,
         'PageSize': 10,
         'CurRowNum': offset,
-        'userID': userId,
+        'sortField': searchFilter,
+        'sortDirection': true,
+        //'userID': userId,
         'fujiClass2ID': fujiClass2
       }
     );
@@ -205,15 +223,15 @@ class _EquipmentsListState extends State<EquipmentsList> {
                                 underline: Container(),
                                 items: <DropdownMenuItem>[
                                   DropdownMenuItem(
-                                    value: 'e.ID',
+                                    value: '$prefix.ID',
                                     child: Text('系统编号'),
                                   ),
                                   DropdownMenuItem(
-                                    value: 'e.AssetCode',
+                                    value: '$prefix.AssetCode',
                                     child: Text('资产编号'),
                                   ),
                                   DropdownMenuItem(
-                                    value: 'e.EquipmentCode',
+                                    value: '$prefix.EquipmentCode',
                                     child: Text('设备型号'),
                                   ),
                                 ],
@@ -614,6 +632,23 @@ class _EquipmentsListState extends State<EquipmentsList> {
 
   void initState() {
     super.initState();
+    switch (widget.equipmentType) {
+      case EquipmentType.MEDICAL:
+        prefix = 'e';
+        pageTitle = '医疗设备';
+        cardHead = "设备";
+        break;
+      case EquipmentType.MEASURE:
+        prefix = 'mi';
+        pageTitle = '计量器具';
+        cardHead = "器具";
+        break;
+      case EquipmentType.OTHER:
+        prefix = 'oe';
+        pageTitle = '其他设备';
+        cardHead = "设备";
+        break;
+    }
     cModel = MainModel.of(context);
     initFilter();
     setState(() {
@@ -765,6 +800,49 @@ class _EquipmentsListState extends State<EquipmentsList> {
     }
   }
 
+  List<Widget> _buildEquipInfo(Map item) {
+    List<Widget> _list = [];
+    switch (widget.equipmentType) {
+      case EquipmentType.MEDICAL:
+        _list.addAll([
+          BuildWidget.buildCardRow('资产编号', item['AssetCode']),
+          BuildWidget.buildCardRow('设备型号', item['EquipmentCode']),
+          BuildWidget.buildCardRow('序列号', item['SerialCode']),
+          BuildWidget.buildCardRow('厂商', item['Manufacturer']['Name']),
+          BuildWidget.buildCardRow('资产等级', item['AssetLevel']['Name']),
+          BuildWidget.buildCardRow('使用科室', item['Department']['Name']),
+          BuildWidget.buildCardRow('设备状态', item['EquipmentStatus']['Name']),
+          BuildWidget.buildCardRow('维保状态', item['WarrantyStatus']),
+          BuildWidget.buildCardRow('富士II类', item['FujiClass2']['Name']),
+        ]);
+        break;
+      case EquipmentType.MEASURE:
+        _list.addAll([
+          BuildWidget.buildCardRow('资产编号', item['AssetCode']),
+          BuildWidget.buildCardRow('序列号', item['SerialCode']),
+          BuildWidget.buildCardRow('器具型号', item['ModelCode']),
+          BuildWidget.buildCardRow('厂商', item['Manufacturer']['Name']),
+          BuildWidget.buildCardRow('资产等级', item['AssetLevel']['Name']),
+          BuildWidget.buildCardRow('使用科室', item['Department']['Name']),
+          BuildWidget.buildCardRow('器具状态', item['EquipmentStatus']['Name']),
+          BuildWidget.buildCardRow('关联设备', item['Equipment']['Name']),
+        ]);
+        break;
+      case EquipmentType.OTHER:
+        _list.addAll([
+          BuildWidget.buildCardRow('资产编号', item['AssetCode']),
+          BuildWidget.buildCardRow('序列号', item['SerialCode']),
+          BuildWidget.buildCardRow('设备型号', item['OtherEqptCode']),
+          BuildWidget.buildCardRow('厂商', item['Manufacturer']['Name']),
+          BuildWidget.buildCardRow('资产等级', item['AssetLevel']['Name']),
+          BuildWidget.buildCardRow('使用科室', item['Department']['Name']),
+          BuildWidget.buildCardRow('设备状态', item['EquipmentStatus']['Name']),
+        ]);
+        break;
+    }
+    return _list;
+  }
+
   Card buildEquipmentCard(Map item) {
     return new Card(
       child: new Column(
@@ -775,11 +853,11 @@ class _EquipmentsListState extends State<EquipmentsList> {
             leading: IconButton(
               icon: Icon(Icons.desktop_mac, size: 36.0, color: Colors.green,),
               onPressed: () {
-                Navigator.of(context).push(new MaterialPageRoute(builder: (_) => new EquipmentDetail(editable: false, equipment: item,)));
+                Navigator.of(context).push(new MaterialPageRoute(builder: (_) => new EquipmentDetail(editable: false, equipment: item, equipmentType: widget.equipmentType,)));
               },
             ),
             title: Text(
-              "设备名称：${item['Name']}",
+              "$cardHead名称：${item['Name']}",
               style: new TextStyle(
                   fontSize: 16.0,
                   color: Theme.of(context).primaryColor
@@ -795,17 +873,7 @@ class _EquipmentsListState extends State<EquipmentsList> {
           Padding(
             padding: EdgeInsets.symmetric(horizontal: 8.0),
             child: Column(
-              children: <Widget>[
-                BuildWidget.buildCardRow('资产编号', item['AssetCode']),
-                BuildWidget.buildCardRow('设备型号', item['EquipmentCode']),
-                BuildWidget.buildCardRow('序列号', item['SerialCode']),
-                BuildWidget.buildCardRow('厂商', item['Manufacturer']['Name']),
-                BuildWidget.buildCardRow('资产等级', item['AssetLevel']['Name']),
-                BuildWidget.buildCardRow('使用科室', item['Department']['Name']),
-                BuildWidget.buildCardRow('设备状态', item['EquipmentStatus']['Name']),
-                BuildWidget.buildCardRow('维保状态', item['WarrantyStatus']),
-                BuildWidget.buildCardRow('富士II类', item['FujiClass2']['Name']),
-              ],
+              children: _buildEquipInfo(item),
             ),
           ),
           new Row(
@@ -814,8 +882,20 @@ class _EquipmentsListState extends State<EquipmentsList> {
             children: <Widget>[
               new RaisedButton(
                 onPressed: (){
+                  CodeType codeType;
+                  switch (widget.equipmentType) {
+                    case EquipmentType.MEDICAL:
+                      codeType = CodeType.DEVICE;
+                      break;
+                    case EquipmentType.MEASURE:
+                      codeType = CodeType.MEASURE;
+                      break;
+                    case EquipmentType.OTHER:
+                      codeType = CodeType.OTHER;
+                      break;
+                  }
                   Navigator.of(context).push(new MaterialPageRoute(builder: (_) {
-                    return new PrintQrcode(equipmentId: item['ID'],);
+                    return new PrintQrcode(equipmentId: item['ID'], codeType: codeType,);
                   }));
                 },
                 shape: RoundedRectangleBorder(
@@ -847,7 +927,7 @@ class _EquipmentsListState extends State<EquipmentsList> {
                     _keywords.clear();
                   });
                   Navigator.of(context).push(new MaterialPageRoute(builder: (_) {
-                    return new EquipmentDetail(equipment: item, editable: _editable,);
+                    return new EquipmentDetail(equipment: item, editable: _editable, equipmentType: widget.equipmentType,);
                   })).then((result) {
                     setState(() {
                       _loading = true;
@@ -885,26 +965,6 @@ class _EquipmentsListState extends State<EquipmentsList> {
               ),
               new RaisedButton(
                 onPressed: () async {
-                  //List<TimelineModel> _steps = await getTimeline(item['ID']);
-                  //if (_steps.length > 0) {
-                  //  showDialog(context: context,
-                  //      builder: (context) => SimpleDialog(
-                  //        title: new Text('生命周期'),
-                  //        children: <Widget>[
-                  //          new Container(
-                  //            width: 300.0,
-                  //            height: _steps.length*80.0,
-                  //            child: Timeline(
-                  //              children: _steps,
-                  //              position: TimelinePosition.Left,
-                  //            )
-                  //          ),
-                  //        ],
-                  //      )
-                  //  );
-                  //} else {
-                  //  showDialog(context: context, builder: (context) => CupertinoAlertDialog(title: new Text('暂无事件'),));
-                  //}
                   if (limited&&role!=1) {
                     return;
                   }
@@ -952,7 +1012,7 @@ class _EquipmentsListState extends State<EquipmentsList> {
             onChanged: (val) {
               getEquipments(filterText: val);
             },
-          ):Text('医疗设备列表'),
+          ):Text("$pageTitle列表"??''),
           elevation: 0.7,
           actions: <Widget>[
             isSearchState?IconButton(
@@ -1002,7 +1062,7 @@ class _EquipmentsListState extends State<EquipmentsList> {
         floatingActionButton: role==3?Container():FloatingActionButton(
           onPressed: () {
             Navigator.of(context).push(new MaterialPageRoute(builder: (_) {
-              return new EquipmentDetail(editable: true,);
+              return new EquipmentDetail(editable: true, equipmentType: widget.equipmentType,);
             })).then((result) {
               setState(() {
                 offset = 0;
@@ -1020,4 +1080,10 @@ class _EquipmentsListState extends State<EquipmentsList> {
         ),
     );
   }
+}
+
+enum EquipmentType {
+  MEDICAL,
+  MEASURE,
+  OTHER,
 }

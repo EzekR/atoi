@@ -104,7 +104,7 @@ class EngineerModel extends Model {
       'PageSize': 10,
       'CurRowNum': 0,
       'urgency': _dispatchUrgencyId,
-      'type': _dispatchTypeId
+      'typeIDs': _dispatchTypeId
     };
     if (_filterText != '') {
       _params['filterText'] = _filterText;
@@ -135,7 +135,7 @@ class EngineerModel extends Model {
       'PageSize': 10,
       'CurRowNum': _offset,
       'urgency': _dispatchUrgencyId,
-      'type': _dispatchTypeId
+      'typeIDs': _dispatchTypeId
     };
     if (_filterText != '') {
       _params['filterText'] = _filterText;
@@ -161,7 +161,7 @@ class EngineerModel extends Model {
     var userID = await prefs.getInt('userID');
     Map<String, dynamic> _params = {
       'urgency': _dispatchUrgencyId,
-      'type': _dispatchTypeId,
+      'typeIDs': _dispatchTypeId,
     };
     if (_filterText != '') {
       _params['filterText'] = _filterText;
@@ -187,7 +187,7 @@ class EngineerModel extends Model {
     var userID = await prefs.getInt('userID');
     Map<String, dynamic> _params = {
       'urgency': _dispatchUrgencyId,
-      'type': _dispatchTypeId,
+      'typeIDs': _dispatchTypeId,
     };
     if (_filterText != '') {
       _params['filterText'] = _filterText;

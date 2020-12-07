@@ -1,8 +1,10 @@
+import 'package:atoi/utils/common.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:photo_view/photo_view.dart';
 import 'dart:typed_data';
 import 'dart:io';
+import 'dart:developer';
 
 /// 页面通用组件构建类
 class BuildWidget {
@@ -10,6 +12,7 @@ class BuildWidget {
 
   /// 构建页面信息行
   static GestureDetector buildRow(String labelText, String defaultText, {Function onTap}) {
+    double textNumber = double.tryParse(defaultText);
     return GestureDetector(
       onTap: onTap,
       child: new Padding(
@@ -45,6 +48,7 @@ class BuildWidget {
             new Expanded(
               flex: 6,
               child: new Text(
+                //textNumber==null?defaultText:CommonUtil.CurrencyForm(textNumber, times: 0, digits: 0),
                 defaultText,
                 style: new TextStyle(
                     fontSize: 16.0,
@@ -61,6 +65,7 @@ class BuildWidget {
 
   /// 构建列表信息行
   static GestureDetector buildCardRow(String leading, String content, {Function onTap}) {
+    double textNumber = double.tryParse(content);
     return new GestureDetector(
       onTap: onTap,
       child: new Row(
@@ -92,6 +97,7 @@ class BuildWidget {
           new Expanded(
             flex: 7,
             child: new Text(
+              //textNumber==null?content:CommonUtil.CurrencyForm(textNumber, times: 0, digits: 0),
               content,
               style: new TextStyle(
                   fontSize: 16.0,
@@ -404,6 +410,67 @@ class BuildWidget {
     );
   }
 
+  static Row buildDropdownNew(String title, int currentItem, List dropdownItems, Function changeDropdown, {bool required}) {
+    return new Row(
+      children: <Widget>[
+        new Expanded(
+          flex: 4,
+          child: new Wrap(
+            alignment: WrapAlignment.end,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            children: <Widget>[
+              required?new Text(
+                '*',
+                style: new TextStyle(
+                    color: Colors.red
+                ),
+              ):Container(),
+              new Text(
+                title,
+                style: new TextStyle(
+                    fontSize: 16.0,
+                    fontWeight: FontWeight.w600
+                ),
+              )
+            ],
+          ),
+        ),
+        new Expanded(
+          flex: 1,
+          child: new Text(
+            '：',
+            style: new TextStyle(
+              fontSize: 16.0,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ),
+        new Expanded(
+          flex: 6,
+          child: new DropdownButton(
+            value: currentItem,
+            items: dropdownItems.map<DropdownMenuItem>((item) {
+              return DropdownMenuItem(
+                value: item['ID'],
+                child: Text(
+                  item['Name'],
+                  style: TextStyle(
+                      fontSize: 12.0
+                  ),
+                ),
+              );
+            }).toList(),
+            onChanged: changeDropdown,
+            style: new TextStyle(
+              color: Colors.black54,
+              fontSize: 12.0,
+            ),
+          ),
+        )
+      ],
+    );
+  }
+
   static GestureDetector buildDropdownWithList(String title, int currentItem, List dropdownItems, Function changeDropdown, {FocusNode focusNode, BuildContext context, bool required}) {
     //if (context != null) {
     //  FocusScope.of(context).requestFocus(new FocusNode());
@@ -538,6 +605,80 @@ class BuildWidget {
               onTap: () {
                 focusNode.requestFocus();
               },
+            ),
+          )
+        ],
+      ),
+    );
+  }
+
+  static Padding buildInputWithSearch(String labelText, TextEditingController controller, {TextInputType inputType, int lines, int maxLength, FocusNode focusNode, Function tapEvent, bool required, Function pressed, bool enabled}) {
+    inputType??TextInputType.text;
+    lines = lines ?? 3;
+    maxLength = maxLength ?? 30;
+    focusNode = focusNode ?? new FocusNode();
+    required = required??false;
+    pressed = pressed??null;
+    return new Padding(
+      padding: EdgeInsets.symmetric(vertical: 5.0),
+      child: new Row(
+        children: <Widget>[
+          new Expanded(
+            flex: 4,
+            child: new Wrap(
+              alignment: WrapAlignment.end,
+              crossAxisAlignment: WrapCrossAlignment.start,
+              children: <Widget>[
+                required?new Text(
+                  '*',
+                  style: new TextStyle(
+                      color: Colors.red
+                  ),
+                ):Container(),
+                new Text(
+                  labelText,
+                  style: new TextStyle(
+                      fontSize: 16.0,
+                      fontWeight: FontWeight.w600
+                  ),
+                )
+              ],
+            ),
+          ),
+          new Expanded(
+            flex: 1,
+            child: new Text(
+              '：',
+              style: new TextStyle(
+                fontSize: 16.0,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+          new Expanded(
+            flex: 4,
+            child: new TextField(
+              controller: controller,
+              maxLines: lines,
+              maxLength: maxLength,
+              keyboardType: inputType,
+              focusNode: focusNode,
+              enabled: enabled??true,
+              //textInputAction: TextInputAction.next,
+              decoration: InputDecoration(
+                fillColor: Color(0xfff0f0f0),
+                filled: true,
+              ),
+              onTap: () {
+                focusNode.requestFocus();
+              },
+            ),
+          ),
+          new Expanded(
+            flex: 2,
+            child: IconButton(
+              icon: Icon(Icons.search),
+              onPressed: pressed,
             ),
           )
         ],

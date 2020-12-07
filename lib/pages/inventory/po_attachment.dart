@@ -1,3 +1,6 @@
+import 'dart:developer';
+
+import 'package:atoi/pages/equipments/equipments_list.dart';
 import 'package:atoi/pages/inventory/consumable_list.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
@@ -57,6 +60,7 @@ class _POAttachmentState extends State<POAttachment> {
   // component
   TextEditingController componentName = new TextEditingController(),
                         componentDesc = new TextEditingController(),
+                        unit = new TextEditingController(),
                         componentPrice = new TextEditingController();
   //service
   TextEditingController serviceName = new TextEditingController(),
@@ -92,6 +96,7 @@ class _POAttachmentState extends State<POAttachment> {
           _consumableDetail = widget.po['Consumable'];
           spec.text = widget.po['Specification'];
           model.text = widget.po['Model'];
+          unit.text = widget.po['Unit'];
           price.text = widget.po['Price'].toString();
           quantity.text = widget.po['Qty'].toString();
         }
@@ -486,6 +491,12 @@ class _POAttachmentState extends State<POAttachment> {
         return;
       }
 
+      if (unit.text.isEmpty) {
+        showDialog(context: context, builder: (context) => CupertinoAlertDialog(
+          title: new Text('单位不可为空'),
+        )).then((result) => FocusScope.of(context).requestFocus(_focusComponent[5]));
+        return;
+      }
       if (model.text.isEmpty) {
         showDialog(context: context, builder: (context) => CupertinoAlertDialog(
           title: new Text('型号不可为空'),
@@ -558,7 +569,8 @@ class _POAttachmentState extends State<POAttachment> {
           'Specification': spec.text,
           'Model': model.text,
           'Price': price.text,
-          'Qty': quantity.text
+          'Qty': quantity.text,
+          'Unit': unit.text
         };
         break;
       case AttachmentType.SERVICE:
@@ -573,6 +585,7 @@ class _POAttachmentState extends State<POAttachment> {
         };
         break;
     }
+    log("$_componentTmp");
     Navigator.of(context).pop(jsonEncode(_componentTmp));
   }
 
@@ -659,7 +672,7 @@ class _POAttachmentState extends State<POAttachment> {
                         icon: Icon(Icons.search),
                         onPressed: () async {
                           FocusScope.of(context).requestFocus(new FocusNode());
-                          final _searchResult = await Navigator.of(context).push(new MaterialPageRoute(builder: (_) => SearchLazy(searchType: SearchType.DEVICE,)));
+                          final _searchResult = await Navigator.of(context).push(new MaterialPageRoute(builder: (_) => SearchLazy(searchType: SearchType.DEVICE, onlyType: EquipmentType.MEDICAL,)));
                           print(_searchResult);
                           if (_searchResult != null &&
                               _searchResult != 'null') {
@@ -748,6 +761,7 @@ class _POAttachmentState extends State<POAttachment> {
           widget.editable?BuildWidget.buildInput('规格', spec, maxLength: 20, focusNode: _focusComponent[1], required: true):BuildWidget.buildRow('规格', spec.text),
           widget.editable?BuildWidget.buildInput('型号', model, focusNode: _focusComponent[2], required: true):BuildWidget.buildRow('型号', model.text),
           widget.editable?BuildWidget.buildInput('单价（元）', price, maxLength: 13, focusNode: _focusComponent[3], required: true, inputType: TextInputType.numberWithOptions()):BuildWidget.buildRow('单价(元)', price.text),
+          widget.editable?BuildWidget.buildInput('单位', unit, maxLength: 10, focusNode: _focusComponent[5], required: true, ):BuildWidget.buildRow('单位', price.text),
           widget.editable?BuildWidget.buildInput('数量', quantity, maxLength: 13, inputType: TextInputType.number, focusNode: _focusComponent[4], required: true):BuildWidget.buildRow('数量', quantity.text),
         ]);
         break;

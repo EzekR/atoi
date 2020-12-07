@@ -6,6 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:atoi/models/models.dart';
 import 'package:atoi/pages/inventory/spare_detail.dart';
 import 'package:atoi/utils/common.dart';
+import 'package:atoi/pages/equipments/print_qrcode.dart';
 
 /// 备件列表类
 class SpareList extends StatefulWidget{
@@ -403,6 +404,9 @@ class _SpareListState extends State<SpareList> {
             padding: EdgeInsets.symmetric(horizontal: 8.0),
             child: Column(
               children: <Widget>[
+                BuildWidget.buildCardRow('名称', item['Name']),
+                BuildWidget.buildCardRow('型号', item['Model']),
+                BuildWidget.buildCardRow('厂家', item['Manufacturer']),
                 BuildWidget.buildCardRow('富士II类', item['FujiClass2']['Name']),
                 BuildWidget.buildCardRow('序列号', item['SerialCode']),
                 BuildWidget.buildCardRow('月租(元)', item['Price'].toString()),
@@ -410,6 +414,7 @@ class _SpareListState extends State<SpareList> {
                 BuildWidget.buildCardRow('结束日期', item['EndDate'].split('T')[0]),
                 BuildWidget.buildCardRow('上次盘点日期', CommonUtil.TimeForm(item['LastestStocktakingDate']??'', 'yyyy-mm-dd')),
                 BuildWidget.buildCardRow('状态', today.isBefore(_start)?'未使用':'当前在用'),
+                BuildWidget.buildCardRow('使用状态', item['UsageStatus']),
                 //BuildWidget.buildCardRow('状态', item['IsActive']?'启用':'停用'),
               ],
             ),
@@ -418,6 +423,32 @@ class _SpareListState extends State<SpareList> {
             mainAxisAlignment: MainAxisAlignment.end,
             mainAxisSize: MainAxisSize.max,
             children: <Widget>[
+              new RaisedButton(
+                onPressed: (){
+                  Navigator.of(context).push(new MaterialPageRoute(builder: (_) => PrintQrcode(equipmentId: item['ID'], codeType: CodeType.SPARE,)));
+                },
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                color: new Color(0xff2E94B9),
+                child: new Row(
+                  children: <Widget>[
+                    new Icon(
+                      Icons.widgets,
+                      color: Colors.white,
+                    ),
+                    new Text(
+                      '二维码',
+                      style: new TextStyle(
+                          color: Colors.white
+                      ),
+                    )
+                  ],
+                ),
+              ),
+              SizedBox(
+                width: 20,
+              ),
               new RaisedButton(
                 onPressed: (){
                   Navigator.of(context).push(new MaterialPageRoute(builder: (_) {

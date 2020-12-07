@@ -171,6 +171,9 @@ Future getImage() async {
             'ID': model.FaultMaintain[_currentResult],
           },
           'FaultDesc': _fault.text,
+          'AssetType': {
+            'ID': _equipment['AssetType']
+          },
           'Files': fileList
         }
       };

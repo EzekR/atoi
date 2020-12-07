@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:atoi/pages/equipments/equipments_list.dart';
 import 'package:atoi/utils/http_request.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
@@ -6,10 +7,12 @@ import 'dart:convert';
 
 class SearchLazy extends StatefulWidget {
 
-  SearchLazy({Key key, this.searchType, this.fujiClass2}):super(key: key);
+  SearchLazy({Key key, this.searchType, this.fujiClass2, this.equipmentID, this.onlyType}):super(key: key);
 
   final SearchType searchType;
+  final EquipmentType onlyType;
   final int fujiClass2;
+  final int equipmentID;
 
   _SearchLazyState createState() => _SearchLazyState();
 }
@@ -23,6 +26,8 @@ class _SearchLazyState extends State<SearchLazy> {
   TextEditingController query = new TextEditingController();
   String hintText = '请输入设备名称/型号/序列';
   String noMoreText = '没有更多设备';
+  String deviceUrl = '/Equipment/Getdevices';
+  int deviceType = 1;
 
   void initState() {
     getData('');
@@ -51,6 +56,11 @@ class _SearchLazyState extends State<SearchLazy> {
           noMoreText = '没有更多厂商';
         });
         break;
+      case SearchType.COMPONENT:
+        setState(() {
+          hintText = '请输入零件简称';
+          noMoreText = '没有更多零件';
+        });
     }
     _scrollController.addListener(() {
       if (_scrollController.position.pixels == _scrollController.position.maxScrollExtent) {
@@ -76,14 +86,46 @@ class _SearchLazyState extends State<SearchLazy> {
     Map<String, dynamic> _params;
     switch (widget.searchType) {
       case SearchType.DEVICE:
-        _url = '/Equipment/Getdevices';
-        _params = {
-          'filterText': filter,
-          'filterField': 'e.Name',
-          'departmentId': -1,
-          'CurRowNum': offset,
-          'PageSize': 20
-        };
+        _url = deviceUrl;
+        switch (deviceType) {
+          case 1:
+            _params = {
+              'filterText': filter,
+              'filterField': 'e.Name',
+              'departmentId': -1,
+              'status': 0,
+              'useStatus': false,
+              'CurRowNum': offset,
+              'PageSize': 20
+            };
+            break;
+          case 2:
+            _params = {
+              'status': 0,
+              'departmentID':-1,
+              'useStatus':false,
+              'filterField': 'mi.Name',
+              'filterText': filter,
+              'curRowNum': offset,
+              'sortField': 'mi.Name',
+              'sortDirection': true,
+              'pageSize':10
+            };
+            break;
+          case 3:
+            _params = {
+              'status': 0,
+              'departmentID':-1,
+              'useStatus':false,
+              'filterField': 'oe.Name',
+              'filterText': filter,
+              'curRowNum': offset,
+              'sortField': 'oe.Name',
+              'sortDirection': true,
+              'pageSize':10
+            };
+            break;
+        }
         if (widget.fujiClass2 != null) {
           _params['fujiclass2ID'] = widget.fujiClass2;
         }
@@ -116,6 +158,20 @@ class _SearchLazyState extends State<SearchLazy> {
           'PageSize': 20
         };
         break;
+      case SearchType.COMPONENT:
+        _url = '/InvComponent/QueryComponentList';
+        _params = {
+          'filterText': filter,
+          'filterField': 'c.Name',
+          'statusID': 0,
+          'CurRowNum': offset,
+          'PageSize': 20,
+          'eqptID': widget.equipmentID,
+          'componentTypeID': 0,
+          'sortField': 'ic.ID',
+          'sortDirection': true
+        };
+        break;
     }
     var resp = await HttpRequest.request(
         _url,
@@ -137,12 +193,66 @@ class _SearchLazyState extends State<SearchLazy> {
           Navigator.of(context).pop();
         }),
         actions: <Widget>[
+          widget.searchType==SearchType.DEVICE&&widget.onlyType==null?PopupMenuButton(
+            onSelected: (val) {
+              print(val);
+              setState(() {
+                deviceType = val;
+                suggestionList.clear();
+              });
+              switch (val) {
+                case 1:
+                  deviceUrl = '/Equipment/Getdevices';
+                  break;
+                case 2:
+                  deviceUrl = '/MeasInstrum/QueryMeasInstrums';
+                  break;
+                case 3:
+                  deviceUrl = '/OtherEqpt/QueryOtherEqpts';
+                  break;
+              }
+              getData(query.text);
+            },
+            icon: Icon(Icons.menu, color: Colors.grey,),
+            itemBuilder: (context) => [
+              PopupMenuItem(
+                value: 1,
+                child: Row(
+                  children: <Widget>[
+                    Icon(Icons.devices, color: Colors.blueAccent,),
+                    SizedBox(width: 10.0,),
+                    Text('医疗设备')
+                  ],
+                ),
+              ),
+              PopupMenuItem(
+                value: 2,
+                child: Row(
+                  children: <Widget>[
+                    Icon(Icons.straighten, color: Colors.blueAccent,),
+                    SizedBox(width: 10.0,),
+                    Text('计量器具')
+                  ],
+                ),
+              ),
+              PopupMenuItem(
+                value: 3,
+                child: Row(
+                  children: <Widget>[
+                    Icon(Icons.devices_other, color: Colors.blueAccent,),
+                    SizedBox(width: 10.0,),
+                    Text('其他设备')
+                  ],
+                ),
+              ),
+            ],
+          ):Container(),
           IconButton(
             icon: Icon(Icons.cancel, color: Colors.grey,),
             onPressed: () {
               query.clear();
             },
-          )
+          ),
         ],
         title: TextField(
           controller: query,
@@ -188,6 +298,9 @@ class _SearchLazyState extends State<SearchLazy> {
                 case SearchType.MANUFACTURER:
                   _title = '${suggestionList[i]['Name']}-${suggestionList[i]['SupplierType']['Name']}';
                   break;
+                case SearchType.COMPONENT:
+                  _title = '${suggestionList[i]['Component']['Name']}-${suggestionList[i]['OID']}';
+                  break;
               }
               return ListTile(
                 title: Text(_title,
@@ -197,6 +310,7 @@ class _SearchLazyState extends State<SearchLazy> {
                   ),
                 ),
                 onTap: () {
+                  suggestionList[i]['AssetType'] = deviceType;
                   Navigator.of(context).pop(jsonEncode(suggestionList[i]));
                 },
               );
@@ -214,5 +328,6 @@ enum SearchType {
   DEVICE,
   DEPARTMENT,
   VENDOR,
-  MANUFACTURER
+  MANUFACTURER,
+  COMPONENT,
 }

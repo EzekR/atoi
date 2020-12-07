@@ -351,7 +351,7 @@ class _POListState extends State<POList> {
             mainAxisAlignment: MainAxisAlignment.end,
             mainAxisSize: MainAxisSize.max,
             children: <Widget>[
-              item['Status']['ID']==1&&role==2?new RaisedButton(
+              item['Status']['ID']==1&&role==2&&_editable?new RaisedButton(
                 onPressed: (){
                   Navigator.of(context).push(new MaterialPageRoute(builder: (_) {
                     return new PODetail(purchaseOrder: item, editable: _editable,);
@@ -375,11 +375,11 @@ class _POListState extends State<POList> {
                 child: new Row(
                   children: <Widget>[
                     new Icon(
-                      _editable?Icons.mode_edit:Icons.remove_red_eye,
+                      Icons.mode_edit,
                       color: Colors.white,
                     ),
                     new Text(
-                      _editable?'编辑':'查看',
+                      '编辑',
                       style: new TextStyle(
                           color: Colors.white
                       ),

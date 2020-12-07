@@ -1,3 +1,4 @@
+import 'package:atoi/pages/inventory/consumable_list.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:atoi/models/models.dart';
@@ -176,7 +177,7 @@ class _ConsumableDetailState extends State<ConsumableDetail> {
     if (unit.text.isEmpty) {
       showDialog(context: context, builder: (context) => CupertinoAlertDialog(
         title: new Text('单位不可为空'),
-      )).then((result) => FocusScope.of(context).requestFocus(_focusComponent[6]));
+      )).then((result) => FocusScope.of(context).requestFocus(_focusComponent[7]));
       return;
     }
     if (price.text.isEmpty) {
@@ -220,7 +221,7 @@ class _ConsumableDetailState extends State<ConsumableDetail> {
     if (supplier == null) {
       showDialog(context: context, builder: (context) => CupertinoAlertDialog(
         title: new Text('供应商不可为空'),
-      )).then((result) => FocusScope.of(context).requestFocus(_focusComponent[0]));
+      )).then((result) => scrollController.jumpTo(1000));
       return;
     }
     if (purchaseDate == 'YYYY-MM-DD') {
@@ -264,38 +265,62 @@ class _ConsumableDetailState extends State<ConsumableDetail> {
         showDialog(context: context, builder: (context) => CupertinoAlertDialog(
           title: new Text('请确认可用数量是否要大于入库数量'),
           actions: <Widget>[
-            CupertinoDialogAction(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: Text(
-                  '取消'
-              ),
-            ),
-            CupertinoDialogAction(
-              onPressed: () async {
-                resp = await HttpRequest.request(
-                    '/InvConsumable/SaveConsumable',
-                    method: HttpRequest.POST,
-                    data: _data
-                );
-                if (resp['ResultCode'] == '00') {
-                  showDialog(context: context, builder: (context) {
-                    return CupertinoAlertDialog(
-                      title: new Text('保存成功'),
-                    );
-                  }).then((result) => Navigator.of(context).pop());
-                } else {
-                  showDialog(context: context, builder: (context) {
-                    return CupertinoAlertDialog(
-                      title: new Text(resp['ResultMessage']),
-                    );
-                  });
-                }
-              },
-              child: Text(
-                  '确认'
-              ),
+            new Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                new Container(
+                  width: 100.0,
+                  child: RaisedButton(
+                    //padding: EdgeInsets.symmetric(vertical: 10.0, horizontal: 16.0),
+                    child: Text('确认', style: TextStyle(color: Colors.white),),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    color: AppConstants.AppColors['btn_cancel'],
+                    onPressed: () async {
+                      resp = await HttpRequest.request(
+                          '/InvConsumable/SaveConsumable',
+                          method: HttpRequest.POST,
+                          data: _data
+                      );
+                      if (resp['ResultCode'] == '00') {
+                        showDialog(context: context, builder: (context) {
+                          return CupertinoAlertDialog(
+                            title: new Text('保存成功'),
+                          );
+                        }).then((result) {
+                          int count = 0;
+                          Navigator.popUntil(context, (route) {
+                            return count++ == 2;
+                          });
+                        });
+                      } else {
+                        showDialog(context: context, builder: (context) {
+                          return CupertinoAlertDialog(
+                            title: new Text(resp['ResultMessage']),
+                          );
+                        });
+                      }
+                    },
+                  ),
+                ),
+                new SizedBox(
+                  width: 10.0,
+                ),
+                new Container(
+                  width: 100.0,
+                  child: RaisedButton(
+                    child: Text('取消', style: TextStyle(color: Colors.white),),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    color: AppConstants.AppColors['btn_main'],
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                  ),
+                )
+              ],
             ),
           ],
         ));
@@ -492,7 +517,7 @@ class _ConsumableDetailState extends State<ConsumableDetail> {
                                 widget.editable?BuildWidget.buildInput('批次号', lotNum, maxLength: 30, focusNode: _focusComponent[1], required: true):BuildWidget.buildRow('批次号', lotNum.text),
                                 widget.editable?BuildWidget.buildInput('规格', spec, maxLength: 50, focusNode: _focusComponent[2], required: true):BuildWidget.buildRow('规格', spec.text),
                                 widget.editable?BuildWidget.buildInput('型号', model, maxLength: 50, focusNode: _focusComponent[3], required: true):BuildWidget.buildRow('型号', model.text),
-                                widget.editable?BuildWidget.buildInput('单位', unit, maxLength: 50, focusNode: _focusComponent[6], required: true):BuildWidget.buildRow('单位', unit.text),
+                                widget.editable?BuildWidget.buildInput('单位', unit, maxLength: 10, focusNode: _focusComponent[7], required: true):BuildWidget.buildRow('单位', unit.text),
                                 widget.editable?new Padding(
                                   padding: EdgeInsets.symmetric(vertical: 5.0),
                                   child: new Row(
@@ -641,7 +666,7 @@ class _ConsumableDetailState extends State<ConsumableDetail> {
                                   ),
                                 ):BuildWidget.buildRow('购入日期', purchaseDate),
                                 widget.consumable!=null?BuildWidget.buildRow('采购单号', purchaseNumber):Container(),
-                                widget.editable?BuildWidget.buildInput('备注', comments, maxLength: 500, focusNode: _focusComponent[7]):BuildWidget.buildRow('备注', comments.text),
+                                widget.editable?BuildWidget.buildInput('备注', comments, maxLength: 500, focusNode: _focusComponent[8]):BuildWidget.buildRow('备注', comments.text),
                                 new Divider(),
                                 new Padding(
                                     padding:

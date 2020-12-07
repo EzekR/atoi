@@ -1,3 +1,4 @@
+import 'package:atoi/pages/equipments/print_qrcode.dart';
 import 'package:atoi/utils/common.dart';
 import 'package:date_format/date_format.dart';
 import 'package:flutter/material.dart';
@@ -22,11 +23,14 @@ class _ComponentListState extends State<ComponentList> {
   bool _editable = true;
 
   TextEditingController _keywords = new TextEditingController();
+  TextEditingController equipmentCode = new TextEditingController();
   String field = 'c.Name';
-  int useStatus = 1;
+  int useStatus = 0;
   List useList = [];
   int supplierId = 0;
   List supplierList = [];
+  List typeList = [];
+  int typeID = 0;
   Future<SharedPreferences> prefs = SharedPreferences.getInstance();
   ConstantsModel cModel;
   ScrollController _scrollController = new ScrollController();
@@ -86,10 +90,14 @@ class _ComponentListState extends State<ComponentList> {
           'value': 3,
           'text': '报废'
         },
-
       ];
       supplierList = initList(cModel.SupplierType);
       supplierId = supplierList[0]['value'];
+      typeList = cModel.ComponentTypes;
+      typeList.add({
+        'ID': 0,
+        'Name': '全部'
+      });
     });
   }
 
@@ -103,7 +111,9 @@ class _ComponentListState extends State<ComponentList> {
           'filterField': field,
           'statusID': useStatus,
           'CurRowNum': offset,
-          'PageSize': 10
+          'PageSize': 10,
+          'typeID': typeID,
+          'eqptID': equipmentCode.text
         }
     );
     if (resp['ResultCode'] == '00') {
@@ -199,6 +209,41 @@ class _ComponentListState extends State<ComponentList> {
                     Row(
                       children: <Widget>[
                         SizedBox(width: 16.0,),
+                        Text('设备系统编号', style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.w600),)
+                      ],
+                    ),
+                    SizedBox(height: 6.0,),
+                    Row(
+                      children: <Widget>[
+                        SizedBox(width: 16.0,),
+                        Container(
+                            width: 230.0,
+                            height: 40.0,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(5.0),
+                              color: Color(0xfff2f2f2),
+                            ),
+                            child: Row(
+                              children: <Widget>[
+                                Container(
+                                    width: 230.0,
+                                    child: Align(
+                                      alignment: Alignment(0.0, -0.5),
+                                      child: TextField(
+                                        decoration: InputDecoration.collapsed(hintText: ''),
+                                        controller: equipmentCode,
+                                      ),
+                                    )
+                                ),
+                              ],
+                            )
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 18.0,),
+                    Row(
+                      children: <Widget>[
+                        SizedBox(width: 16.0,),
                         Text('状态', style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.w600),)
                       ],
                     ),
@@ -241,6 +286,52 @@ class _ComponentListState extends State<ComponentList> {
                         ),
                       ],
                     ),
+                    SizedBox(height: 18.0,),
+                    Row(
+                      children: <Widget>[
+                        SizedBox(width: 16.0,),
+                        Text('类型', style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.w600),)
+                      ],
+                    ),
+                    SizedBox(height: 6.0,),
+                    Row(
+                      children: <Widget>[
+                        SizedBox(width: 16.0,),
+                        Container(
+                            width: 230.0,
+                            height: 40.0,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(5.0),
+                              color: Color(0xfff2f2f2),
+                            ),
+                            child: Row(
+                              children: <Widget>[
+                                SizedBox(width: 6.0,),
+                                DropdownButton(
+                                  value: typeID,
+                                  underline: Container(),
+                                  items: typeList.map<DropdownMenuItem>((item) {
+                                    return DropdownMenuItem(
+                                      value: item['ID'],
+                                      child: Container(
+                                        width: 200,
+                                        child: Text(item['Name']),
+                                      ),
+                                    );
+                                  }).toList(),
+                                  onChanged: (val) {
+                                    print(val);
+                                    FocusScope.of(context).requestFocus(new FocusNode());
+                                    setState(() {
+                                      typeID = val;
+                                    });
+                                  },
+                                )
+                              ],
+                            )
+                        ),
+                      ],
+                    ),
                     SizedBox(height: 30.0,),
                   ],
                 ),
@@ -263,6 +354,7 @@ class _ComponentListState extends State<ComponentList> {
                       child: FlatButton(onPressed: () {
                         setState((){
                           useStatus = 0;
+                          typeID = 0;
                           field = 'c.Name';
                           _keywords.clear();
                         });
@@ -377,6 +469,32 @@ class _ComponentListState extends State<ComponentList> {
             children: <Widget>[
               new RaisedButton(
                 onPressed: (){
+                  Navigator.of(context).push(new MaterialPageRoute(builder: (_) => PrintQrcode(equipmentId: item['ID'], codeType: CodeType.COMPONENT,)));
+                },
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                color: new Color(0xff2E94B9),
+                child: new Row(
+                  children: <Widget>[
+                    new Icon(
+                      Icons.widgets,
+                      color: Colors.white,
+                    ),
+                    new Text(
+                      '二维码',
+                      style: new TextStyle(
+                          color: Colors.white
+                      ),
+                    )
+                  ],
+                ),
+              ),
+              SizedBox(
+                width: 20,
+              ),
+              new RaisedButton(
+                onPressed: (){
                   Navigator.of(context).push(new MaterialPageRoute(builder: (_) {
                     return new ComponentDetail(component: item, editable: _editable, isStock: false,);
                   })).then((result) {
@@ -415,7 +533,7 @@ class _ComponentListState extends State<ComponentList> {
                 width: 60,
               )
             ],
-          )
+          ),
         ],
       ),
     );

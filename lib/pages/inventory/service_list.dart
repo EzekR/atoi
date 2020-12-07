@@ -169,6 +169,10 @@ class _ServiceListState extends State<ServiceList> {
                                     value: 'se.Name',
                                     child: Text('服务名称'),
                                   ),
+                                  DropdownMenuItem(
+                                    value: 'e.ID',
+                                    child: Text('系统编号'),
+                                  ),
                                 ],
                                 onChanged: (val) {
                                   FocusScope.of(context).requestFocus(new FocusNode());
@@ -348,7 +352,7 @@ class _ServiceListState extends State<ServiceList> {
                 BuildWidget.buildCardRow('服务次数', item['TotalTimes'].toString()),
                 BuildWidget.buildCardRow('开始日期', item['StartDate'].split('T')[0]),
                 BuildWidget.buildCardRow('结束日期', item['EndDate'].split('T')[0]),
-                BuildWidget.buildCardRow('金额', item['Price'].toString()),
+                BuildWidget.buildCardRow('金额', CommonUtil.CurrencyForm(item['Price'], times: 1, digits: 0)),
                 BuildWidget.buildCardRow('剩余服务次数', item['AvaibleTimes'].toString()),
                 BuildWidget.buildCardRow('采购单号', item['Purchase']['ID']==0?'':'${item['Purchase']['Name']}'),
                 BuildWidget.buildCardRow('上次盘点日期', CommonUtil.TimeForm(item['LastestStocktakingDate']??'', 'yyyy-mm-dd')),

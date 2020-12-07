@@ -1,3 +1,4 @@
+import 'package:atoi/utils/common.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:atoi/utils/http_request.dart';
@@ -12,13 +13,12 @@ import 'package:atoi/models/models.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_cupertino_date_picker/flutter_cupertino_date_picker.dart';
 import 'package:date_format/date_format.dart';
-import 'package:photo_view/photo_view.dart';
 import 'package:atoi/utils/event_bus.dart';
 import 'package:multi_image_picker/multi_image_picker.dart';
-import 'dart:typed_data';
-import 'package:uuid/uuid.dart';
 import 'package:atoi/pages/equipments/equipments_list.dart';
 import 'package:atoi/utils/image_util.dart';
+import 'package:atoi/widgets/search_page.dart';
+import 'dart:developer';
 
 /// 工程师报告页面
 class EngineerReportPage extends StatefulWidget {
@@ -36,7 +36,9 @@ class EngineerReportPage extends StatefulWidget {
 class _EngineerReportPageState extends State<EngineerReportPage> {
   List<bool> _expandList = [false, false, false, true, false, false, false];
   bool _isDelayed = false;
-  var _accessory = [];
+  List _accessory = [];
+  List _consumable = [];
+  List _service = [];
   ConstantsModel model;
   bool hold = false;
   int _reportId;
@@ -48,9 +50,14 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
   List _serviceResults = [];
   List _sources = [];
   List _providers = [];
+  List consumables = [];
+  List services = [];
+  List _equipments = [];
 
   List _reportType = [];
   List _reportList = [];
+  List<TextEditingController> equipmentComments = [];
+  List<TextEditingController> equipmentStatus = [];
 
   List _serviceScope = [
     '是',
@@ -216,7 +223,9 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
               : data['SolutionResultStatus']['Name'];
           _delay.text = data['DelayReason'];
           _unsolved.text = data['SolutionUnsolvedComments'];
-          _accessory = data['ReportAccessories'];
+          _accessory = data['ReportComponent'];
+          services = data['ReportService'];
+          consumables = data['ReportConsumable'];
           _fujiComments = data['FujiComments'];
           _reportStatus = data['Status']['Name'];
           _reportOID = data['OID'];
@@ -284,7 +293,10 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
       setState(() {
         _dispatch = resp['Data'];
         _isDelayed = resp['Data']['Request']['IsDelay'];
+        _equipments = resp['Data']['Request']['Equipments'];
       });
+      equipmentComments = _equipments.map((item) => new TextEditingController(text: item['StocktakingComments'])).toList();
+      equipmentStatus = _equipments.map((item) => new TextEditingController(text: item['StocktakingStatus'])).toList();
     }
   }
 
@@ -308,12 +320,53 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
     return new FocusNode();
   }).toList();
 
+  Map stuffDuplicated() {
+    bool duplicated = false;
+    String duplicatedStuff;
+    for(int i=0; i<_accessory.length; i++) {
+      List _tmp = _accessory.where((item) => item['OldSerialCode']==_accessory[i]['OldSerialCode']).toList();
+      List _tmp1 = _accessory.where((item) => item['NewInvComponent']['ID']==_accessory[i]['NewInvComponent']['ID']).toList();
+      if (_tmp.length > 1 || _tmp1.length > 1) {
+        duplicated = true;
+        duplicatedStuff = '零件';
+      }
+    }
+    for(int j=0; j<consumables.length; j++) {
+      List _tmp = consumables.where((item) => item['InvConsumable']['ID']==consumables[j]['InvConsumable']['ID']).toList();
+      if (_tmp.length > 1) {
+        duplicated = true;
+        duplicatedStuff = '耗材';
+      }
+    }
+    for(int j=0; j<consumables.length; j++) {
+      List _tmp = services.where((item) => item['Service']['ID']==consumables[j]['Service']['ID']).toList();
+      if (_tmp.length > 1) {
+        duplicated = true;
+        duplicatedStuff = '服务';
+      }
+    }
+
+    return {
+      'duplicate': duplicated,
+      'type': duplicatedStuff
+    };
+  }
+
   Future<Null> uploadReport(int statusId) async {
     setState(() {
       _expandList = _expandList.map((item) {
         return true;
       }).toList();
     });
+    Map duplicated = stuffDuplicated();
+    if (duplicated['duplicate']) {
+      showDialog(
+          context: context,
+          builder: (context) => CupertinoAlertDialog(
+            title: new Text('${duplicated['type']}有重复'),
+          )).then((result) => _scrollController.jumpTo(1400.0));
+      return;
+    }
     if (_dispatch['RequestType']['ID'] == 9 && _acceptDate == 'YY-MM-DD' && _currentType != '通用作业报告' && statusId == 2) {
       showDialog(
           context: context,
@@ -455,7 +508,9 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
     var prefs = await _prefs;
     var userID = prefs.getInt('userID');
     var _data = {
-      'Dispatch': {'ID': widget.dispatchId},
+      'Dispatch': {
+        'ID': _dispatch['ID']
+      },
       'FaultCode': _code.text,
       'FaultDesc': _description.text,
       'SolutionCauseAnalysis': _analysis.text,
@@ -483,8 +538,10 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
       },
       'Comments': _comments.text,
       'FileInfo': _json,
-      'ReportAccessories': _accessory,
-      'ID': _reportId
+      'ReportComponent': _accessory,
+      'ReportConsumable': consumables,
+      'ReportService': _service,
+      'ID': _reportId,
     };
     var _id = _reportList.firstWhere((item) => item['Name'] == _currentType, orElse: () => null);
     _data['Type'] = {
@@ -506,6 +563,9 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
       setState(() {
         _reportId = resp['Data'];
       });
+      if (_dispatch['RequestType']['ID'] == 12) {
+        saveInventoryEquipments();
+      }
       showDialog(
           context: context,
           builder: (context) => CupertinoAlertDialog(
@@ -520,6 +580,31 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
           builder: (context) => CupertinoAlertDialog(
                 title: new Text(resp['ResultMessage']),
               ));
+    }
+  }
+
+  Future<bool> saveInventoryEquipments() async {
+    List _equipments = [];
+    for(int i=0; i<_dispatch['Request']['Equipments'].length; i++) {
+      _equipments.add({
+        'equipmentID': _dispatch['Request']['Equipments'][i]['ID'],
+        'stocktakingStatus': equipmentStatus[i].text,
+        'stocktakingComments': equipmentComments[i].text,
+        'assetType': _dispatch['Request']['AssetType']['ID']
+      });
+    }
+    Map resp = await HttpRequest.request(
+      '/Request/SaveStocktakingEquipments',
+      method: HttpRequest.POST,
+      data: {
+        'requestID': _dispatch['Request']['ID'],
+        'equipments': _equipments
+      }
+    );
+    if (resp['ResultCode'] == '00') {
+      return true;
+    } else {
+      return false;
     }
   }
 
@@ -1022,9 +1107,8 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
                 icon: Icon(Icons.add),
                 onPressed: () async {
                   //_addAccessory();
-                  final _acc = await Navigator.of(context)
-                      .push(new MaterialPageRoute(builder: (_) {
-                    return new EngineerReportAccessory();
+                  final _acc = await Navigator.of(context).push(new MaterialPageRoute(builder: (_) {
+                    return new EngineerReportAccessory(equipmentID: _dispatch['Request']['Equipments'][0]['ID'], accType: AccType.COMPONENT,);
                   }));
                   print(_acc);
                   if (_acc != null) {
@@ -1047,12 +1131,9 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
           _acc['ImageOld'] = _imageOld;
         }
         var _accList = [
-          BuildWidget.buildRow('名称', _acc['Name']),
-          BuildWidget.buildRow('来源', _acc['Source']['Name']),
-          _acc['Source']['Name'] == '外部供应商'
-              ? BuildWidget.buildRow('外部供应商', _acc['Supplier']['Name'])
-              : new Container(),
-          BuildWidget.buildRow('新装零件编号', _acc['NewSerialCode']),
+          BuildWidget.buildRow('简称', _acc['NewInvComponent']['Component']['Name']),
+          BuildWidget.buildRow('新装零件编号', _acc['NewInvComponent']['SerialCode']),
+          BuildWidget.buildRow('金额（元/件）', CommonUtil.CurrencyForm(_acc['NewInvComponent']['Price'], digits: 0, times: 1)),
           BuildWidget.buildRow('附件', ''),
           new Row(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -1066,9 +1147,8 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
                   : new Container()
             ],
           ),
-          BuildWidget.buildRow('金额（元/件）', _acc['Amount'].toString()),
-          BuildWidget.buildRow('数量', _acc['Qty'].toString()),
-          BuildWidget.buildRow('拆下零件编号', _acc['OldSerialCode']),
+          BuildWidget.buildRow('拆下零件编号', _acc['OldInvComponent']['SerialCode']),
+          BuildWidget.buildRow('金额（元/件）', CommonUtil.CurrencyForm(_acc['OldInvComponent']['Price'], times: 1, digits: 0)),
           BuildWidget.buildRow('附件', ''),
           new Row(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -1107,15 +1187,9 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
     return _list;
   }
 
+
   List<Widget> buildConsumable() {
     List<Widget> _list = [];
-
-    void saveAccessory(Map accessory) async {
-      setState(() {
-        _accessory.add(accessory);
-      });
-    }
-
     _list.add(new Row(
       mainAxisAlignment: MainAxisAlignment.end,
       children: <Widget>[
@@ -1127,88 +1201,98 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
             icon: Icon(Icons.add),
             onPressed: () async {
               //_addAccessory();
-              final _acc = await Navigator.of(context)
+              final consumable = await Navigator.of(context)
                   .push(new MaterialPageRoute(builder: (_) {
-                return new EngineerReportAccessory();
+                return new EngineerReportAccessory(fujiClass2: _dispatch['Request']['Equipments'][0]['FujiClass2']['ID'], accType: AccType.CONSUMABLE,);
               }));
-              print(_acc);
-              if (_acc != null) {
-                saveAccessory(_acc);
+              if (consumable != null) {
+                setState(() {
+                  consumables.add(consumable);
+                });
               }
             })
             : new Container()
       ],
     ));
-    if (_accessory != null) {
-      for (var _acc in _accessory) {
-        var _imageNew = _acc['FileInfos']
-            .firstWhere((info) => info['FileType'] == 1, orElse: () => null);
-        var _imageOld = _acc['FileInfos']
-            .firstWhere((info) => info['FileType'] == 2, orElse: () => null);
-        if (_imageNew != null) {
-          _acc['ImageNew'] = _imageNew;
-        }
-        if (_imageOld != null) {
-          _acc['ImageOld'] = _imageOld;
-        }
-        var _accList = [
-          BuildWidget.buildRow('名称', _acc['Name']),
-          BuildWidget.buildRow('来源', _acc['Source']['Name']),
-          _acc['Source']['Name'] == '外部供应商'
-              ? BuildWidget.buildRow('外部供应商', _acc['Supplier']['Name'])
-              : new Container(),
-          BuildWidget.buildRow('新装零件编号', _acc['NewSerialCode']),
-          BuildWidget.buildRow('附件', ''),
-          new Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              _acc['ImageNew'] != null &&
-                  _acc['ImageNew']['FileContent'] != null
-                  ? new Container(
-                width: 100.0,
-                child: BuildWidget.buildPhotoPageList(context, base64Decode(_acc['ImageNew']['FileContent'])),
-              )
-                  : new Container()
-            ],
+    log('$consumables');
+    consumables.forEach((item) => _list.addAll([
+      BuildWidget.buildRow('简称', item['InvConsumable']['Consumable']['Name']),
+      BuildWidget.buildRow('批次号', item['InvConsumable']['LotNum']),
+      BuildWidget.buildRow('供应商', item['InvConsumable']['Supplier']['Name']),
+      BuildWidget.buildRow('单价', item['InvConsumable']['Price'].toString()),
+      BuildWidget.buildRow('数量', item['Qty']),
+      widget.status == 3 || widget.status == 2
+          ? new Container()
+          : new Row(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: <Widget>[
+          new Text(
+            '删除耗材',
           ),
-          BuildWidget.buildRow('金额（元/件）', _acc['Amount'].toString()),
-          BuildWidget.buildRow('数量', _acc['Qty'].toString()),
-          BuildWidget.buildRow('拆下零件编号', _acc['OldSerialCode']),
-          BuildWidget.buildRow('附件', ''),
-          new Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              _acc['ImageOld'] != null &&
-                  _acc['ImageOld']['FileContent'] != null
-                  ? new Container(
-                width: 100.0,
-                child: BuildWidget.buildPhotoPageList(context, base64Decode(_acc['ImageOld']['FileContent'])),
-              )
-                  : new Container()
-            ],
+          new IconButton(
+              icon: Icon(Icons.delete_forever),
+              onPressed: () {
+                setState(() {
+                  consumables.remove(item);
+                });
+              })
+        ],
+      ),
+      Divider()
+    ]));
+    return _list;
+  }
+
+  List<Widget> buildService() {
+    List<Widget> _list = [];
+    _list.add(new Row(
+      mainAxisAlignment: MainAxisAlignment.end,
+      children: <Widget>[
+        widget.status == 0 || widget.status == 1
+            ? new Text('新增服务')
+            : new Container(),
+        widget.status == 0 || widget.status == 1
+            ? new IconButton(
+            icon: Icon(Icons.add),
+            onPressed: () async {
+              //_addAccessory();
+              final service = await Navigator.of(context)
+                  .push(new MaterialPageRoute(builder: (_) {
+                return new EngineerReportAccessory(equipmentID: _dispatch['Request']['Equipments'][0]['ID'], accType: AccType.SERVICE,);
+              }));
+              if (service != null) {
+                setState(() {
+                  services.add(service);
+                });
+              }
+            })
+            : new Container()
+      ],
+    ));
+    services.forEach((item) => _list.addAll([
+      BuildWidget.buildRow('维修服务系统编号', item['InvConsumable']['Consumable']['Name']),
+      BuildWidget.buildRow('服务名称', item['InvConsumable']['LotNum']),
+      BuildWidget.buildRow('供应商', item['InvConsumable']['Supplier']['Name']),
+      BuildWidget.buildRow('金额(元)', CommonUtil.CurrencyForm(item['InvConsumable']['Price'], digits: 0, times: 1)),
+      widget.status == 3 || widget.status == 2
+          ? new Container()
+          : new Row(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: <Widget>[
+          new Text(
+            '删除服务',
           ),
-          widget.status == 3 || widget.status == 2
-              ? new Container()
-              : new Row(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: <Widget>[
-              new Text(
-                '删除耗材',
-              ),
-              new IconButton(
-                  icon: Icon(Icons.delete_forever),
-                  onPressed: () {
-                    setState(() {
-                      _accessory.remove(_acc);
-                    });
-                  })
-            ],
-          ),
-          new Divider()
-        ];
-        _list.addAll(_accList);
-      }
-    }
+          new IconButton(
+              icon: Icon(Icons.delete_forever),
+              onPressed: () {
+                setState(() {
+                  consumables.remove(item);
+                });
+              })
+        ],
+      ),
+      Divider()
+    ]));
     return _list;
   }
 
@@ -1228,6 +1312,26 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
                 '设备基本信息',
                 style:
                     new TextStyle(fontSize: 20.0, fontWeight: FontWeight.w400),
+              ),
+              trailing: IconButton(
+                onPressed: () async {
+                  if (_dispatch['Request']['RequestType']['ID'] != 12) {
+                    return;
+                  }
+                  if (!_edit) {
+                    return;
+                  }
+                  final selected = await Navigator.of(context)
+                      .push(new MaterialPageRoute(builder: (context) {
+                    return SearchPage(equipments: _dispatch['Request']['Equipments']??[],);
+                  }));
+                  if (selected != null) {
+                    setState(() {
+                     _dispatch['Request']['Equipments']  = selected??[];
+                    });
+                  }
+                },
+                icon: Icon(Icons.add),
               ),
             );
           },
@@ -1414,7 +1518,7 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
           body: new Padding(
             padding: EdgeInsets.symmetric(horizontal: 8.0),
             child: new Column(
-              children: buildAccessory(),
+              children: buildService(),
             ),
           ),
           isExpanded: _expandList[6],
@@ -1430,20 +1534,26 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
         ? _equipments = []
         : _equipments = _dispatch['Request']['Equipments'];
     List<Widget> _list = [];
-    for (var _equipment in _equipments) {
-      var equipList = [
-        BuildWidget.buildRow('系统编号', _equipment['OID'] ?? ''),
-        BuildWidget.buildRow('资产编号', _equipment['AssetCode']??''),
-        BuildWidget.buildRow('名称', _equipment['Name']??'', onTap: () => Navigator.of(context).push(new MaterialPageRoute(builder: (_) => new EquipmentsList(equipmentId: _equipment['OID'],)))),
-        BuildWidget.buildRow('型号', _equipment['EquipmentCode'] ?? ''),
-        BuildWidget.buildRow('序列号', _equipment['SerialCode'] ?? ''),
-        BuildWidget.buildRow('设备厂商', _equipment['Manufacturer']['Name'] ?? ''),
-        BuildWidget.buildRow('使用科室', _equipment['Department']['Name'] ?? ''),
-        BuildWidget.buildRow('安装地点', _equipment['InstalSite'] ?? ''),
-        BuildWidget.buildRow('维保状态', _equipment['WarrantyStatus'] ?? ''),
-        BuildWidget.buildRow('服务范围', _equipment['ContractScope']['Name'] ?? ''),
+    for (int i=0; i<_equipments.length; i++) {
+      List<Widget> equipList = [
+        BuildWidget.buildRow('系统编号', _equipments[i]['OID'] ?? ''),
+        BuildWidget.buildRow('资产编号', _equipments[i]['AssetCode']??''),
+        BuildWidget.buildRow('名称', _equipments[i]['Name']??'', onTap: () => Navigator.of(context).push(new MaterialPageRoute(builder: (_) => new EquipmentsList(equipmentId: _equipments[i]['OID'],)))),
+        BuildWidget.buildRow('型号', _equipments[i]['EquipmentCode'] ?? ''),
+        BuildWidget.buildRow('序列号', _equipments[i]['SerialCode'] ?? ''),
+        BuildWidget.buildRow('设备厂商', _equipments[i]['Manufacturer']['Name'] ?? ''),
+        BuildWidget.buildRow('使用科室', _equipments[i]['Department']['Name'] ?? ''),
+        BuildWidget.buildRow('安装地点', _equipments[i]['InstalSite'] ?? ''),
+        BuildWidget.buildRow('维保状态', _equipments[i]['WarrantyStatus'] ?? ''),
+        BuildWidget.buildRow('服务范围', _equipments[i]['ContractScope']['Name'] ?? ''),
         new Divider()
       ];
+      if (_dispatch['Request']['RequestType']['ID'] == 12) {
+        equipList.addAll([
+          _edit?BuildWidget.buildInput('盘点状态', equipmentStatus[i], lines: 1):BuildWidget.buildRow('盘点状态', _equipments[i]['StocktakingStatus']),
+          _edit?BuildWidget.buildInput('盘点备注', equipmentComments[i], lines: 1):BuildWidget.buildRow('盘点备注', _equipments[i]['StocktakingComments'])
+        ]);
+      }
       _list.addAll(equipList);
     }
     return _list;

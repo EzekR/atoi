@@ -1,3 +1,4 @@
+import 'package:atoi/widgets/search_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:atoi/models/models.dart';
@@ -29,6 +30,7 @@ class _ServiceDetailState extends State<ServiceDetail> {
   String oid = '系统自动生成';
   EventBus bus = new EventBus();
   Map manufacturer;
+  List equips = [];
   Map supplier;
   String startDate = 'YYYY-MM-DD';
   String endDate = 'YYYY-MM-DD';
@@ -106,12 +108,12 @@ class _ServiceDetailState extends State<ServiceDetail> {
     setState(() {
       _isExpandedDetail = true;
     });
-    if (_fujiClass2 == 0) {
-      showDialog(context: context, builder: (context) => CupertinoAlertDialog(
-        title: new Text('富士II类不可为空'),
-      )).then((result) => scrollController.jumpTo(0.0));
-      return;
-    }
+    //if (_fujiClass2 == 0) {
+    //  showDialog(context: context, builder: (context) => CupertinoAlertDialog(
+    //    title: new Text('富士II类不可为空'),
+    //  )).then((result) => scrollController.jumpTo(0.0));
+    //  return;
+    //}
     if (serviceName.text.isEmpty) {
       showDialog(context: context, builder: (context) => CupertinoAlertDialog(
         title: new Text('服务名称不可为空'),
@@ -381,7 +383,70 @@ class _ServiceDetailState extends State<ServiceDetail> {
                             child: new Column(
                               children: <Widget>[
                                 BuildWidget.buildRow('系统编号', oid),
-                                widget.editable?buildDropdown('富士II类', _fujiClass2, _fujiList, changeFuji, required: true):BuildWidget.buildRow('富士II类', _fujiClass2Name??''),
+                                //widget.editable?buildDropdown('富士II类', _fujiClass2, _fujiList, changeFuji, required: true):BuildWidget.buildRow('富士II类', _fujiClass2Name??''),
+                                widget.editable?new Padding(
+                                  padding: EdgeInsets.symmetric(vertical: 5.0),
+                                  child: new Row(
+                                    children: <Widget>[
+                                      new Expanded(
+                                        flex: 4,
+                                        child: new Wrap(
+                                          alignment: WrapAlignment.end,
+                                          crossAxisAlignment: WrapCrossAlignment.center,
+                                          children: <Widget>[
+                                            new Text(
+                                              '*',
+                                              style: new TextStyle(
+                                                  color: Colors.red
+                                              ),
+                                            ),
+                                            new Text(
+                                              '关联设备',
+                                              style: new TextStyle(
+                                                  fontSize: 16.0, fontWeight: FontWeight.w600),
+                                            )
+                                          ],
+                                        ),
+                                      ),
+                                      new Expanded(
+                                        flex: 1,
+                                        child: new Text(
+                                          '：',
+                                          style: new TextStyle(
+                                            fontSize: 16.0,
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                        ),
+                                      ),
+                                      new Expanded(
+                                        flex: 4,
+                                        child: new Text(
+                                          equips.map((item) => item['Name']).toList().join(", "),
+                                          style: new TextStyle(
+                                              fontSize: 16.0,
+                                              fontWeight: FontWeight.w400,
+                                              color: Colors.black54),
+                                        ),
+                                      ),
+                                      new Expanded(
+                                          flex: 2,
+                                          child: new IconButton(
+                                              focusNode: _focusComponent[3],
+                                              icon: Icon(Icons.search),
+                                              onPressed: () async {
+                                                FocusScope.of(context).requestFocus(new FocusNode());
+                                                final _searchResult = await Navigator.of(context).push(new MaterialPageRoute(builder: (_) => SearchPage(equipments: equips,)));
+                                                print(_searchResult);
+                                                if (_searchResult != null &&
+                                                    _searchResult != 'null') {
+                                                  setState(() {
+                                                    equips = _searchResult;
+                                                  });
+                                                }
+                                              })),
+                                    ],
+                                  ),
+                                ):BuildWidget.buildRow('关联设备', supplier==null?'':supplier['Name']),
                                 widget.editable?BuildWidget.buildInput('服务名称', serviceName, maxLength: 50, focusNode: _focusComponent[1], required: true):BuildWidget.buildRow('服务名称', serviceName.text),
                                 widget.editable?new Padding(
                                   padding: EdgeInsets.symmetric(vertical: 5.0),

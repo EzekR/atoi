@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:atoi/utils/common.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:atoi/models/models.dart';
@@ -129,7 +130,7 @@ class _PODetailState extends State<PODetail> {
           return {
             '服务名称': _data['Name'],
             '关联富士II类': _data['FujiClass2']['Name'],
-            '金额': _data['Price'].toString(),
+            '金额': CommonUtil.CurrencyForm(_data['Price'], times: 1, digits: 0),
             '服务开始时间': _data['StartDate'].toString().split('T')[0],
             '服务结束时间': _data['EndDate'].toString().split('T')[0],
             '服务次数': _data['TotalTimes'].toString()
@@ -517,7 +518,7 @@ class _PODetailState extends State<PODetail> {
                             _services[key] = {
                               '服务名称': _data['Name'],
                               '关联富士II类': _data['FujiClass2']['Name'],
-                              '金额': _data['Price'],
+                              '金额': CommonUtil.CurrencyForm(double.tryParse(_data['Price']), times: 1, digits: 0),
                               '服务开始时间': _data['StartDate'].toString().split("T")[0],
                               '服务结束时间': _data['EndDate'].toString().split("T")[0],
                               '服务次数': _data['TotalTimes']
@@ -637,6 +638,7 @@ class _PODetailState extends State<PODetail> {
                             '型号': _data['Model'],
                             '关联富士II类': _data['Consumable']['FujiClass2']['Name'],
                             '单价': _data['Price'],
+                            '单位': _data['Unit'],
                             '数量': _data['Qty']
                           });
                           break;
@@ -645,7 +647,7 @@ class _PODetailState extends State<PODetail> {
                           _services.add({
                             '服务名称': _data['Name'],
                             '关联富士II类': _data['FujiClass2']['Name'],
-                            '金额': _data['Price'],
+                            '金额': CommonUtil.CurrencyForm(double.tryParse(_data['Price']), times: 1, digits: 0),
                             '服务开始时间': _data['StartDate'].toString().split('T')[0],
                             '服务结束时间': _data['EndDate'].toString().split('T')[0],
                             '服务次数': _data['TotalTimes']
@@ -800,7 +802,7 @@ class _PODetailState extends State<PODetail> {
                                       ),
                                     ],
                                   ),
-                                ):BuildWidget.buildRow('开始日期', startDate),
+                                ):BuildWidget.buildRow('采购日期', startDate),
                                 widget.editable?new Padding(
                                   padding: EdgeInsets.symmetric(vertical: 5.0),
                                   child: new Row(
@@ -880,7 +882,7 @@ class _PODetailState extends State<PODetail> {
                                       ),
                                     ],
                                   ),
-                                ):BuildWidget.buildRow('结束日期', endDate),
+                                ):BuildWidget.buildRow('到货日期', endDate),
                                 widget.editable?new Padding(
                                   padding: EdgeInsets.symmetric(vertical: 5.0),
                                   child: new Row(

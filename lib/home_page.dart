@@ -54,6 +54,7 @@ class _HomePageState extends State<HomePage>
   int urgencyId = 0;
   int dispatchStatusId = 3;
   int source = 0;
+  int assetType = 0;
   bool overDue = false;
   String startDate = '';
   String endDate = '';
@@ -65,6 +66,7 @@ class _HomePageState extends State<HomePage>
   List urgencyList = [];
   List dispatchList = [];
   List sourceList = [];
+  List assetTypeList = [];
   EventBus bus = new EventBus();
   bool showEquip = false;
   bool showTable = false;
@@ -136,6 +138,7 @@ class _HomePageState extends State<HomePage>
     model.dispatchStatusId = 3;
     model.offset = 10;
     model.source = 0;
+    model.assetType = 0;
     setState(() {
       startDate = formatDate(_start, [yyyy, '-', mm, '-', dd]);
       endDate = formatDate(_end, [yyyy, '-', mm, '-', dd]);
@@ -144,6 +147,11 @@ class _HomePageState extends State<HomePage>
       selectedTypes = [];
       statusList = initList(cModel.RequestStatus);
       sourceList = initList(cModel.Sources);
+      assetTypeList = cModel.AssetType;
+      assetTypeList.add({
+        'ID': 0,
+        'Name': '全部'
+      });
       source = sourceList[0]['value'];
       statusList.removeWhere((item) => item['value'] == -1 || item['value'] == 99);
       statusId = statusList[0]['value'];
@@ -156,6 +164,7 @@ class _HomePageState extends State<HomePage>
       dispatchStatusId = 3;
       filterText.clear();
       _currentTabIndex==2?field='d.ID':field='r.ID';
+      assetType = 0;
     });
     _currentTabIndex==2?model.getDispatches():model.getRequests();
   }
@@ -175,6 +184,7 @@ class _HomePageState extends State<HomePage>
     model.dispatchStatusId = dispatchStatusId;
     model.source = source;
     model.typeList = selectedTypes;
+    model.assetType = assetType;
     switch (_currentTabIndex) {
       case 1:
         model.getRequests();
@@ -853,6 +863,51 @@ class _HomePageState extends State<HomePage>
                         ),
                       ],
                     ),
+                    SizedBox(height: 18.0,),
+                    Row(
+                      children: <Widget>[
+                        SizedBox(width: 16.0,),
+                        Text('资产类型', style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.w600),)
+                      ],
+                    ),
+                    SizedBox(height: 6.0,),
+                    Row(
+                      children: <Widget>[
+                        SizedBox(width: 16.0,),
+                        Container(
+                            width: 200.0,
+                            height: 40.0,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(5.0),
+                              color: Color(0xfff2f2f2),
+                            ),
+                            child: Row(
+                              children: <Widget>[
+                                SizedBox(width: 6.0,),
+                                DropdownButton(
+                                  value: assetType,
+                                  underline: Container(),
+                                  items: assetTypeList.map<DropdownMenuItem>((item) {
+                                    return DropdownMenuItem(
+                                      value: item['ID'],
+                                      child: Container(
+                                        width: 160.0,
+                                        child: Text(item['Name']??""),
+                                      ),
+                                    );
+                                  }).toList(),
+                                  onChanged: (val) {
+                                    FocusScope.of(context).requestFocus(new FocusNode());
+                                    setState(() {
+                                      assetType = val;
+                                    });
+                                  },
+                                )
+                              ],
+                            )
+                        ),
+                      ],
+                    ),
                     _currentTabIndex==2?Container():SizedBox(height: 18.0,),
                     _currentTabIndex==2?Container():Row(
                       children: <Widget>[
@@ -920,6 +975,7 @@ class _HomePageState extends State<HomePage>
                           departmentId = departmentList[0]['value'];
                           urgencyId = urgencyList[0]['value'];
                           source = sourceList[0]['value'];
+                          assetType = 0;
                         });
                         initFilter();
                       }, child: Text('重置')),
@@ -1100,7 +1156,7 @@ class _HomePageState extends State<HomePage>
                       },
                     ),
                     AnimatedContainer(
-                      height: showEquip?120.0:0.0,
+                      height: showEquip?200.0:0.0,
                       duration: Duration(milliseconds: 200),
                       child: Column(
                         children: <Widget>[
@@ -1109,7 +1165,7 @@ class _HomePageState extends State<HomePage>
                             child: FlatButton(
                               onPressed: () {
                                 Navigator.of(context).push(new MaterialPageRoute(builder: (_) {
-                                  return new EquipmentsList();
+                                  return new EquipmentsList(equipmentType: EquipmentType.MEDICAL,);
                                 }));
                               },
                               child: Row(
@@ -1126,6 +1182,62 @@ class _HomePageState extends State<HomePage>
                                     style: TextStyle(
                                       fontSize: 14.0,
                                       color: Colors.black54
+                                    ),
+                                  )
+                                ],
+                              ),
+                            ),
+                          ),
+                          Container(
+                            height: 40.0,
+                            child: FlatButton(
+                              onPressed: () {
+                                Navigator.of(context).push(new MaterialPageRoute(builder: (_) {
+                                  return new EquipmentsList(equipmentType: EquipmentType.MEASURE,);
+                                }));
+                              },
+                              child: Row(
+                                children: <Widget>[
+                                  SizedBox(
+                                    width: 60.0,
+                                  ),
+                                  Icon(Icons.straighten, color: Colors.grey, size: 16.0,),
+                                  SizedBox(
+                                    width: 10.0,
+                                  ),
+                                  Text(
+                                    '计量器具',
+                                    style: TextStyle(
+                                        fontSize: 14.0,
+                                        color: Colors.black54
+                                    ),
+                                  )
+                                ],
+                              ),
+                            ),
+                          ),
+                          Container(
+                            height: 40.0,
+                            child: FlatButton(
+                              onPressed: () {
+                                Navigator.of(context).push(new MaterialPageRoute(builder: (_) {
+                                  return new EquipmentsList(equipmentType: EquipmentType.OTHER,);
+                                }));
+                              },
+                              child: Row(
+                                children: <Widget>[
+                                  SizedBox(
+                                    width: 60.0,
+                                  ),
+                                  Icon(Icons.devices_other, color: Colors.grey, size: 16.0,),
+                                  SizedBox(
+                                    width: 10.0,
+                                  ),
+                                  Text(
+                                    '其他设备',
+                                    style: TextStyle(
+                                        fontSize: 14.0,
+                                        color: Colors.black54
                                     ),
                                   )
                                 ],

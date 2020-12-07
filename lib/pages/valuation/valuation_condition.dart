@@ -9,7 +9,8 @@ import 'package:date_format/date_format.dart';
 
 class ValuationCondition extends StatefulWidget {
   final Map condition;
-  ValuationCondition({Key key, this.condition}):super(key:key);
+  final int historyID;
+  ValuationCondition({Key key, this.condition, this.historyID}):super(key:key);
   _ValuationConditionState createState() => new _ValuationConditionState();
 }
 
@@ -91,7 +92,7 @@ class _ValuationConditionState extends State<ValuationCondition> {
         children: <Widget>[
           RaisedButton(
             onPressed: () {
-              Navigator.of(context).push(new MaterialPageRoute(builder: (_) => ValuationAnalysis()));
+              Navigator.of(context).push(new MaterialPageRoute(builder: (_) => ValuationAnalysis(historyID: widget.historyID,)));
             },
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(6),

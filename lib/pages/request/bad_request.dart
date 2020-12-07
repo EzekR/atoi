@@ -168,7 +168,10 @@ Future getImage() async {
             'ID': model.FaultBad[_currentResult],
           },
           'FaultDesc': _fault.text,
-          'Files': fileList
+          'Files': fileList,
+          'AssetType': {
+            'ID': _equipment['AssetType']
+          }
         }
       };
       //Fluttertoast.showToast(

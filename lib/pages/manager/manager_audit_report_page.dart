@@ -1,3 +1,4 @@
+import 'package:atoi/utils/common.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -7,17 +8,15 @@ import 'package:atoi/utils/constants.dart';
 import 'package:atoi/widgets/build_widget.dart';
 import 'dart:convert';
 import 'dart:typed_data';
-import 'package:photo_view/photo_view.dart';
-import 'package:scoped_model/scoped_model.dart';
 import 'package:atoi/models/models.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:multi_image_picker/multi_image_picker.dart';
-import 'package:uuid/uuid.dart';
 import 'dart:io';
 import 'package:atoi/pages/equipments/equipments_list.dart';
 import 'dart:async';
 import 'package:atoi/utils/image_util.dart';
+import 'package:atoi/widgets/search_page.dart';
 
 /// 超管审核报告页面类
 class ManagerAuditReportPage extends StatefulWidget {
@@ -65,6 +64,8 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
   var _accessory;
   List reportAccess = [];
   List<dynamic> imageAttach = [];
+  List<TextEditingController> equipmentComments = [];
+  List<TextEditingController> equipmentStatus = [];
 
   List _serviceScope = ['是', '否'];
 
@@ -364,6 +365,31 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
     return new FocusNode();
   }).toList();
 
+  Future<bool> saveInventoryEquipments() async {
+    List _equipmentStock = [];
+    for(int i=0; i<_equipments.length; i++) {
+      _equipmentStock.add({
+        'equipmentID': _equipments[i]['ID'],
+        'stocktakingStatus': equipmentStatus[i].text,
+        'stocktakingComments': equipmentComments[i].text,
+        'assetType': _dispatch['Request']['AssetType']['ID']
+      });
+    }
+    Map resp = await HttpRequest.request(
+        '/Request/SaveStocktakingEquipments',
+        method: HttpRequest.POST,
+        data: {
+          'requestID': _dispatch['Request']['ID'],
+          'equipments': _equipments
+        }
+    );
+    if (resp['ResultCode'] == '00') {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
   Future<Null> approveReport() async {
     setState(() {
       _expandList = _expandList.map((item) {
@@ -411,6 +437,9 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
         'FileType': 1
       };
     }
+    _body['Request'] = {
+      'Equipments': _equipments
+    };
     _body['FileInfo'] = _json;
     _body['Dispatch'] = {
       'ID': _dispatch['ID']
@@ -447,6 +476,9 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
     Fluttertoast.cancel();
     print(_response);
     if (_response['ResultCode'] == '00') {
+      if (_dispatch['RequestType']['ID'] == 12) {
+        saveInventoryEquipments();
+      }
       showDialog(
           context: context,
           builder: (context) => CupertinoAlertDialog(
@@ -668,7 +700,7 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
                 child: BuildWidget.buildPhotoPageList(context, _acc['ImageNew']['FileContent'])):new Container()
             ],
           ),
-          BuildWidget.buildRow('金额（元/件）', _acc['Amount'].toString()),
+          BuildWidget.buildRow('金额（元/件）', CommonUtil.CurrencyForm(_acc['Amount'], times: 1, digits: 0)),
           BuildWidget.buildRow('数量', _acc['Qty'].toString()),
           BuildWidget.buildRow('拆下零件编号', _acc['OldSerialCode']),
           BuildWidget.buildRow('附件', ''),
@@ -743,7 +775,7 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
         break;
       case 601:
         _list.addAll([
-          BuildWidget.buildRow('资产金额', _report['PurchaseAmount'].toString()),
+          BuildWidget.buildRow('资产金额', CommonUtil.CurrencyForm(_report['PurchaseAmount'], times: 1, digits: 0)),
           //BuildWidget.buildRow('整包范围', _report['ServiceScope']?'是':'否'),
           Container(
             key: scopeKey,
@@ -837,6 +869,34 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
     return _list;
   }
 
+  List<Widget> buildEquipments() {
+    List<Widget> _list = [];
+    equipmentComments = _equipments.map<TextEditingController>((_) => new TextEditingController()).toList();
+    equipmentStatus = _equipments.map<TextEditingController>((_) => new TextEditingController()).toList();
+    for(int i=0; i<_equipments.length; i++) {
+      _list.addAll([
+        BuildWidget.buildRow('系统编号', _equipments[i]['OID']??''),
+        BuildWidget.buildRow('资产编号', _equipments[i]['AssetCode']??''),
+        BuildWidget.buildRow('名称', _equipments[i]['Name']??'', onTap: () => Navigator.of(context).push(new MaterialPageRoute(builder: (_) => new EquipmentsList(equipmentId: _equipments[i]['OID'],)))),
+        BuildWidget.buildRow('型号', _equipments[i]['EquipmentCode']??''),
+        BuildWidget.buildRow('序列号', _equipments[i]['SerialCode']??''),
+        BuildWidget.buildRow('设备厂商', _equipments[i]['Manufacturer']['Name']??''),
+        BuildWidget.buildRow('使用科室', _equipments[i]['Department']['Name']??''),
+        BuildWidget.buildRow('安装地点', _equipments[i]['InstalSite']??''),
+        BuildWidget.buildRow('维保状态', _equipments[i]['WarrantyStatus']??''),
+        BuildWidget.buildRow('服务范围', _equipments[i]['ContractScope']['Name']??''),
+        new Divider(),
+      ]);
+      if (_dispatch['Request']['RequestType']['ID'] == 12) {
+        _list.addAll([
+          BuildWidget.buildInput('盘点状态', equipmentStatus[i], lines: 1),
+          BuildWidget.buildInput('备注', equipmentComments[i], lines: 1),
+        ]);
+      }
+    }
+    return _list;
+  }
+
   List<ExpansionPanel> buildExpansion() {
     List<ExpansionPanel> _list = [];
     if (_dispatch['Request']['RequestType']['ID'] != 14) {
@@ -854,27 +914,29 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
                     fontWeight: FontWeight.w400
                 ),
               ),
+              trailing: _dispatch['Request']['RequestType']['ID']==12?IconButton(
+                onPressed: () async {
+                  if (widget.status > 3) {
+                    return;
+                  }
+                  final selected = await Navigator.of(context)
+                      .push(new MaterialPageRoute(builder: (context) {
+                    return SearchPage(equipments: _equipments);
+                  }));
+                  if (selected != null) {
+                    setState(() {
+                      _equipments = selected??[];
+                    });
+                  }
+                },
+                icon: Icon(Icons.add),
+              ):Container(),
             );
           },
           body: new Padding(
             padding: EdgeInsets.symmetric(horizontal: 8.0),
             child: new Column(
-              children: _equipments.map((_equipment) => [
-                BuildWidget.buildRow('系统编号', _equipment['OID']??''),
-                BuildWidget.buildRow('资产编号', _equipment['AssetCode']??''),
-                BuildWidget.buildRow('名称', _equipment['Name']??'', onTap: () => Navigator.of(context).push(new MaterialPageRoute(builder: (_) => new EquipmentsList(equipmentId: _equipment['OID'],)))),
-                BuildWidget.buildRow('型号', _equipment['EquipmentCode']??''),
-                BuildWidget.buildRow('序列号', _equipment['SerialCode']??''),
-                BuildWidget.buildRow('设备厂商', _equipment['Manufacturer']['Name']??''),
-                BuildWidget.buildRow('使用科室', _equipment['Department']['Name']??''),
-                BuildWidget.buildRow('安装地点', _equipment['InstalSite']??''),
-                BuildWidget.buildRow('维保状态', _equipment['WarrantyStatus']??''),
-                BuildWidget.buildRow('服务范围', _equipment['ContractScope']['Name']??''),
-                new Divider(),
-              ]).toList().reduce((_listA, _listB) {
-                _listA.addAll(_listB);
-                return _listA;
-              }),
+              children: buildEquipments()
             ),
           ),
           isExpanded: _expandList[0],

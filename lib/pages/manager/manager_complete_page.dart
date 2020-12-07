@@ -1,3 +1,4 @@
+import 'package:atoi/utils/common.dart';
 import 'package:flutter/material.dart';
 import 'package:atoi/utils/http_request.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -390,7 +391,7 @@ class _ManagerCompletePageState extends State<ManagerCompletePage> {
         break;
       case 601:
         _list.addAll([
-          BuildWidget.buildRow('资产金额', _report['PurchaseAmount'].toString()),
+          BuildWidget.buildRow('资产金额', CommonUtil.CurrencyForm(_report['PurchaseAmount'], times: 1, digits: 0)),
           BuildWidget.buildRow('整包范围', _report['ServiceScope']?'是':'否'),
           BuildWidget.buildRow('报告明细', _report['SolutionCauseAnalysis']),
           BuildWidget.buildRow('结果', _report['Result']),
@@ -479,7 +480,7 @@ class _ManagerCompletePageState extends State<ManagerCompletePage> {
                   : new Container()
             ],
           ),
-          BuildWidget.buildRow('金额（元/件）', _acc['Amount'].toString()),
+          BuildWidget.buildRow('金额（元/件）', CommonUtil.CurrencyForm(_acc['Amount'], times: 1, digits: 0)),
           BuildWidget.buildRow('数量', _acc['Qty'].toString()),
           BuildWidget.buildRow('拆下零件编号', _acc['OldSerialCode']),
           BuildWidget.buildRow('附件', ''),

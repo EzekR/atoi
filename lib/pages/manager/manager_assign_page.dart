@@ -166,7 +166,6 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
     var prefs = await _prefs;
     var userId = prefs.getInt('userID');
     var params = {
-      'userId': userId,
       'requestId': requestId
     };
     var resp = await HttpRequest.request(

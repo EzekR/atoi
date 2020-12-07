@@ -1,3 +1,4 @@
+import 'package:atoi/pages/equipments/equipments_list.dart';
 import 'package:flutter/material.dart';
 import 'package:floating_search_bar/floating_search_bar.dart';
 import 'package:atoi/utils/http_request.dart';
@@ -5,9 +6,10 @@ import 'package:flutter_spinkit/flutter_spinkit.dart';
 
 class SearchPage extends StatefulWidget {
 
-  SearchPage({Key key, this.equipments}):super(key: key);
+  SearchPage({Key key, this.equipments, this.onlyType}):super(key: key);
 
   final List equipments;
+  final EquipmentType onlyType;
 
   _SearchPageState createState() => _SearchPageState();
 }
@@ -19,6 +21,7 @@ class _SearchPageState extends State<SearchPage> {
   ScrollController _scrollController = new ScrollController();
   int offset = 0;
   bool _noMore = false;
+  int deviceType = 1;
 
   void initState() {
     getDevices('');
@@ -50,16 +53,48 @@ class _SearchPageState extends State<SearchPage> {
   }
 
   Future<Null> getDevices(String filter) async {
-    var resp = await HttpRequest.request(
-        '/Equipment/Getdevices',
-        method: HttpRequest.GET,
-        params: {
+    Map _params;
+    switch (deviceType) {
+      case 1:
+        _params = {
           'filterText': filter,
           'filterField': 'e.Name',
           'departmentId': -1,
           'PageSize': 20,
           'CurRowNum': offset
-        }
+        };
+        break;
+      case 2:
+        _params = {
+          'status': 0,
+          'departmentID':-1,
+          'useStatus':false,
+          'filterField': 'mi.Name',
+          'filterText': filter,
+          'curRowNum': offset,
+          'sortField': 'mi.Name',
+          'sortDirection': true,
+          'pageSize':10
+        };
+        break;
+      case 3:
+        _params = {
+          'status': 0,
+          'departmentID':-1,
+          'useStatus':false,
+          'filterField': 'oe.Name',
+          'filterText': filter,
+          'curRowNum': offset,
+          'sortField': 'oe.Name',
+          'sortDirection': true,
+          'pageSize':10
+        };
+        break;
+    }
+    var resp = await HttpRequest.request(
+        '/Equipment/Getdevices',
+        method: HttpRequest.GET,
+        params: _params
     );
     print(resp);
     if (resp['ResultCode'] == '00') {
@@ -100,9 +135,60 @@ class _SearchPageState extends State<SearchPage> {
         });
         Navigator.of(context).pop();
       },),
-      trailing: FlatButton(onPressed: () {
-        Navigator.of(context).pop(selected);
-      }, child: new Text('确认')),
+      trailing: Container(
+        width: 120.0,
+        child: Row(
+          children: <Widget>[
+            widget.onlyType==null?PopupMenuButton(
+              onSelected: (val) {
+                print(val);
+                setState(() {
+                  suggestionList.clear();
+                  deviceType = val;
+                });
+                getDevices(query);
+              },
+              icon: Icon(Icons.menu, color: Colors.grey,),
+              itemBuilder: (context) => [
+                PopupMenuItem(
+                  value: 1,
+                  child: Row(
+                    children: <Widget>[
+                      Icon(Icons.devices, color: Colors.blueAccent,),
+                      SizedBox(width: 10.0,),
+                      Text('医疗设备')
+                    ],
+                  ),
+                ),
+                PopupMenuItem(
+                  value: 2,
+                  child: Row(
+                    children: <Widget>[
+                      Icon(Icons.straighten, color: Colors.blueAccent,),
+                      SizedBox(width: 10.0,),
+                      Text('计量器具')
+                    ],
+                  ),
+                ),
+                PopupMenuItem(
+                  value: 3,
+                  child: Row(
+                    children: <Widget>[
+                      Icon(Icons.devices_other, color: Colors.blueAccent,),
+                      SizedBox(width: 10.0,),
+                      Text('其他设备')
+                    ],
+                  ),
+                ),
+              ],
+            ):Container(),
+            FlatButton(onPressed: () {
+              selected[0]['AssetType'] = deviceType;
+              Navigator.of(context).pop(selected);
+            }, child: new Text('确认')),
+          ],
+        ),
+      ),
       onChanged: (String value) {
         setState(() {
           query = value;

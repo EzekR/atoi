@@ -9,7 +9,8 @@ import 'package:atoi/widgets/build_widget.dart';
 class PrintQrcode extends StatefulWidget{
   _PrintQrcodeState createState() => _PrintQrcodeState();
   final int equipmentId;
-  PrintQrcode({Key key, this.equipmentId}):super(key: key);
+  final CodeType codeType;
+  PrintQrcode({Key key, this.equipmentId, this.codeType}):super(key: key);
 }
 
 class _PrintQrcodeState extends State<PrintQrcode> {
@@ -23,8 +24,23 @@ class _PrintQrcodeState extends State<PrintQrcode> {
   }
 
   Future<Null> getEquipment() async {
+    String url;
+    switch (widget.codeType) {
+      case CodeType.COMPONENT:
+        url = '/InvComponent/InvComponentLabel';
+        break;
+      case CodeType.CONSUMABLE:
+        url = '/InvConsumable/InvConsumableLabel';
+        break;
+      case CodeType.SPARE:
+        url = '/InvSpare/InvSpareLabel';
+        break;
+      default:
+        url = '/Equipment/Getdevices';
+        break;
+    }
     var resp = await HttpRequest.request(
-      '/Equipment/Getdevices',
+      url,
       method: HttpRequest.GET,
       params: {
         'filterText': widget.equipmentId
@@ -39,8 +55,29 @@ class _PrintQrcodeState extends State<PrintQrcode> {
   }
 
   Future<Null> getQrcode() async {
+    String url;
+    switch (widget.codeType) {
+      case CodeType.COMPONENT:
+        url = '/InvComponent/InvComponentLabel';
+        break;
+      case CodeType.CONSUMABLE:
+        url = '/InvConsumable/InvConsumableLabel';
+        break;
+      case CodeType.SPARE:
+        url = '/InvSpare/InvSpareLabel';
+        break;
+      case CodeType.MEASURE:
+        url = '/MeasInstrum/MeasInstrumLabel';
+        break;
+      case CodeType.OTHER:
+        url = '/OtherEqpt/OtherEqptLabel';
+        break;
+      default:
+        url = '/Equipment/EquipmentLabel';
+        break;
+    }
     var resp = await HttpRequest.request(
-      '/Equipment/EquipmentLabel',
+      url,
       method: HttpRequest.GET,
       params: {
         'id': widget.equipmentId
@@ -202,7 +239,7 @@ class _PrintQrcodeState extends State<PrintQrcode> {
   Widget build(BuildContext context) {
     return new Scaffold(
       appBar: new AppBar(
-        title: new Text('设备二维码打印'),
+        title: new Text('二维码打印'),
         elevation: 0.7,
         flexibleSpace: Container(
           decoration: BoxDecoration(
@@ -236,4 +273,13 @@ class _PrintQrcodeState extends State<PrintQrcode> {
       )
     );
   }
+}
+
+enum CodeType {
+  DEVICE,
+  COMPONENT,
+  CONSUMABLE,
+  SPARE,
+  MEASURE,
+  OTHER,
 }

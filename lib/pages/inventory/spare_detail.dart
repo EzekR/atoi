@@ -39,6 +39,7 @@ class _SpareDetailState extends State<SpareDetail> {
   String useStatus = "";
   int statusID = 1;
   String status = '';
+  ScrollController scrollController = new ScrollController();
   List statusList = [
     {
       "value": 1,
@@ -99,6 +100,9 @@ class _SpareDetailState extends State<SpareDetail> {
       var _data = resp['Data'];
       setState(() {
         oid = _data['OID'];
+        name.text = _data['Name'];
+        model.text = _data['Model'];
+        manufacturer.text = _data['Manufacturer'];
         _fujiClass2 = _data['FujiClass2']['ID'];
         _fujiClass2Name = _data['FujiClass2']['Name'];
         serialCode.text = _data['SerialCode'];
@@ -129,11 +133,7 @@ class _SpareDetailState extends State<SpareDetail> {
         }
     );
     if (resp['ResultCode'] == '00') {
-      if (resp['Data']['ID'] == 0) {
-        return false;
-      } else {
-        return true;
-      }
+      return resp['Data'];
     } else {
       return false;
     }
@@ -146,7 +146,7 @@ class _SpareDetailState extends State<SpareDetail> {
     if (_fujiClass2 == 0) {
       showDialog(context: context, builder: (context) => CupertinoAlertDialog(
         title: new Text('富士II类不可为空'),
-      )).then((result) => FocusScope.of(context).requestFocus(_focusComponent[0]));
+      )).then((result) => scrollController.jumpTo(0.0));
       return;
     }
     if (manufacturer.text.isEmpty) {
@@ -220,7 +220,7 @@ class _SpareDetailState extends State<SpareDetail> {
       },
       'Comments': comment.text
     };
-    if (widget.isStock) {
+    if (widget.isStock!=null&&widget.isStock) {
       bool exist = await spareExist(serialCode.text);
       if (exist) {
         return;
@@ -368,6 +368,7 @@ class _SpareDetailState extends State<SpareDetail> {
               padding: EdgeInsets.symmetric(vertical: 5.0),
               child: new Card(
                 child: new ListView(
+                  controller: scrollController,
                   children: <Widget>[
                     new ExpansionPanelList(
                       animationDuration: Duration(milliseconds: 200),
