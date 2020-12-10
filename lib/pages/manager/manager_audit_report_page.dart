@@ -871,8 +871,8 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
 
   List<Widget> buildEquipments() {
     List<Widget> _list = [];
-    equipmentComments = _equipments.map<TextEditingController>((_) => new TextEditingController()).toList();
-    equipmentStatus = _equipments.map<TextEditingController>((_) => new TextEditingController()).toList();
+    equipmentComments = _equipments.map<TextEditingController>((item) => new TextEditingController(text: item['StocktakingComments'])).toList();
+    equipmentStatus = _equipments.map<TextEditingController>((item) => new TextEditingController(text: item['StocktakingStatus'])).toList();
     for(int i=0; i<_equipments.length; i++) {
       _list.addAll([
         BuildWidget.buildRow('系统编号', _equipments[i]['OID']??''),

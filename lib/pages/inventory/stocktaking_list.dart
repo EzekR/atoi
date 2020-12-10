@@ -529,7 +529,7 @@ class _StocktakingListState extends State<StocktakingList> {
             mainAxisAlignment: MainAxisAlignment.end,
             mainAxisSize: MainAxisSize.max,
             children: <Widget>[
-              item['Status']['ID']<=2&&userID==item['User']['ID']&&role==2?new RaisedButton(
+              (item['Status']['ID']==2||item['Status']['ID']==1)&&userID==item['User']['ID']&&role==2?new RaisedButton(
                 onPressed: () async {
                   if (item['Status']['ID'] == 1) {
                     bool res = await startStocktaking(item['ID']);
@@ -568,9 +568,7 @@ class _StocktakingListState extends State<StocktakingList> {
                   ],
                 ),
               ):Container(),
-              new SizedBox(
-                width: 40,
-              ),
+              (item['Status']['ID']==2||item['Status']['ID']==1)&&userID==item['User']['ID']&&role==2?SizedBox(width: 40,):Container(),
               item['Status']['ID']==1&&role==2?RaisedButton(
                 onPressed: () {
                   Navigator.of(context).push(new MaterialPageRoute(builder: (_) => new StocktakingDetail(stockID: item['ID'], editable: true,))).then((result) {
@@ -629,7 +627,6 @@ class _StocktakingListState extends State<StocktakingList> {
                   ],
                 ),
               ):Container(),
-              SizedBox(width: 40,),
               item['Status']['ID']>=0&&item['Status']['ID']<=3&&role==1?RaisedButton(
                 onPressed: () {
                   showDialog(context: context, builder: (context) => CupertinoAlertDialog(
@@ -673,7 +670,7 @@ class _StocktakingListState extends State<StocktakingList> {
                     ),
                   ],
                 ),
-              ):Container()
+              ):Container(),
             ],
           )
         ],

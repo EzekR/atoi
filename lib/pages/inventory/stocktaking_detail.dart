@@ -82,14 +82,17 @@ class _StocktakingDetailState extends State<StocktakingDetail> {
   }
 
   Future<int> saveStocktaking(int status) async {
-    //bool result = await checkUnique();
     bool result = true;
+    if (widget.stockID == null) {
+      result = await checkUnique();
+    }
+    //bool result = true;
     if (result) {
       Map resp = await HttpRequest.request(
         '/Stocktaking/SaveStocktaking',
         method: HttpRequest.POST,
         data: {
-          'ID': 0,
+          'ID': widget.stockID??0,
           'ObjectType': {
             'ID': currentObj
           },
@@ -173,9 +176,11 @@ class _StocktakingDetailState extends State<StocktakingDetail> {
   bool checkItemChange() {
     bool hasChanged = false;
     for(int i=0; i<stockItems.length; i++) {
-      if (!stockItems[i]['IsInventory'] || (stockType == 1 && stockItems[i]['Status']['ID'] != stockItems[i]['OriginStatus']['ID']) || (stockType ==3 && stockItems[i]['AvaibleTimes'] != stockItems[i]['OriginAvaibleTimes'])) {
+      if (!stockItems[i]['IsInventory'] || (stockType == 1 && stockItems[i]['Status']['ID'] != stockItems[i]['OriginStatus']['ID']) || (stockType == 2 && stockItems[i]['OriginAvaibleQty'] != stockItems[i]['AvaibleQty']) || (stockType ==3 && stockItems[i]['AvaibleTimes'] != stockItems[i]['OriginAvaibleTimes'])) {
         FocusScope.of(context).requestFocus(focusCards[i]);
-        hasChanged = true;
+        if (stockItems[i]['Comments'] == "") {
+          hasChanged = true;
+        }
       }
     }
     if (hasChanged) {
@@ -310,16 +315,32 @@ class _StocktakingDetailState extends State<StocktakingDetail> {
   void setScanStuff() {
     Map decoded = jsonDecode(barcode);
     log('$decoded');
-    int index = stockItems.indexWhere((item) => item['ID'] == decoded['ID']);
+    String stockObject;
+    switch (stockType) {
+      case 1:
+        stockObject = 'InvComponent';
+        break;
+      case 2:
+        stockObject = 'InvConsumable';
+        break;
+      case 3:
+        stockObject = 'InvService';
+        break;
+      case 4:
+        stockObject = 'InvSpare';
+        break;
+    }
+    int index = stockItems.indexWhere((item) => item[stockObject]['ID'] == decoded['id']);
     if (index < 0) {
       showDialog(context: context, builder: (context) => CupertinoAlertDialog(
         title: new Text('盘点清单不存在该物件'),
       ));
       return;
     }
+    String scanned = jsonEncode(stockItems[index]);
     stockItems.removeAt(index);
     List reversed = stockItems.reversed.toList();
-    reversed.add(stockItems[index]);
+    reversed.add(jsonDecode(scanned));
     setState(() {
       stockItems = reversed.reversed.toList();
     });
@@ -331,6 +352,7 @@ class _StocktakingDetailState extends State<StocktakingDetail> {
       setState(() {
         return this.barcode = barcode;
       });
+      log("$barcode");
       setScanStuff();
     } on PlatformException catch (e) {
       if (e.code == BarcodeScanner.CameraAccessDenied) {
@@ -835,7 +857,7 @@ class _StocktakingDetailState extends State<StocktakingDetail> {
         isExpanded: expandList[0],
       ),
     );
-    if (widget.stockID != null || (stockStatus!=null && stockStatus > 1)) {
+    if (stockStatus!=null && stockStatus > 1) {
       _list.add(
         ExpansionPanel(
             canTapOnHeader: true,
@@ -1004,7 +1026,7 @@ class _StocktakingDetailState extends State<StocktakingDetail> {
                       children: <Widget>[
                         RaisedButton(
                           onPressed: () async {
-                            if (widget.stockID == null || stockStatus == 1) {
+                            if (widget.stockID == null || stockStatus < 2) {
                               saveStocktaking(1);
                             } else {
                               bool res = await checkStocktaking(1);
@@ -1052,7 +1074,7 @@ class _StocktakingDetailState extends State<StocktakingDetail> {
                             borderRadius: BorderRadius.circular(6),
                           ),
                           color: Color(0xff2E94B9),
-                          child: Text(widget.stockID==null?'开始盘点':'提交', style: TextStyle(color: Colors.white)),
+                          child: Text((widget.stockID==null||stockStatus<2)?'开始盘点':'提交', style: TextStyle(color: Colors.white)),
                         ),
                       ],
                     ):Container(),

@@ -68,7 +68,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
   ScrollController _scrollController = new ScrollController();
   int fujiClass2;
   String fujiClass2Name;
-  String fujiClass1;
+  String fujiClass1 = "其他";
   List fujiClass2List = [];
   List fujiClass2Components = [];
   TextEditingController componentCodes = new TextEditingController();
@@ -364,6 +364,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
       List _listData = resp['Data'].map((item) {
         return item['Description'];
       }).toList();
+      _listData.add("");
       setState(() {
         class1 = _listData;
         class1Item = resp['Data'];
@@ -702,8 +703,20 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
 
   Future<String> getDeviceFile(int fileId) async {
     // todo: switch equipment type
+    String url;
+    switch (widget.equipmentType) {
+      case EquipmentType.MEDICAL:
+        url = '/Equipment/DownloadUploadFile';
+        break;
+      case EquipmentType.MEASURE:
+        url = '/MeasInstrum/DownloadUploadFile';
+        break;
+      case EquipmentType.OTHER:
+        url = '/OtherEqpt/DownloadUploadFile';
+        break;
+    }
     var resp = await HttpRequest.request(
-      '/Equipment/DownloadUploadFile',
+      url,
       method: HttpRequest.POST,
       data: {
         'id': fileId
@@ -725,8 +738,20 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
   }
 
   Future<Null> deleteFile(int fileId) async {
+    String url;
+    switch (widget.equipmentType) {
+      case EquipmentType.MEDICAL:
+        url = '/Equipment/DeleteEquipmentFile';
+        break;
+      case EquipmentType.MEASURE:
+        url = '/MeasInstrum/DeleteEquipmentFile';
+        break;
+      case EquipmentType.OTHER:
+        url = '/OtherEqpt/DeleteEquipmentFile';
+        break;
+    }
     var resp = await HttpRequest.request(
-      '/Equipment/DeleteEquipmentFile',
+      url,
       method: HttpRequest.POST,
       data: {
         'fileID': fileId
@@ -1577,7 +1602,11 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
           context: context,
           builder: (context) => CupertinoAlertDialog(
                 title: new Text(resp['ResultMessage']),
-              ));
+              )).then((result) {
+                if (resp['ResultMessage'] == '资产编号不可为空') {
+                  FocusScope.of(context).requestFocus(_focusEquip[4]);
+                }
+      });
     }
     setState(() {
       netstat = false;

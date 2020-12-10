@@ -491,7 +491,7 @@ class _POAttachmentState extends State<POAttachment> {
         return;
       }
 
-      if (unit.text.isEmpty) {
+      if (widget.attachType == AttachmentType.CONSUMABLE && unit.text.isEmpty) {
         showDialog(context: context, builder: (context) => CupertinoAlertDialog(
           title: new Text('单位不可为空'),
         )).then((result) => FocusScope.of(context).requestFocus(_focusComponent[5]));

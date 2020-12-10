@@ -1,3 +1,4 @@
+import 'package:atoi/pages/equipments/equipments_list.dart';
 import 'package:atoi/widgets/search_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
@@ -199,7 +200,7 @@ class _ServiceDetailState extends State<ServiceDetail> {
         'ID': supplier['ID']
       }
     };
-    if (widget.isStock) {
+    if (widget.isStock!=null&&widget.isStock) {
       if (DateTime.tryParse(startDate).isBefore(DateTime.tryParse(widget.date))) {
         showDialog(context: context, builder: (context) => CupertinoAlertDialog(
           title: new Text('开始日期不可早于盘点日期'),
@@ -435,7 +436,7 @@ class _ServiceDetailState extends State<ServiceDetail> {
                                               icon: Icon(Icons.search),
                                               onPressed: () async {
                                                 FocusScope.of(context).requestFocus(new FocusNode());
-                                                final _searchResult = await Navigator.of(context).push(new MaterialPageRoute(builder: (_) => SearchPage(equipments: equips,)));
+                                                final _searchResult = await Navigator.of(context).push(new MaterialPageRoute(builder: (_) => SearchPage(equipments: equips, onlyType: EquipmentType.MEDICAL,)));
                                                 print(_searchResult);
                                                 if (_searchResult != null &&
                                                     _searchResult != 'null') {

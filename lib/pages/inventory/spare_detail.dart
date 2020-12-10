@@ -112,6 +112,7 @@ class _SpareDetailState extends State<SpareDetail> {
         comment.text = _data['Comments'];
         useStatus = _data['UsageStatus'];
         status = _data['Status']['Name'];
+        statusID = _data['Status']['ID'];
       });
     }
   }
