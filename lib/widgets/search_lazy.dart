@@ -7,12 +7,13 @@ import 'dart:convert';
 
 class SearchLazy extends StatefulWidget {
 
-  SearchLazy({Key key, this.searchType, this.fujiClass2, this.equipmentID, this.onlyType}):super(key: key);
+  SearchLazy({Key key, this.searchType, this.fujiClass2, this.equipmentID, this.onlyType, this.componentStatus}):super(key: key);
 
   final SearchType searchType;
   final EquipmentType onlyType;
   final int fujiClass2;
   final int equipmentID;
+  final int componentStatus;
 
   _SearchLazyState createState() => _SearchLazyState();
 }
@@ -163,7 +164,7 @@ class _SearchLazyState extends State<SearchLazy> {
         _params = {
           'filterText': filter,
           'filterField': 'c.Name',
-          'statusID': 0,
+          'statusID': widget.componentStatus??0,
           'CurRowNum': offset,
           'PageSize': 20,
           'eqptID': widget.equipmentID,

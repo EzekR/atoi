@@ -32,7 +32,7 @@ class ManagerAuditReportPage extends StatefulWidget {
 
 class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
 
-  List<bool> _expandList =  [false, false, false, true, false, false];
+  List<bool> _expandList =  [false, false, false, true, false, false, false, false];
   List _equipments = [];
   var _comment = new TextEditingController();
   ConstantsModel model;
@@ -63,6 +63,8 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
   String _mobile = '';
   var _accessory;
   List reportAccess = [];
+  List consumables = [];
+  List services = [];
   List<dynamic> imageAttach = [];
   List<TextEditingController> equipmentComments = [];
   List<TextEditingController> equipmentStatus = [];
@@ -175,66 +177,6 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
     );
   }
 
-  Padding buildRow(String labelText, String defaultText) {
-    return new Padding(
-      padding: EdgeInsets.symmetric(vertical: 5.0),
-      child: new Row(
-        children: <Widget>[
-          new Expanded(
-            flex: 4,
-            child: new Text(
-              labelText,
-              style: new TextStyle(
-                  fontSize: 16.0,
-                  fontWeight: FontWeight.w600
-              ),
-            ),
-          ),
-          new Expanded(
-            flex: 6,
-            child: new Text(
-              defaultText,
-              style: new TextStyle(
-                  fontSize: 16.0,
-                  fontWeight: FontWeight.w400,
-                  color: Colors.black54
-              ),
-            ),
-          )
-        ],
-      ),
-    );
-  }
-
-  Row buildDropdown(String title, String currentItem, List dropdownItems, Function changeDropdown) {
-    return new Row(
-      mainAxisAlignment: MainAxisAlignment.start,
-      children: <Widget>[
-        new Expanded(
-          flex: 4,
-          child: new Padding(
-            padding: EdgeInsets.symmetric(vertical: 5.0),
-            child: new Text(
-              title,
-              style: new TextStyle(
-                  fontSize: 16.0,
-                  fontWeight: FontWeight.w600
-              ),
-            ),
-          ),
-        ),
-        new Expanded(
-          flex: 6,
-          child: new DropdownButton(
-            value: currentItem,
-            items: dropdownItems,
-            onChanged: changeDropdown,
-          ),
-        )
-      ],
-    );
-  }
-
   Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
 
   Future<Null> getReport() async {
@@ -256,12 +198,13 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
         _report = resp['Data'];
         _unsolved.text = resp['Data']['SolutionUnsolvedComments'];
         _currentProvider = resp['Data']['ServiceProvider']['Name'];
-
+        services = resp['Data']['ReportService'];
+        consumables = resp['Data']['ReportConsumable'];
       });
-      for(var item in resp['Data']['ReportAccessories']) {
+      for(var item in resp['Data']['ReportComponent']) {
         reportAccess.add(jsonEncode(item));
       }
-      _accessory = resp['Data']['ReportAccessories'];
+      _accessory = resp['Data']['ReportComponent'];
       for(var _acc in _accessory) {
         var _imageNew = _acc['FileInfos'].firstWhere((info) => info['FileType']==1, orElse: () => null);
         var _imageOld = _acc['FileInfos'].firstWhere((info) => info['FileType']==2, orElse: () => null);
@@ -687,11 +630,9 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
     if (_accessory != null) {
       for (var _acc in _accessory) {
         var _accList = [
-          BuildWidget.buildRow('名称', _acc['Name']),
-          BuildWidget.buildRow('来源', _acc['Source']['Name']),
-          _acc['Source']['Name'] == '外部供应商' ? BuildWidget.buildRow(
-              '外部供应商', _acc['Supplier']['Name']) : new Container(),
-          BuildWidget.buildRow('新装零件编号', _acc['NewSerialCode']),
+          BuildWidget.buildRow('简称', _acc['Component']['Name']),
+          BuildWidget.buildRow('新装零件编号', _acc['NewInvComponent']['SerialCode']),
+          BuildWidget.buildRow('金额（元/件）', CommonUtil.CurrencyForm(_acc['NewInvComponent']['Price'], digits: 0, times: 1)),
           BuildWidget.buildRow('附件', ''),
           new Row(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -700,9 +641,8 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
                 child: BuildWidget.buildPhotoPageList(context, _acc['ImageNew']['FileContent'])):new Container()
             ],
           ),
-          BuildWidget.buildRow('金额（元/件）', CommonUtil.CurrencyForm(_acc['Amount'], times: 1, digits: 0)),
-          BuildWidget.buildRow('数量', _acc['Qty'].toString()),
-          BuildWidget.buildRow('拆下零件编号', _acc['OldSerialCode']),
+          BuildWidget.buildRow('拆下零件编号', _acc['OldInvComponent']['SerialCode']),
+          BuildWidget.buildRow('金额（元/件）', CommonUtil.CurrencyForm(_acc['OldInvComponent']['Price'], digits: 0, times: 1)),
           BuildWidget.buildRow('附件', ''),
           new Row(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -714,6 +654,41 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
           new Divider()
         ];
         _list.addAll(_accList);
+      }
+    }
+    return _list;
+  }
+
+  List<Widget> buildConsumable() {
+    List<Widget> _list = [];
+    if (consumables != null) {
+      for (var item in consumables) {
+        var consumableList = [
+          BuildWidget.buildRow('简称', item['InvConsumable']['Consumable']['Name']),
+          BuildWidget.buildRow('批次号', item['InvConsumable']['LotNum']),
+          BuildWidget.buildRow('供应商', item['InvConsumable']['Supplier']['Name']),
+          BuildWidget.buildRow('单价', item['InvConsumable']['Price'].toString()),
+          BuildWidget.buildRow('数量', item['Qty'].toString()),
+          new Divider()
+        ];
+        _list.addAll(consumableList);
+      }
+    }
+    return _list;
+  }
+
+  List<Widget> buildService() {
+    List<Widget> _list = [];
+    if (services != null) {
+      for (var item in services) {
+        var serviceList = [
+          BuildWidget.buildRow('维修服务系统编号', item['InvConsumable']['Consumable']['Name']),
+          BuildWidget.buildRow('服务名称', item['InvConsumable']['LotNum']),
+          BuildWidget.buildRow('供应商', item['InvConsumable']['Supplier']['Name']),
+          BuildWidget.buildRow('金额(元)', CommonUtil.CurrencyForm(item['InvConsumable']['Price'], digits: 0, times: 1)),
+          new Divider()
+        ];
+        _list.addAll(serviceList);
       }
     }
     return _list;
@@ -914,9 +889,10 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
                     fontWeight: FontWeight.w400
                 ),
               ),
-              trailing: _dispatch['Request']['RequestType']['ID']==12?IconButton(
+              trailing: IconButton(
                 onPressed: () async {
-                  if (widget.status > 3) {
+                  print(widget.status);
+                  if (widget.status >= 3 || _dispatch['Request']['RequestType']['ID']!=12) {
                     return;
                   }
                   final selected = await Navigator.of(context)
@@ -930,7 +906,7 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
                   }
                 },
                 icon: Icon(Icons.add),
-              ):Container(),
+              ),
             );
           },
           body: new Padding(
@@ -1051,7 +1027,7 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
     ]);
 
     if (_dispatch['Request']['RequestType']['ID'] != 14 && _dispatch['Request']['RequestType']['ID'] != 12 && _dispatch['Request']['RequestType']['ID'] != 4) {
-      _list.add(
+      _list.addAll([
         new ExpansionPanel(canTapOnHeader: true,
           headerBuilder: (context, isExpanded) {
             return ListTile(
@@ -1075,7 +1051,53 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
           ):new Container(),
           isExpanded: _expandList[4],
         ),
-      );
+        new ExpansionPanel(canTapOnHeader: true,
+          headerBuilder: (context, isExpanded) {
+            return ListTile(
+              leading: new Icon(Icons.battery_charging_full,
+                size: 20.0,
+                color: Colors.blue,
+              ),
+              title: Text('耗材信息',
+                style: new TextStyle(
+                    fontSize: 20.0,
+                    fontWeight: FontWeight.w400
+                ),
+              ),
+            );
+          },
+          body: consumables!=null?new Padding(
+            padding: EdgeInsets.symmetric(horizontal: 8.0),
+            child: new Column(
+              children: buildConsumable(),
+            ),
+          ):new Container(),
+          isExpanded: _expandList[5],
+        ),
+        new ExpansionPanel(canTapOnHeader: true,
+          headerBuilder: (context, isExpanded) {
+            return ListTile(
+              leading: new Icon(Icons.assignment_ind,
+                size: 20.0,
+                color: Colors.blue,
+              ),
+              title: Text('服务信息',
+                style: new TextStyle(
+                    fontSize: 20.0,
+                    fontWeight: FontWeight.w400
+                ),
+              ),
+            );
+          },
+          body: services!=null?new Padding(
+            padding: EdgeInsets.symmetric(horizontal: 8.0),
+            child: new Column(
+              children: buildService(),
+            ),
+          ):new Container(),
+          isExpanded: _expandList[6],
+        ),
+      ]);
     }
     return _list;
   }

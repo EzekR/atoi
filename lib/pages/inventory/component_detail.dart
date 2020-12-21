@@ -1,3 +1,4 @@
+import 'package:atoi/utils/common.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:atoi/models/models.dart';
@@ -514,7 +515,7 @@ class _ComponentDetailState extends State<ComponentDetail> {
                                     ],
                                   ),
                                 ):BuildWidget.buildRow('供应商', supplier==null?'':supplier['Name']),
-                                widget.editable?BuildWidget.buildInput('单价(元)', price, maxLength: 13, inputType: TextInputType.numberWithOptions(decimal: true), focusNode: _focusComponent[3], required: true):BuildWidget.buildRow('单价', price.text),
+                                widget.editable?BuildWidget.buildInput('单价(元)', price, maxLength: 13, inputType: TextInputType.numberWithOptions(decimal: true), focusNode: _focusComponent[3], required: true):BuildWidget.buildRow('单价', CommonUtil.CurrencyForm(double.tryParse(price.text), times: 1, digits: 0)),
                                 widget.editable&&widget.component==null?new Padding(
                                   padding: EdgeInsets.symmetric(vertical: 5.0),
                                   child: new Row(

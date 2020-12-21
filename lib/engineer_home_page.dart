@@ -110,7 +110,9 @@ class _EngineerHomePageState extends State<EngineerHomePage>
     var _server = await _prefs.getString('serverUrl');
     await _prefs.clear();
     await _prefs.setString('serverUrl', _server);
-    Navigator.of(context).pushNamed(LoginPage.tag);
+    _timer.cancel();
+    print("cancel timer");
+    Navigator.of(context).push(new MaterialPageRoute(builder: (_) => new LoginPage()));
   }
 
   void setFilter() {

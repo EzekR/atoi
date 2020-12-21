@@ -226,7 +226,7 @@ class _LoginPageState extends State<LoginPage> {
       var _prefs = await prefs;
       await _prefs.setString('userInfo', jsonEncode(_data['Data']));
       await _prefs.setInt('userID', _data['Data']['ID']);
-      await _prefs.setInt('role', _data['Data']['Role']['ID']);
+      await _prefs.setInt('role', _data['Data']['Role']['ID']==5?1:_data['Data']['Role']['ID']);
       await _prefs.setBool('isLogin', true);
       await _prefs.setString('roleName', _data['Data']['Role']['Name']);
       await _prefs.setString('userName', _data['Data']['Name']);

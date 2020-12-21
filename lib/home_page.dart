@@ -203,7 +203,8 @@ class _HomePageState extends State<HomePage>
     var _server = await _prefs.getString('serverUrl');
     await _prefs.clear();
     await _prefs.setString('serverUrl', _server);
-    Navigator.of(context).pushNamed(LoginPage.tag);
+    _timer.cancel();
+    Navigator.of(context).push(new MaterialPageRoute(builder: (_) => new LoginPage()));
   }
 
   @override

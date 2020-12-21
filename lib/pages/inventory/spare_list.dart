@@ -409,7 +409,7 @@ class _SpareListState extends State<SpareList> {
                 BuildWidget.buildCardRow('厂家', item['Manufacturer']),
                 BuildWidget.buildCardRow('富士II类', item['FujiClass2']['Name']),
                 BuildWidget.buildCardRow('序列号', item['SerialCode']),
-                BuildWidget.buildCardRow('月租(元)', item['Price'].toString()),
+                BuildWidget.buildCardRow('月租(元)', CommonUtil.CurrencyForm(item['Price'], times: 1, digits: 0)),
                 BuildWidget.buildCardRow('开始日期', item['StartDate'].split('T')[0]),
                 BuildWidget.buildCardRow('结束日期', item['EndDate'].split('T')[0]),
                 BuildWidget.buildCardRow('上次盘点日期', CommonUtil.TimeForm(item['LastestStocktakingDate']??'', 'yyyy-mm-dd')),

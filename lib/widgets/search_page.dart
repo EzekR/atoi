@@ -193,6 +193,7 @@ class _SearchPageState extends State<SearchPage> {
         setState(() {
           query = value;
         });
+        suggestionList.clear();
         getDevices(query);
       },
       onTap: () {},

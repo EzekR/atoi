@@ -19,6 +19,7 @@ import 'package:atoi/pages/equipments/equipments_list.dart';
 import 'package:atoi/utils/image_util.dart';
 import 'package:atoi/widgets/search_page.dart';
 import 'dart:developer';
+import 'package:uuid/uuid.dart';
 
 /// 工程师报告页面
 class EngineerReportPage extends StatefulWidget {
@@ -255,10 +256,8 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
           }
         }
         for (var _acc in _accessory) {
-          var _imageNew = _acc['FileInfos']
-              .firstWhere((info) => info['FileType'] == 1, orElse: () => null);
-          var _imageOld = _acc['FileInfos']
-              .firstWhere((info) => info['FileType'] == 2, orElse: () => null);
+          var _imageNew = _acc['FileInfos'].firstWhere((info) => info['FileType'] == 1, orElse: () => null);
+          var _imageOld = _acc['FileInfos'].firstWhere((info) => info['FileType'] == 2, orElse: () => null);
           if (_imageNew != null) {
             var _fileNew = await getAccessoryFile(_imageNew['ID']);
             _imageNew['FileContent'] = _fileNew;
@@ -1086,31 +1085,63 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
     ]);
     return _list;
   }
+  
+  bool checkUnique(Map acc) {
+    bool unique = true;
+    if (_accessory.isNotEmpty) {
+      int ind = _accessory.indexWhere((item) => item['Component']['ID'] == acc['Component']['ID']);
+      if (ind > -1) {
+        unique = false;
+      }
+    }
+    return unique;
+  }
+
+  void saveAccessory(Map accessory) async {
+    setState(() {
+      _accessory.add(accessory);
+    });
+  }
+
+  Future<String> getImageAcc() async {
+    List<Asset> image = await MultiImagePicker.pickImages(
+        maxImages: 1,
+        enableCamera: true
+    );
+    if (image != null) {
+      ByteData _data = await image[0].getByteData();
+      List<int> compressed = await FlutterImageCompress.compressWithList(
+        _data.buffer.asUint8List(),
+        minHeight: 800,
+        minWidth: 600,
+      );
+      String _image = base64Encode(Uint8List.fromList(compressed));
+      return _image;
+    }
+    return null;
+  }
 
   List<Widget> buildAccessory() {
     List<Widget> _list = [];
 
-    void saveAccessory(Map accessory) async {
-      setState(() {
-        _accessory.add(accessory);
-      });
-    }
-
     _list.add(new Row(
       mainAxisAlignment: MainAxisAlignment.end,
       children: <Widget>[
-        widget.status == 0 || widget.status == 1
-            ? new Text('新增零件')
-            : new Container(),
-        widget.status == 0 || widget.status == 1
-            ? new IconButton(
-                icon: Icon(Icons.add),
-                onPressed: () async {
-                  //_addAccessory();
+        widget.status == 0 || widget.status == 1?new Text('新增零件'):new Container(),
+        widget.status == 0 || widget.status == 1?new IconButton(
+            icon: Icon(Icons.add),
+            onPressed: () async {
                   final _acc = await Navigator.of(context).push(new MaterialPageRoute(builder: (_) {
                     return new EngineerReportAccessory(equipmentID: _dispatch['Request']['Equipments'][0]['ID'], accType: AccType.COMPONENT,);
                   }));
-                  print(_acc);
+                  print("save: $_acc");
+                  bool unique = checkUnique(_acc);
+                  if (!unique) {
+                    showDialog(context: context, builder: (_) => CupertinoAlertDialog(
+                      title: Text("零件不可重复"),
+                    ));
+                    return;
+                  }
                   if (_acc != null) {
                     saveAccessory(_acc);
                   }
@@ -1118,48 +1149,77 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
             : new Container()
       ],
     ));
-    if (_accessory != null) {
-      for (var _acc in _accessory) {
-        var _imageNew = _acc['FileInfos']
-            .firstWhere((info) => info['FileType'] == 1, orElse: () => null);
-        var _imageOld = _acc['FileInfos']
-            .firstWhere((info) => info['FileType'] == 2, orElse: () => null);
-        if (_imageNew != null) {
-          _acc['ImageNew'] = _imageNew;
-        }
-        if (_imageOld != null) {
-          _acc['ImageOld'] = _imageOld;
-        }
-        var _accList = [
-          BuildWidget.buildRow('简称', _acc['NewInvComponent']['Component']['Name']),
+    if (_accessory.isNotEmpty) {
+      for (Map _acc in _accessory) {
+        Map _imageNew = _acc['FileInfos'].firstWhere((info) => info['FileType'] == 1, orElse: () => null);
+        Map _imageOld = _acc['FileInfos'].firstWhere((info) => info['FileType'] == 2, orElse: () => null);
+        print("component:$_acc");
+        List<Widget> _accList = [
+          BuildWidget.buildRow('简称', _acc['Component']['Name']),
           BuildWidget.buildRow('新装零件编号', _acc['NewInvComponent']['SerialCode']),
           BuildWidget.buildRow('金额（元/件）', CommonUtil.CurrencyForm(_acc['NewInvComponent']['Price'], digits: 0, times: 1)),
           BuildWidget.buildRow('附件', ''),
           new Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
-              _acc['ImageNew'] != null &&
-                      _acc['ImageNew']['FileContent'] != null
-                  ? new Container(
-                      width: 100.0,
-                      child: BuildWidget.buildPhotoPageList(context, base64Decode(_acc['ImageNew']['FileContent'])),
-                    )
-                  : new Container()
+              Container(
+                width: 100.0,
+                child: _imageNew!=null&&_imageNew['FileContent']!=null?BuildWidget.buildPhotoPageList(context, base64Decode(_imageNew['FileContent'])):Container(),
+              ),
+              _imageNew!=null&&_imageNew['FileContent']!=null?IconButton(
+                icon: Icon(Icons.delete, color: Colors.red,),
+                onPressed: () {
+                  setState(() {
+                    _acc['FileInfos'].remove(_imageNew);
+                  });
+                },
+              ):IconButton(
+                icon: Icon(Icons.add, color: Colors.blue,),
+                onPressed: () async {
+                  String _image = await getImageAcc();
+                  setState(() {
+                    _acc['FileInfos'].add({
+                      'FileName': 'acc_new_${Uuid().v1()}.jpg',
+                      'ID': 0,
+                      'FileType': 1,
+                      'FileContent': _image
+                    });
+                  });
+                },
+              )
             ],
           ),
           BuildWidget.buildRow('拆下零件编号', _acc['OldInvComponent']['SerialCode']),
-          BuildWidget.buildRow('金额（元/件）', CommonUtil.CurrencyForm(_acc['OldInvComponent']['Price'], times: 1, digits: 0)),
+          BuildWidget.buildRow('金额（元/件）', "***"),
           BuildWidget.buildRow('附件', ''),
           new Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
-              _acc['ImageOld'] != null &&
-                      _acc['ImageOld']['FileContent'] != null
-                  ? new Container(
-                      width: 100.0,
-                      child: BuildWidget.buildPhotoPageList(context, base64Decode(_acc['ImageOld']['FileContent'])),
-                    )
-                  : new Container()
+              Container(
+                width: 100.0,
+                child: _imageOld!=null&&_imageOld['FileContent']!=null?BuildWidget.buildPhotoPageList(context, base64Decode(_imageOld['FileContent'])):Container(),
+              ),
+              _imageOld!=null&&_imageOld['FileContent']!=null?IconButton(
+                icon: Icon(Icons.delete, color: Colors.red,),
+                onPressed: () {
+                  setState(() {
+                    _acc['FileInfos'].remove(_imageOld);
+                  });
+                },
+              ):IconButton(
+                icon: Icon(Icons.add, color: Colors.blue,),
+                onPressed: () async {
+                  String _image = await getImageAcc();
+                  setState(() {
+                    _acc['FileInfos'].add({
+                      'FileName': 'acc_old_${Uuid().v1()}.jpg',
+                      'ID': 0,
+                      'FileType': 2,
+                      'FileContent': _image
+                    });
+                  });
+                },
+              )
             ],
           ),
           widget.status == 3 || widget.status == 2
@@ -1206,6 +1266,12 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
                 return new EngineerReportAccessory(fujiClass2: _dispatch['Request']['Equipments'][0]['FujiClass2']['ID'], accType: AccType.CONSUMABLE,);
               }));
               if (consumable != null) {
+                if (consumables.firstWhere((item) => item['InvConsumable']['ID'] == consumable['InvConsumable']['ID']) > -1) {
+                  showDialog(context: context, builder: (_) => CupertinoAlertDialog(
+                    title: Text("耗材不可重复"),
+                  ));
+                  return;
+                }
                 setState(() {
                   consumables.add(consumable);
                 });
@@ -1261,6 +1327,12 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
                 return new EngineerReportAccessory(equipmentID: _dispatch['Request']['Equipments'][0]['ID'], accType: AccType.SERVICE,);
               }));
               if (service != null) {
+                if (services.firstWhere((item) => item['Service']['ID'] == service['Service']['ID']) > -1) {
+                  showDialog(context: context, builder: (_) => CupertinoAlertDialog(
+                    title: Text("服务不可重复添加"),
+                  ));
+                  return;
+                }
                 setState(() {
                   services.add(service);
                 });

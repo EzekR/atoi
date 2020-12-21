@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:atoi/utils/common.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:atoi/models/models.dart';
@@ -189,19 +190,19 @@ class _SpareDetailState extends State<SpareDetail> {
     if (startDate == 'YYYY-MM-DD') {
       showDialog(context: context, builder: (context) => CupertinoAlertDialog(
         title: new Text('开始日期不可为空'),
-      )).then((result) => FocusScope.of(context).requestFocus(_focusComponent[0]));
+      )).then((result) => scrollController.jumpTo(400.0));
       return;
     }
     if (endDate == 'YYYY-MM-DD') {
       showDialog(context: context, builder: (context) => CupertinoAlertDialog(
         title: new Text('结束日期不可为空'),
-      )).then((result) => FocusScope.of(context).requestFocus(_focusComponent[0]));
+      )).then((result) => scrollController.jumpTo(400.0));
       return;
     }
     if (DateTime.parse(startDate).isAfter(DateTime.parse(endDate))) {
       showDialog(context: context, builder: (context) => CupertinoAlertDialog(
         title: new Text('开始日期不可在结束日期之后'),
-      )).then((result) => FocusScope.of(context).requestFocus(_focusComponent[0]));
+      )).then((result) => scrollController.jumpTo(400.0));
       return;
     }
     var prefs = await _prefs;
@@ -407,7 +408,7 @@ class _SpareDetailState extends State<SpareDetail> {
                                 widget.editable?BuildWidget.buildInput('型号', model, maxLength: 30, focusNode: _focusComponent[8], required: true):BuildWidget.buildRow('型号', model.text),
                                 widget.editable?BuildWidget.buildInput('厂家', manufacturer, maxLength: 30, focusNode: _focusComponent[7], required: true):BuildWidget.buildRow('厂家', manufacturer.text),
                                 widget.editable?BuildWidget.buildInput('序列号', serialCode, maxLength: 30, focusNode: _focusComponent[2], required: true):BuildWidget.buildRow('序列号', serialCode.text),
-                                widget.editable?BuildWidget.buildInput('月租(元)', price, maxLength: 13, inputType: TextInputType.numberWithOptions(decimal: true), focusNode: _focusComponent[3], required: true):BuildWidget.buildRow('月租(元)', price.text),
+                                widget.editable?BuildWidget.buildInput('月租(元)', price, maxLength: 13, inputType: TextInputType.numberWithOptions(decimal: true), focusNode: _focusComponent[3], required: true):BuildWidget.buildRow('月租(元)', CommonUtil.CurrencyForm(double.tryParse(price.text), times: 1, digits: 0)),
                                 widget.editable?new Padding(
                                   padding: EdgeInsets.symmetric(vertical: 5.0),
                                   child: new Row(

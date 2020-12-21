@@ -60,7 +60,7 @@ class _StocktakingDetailState extends State<StocktakingDetail> {
       '/Stocktaking/VerifyUniqueStocktaking',
       method: HttpRequest.POST,
       data: {
-        'id': 0,
+        'id': widget.stockID??0,
         'objId': currentObj
       }
     );
@@ -165,6 +165,7 @@ class _StocktakingDetailState extends State<StocktakingDetail> {
       }).toList();
       setState(() {
         stockType = resp['Data']['ObjectType']['ID'];
+        currentObj = stockType;
         stockName = resp['Data']['ObjectType']['Name'];
         stockStatus = resp['Data']['Status']['ID'];
         scheduledDate = CommonUtil.TimeForm(resp['Data']['ScheduledDate'], 'yyyy-mm-dd');
@@ -1049,7 +1050,7 @@ class _StocktakingDetailState extends State<StocktakingDetail> {
                         ),
                         RaisedButton(
                           onPressed: () async {
-                            if (widget.stockID == null) {
+                            if (widget.stockID == null||stockStatus<2) {
                               int stockID = await saveStocktaking(1);
                               if (stockID != 0) {
                                 bool result = await startStocktaking(stockID);

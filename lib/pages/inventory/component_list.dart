@@ -454,7 +454,7 @@ class _ComponentListState extends State<ComponentList> {
                 BuildWidget.buildCardRow('设备系统编号', item['Equipment']['OID']),
                 BuildWidget.buildCardRow('设备名称', item['Equipment']['Name']),
                 BuildWidget.buildCardRow('供应商', item['Supplier']['Name']),
-                BuildWidget.buildCardRow('单价（元）', item['Price'].toString()),
+                BuildWidget.buildCardRow('单价（元）', CommonUtil.CurrencyForm(item['Price'], times: 1, digits: 0)),
                 BuildWidget.buildCardRow('购入日期', item['PurchaseDate'].split('T')[0]),
                 BuildWidget.buildCardRow('采购单号', item['Purchase']['ID']==0?'':'${item['Purchase']['Name']}'),
                 BuildWidget.buildCardRow('上次盘点日期', CommonUtil.TimeForm(item['LastestStocktakingDate']??'', 'yyyy-mm-dd')),

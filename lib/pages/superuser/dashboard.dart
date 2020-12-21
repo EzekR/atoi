@@ -1964,7 +1964,7 @@ class _DashboardState extends State<Dashboard> {
                           Expanded(
                             flex: 8,
                             child: Text(
-                              '${item['EquipmentName']} 【${item['EquipmentOID']}】${item['FaultDesc']}',
+                              '${item['Equipments'][0]['Department']['Name']}: ${item['EquipmentName']} 【${item['EquipmentOID']}】${item['FaultDesc']}',
                               style: TextStyle(
                                   color: Color(0xff1e1e1e),
                                   fontSize: 14.0
@@ -3215,85 +3215,83 @@ class _DashboardState extends State<Dashboard> {
   }
 
   Widget build(BuildContext context) {
-    return new Scaffold(
-      appBar: new AppBar(
-        title: new Align(
-          alignment: Alignment(-1.0, 0),
-          child: new Text('ATOI医疗设备管理系统',
-            textAlign: TextAlign.left,
-          ),
-        ),
-        automaticallyImplyLeading: false,
-        centerTitle: false,
-        elevation: 0.0,
-        bottomOpacity: 0,
-        backgroundColor: Color(0xff385A95),
-        // linear gradient decoration
-        //flexibleSpace: Container(
-        //  decoration: BoxDecoration(
-        //    gradient: LinearGradient(
-        //      begin: Alignment.centerLeft,
-        //      end: Alignment.centerRight,
-        //      colors: [
-        //        const Color(0xFF385A95),
-        //        const Color(0xFF3FA5CC)
-        //      ],
-        //    ),
-        //  ),
-        //),
-        actions: <Widget>[
-          GestureDetector(
-            onTap: () {
-              role==3?Navigator.of(context).push(new MaterialPageRoute(builder: (_) => SuperHome())):null;
-            },
-            child: Center(
-              child: Text(
-                userName??'superuser',
+    return WillPopScope(
+      child: new Scaffold(
+          appBar: new AppBar(
+            title: new Align(
+              alignment: Alignment(-1.0, 0),
+              child: new Text('ATOI医疗设备管理系统',
+                textAlign: TextAlign.left,
               ),
             ),
-          ),
-          SizedBox(
-            width:10
-          )
-        ],
-      ),
-      body: Column(
-        children: <Widget>[
-          Container(
-            color: Color(0xFF385A95),
-            child: !isDetailPage&&widget.equipmentId==null?Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: <Widget>[
-                  buildTab('资产概览', 0),
-                  buildTab('当日报修', 1),
-                  buildTab('关键事件', 2),
-                  buildTab('关键指标', 3),
-                ],
-              ):Container(
-              height: 32.0,
-              color: Color(0xFF385A95),
+            leading: IconButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              icon: Icon(Icons.arrow_back_ios),
             ),
-          ),
-          Container(
-            height: MediaQuery.of(context).size.height-110,
-            color: Color(0xffd8e0ee),
-            child: Stack(
-              children: <Widget>[
-                Container(
-                  child: CustomPaint(
-                    size: Size.infinite,
-                    painter: CurvePainter(),
+            automaticallyImplyLeading: false,
+            centerTitle: false,
+            elevation: 0.0,
+            bottomOpacity: 0,
+            backgroundColor: Color(0xff385A95),
+            actions: <Widget>[
+              GestureDetector(
+                onTap: () {
+                  role==3?Navigator.of(context).push(new MaterialPageRoute(builder: (_) => SuperHome())):null;
+                },
+                child: Center(
+                  child: Text(
+                    userName??'superuser',
                   ),
                 ),
-                ListView(
-                    controller: new ScrollController(),
-                    children: listBuilder()
-                ),
-              ],
-            )
+              ),
+              SizedBox(
+                  width:10
+              )
+            ],
           ),
-        ],
-      )
+          body: Column(
+            children: <Widget>[
+              Container(
+                color: Color(0xFF385A95),
+                child: !isDetailPage&&widget.equipmentId==null?Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: <Widget>[
+                    buildTab('资产概览', 0),
+                    buildTab('当日报修', 1),
+                    buildTab('关键事件', 2),
+                    buildTab('关键指标', 3),
+                  ],
+                ):Container(
+                  height: 32.0,
+                  color: Color(0xFF385A95),
+                ),
+              ),
+              Container(
+                  height: MediaQuery.of(context).size.height-110,
+                  color: Color(0xffd8e0ee),
+                  child: Stack(
+                    children: <Widget>[
+                      Container(
+                        child: CustomPaint(
+                          size: Size.infinite,
+                          painter: CurvePainter(),
+                        ),
+                      ),
+                      ListView(
+                          controller: new ScrollController(),
+                          children: listBuilder()
+                      ),
+                    ],
+                  )
+              ),
+            ],
+          )
+      ),
+      onWillPop: () async {
+        return false;
+      },
     );
   }
 }

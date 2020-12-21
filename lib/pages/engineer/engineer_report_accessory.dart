@@ -46,8 +46,8 @@ class _EngineerReportAccessoryState extends State<EngineerReportAccessory> {
   var _vendor;
   List<DropdownMenuItem<String>> _dropDownMenuSources;
   List<DropdownMenuItem<String>> _dropDownMenuVendors;
-  Map newComponent;
-  Map oldComponent;
+  Map newComponent = {};
+  Map oldComponent = {};
   List consumables = [];
   int consumable;
   List batches = [];
@@ -294,15 +294,44 @@ class _EngineerReportAccessoryState extends State<EngineerReportAccessory> {
     return new FocusNode();
   }).toList();
 
+  Future<bool> codeUsed() async {
+    bool used = false;
+    Map resp1 = await HttpRequest.request(
+      '/DispatchReport/CheckOldSerialCode',
+      method: HttpRequest.GET,
+      params: {
+        'dispatchReportID': 0,
+        'serialCode': _oldCode.text
+      }
+    );
+    Map resp2 = await HttpRequest.request(
+      '/InvComponent/CheckComponentSerialCode',
+      method: HttpRequest.GET,
+      params: {
+        'invComponentID': 0,
+        'serialCode': _oldCode.text
+      }
+    );
+    bool _usedInReport = resp1['Data'];
+    int _invID = resp2['Data']['ID'];
+    if (!_usedInReport && _invID == 0) {
+      used = false;
+    } else {
+      used = true;
+    }
+    return used;
+  }
+
   void saveAccessory() async {
-    //if (_name.text.isEmpty) {
-    //  showDialog(context: context,
-    //    builder: (context) => CupertinoAlertDialog(
-    //      title: new Text('名称不可为空'),
-    //    )
-    //  ).then((result) => FocusScope.of(context).requestFocus(_focusAcc[0]));
-    //  return;
-    //}
+    bool used = await codeUsed();
+    if (used) {
+      showDialog(context: context,
+          builder: (context) => CupertinoAlertDialog(
+            title: new Text('拆下序列号已使用'),
+          )
+      ).then((result) => FocusScope.of(context).requestFocus(_focusAcc[2]));
+      return;
+    }
     if (_newCode.text.isEmpty) {
       showDialog(context: context,
           builder: (context) => CupertinoAlertDialog(
@@ -319,54 +348,6 @@ class _EngineerReportAccessoryState extends State<EngineerReportAccessory> {
       ).then((result) => FocusScope.of(context).requestFocus(_focusAcc[2]));
       return;
     }
-    //if (_amount.text.isEmpty) {
-    //  showDialog(context: context,
-    //      builder: (context) => CupertinoAlertDialog(
-    //        title: new Text('新装部件金额不可为空'),
-    //      )
-    //  ).then((result) => FocusScope.of(context).requestFocus(_focusAcc[3]));
-    //  return;
-    //}
-    //if (double.tryParse(_amount.text) > 99999999.99) {
-    //  showDialog(context: context,
-    //      builder: (context) => CupertinoAlertDialog(
-    //        title: new Text('新装部件金额过大'),
-    //      )
-    //  ).then((result) => FocusScope.of(context).requestFocus(_focusAcc[3]));
-    //  return;
-    //}
-    //if (_qty.text.isEmpty) {
-    //  showDialog(context: context,
-    //      builder: (context) => CupertinoAlertDialog(
-    //        title: new Text('数量不可为空'),
-    //      )
-    //  ).then((result) => FocusScope.of(context).requestFocus(_focusAcc[4]));
-    //  return;
-    //}
-    //if (_qty.text.split('.').length>1) {
-    //  showDialog(context: context,
-    //      builder: (context) => CupertinoAlertDialog(
-    //        title: new Text('零件数量必须为整数'),
-    //      )
-    //  ).then((result) => FocusScope.of(context).requestFocus(_focusAcc[4]));
-    //  return;
-    //}
-    //if (int.tryParse(_qty.text) > 999999999) {
-    //  showDialog(context: context,
-    //      builder: (context) => CupertinoAlertDialog(
-    //        title: new Text('数量过大'),
-    //      )
-    //  ).then((result) => FocusScope.of(context).requestFocus(_focusAcc[4]));
-    //  return;
-    //}
-    //if (_currentSource == '外部供应商' && _vendor == null) {
-    //  showDialog(context: context,
-    //    builder: (context) => CupertinoAlertDialog(
-    //      title: new Text('请选择供应商'),
-    //    )
-    //  ).then((result) => FocusScope.of(context).requestFocus(_focusAcc[5]));
-    //  return;
-    //}
     var _supplier = _vendor;
     print(_supplier);
     var imageNew;
@@ -394,19 +375,12 @@ class _EngineerReportAccessoryState extends State<EngineerReportAccessory> {
         }
       );
     }
+    oldComponent['SerialCode'] = _oldCode.text;
     var data = {
-      //'Name': _name.text,
-      //'Source': {
-      //  'Name': _currentSource,
-      //  'ID': model.AccessorySourceType[_currentSource]
-      //},
-      //'Supplier': _currentSource=='备件库'?{'ID': 0}:_supplier,
       'DispatchReportID': 0,
       'OldSerialCode': _oldCode.text,
       'UsedDate': '',
-      'Component': {
-        'ID': newComponent['Component']['ID']
-      },
+      'Component': newComponent['Component'],
       'NewInvComponent': newComponent,
       'OldInvComponent': oldComponent,
       'FileInfos': _files
@@ -439,6 +413,15 @@ class _EngineerReportAccessoryState extends State<EngineerReportAccessory> {
       ).then((result) => FocusScope.of(context).requestFocus(_focusAcc[9]));
       return;
     }
+    Map _consumable = batchesRaw.firstWhere((item) => item['ID'] == batch, orElse: null);
+    if (_consumable != null && double.tryParse(consumableQuantity.text) > _consumable['AvaibleQty']) {
+      showDialog(context: context,
+          builder: (context) => CupertinoAlertDialog(
+            title: new Text('数量不可大于耗材可用数量'),
+          )
+      ).then((result) => FocusScope.of(context).requestFocus(_focusAcc[9]));
+      return;
+    }
     Map data = {
       'InvConsumable': batchesRaw.firstWhere((item) => item['ID'] == batch, orElse: null),
       'Qty': consumableQuantity.text
@@ -455,8 +438,17 @@ class _EngineerReportAccessoryState extends State<EngineerReportAccessory> {
       ).then((result) => FocusScope.of(context).requestFocus(_focusAcc[1]));
       return;
     }
+    Map _service = services.firstWhere((item) => item['ID'] == service, orElse: null);
+    if (_service != null&&_service['AvaibleTimes'] <= 0) {
+      showDialog(context: context,
+          builder: (context) => CupertinoAlertDialog(
+            title: new Text('外购维修服务剩余服务次数为0不可添加'),
+          )
+      ).then((result) => FocusScope.of(context).requestFocus(_focusAcc[1]));
+      return;
+    }
     Map data = {
-      'Service': services.firstWhere((item) => item['ID'] == service, orElse: null),
+      'Service': _service
     };
     Navigator.of(context).pop(data);
   }
@@ -529,22 +521,35 @@ class _EngineerReportAccessoryState extends State<EngineerReportAccessory> {
   }
 
   void searchNew() async {
-    Map data = await searchComponent();
+    Map data = await searchComponent(1);
     setState(() {
       newComponent = data;
       _newCode.text = newComponent['SerialCode'];
     });
+    checkCoherence();
   }
 
   void searchOld() async {
-    Map data = await searchComponent();
+    Map data = await searchComponent(2);
     setState(() {
       oldComponent = data;
       _oldCode.text = oldComponent['SerialCode'];
     });
+    checkCoherence();
   }
 
-  Future<Map> searchComponent() async {
+  void checkCoherence() {
+    if ((oldComponent.isNotEmpty && newComponent.isNotEmpty) && (oldComponent['SerialCode'] != newComponent['SerialCode'])) {
+      showDialog(context: context,
+          builder: (context) => CupertinoAlertDialog(
+            title: new Text('拆下零件的简称要与新装零件一致'),
+          )
+      ).then((result) => FocusScope.of(context).requestFocus(_focusAcc[1]));
+      return;
+    }
+  }
+
+  Future<Map> searchComponent(int status) async {
     String result = await Navigator.of(context).push(new MaterialPageRoute(builder: (_) => SearchLazy(searchType: SearchType.COMPONENT, equipmentID: widget.equipmentID,)));
     Map data = jsonDecode(result);
     return data;
@@ -555,12 +560,6 @@ class _EngineerReportAccessoryState extends State<EngineerReportAccessory> {
     switch (widget.accType) {
       case AccType.COMPONENT:
         _list.addAll([
-          //BuildWidget.buildInput('名称', _name, focusNode: _focusAcc[0], lines: 1, required: true),
-          //BuildWidget.buildDropdown('来源', _currentSource, _dropDownMenuSources, changedDropDownSource, context: context),
-          //new SizedBox(
-          //  height: 5.0,
-          //),
-          //_currentSource=='外部供应商'?buildRowVendor('外部供应商', _vendor==null?'':_vendor['Name']):new Container(),
           BuildWidget.buildInputWithSearch('新装编号', _newCode, focusNode: _focusAcc[1], lines: 1, required: true, pressed: searchNew, enabled: false),
           new Padding(
             padding: EdgeInsets.symmetric(vertical: 5.0),

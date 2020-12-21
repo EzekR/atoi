@@ -2677,7 +2677,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
         ),
       ):BuildWidget.buildRow('经销商', supplier==null?'':supplier['Name']),
       widget.editable?BuildWidget.buildInput('采购金额(元)', purchaseAmount, lines: 1, maxLength: 11, inputType: TextInputType.numberWithOptions(decimal: true), focusNode: _focusEquip[5]):BuildWidget.buildRow('采购金额（元）', CommonUtil.CurrencyForm(double.tryParse(purchaseAmount.text), times: 1, digits: 0)),
-      widget.editable?BuildWidget.buildRadio(widget.equipmentType==EquipmentType.MEASURE?'器具产地':'设备产地', origin, currentOrigin, changeOrigin):BuildWidget.buildRow('设备产地', currentOrigin),
+      widget.editable?BuildWidget.buildRadio(widget.equipmentType==EquipmentType.MEASURE?'器具产地':'设备产地', origin, currentOrigin, changeOrigin):BuildWidget.buildRow(widget.equipmentType==EquipmentType.MEASURE?'器具产地':'设备产地', currentOrigin),
     ]);
     switch (widget.equipmentType) {
       case EquipmentType.MEDICAL:
