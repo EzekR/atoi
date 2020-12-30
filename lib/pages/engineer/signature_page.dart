@@ -45,7 +45,7 @@ class _SignaturePageState extends State<SignaturePage> {
   ByteData _img = ByteData(0);
   var color = Colors.black;
   var strokeWidth = 5.0;
-  final _sign = GlobalKey<SignatureState>();
+  GlobalKey<SignatureState> _sign = GlobalKey<SignatureState>();
 
   void initState() {
     super.initState();

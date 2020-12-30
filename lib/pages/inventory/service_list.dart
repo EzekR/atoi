@@ -171,7 +171,7 @@ class _ServiceListState extends State<ServiceList> {
                                   ),
                                   DropdownMenuItem(
                                     value: 'e.ID',
-                                    child: Text('系统编号'),
+                                    child: Text('设备系统编号'),
                                   ),
                                 ],
                                 onChanged: (val) {
@@ -347,7 +347,7 @@ class _ServiceListState extends State<ServiceList> {
             padding: EdgeInsets.symmetric(horizontal: 8.0),
             child: Column(
               children: <Widget>[
-                BuildWidget.buildCardRow('关联富士II类', item['FujiClass2']['Name']),
+                BuildWidget.buildCardRow('关联设备', item['Equipments'].map((item) => item['Name']).toList().join(",")),
                 BuildWidget.buildCardRow('供应商', item['Supplier']['Name']),
                 BuildWidget.buildCardRow('服务次数', item['TotalTimes'].toString()),
                 BuildWidget.buildCardRow('开始日期', item['StartDate'].split('T')[0]),

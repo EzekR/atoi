@@ -121,18 +121,39 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
   List<DropdownMenuItem<String>> mandatoryTypes;
   String currentMandatoryType = '无';
 
+  List<Map> periodTypeList = [
+    {
+      'ID': 0,
+      'Name': '无'
+    },
+    {
+      'ID': 1,
+      'Name': '天/次'
+    },
+    {
+      'ID': 3,
+      'Name': '月/次'
+    },
+    {
+      'ID': 4,
+      'Name': '年/次'
+    },
+  ];
+
+
+
   List patrolPeriodList = ['无', '天/次', '月/次', '年/次'];
   List<DropdownMenuItem<String>> dropdownPatrolPeriod;
-  String currentPatrolPeriod;
+  int currentPatrolPeriod;
 
   List mandatoryPeriodList = ['无', '天/次', '月/次', '年/次'];
   List<DropdownMenuItem<String>> dropdownMandatoryPeriod;
-  String currentMaintainPeriod;
-  String currentMandatoryPeriod;
+  int currentMaintainPeriod;
+  int currentMandatoryPeriod;
 
   List correctionPeriodList = ['无', '天/次', '月/次', '年/次'];
   List<DropdownMenuItem<String>> dropdownCorrectionPeriod;
-  String currentCorrectionPeriod;
+  int currentCorrectionPeriod;
 
   List equipmentClass = ['1类', '2类', '3类'];
   List<DropdownMenuItem<String>> dropdownClass;
@@ -303,16 +324,16 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
   void changeMandatoryType(String selectedMethod) {
     FocusScope.of(context).requestFocus(new FocusNode());
     if (selectedMethod == '周期') {
-      currentMandatoryPeriod = '无';
+      currentMandatoryPeriod = 0;
     }
     setState(() {
       currentMandatoryType = selectedMethod;
     });
   }
 
-  void changePatrolPeriod(String selectedMethod) {
+  void changePatrolPeriod(selectedMethod) {
     FocusScope.of(context).requestFocus(new FocusNode());
-    if (selectedMethod == '无') {
+    if (selectedMethod == 1) {
       patrolPeriod.clear();
     }
     setState(() {
@@ -320,9 +341,9 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
     });
   }
 
-  void changeMandatoryPeriod(String selectedMethod) {
+  void changeMandatoryPeriod(selectedMethod) {
     FocusScope.of(context).requestFocus(new FocusNode());
-    if (selectedMethod == '无') {
+    if (selectedMethod == 1) {
       maintainPeriod.clear();
     }
     setState(() {
@@ -330,9 +351,9 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
     });
   }
 
-  void changeMaintainPeriod(String selectedMethod) {
+  void changeMaintainPeriod(selectedMethod) {
     FocusScope.of(context).requestFocus(new FocusNode());
-    if (selectedMethod == '无') {
+    if (selectedMethod == 1) {
       maintainPeriod.clear();
     }
     setState(() {
@@ -340,9 +361,9 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
     });
   }
 
-  void changeCorrectionPeriod(String selectedMethod) {
+  void changeCorrectionPeriod(selectedMethod) {
     FocusScope.of(context).requestFocus(new FocusNode());
-    if (selectedMethod == '无') {
+    if (selectedMethod == 1) {
       correctionPeriod.clear();
     }
     setState(() {
@@ -462,11 +483,11 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
     currentMandatory = dropdownMandatory[0].value;
     mandatoryTypes = getDropDownMenuItems(mandatoryPeriod);
     dropdownPatrolPeriod = getDropDownMenuItems(model.PeriodTypeList);
-    currentPatrolPeriod = dropdownPatrolPeriod[0].value;
-    dropdownMandatoryPeriod = getDropDownMenuItems(model.PeriodTypeList);
-    currentMaintainPeriod = dropdownMandatoryPeriod[0].value;
+    currentPatrolPeriod = 1;
+    dropdownMandatoryPeriod = getDropDownMenuItems(mandatoryPeriodList);
+    currentMaintainPeriod = 1;
     dropdownCorrectionPeriod = getDropDownMenuItems(model.PeriodTypeList);
-    currentCorrectionPeriod = dropdownCorrectionPeriod[0].value;
+    currentCorrectionPeriod = 1;
     dropdownClass = getDropDownMenuItems(equipmentClass);
     currentClass = dropdownClass[0].value;
     initDepart();
@@ -512,35 +533,37 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
 
   void getCheckPeriod(int typeId) async {
     Map _data = {
-      'equipmentid': widget.equipment!=null?widget.equipment['ID']:0,
-      'typeid': typeId,
+      'equipmentID': widget.equipment!=null?widget.equipment['ID']:0,
+      'typeID': typeId,
     };
+    Map _info = {};
     switch (typeId) {
       case 2:
-        _data['MaintenancePeriod'] = maintainPeriod.text;
-        _data['MaintenanceType'] = {
-          "ID": model.PeriodType[currentMaintainPeriod]
+        _info['MaintenancePeriod'] = maintainPeriod.text;
+        _info['MaintenanceType'] = {
+          "ID": periodTypeList.firstWhere((item) => item['ID'] == currentMaintainPeriod)['ID']
         };
         break;
       case 3:
-        _data['MandatoryPeriod'] = mandatoryInterval.text;
-        _data['MandatoryType'] = {
-          "ID": model.PeriodType[currentMandatoryPeriod]
+        _info['MandatoryTestPeriod'] = mandatoryInterval.text;
+        _info['MandatoryTestType'] = {
+          "ID": periodTypeList.firstWhere((item) => item['ID'] == currentMandatoryPeriod)['ID']
         };
         break;
       case 4:
-        _data['PatrolPeriod'] = patrolPeriod.text;
-        _data['PatrolType'] = {
-          "ID": model.PeriodType[currentPatrolPeriod]
+        _info['PatrolPeriod'] = patrolPeriod.text;
+        _info['PatrolType'] = {
+          "ID": periodTypeList.firstWhere((item) => item['ID'] == currentPatrolPeriod)['ID']
         };
         break;
       case 5:
-        _data['CorrectionPeriod'] = correctionPeriod.text;
-        _data['CorrectionType'] = {
-          "ID": model.PeriodType[currentCorrectionPeriod]
+        _info['CorrectionPeriod'] = correctionPeriod.text;
+        _info['CorrectionType'] = {
+          "ID": periodTypeList.firstWhere((item) => item['ID'] == currentCorrectionPeriod)['ID']
         };
         break;
     }
+    _data['equipmentInfo'] = _info;
     Map resp = await HttpRequest.request(
       '/equipment/getsysrequestlist',
       method: HttpRequest.POST,
@@ -932,23 +955,21 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
             currentRecall = _data['RecallFlag'] ? '是' : '否';
             currentServiceScope = _data['ServiceScope']?"是":"否";
             recallDate = formatDateString(_data['RecallDate'].toString());
-            currentPatrolPeriod = _data['PatrolType']['Name'] == '' ? '无' : _data['PatrolType']['Name'];
-            currentMaintainPeriod = _data['MaintenanceType']['Name'] == '' ? '无' : _data['MaintenanceType']['Name'];
-            currentCorrectionPeriod = _data['CorrectionType']['Name'] == '' ? '无' : _data['CorrectionType']['Name'];
+            currentPatrolPeriod = _data['PatrolType']['ID'];
+            currentMaintainPeriod = _data['MaintenanceType']['ID'];
+            currentCorrectionPeriod = _data['CorrectionType']['ID'];
             getFujiClass1();
             getFujiClass2();
             fujiClass2 = _data['FujiClass2']['ID'];
             getFujiComponent();
             componentCodes.text = _data['CTSerialCode'];
             componentSeconds.text = _data['CTUsedSeconds'].toString();
-            log('${_data["HisComponentList"]}');
             historyComponent = _data['HisComponentList'];
             historyConsumable = _data['HisConsumableList'];
-            log("${_data['MandatoryTestPeriodType']}");
-            currentMandatoryType = _data['MandatoryTestPeriodType']['ID']==0?"无":_data['MandatoryTestPeriodType']['Name'];
+            currentMandatoryType = _data['MandatoryTestPeriodType']['Name'];
             mandatoryDate = formatDateString(_data['MandatoryTestDate'].toString());
             mandatoryInterval.text = _data['MandatoryTestPeriod'].toString();
-            currentMandatoryPeriod = _data['MandatoryTestType']['ID']==0?'无':_data['MandatoryTestType']['Name'];
+            currentMandatoryPeriod = _data['MandatoryTestType']['ID'];
           });
           downloadFiles(_data['EquipmentFile']);
           break;
@@ -992,13 +1013,13 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
             currentRecall = _data['RecallFlag'] ? '是' : '否';
             currentServiceScope = _data['ServiceScope']?"是":"否";
             recallDate = formatDateString(_data['RecallDate'].toString());
-            currentPatrolPeriod = _data['PatrolType']['Name'] == '' ? '无' : _data['PatrolType']['Name'];
-            currentMaintainPeriod = _data['MaintenanceType']['Name'] == '' ? '无' : _data['MaintenanceType']['Name'];
-            currentCorrectionPeriod = _data['CorrectionType']['Name'] == '' ? '无' : _data['CorrectionType']['Name'];
-            currentMandatoryType = _data['MandatoryTestPeriodType']['ID']==0?"无":_data['MandatoryTestPeriodType']['Name'];
+            currentPatrolPeriod = _data['PatrolType']['ID'];
+            currentMaintainPeriod = _data['MaintenanceType']['ID'];
+            currentCorrectionPeriod = _data['CorrectionType']['ID'];
+            currentMandatoryType = _data['MandatoryTestPeriodType']['Name'];
             mandatoryDate = formatDateString(_data['MandatoryTestDate'].toString());
             mandatoryInterval.text = _data['MandatoryTestPeriod'].toString();
-            currentMandatoryPeriod = _data['MandatoryTestType']['ID']==0?'无':_data['MandatoryTestType']['Name'];
+            currentMandatoryPeriod = _data['MandatoryTestType']['ID'];
             relatedEquipment = _data['Equipment'];
           });
           downloadFiles(_data['MeasInstrumFile']);
@@ -1043,13 +1064,13 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
             currentRecall = _data['RecallFlag'] ? '是' : '否';
             currentServiceScope = _data['ServiceScope']?"是":"否";
             recallDate = formatDateString(_data['RecallDate'].toString());
-            currentPatrolPeriod = _data['PatrolType']['Name'] == '' ? '无' : _data['PatrolType']['Name'];
-            currentMaintainPeriod = _data['MaintenanceType']['Name'] == '' ? '无' : _data['MaintenanceType']['Name'];
-            currentCorrectionPeriod = _data['CorrectionType']['Name'] == '' ? '无' : _data['CorrectionType']['Name'];
-            currentMandatoryType = _data['MandatoryTestPeriodType']['ID']==0?"无":_data['MandatoryTestPeriodType']['Name'];
+            currentPatrolPeriod = _data['PatrolType']['ID'];
+            currentMaintainPeriod = _data['MaintenanceType']['ID'];
+            currentCorrectionPeriod = _data['CorrectionType']['ID'];
+            currentMandatoryType = _data['MandatoryTestPeriodType']['ID'];
             mandatoryDate = formatDateString(_data['MandatoryTestDate'].toString());
             mandatoryInterval.text = _data['MandatoryTestPeriod'].toString();
-            currentMandatoryPeriod = _data['MandatoryTestType']['ID']==0?'无':_data['MandatoryTestType']['Name'];
+            currentMandatoryPeriod = _data['MandatoryTestType']['ID'];
             relatedEquipment = _data['Equipment'];
           });
           downloadFiles(_data['OtherEqptFile']);
@@ -1075,6 +1096,36 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
     return new FocusNode();
   }).toList();
 
+  Future<bool> checkAssetCode() async {
+    bool duplicate = false;
+    String _url;
+    switch (widget.equipmentType) {
+      case EquipmentType.MEDICAL:
+        break;
+      case EquipmentType.MEASURE:
+        _url = '/MeasInstrum/CheckAssetCode';
+        break;
+      case EquipmentType.OTHER:
+        _url = '/OtherEqpt/CheckAssetCode';
+        break;
+    }
+    Map _param = {
+      'assetCode': assetCode.text,
+      'id': widget.equipment==null?0:widget.equipment['ID']
+    };
+    if (widget.equipmentType == EquipmentType.MEASURE || widget.equipmentType == EquipmentType.OTHER) {
+      Map resp = await HttpRequest.request(
+        _url,
+        method: HttpRequest.GET,
+        params: _param
+      );
+      if (resp['ResultCode'] == '00') {
+        duplicate = resp['Data'];
+      }
+    }
+    return duplicate;
+  }
+
   Future<Null> saveEquipment() async {
     setState(() {
       expansionList = expansionList.map((item) {
@@ -1086,6 +1137,16 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
       notification = '器具';
     } else {
       notification = '设备';
+    }
+    bool duplicate = await checkAssetCode();
+    if (duplicate) {
+      showDialog(
+          context: context,
+          builder: (context) => CupertinoAlertDialog(
+            title: new Text('$notification资产编号重复'),
+          )
+      ).then((result) => FocusScope.of(context).requestFocus(_focusEquip[4]));
+      return;
     }
     if (widget.equipmentType == EquipmentType.MEDICAL && fujiClass2==null) {
       showDialog(
@@ -1207,7 +1268,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
       });
       return;
     }
-    if (currentPatrolPeriod != '无' && patrolPeriod.text.isEmpty) {
+    if (currentPatrolPeriod > 0 && patrolPeriod.text.isEmpty) {
       showDialog(
           context: context,
           builder: (context) => CupertinoAlertDialog(
@@ -1216,7 +1277,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
       ).then((result) => FocusScope.of(context).requestFocus(_focusEquip[6]));
       return;
     }
-    if (int.tryParse(patrolPeriod.text.toString()) != null && int.tryParse(patrolPeriod.text.toString()) <= 0 && currentPatrolPeriod != '无') {
+    if (int.tryParse(patrolPeriod.text.toString()) != null && int.tryParse(patrolPeriod.text.toString()) <= 0 && currentPatrolPeriod > 0) {
       showDialog(
           context: context,
           builder: (context) => CupertinoAlertDialog(
@@ -1225,7 +1286,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
       ).then((result) => FocusScope.of(context).requestFocus(_focusEquip[6]));
       return;
     }
-    if (currentMaintainPeriod != '无' && maintainPeriod.text.isEmpty) {
+    if (currentMaintainPeriod > 0 && maintainPeriod.text.isEmpty) {
       showDialog(
           context: context,
           builder: (context) => CupertinoAlertDialog(
@@ -1234,7 +1295,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
       ).then((result) => FocusScope.of(context).requestFocus(_focusEquip[7]));
       return;
     }
-    if (int.tryParse(maintainPeriod.text.toString()) !=null && int.tryParse(maintainPeriod.text.toString()) <= 0 && currentMaintainPeriod !='无') {
+    if (int.tryParse(maintainPeriod.text.toString()) !=null && int.tryParse(maintainPeriod.text.toString()) <= 0 && currentMaintainPeriod > 0) {
       showDialog(
           context: context,
           builder: (context) => CupertinoAlertDialog(
@@ -1243,7 +1304,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
       ).then((result) => FocusScope.of(context).requestFocus(_focusEquip[7]));
       return;
     }
-    if (currentCorrectionPeriod != '无' && correctionPeriod.text.isEmpty) {
+    if (currentCorrectionPeriod > 0 && correctionPeriod.text.isEmpty) {
       showDialog(
           context: context,
           builder: (context) => CupertinoAlertDialog(
@@ -1252,7 +1313,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
       ).then((result) => FocusScope.of(context).requestFocus(_focusEquip[8]));
       return;
     }
-    if (int.tryParse(correctionPeriod.text.toString()) != null && int.tryParse(correctionPeriod.text.toString()) <= 0 && currentCorrectionPeriod != '无') {
+    if (int.tryParse(correctionPeriod.text.toString()) != null && int.tryParse(correctionPeriod.text.toString()) <= 0 && currentCorrectionPeriod > 0) {
       showDialog(
           context: context,
           builder: (context) => CupertinoAlertDialog(
@@ -1261,15 +1322,6 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
       ).then((result) => FocusScope.of(context).requestFocus(_focusEquip[8]));
       return;
     }
-    //if (usageDate == 'YY-MM-DD') {
-    //  showDialog(
-    //      context: context,
-    //      builder: (context) => CupertinoAlertDialog(
-    //        title: new Text('启用日期不可为空'),
-    //      )
-    //  );
-    //  return;
-    //}
     if (installDate == 'YY-MM-DD') {
       showDialog(
           context: context,
@@ -1281,17 +1333,6 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
       });
       return;
     }
-    //var _iStart = DateTime.parse(installStartDate);
-    //var _iEnd = DateTime.parse(installEndDate);
-    //if (_iEnd.isBefore(_iStart)) {
-    //  showDialog(
-    //      context: context,
-    //      builder: (context) => CupertinoAlertDialog(
-    //        title: new Text('安装日期格式有误'),
-    //      )
-    //  );
-    //  return;
-    //}
     var _prefs = await prefs;
     var _userId = _prefs.getInt('userID');
     var _equipmentFiles = [];
@@ -1382,20 +1423,20 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
           },
           "MandatoryTestDate": currentMandatoryType=='固定日期'?mandatoryDate:'YY-MM-DD',
           "MandatoryTestType": {
-            'ID': currentMandatoryType=='周期'?mandatoryPeriodList.indexOf((item) => item ==currentMandatoryPeriod):0
+            'ID': currentMandatoryType=='周期'?periodTypeList.firstWhere((item) => item['ID'] ==currentMandatoryPeriod)['ID']:0
           },
           "MandatoryTestPeriod": currentMandatoryType=='周期'?mandatoryInterval.text:0,
           "MaintenancePeriod": maintainPeriod.text.isEmpty?null:maintainPeriod.text,
           "MaintenanceType": {
-            "ID": model.PeriodType[currentMaintainPeriod],
+            "ID": currentMaintainPeriod,
           },
           "PatrolPeriod": patrolPeriod.text.isEmpty?null:patrolPeriod.text,
           "PatrolType": {
-            "ID": model.PeriodType[currentPatrolPeriod],
+            "ID": currentPatrolPeriod,
           },
           "CorrectionPeriod": correctionPeriod.text.isEmpty?null:correctionPeriod.text,
           "CorrectionType": {
-            "ID": model.PeriodType[currentCorrectionPeriod],
+            "ID": currentCorrectionPeriod,
           },
           "MandatoryTestStatus": {
             "ID": mandatoryFlagType[currentMandatory],
@@ -1462,15 +1503,15 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
           "ScrapDate": scrapDate=='YY-MM-DD'?null:scrapDate,
           "MaintenancePeriod": maintainPeriod.text.isEmpty?null:maintainPeriod.text,
           "MaintenanceType": {
-            "ID": model.PeriodType[currentMaintainPeriod],
+            "ID": currentMaintainPeriod,
           },
           "PatrolPeriod": patrolPeriod.text.isEmpty?null:patrolPeriod.text,
           "PatrolType": {
-            "ID": model.PeriodType[currentPatrolPeriod],
+            "ID": currentPatrolPeriod,
           },
           "CorrectionPeriod": correctionPeriod.text.isEmpty?null:correctionPeriod.text,
           "CorrectionType": {
-            "ID": model.PeriodType[currentCorrectionPeriod],
+            "ID": currentCorrectionPeriod,
           },
           "MandatoryTestStatus": {
             "ID": mandatoryFlagType[currentMandatory],
@@ -1485,7 +1526,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
           },
           "MandatoryTestDate": currentMandatoryType=='固定日期'?mandatoryDate:'YY-MM-DD',
           "MandatoryTestPeriodType": {
-            'ID': currentMandatoryType=='周期'?mandatoryPeriodList.indexOf((item) => item ==currentMandatoryPeriod):0
+            'ID': currentMandatoryType=='周期'?mandatoryPeriodList.firstWhere((item) => item['ID'] ==currentMandatoryPeriod)['ID']:0
           },
           "MandatoryTestPeriod": currentMandatoryType=='周期'?mandatoryInterval.text:0,
         };
@@ -1545,15 +1586,15 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
           "ScrapDate": scrapDate=='YY-MM-DD'?null:scrapDate,
           "MaintenancePeriod": maintainPeriod.text.isEmpty?null:maintainPeriod.text,
           "MaintenanceType": {
-            "ID": model.PeriodType[currentMaintainPeriod],
+            "ID": currentMaintainPeriod,
           },
           "PatrolPeriod": patrolPeriod.text.isEmpty?null:patrolPeriod.text,
           "PatrolType": {
-            "ID": model.PeriodType[currentPatrolPeriod],
+            "ID": currentPatrolPeriod,
           },
           "CorrectionPeriod": correctionPeriod.text.isEmpty?null:correctionPeriod.text,
           "CorrectionType": {
-            "ID": model.PeriodType[currentCorrectionPeriod],
+            "ID": currentCorrectionPeriod,
           },
           "MandatoryTestStatus": {
             "ID": mandatoryFlagType[currentMandatory],
@@ -1568,7 +1609,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
           },
           "MandatoryTestDate": currentMandatoryType=='固定日期'?mandatoryDate:'YY-MM-DD',
           "MandatoryTestPeriodType": {
-            'ID': currentMandatoryType=='周期'?mandatoryPeriodList.indexOf((item) => item ==currentMandatoryPeriod):0
+            'ID': currentMandatoryType=='周期'?mandatoryPeriodList.firstWhere((item) => item['ID'] ==currentMandatoryPeriod)['ID']:0
           },
           "MandatoryTestPeriod": currentMandatoryType=='周期'?mandatoryInterval.text:0,
           "Equipment": relatedEquipment
@@ -1618,15 +1659,15 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
   }
 
   void showMandatory() async {
-    if (currentMandatoryPeriod == '无' || mandatoryInterval.text == null || mandatoryInterval.text == '') {
+    if (currentMandatoryPeriod == 0 || mandatoryInterval.text == null || mandatoryInterval.text == '') {
       return;
     }
     await getCheckPeriod(3);
-    showPeriodSheet('一年内计划巡检');
+    showPeriodSheet('一年内计划强检');
   }
 
   void showPatrol() async {
-    if (currentPatrolPeriod == '无' || patrolPeriod.text == null || patrolPeriod.text == '') {
+    if (currentPatrolPeriod == 0 || patrolPeriod.text == null || patrolPeriod.text == '') {
       return;
     }
     await getCheckPeriod(4);
@@ -1634,7 +1675,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
   }
 
   void showMaintain() async {
-    if (currentMaintainPeriod == '无' || maintainPeriod.text == null || maintainPeriod.text == '') {
+    if (currentMaintainPeriod == 0 || maintainPeriod.text == null || maintainPeriod.text == '') {
       return;
     }
     await getCheckPeriod(2);
@@ -1642,7 +1683,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
   }
 
   void showCorrection() async {
-    if (currentCorrectionPeriod == '无' || correctionPeriod.text == null || correctionPeriod.text == '') {
+    if (currentCorrectionPeriod == 0 || correctionPeriod.text == null || correctionPeriod.text == '') {
       return;
     }
     await getCheckPeriod(5);
@@ -1675,8 +1716,17 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
       }
     );
     if (resp['ResultCode'] == '00') {
+      log("fuji 2 list:${resp['Data']}");
+      fujiClass2List = resp['Data'];
+      int ind = fujiClass2List.indexWhere((item) => item['ID'] == -1);
+      if (ind < 0) {
+        fujiClass2List.add({
+          'ID': -1,
+          'Name': ''
+        });
+      }
       setState(() {
-        fujiClass2List = resp['Data'];
+        fujiClass2List = fujiClass2List;
       });
     }
   }
@@ -2765,7 +2815,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
                         })),
               ],
             ),
-          ):BuildWidget.buildRow('关联设备', relatedEquipment['Name']),
+          ):BuildWidget.buildRow('关联设备', relatedEquipment==null?"":relatedEquipment['Name']),
         ]);
         break;
       case EquipmentType.OTHER:
@@ -3132,7 +3182,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
                   icon: Icon(Icons.calendar_today, color: AppConstants.AppColors['btn_main'],),
                   onPressed: () async {
                     FocusScope.of(context).requestFocus(new FocusNode());
-                    var _time = DateTime.tryParse(mandatoryDate)??DateTime.now();
+                    var _time = DateTime.tryParse(mandatoryDate)??DateTime.now().add(Duration(days: 30));
                     DatePicker.showDatePicker(
                       context,
                       pickerTheme: DateTimePickerTheme(
@@ -3140,7 +3190,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
                         confirm: Text('确认', style: TextStyle(color: Colors.blueAccent)),
                         cancel: Text('取消', style: TextStyle(color: Colors.redAccent)),
                       ),
-                      minDateTime: DateTime.now().add(Duration(days: -7300)),
+                      minDateTime: DateTime.now().add(Duration(days: 30)),
                       maxDateTime: DateTime.parse('2030-01-01'),
                       initialDateTime: _time,
                       dateFormat: 'yyyy-MM-dd',
@@ -3161,8 +3211,8 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
           ],
         ),
       ):Container(),
-      !widget.editable&&currentMandatoryType=="固定周期"?BuildWidget.buildRow('强检时间', displayDate(mandatoryDate)):Container(),
-      widget.editable&&currentMandatoryType=='周期'?BuildWidget.buildDropdownWithInput('强检周期', mandatoryInterval, currentMandatoryPeriod, dropdownMandatoryPeriod, changeMandatoryPeriod, showMandatory, inputType: TextInputType.number, focusNode: _focusEquip[19], context: context):Container(),
+      !widget.editable&&currentMandatoryType=="固定日期"?BuildWidget.buildRow('强检时间', displayDate(mandatoryDate)):Container(),
+      widget.editable&&currentMandatoryType=='周期'?BuildWidget.buildDropdownWithInput('强检周期', mandatoryInterval, currentMandatoryPeriod, periodTypeList, changeMandatoryPeriod, showMandatory, inputType: TextInputType.number, focusNode: _focusEquip[19], context: context):Container(),
       !widget.editable&&currentMandatoryType=='周期'?Row(
         children: <Widget>[
           new Expanded(
@@ -3172,7 +3222,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
               crossAxisAlignment: WrapCrossAlignment.center,
               children: <Widget>[
                 new Text(
-                  '巡检周期',
+                  '强检周期',
                   style: new TextStyle(
                       fontSize: 16.0,
                       fontWeight: FontWeight.w600
@@ -3194,7 +3244,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
           new Expanded(
             flex: 4,
             child: new Text(
-              currentPatrolPeriod=='无'?'无巡检':'${patrolPeriod.text} $currentPatrolPeriod',
+              currentPatrolPeriod==1?'无强检':'${mandatoryInterval.text} ${periodTypeList.firstWhere((item) => item['ID']==currentMandatoryPeriod)['Name']}',
               style: new TextStyle(
                   fontSize: 16.0,
                   fontWeight: FontWeight.w400,
@@ -3204,10 +3254,9 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
           ),
           new Expanded(
             flex: 2,
-            child: currentPatrolPeriod=='无'?Container():IconButton(icon: Icon(Icons.calendar_today), onPressed: () async {
-              print('check period');
-              await getCheckPeriod(4);
-              showPeriodSheet('一年内计划巡检');
+            child: currentMandatoryPeriod==1?Container():IconButton(icon: Icon(Icons.calendar_today), onPressed: () async {
+              await getCheckPeriod(3);
+              showPeriodSheet('一年内计划强检');
             }),
           )
         ],
@@ -3258,7 +3307,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
                   icon: Icon(Icons.calendar_today, color: AppConstants.AppColors['btn_main'],),
                   onPressed: () async {
                     FocusScope.of(context).requestFocus(new FocusNode());
-                    var _time = DateTime.tryParse(recallDate)??DateTime.now();
+                    var _time = DateTime.tryParse(recallDate)??DateTime.now().add(Duration(days: 30));
                     DatePicker.showDatePicker(
                       context,
                       pickerTheme: DateTimePickerTheme(
@@ -3266,7 +3315,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
                         confirm: Text('确认', style: TextStyle(color: Colors.blueAccent)),
                         cancel: Text('取消', style: TextStyle(color: Colors.redAccent)),
                       ),
-                      minDateTime: DateTime.now().add(Duration(days: -7300)),
+                      minDateTime: DateTime.now().add(Duration(days: 30)),
                       maxDateTime: DateTime.parse('2030-01-01'),
                       initialDateTime: _time,
                       dateFormat: 'yyyy-MM-dd',
@@ -3287,7 +3336,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
           ],
         ),
       ):BuildWidget.buildRow('召回时间', displayDate(recallDate)),
-      widget.editable?BuildWidget.buildDropdownWithInput('巡检周期', patrolPeriod, currentPatrolPeriod, dropdownPatrolPeriod, changePatrolPeriod, showPatrol, inputType: TextInputType.number, focusNode: _focusEquip[6], context: context):Row(
+      widget.editable?BuildWidget.buildDropdownWithInput('巡检周期', patrolPeriod, currentPatrolPeriod, periodTypeList, changePatrolPeriod, showPatrol, inputType: TextInputType.number, focusNode: _focusEquip[6], context: context):Row(
         children: <Widget>[
           new Expanded(
             flex: 4,
@@ -3318,7 +3367,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
           new Expanded(
             flex: 4,
             child: new Text(
-              currentPatrolPeriod=='无'?'无巡检':'${patrolPeriod.text} $currentPatrolPeriod',
+              currentPatrolPeriod==1?'无巡检':'${patrolPeriod.text} ${periodTypeList.firstWhere((item) => item['ID']==currentPatrolPeriod)['Name']}',
               style: new TextStyle(
                   fontSize: 16.0,
                   fontWeight: FontWeight.w400,
@@ -3328,7 +3377,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
           ),
           new Expanded(
             flex: 2,
-            child: currentPatrolPeriod=='无'?Container():IconButton(icon: Icon(Icons.calendar_today), onPressed: () async {
+            child: currentPatrolPeriod==1?Container():IconButton(icon: Icon(Icons.calendar_today), onPressed: () async {
               print('check period');
               await getCheckPeriod(4);
               showPeriodSheet('一年内计划巡检');
@@ -3340,7 +3389,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
           '保养周期',
           maintainPeriod,
           currentMaintainPeriod,
-          dropdownMandatoryPeriod,
+          periodTypeList,
           changeMaintainPeriod,
           showMaintain,
           inputType: TextInputType.number, focusNode: _focusEquip[7], context: context):Row(
@@ -3374,7 +3423,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
           new Expanded(
             flex: 4,
             child: new Text(
-              currentMaintainPeriod=='无'?'无保养':'${maintainPeriod.text} $currentMaintainPeriod',
+              currentMaintainPeriod==1?'无保养':'${maintainPeriod.text} ${periodTypeList.firstWhere((item) => item['ID']==currentMaintainPeriod)['Name']}',
               style: new TextStyle(
                   fontSize: 16.0,
                   fontWeight: FontWeight.w400,
@@ -3384,7 +3433,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
           ),
           new Expanded(
             flex: 2,
-            child: currentMaintainPeriod=='无'?Container():IconButton(icon: Icon(Icons.calendar_today), onPressed: () async {
+            child: currentMaintainPeriod==1?Container():IconButton(icon: Icon(Icons.calendar_today), onPressed: () async {
               print('check period');
               await getCheckPeriod(2);
               showPeriodSheet('一年内计划保养');
@@ -3396,7 +3445,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
           '校准周期',
           correctionPeriod,
           currentCorrectionPeriod,
-          dropdownCorrectionPeriod,
+          periodTypeList,
           changeCorrectionPeriod,
           showCorrection,
           inputType: TextInputType.number, focusNode: _focusEquip[8], context: context):Row(
@@ -3430,7 +3479,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
           new Expanded(
             flex: 4,
             child: new Text(
-              currentCorrectionPeriod=='无'?'无校准':'${correctionPeriod.text} $currentCorrectionPeriod',
+              currentCorrectionPeriod==1?'无校准':'${correctionPeriod.text} ${periodTypeList.firstWhere((item) => item['ID']==currentCorrectionPeriod)['Name']}',
               style: new TextStyle(
                   fontSize: 16.0,
                   fontWeight: FontWeight.w400,
@@ -3440,7 +3489,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
           ),
           new Expanded(
             flex: 2,
-            child: currentCorrectionPeriod=='无'?Container():IconButton(icon: Icon(Icons.calendar_today), onPressed: () async {
+            child: currentCorrectionPeriod==1?Container():IconButton(icon: Icon(Icons.calendar_today), onPressed: () async {
               print('check period');
               await getCheckPeriod(5);
               showPeriodSheet('一年内计划校准');

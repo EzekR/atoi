@@ -6,10 +6,12 @@ import 'package:flutter_spinkit/flutter_spinkit.dart';
 
 class SearchPage extends StatefulWidget {
 
-  SearchPage({Key key, this.equipments, this.onlyType}):super(key: key);
+  SearchPage({Key key, this.equipments, this.onlyType, this.multiType, this.fujiClass2}):super(key: key);
 
   final List equipments;
   final EquipmentType onlyType;
+  final MultiSearchType multiType;
+  final int fujiClass2;
 
   _SearchPageState createState() => _SearchPageState();
 }
@@ -91,8 +93,30 @@ class _SearchPageState extends State<SearchPage> {
         };
         break;
     }
+    String _url;
+    switch (widget.multiType) {
+      case MultiSearchType.COMPONENT:
+        _url = '/InvComponent/QueryComponentsByFujiClass2ID';
+        _params = {
+          'fujiClass2ID': widget.fujiClass2,
+          'filterField': 'c.Name',
+          'filterText': filter
+        };
+        break;
+      case MultiSearchType.EQUIPMENT:
+        _url = '/Equipment/Getdevices';
+        break;
+      case MultiSearchType.CONSUMABLE:
+        _url = '/InvConsumable/QueryConsumablesByFujiClass2ID';
+        _params = {
+          'fujiClass2ID': widget.fujiClass2,
+          'filterField': 'c.Name',
+          'filterText': filter
+        };
+        break;
+    }
     var resp = await HttpRequest.request(
-        '/Equipment/Getdevices',
+        _url,
         method: HttpRequest.GET,
         params: _params
     );
@@ -114,7 +138,7 @@ class _SearchPageState extends State<SearchPage> {
             value: selected.firstWhere((item) => item['ID'] == suggestionList[i]['ID'], orElse: ()=>null)!=null?true:false,
             title: RichText(
                 text: TextSpan(
-                    text: '${suggestionList[i]['Name']}/${suggestionList[i]['EquipmentCode']}/${suggestionList[i]['SerialCode']}',
+                    text: widget.multiType!=MultiSearchType.EQUIPMENT?'${suggestionList[i]['Name']}/${suggestionList[i]['OID']}/${suggestionList[i]['Type']['Name']}':'${suggestionList[i]['Name']}/${suggestionList[i]['EquipmentCode']}/${suggestionList[i]['SerialCode']}',
                     style: TextStyle(
                         color: Colors.grey ),
                     children: [
@@ -198,7 +222,7 @@ class _SearchPageState extends State<SearchPage> {
       },
       onTap: () {},
       decoration: InputDecoration.collapsed(
-        hintText: "请输入设备名称",
+        hintText: widget.multiType==MultiSearchType.COMPONENT?"请输入零件名称":"请输入设备名称",
         hintStyle: new TextStyle(
           fontSize: 14.0,
           color: Colors.grey,
@@ -207,4 +231,10 @@ class _SearchPageState extends State<SearchPage> {
       ),
     );
   }
+}
+
+enum MultiSearchType {
+  EQUIPMENT,
+  COMPONENT,
+  CONSUMABLE
 }

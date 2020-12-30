@@ -1,3 +1,4 @@
+import 'package:atoi/pages/equipments/print_qrcode.dart';
 import 'package:atoi/pages/inventory/po_attachment.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
@@ -89,6 +90,12 @@ class _InboundStuffState extends State<InboundStuff> {
     Map _component = widget.stuff;
     Map _po = widget.purchaseOrder;
     print(_po.toString());
+    if (inboundComponents.length > _component['Qty']) {
+      showDialog(context: context, builder: (context) => CupertinoAlertDialog(
+        title: new Text('入库数量不能超过采购数量'),
+      ));
+      return;
+    }
     if (widget.type == AttachmentType.COMPONENT) {
       if (serialList.any((item) => item.text.isEmpty)) {
         showDialog(context: context, builder: (context) => CupertinoAlertDialog(
@@ -171,7 +178,18 @@ class _InboundStuffState extends State<InboundStuff> {
     if (resp['ResultCode'] == '00') {
       showDialog(context: context, builder: (context) => CupertinoAlertDialog(
         title: new Text('入库成功'),
-      )).then((result) => Navigator.of(context, rootNavigator: true).pop());
+      )).then((result) {
+        switch (widget.type) {
+          case AttachmentType.COMPONENT:
+            Navigator.of(context).push(new MaterialPageRoute(builder: (_) => PrintQrcode(components: resp['Data']['Components'], codeType: CodeType.COMPONENT,)));
+            break;
+          case AttachmentType.CONSUMABLE:
+            Navigator.of(context).push(new MaterialPageRoute(builder: (_) => PrintQrcode(equipmentId: resp['Data']['Consumables'][0]['ID'], codeType: CodeType.CONSUMABLE,)));
+            break;
+          case AttachmentType.SERVICE:
+            break;
+        }
+      });
     } else {
       showDialog(context: context, builder: (context) => CupertinoAlertDialog(
         title: new Text(resp['ResultMessage']),
@@ -194,7 +212,7 @@ class _InboundStuffState extends State<InboundStuff> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: <Widget>[
-                      IconButton(
+                      inboundComponents.length>1?IconButton(
                         color: Colors.redAccent,
                         icon: Icon(Icons.delete_forever),
                         onPressed: () {
@@ -205,7 +223,7 @@ class _InboundStuffState extends State<InboundStuff> {
                             modelList.removeAt(i);
                           });
                         },
-                      ),
+                      ):Container(),
                     ],
                   )
                 ],
@@ -223,11 +241,11 @@ class _InboundStuffState extends State<InboundStuff> {
                     BuildWidget.buildCardInput('批次号', lotNumList[i]),
                     BuildWidget.buildCardInput('规格', specList[i]),
                     BuildWidget.buildCardInput('型号', modelList[i]),
-                    BuildWidget.buildCardInput('数量', quantityList[i]),
+                    BuildWidget.buildCardRow('数量', quantityList[i].text),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.end,
                       children: <Widget>[
-                        IconButton(
+                        inboundConsumable.length>1?IconButton(
                           color: Colors.redAccent,
                           icon: Icon(Icons.delete_forever),
                           onPressed: () {
@@ -239,7 +257,7 @@ class _InboundStuffState extends State<InboundStuff> {
                               quantityList.removeAt(i);
                             });
                           },
-                        ),
+                        ):Container(),
                       ],
                     )
                   ],
@@ -256,10 +274,14 @@ class _InboundStuffState extends State<InboundStuff> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
           RaisedButton(
-            color: Colors.blueAccent,
             onPressed: () {
               inboundComponent();
             },
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(6),
+            ),
+            padding: EdgeInsets.all(12.0),
+            color: new Color(0xff2E94B9),
             child: Center(
               child: Text('入库',
                 style: TextStyle(
@@ -305,7 +327,7 @@ class _InboundStuffState extends State<InboundStuff> {
       body: ListView(
         children: buildStuffList(),
       ),
-      floatingActionButton: FloatingActionButton(
+      floatingActionButton: widget.type != AttachmentType.CONSUMABLE?FloatingActionButton(
         onPressed: () {
           switch (widget.type) {
             case AttachmentType.COMPONENT:
@@ -320,7 +342,7 @@ class _InboundStuffState extends State<InboundStuff> {
         },
         backgroundColor: Colors.blueAccent,
         child: Icon(Icons.add_circle, color: Colors.white,),
-      ),
+      ):Container(),
     );
   }
 }

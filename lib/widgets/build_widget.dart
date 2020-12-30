@@ -111,6 +111,68 @@ class BuildWidget {
     );
   }
 
+  static GestureDetector buildCardRowWithSearch(String leading, String content, {Function onTap, Function toSearch, bool required}) {
+    double textNumber = double.tryParse(content);
+    required = required??false;
+    return new GestureDetector(
+      onTap: onTap,
+      child: new Row(
+        children: <Widget>[
+          new Expanded(
+              flex: 3,
+              child: new Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: <Widget>[
+                  new Text(
+                    required?"*":"",
+                    style: TextStyle(
+                      fontSize: 16.0,
+                      color: Colors.red
+                    ),
+                  ),
+                  new Text(
+                    leading,
+                    style: new TextStyle(
+                        fontSize: 16.0,
+                        fontWeight: FontWeight.w600
+                    ),
+                  ),
+                ],
+              )
+          ),
+          new Expanded(
+              flex: 1,
+              child: new Text(':',
+                style: new TextStyle(
+                    fontSize: 16.0,
+                    fontWeight: FontWeight.w600
+                ),
+              )
+          ),
+          new Expanded(
+            flex: 5,
+            child: new Text(
+              //textNumber==null?content:CommonUtil.CurrencyForm(textNumber, times: 0, digits: 0),
+              content,
+              style: new TextStyle(
+                  fontSize: 16.0,
+                  fontWeight: FontWeight.w400,
+                  color: onTap==null?Colors.grey:Color(0xff2c5c85)
+              ),
+            ),
+          ),
+          new Expanded(
+            flex: 2,
+            child: IconButton(
+              onPressed: toSearch,
+              icon: Icon(Icons.search),
+            ),
+          )
+        ],
+      ),
+    );
+  }
+
   static GestureDetector buildCardInput(String leading, TextEditingController content, {Function onTap, bool required, FocusNode focus, int maxLength, Function callback, TextInputType inputType}) {
     required = required??false;
     focus = focus??new FocusNode();
@@ -157,6 +219,10 @@ class BuildWidget {
               maxLength: maxLength,
               maxLines: 1,
               focusNode: focus,
+              decoration: InputDecoration(
+                fillColor: Color(0xfff0f0f0),
+                filled: true,
+              ),
               keyboardType: inputType,
               onChanged: (value) {
                 callback(value);
@@ -784,7 +850,7 @@ class BuildWidget {
   }
 
   /// 构建带输入框的下拉菜单
-  static Row buildDropdownWithInput(String title, TextEditingController controller, String currentItem, List dropdownItems, Function changeDropdown, Function showPeriod, {TextInputType inputType, FocusNode focusNode, BuildContext context, bool required}) {
+  static Row buildDropdownWithInput(String title, TextEditingController controller, int currentItem, List<Map> dropList, Function changeDropdown, Function showPeriod, {TextInputType inputType, FocusNode focusNode, BuildContext context, bool required}) {
     inputType??TextInputType.text;
     focusNode = focusNode ?? new FocusNode();
     //if (context != null) {
@@ -847,7 +913,14 @@ class BuildWidget {
               ),
               new DropdownButton(
                 value: currentItem,
-                items: dropdownItems,
+                items: dropList.map<DropdownMenuItem>((item) {
+                  return DropdownMenuItem(
+                    value: item['ID'],
+                    child: Text(
+                      item['Name']
+                    ),
+                  );
+                }).toList(),
                 style: new TextStyle(
                     fontSize: 10.0,
                     color: Colors.black

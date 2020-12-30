@@ -430,6 +430,8 @@ class _StocktakingListState extends State<StocktakingList> {
                           field = 'u.Name';
                           _type = 0;
                           _keywords.clear();
+                          beginDate = "";
+                          endDate = "";
                         });
                         initFilter();
                       }, child: Text('重置')),
@@ -569,7 +571,7 @@ class _StocktakingListState extends State<StocktakingList> {
                 ),
               ):Container(),
               (item['Status']['ID']==2||item['Status']['ID']==1)&&userID==item['User']['ID']&&role==2?SizedBox(width: 40,):Container(),
-              item['Status']['ID']==1&&role==2?RaisedButton(
+              item['Status']['ID']==1&&role==2&&userID==item['User']['ID']?RaisedButton(
                 onPressed: () {
                   Navigator.of(context).push(new MaterialPageRoute(builder: (_) => new StocktakingDetail(stockID: item['ID'], editable: true,))).then((result) {
                     beginDate = '';
@@ -599,14 +601,13 @@ class _StocktakingListState extends State<StocktakingList> {
                 ),
               ):Container(),
               item['Status']['ID']==3&&role==1?RaisedButton(
-                onPressed: () {
-                  Navigator.of(context).push(new MaterialPageRoute(builder: (_) => new StocktakingDetail(stockID: item['ID'], editable: true,))).then((result) {
-                    beginDate = '';
-                    endDate = '';
-                    offset = 0;
-                    _stock.clear();
-                    getStock();
-                  });
+                onPressed: () async {
+                  final _ = await Navigator.of(context).push(new MaterialPageRoute(builder: (_) => new StocktakingDetail(stockID: item['ID'], editable: true,)));
+                  beginDate = '';
+                  endDate = '';
+                  offset = 0;
+                  _stock.clear();
+                  getStock();
                 },
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(6),

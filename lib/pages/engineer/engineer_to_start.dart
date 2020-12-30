@@ -114,7 +114,7 @@ class _EngineerToStartState extends State<EngineerToStart> {
                           '设备名称',
                           deviceName.length > 1
                               ? '多设备'
-                              : deviceName[0]['Name'], onTap: deviceName.length>1?null:() => Navigator.of(context).push(new MaterialPageRoute(builder: (_) => new EquipmentsList(equipmentId: deviceName[0]['OID'],)))),
+                              : deviceName[0]['Name'], onTap: deviceName.length>1?null:() => Navigator.of(context).push(new MaterialPageRoute(builder: (_) => new EquipmentsList(equipmentId: deviceName[0]['OID'], assetType: deviceName[0]['AssetType']['ID'],)))),
                   location == ''
                       ? new Container()
                       : BuildWidget.buildCardRow('使用科室', location),

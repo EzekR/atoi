@@ -582,7 +582,7 @@ class _EngineerHomePageState extends State<EngineerHomePage>
                       },
                     ),
                     AnimatedContainer(
-                      height: showEquip?120.0:0.0,
+                      height: showEquip?200.0:0.0,
                       duration: Duration(milliseconds: 200),
                       child: Column(
                         children: <Widget>[
@@ -605,6 +605,62 @@ class _EngineerHomePageState extends State<EngineerHomePage>
                                   ),
                                   Text(
                                     '医疗设备',
+                                    style: TextStyle(
+                                        fontSize: 14.0,
+                                        color: Colors.black54
+                                    ),
+                                  )
+                                ],
+                              ),
+                            ),
+                          ),
+                          Container(
+                            height: 40.0,
+                            child: FlatButton(
+                              onPressed: () {
+                                Navigator.of(context).push(new MaterialPageRoute(builder: (_) {
+                                  return new EquipmentsList(equipmentType: EquipmentType.MEASURE,);
+                                }));
+                              },
+                              child: Row(
+                                children: <Widget>[
+                                  SizedBox(
+                                    width: 60.0,
+                                  ),
+                                  Icon(Icons.straighten, color: Colors.grey, size: 16.0,),
+                                  SizedBox(
+                                    width: 10.0,
+                                  ),
+                                  Text(
+                                    '计量器具',
+                                    style: TextStyle(
+                                        fontSize: 14.0,
+                                        color: Colors.black54
+                                    ),
+                                  )
+                                ],
+                              ),
+                            ),
+                          ),
+                          Container(
+                            height: 40.0,
+                            child: FlatButton(
+                              onPressed: () {
+                                Navigator.of(context).push(new MaterialPageRoute(builder: (_) {
+                                  return new EquipmentsList(equipmentType: EquipmentType.OTHER,);
+                                }));
+                              },
+                              child: Row(
+                                children: <Widget>[
+                                  SizedBox(
+                                    width: 60.0,
+                                  ),
+                                  Icon(Icons.devices_other, color: Colors.grey, size: 16.0,),
+                                  SizedBox(
+                                    width: 10.0,
+                                  ),
+                                  Text(
+                                    '其他设备',
                                     style: TextStyle(
                                         fontSize: 14.0,
                                         color: Colors.black54

@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:atoi/utils/common.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
@@ -40,7 +42,7 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
   int _attachId;
   String _attachFile;
   ScrollController _scrollController = new ScrollController();
-  final scopeKey = new GlobalKey();
+  GlobalKey scopeKey = new GlobalKey();
 
   List _serviceResults = [
     '待分配',
@@ -680,12 +682,13 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
   List<Widget> buildService() {
     List<Widget> _list = [];
     if (services != null) {
+      log("service:$services");
       for (var item in services) {
         var serviceList = [
-          BuildWidget.buildRow('维修服务系统编号', item['InvConsumable']['Consumable']['Name']),
-          BuildWidget.buildRow('服务名称', item['InvConsumable']['LotNum']),
-          BuildWidget.buildRow('供应商', item['InvConsumable']['Supplier']['Name']),
-          BuildWidget.buildRow('金额(元)', CommonUtil.CurrencyForm(item['InvConsumable']['Price'], digits: 0, times: 1)),
+          BuildWidget.buildRow('维修服务系统编号', item['Service']['OID']),
+          BuildWidget.buildRow('服务名称', item['Service']['Name']),
+          BuildWidget.buildRow('供应商', item['Service']['Supplier']['Name']),
+          BuildWidget.buildRow('金额(元)', CommonUtil.CurrencyForm(item['Service']['Price'], digits: 0, times: 1)),
           new Divider()
         ];
         _list.addAll(serviceList);
@@ -852,7 +855,7 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
       _list.addAll([
         BuildWidget.buildRow('系统编号', _equipments[i]['OID']??''),
         BuildWidget.buildRow('资产编号', _equipments[i]['AssetCode']??''),
-        BuildWidget.buildRow('名称', _equipments[i]['Name']??'', onTap: () => Navigator.of(context).push(new MaterialPageRoute(builder: (_) => new EquipmentsList(equipmentId: _equipments[i]['OID'],)))),
+        BuildWidget.buildRow('名称', _equipments[i]['Name']??'', onTap: () => Navigator.of(context).push(new MaterialPageRoute(builder: (_) => new EquipmentsList(equipmentId: _equipments[i]['OID'], assetType: _equipments[i]['AssetType']['ID'],)))),
         BuildWidget.buildRow('型号', _equipments[i]['EquipmentCode']??''),
         BuildWidget.buildRow('序列号', _equipments[i]['SerialCode']??''),
         BuildWidget.buildRow('设备厂商', _equipments[i]['Manufacturer']['Name']??''),
@@ -897,7 +900,7 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
                   }
                   final selected = await Navigator.of(context)
                       .push(new MaterialPageRoute(builder: (context) {
-                    return SearchPage(equipments: _equipments);
+                    return SearchPage(equipments: _equipments, multiType: MultiSearchType.EQUIPMENT,);
                   }));
                   if (selected != null) {
                     setState(() {

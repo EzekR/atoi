@@ -16,6 +16,7 @@ import 'dart:convert';
 import 'package:flutter_cupertino_date_picker/flutter_cupertino_date_picker.dart';
 import 'package:atoi/utils/constants.dart';
 import 'package:date_format/date_format.dart';
+import 'package:atoi/widgets/search_page.dart';
 
 /// 采购单附件类
 class POAttachment extends StatefulWidget {
@@ -39,6 +40,7 @@ class _POAttachmentState extends State<POAttachment> {
   String _fujiClass2Name;
   List _fujiList = [];
   String title;
+  List equips = [];
 
   String _fujiComponentName;
   int _fujiComponent;
@@ -520,9 +522,9 @@ class _POAttachmentState extends State<POAttachment> {
     }
 
     if (widget.attachType == AttachmentType.SERVICE) {
-      if (_fujiClass2 == 0) {
+      if (equips.isEmpty) {
         showDialog(context: context, builder: (context) => CupertinoAlertDialog(
-          title: new Text('富士II类不可为空'),
+          title: new Text('关联设备不可为空'),
         )).then((result) => scrollController.jumpTo(0.0));
         return;
       }
@@ -574,9 +576,8 @@ class _POAttachmentState extends State<POAttachment> {
         };
         break;
       case AttachmentType.SERVICE:
-        Map _selectedFuji = cModel.FujiClass2.firstWhere((item) => item['ID'] == _fujiClass2);
         _componentTmp = {
-          'FujiClass2': _selectedFuji,
+          'Equipments': equips,
           'Name': serviceName.text,
           'TotalTimes': serviceTimes.text,
           'Price': price.text,
@@ -586,7 +587,7 @@ class _POAttachmentState extends State<POAttachment> {
         break;
     }
     log("$_componentTmp");
-    Navigator.of(context).pop(jsonEncode(_componentTmp));
+    Navigator.of(context).pop(_componentTmp);
   }
 
   Padding buildRow(String labelText, String defaultText) {
@@ -767,68 +768,71 @@ class _POAttachmentState extends State<POAttachment> {
         break;
       case AttachmentType.SERVICE:
         _list.addAll([
-          widget.editable?Row(
-            children: <Widget>[
-              new Expanded(
-                flex: 4,
-                child: new Wrap(
-                  alignment: WrapAlignment.end,
-                  crossAxisAlignment: WrapCrossAlignment.center,
-                  children: <Widget>[
-                    new Text(
-                      '*',
-                      style: new TextStyle(
-                          color: Colors.red
-                      ),
-                    ),
-                    new Text(
-                      '富士II类',
-                      style: new TextStyle(
-                          fontSize: 16.0,
-                          fontWeight: FontWeight.w600
-                      ),
-                    )
-                  ],
-                ),
-              ),
-              new Expanded(
-                flex: 1,
-                child: new Text(
-                  '：',
-                  style: new TextStyle(
-                    fontSize: 16.0,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ),
-              new Expanded(
-                flex: 6,
-                child: new DropdownButton(
-                  value: _fujiClass2,
-                  items: _fujiList.map<DropdownMenuItem>((item) {
-                    return DropdownMenuItem(
-                      value: item['value'],
-                      child: Text(
-                        item['text'],
-                        style: TextStyle(
-                            fontSize: 12.0
+          widget.editable?new Padding(
+            padding: EdgeInsets.symmetric(vertical: 5.0),
+            child: new Row(
+              children: <Widget>[
+                new Expanded(
+                  flex: 4,
+                  child: new Wrap(
+                    alignment: WrapAlignment.end,
+                    crossAxisAlignment: WrapCrossAlignment.center,
+                    children: <Widget>[
+                      new Text(
+                        '*',
+                        style: new TextStyle(
+                            color: Colors.red
                         ),
                       ),
-                    );
-                  }).toList(),
-                  onChanged: (value) {
-                    setState(() {
-                      _fujiClass2 = value;
-                    });
-                  },
-                  style: new TextStyle(
-                    color: Colors.black54,
-                    fontSize: 12.0,
+                      new Text(
+                        '关联设备',
+                        style: new TextStyle(
+                            fontSize: 16.0, fontWeight: FontWeight.w600),
+                      )
+                    ],
                   ),
                 ),
-              ),
-            ],
-          ):Container(),
+                new Expanded(
+                  flex: 1,
+                  child: new Text(
+                    '：',
+                    style: new TextStyle(
+                      fontSize: 16.0,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+                new Expanded(
+                  flex: 4,
+                  child: new Text(
+                    equips.map((equip) => equip['Name']).join(";"),
+                    style: new TextStyle(
+                        fontSize: 16.0,
+                        fontWeight: FontWeight.w400,
+                        color: Colors.black54),
+                  ),
+                ),
+                new Expanded(
+                    flex: 2,
+                    child: new IconButton(
+                        focusNode: _focusComponent[3],
+                        icon: Icon(Icons.search),
+                        onPressed: () async {
+                          FocusScope.of(context).requestFocus(new FocusNode());
+                          final _searchResult = await Navigator.of(context).push(new MaterialPageRoute(builder: (_) => SearchPage(equipments: equips, onlyType: EquipmentType.MEDICAL, multiType: MultiSearchType.EQUIPMENT,)));
+                          print(_searchResult);
+                          if (_searchResult != null &&
+                              _searchResult != 'null') {
+                            setState(() {
+                              equips = _searchResult;
+                            });
+                            await getEquipment(_equipment['ID']);
+                            await getFujiComponents(_equipment['FujiClass2']['ID']);
+                          }
+                        })),
+              ],
+            ),
+          ):BuildWidget.buildRow('关联设备', _equipment==null?'':_equipment['Name']),
           widget.editable?BuildWidget.buildInput('服务名称', serviceName, maxLength: 20, focusNode: _focusComponent[1], required: true):BuildWidget.buildRow('服务名称', serviceName.text),
           widget.editable?BuildWidget.buildInput('金额', price, maxLength: 13, focusNode: _focusComponent[2], required: true, inputType: TextInputType.numberWithOptions()):BuildWidget.buildRow('金额', price.text),
           widget.editable?new Padding(

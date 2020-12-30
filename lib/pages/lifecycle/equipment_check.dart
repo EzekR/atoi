@@ -347,7 +347,7 @@ Future getImage() async {
                     //toSearch();
                     final selected = await Navigator.of(context)
                         .push(new MaterialPageRoute(builder: (context) {
-                      return SearchPage(equipments: _equipments,);
+                      return SearchPage(equipments: _equipments, multiType: MultiSearchType.EQUIPMENT,);
                     }));
                     if (selected != null) {
                       setState(() {

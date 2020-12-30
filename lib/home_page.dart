@@ -865,14 +865,14 @@ class _HomePageState extends State<HomePage>
                       ],
                     ),
                     SizedBox(height: 18.0,),
-                    Row(
+                    _currentTabIndex==2?Container():Row(
                       children: <Widget>[
                         SizedBox(width: 16.0,),
                         Text('资产类型', style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.w600),)
                       ],
                     ),
-                    SizedBox(height: 6.0,),
-                    Row(
+                    _currentTabIndex==2?Container():SizedBox(height: 6.0,),
+                    _currentTabIndex==2?Container():Row(
                       children: <Widget>[
                         SizedBox(width: 16.0,),
                         Container(

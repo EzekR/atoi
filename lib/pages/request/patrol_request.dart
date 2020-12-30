@@ -333,7 +333,7 @@ Future getImage() async {
                   iconSize: 30.0,
                   onPressed: () async {
                     Navigator.of(context).push(new MaterialPageRoute(builder: (context) {
-                      return SearchPage(equipments: _equipments,);
+                      return SearchPage(equipments: _equipments, multiType: MultiSearchType.EQUIPMENT,);
                     })).then((selected) {
                       if (selected != null) {
                         setState(() {

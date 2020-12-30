@@ -205,7 +205,7 @@ class _SpareListState extends State<SpareList> {
                     Row(
                       children: <Widget>[
                         SizedBox(width: 16.0,),
-                        Text('使用状态', style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.w600),)
+                        Text('状态', style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.w600),)
                       ],
                     ),
                     SizedBox(height: 6.0,),
@@ -251,7 +251,7 @@ class _SpareListState extends State<SpareList> {
                     Row(
                       children: <Widget>[
                         SizedBox(width: 16.0,),
-                        Text('状态', style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.w600),)
+                        Text('使用状态', style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.w600),)
                       ],
                     ),
                     SizedBox(height: 6.0,),
@@ -413,8 +413,8 @@ class _SpareListState extends State<SpareList> {
                 BuildWidget.buildCardRow('开始日期', item['StartDate'].split('T')[0]),
                 BuildWidget.buildCardRow('结束日期', item['EndDate'].split('T')[0]),
                 BuildWidget.buildCardRow('上次盘点日期', CommonUtil.TimeForm(item['LastestStocktakingDate']??'', 'yyyy-mm-dd')),
-                BuildWidget.buildCardRow('状态', today.isBefore(_start)?'未使用':'当前在用'),
-                BuildWidget.buildCardRow('使用状态', item['UsageStatus']),
+                BuildWidget.buildCardRow('状态', item['UsageStatus']),
+                BuildWidget.buildCardRow('使用状态', item['Status']['Name']),
                 //BuildWidget.buildCardRow('状态', item['IsActive']?'启用':'停用'),
               ],
             ),

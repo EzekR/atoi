@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:atoi/utils/http_request.dart';
@@ -10,51 +12,48 @@ class PrintQrcode extends StatefulWidget{
   _PrintQrcodeState createState() => _PrintQrcodeState();
   final int equipmentId;
   final CodeType codeType;
-  PrintQrcode({Key key, this.equipmentId, this.codeType}):super(key: key);
+  final List components;
+  PrintQrcode({Key key, this.equipmentId, this.codeType, this.components}):super(key: key);
 }
 
 class _PrintQrcodeState extends State<PrintQrcode> {
   var _equipment;
   var _qrcode;
   List _image;
+  List qrcodes = [];
+  List qrcodesString = [];
 
   void initState() {
     super.initState();
-    getQrcode();
+    getAllCodes();
   }
 
-  Future<Null> getEquipment() async {
-    String url;
-    switch (widget.codeType) {
-      case CodeType.COMPONENT:
-        url = '/InvComponent/InvComponentLabel';
-        break;
-      case CodeType.CONSUMABLE:
-        url = '/InvConsumable/InvConsumableLabel';
-        break;
-      case CodeType.SPARE:
-        url = '/InvSpare/InvSpareLabel';
-        break;
-      default:
-        url = '/Equipment/Getdevices';
-        break;
-    }
-    var resp = await HttpRequest.request(
-      url,
-      method: HttpRequest.GET,
-      params: {
-        'filterText': widget.equipmentId
+  void getAllCodes() async {
+    if (widget.equipmentId != null) {
+      String encoded = await getQrcode(widget.equipmentId);
+      if (encoded != "") {
+        Uint8List _decoded = base64Decode(encoded);
+        qrcodes.add(_decoded);
+        qrcodesString.add(encoded);
       }
-    );
-    if (resp['ResultCode'] == '00') {
-      setState(() {
-        _equipment = resp['Data'][0];
-      });
-      getQrcode();
+    } else {
+      if (widget.components != null) {
+        for(int i=0; i<widget.components.length; i++) {
+          String _code = await getQrcode(widget.components[i]['ID']);
+          if (_code != "") {
+            Uint8List _decoded = base64Decode(_code);
+            qrcodes.add(_decoded);
+            qrcodesString.add(_code);
+          }
+        }
+      }
     }
+    setState(() {
+      qrcodes = qrcodes;
+    });
   }
 
-  Future<Null> getQrcode() async {
+  Future<String> getQrcode(int id) async {
     String url;
     switch (widget.codeType) {
       case CodeType.COMPONENT:
@@ -80,15 +79,13 @@ class _PrintQrcodeState extends State<PrintQrcode> {
       url,
       method: HttpRequest.GET,
       params: {
-        'id': widget.equipmentId
+        'id': id
       }
     );
     if (resp['ResultCode'] == '00') {
-      setState(() {
-        _qrcode = resp['Data'];
-        _image = base64Decode(resp['Data']);
-      });
+      return resp['Data'];
     }
+    return "";
   }
 
   Row buildCardRowLeft(String tHead, String tBody) {
@@ -137,7 +134,7 @@ class _PrintQrcodeState extends State<PrintQrcode> {
       );
   }
 
-  Card buildPrintCard() {
+  Card buildPrintCard(Uint8List image) {
     return new Card(
       child: new Container(
         width: 390,
@@ -145,96 +142,53 @@ class _PrintQrcodeState extends State<PrintQrcode> {
         child: new Padding(
           padding: EdgeInsets.symmetric(horizontal: 10.0),
           child: Center(
-            child: BuildWidget.buildPhotoPageList(context, _image),
+            child: BuildWidget.buildPhotoPageList(context, image),
           ),
         ),
-//        child: new Padding(
-//          padding: EdgeInsets.symmetric(vertical: 10.0, horizontal: 10.0),
-//          child: new Row(
-//            children: <Widget>[
-//              new Expanded(
-//                flex: 6,
-//                child: new Column(
-//                  children: <Widget>[
-//                    buildCardRowLeft('医院', '龙山县人民医院'),
-//                    new SizedBox(height: 5.0,),
-//                    buildCardRowLeft('科室', _equipment['Department']['Name']),
-//                    new SizedBox(height: 5.0,),
-//                    buildCardRowLeft('放置地点', _equipment['InstalSite']),
-//                    new SizedBox(height: 5.0,),
-//                    buildCardRowLeft('名称', _equipment['Name']),
-//                    new SizedBox(height: 5.0,),
-//                    buildCardRowLeft('型号', _equipment['EquipmentCode']),
-//                    new SizedBox(height: 5.0,),
-//                    buildCardRowLeft('序列号', _equipment['SerialCode']),
-//                    new SizedBox(height: 5.0,),
-//                    buildCardRowLeft('资产编号', _equipment['OID']),
-//                    new SizedBox(height: 5.0,),
-//                  ],
-//                ),
-//              ),
-//              new Expanded(
-//                flex: 4,
-//                child: new Column(
-//                  crossAxisAlignment: CrossAxisAlignment.end,
-//                  children: <Widget>[
-//                    new Container(
-//                      child: Image.asset('assets/atoi.png'),
-//                    ),
-//                    new SizedBox(height: 16.0,),
-//                    new QrImage(
-//                      data: "www.baidu.com",
-//                      version: QrVersions.auto,
-//                      size: 150.0,
-//                    ),
-//                    new Padding(
-//                      padding: EdgeInsets.symmetric(horizontal: 16.0),
-//                      child: new Text('微信扫一扫报修'),
-//                    )
-//                  ],
-//                ),
-//              )
-//            ],
-//          ),
-//        )
       ),
     );
   }
 
   Future<Null> printQRcode() async {
-    var error = await BrotherPrinter.printImage(_qrcode);
-    print(error);
-    showDialog(
-      context: context,
-      builder: (context) => CupertinoAlertDialog(
-        title: new Text(error=='ok'?'打印完成':'请连接打印机'),
-      )
-    );
+    for(String code in qrcodesString) {
+      var error = await BrotherPrinter.printImage(code);
+      print(error);
+      showDialog(
+          context: context,
+          builder: (context) => CupertinoAlertDialog(
+            title: new Text(error=='ok'?'打印完成':'请连接打印机'),
+          )
+      );
+    }
   }
 
-  //void printQrcode() async {
-  //  final doc  = pdf.Document();
-  //  var _image = base64Decode(_qrcode);
-  //  var imageProvider = MemoryImage(_image);
-  //  final PdfImage image = await pdfImageFromImageProvider(pdf: doc.document, image: imageProvider);
-
-  //  doc.addPage(
-  //    pdf.Page(
-  //      //pageFormat: PdfPageFormat.a9,
-  //      build: (context) {
-  //        return pdf.Center(
-  //          child: pdf.Image(image)
-  //        );
-  //      }
-  //    )
-  //  );
-
-  //  await Printing.layoutPdf(
-  //    onLayout: (PdfPageFormat format) async {
-  //      return doc.save();
-  //    }
-  //  );
-  //}
+  List<Widget> buildList() {
+    List<Widget> _list = [];
+    _list.addAll(
+      qrcodes.map((codes) {
+        return buildPrintCard(codes);
+      }).toList()
+    );
+    _list.add(
+      new SizedBox(height: 16.0,)
+    );
+    _list.add(
+      Center(
+        child: new RaisedButton(
+          onPressed: () async {
+            printQRcode();
+          },
+          child: new Text(
+            '打印',
+            style: new TextStyle(
+                color: Colors.white
+            ),
+          ),
+        )
+      )
+    );
+    return _list;
+  }
 
   Widget build(BuildContext context) {
     return new Scaffold(
@@ -254,22 +208,9 @@ class _PrintQrcodeState extends State<PrintQrcode> {
           ),
         ),
       ),
-      body: new Column(
-        children: <Widget>[
-          _image==null?new Container():buildPrintCard(),
-          new SizedBox(height: 16.0,),
-          new RaisedButton(
-              onPressed: () async {
-                printQRcode();
-              },
-              child: new Text(
-                '打印',
-                style: new TextStyle(
-                  color: Colors.white
-                ),
-              ),
-              )
-        ],
+      body: new ListView(
+        controller: new ScrollController(),
+        children: buildList(),
       )
     );
   }

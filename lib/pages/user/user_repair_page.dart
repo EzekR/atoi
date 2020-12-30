@@ -176,8 +176,10 @@ class _UserRepairPageState extends State<UserRepairPage> {
         'RequestType': {'ID': 1},
         'FaultDesc': _describe.text,
         'MachineStatus': {
-          //'ID': model.FaultRepair[_currentResult]
           'ID': model.MachineStatus[_currentResult]
+        },
+        'AssetType': {
+          'ID': 1
         },
         'Files': Files
       }

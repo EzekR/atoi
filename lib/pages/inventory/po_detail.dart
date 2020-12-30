@@ -129,7 +129,7 @@ class _PODetailState extends State<PODetail> {
         _services = _servicesList.map((_data) {
           return {
             '服务名称': _data['Name'],
-            '关联富士II类': _data['FujiClass2']['Name'],
+            '关联设备': _data['Equipments'].map((equip) => equip['Name']).join(";"),
             '金额': CommonUtil.CurrencyForm(_data['Price'], times: 1, digits: 0),
             '服务开始时间': _data['StartDate'].toString().split('T')[0],
             '服务结束时间': _data['EndDate'].toString().split('T')[0],
@@ -614,7 +614,7 @@ class _PODetailState extends State<PODetail> {
                   Navigator.of(context).push(new MaterialPageRoute(builder: (context) => new POAttachment(editable: true, attachType: pageType,))).then((result) {
                     print(result);
                     if (result != null) {
-                      Map _data = jsonDecode(result);
+                      Map _data = result;
                       switch (pageType) {
                         case AttachmentType.COMPONENT:
                           _componentsList.add(_data);
@@ -646,7 +646,7 @@ class _PODetailState extends State<PODetail> {
                           _servicesList.add(_data);
                           _services.add({
                             '服务名称': _data['Name'],
-                            '关联富士II类': _data['FujiClass2']['Name'],
+                            '关联设备': _data['Equipments'].map((equip) => equip['Name']).join(";"),
                             '金额': CommonUtil.CurrencyForm(double.tryParse(_data['Price']), times: 1, digits: 0),
                             '服务开始时间': _data['StartDate'].toString().split('T')[0],
                             '服务结束时间': _data['EndDate'].toString().split('T')[0],
@@ -663,6 +663,21 @@ class _PODetailState extends State<PODetail> {
       );
     }
     return _list;
+  }
+
+  bool checkInboundQuantity() {
+    bool allInbound = true;
+    _componentsList.forEach((_comp) {
+      if (_comp['InboundQty'] != _comp['Qty']) {
+        allInbound = false;
+      }
+    });
+    _consumable.forEach((_con) {
+      if (_con['InboundQty'] != _con['Qty']) {
+        allInbound = false;
+      }
+    });
+    return allInbound;
   }
 
   Widget build(BuildContext context) {
@@ -1099,9 +1114,9 @@ class _PODetailState extends State<PODetail> {
                           child:
                           Text('保存', style: TextStyle(color: Colors.white)),
                         ):new Container(),
-                        widget.editable?new RaisedButton(
+                        widget.operation==PurchaseOrderOperation.EDIT?new RaisedButton(
                           onPressed: () {
-                            widget.operation==PurchaseOrderOperation.INBOUND?handlePO(3):savePurchaseOrder(statusId: 2);
+                            savePurchaseOrder(statusId: 2);
                           },
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(6),
@@ -1109,7 +1124,25 @@ class _PODetailState extends State<PODetail> {
                           padding: EdgeInsets.all(12.0),
                           color: new Color(0xffD25565),
                           child:
-                          Text(widget.operation==PurchaseOrderOperation.INBOUND?'完成':'提交', style: TextStyle(color: Colors.white)),
+                          Text('提交', style: TextStyle(color: Colors.white)),
+                        ):Container(),
+                        widget.operation==PurchaseOrderOperation.INBOUND?new RaisedButton(
+                          onPressed: () {
+                            if (!checkInboundQuantity()) {
+                              showDialog(context: context, builder: (context) => CupertinoAlertDialog(
+                                title: new Text('零件或耗材未完全入库，请联系管理员'),
+                              ));
+                              return;
+                            }
+                            handlePO(3);
+                          },
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          padding: EdgeInsets.all(12.0),
+                          color: new Color(0xffD25565),
+                          child:
+                          Text('完成', style: TextStyle(color: Colors.white)),
                         ):Container(),
                         new RaisedButton(
                           onPressed: () {

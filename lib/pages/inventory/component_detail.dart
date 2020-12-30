@@ -16,10 +16,11 @@ import 'package:date_format/date_format.dart';
 
 /// 零件详情页
 class ComponentDetail extends StatefulWidget {
-  ComponentDetail({Key key, this.component, this.editable, this.isStock}) : super(key: key);
+  ComponentDetail({Key key, this.component, this.editable, this.isStock, this.componentList}) : super(key: key);
   final Map component;
   final bool editable;
   final bool isStock;
+  final List componentList;
   _ComponentDetailState createState() => new _ComponentDetailState();
 }
 
@@ -160,6 +161,9 @@ class _ComponentDetailState extends State<ComponentDetail> {
       if (resp['Data']['ID'] == 0) {
         return false;
       } else {
+        showDialog(context: context, builder: (context) => CupertinoAlertDialog(
+          title: new Text('该零件当前状态为${resp['Data']['Name']}，无法新增'),
+        ));
         return true;
       }
     } else {
@@ -263,11 +267,15 @@ class _ComponentDetailState extends State<ComponentDetail> {
       "info": _info
     };
     if (widget.isStock) {
+      int index = widget.componentList.indexWhere((item) => item['SerialCode'] == _info['SerialCode']);
+      if (index > -1) {
+        showDialog(context: context, builder: (context) => CupertinoAlertDialog(
+          title: new Text('相同零件序列号已在盘点列表中'),
+        ));
+        return;
+      }
       bool existence = await componentExist(serialCode.text);
       if (existence) {
-        showDialog(context: context, builder: (context) => CupertinoAlertDialog(
-          title: new Text('该零件状态为在库，不可新增'),
-        ));
         return;
       } else {
         Navigator.of(context).pop(jsonEncode(_info));

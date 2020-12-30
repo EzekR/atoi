@@ -38,7 +38,7 @@ class _StocktakingDetailState extends State<StocktakingDetail> {
   int stockType = 0;
   String stockName = '';
   int role;
-  int stockStatus;
+  int stockStatus = 0;
   TextEditingController approveComment = new TextEditingController();
   String barcode;
   FocusNode focusComment = new FocusNode();
@@ -53,6 +53,9 @@ class _StocktakingDetailState extends State<StocktakingDetail> {
   void getRole() async {
     SharedPreferences _prefs = await SharedPreferences.getInstance();
     role = _prefs.getInt('role');
+    setState(() {
+      role = role;
+    });
   }
 
   Future<bool> checkUnique() async {
@@ -83,10 +86,7 @@ class _StocktakingDetailState extends State<StocktakingDetail> {
 
   Future<int> saveStocktaking(int status) async {
     bool result = true;
-    if (widget.stockID == null) {
-      result = await checkUnique();
-    }
-    //bool result = true;
+    result = await checkUnique();
     if (result) {
       Map resp = await HttpRequest.request(
         '/Stocktaking/SaveStocktaking',
@@ -160,16 +160,17 @@ class _StocktakingDetailState extends State<StocktakingDetail> {
           stockItems = resp['Data']['StSpares'];
           break;
       }
-      focusCards = new List(stockItems.length).map((item) {
-        return new FocusNode();
-      }).toList();
       setState(() {
+        stockItems = stockItems;
         stockType = resp['Data']['ObjectType']['ID'];
         currentObj = stockType;
         stockName = resp['Data']['ObjectType']['Name'];
         stockStatus = resp['Data']['Status']['ID'];
         scheduledDate = CommonUtil.TimeForm(resp['Data']['ScheduledDate'], 'yyyy-mm-dd');
         remarks.text = resp['Data']['Comment'];
+        focusCards = new List(stockItems.length).map((item) {
+          return new FocusNode();
+        }).toList();
       });
     }
   }
@@ -203,6 +204,9 @@ class _StocktakingDetailState extends State<StocktakingDetail> {
         'ID': widget.stockID,
         'ObjectType': {
           'ID': stockType
+        },
+        'Status': {
+          'ID': stockStatus
         }
       },
     };
@@ -879,27 +883,20 @@ class _StocktakingDetailState extends State<StocktakingDetail> {
                       ),
                       widget.editable?IconButton(
                         icon: Icon(Icons.add_circle, color: Colors.blueAccent,),
-                        onPressed: () {
+                        onPressed: () async {
                           switch (stockType) {
                             case 1:
-                              Navigator.of(context).push(new MaterialPageRoute(builder: (_) => ComponentDetail(editable: true, isStock: true,))).then((result) async {
-                                if (result != null) {
-                                  Map _info = jsonDecode(result);
-                                  int index = stockItems.indexWhere((item) => item['SerialCode'] == _info['SerialCode']);
-                                  if (index > -1) {
-                                    showDialog(context: context, builder: (context) => CupertinoAlertDialog(
-                                      title: new Text('相同零件序列号已在盘点列表中'),
-                                    ));
-                                  }
-                                  bool save = await saveStuffToStocktaking(_info);
-                                  if (save) {
-                                    getStockDetailByID();
-                                    showDialog(context: context, builder: (context) => CupertinoAlertDialog(
-                                      title: new Text('添加成功'),
-                                    ));
-                                  }
+                              final result = await Navigator.of(context).push(new MaterialPageRoute(builder: (_) => ComponentDetail(editable: true, isStock: true, componentList: stockItems,)));
+                              if (result != null) {
+                                Map _info = jsonDecode(result);
+                                bool save = await saveStuffToStocktaking(_info);
+                                if (save) {
+                                  getStockDetailByID();
+                                  showDialog(context: context, builder: (context) => CupertinoAlertDialog(
+                                    title: new Text('添加成功'),
+                                  ));
                                 }
-                              });
+                              }
                               break;
                             case 2:
                               Navigator.of(context).push(new MaterialPageRoute(builder: (_) => ConsumableDetail(editable: true, isStock: true,))).then((result) async {

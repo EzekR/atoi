@@ -97,6 +97,7 @@ class _ServiceDetailState extends State<ServiceDetail> {
         _fujiClass2 = _data['FujiClass2']['ID'];
         _fujiClass2Name = _data['FujiClass2']['Name'];
         purchaseNo = _data['Purchase']['ID']==0?"":_data['Purchase']['Name'];
+        equips = _data['Equipments'];
       });
     }
   }
@@ -188,6 +189,7 @@ class _ServiceDetailState extends State<ServiceDetail> {
       'FujiClass2': {
         'ID': _fujiClass2
       },
+      'Equipments': equips,
       'Name': serviceName.text,
       'TotalTimes': totalTimes.text,
       'Price': price.text,
@@ -436,7 +438,7 @@ class _ServiceDetailState extends State<ServiceDetail> {
                                               icon: Icon(Icons.search),
                                               onPressed: () async {
                                                 FocusScope.of(context).requestFocus(new FocusNode());
-                                                final _searchResult = await Navigator.of(context).push(new MaterialPageRoute(builder: (_) => SearchPage(equipments: equips, onlyType: EquipmentType.MEDICAL,)));
+                                                final _searchResult = await Navigator.of(context).push(new MaterialPageRoute(builder: (_) => SearchPage(equipments: equips, onlyType: EquipmentType.MEDICAL, multiType: MultiSearchType.EQUIPMENT,)));
                                                 print(_searchResult);
                                                 if (_searchResult != null &&
                                                     _searchResult != 'null') {
@@ -447,7 +449,7 @@ class _ServiceDetailState extends State<ServiceDetail> {
                                               })),
                                     ],
                                   ),
-                                ):BuildWidget.buildRow('关联设备', supplier==null?'':supplier['Name']),
+                                ):BuildWidget.buildRow('关联设备', equips==null?'':equips.map((item) => item['Name']).toList().join(",")),
                                 widget.editable?BuildWidget.buildInput('服务名称', serviceName, maxLength: 50, focusNode: _focusComponent[1], required: true):BuildWidget.buildRow('服务名称', serviceName.text),
                                 widget.editable?new Padding(
                                   padding: EdgeInsets.symmetric(vertical: 5.0),

@@ -539,7 +539,7 @@ class _EngineerReportAccessoryState extends State<EngineerReportAccessory> {
   }
 
   void checkCoherence() {
-    if ((oldComponent.isNotEmpty && newComponent.isNotEmpty) && (oldComponent['SerialCode'] != newComponent['SerialCode'])) {
+    if ((oldComponent.isNotEmpty && newComponent.isNotEmpty) && (oldComponent['Component']['ID'] != newComponent['Component']['ID'])) {
       showDialog(context: context,
           builder: (context) => CupertinoAlertDialog(
             title: new Text('拆下零件的简称要与新装零件一致'),

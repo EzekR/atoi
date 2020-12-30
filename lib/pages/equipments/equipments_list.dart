@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:atoi/utils/http_request.dart';
@@ -17,7 +19,8 @@ import 'package:atoi/pages/superuser/dashboard.dart';
 class EquipmentsList extends StatefulWidget{
   final String equipmentId;
   final EquipmentType equipmentType;
-  EquipmentsList({Key key, this.equipmentId, this.equipmentType}):super(key: key);
+  final int assetType;
+  EquipmentsList({Key key, this.equipmentId, this.equipmentType, this.assetType}):super(key: key);
   _EquipmentsListState createState() => _EquipmentsListState();
 }
 
@@ -118,20 +121,34 @@ class _EquipmentsListState extends State<EquipmentsList> {
   }
 
   Future<Null> getEquipments({String filterText}) async {
-    SharedPreferences _prefs = await SharedPreferences.getInstance();
-    int userId = _prefs.getInt('userID');
     filterText = filterText??'';
     String url;
-    switch (widget.equipmentType) {
-      case EquipmentType.MEDICAL:
-        url = '/Equipment/Getdevices';
-        break;
-      case EquipmentType.MEASURE:
-        url = '/MeasInstrum/QueryMeasInstrums';
-        break;
-      case EquipmentType.OTHER:
-        url = '/OtherEqpt/QueryOtherEqpts';
-        break;
+    if (widget.equipmentType != null) {
+      switch (widget.equipmentType) {
+        case EquipmentType.MEDICAL:
+          url = '/Equipment/Getdevices';
+          break;
+        case EquipmentType.MEASURE:
+          url = '/MeasInstrum/QueryMeasInstrums';
+          break;
+        case EquipmentType.OTHER:
+          url = '/OtherEqpt/QueryOtherEqpts';
+          break;
+      }
+    }
+    if (widget.assetType != null) {
+      log("${widget.assetType}");
+      switch (widget.assetType) {
+        case 1:
+          url = '/Equipment/Getdevices';
+          break;
+        case 2:
+          url = '/MeasInstrum/QueryMeasInstrums';
+          break;
+        case 3:
+          url = '/OtherEqpt/QueryOtherEqpts';
+          break;
+      }
     }
     var resp = await HttpRequest.request(
       url,
@@ -649,6 +666,23 @@ class _EquipmentsListState extends State<EquipmentsList> {
         cardHead = "设备";
         break;
     }
+    switch (widget.assetType) {
+      case 1:
+        prefix = 'e';
+        pageTitle = '医疗设备';
+        cardHead = "设备";
+        break;
+      case 2:
+        prefix = 'mi';
+        pageTitle = '计量器具';
+        cardHead = "器具";
+        break;
+      case 3:
+        prefix = 'oe';
+        pageTitle = '其他设备';
+        cardHead = "设备";
+        break;
+    }
     cModel = MainModel.of(context);
     initFilter();
     setState(() {
@@ -829,6 +863,44 @@ class _EquipmentsListState extends State<EquipmentsList> {
         ]);
         break;
       case EquipmentType.OTHER:
+        _list.addAll([
+          BuildWidget.buildCardRow('资产编号', item['AssetCode']),
+          BuildWidget.buildCardRow('序列号', item['SerialCode']),
+          BuildWidget.buildCardRow('设备型号', item['OtherEqptCode']),
+          BuildWidget.buildCardRow('厂商', item['Manufacturer']['Name']),
+          BuildWidget.buildCardRow('资产等级', item['AssetLevel']['Name']),
+          BuildWidget.buildCardRow('使用科室', item['Department']['Name']),
+          BuildWidget.buildCardRow('设备状态', item['EquipmentStatus']['Name']),
+        ]);
+        break;
+    }
+    switch (widget.assetType) {
+      case 1:
+        _list.addAll([
+          BuildWidget.buildCardRow('资产编号', item['AssetCode']),
+          BuildWidget.buildCardRow('设备型号', item['EquipmentCode']),
+          BuildWidget.buildCardRow('序列号', item['SerialCode']),
+          BuildWidget.buildCardRow('厂商', item['Manufacturer']['Name']),
+          BuildWidget.buildCardRow('资产等级', item['AssetLevel']['Name']),
+          BuildWidget.buildCardRow('使用科室', item['Department']['Name']),
+          BuildWidget.buildCardRow('设备状态', item['EquipmentStatus']['Name']),
+          BuildWidget.buildCardRow('维保状态', item['WarrantyStatus']),
+          BuildWidget.buildCardRow('富士II类', item['FujiClass2']['Name']),
+        ]);
+        break;
+      case 2:
+        _list.addAll([
+          BuildWidget.buildCardRow('资产编号', item['AssetCode']),
+          BuildWidget.buildCardRow('序列号', item['SerialCode']),
+          BuildWidget.buildCardRow('器具型号', item['ModelCode']),
+          BuildWidget.buildCardRow('厂商', item['Manufacturer']['Name']),
+          BuildWidget.buildCardRow('资产等级', item['AssetLevel']['Name']),
+          BuildWidget.buildCardRow('使用科室', item['Department']['Name']),
+          BuildWidget.buildCardRow('器具状态', item['EquipmentStatus']['Name']),
+          BuildWidget.buildCardRow('关联设备', item['Equipment']['Name']),
+        ]);
+        break;
+      case 3:
         _list.addAll([
           BuildWidget.buildCardRow('资产编号', item['AssetCode']),
           BuildWidget.buildCardRow('序列号', item['SerialCode']),

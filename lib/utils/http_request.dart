@@ -28,7 +28,7 @@ class HttpRequest {
   //static const String API_PREFIX = 'http://159.226.128.250/MEMS_FUJI/APP';
   static const String APP_VERSION = '1.1.12';
   // default server
-  static const String API_PREFIX = 'http://27.115.59.42:81/MEMS';
+  static const String API_PREFIX = 'http://fujifilm.esdpro.com/atoi_esd';
   static const int CONNECT_TIMEOUT = 10000;
   static const int RECEIVE_TIMEOUT = 10000;
 
@@ -47,7 +47,7 @@ class HttpRequest {
 
     data = data ?? new Map<String, dynamic>();
     params = params ?? new Map<String, dynamic>();
-    method = method ?? 'GET';
+    method = method ?? HttpRequest.GET;
     isBoard = isBoard??false;
 
     Map<String, dynamic> _params = Map.from(params);
@@ -58,17 +58,19 @@ class HttpRequest {
     var _userId = await prefs.getInt('userID');
     var serverUrl = _url ?? API_PREFIX;
     var _sessionId = await prefs.getString('sessionId');
-    if (_sessionId != null) {
+    if (method == HttpRequest.GET) {
       _params['sessionId'] = _sessionId;
+      _params['userID'] = _userId;
     }
-    if (_userId != null) {
-      _data.putIfAbsent('userID', () => _userId);
-      _params.putIfAbsent('userID', () => _userId);
+    if (method == HttpRequest.POST) {
+      _data['sessionId'] = _sessionId;
+      _data['userID'] = _userId;
     }
     EventBus bus = new EventBus();
     /// 打印请求相关信息：请求地址、请求方式、请求参数
     print('请求地址：【' + method + '  ' + url + '】');
-    log('请求body：'+data.toString());
+    log('请求body：'+_data.toString());
+    print("请求body:"+_data.toString());
     print('请求params：'+_params.toString());
     print('服务器地址：'+serverUrl);
 
@@ -77,8 +79,7 @@ class HttpRequest {
     var result;
 
     try {
-      Response response = await dio.request(url, queryParameters: _params, data: data, options: new Options(method: method));
-
+      Response response = await dio.request(url, queryParameters: _params, data: _data, options: new Options(method: method));
       result = response.data;
 
       if (result['ResultCode'] == '04') {

@@ -1,8 +1,11 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:atoi_charts/charts.dart';
 import 'package:badges/badges.dart';
 import 'package:atoi_gauge/gauges.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:spider_chart/spider_chart.dart';
 import 'package:timeline_tile/timeline_tile.dart';
 import 'package:atoi/pages/superuser/superuser_home.dart';
@@ -71,6 +74,8 @@ class _DashboardState extends State<Dashboard> {
   List years;
   int currentYear;
   int retainDepartmentId;
+  ScrollController scrollController = new ScrollController();
+  bool loading = false;
 
   List<IncomeData> incomeData = [];
 
@@ -427,6 +432,14 @@ class _DashboardState extends State<Dashboard> {
       getKpi();
     }
     getUserName();
+  }
+
+  Future<Null> refreshView() async {
+    getOverview();
+    getDepartmentIncome();
+    getRequestToday();
+    getKeyEvents();
+    getKpi();
   }
 
   void showBottomSheet() {
@@ -1531,6 +1544,9 @@ class _DashboardState extends State<Dashboard> {
                         getCount(equipmentId: equipmentData[pointIndex]['ID']);
                       }
                     }
+                  },
+                  onLongPress: () {
+                    print("long press");
                   },
                   child: Container(
                     height: widget.equipmentId!=null?120:250,
@@ -3279,9 +3295,12 @@ class _DashboardState extends State<Dashboard> {
                           painter: CurvePainter(),
                         ),
                       ),
-                      ListView(
-                          controller: new ScrollController(),
-                          children: listBuilder()
+                      RefreshIndicator(
+                        child: ListView(
+                            controller: scrollController,
+                            children: listBuilder()
+                        ),
+                        onRefresh: refreshView,
                       ),
                     ],
                   )

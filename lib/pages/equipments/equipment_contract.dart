@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:atoi/pages/equipments/equipments_list.dart';
 import 'package:atoi/utils/common.dart';
 import 'package:flutter/material.dart';
@@ -52,6 +54,10 @@ class _EquipmentContractState extends State<EquipmentContract> {
   String _contractStatus = '生效';
   EventBus bus = new EventBus();
   ScrollController _scrollController = new ScrollController();
+  List<bool> expansionList = new List(5).map((_) => true).toList();
+  List relatedComponents = [];
+  List relatedConsumables = [];
+  int currentEquip;
 
   ConstantsModel model;
 
@@ -81,6 +87,7 @@ class _EquipmentContractState extends State<EquipmentContract> {
       var _data = resp['Data'];
       setState(() {
         _equipments = _data['Equipments'];
+        currentEquip = _equipments.length>0?_equipments[0]['ID']:0;
         OID = _data['OID'];
         projectNum.text = _data['ProjectNum'];
         contractNum.text = _data['ContractNum'];
@@ -94,6 +101,16 @@ class _EquipmentContractState extends State<EquipmentContract> {
         currentType = _data['Type']['Name'];
         currentScope = _data['Scope']['Name'];
         supplier = _data['Supplier'];
+        relatedComponents = _data['Components'].map((item) {
+          Map _comp = item['Component'];
+          _comp['Equipment'] = item['Equipment'];
+          return _comp;
+        }).toList();
+        relatedConsumables = _data['Consumables'].map((item) {
+          Map _con = item['Consumable'];
+          _con['Equipment'] = item['Equipment'];
+          return _con;
+        }).toList();
       });
       var today = new DateTime.now();
       var _start = DateTime.parse(_data['StartDate']);
@@ -186,6 +203,24 @@ class _EquipmentContractState extends State<EquipmentContract> {
       "StartDate": startDate,
       "EndDate": endDate,
       "Comments": comments.text,
+      "Components": relatedComponents.map((comp) => {
+        "ContractID": widget.contract['ID'],
+        "Equipment": {
+          'ID': comp['Equipment']['ID']
+        },
+        'Component': {
+          'ID': comp['ID']
+        }
+      }).toList(),
+      "Consumables": relatedConsumables.map((con) => {
+        "ContractID": widget.contract['ID'],
+        "Equipment": {
+          'ID': con['Equipment']['ID']
+        },
+        'Consumable': {
+          'ID': con['ID']
+        }
+      }).toList(),
       //"Status": status.text,
     };
     if (widget.contract != null) {
@@ -499,6 +534,84 @@ Future getImage() async {
     );
     return content;
   }
+  
+  List<Widget> buildRelatedStaff(List targetStaff, int listType) {
+    List<Widget> _list = [];
+    _list.addAll(
+      targetStaff.map<Widget>((item) => Card(
+        child: Column(
+          children: <Widget>[
+            BuildWidget.buildCardRow('简称', item['Name']),
+            BuildWidget.buildCardRow('描述', item['Description']),
+            BuildWidget.buildCardRow('设备系统编号', item['Equipment']['OID']),
+            BuildWidget.buildCardRow('设备资产编号', item['Equipment']['AssetCode']),
+            BuildWidget.buildCardRow('关联设备名称', item['Equipment']['Name']),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: <Widget>[
+                IconButton(
+                  icon: Icon(Icons.delete_forever),
+                  color: Colors.red,
+                  onPressed: () {
+                    setState(() {
+                      targetStaff.remove(item);
+                    });
+                  },
+                )
+              ],
+            )
+          ],
+        ),
+      )).toList()
+    );
+    _list.add(
+        Row(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: <Widget>[
+            IconButton(
+              icon: Icon(Icons.add),
+              onPressed: () {
+                showDialog(
+                    context: context,
+                    builder: (context) => StatefulBuilder(
+                      builder: (context, setState) => SimpleDialog(
+                        title: Text(listType==1?"添加零件":"添加耗材"),
+                        children: <Widget>[
+                          BuildWidget.buildCardDropdown('关联设备', currentEquip, _equipments.map((item) => {
+                            'value': item['ID'],
+                            'text': item['Name']
+                          }).toList(), (val) => setState(() {currentEquip=val;}), required: true),
+                          BuildWidget.buildCardRow('设备系统编号', _equipments.firstWhere((item) => item['ID']==currentEquip)['OID']),
+                          BuildWidget.buildCardRow('设备资产编号', _equipments.firstWhere((item) => item['ID']==currentEquip)['AssetCode']),
+                          BuildWidget.buildCardRowWithSearch(listType==1?'零件':"耗材", targetStaff.map((item) => item['Name']).join("; "), required: true, toSearch: () async {
+                            final comps = await Navigator.of(context).push(new MaterialPageRoute(builder: (_) => SearchPage(multiType: listType==1?MultiSearchType.COMPONENT:MultiSearchType.CONSUMABLE, equipments: targetStaff, onlyType: EquipmentType.MEDICAL,
+                              fujiClass2: _equipments.firstWhere((item) => item['ID']==currentEquip)['FujiClass2']['ID'],)));
+                            if (comps != null) {
+                              comps.forEach((comp) {
+                                comp['Equipment'] = _equipments.firstWhere((item) => item['ID'] == currentEquip);
+                              });
+                              log("$comps");
+                              setState(() {
+                                addAllUnique(comps, targetStaff);
+                              });
+                            }
+                          })
+                        ],
+                      ),
+                    )
+                );
+              },
+            )
+          ],
+        )
+    );
+
+    return _list;
+  }
+
+  void addAllUnique(List source, List target) {
+    source.forEach((item) => target.indexOf(item)>-1?null:target.add(item));
+  }
 
   Widget build(BuildContext context) {
     return ScopedModelDescendant<MainModel>(
@@ -528,7 +641,7 @@ Future getImage() async {
                   onPressed: () async {
                     //toSearch();
                     Navigator.of(context).push(new MaterialPageRoute(builder: (context) {
-                      return SearchPage(equipments: _equipments, onlyType: EquipmentType.MEDICAL,);
+                      return SearchPage(equipments: _equipments, onlyType: EquipmentType.MEDICAL, multiType: MultiSearchType.EQUIPMENT,);
                     })).then((selected) {
                       print(selected.toString());
                       if (selected != null) {
@@ -559,14 +672,7 @@ Future getImage() async {
                       expansionCallback: (index, isExpanded) {
                         FocusScope.of(context).unfocus();
                         setState(() {
-                          if (index == 0) {
-                            _isExpandedBasic = !isExpanded;
-                          } else {
-                            if (index == 1) {
-                              _isExpandedDetail = !isExpanded;
-                            } else {
-                            }
-                          }
+                          expansionList[index] = !expansionList[index];
                         });
                       },
                       children: [
@@ -589,7 +695,7 @@ Future getImage() async {
                           body: _equipments ==null || _equipments.isEmpty
                               ? new Center(child: new Text('请选择设备'))
                               : buildEquip(),
-                          isExpanded: _isExpandedBasic,
+                          isExpanded: expansionList[0],
                         ),
                         new ExpansionPanel(canTapOnHeader: true,
                           headerBuilder: (context, isExpanded) {
@@ -789,7 +895,51 @@ Future getImage() async {
                               ],
                             ),
                           ),
-                          isExpanded: _isExpandedDetail,
+                          isExpanded: expansionList[1],
+                        ),
+                        ExpansionPanel(
+                          canTapOnHeader: true,
+                          headerBuilder: (context, isExpanded) {
+                            return ListTile(
+                              leading: new Icon(
+                                Icons.description,
+                                size: 20.0,
+                                color: Colors.blue,
+                              ),
+                              title: Text(
+                                '零件',
+                                style: new TextStyle(
+                                    fontSize: 20.0,
+                                    fontWeight: FontWeight.w400),
+                              ),
+                            );
+                          },
+                          body: Column(
+                            children: buildRelatedStaff(relatedComponents, 1),
+                          ),
+                          isExpanded: expansionList[2]
+                        ),
+                        ExpansionPanel(
+                            canTapOnHeader: true,
+                            headerBuilder: (context, isExpanded) {
+                              return ListTile(
+                                leading: new Icon(
+                                  Icons.description,
+                                  size: 20.0,
+                                  color: Colors.blue,
+                                ),
+                                title: Text(
+                                  '耗材',
+                                  style: new TextStyle(
+                                      fontSize: 20.0,
+                                      fontWeight: FontWeight.w400),
+                                ),
+                              );
+                            },
+                            body: Column(
+                              children: buildRelatedStaff(relatedConsumables, 2),
+                            ),
+                            isExpanded: expansionList[3]
                         ),
                       ],
                     ),

@@ -159,7 +159,7 @@ class _EngineerStartPageState extends State<EngineerStartPage> {
       var equipList = [
         BuildWidget.buildRow('系统编号', _equipment['OID']??''),
         BuildWidget.buildRow('资产编号', _equipment['AssetCode']??''),
-        BuildWidget.buildRow('名称', _equipment['Name']??'', onTap: () => Navigator.of(context).push(new MaterialPageRoute(builder: (_) => new EquipmentsList(equipmentId: _equipment['OID'],)))),
+        BuildWidget.buildRow('名称', _equipment['Name']??'', onTap: () => Navigator.of(context).push(new MaterialPageRoute(builder: (_) => new EquipmentsList(equipmentId: _equipment['OID'], assetType: _equipment['AssetType']['ID'],)))),
         BuildWidget.buildRow('型号', _equipment['EquipmentCode']??''),
         BuildWidget.buildRow('序列号', _equipment['SerialCode']??''),
         BuildWidget.buildRow('设备厂商', _equipment['Manufacturer']['Name']??''),

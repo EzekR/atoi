@@ -354,7 +354,7 @@ class _POListState extends State<POList> {
               item['Status']['ID']==1&&role==2&&_editable?new RaisedButton(
                 onPressed: (){
                   Navigator.of(context).push(new MaterialPageRoute(builder: (_) {
-                    return new PODetail(purchaseOrder: item, editable: _editable,);
+                    return new PODetail(purchaseOrder: item, editable: _editable, operation: PurchaseOrderOperation.EDIT,);
                   })).then((result) {
                     setState(() {
                       _loading = true;

@@ -302,6 +302,7 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
   Future<Null> getReportId(int reportType) async {
     var resp = await HttpRequest.request(
       '/DispatchReport/GetDispatchReportType',
+      method: HttpRequest.GET,
       params: {
         'id': reportType
       }
@@ -337,8 +338,8 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
         duplicatedStuff = '耗材';
       }
     }
-    for(int j=0; j<consumables.length; j++) {
-      List _tmp = services.where((item) => item['Service']['ID']==consumables[j]['Service']['ID']).toList();
+    for(int j=0; j<services.length; j++) {
+      List _tmp = services.where((item) => item['Service']['ID']==services[j]['Service']['ID']).toList();
       if (_tmp.length > 1) {
         duplicated = true;
         duplicatedStuff = '服务';
@@ -539,7 +540,7 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
       'FileInfo': _json,
       'ReportComponent': _accessory,
       'ReportConsumable': consumables,
-      'ReportService': _service,
+      'ReportService': services,
       'ID': _reportId,
     };
     var _id = _reportList.firstWhere((item) => item['Name'] == _currentType, orElse: () => null);
@@ -1266,7 +1267,7 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
                 return new EngineerReportAccessory(fujiClass2: _dispatch['Request']['Equipments'][0]['FujiClass2']['ID'], accType: AccType.CONSUMABLE,);
               }));
               if (consumable != null) {
-                if (consumables.firstWhere((item) => item['InvConsumable']['ID'] == consumable['InvConsumable']['ID']) > -1) {
+                if (consumables.indexWhere((item) => item['InvConsumable']['ID'] == consumable['InvConsumable']['ID']) > -1) {
                   showDialog(context: context, builder: (_) => CupertinoAlertDialog(
                     title: Text("耗材不可重复"),
                   ));
@@ -1286,7 +1287,7 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
       BuildWidget.buildRow('批次号', item['InvConsumable']['LotNum']),
       BuildWidget.buildRow('供应商', item['InvConsumable']['Supplier']['Name']),
       BuildWidget.buildRow('单价', item['InvConsumable']['Price'].toString()),
-      BuildWidget.buildRow('数量', item['Qty']),
+      BuildWidget.buildRow('数量', item['Qty'].toString()),
       widget.status == 3 || widget.status == 2
           ? new Container()
           : new Row(
@@ -1327,7 +1328,7 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
                 return new EngineerReportAccessory(equipmentID: _dispatch['Request']['Equipments'][0]['ID'], accType: AccType.SERVICE,);
               }));
               if (service != null) {
-                if (services.firstWhere((item) => item['Service']['ID'] == service['Service']['ID']) > -1) {
+                if (services.indexWhere((item) => item['Service']['ID'] == service['Service']['ID']) > -1) {
                   showDialog(context: context, builder: (_) => CupertinoAlertDialog(
                     title: Text("服务不可重复添加"),
                   ));
@@ -1342,10 +1343,10 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
       ],
     ));
     services.forEach((item) => _list.addAll([
-      BuildWidget.buildRow('维修服务系统编号', item['InvConsumable']['Consumable']['Name']),
-      BuildWidget.buildRow('服务名称', item['InvConsumable']['LotNum']),
-      BuildWidget.buildRow('供应商', item['InvConsumable']['Supplier']['Name']),
-      BuildWidget.buildRow('金额(元)', CommonUtil.CurrencyForm(item['InvConsumable']['Price'], digits: 0, times: 1)),
+      BuildWidget.buildRow('维修服务系统编号', item['Service']['OID']),
+      BuildWidget.buildRow('服务名称', item['Service']['Name']),
+      BuildWidget.buildRow('供应商', item['Service']['Supplier']['Name']),
+      BuildWidget.buildRow('金额(元)', "***"),
       widget.status == 3 || widget.status == 2
           ? new Container()
           : new Row(
@@ -1395,7 +1396,7 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
                   }
                   final selected = await Navigator.of(context)
                       .push(new MaterialPageRoute(builder: (context) {
-                    return SearchPage(equipments: _dispatch['Request']['Equipments']??[],);
+                    return SearchPage(equipments: _dispatch['Request']['Equipments']??[], multiType: MultiSearchType.EQUIPMENT,);
                   }));
                   if (selected != null) {
                     setState(() {
@@ -1610,7 +1611,7 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
       List<Widget> equipList = [
         BuildWidget.buildRow('系统编号', _equipments[i]['OID'] ?? ''),
         BuildWidget.buildRow('资产编号', _equipments[i]['AssetCode']??''),
-        BuildWidget.buildRow('名称', _equipments[i]['Name']??'', onTap: () => Navigator.of(context).push(new MaterialPageRoute(builder: (_) => new EquipmentsList(equipmentId: _equipments[i]['OID'],)))),
+        BuildWidget.buildRow('名称', _equipments[i]['Name']??'', onTap: () => Navigator.of(context).push(new MaterialPageRoute(builder: (_) => new EquipmentsList(equipmentId: _equipments[i]['OID'], assetType: _equipments[i]['AssetType']['ID'],)))),
         BuildWidget.buildRow('型号', _equipments[i]['EquipmentCode'] ?? ''),
         BuildWidget.buildRow('序列号', _equipments[i]['SerialCode'] ?? ''),
         BuildWidget.buildRow('设备厂商', _equipments[i]['Manufacturer']['Name'] ?? ''),
