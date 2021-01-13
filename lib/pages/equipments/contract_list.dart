@@ -6,6 +6,7 @@ import 'package:atoi/pages/equipments/vendor_detail.dart';
 import 'package:atoi/pages/equipments/equipment_contract.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:atoi/models/models.dart';
+import 'package:atoi/permissions.dart';
 
 /// 合同列表页面类
 class ContractList extends StatefulWidget{
@@ -28,6 +29,8 @@ class _ContractListState extends State<ContractList> {
   TextEditingController _keywords = new TextEditingController();
   String field = 'c.ID';
   int role;
+  Map techPermission;
+  Map specialPermission;
 
   Future<SharedPreferences> prefs = SharedPreferences.getInstance();
 
@@ -37,6 +40,15 @@ class _ContractListState extends State<ContractList> {
     var _prefs = await prefs;
     role = _prefs.getInt('role');
     _editable = role==1?true:false;
+  }
+
+  void getPermission() async {
+    SharedPreferences _prefs = await prefs;
+    Permission permissionInstance = new Permission();
+    permissionInstance.prefs = _prefs;
+    permissionInstance.initPermissions();
+    techPermission = permissionInstance.getTechPermissions('Asset', 'Contract');
+    specialPermission = permissionInstance.getSpecialPermissions('Asset', 'Contract');
   }
 
   void setFilter() async {
@@ -300,6 +312,7 @@ class _ContractListState extends State<ContractList> {
   }
 
   void initState() {
+    getPermission();
     super.initState();
     cModel = MainModel.of(context);
     initFilter();
@@ -336,10 +349,15 @@ class _ContractListState extends State<ContractList> {
         mainAxisSize: MainAxisSize.max,
         children: <Widget>[
           ListTile(
-            leading: Icon(
-              Icons.insert_drive_file,
+            leading: IconButton(
+              icon: Icon(Icons.insert_drive_file,
               color: Color(0xff14BD98),
-              size: 36.0,
+              size: 36.0),
+              onPressed: () {
+                Navigator.of(context).push(new MaterialPageRoute(builder: (_) {
+                  return new EquipmentContract(contract: item, editable: false,);
+                }));
+              },
             ),
             title: Text(
               "合同名称：${item['Name']}",
@@ -374,7 +392,7 @@ class _ContractListState extends State<ContractList> {
             mainAxisAlignment: MainAxisAlignment.end,
             mainAxisSize: MainAxisSize.max,
             children: <Widget>[
-              new RaisedButton(
+              techPermission==null||!techPermission['Edit']?Container():new RaisedButton(
                 onPressed: () async {
                   final _result = await Navigator.of(context).push(new MaterialPageRoute(builder: (_) {
                     return new EquipmentContract(contract: item, editable: _editable,);
@@ -482,7 +500,7 @@ class _ContractListState extends State<ContractList> {
           }
         },
       )),
-      floatingActionButton: role==3?Container():FloatingActionButton(
+      floatingActionButton: techPermission==null||!techPermission['Add']?Container():FloatingActionButton(
         onPressed: () {
           Navigator.of(context).push(new MaterialPageRoute(builder: (_) {
             return new EquipmentContract(editable: true,);

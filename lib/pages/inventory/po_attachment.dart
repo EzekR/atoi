@@ -105,9 +105,8 @@ class _POAttachmentState extends State<POAttachment> {
         break;
       case AttachmentType.SERVICE:
         title = '服务';
-        initFuji();
         if (widget.po != null) {
-          _fujiClass2 = widget.po['FujiClass2']['ID'];
+          equips = widget.po['Equipments'];
           serviceTimes.text = widget.po['TotalTimes'].toString();
           price.text = widget.po['Price'].toString();
           serviceName.text = widget.po['Name'];
@@ -462,7 +461,7 @@ class _POAttachmentState extends State<POAttachment> {
   void saveAttachmentToPO() async {
     if (widget.attachType == AttachmentType.COMPONENT && _component == null) {
       showDialog(context: context, builder: (context) => CupertinoAlertDialog(
-        title: new Text('设备不可为空'),
+        title: new Text('零件不可为空'),
       )).then((result) => scrollController.jumpTo(0.0));
       return;
     }
@@ -895,7 +894,7 @@ class _POAttachmentState extends State<POAttachment> {
                             cancel: Text('取消', style: TextStyle(color: Colors.redAccent)),
                           ),
                           minDateTime: DateTime.now().add(Duration(days: -7300)),
-                          maxDateTime: DateTime.parse('2030-01-01'),
+                          maxDateTime: DateTime.now().add(Duration(days: 365*10)),
                           initialDateTime: _time,
                           dateFormat: 'yyyy-MM-dd',
                           locale: DateTimePickerLocale.en_us,
@@ -975,7 +974,7 @@ class _POAttachmentState extends State<POAttachment> {
                             cancel: Text('取消', style: TextStyle(color: Colors.redAccent)),
                           ),
                           minDateTime: DateTime.now().add(Duration(days: -7300)),
-                          maxDateTime: DateTime.parse('2030-01-01'),
+                          maxDateTime: DateTime.now().add(Duration(days: 365*10)),
                           initialDateTime: _time,
                           dateFormat: 'yyyy-MM-dd',
                           locale: DateTimePickerLocale.en_us,

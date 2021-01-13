@@ -127,6 +127,20 @@ class _LoginPageState extends State<LoginPage> {
     }
   }
 
+  void getUserPermissions(int userID) async {
+    SharedPreferences _prefs = await prefs;
+    Map resp = await HttpRequest.request(
+      '/User/GetMenuByUserID',
+      method: HttpRequest.GET,
+      params: {
+        'id': userID
+      }
+    );
+    if (resp['ResultCode'] == '00') {
+      _prefs.setString('userPermissions', jsonEncode(resp['Data']));
+    }
+  }
+
   /// 初始化JPUSH推送服务
   void _startupJpush() async {
     print("初始化jpush");
@@ -232,6 +246,7 @@ class _LoginPageState extends State<LoginPage> {
       await _prefs.setString('userName', _data['Data']['Name']);
       await _prefs.setString('mobile', _data['Data']['Mobile']);
       await _prefs.setString('sessionId', _data['Data']['SessionID']);
+      await getUserPermissions(_data['Data']['ID']);
       switch (_data['Data']['Role']['ID']) {
         case 1:
           Navigator.of(context).pushNamed(HomePage.tag);

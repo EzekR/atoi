@@ -179,7 +179,7 @@ class _UserRepairPageState extends State<UserRepairPage> {
           'ID': model.MachineStatus[_currentResult]
         },
         'AssetType': {
-          'ID': 1
+          'ID': widget.equipment['AssetType']['ID']
         },
         'Files': Files
       }
@@ -412,10 +412,11 @@ Future getImage() async {
                           BuildWidget.buildRow(
                               '系统编号', widget.equipment['OID'] ?? ''),
                           BuildWidget.buildRow('资产编号', widget.equipment['AssetCode']??''),
+                          BuildWidget.buildRow('资产类型', widget.equipment['AssetType']['Name']??''),
                           BuildWidget.buildRow(
                               '名称', widget.equipment['Name'] ?? ''),
                           BuildWidget.buildRow(
-                              '型号', widget.equipment['EquipmentCode'] ?? ''),
+                              '型号', widget.equipment['ModelCode'] ?? ''),
                           BuildWidget.buildRow(
                               '序列号', widget.equipment['SerialCode'] ?? ''),
                           BuildWidget.buildRow('设备厂商',

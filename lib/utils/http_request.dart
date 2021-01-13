@@ -58,28 +58,29 @@ class HttpRequest {
     var _userId = await prefs.getInt('userID');
     var serverUrl = _url ?? API_PREFIX;
     var _sessionId = await prefs.getString('sessionId');
+    _data['sessionId'] = _sessionId;
+    _data['userID'] = _userId??0;
     if (method == HttpRequest.GET) {
-      _params['sessionId'] = _sessionId;
-      _params['userID'] = _userId;
-    }
-    if (method == HttpRequest.POST) {
-      _data['sessionId'] = _sessionId;
-      _data['userID'] = _userId;
+      _params['sessionID'] = _sessionId;
+      _params['userID'] = _userId??0;
     }
     EventBus bus = new EventBus();
     /// 打印请求相关信息：请求地址、请求方式、请求参数
     print('请求地址：【' + method + '  ' + url + '】');
     log('请求body：'+_data.toString());
-    print("请求body:"+_data.toString());
-    print('请求params：'+_params.toString());
+    log('请求params：'+_params.toString());
     print('服务器地址：'+serverUrl);
 
     serverUrl = serverUrl+'/APP';
     Dio dio = createInstance(serverUrl);
     var result;
+    Map<String, dynamic> header = {
+      'sessionID': _sessionId,
+      'userID': _userId??0
+    };
 
     try {
-      Response response = await dio.request(url, queryParameters: _params, data: _data, options: new Options(method: method));
+      Response response = await dio.request(url, queryParameters: _params, data: _data, options: new Options(method: method, headers: header));
       result = response.data;
 
       if (result['ResultCode'] == '04') {

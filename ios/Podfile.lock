@@ -54,6 +54,12 @@ PODS:
   - SDWebImageWebPCoder (0.6.1):
     - libwebp (~> 1.0)
     - SDWebImage/Core (~> 5.7)
+  - sensors_analytics_flutter_plugin (1.0.4):
+    - Flutter
+    - SensorsAnalyticsSDK
+  - SensorsAnalyticsSDK (2.2.5):
+    - SensorsAnalyticsSDK/Core (= 2.2.5)
+  - SensorsAnalyticsSDK/Core (2.2.5)
   - shared_preferences (0.0.1):
     - Flutter
   - shared_preferences_linux (0.0.1):
@@ -76,6 +82,7 @@ DEPENDENCIES:
   - multi_image_picker (from `.symlinks/plugins/multi_image_picker/ios`)
   - path_provider_linux (from `.symlinks/plugins/path_provider_linux/ios`)
   - permission_handler (from `.symlinks/plugins/permission_handler/ios`)
+  - sensors_analytics_flutter_plugin (from `.symlinks/plugins/sensors_analytics_flutter_plugin/ios`)
   - shared_preferences (from `.symlinks/plugins/shared_preferences/ios`)
   - shared_preferences_linux (from `.symlinks/plugins/shared_preferences_linux/ios`)
   - shared_preferences_macos (from `.symlinks/plugins/shared_preferences_macos/ios`)
@@ -94,6 +101,7 @@ SPEC REPOS:
     - Reachability
     - SDWebImage
     - SDWebImageWebPCoder
+    - SensorsAnalyticsSDK
 
 EXTERNAL SOURCES:
   barcode_scan:
@@ -120,6 +128,8 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/path_provider_linux/ios"
   permission_handler:
     :path: ".symlinks/plugins/permission_handler/ios"
+  sensors_analytics_flutter_plugin:
+    :path: ".symlinks/plugins/sensors_analytics_flutter_plugin/ios"
   shared_preferences:
     :path: ".symlinks/plugins/shared_preferences/ios"
   shared_preferences_linux:
@@ -153,6 +163,8 @@ SPEC CHECKSUMS:
   Reachability: 33e18b67625424e47b6cde6d202dce689ad7af96
   SDWebImage: 84000f962cbfa70c07f19d2234cbfcf5d779b5dc
   SDWebImageWebPCoder: d0dac55073088d24b2ac1b191a71a8f8d0adac21
+  sensors_analytics_flutter_plugin: 7a566e45a6db7a1b3008f49f92a8a0d43f5a13c3
+  SensorsAnalyticsSDK: bb0edecb8182c3397f37bb1d957923e8eba2b865
   shared_preferences: af6bfa751691cdc24be3045c43ec037377ada40d
   shared_preferences_linux: afefbfe8d921e207f01ede8b60373d9e3b566b78
   shared_preferences_macos: f3f29b71ccbb56bf40c9dd6396c9acf15e214087

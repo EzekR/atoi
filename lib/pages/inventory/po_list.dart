@@ -426,6 +426,7 @@ class _POListState extends State<POList> {
                   ],
                 ),
               ):Container(),
+              SizedBox(width: 18.0,),
               item['Status']['ID']==3&&_editable&&role==2?new RaisedButton(
                 onPressed: (){
                   Navigator.of(context).push(new MaterialPageRoute(builder: (_) {
@@ -462,6 +463,7 @@ class _POListState extends State<POList> {
                   ],
                 ),
               ):Container(),
+              item['Status']['ID']==3&&_editable&&role==2?SizedBox(width: 18.0,):Container()
             ],
           ),
         ],

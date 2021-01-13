@@ -14,6 +14,7 @@ import 'package:atoi/models/models.dart';
 import 'dart:convert';
 import 'package:atoi/widgets/search_department.dart';
 import 'package:atoi/pages/superuser/dashboard.dart';
+import 'package:atoi/permissions.dart';
 
 /// 设备列表页面类
 class EquipmentsList extends StatefulWidget{
@@ -57,12 +58,35 @@ class _EquipmentsListState extends State<EquipmentsList> {
   int offset = 0;
   int role;
   bool limited = false;
+  // permission
+  Map techPermission;
+  Map specialPermission;
 
   Future<Null> getRole() async {
     var _prefs = await prefs;
     role = _prefs.getInt('role');
     limited = _prefs.getBool('limitEngineer');
     _editable = role==1;
+  }
+
+  void getPermission() async {
+    SharedPreferences _prefs = await prefs;
+    Permission permissionInstance = new Permission();
+    permissionInstance.prefs = _prefs;
+    permissionInstance.initPermissions();
+    String _type;
+    switch (widget.equipmentType) {
+      case EquipmentType.MEDICAL:
+        _type = "Equipment";
+        break;
+      case EquipmentType.MEASURE:
+        _type = "MeasInstrum";
+        break;
+      case EquipmentType.OTHER:
+        _type = "OtherEqpt";
+    }
+    techPermission = permissionInstance.getTechPermissions('Asset', _type);
+    specialPermission = permissionInstance.getSpecialPermissions('Asset', _type);
   }
 
   List initList(Map _map, {int valueForAll}) {
@@ -649,6 +673,7 @@ class _EquipmentsListState extends State<EquipmentsList> {
 
   void initState() {
     super.initState();
+    getPermission();
     switch (widget.equipmentType) {
       case EquipmentType.MEDICAL:
         prefix = 'e';
@@ -948,7 +973,7 @@ class _EquipmentsListState extends State<EquipmentsList> {
               children: _buildEquipInfo(item),
             ),
           ),
-          new Row(
+          specialPermission==null||!specialPermission['QRCode']?Container():new Row(
             mainAxisAlignment: MainAxisAlignment.center,
             mainAxisSize: MainAxisSize.max,
             children: <Widget>[
@@ -992,7 +1017,7 @@ class _EquipmentsListState extends State<EquipmentsList> {
               new Padding(
                 padding: EdgeInsets.symmetric(horizontal: 5.0),
               ),
-              new RaisedButton(
+              techPermission==null||!techPermission['Edit']?Container():new RaisedButton(
                 onPressed: (){
                   setState(() {
                     isSearchState = false;
@@ -1035,7 +1060,7 @@ class _EquipmentsListState extends State<EquipmentsList> {
               new Padding(
                 padding: EdgeInsets.symmetric(horizontal: 5.0),
               ),
-              new RaisedButton(
+              specialPermission==null||!specialPermission['TimeLine']?Container():new RaisedButton(
                 onPressed: () async {
                   if (limited&&role!=1) {
                     return;
@@ -1131,7 +1156,7 @@ class _EquipmentsListState extends State<EquipmentsList> {
             }
           },
         )),
-        floatingActionButton: role==3?Container():FloatingActionButton(
+        floatingActionButton: techPermission==null||!techPermission['Add']?Container():FloatingActionButton(
           onPressed: () {
             Navigator.of(context).push(new MaterialPageRoute(builder: (_) {
               return new EquipmentDetail(editable: true, equipmentType: widget.equipmentType,);

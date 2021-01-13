@@ -1,10 +1,34 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:atoi/permissions.dart';
 
 /// 超管菜单页面类
-class ManagerMenu extends StatelessWidget {
+///
+class ManagerMenu extends StatefulWidget {
+  _ManagerMenuState createState() => new _ManagerMenuState();
+}
+
+class _ManagerMenuState extends State<ManagerMenu> {
+
+  Map techPermission;
+  Map specialPermission;
+
+  void getPermission() async {
+    SharedPreferences _prefs = await SharedPreferences.getInstance();
+    Permission permissionInstance = new Permission();
+    permissionInstance.prefs = _prefs;
+    permissionInstance.initPermissions();
+    techPermission = permissionInstance.getTechPermissions('Operations', 'Request');
+    specialPermission = permissionInstance.getSpecialPermissions('Operations', 'Request');
+  }
+
+  void initState() {
+    getPermission();
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
-    // TODO: implement build
 
     Column buildIconColumn(IconData icon, String title, String type) {
       Color color = Theme.of(context).accentColor;
@@ -16,6 +40,9 @@ class ManagerMenu extends StatelessWidget {
           new IconButton(
             icon: new Icon(icon),
             onPressed: () {
+              if (!techPermission['Add']) {
+                return;
+              }
               Navigator.of(context).pushNamed(type);
             },
             color: color,
@@ -112,6 +139,9 @@ class ManagerMenu extends StatelessWidget {
                       new IconButton(
                         icon: new Icon(Icons.insert_chart),
                         onPressed: () {
+                          if (!techPermission['Add']) {
+                            return;
+                          }
                           showModalBottomSheet(
                               context: context,
                               builder: (context) {

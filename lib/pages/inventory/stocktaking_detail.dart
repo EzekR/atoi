@@ -7,7 +7,6 @@ import 'package:atoi/pages/inventory/service_detail.dart';
 import 'package:atoi/pages/inventory/spare_detail.dart';
 import 'package:atoi/utils/http_request.dart';
 import 'package:flutter/material.dart';
-import 'package:scoped_model/scoped_model.dart';
 import 'package:atoi/models/models.dart';
 import 'package:flutter_cupertino_date_picker/flutter_cupertino_date_picker.dart';
 import 'package:date_format/date_format.dart';
@@ -33,7 +32,7 @@ class _StocktakingDetailState extends State<StocktakingDetail> {
   ConstantsModel cModel;
   String scheduledDate;
   TextEditingController remarks = new TextEditingController();
-  List<bool> expandList = new List(3).map((item) => true).toList();
+  List<bool> expandList = [true, true, true, true];
   List stockItems = [];
   int stockType = 0;
   String stockName = '';
@@ -178,9 +177,14 @@ class _StocktakingDetailState extends State<StocktakingDetail> {
   bool checkItemChange() {
     bool hasChanged = false;
     for(int i=0; i<stockItems.length; i++) {
-      if (!stockItems[i]['IsInventory'] || (stockType == 1 && stockItems[i]['Status']['ID'] != stockItems[i]['OriginStatus']['ID']) || (stockType == 2 && stockItems[i]['OriginAvaibleQty'] != stockItems[i]['AvaibleQty']) || (stockType ==3 && stockItems[i]['AvaibleTimes'] != stockItems[i]['OriginAvaibleTimes'])) {
-        FocusScope.of(context).requestFocus(focusCards[i]);
+      if (!stockItems[i]['IsInventory'] || (stockType == 1 &&
+          stockItems[i]['Status']['ID'] != stockItems[i]['OriginStatus']['ID'])
+          || (stockType == 2 && stockItems[i]['OriginAvaibleQty'] != stockItems[i]['AvaibleQty'])
+          || (stockType ==3 && stockItems[i]['AvaibleTimes'] != stockItems[i]['OriginAvaibleTimes'])
+      || (stockType == 1 && stockItems[i]['InvComponent']['ID'] == 0) || (stockType == 2&& stockItems[i]['InvConsumable']['ID'] == 0)
+      || (stockType ==3 && stockItems[i]['InvService']['ID'] == 0) || (stockType == 4 && stockItems[i]['InvSpare']['ID'] == 0)) {
         if (stockItems[i]['Comments'] == "") {
+          FocusScope.of(context).requestFocus(focusCards[i]);
           hasChanged = true;
         }
       }
@@ -194,10 +198,6 @@ class _StocktakingDetailState extends State<StocktakingDetail> {
   }
 
   Future<bool> checkStocktaking(int action) async {
-    bool res = checkItemChange();
-    if (res) {
-      return false;
-    }
     Map _data = {
       'action': action,
       'info': {
@@ -309,11 +309,13 @@ class _StocktakingDetailState extends State<StocktakingDetail> {
       setState(() {
         stockItems.remove(item);
       });
+      showDialog(context: context, builder: (context) => CupertinoAlertDialog(
+        title: new Text('删除成功'),
+      ));
     } else {
       showDialog(context: context, builder: (context) => CupertinoAlertDialog(
         title: new Text('删除失败'),
       ));
-      return;
     }
   }
 
@@ -377,6 +379,7 @@ class _StocktakingDetailState extends State<StocktakingDetail> {
   }
 
   void initState() {
+    super.initState();
     cModel = MainModel.of(context);
     dropObj = cModel.StockingType;
     scheduledDate = formatDate(DateTime.now(), [yyyy,'-',mm,'-',dd]);
@@ -384,7 +387,6 @@ class _StocktakingDetailState extends State<StocktakingDetail> {
       getStockDetailByID();
     }
     getRole();
-    super.initState();
   }
 
   Row buildDropdown(String title, int currentItem, List dropdownItems, Function changeDropdown, {bool required}) {
@@ -523,7 +525,7 @@ class _StocktakingDetailState extends State<StocktakingDetail> {
                                     ),
                                     CupertinoDialogAction(
                                       onPressed: () async {
-                                        Navigator.of(context).pop();
+                                        //Navigator.of(context).pop();
                                         deleteObj(stockItems[i]);
                                       },
                                       child: Text(
@@ -633,7 +635,7 @@ class _StocktakingDetailState extends State<StocktakingDetail> {
                       children: <Widget>[
                         BuildWidget.buildCardRow('系统编号', stockItems[i]['InvService']['ID']==0?'':stockItems[i]['OID']),
                         BuildWidget.buildCardRow('服务名称', stockItems[i]['Name']),
-                        BuildWidget.buildCardRow('富士II类', stockItems[i]['FujiClass2']['Name']),
+                        BuildWidget.buildCardRow('关联设备', stockItems[i]['Equipments'].map((equip) => equip['Name']).join(";")),
                         BuildWidget.buildCardRow('起止时间', '${CommonUtil.TimeForm(stockItems[i]['StartDate'], 'yyyy-mm-dd')} - ${CommonUtil.TimeForm(stockItems[i]['EndDate'], 'yyyy-mm-dd')}'),
                         BuildWidget.buildCardRow('供应商', stockItems[i]['Supplier']['Name']),
                         BuildWidget.buildCardRow('采购单号', stockItems[i]['Purchase']['ID']==0?'':stockItems[i]['Purchase']['Name']),
@@ -774,7 +776,7 @@ class _StocktakingDetailState extends State<StocktakingDetail> {
           padding: EdgeInsets.symmetric(horizontal: 12.0),
           child: new Column(
             children: <Widget>[
-              widget.stockID==null||stockStatus==1?buildDropdown('盘点对象', currentObj, dropObj, changeObj):BuildWidget.buildRow('盘点对象', stockName),
+              widget.editable&&(widget.stockID==null||stockStatus==1)?buildDropdown('盘点对象', currentObj, dropObj, changeObj):BuildWidget.buildRow('盘点对象', stockName),
               new Padding(
                 padding: EdgeInsets.symmetric(vertical: 5.0),
                 child: widget.stockID==null||stockStatus==1?new Row(
@@ -822,7 +824,7 @@ class _StocktakingDetailState extends State<StocktakingDetail> {
                     ),
                     new Expanded(
                       flex: 2,
-                      child: new IconButton(
+                      child: widget.editable?new IconButton(
                           icon: Icon(Icons.calendar_today, color: AppConstants.AppColors['btn_main'],),
                           onPressed: () async {
                             FocusScope.of(context).requestFocus(new FocusNode());
@@ -835,7 +837,7 @@ class _StocktakingDetailState extends State<StocktakingDetail> {
                                 cancel: Text('取消', style: TextStyle(color: Colors.redAccent)),
                               ),
                               minDateTime: DateTime.now().add(Duration(days: -7300)),
-                              maxDateTime: DateTime.parse('2030-01-01'),
+                              maxDateTime: DateTime.now().add(Duration(days: 365*10)),
                               initialDateTime: _time,
                               dateFormat: 'yyyy-MM-dd',
                               locale: DateTimePickerLocale.en_us,
@@ -850,12 +852,12 @@ class _StocktakingDetailState extends State<StocktakingDetail> {
                                 });
                               },
                             );
-                          }),
+                          }):Container(),
                     ),
                   ],
                 ):BuildWidget.buildRow('计划日期', scheduledDate),
               ),
-              widget.stockID==null||stockStatus==1?BuildWidget.buildInput("备注", remarks, maxLength: 255, lines: 3):BuildWidget.buildRow('备注', remarks.text)
+              widget.editable&&(widget.stockID==null||stockStatus==1)?BuildWidget.buildInput("备注", remarks, maxLength: 255, lines: 3):BuildWidget.buildRow('备注', remarks.text)
             ],
           ),
         ),
@@ -884,78 +886,71 @@ class _StocktakingDetailState extends State<StocktakingDetail> {
                       widget.editable?IconButton(
                         icon: Icon(Icons.add_circle, color: Colors.blueAccent,),
                         onPressed: () async {
+                          Map _info;
                           switch (stockType) {
                             case 1:
-                              final result = await Navigator.of(context).push(new MaterialPageRoute(builder: (_) => ComponentDetail(editable: true, isStock: true, componentList: stockItems,)));
+                              final result = await Navigator.of(context).push(new MaterialPageRoute(builder: (context) => new ComponentDetail(editable: true, isStock: true, componentList: stockItems,)));
                               if (result != null) {
-                                Map _info = jsonDecode(result);
-                                bool save = await saveStuffToStocktaking(_info);
-                                if (save) {
-                                  getStockDetailByID();
-                                  showDialog(context: context, builder: (context) => CupertinoAlertDialog(
-                                    title: new Text('添加成功'),
-                                  ));
-                                }
+                                _info = jsonDecode(result);
+                                _info['InvComponent'] = {
+                                  'ID': 0
+                                };
                               }
                               break;
                             case 2:
-                              Navigator.of(context).push(new MaterialPageRoute(builder: (_) => ConsumableDetail(editable: true, isStock: true,))).then((result) async {
+                              Navigator.of(context).push(new MaterialPageRoute(builder: (context) => new ConsumableDetail(editable: true, isStock: true,))).then((result) async {
                                 if (result != null){
-                                  Map _info = jsonDecode(result);
+                                  _info = jsonDecode(result);
                                   int ind = stockItems.indexWhere((item) => item['LotNum']==_info['LotNum'] || item['Consumable']['ID']==_info['Consumable']['ID']);
                                   if (ind > -1) {
                                     showDialog(context: context, builder: (context) => CupertinoAlertDialog(
                                       title: new Text('耗材已在库中'),
                                     ));
                                   }
-                                  bool save = await saveStuffToStocktaking(_info);
-                                  if (save) {
-                                    getStockDetailByID();
-                                    showDialog(context: context, builder: (context) => CupertinoAlertDialog(
-                                      title: new Text('添加成功'),
-                                    ));
-                                  }
+                                  _info['InvConsumable'] = {
+                                    'ID': 0
+                                  };
                                 }
                               });
                               break;
                             case 3:
-                              Navigator.of(context).push(new MaterialPageRoute(builder: (_) => ServiceDetail(editable: true, isStock: true, date: scheduledDate,))).then((result) async {
-                                if (result != null) {
-                                  Map _info = jsonDecode(result);
-                                  bool save = await saveStuffToStocktaking(_info);
-                                  if (save) {
-                                    getStockDetailByID();
-                                    showDialog(context: context, builder: (context) => CupertinoAlertDialog(
-                                      title: new Text('添加成功'),
-                                    ));
-                                  }
-                                }
-                              });
+                              final String result = await Navigator.of(context).push(new MaterialPageRoute(builder: (context) => new ServiceDetail(editable: true, isStock: true, date: scheduledDate,)));
+                              log("$result");
+                              if (result != null) {
+                                _info = jsonDecode(result);
+                                _info['InvService'] = {
+                                  'ID': 0
+                                };
+                              }
                               break;
                             case 4:
-                              Navigator.of(context).push(new MaterialPageRoute(builder: (_) => SpareDetail(editable: true, isStock: true,))).then((result) async {
+                              Navigator.of(context).push(new MaterialPageRoute(builder: (context) => new SpareDetail(editable: true, isStock: true,))).then((result) async {
                                 if (result != null) {
-                                  Map _info = jsonDecode(result);
+                                  _info = jsonDecode(result);
                                   int ind = stockItems.indexWhere((item) => item['FujiClass2']['ID']==_info['FujiClass2']['ID']||item['StartDate']==_info['StartDate']);
                                   if (ind > -1) {
                                     showDialog(context: context, builder: (context) => CupertinoAlertDialog(
                                       title: new Text('备用机已在库中'),
                                     ));
                                   }
-                                  bool save = await saveStuffToStocktaking(_info);
-                                  if (save) {
-                                    getStockDetailByID();
-                                    showDialog(context: context, builder: (context) => CupertinoAlertDialog(
-                                      title: new Text('添加成功'),
-                                    ));
-                                  }
+                                  _info['InvSpare'] = {
+                                    'ID': 0
+                                  };
                                 }
                               });
                               break;
                           }
+                          bool save = await saveStuffToStocktaking(_info);
+                          if (save) {
+                            stockItems.add(_info);
+                            getStockDetailByID();
+                            showDialog(context: context, builder: (context) => CupertinoAlertDialog(
+                              title: new Text('添加成功'),
+                            ));
+                          }
                         },
                       ):Container(),
-                      widget.editable?IconButton(
+                      widget.editable&&stockType!=3?IconButton(
                         onPressed: () {
                           scan();
                         },
@@ -983,166 +978,166 @@ class _StocktakingDetailState extends State<StocktakingDetail> {
   }
 
   Widget build(BuildContext context) {
-    return ScopedModelDescendant<MainModel>(
-      builder: (context, child, mainModel) {
-        return new Scaffold(
-            appBar: new AppBar(
-              title: Text('盘点'),
-              elevation: 0.7,
-              flexibleSpace: Container(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.centerLeft,
-                    end: Alignment.centerRight,
-                    colors: [
-                      Theme.of(context).primaryColor,
-                      Theme.of(context).accentColor
-                    ],
-                  ),
-                ),
+    return new Scaffold(
+        appBar: new AppBar(
+          title: Text('盘点'),
+          elevation: 0.7,
+          flexibleSpace: Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.centerLeft,
+                end: Alignment.centerRight,
+                colors: [
+                  Theme.of(context).primaryColor,
+                  Theme.of(context).accentColor
+                ],
               ),
-              actions: <Widget>[],
             ),
-            body: new Padding(
-              padding: EdgeInsets.symmetric(vertical: 5.0),
-              child: new Card(
-                child: new ListView(
-                  children: <Widget>[
-                    new ExpansionPanelList(
-                      animationDuration: Duration(milliseconds: 200),
-                      expansionCallback: (index, isExpanded) {
-                        setState(() {
-                          expandList[index] = !isExpanded;
-                        });
-                      },
-                      children: buildExpansion(),
-                    ),
-                    SizedBox(height: 24.0),
-                    widget.editable&&role==1?BuildWidget.buildInput('审批备注', approveComment, focusNode: focusComment):Container(),
-                    widget.editable&&role==2?Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: <Widget>[
-                        RaisedButton(
-                          onPressed: () async {
-                            if (widget.stockID == null || stockStatus < 2) {
-                              saveStocktaking(1);
-                            } else {
-                              bool res = await checkStocktaking(1);
-                              if (res) {
-                                showDialog(context: context, builder: (context) => CupertinoAlertDialog(
-                                  title: new Text('保存成功'),
-                                )).then((result) => Navigator.of(context).pop());
-                              } else {
-                                showDialog(context: context, builder: (context) => CupertinoAlertDialog(
-                                  title: new Text('保存失败'),
-                                ));
-                              }
-                            }
-                          },
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(6),
-                          ),
-                          color: Color(0xff2E94B9),
-                          child: Text('保存', style: TextStyle(color: Colors.white),),
-                        ),
-                        RaisedButton(
-                          onPressed: () async {
-                            if (widget.stockID == null||stockStatus<2) {
-                              int stockID = await saveStocktaking(1);
-                              if (stockID != 0) {
-                                bool result = await startStocktaking(stockID);
-                                if (result) {
-                                  Navigator.of(context).push(new MaterialPageRoute(builder: (_) => new StocktakingDetail(stockID: stockID, editable: true,)));
-                                }
-                              }
-                            } else {
-                              bool res = await checkStocktaking(2);
-                              if (res) {
-                                showDialog(context: context, builder: (context) => CupertinoAlertDialog(
-                                  title: new Text('提交成功'),
-                                )).then((result) => Navigator.of(context).pop());
-                              } else {
-                                showDialog(context: context, builder: (context) => CupertinoAlertDialog(
-                                  title: new Text('提交失败'),
-                                ));
-                              }
-                            }
-                          },
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(6),
-                          ),
-                          color: Color(0xff2E94B9),
-                          child: Text((widget.stockID==null||stockStatus<2)?'开始盘点':'提交', style: TextStyle(color: Colors.white)),
-                        ),
-                      ],
-                    ):Container(),
-                    widget.editable&&role==1?Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: <Widget>[
-                        RaisedButton(
-                          onPressed: () async {
-                            bool res = await checkStocktaking(1);
-                            if (res) {
-                              //if (approveComment.text.isEmpty) {
-                              //  showDialog(context: context, builder: (context) => CupertinoAlertDialog(
-                              //    title: new Text('备注不可为空'),
-                              //  ));
-                              //  return;
-                              //}
-                              bool resp = await approveStock(3);
-                              if (resp) {
-                                showDialog(context: context, builder: (context) => CupertinoAlertDialog(
-                                  title: new Text('已同步'),
-                                )).then((result) => Navigator.of(context).pop());
-                              } else {
-                                showDialog(context: context, builder: (context) => CupertinoAlertDialog(
-                                  title: new Text('同步失败'),
-                                ));
-                              }
-                            }
-                          },
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(6),
-                          ),
-                          color: Color(0xff2E94B9),
-                          child: Text('同步', style: TextStyle(color: Colors.white),),
-                        ),
-                        RaisedButton(
-                          onPressed: () async {
-                            bool res = await checkStocktaking(1);
-                            if (res) {
-                              if (approveComment.text.isEmpty) {
-                                showDialog(context: context, builder: (context) => CupertinoAlertDialog(
-                                  title: new Text('审批备注不可为空'),
-                                )).then((result) => FocusScope.of(context).requestFocus(focusComment));
-                                return;
-                              }
-                              bool resp = await approveStock(4);
-                              if (resp) {
-                                showDialog(context: context, builder: (context) => CupertinoAlertDialog(
-                                  title: new Text('已退回'),
-                                )).then((result) => Navigator.of(context).pop());
-                              } else {
-                                showDialog(context: context, builder: (context) => CupertinoAlertDialog(
-                                  title: new Text('退回失败'),
-                                ));
-                              }
-                            }
-                          },
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(6),
-                          ),
-                          color: Color(0xff2E94B9),
-                          child: Text('退回', style: TextStyle(color: Colors.white),),
-                        ),
-                      ],
-                    ):Container()
-                  ],
+          ),
+          actions: <Widget>[],
+        ),
+        body: new Padding(
+          padding: EdgeInsets.symmetric(vertical: 5.0),
+          child: new Card(
+            child: new ListView(
+              children: <Widget>[
+                new ExpansionPanelList(
+                  animationDuration: Duration(milliseconds: 200),
+                  expansionCallback: (index, isExpanded) {
+                    setState(() {
+                      expandList[index] = !isExpanded;
+                    });
+                  },
+                  children: buildExpansion(),
                 ),
-              ),
-            )
-        );
-      },
+                SizedBox(height: 24.0),
+                widget.editable&&role==1?BuildWidget.buildInput('审批备注', approveComment, focusNode: focusComment):Container(),
+                widget.editable&&role==2?Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: <Widget>[
+                    RaisedButton(
+                      onPressed: () async {
+                        if (widget.stockID == null || stockStatus < 2) {
+                          saveStocktaking(1);
+                        } else {
+                          bool res = await checkStocktaking(1);
+                          if (res) {
+                            showDialog(context: context, builder: (context) => CupertinoAlertDialog(
+                              title: new Text('保存成功'),
+                            )).then((result) => Navigator.of(context).pop());
+                          } else {
+                            showDialog(context: context, builder: (context) => CupertinoAlertDialog(
+                              title: new Text('保存失败'),
+                            ));
+                          }
+                        }
+                      },
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      color: Color(0xff2E94B9),
+                      child: Text('保存', style: TextStyle(color: Colors.white),),
+                    ),
+                    RaisedButton(
+                      onPressed: () async {
+                        if (widget.stockID == null||stockStatus<2) {
+                          int stockID = await saveStocktaking(1);
+                          if (stockID != 0) {
+                            bool result = await startStocktaking(stockID);
+                            if (result) {
+                              Navigator.of(context).push(new MaterialPageRoute(builder: (context) => new StocktakingDetail(stockID: stockID, editable: true,)));
+                            }
+                          }
+                        } else {
+                          bool changed = await checkItemChange();
+                          if (changed) {
+                            return;
+                          }
+                          bool res = await checkStocktaking(2);
+                          if (res) {
+                            showDialog(context: context, builder: (context) => CupertinoAlertDialog(
+                              title: new Text('提交成功'),
+                            )).then((result) => Navigator.of(context).pop());
+                          } else {
+                            showDialog(context: context, builder: (context) => CupertinoAlertDialog(
+                              title: new Text('提交失败'),
+                            ));
+                          }
+                        }
+                      },
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      color: Color(0xff2E94B9),
+                      child: Text((widget.stockID==null||stockStatus<2)?'开始盘点':'提交', style: TextStyle(color: Colors.white)),
+                    ),
+                  ],
+                ):Container(),
+                widget.editable&&role==1?Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: <Widget>[
+                    RaisedButton(
+                      onPressed: () async {
+                        bool res = await checkStocktaking(1);
+                        if (res) {
+                          //if (approveComment.text.isEmpty) {
+                          //  showDialog(context: context, builder: (context) => CupertinoAlertDialog(
+                          //    title: new Text('备注不可为空'),
+                          //  ));
+                          //  return;
+                          //}
+                          bool resp = await approveStock(3);
+                          if (resp) {
+                            showDialog(context: context, builder: (context) => CupertinoAlertDialog(
+                              title: new Text('已同步'),
+                            )).then((result) => Navigator.of(context).pop());
+                          } else {
+                            showDialog(context: context, builder: (context) => CupertinoAlertDialog(
+                              title: new Text('同步失败'),
+                            ));
+                          }
+                        }
+                      },
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      color: Color(0xff2E94B9),
+                      child: Text('同步', style: TextStyle(color: Colors.white),),
+                    ),
+                    RaisedButton(
+                      onPressed: () async {
+                        bool res = await checkStocktaking(1);
+                        if (res) {
+                          if (approveComment.text.isEmpty) {
+                            showDialog(context: context, builder: (context) => CupertinoAlertDialog(
+                              title: new Text('审批备注不可为空'),
+                            )).then((result) => FocusScope.of(context).requestFocus(focusComment));
+                            return;
+                          }
+                          bool resp = await approveStock(4);
+                          if (resp) {
+                            showDialog(context: context, builder: (context) => CupertinoAlertDialog(
+                              title: new Text('已退回'),
+                            )).then((result) => Navigator.of(context).pop());
+                          } else {
+                            showDialog(context: context, builder: (context) => CupertinoAlertDialog(
+                              title: new Text('退回失败'),
+                            ));
+                          }
+                        }
+                      },
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      color: Color(0xff2E94B9),
+                      child: Text('退回', style: TextStyle(color: Colors.white),),
+                    ),
+                  ],
+                ):Container()
+              ],
+            ),
+          ),
+        )
     );
   }
 }

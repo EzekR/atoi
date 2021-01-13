@@ -123,6 +123,7 @@ class _ComponentListState extends State<ComponentList> {
     }
   }
 
+  // todo: 增加filter
   void showSheet(BuildContext context) {
     showModalBottomSheet(context: context, builder: (context) {
       return StatefulBuilder(
@@ -191,6 +192,18 @@ class _ComponentListState extends State<ComponentList> {
                                   DropdownMenuItem(
                                     value: 'c.Description',
                                     child: Text('描述'),
+                                  ),
+                                  DropdownMenuItem(
+                                    value: 'ic.ID',
+                                    child: Text('系统编号'),
+                                  ),
+                                  DropdownMenuItem(
+                                    value: 'ic.PurchaseID',
+                                    child: Text('采购单号'),
+                                  ),
+                                  DropdownMenuItem(
+                                    value: 'ic.SerialCode',
+                                    child: Text('序列号'),
                                   ),
                                 ],
                                 onChanged: (val) {

@@ -63,7 +63,7 @@ class _EquipmentContractState extends State<EquipmentContract> {
 
   MainModel mainModel = MainModel();
 
-  List _equipments;
+  List _equipments = [];
 
   List<dynamic> _imageList = [];
 
@@ -294,7 +294,7 @@ class _EquipmentContractState extends State<EquipmentContract> {
         cancel: Text('取消', style: TextStyle(color: Colors.redAccent)),
       ),
       minDateTime: DateTime.parse('2000-01-01'),
-      maxDateTime: DateTime.parse('2030-01-01'),
+      maxDateTime: DateTime.now().add(Duration(days: 365*10)),
       initialDateTime: _time,
       dateFormat: 'yyyy-MM-dd',
       locale: DateTimePickerLocale.en_us,
@@ -539,29 +539,32 @@ Future getImage() async {
     List<Widget> _list = [];
     _list.addAll(
       targetStaff.map<Widget>((item) => Card(
-        child: Column(
-          children: <Widget>[
-            BuildWidget.buildCardRow('简称', item['Name']),
-            BuildWidget.buildCardRow('描述', item['Description']),
-            BuildWidget.buildCardRow('设备系统编号', item['Equipment']['OID']),
-            BuildWidget.buildCardRow('设备资产编号', item['Equipment']['AssetCode']),
-            BuildWidget.buildCardRow('关联设备名称', item['Equipment']['Name']),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: <Widget>[
-                IconButton(
-                  icon: Icon(Icons.delete_forever),
-                  color: Colors.red,
-                  onPressed: () {
-                    setState(() {
-                      targetStaff.remove(item);
-                    });
-                  },
-                )
-              ],
-            )
-          ],
-        ),
+        child: Padding(
+          padding: EdgeInsets.all(8.0),
+          child: Column(
+            children: <Widget>[
+              BuildWidget.buildCardRow('简称', item['Name']),
+              BuildWidget.buildCardRow('描述', item['Description']),
+              BuildWidget.buildCardRow('设备系统编号', item['Equipment']['OID']),
+              BuildWidget.buildCardRow('设备资产编号', item['Equipment']['AssetCode']),
+              BuildWidget.buildCardRow('关联设备名称', item['Equipment']['Name']),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: <Widget>[
+                  IconButton(
+                    icon: Icon(Icons.delete_forever),
+                    color: Colors.red,
+                    onPressed: () {
+                      setState(() {
+                        targetStaff.remove(item);
+                      });
+                    },
+                  )
+                ],
+              )
+            ],
+          ),
+        )
       )).toList()
     );
     _list.add(
@@ -581,11 +584,14 @@ Future getImage() async {
                             'value': item['ID'],
                             'text': item['Name']
                           }).toList(), (val) => setState(() {currentEquip=val;}), required: true),
-                          BuildWidget.buildCardRow('设备系统编号', _equipments.firstWhere((item) => item['ID']==currentEquip)['OID']),
-                          BuildWidget.buildCardRow('设备资产编号', _equipments.firstWhere((item) => item['ID']==currentEquip)['AssetCode']),
+                          BuildWidget.buildCardRow('设备系统编号', _equipments.isNotEmpty?_equipments.firstWhere((item) => item['ID']==currentEquip, orElse: null)['OID']:""),
+                          BuildWidget.buildCardRow('设备资产编号', _equipments.isNotEmpty?_equipments?.firstWhere((item) => item['ID']==currentEquip, orElse: null)['AssetCode']:""),
                           BuildWidget.buildCardRowWithSearch(listType==1?'零件':"耗材", targetStaff.map((item) => item['Name']).join("; "), required: true, toSearch: () async {
+                            if (_equipments.isEmpty) {
+                              return;
+                            }
                             final comps = await Navigator.of(context).push(new MaterialPageRoute(builder: (_) => SearchPage(multiType: listType==1?MultiSearchType.COMPONENT:MultiSearchType.CONSUMABLE, equipments: targetStaff, onlyType: EquipmentType.MEDICAL,
-                              fujiClass2: _equipments.firstWhere((item) => item['ID']==currentEquip)['FujiClass2']['ID'],)));
+                              fujiClass2: _equipments?.firstWhere((item) => item['ID']==currentEquip)['FujiClass2']['ID'],)));
                             if (comps != null) {
                               comps.forEach((comp) {
                                 comp['Equipment'] = _equipments.firstWhere((item) => item['ID'] == currentEquip);
@@ -647,6 +653,7 @@ Future getImage() async {
                       if (selected != null) {
                         setState(() {
                           _equipments = selected;
+                          currentEquip = _equipments[0]['ID'];
                         });
                       }
                     });

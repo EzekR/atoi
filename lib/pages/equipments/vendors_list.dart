@@ -5,6 +5,7 @@ import 'package:atoi/widgets/build_widget.dart';
 import 'package:atoi/pages/equipments/vendor_detail.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:atoi/models/models.dart';
+import 'package:atoi/permissions.dart';
 
 /// 供应商列表类
 class VendorsList extends StatefulWidget{
@@ -31,11 +32,22 @@ class _VendorsListState extends State<VendorsList> {
   int offset = 0;
   bool _noMore = false;
   int role;
+  Map techPermission;
+  Map specialPermission;
 
   Future<Null> getRole() async {
     var _prefs = await prefs;
     role = _prefs.getInt('role');
     _editable = role==1?true:false;
+  }
+
+  void getPermission() async {
+    SharedPreferences _prefs = await prefs;
+    Permission permissionInstance = new Permission();
+    permissionInstance.prefs = _prefs;
+    permissionInstance.initPermissions();
+    techPermission = permissionInstance.getTechPermissions('Asset', 'Supplier');
+    specialPermission = permissionInstance.getSpecialPermissions('Asset', 'Supplier');
   }
 
   void setFilter() {
@@ -347,6 +359,7 @@ class _VendorsListState extends State<VendorsList> {
   }
 
   void initState() {
+    getPermission();
     super.initState();
     cModel = MainModel.of(context);
     initFilter();
@@ -383,10 +396,15 @@ class _VendorsListState extends State<VendorsList> {
         mainAxisSize: MainAxisSize.max,
         children: <Widget>[
           ListTile(
-            leading: Icon(
-              Icons.store,
+            leading: IconButton(
+              icon: Icon(Icons.store,
               color: Color(0xff14BD98),
-              size: 36.0,
+              size: 36.0,),
+              onPressed: () {
+                Navigator.of(context).push(new MaterialPageRoute(builder: (_) {
+                  return new VendorDetail(vendor: item, editable: false,);
+                }));
+              },
             ),
             title: Text(
               "供应商名称：${item['Name']}",
@@ -420,7 +438,7 @@ class _VendorsListState extends State<VendorsList> {
             mainAxisAlignment: MainAxisAlignment.end,
             mainAxisSize: MainAxisSize.max,
             children: <Widget>[
-              new RaisedButton(
+              techPermission==null||!techPermission['Edit']?Container():new RaisedButton(
                 onPressed: (){
                   Navigator.of(context).push(new MaterialPageRoute(builder: (_) {
                     return new VendorDetail(vendor: item, editable: _editable,);
@@ -529,7 +547,7 @@ class _VendorsListState extends State<VendorsList> {
           }
         },
       )),
-      floatingActionButton: role==3?Container():FloatingActionButton(
+      floatingActionButton: techPermission==null||!techPermission['Add']?Container():FloatingActionButton(
         onPressed: () {
           Navigator.of(context).push(new MaterialPageRoute(builder: (_) {
             return new VendorDetail(editable: true,);

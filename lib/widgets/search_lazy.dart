@@ -7,7 +7,7 @@ import 'dart:convert';
 
 class SearchLazy extends StatefulWidget {
 
-  SearchLazy({Key key, this.searchType, this.fujiClass2, this.equipmentID, this.onlyType, this.componentStatus}):super(key: key);
+  SearchLazy({Key key, this.searchType, this.fujiClass2, this.equipmentID, this.onlyType, this.componentStatus,}):super(key: key);
 
   final SearchType searchType;
   final EquipmentType onlyType;

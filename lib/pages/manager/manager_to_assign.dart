@@ -13,6 +13,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter_cupertino_date_picker/flutter_cupertino_date_picker.dart';
 import 'package:date_format/date_format.dart';
 import 'package:atoi/pages/equipments/equipments_list.dart';
+import 'package:atoi/permissions.dart';
 
 /// 超管待派工列表页面类
 class ManagerToAssign extends StatefulWidget {
@@ -24,24 +25,36 @@ class ManagerToAssign extends StatefulWidget {
 class _ManagerToAssignState extends State<ManagerToAssign> {
 
   List<dynamic> _tasks = [];
-  Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
+  Future<SharedPreferences> prefs = SharedPreferences.getInstance();
 
   bool _loading = false;
   bool _noMore = false;
   int _role = 1;
+  Map techPermission;
+  Map specialPermission;
 
   ScrollController _scrollController = ScrollController();
 
   Future<Null> getRole() async {
-    var prefs = await _prefs;
-    var _roleId = prefs.getInt('role');
+    var _prefs = await prefs;
+    var _roleId = _prefs.getInt('role');
     setState(() {
       _role = _roleId;
     });
   }
 
+  void getPermission() async {
+    SharedPreferences _prefs = await prefs;
+    Permission permissionInstance = new Permission();
+    permissionInstance.prefs = _prefs;
+    permissionInstance.initPermissions();
+    techPermission = permissionInstance.getTechPermissions('Operations', 'Request');
+    specialPermission = permissionInstance.getSpecialPermissions('Operations', 'Request');
+  }
+
   void initState() {
     //getData();
+    getPermission();
     refresh();
     super.initState();
     getRole();
@@ -67,8 +80,8 @@ class _ManagerToAssignState extends State<ManagerToAssign> {
   }
 
   Future<Null> getData() async {
-    var prefs = await _prefs;
-    var userID = await prefs.getInt('userID');
+    var _prefs = await prefs;
+    var userID = await _prefs.getInt('userID');
     Map<String, dynamic> params = {
       'userID': userID,
       'statusID': 1,
@@ -89,7 +102,7 @@ class _ManagerToAssignState extends State<ManagerToAssign> {
       params: params
     );
     print(_data['Data']);
-    prefs.setString('badgeA', _data['Data'].length.toString());
+    _prefs.setString('badgeA', _data['Data'].length.toString());
     setState(() {
       _tasks = _data['Data'];
       _loading = false;
@@ -97,8 +110,8 @@ class _ManagerToAssignState extends State<ManagerToAssign> {
   }
 
   Future _cancelRequest(int requestId) async {
-    var prefs = await _prefs;
-    var userId = prefs.getInt('userID');
+    var _prefs = await prefs;
+    var userId = _prefs.getInt('userID');
     Map<String, dynamic> _data = {
       'userID': userId,
       'requestID': requestId
@@ -219,7 +232,7 @@ class _ManagerToAssignState extends State<ManagerToAssign> {
                     mainAxisAlignment: MainAxisAlignment.end,
                     mainAxisSize: MainAxisSize.max,
                     children: <Widget>[
-                      new RaisedButton(
+                      specialPermission==null||!specialPermission['RequestDispatch']?Container():new RaisedButton(
                         onPressed: (){
                           //Navigator.of(context).pushNamed(ManagerAssignPage.tag);
                           Navigator.of(context).push(new MaterialPageRoute(builder: (_) {
@@ -248,7 +261,7 @@ class _ManagerToAssignState extends State<ManagerToAssign> {
                       new Padding(
                         padding: EdgeInsets.symmetric(horizontal: 5.0),
                       ),
-                      new RaisedButton(
+                      specialPermission==null||!specialPermission['RequestSelective']?Container():new RaisedButton(
                         onPressed: (){
                           var _date = DateTime.tryParse(task['SelectiveDate'].toString())??new DateTime.now();
                           DatePicker.showDatePicker(
@@ -259,7 +272,7 @@ class _ManagerToAssignState extends State<ManagerToAssign> {
                               cancel: Text('取消', style: TextStyle(color: Colors.redAccent)),
                             ),
                             minDateTime: DateTime.now(),
-                            maxDateTime: DateTime.parse('2030-01-01'),
+                            maxDateTime: DateTime.now().add(Duration(days: 365*10)),
                             initialDateTime: _date,
                             dateFormat: 'yyyy-MM-dd',
                             locale: DateTimePickerLocale.en_us,
@@ -329,7 +342,7 @@ class _ManagerToAssignState extends State<ManagerToAssign> {
       builder: (context, child, model) {
         return new RefreshIndicator(
             child:
-            model.requests.length == 0?ListView(padding: const EdgeInsets.symmetric(vertical: 150.0), children: <Widget>[new Center(child: _loading?SpinKitThreeBounce(color: Colors.blue):new Text('没有待派工请求'),)],):
+            (model.requests.length == 0?ListView(padding: const EdgeInsets.symmetric(vertical: 150.0), children: <Widget>[new Center(child: _loading?SpinKitThreeBounce(color: Colors.blue):new Text('没有待派工请求'),)],):
             ListView.builder(
                 padding: const EdgeInsets.all(2.0),
                 itemCount: model.requests.length>9?model.requests.length+1:model.requests.length,
@@ -346,7 +359,7 @@ class _ManagerToAssignState extends State<ManagerToAssign> {
                     );
                   }
                 }
-            ),
+            )),
             onRefresh: model.getRequests
         );
       }

@@ -40,6 +40,7 @@ class _PODetailState extends State<PODetail> {
   ConstantsModel cModel;
   ScrollController controller = new ScrollController();
   FocusNode focusApprove = new FocusNode();
+  String pageTitle = "新增采购单";
 
   List _accs = [];
   List _consumable = [];
@@ -77,6 +78,20 @@ class _PODetailState extends State<PODetail> {
       getPurchaseOrder();
     }
     getName();
+    switch (widget.operation) {
+      case PurchaseOrderOperation.APPROVE:
+        pageTitle = "审核采购单";
+        break;
+      case PurchaseOrderOperation.EDIT:
+        pageTitle = "编辑采购单";
+        break;
+      case PurchaseOrderOperation.INBOUND:
+        pageTitle = "采购单入库";
+        break;
+    }
+    if (!widget.editable&&widget.operation==null) {
+      pageTitle = "查看采购单";
+    }
   }
 
   Future<Null> getPurchaseOrder() async {
@@ -414,10 +429,9 @@ class _PODetailState extends State<PODetail> {
               !fullItem['Inbounded']?RaisedButton(
                 onPressed: () {
                   List _service = [
+                    // todo : 改成关联设备
                     {
-                      'FujiClass2': {
-                        'ID': fullItem['FujiClass2']['ID']
-                      },
+                      'Equipments': fullItem['Equipments'],
                       'Name': fullItem['Name'],
                       'TotalTimes': fullItem['TotalTimes'],
                       'Price': fullItem['Price'],
@@ -477,6 +491,7 @@ class _PODetailState extends State<PODetail> {
               RaisedButton(
                 onPressed: () {
                   print(fullItem);
+                  // todo: 富士二类改成关联设备
                   Navigator.of(context).push(new MaterialPageRoute(builder: (context) => POAttachment(po: fullItem, editable: true, attachType: pageType,))).then((result) {
                     if (result !=null) {
                       setState(() {
@@ -517,7 +532,7 @@ class _PODetailState extends State<PODetail> {
                             });
                             _services[key] = {
                               '服务名称': _data['Name'],
-                              '关联富士II类': _data['FujiClass2']['Name'],
+                              '关联设备': _data['Equipments'].map((equip) => equip['Name']).join(";"),
                               '金额': CommonUtil.CurrencyForm(double.tryParse(_data['Price']), times: 1, digits: 0),
                               '服务开始时间': _data['StartDate'].toString().split("T")[0],
                               '服务结束时间': _data['EndDate'].toString().split("T")[0],
@@ -665,14 +680,30 @@ class _PODetailState extends State<PODetail> {
     return _list;
   }
 
-  bool checkInboundQuantity() {
+  bool checkInboundComponent() {
     bool allInbound = true;
     _componentsList.forEach((_comp) {
       if (_comp['InboundQty'] != _comp['Qty']) {
         allInbound = false;
       }
     });
-    _consumable.forEach((_con) {
+    return allInbound;
+  }
+
+  bool checkInboundConsumable() {
+    bool allInbound = true;
+    _consumableList.forEach((_con) {
+      if (_con['InboundQty'] != _con['Qty']) {
+        allInbound = false;
+      }
+    });
+    return allInbound;
+  }
+
+  // todo: 服务未完全入库判断
+  bool checkInboundService() {
+    bool allInbound = true;
+    _servicesList.forEach((_con) {
       if (_con['InboundQty'] != _con['Qty']) {
         allInbound = false;
       }
@@ -685,7 +716,8 @@ class _PODetailState extends State<PODetail> {
       builder: (context, child, mainModel) {
         return new Scaffold(
             appBar: new AppBar(
-              title: widget.editable?Text(widget.purchaseOrder==null?'新增采购单':'修改采购单'):Text('查看采购单'),
+              // todo : 判断title
+              title: Text(pageTitle),
               elevation: 0.7,
               flexibleSpace: Container(
                 decoration: BoxDecoration(
@@ -798,7 +830,7 @@ class _PODetailState extends State<PODetail> {
                                                   cancel: Text('取消', style: TextStyle(color: Colors.redAccent)),
                                                 ),
                                                 minDateTime: DateTime.now().add(Duration(days: -7300)),
-                                                maxDateTime: DateTime.parse('2030-01-01'),
+                                                maxDateTime: DateTime.now().add(Duration(days: 365*10)),
                                                 initialDateTime: _time,
                                                 dateFormat: 'yyyy-MM-dd',
                                                 locale: DateTimePickerLocale.en_us,
@@ -878,7 +910,7 @@ class _PODetailState extends State<PODetail> {
                                                   cancel: Text('取消', style: TextStyle(color: Colors.redAccent)),
                                                 ),
                                                 minDateTime: DateTime.now().add(Duration(days: -7300)),
-                                                maxDateTime: DateTime.parse('2030-01-01'),
+                                                maxDateTime: DateTime.now().add(Duration(days: 365*10)),
                                                 initialDateTime: _time,
                                                 dateFormat: 'yyyy-MM-dd',
                                                 locale: DateTimePickerLocale.en_us,
@@ -1060,9 +1092,9 @@ class _PODetailState extends State<PODetail> {
                     SizedBox(height: 24.0),
                     widget.operation==PurchaseOrderOperation.APPROVE?BuildWidget.buildInput('审批备注', approveComments, focusNode: focusApprove):Container(),
                     new Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
                       mainAxisSize: MainAxisSize.max,
-                      crossAxisAlignment: CrossAxisAlignment.end,
+                      crossAxisAlignment: CrossAxisAlignment.center,
                       children: widget.operation==PurchaseOrderOperation.APPROVE?[
                         new RaisedButton(
                           onPressed: () {
@@ -1101,6 +1133,7 @@ class _PODetailState extends State<PODetail> {
                           Text('终止', style: TextStyle(color: Colors.white)),
                         ),
                       ]:[
+                        Container(),
                         widget.editable?new RaisedButton(
                           onPressed: () {
                             FocusScope.of(context).requestFocus(new FocusNode());
@@ -1114,8 +1147,9 @@ class _PODetailState extends State<PODetail> {
                           child:
                           Text('保存', style: TextStyle(color: Colors.white)),
                         ):new Container(),
-                        widget.operation==PurchaseOrderOperation.EDIT?new RaisedButton(
+                        widget.editable?new RaisedButton(
                           onPressed: () {
+                            FocusScope.of(context).requestFocus(new FocusNode());
                             savePurchaseOrder(statusId: 2);
                           },
                           shape: RoundedRectangleBorder(
@@ -1128,9 +1162,21 @@ class _PODetailState extends State<PODetail> {
                         ):Container(),
                         widget.operation==PurchaseOrderOperation.INBOUND?new RaisedButton(
                           onPressed: () {
-                            if (!checkInboundQuantity()) {
+                            if (!checkInboundComponent()) {
                               showDialog(context: context, builder: (context) => CupertinoAlertDialog(
-                                title: new Text('零件或耗材未完全入库，请联系管理员'),
+                                title: new Text('零件未完全入库，请联系管理员'),
+                              ));
+                              return;
+                            }
+                            if (!checkInboundConsumable()) {
+                              showDialog(context: context, builder: (context) => CupertinoAlertDialog(
+                                title: new Text('耗材未完全入库，请联系管理员'),
+                              ));
+                              return;
+                            }
+                            if (!checkInboundService()) {
+                              showDialog(context: context, builder: (context) => CupertinoAlertDialog(
+                                title: new Text('服务未完全入库，请联系管理员'),
                               ));
                               return;
                             }
@@ -1144,18 +1190,6 @@ class _PODetailState extends State<PODetail> {
                           child:
                           Text('完成', style: TextStyle(color: Colors.white)),
                         ):Container(),
-                        new RaisedButton(
-                          onPressed: () {
-                            Navigator.of(context).pop();
-                          },
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(6),
-                          ),
-                          padding: EdgeInsets.all(12.0),
-                          color: new Color(0xffD25565),
-                          child:
-                          Text("返回", style: TextStyle(color: Colors.white)),
-                        )
                       ],
                     )
                   ],

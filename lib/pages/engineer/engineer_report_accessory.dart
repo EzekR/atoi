@@ -323,7 +323,10 @@ class _EngineerReportAccessoryState extends State<EngineerReportAccessory> {
   }
 
   void saveAccessory() async {
-    bool used = await codeUsed();
+    bool used = false;
+    if (oldComponent.isEmpty) {
+      used = await codeUsed();
+    }
     if (used) {
       showDialog(context: context,
           builder: (context) => CupertinoAlertDialog(
@@ -405,7 +408,7 @@ class _EngineerReportAccessoryState extends State<EngineerReportAccessory> {
       ).then((result) => FocusScope.of(context).requestFocus(_focusAcc[1]));
       return;
     }
-    if (consumableQuantity.text.isEmpty) {
+    if (consumableQuantity.text.isEmpty || consumableQuantity.text == '0') {
       showDialog(context: context,
           builder: (context) => CupertinoAlertDialog(
             title: new Text('数量不可为空'),
@@ -550,7 +553,7 @@ class _EngineerReportAccessoryState extends State<EngineerReportAccessory> {
   }
 
   Future<Map> searchComponent(int status) async {
-    String result = await Navigator.of(context).push(new MaterialPageRoute(builder: (_) => SearchLazy(searchType: SearchType.COMPONENT, equipmentID: widget.equipmentID,)));
+    String result = await Navigator.of(context).push(new MaterialPageRoute(builder: (_) => SearchLazy(searchType: SearchType.COMPONENT, equipmentID: widget.equipmentID, componentStatus: status,)));
     Map data = jsonDecode(result);
     return data;
   }
@@ -708,7 +711,7 @@ class _EngineerReportAccessoryState extends State<EngineerReportAccessory> {
         _list.addAll([
           BuildWidget.buildDropdownNew('耗材简称', consumable, consumables, (val) => setState(() {consumable=val; getBatch();}), required: true),
           BuildWidget.buildDropdownNew('批次号', batch, batches, (val)=>setState((){batch = val;}), required: true),
-          BuildWidget.buildInput('数量', consumableQuantity, lines: 1, maxLength: 13, required: true, focusNode: _focusAcc[9])
+          BuildWidget.buildInput('数量', consumableQuantity, lines: 1, maxLength: 13, required: true, focusNode: _focusAcc[9], inputType: TextInputType.numberWithOptions())
         ]);
         break;
       case AccType.SERVICE:

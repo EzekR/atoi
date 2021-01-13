@@ -35,6 +35,7 @@ class _SpareListState extends State<SpareList> {
   int fujiClass2 = 0;
   int useStatusId = 0;
   List useStatusList = [];
+  List fujiClass2List = [];
 
   Future<Null> getRole() async {
     var _prefs = await prefs;
@@ -89,12 +90,30 @@ class _SpareListState extends State<SpareList> {
         'text': item['Name']
       };
     }).toList());
+    getFujiClass2();
     setState(() {
       field = 'sp.ID';
       _keywords.clear();
       _statusList = _list;
       useStatusList = _useList;
     });
+  }
+
+  Future<Null> getFujiClass2() async {
+    Map resp = await HttpRequest.request(
+      '/FujiClass2/GetFujiClass2',
+      method: HttpRequest.GET
+    );
+    if (resp['ResultCode'] == '00') {
+      fujiClass2List.add({
+        'value': 0,
+        'text': '全部'
+      });
+      fujiClass2List.addAll(resp['Data'].map((item) => {
+        'value': item['ID'],
+        'text': item['Name']
+      }).toList());
+    }
   }
 
   Future<Null> getSpares({String filterText}) async {
@@ -188,6 +207,18 @@ class _SpareListState extends State<SpareList> {
                                     value: 'sp.SerialCode',
                                     child: Text('序列号'),
                                   ),
+                                  DropdownMenuItem(
+                                    value: 'sp.Name',
+                                    child: Text('设备名称'),
+                                  ),
+                                  DropdownMenuItem(
+                                    value: 'sp.Model',
+                                    child: Text('型号'),
+                                  ),
+                                  DropdownMenuItem(
+                                    value: 'sp.Manufacturer',
+                                    child: Text('厂家'),
+                                  ),
                                 ],
                                 onChanged: (val) {
                                   FocusScope.of(context).requestFocus(new FocusNode());
@@ -205,7 +236,53 @@ class _SpareListState extends State<SpareList> {
                     Row(
                       children: <Widget>[
                         SizedBox(width: 16.0,),
-                        Text('状态', style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.w600),)
+                        Text('富士II类', style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.w600),)
+                      ],
+                    ),
+                    SizedBox(height: 6.0,),
+                    Row(
+                      children: <Widget>[
+                        SizedBox(width: 16.0,),
+                        Container(
+                            width: 230.0,
+                            height: 40.0,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(5.0),
+                              color: Color(0xfff2f2f2),
+                            ),
+                            child: Row(
+                              children: <Widget>[
+                                SizedBox(width: 6.0,),
+                                DropdownButton(
+                                  value: fujiClass2,
+                                  underline: Container(),
+                                  items: fujiClass2List.map<DropdownMenuItem>((item) {
+                                    return DropdownMenuItem(
+                                      value: item['value'],
+                                      child: Container(
+                                        width: 200,
+                                        child: Text(item['text']),
+                                      ),
+                                    );
+                                  }).toList(),
+                                  onChanged: (val) {
+                                    print(val);
+                                    FocusScope.of(context).requestFocus(new FocusNode());
+                                    setState(() {
+                                      fujiClass2 = val;
+                                    });
+                                  },
+                                )
+                              ],
+                            )
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 18.0,),
+                    Row(
+                      children: <Widget>[
+                        SizedBox(width: 16.0,),
+                        Text('使用状态', style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.w600),)
                       ],
                     ),
                     SizedBox(height: 6.0,),
@@ -251,7 +328,7 @@ class _SpareListState extends State<SpareList> {
                     Row(
                       children: <Widget>[
                         SizedBox(width: 16.0,),
-                        Text('使用状态', style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.w600),)
+                        Text('状态', style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.w600),)
                       ],
                     ),
                     SizedBox(height: 6.0,),

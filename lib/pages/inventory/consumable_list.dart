@@ -192,6 +192,18 @@ class _ConsumableListState extends State<ConsumableList> {
                                     value: 'c.Description',
                                     child: Text('描述'),
                                   ),
+                                  DropdownMenuItem(
+                                    value: 'ic.ID',
+                                    child: Text('系统编号'),
+                                  ),
+                                  DropdownMenuItem(
+                                    value: 'ic.PurchaseID',
+                                    child: Text('采购单号'),
+                                  ),
+                                  DropdownMenuItem(
+                                    value: 'ic.LotNum',
+                                    child: Text('批次号'),
+                                  ),
                                 ],
                                 onChanged: (val) {
                                   FocusScope.of(context).requestFocus(new FocusNode());

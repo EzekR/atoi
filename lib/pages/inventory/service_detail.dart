@@ -37,8 +37,6 @@ class _ServiceDetailState extends State<ServiceDetail> {
   String endDate = 'YYYY-MM-DD';
   String purchaseDate = 'YYYY-MM-DD';
   int _fujiClass2 = 0;
-  String _fujiClass2Name;
-  List _fujiList = [];
   String purchaseNo = "";
   ScrollController scrollController = new ScrollController();
 
@@ -46,30 +44,30 @@ class _ServiceDetailState extends State<ServiceDetail> {
 
   TextEditingController serviceName = new TextEditingController(), totalTimes = new TextEditingController(), availableTimes = new TextEditingController(), price = new TextEditingController(), comments = new TextEditingController();
 
+  @override
   void initState() {
     super.initState();
     cModel = MainModel.of(context);
-    initFuji();
     getService();
   }
 
-  void initFuji() {
-    cModel.getConstants();
-    List _list = [];
-    _list.add({
-      'value': 0,
-      'text': ''
-    });
-    _list.addAll(cModel.FujiClass2.map((item) {
-      return {
-        'value': item['ID'],
-        'text': item['Name']
-      };
-    }).toList());
-    setState(() {
-      _fujiList = _list;
-    });
-  }
+  //void initFuji() {
+  //  cModel.getConstants();
+  //  List _list = [];
+  //  _list.add({
+  //    'value': 0,
+  //    'text': ''
+  //  });
+  //  _list.addAll(cModel.FujiClass2.map((item) {
+  //    return {
+  //      'value': item['ID'],
+  //      'text': item['Name']
+  //    };
+  //  }).toList());
+  //  setState(() {
+  //    _fujiList = _list;
+  //  });
+  //}
 
   void changeFuji(value) {
     FocusScope.of(context).requestFocus(new FocusNode());
@@ -95,7 +93,7 @@ class _ServiceDetailState extends State<ServiceDetail> {
         endDate = _data['EndDate'].toString().split('T')[0];
         purchaseDate = _data['PurchaseDate'].toString().split('T')[0];
         _fujiClass2 = _data['FujiClass2']['ID'];
-        _fujiClass2Name = _data['FujiClass2']['Name'];
+        //_fujiClass2Name = _data['FujiClass2']['Name'];
         purchaseNo = _data['Purchase']['ID']==0?"":_data['Purchase']['Name'];
         equips = _data['Equipments'];
       });
@@ -116,6 +114,12 @@ class _ServiceDetailState extends State<ServiceDetail> {
     //  )).then((result) => scrollController.jumpTo(0.0));
     //  return;
     //}
+    if (equips.isEmpty) {
+      showDialog(context: context, builder: (context) => CupertinoAlertDialog(
+        title: new Text('关联设备不可为空'),
+      )).then((result) => scrollController.jumpTo(0.0));
+      return;
+    }
     if (serviceName.text.isEmpty) {
       showDialog(context: context, builder: (context) => CupertinoAlertDialog(
         title: new Text('服务名称不可为空'),
@@ -575,7 +579,7 @@ class _ServiceDetailState extends State<ServiceDetail> {
                                                   cancel: Text('取消', style: TextStyle(color: Colors.redAccent)),
                                                 ),
                                                 minDateTime: DateTime.now().add(Duration(days: -7300)),
-                                                maxDateTime: DateTime.parse('2030-01-01'),
+                                                maxDateTime: DateTime.now().add(Duration(days: 365*10)),
                                                 initialDateTime: _time,
                                                 dateFormat: 'yyyy-MM-dd',
                                                 locale: DateTimePickerLocale.en_us,
@@ -655,7 +659,7 @@ class _ServiceDetailState extends State<ServiceDetail> {
                                                   cancel: Text('取消', style: TextStyle(color: Colors.redAccent)),
                                                 ),
                                                 minDateTime: DateTime.now().add(Duration(days: -7300)),
-                                                maxDateTime: DateTime.parse('2030-01-01'),
+                                                maxDateTime: DateTime.now().add(Duration(days: 365*10)),
                                                 initialDateTime: _time,
                                                 dateFormat: 'yyyy-MM-dd',
                                                 locale: DateTimePickerLocale.en_us,
@@ -737,7 +741,7 @@ class _ServiceDetailState extends State<ServiceDetail> {
                                                   cancel: Text('取消', style: TextStyle(color: Colors.redAccent)),
                                                 ),
                                                 minDateTime: DateTime.now().add(Duration(days: -7300)),
-                                                maxDateTime: DateTime.parse('2030-01-01'),
+                                                maxDateTime: DateTime.now().add(Duration(days: 365*10)),
                                                 initialDateTime: _time,
                                                 dateFormat: 'yyyy-MM-dd',
                                                 locale: DateTimePickerLocale.en_us,

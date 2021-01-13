@@ -68,7 +68,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
   ScrollController _scrollController = new ScrollController();
   int fujiClass2;
   String fujiClass2Name;
-  String fujiClass1 = "其他";
+  String fujiClass1 = "其它";
   List fujiClass2List = [];
   List fujiClass2Components = [];
   TextEditingController componentCodes = new TextEditingController();
@@ -208,7 +208,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
   Future<Null> getRole() async {
     var _prefs = await prefs;
     var _role = _prefs.getInt('role');
-    isAdmin = _role == 1?true:false;
+    isAdmin = _role == 1;
   }
 
   void changeValue(value) {
@@ -382,12 +382,13 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
     var resp = await HttpRequest.request('/Equipment/GetEquipmentClass',
         method: HttpRequest.GET, params: {'level': 1});
     if (resp['ResultCode'] == '00') {
-      List _listData = resp['Data'].map((item) {
+      List _list = [];
+      _list.add("");
+      _list.addAll(resp['Data'].map((item) {
         return item['Description'];
-      }).toList();
-      _listData.add("");
+      }).toList());
       setState(() {
-        class1 = _listData;
+        class1 = _list;
         class1Item = resp['Data'];
       });
       dropdownClass1 = getDropDownMenuItems(class1);
@@ -427,6 +428,17 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
   }
 
   void changeClass1(String selectedClass) {
+    if (selectedClass == "") {
+      setState(() {
+        classCode1 = "00";
+        classCode2 = "00";
+        classCode3 = "00";
+        currentClass1 = "";
+        currentClass2 = null;
+        currentClass3 = null;
+      });
+      return;
+    }
     FocusScope.of(context).requestFocus(new FocusNode());
     var _selectedItem = class1Item.firstWhere((item) {
       return item['Description'] == selectedClass;
@@ -483,11 +495,11 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
     currentMandatory = dropdownMandatory[0].value;
     mandatoryTypes = getDropDownMenuItems(mandatoryPeriod);
     dropdownPatrolPeriod = getDropDownMenuItems(model.PeriodTypeList);
-    currentPatrolPeriod = 1;
+    currentPatrolPeriod = 0;
     dropdownMandatoryPeriod = getDropDownMenuItems(mandatoryPeriodList);
-    currentMaintainPeriod = 1;
+    currentMaintainPeriod = 0;
     dropdownCorrectionPeriod = getDropDownMenuItems(model.PeriodTypeList);
-    currentCorrectionPeriod = 1;
+    currentCorrectionPeriod = 0;
     dropdownClass = getDropDownMenuItems(equipmentClass);
     currentClass = dropdownClass[0].value;
     initDepart();
@@ -508,6 +520,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
     }
     getRole();
     getSystemSetting();
+    getFujiClass2();
   }
 
   Future getImage(List _imageList) async {
@@ -1101,6 +1114,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
     String _url;
     switch (widget.equipmentType) {
       case EquipmentType.MEDICAL:
+        _url = "/Equipment/CheckAssetCode";
         break;
       case EquipmentType.MEASURE:
         _url = '/MeasInstrum/CheckAssetCode';
@@ -1261,7 +1275,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
       showDialog(
           context: context,
           builder: (context) => CupertinoAlertDialog(
-            title: new Text('强检日期不可为空'),
+            title: new Text('强检时间不可为空'),
           )
       ).then((result) {
         _scrollController.jumpTo(fujiClass2Components.isEmpty?2200.0:2600.0);
@@ -1695,8 +1709,8 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
       '/equipment/GetFujiClass1ByEquipmentClass',
       method: HttpRequest.GET,
       params: {
-        'equipmentClass1': classCode1,
-        'equipmentClass2': classCode2
+        'equipmentClass1': classCode1==""?00:classCode1,
+        'equipmentClass2': classCode2==""?00:classCode2
       }
     );
     if (resp['ResultCode'] == '00') {
@@ -1711,20 +1725,20 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
       '/equipment/GetFujiClass2ByEqptClass',
       method: HttpRequest.GET,
       params: {
-        'equipmentClass1': classCode1,
-        'equipmentClass2': classCode2
+        'equipmentClass1': classCode1==""?00:classCode1,
+        'equipmentClass2': classCode2==""?00:classCode2
       }
     );
     if (resp['ResultCode'] == '00') {
       log("fuji 2 list:${resp['Data']}");
       fujiClass2List = resp['Data'];
       int ind = fujiClass2List.indexWhere((item) => item['ID'] == -1);
-      if (ind < 0) {
-        fujiClass2List.add({
-          'ID': -1,
-          'Name': ''
-        });
-      }
+      //if (ind < 0) {
+      //  fujiClass2List.add({
+      //    'ID': -1,
+      //    'Name': ''
+      //  });
+      //}
       setState(() {
         fujiClass2List = fujiClass2List;
       });
@@ -1758,7 +1772,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
         cancel: Text('取消', style: TextStyle(color: Colors.redAccent)),
       ),
       minDateTime: DateTime.parse('2000-01-01'),
-      maxDateTime: DateTime.parse('2030-01-01'),
+      maxDateTime: DateTime.now().add(Duration(days: 365*10)),
       initialDateTime: _time,
       dateFormat: 'yyyy-MM-dd',
       locale: DateTimePickerLocale.en_us,
@@ -1917,9 +1931,9 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
             ),
           ):BuildWidget.buildRow('标准响应时间', '${responseTime.text} 分'),
           widget.editable?BuildWidget.buildDropdown('等级', currentClass, dropdownClass, changeClass, context: context):BuildWidget.buildRow('等级', currentClass),
-          widget.editable?BuildWidget.buildDropdown('设备类别(I)', currentClass1, dropdownClass1, changeClass1, context: context):BuildWidget.buildRow('设备类别(I)', currentClass1==null?'':currentClass1),
-          widget.editable?BuildWidget.buildDropdown('设备类别(II)', currentClass2, dropdownClass2, changeClass2, context: context):BuildWidget.buildRow('设备类别(II)', currentClass2==null?'':currentClass2),
-          widget.editable?BuildWidget.buildDropdown('设备类别(III)', currentClass3, dropdownClass3, changeClass3, context: context):BuildWidget.buildRow('设备类别(III)', currentClass3==null?'':currentClass3),
+          widget.editable&&isAdmin?BuildWidget.buildDropdown('设备类别(I)', currentClass1, dropdownClass1, changeClass1, context: context):BuildWidget.buildRow('设备类别(I)', currentClass1==null?'':currentClass1),
+          widget.editable&&isAdmin?BuildWidget.buildDropdown('设备类别(II)', currentClass2, dropdownClass2, changeClass2, context: context):BuildWidget.buildRow('设备类别(II)', currentClass2==null?'':currentClass2),
+          widget.editable&&isAdmin?BuildWidget.buildDropdown('设备类别(III)', currentClass3, dropdownClass3, changeClass3, context: context):BuildWidget.buildRow('设备类别(III)', currentClass3==null?'':currentClass3),
           BuildWidget.buildRow('分类编码', classCode1+classCode2+classCode3),
           widget.editable&&isAdmin?BuildWidget.buildRadio('整包范围', serviceScope, currentServiceScope, changeServiceScope):BuildWidget.buildRow('整包范围', currentServiceScope),
           widget.editable?BuildWidget.buildInput('品牌', brand, lines: 1, focusNode: _focusEquip[10]):BuildWidget.buildRow('品牌', brand.text),
@@ -1978,7 +1992,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
                             cancel: Text('取消', style: TextStyle(color: Colors.redAccent)),
                           ),
                           minDateTime: DateTime.now().add(Duration(days: -7300)),
-                          maxDateTime: DateTime.parse('2030-01-01'),
+                          maxDateTime: DateTime.now().add(Duration(days: 365*10)),
                           initialDateTime: _time,
                           dateFormat: 'yyyy-MM-dd',
                           locale: DateTimePickerLocale.en_us,
@@ -2189,7 +2203,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
                             cancel: Text('取消', style: TextStyle(color: Colors.redAccent)),
                           ),
                           minDateTime: DateTime.now().add(Duration(days: -7300)),
-                          maxDateTime: DateTime.parse('2030-01-01'),
+                          maxDateTime: DateTime.now().add(Duration(days: 365*10)),
                           initialDateTime: _time,
                           dateFormat: 'yyyy-MM-dd',
                           locale: DateTimePickerLocale.en_us,
@@ -2398,7 +2412,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
                             cancel: Text('取消', style: TextStyle(color: Colors.redAccent)),
                           ),
                           minDateTime: DateTime.now().add(Duration(days: -7300)),
-                          maxDateTime: DateTime.parse('2030-01-01'),
+                          maxDateTime: DateTime.now().add(Duration(days: 365*10)),
                           initialDateTime: _time,
                           dateFormat: 'yyyy-MM-dd',
                           locale: DateTimePickerLocale.en_us,
@@ -2492,7 +2506,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
                                   cancel: Text('取消', style: TextStyle(color: Colors.redAccent)),
                                 ),
                                 minDateTime: DateTime.now().add(Duration(days: -7300)),
-                                maxDateTime: DateTime.parse('2030-01-01'),
+                                maxDateTime: DateTime.now().add(Duration(days: 365*10)),
                                 initialDateTime: _time,
                                 dateFormat: 'yyyy-MM-dd',
                                 locale: DateTimePickerLocale.en_us,
@@ -2543,7 +2557,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
                                   cancel: Text('取消', style: TextStyle(color: Colors.redAccent)),
                                 ),
                                 minDateTime: DateTime.now().add(Duration(days: -7300)),
-                                maxDateTime: DateTime.parse('2030-01-01'),
+                                maxDateTime: DateTime.now().add(Duration(days: 365*10)),
                                 initialDateTime: _time,
                                 dateFormat: 'yyyy-MM-dd',
                                 locale: DateTimePickerLocale.en_us,
@@ -2651,7 +2665,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
                         cancel: Text('取消', style: TextStyle(color: Colors.redAccent)),
                       ),
                       minDateTime: DateTime.now().add(Duration(days: -7300)),
-                      maxDateTime: DateTime.parse('2030-01-01'),
+                      maxDateTime: DateTime.now().add(Duration(days: 365*10)),
                       initialDateTime: _time,
                       dateFormat: 'yyyy-MM-dd',
                       locale: DateTimePickerLocale.en_us,
@@ -2888,7 +2902,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
                         cancel: Text('取消', style: TextStyle(color: Colors.redAccent)),
                       ),
                       minDateTime: DateTime.now().add(Duration(days: -7300)),
-                      maxDateTime: DateTime.parse('2030-01-01'),
+                      maxDateTime: DateTime.now().add(Duration(days: 365*10)),
                       initialDateTime: _time,
                       dateFormat: 'yyyy-MM-dd',
                       locale: DateTimePickerLocale.en_us,
@@ -2962,7 +2976,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
                         cancel: Text('取消', style: TextStyle(color: Colors.redAccent)),
                       ),
                       minDateTime: DateTime.now().add(Duration(days: -7300)),
-                      maxDateTime: DateTime.parse('2030-01-01'),
+                      maxDateTime: DateTime.now().add(Duration(days: 365*10)),
                       initialDateTime: _time,
                       dateFormat: 'yyyy-MM-dd',
                       locale: DateTimePickerLocale.en_us,
@@ -3037,7 +3051,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
                         cancel: Text('取消', style: TextStyle(color: Colors.redAccent)),
                       ),
                       minDateTime: DateTime.now().add(Duration(days: -7300)),
-                      maxDateTime: DateTime.parse('2030-01-01'),
+                      maxDateTime: DateTime.now().add(Duration(days: 365*10)),
                       initialDateTime: _time,
                       dateFormat: 'yyyy-MM-dd',
                       locale: DateTimePickerLocale.en_us,
@@ -3114,7 +3128,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
                         cancel: Text('取消', style: TextStyle(color: Colors.redAccent)),
                       ),
                       minDateTime: DateTime.now().add(Duration(days: -7300)),
-                      maxDateTime: DateTime.parse('2030-01-01'),
+                      maxDateTime: DateTime.now().add(Duration(days: 365*10)),
                       initialDateTime: _time,
                       dateFormat: 'yyyy-MM-dd',
                       locale: DateTimePickerLocale.en_us,
@@ -3183,6 +3197,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
                   onPressed: () async {
                     FocusScope.of(context).requestFocus(new FocusNode());
                     var _time = DateTime.tryParse(mandatoryDate)??DateTime.now().add(Duration(days: 30));
+                    DateTime _date = DateTime.now();
                     DatePicker.showDatePicker(
                       context,
                       pickerTheme: DateTimePickerTheme(
@@ -3190,8 +3205,8 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
                         confirm: Text('确认', style: TextStyle(color: Colors.blueAccent)),
                         cancel: Text('取消', style: TextStyle(color: Colors.redAccent)),
                       ),
-                      minDateTime: DateTime.now().add(Duration(days: 30)),
-                      maxDateTime: DateTime.parse('2030-01-01'),
+                      minDateTime: DateTime(_date.year, _date.month+1, _date.day),
+                      maxDateTime: DateTime.now().add(Duration(days: 365*10)),
                       initialDateTime: _time,
                       dateFormat: 'yyyy-MM-dd',
                       locale: DateTimePickerLocale.en_us,
@@ -3308,6 +3323,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
                   onPressed: () async {
                     FocusScope.of(context).requestFocus(new FocusNode());
                     var _time = DateTime.tryParse(recallDate)??DateTime.now().add(Duration(days: 30));
+                    DateTime _date = DateTime.now();
                     DatePicker.showDatePicker(
                       context,
                       pickerTheme: DateTimePickerTheme(
@@ -3315,8 +3331,8 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
                         confirm: Text('确认', style: TextStyle(color: Colors.blueAccent)),
                         cancel: Text('取消', style: TextStyle(color: Colors.redAccent)),
                       ),
-                      minDateTime: DateTime.now().add(Duration(days: 30)),
-                      maxDateTime: DateTime.parse('2030-01-01'),
+                      minDateTime: DateTime(_date.year, _date.month+1, _date.day),
+                      maxDateTime: DateTime.now().add(Duration(days: 365*10)),
                       initialDateTime: _time,
                       dateFormat: 'yyyy-MM-dd',
                       locale: DateTimePickerLocale.en_us,
@@ -3367,7 +3383,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
           new Expanded(
             flex: 4,
             child: new Text(
-              currentPatrolPeriod==1?'无巡检':'${patrolPeriod.text} ${periodTypeList.firstWhere((item) => item['ID']==currentPatrolPeriod)['Name']}',
+              currentPatrolPeriod==0?'无巡检':'${patrolPeriod.text} ${periodTypeList.firstWhere((item) => item['ID']==currentPatrolPeriod)['Name']}',
               style: new TextStyle(
                   fontSize: 16.0,
                   fontWeight: FontWeight.w400,
@@ -3377,7 +3393,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
           ),
           new Expanded(
             flex: 2,
-            child: currentPatrolPeriod==1?Container():IconButton(icon: Icon(Icons.calendar_today), onPressed: () async {
+            child: currentPatrolPeriod==0?Container():IconButton(icon: Icon(Icons.calendar_today), onPressed: () async {
               print('check period');
               await getCheckPeriod(4);
               showPeriodSheet('一年内计划巡检');
@@ -3423,7 +3439,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
           new Expanded(
             flex: 4,
             child: new Text(
-              currentMaintainPeriod==1?'无保养':'${maintainPeriod.text} ${periodTypeList.firstWhere((item) => item['ID']==currentMaintainPeriod)['Name']}',
+              currentMaintainPeriod==0?'无保养':'${maintainPeriod.text} ${periodTypeList.firstWhere((item) => item['ID']==currentMaintainPeriod)['Name']}',
               style: new TextStyle(
                   fontSize: 16.0,
                   fontWeight: FontWeight.w400,
@@ -3433,7 +3449,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
           ),
           new Expanded(
             flex: 2,
-            child: currentMaintainPeriod==1?Container():IconButton(icon: Icon(Icons.calendar_today), onPressed: () async {
+            child: currentMaintainPeriod==0?Container():IconButton(icon: Icon(Icons.calendar_today), onPressed: () async {
               print('check period');
               await getCheckPeriod(2);
               showPeriodSheet('一年内计划保养');
@@ -3479,7 +3495,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
           new Expanded(
             flex: 4,
             child: new Text(
-              currentCorrectionPeriod==1?'无校准':'${correctionPeriod.text} ${periodTypeList.firstWhere((item) => item['ID']==currentCorrectionPeriod)['Name']}',
+              currentCorrectionPeriod==0?'无校准':'${correctionPeriod.text} ${periodTypeList.firstWhere((item) => item['ID']==currentCorrectionPeriod)['Name']}',
               style: new TextStyle(
                   fontSize: 16.0,
                   fontWeight: FontWeight.w400,
@@ -3489,7 +3505,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
           ),
           new Expanded(
             flex: 2,
-            child: currentCorrectionPeriod==1?Container():IconButton(icon: Icon(Icons.calendar_today), onPressed: () async {
+            child: currentCorrectionPeriod==0?Container():IconButton(icon: Icon(Icons.calendar_today), onPressed: () async {
               print('check period');
               await getCheckPeriod(5);
               showPeriodSheet('一年内计划校准');

@@ -1,3 +1,4 @@
+import 'package:atoi/pages/equipments/equipments_list.dart';
 import 'package:atoi/utils/common.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
@@ -443,7 +444,7 @@ class _ComponentDetailState extends State<ComponentDetail> {
                                           icon: Icon(Icons.search),
                                           onPressed: () async {
                                             FocusScope.of(context).requestFocus(new FocusNode());
-                                            final _searchResult = await Navigator.of(context).push(new MaterialPageRoute(builder: (_) => SearchLazy(searchType: SearchType.DEVICE, fujiClass2: fujiClass2,)));
+                                            final _searchResult = await Navigator.of(context).push(new MaterialPageRoute(builder: (_) => SearchLazy(searchType: SearchType.DEVICE, fujiClass2: fujiClass2, onlyType: EquipmentType.MEDICAL,)));
                                             print(_searchResult);
                                             if (_searchResult != null &&
                                                 _searchResult != 'null') {
@@ -584,7 +585,7 @@ class _ComponentDetailState extends State<ComponentDetail> {
                                                   cancel: Text('取消', style: TextStyle(color: Colors.redAccent)),
                                                 ),
                                                 minDateTime: DateTime.now().add(Duration(days: -7300)),
-                                                maxDateTime: DateTime.parse('2030-01-01'),
+                                                maxDateTime: DateTime.now().add(Duration(days: 365*10)),
                                                 initialDateTime: _time,
                                                 dateFormat: 'yyyy-MM-dd',
                                                 locale: DateTimePickerLocale.en_us,

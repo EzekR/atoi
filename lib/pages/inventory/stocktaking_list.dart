@@ -345,7 +345,7 @@ class _StocktakingListState extends State<StocktakingList> {
                                       cancel: Text('取消', style: TextStyle(color: Colors.redAccent)),
                                     ),
                                     minDateTime: DateTime.parse('2000-01-01'),
-                                    maxDateTime: DateTime.parse('2030-01-01'),
+                                    maxDateTime: DateTime.now().add(Duration(days: 365*10)),
                                     initialDateTime: DateTime.tryParse(beginDate)??DateTime.now(),
                                     dateFormat: 'yyyy-MM-dd',
                                     locale: DateTimePickerLocale.en_us,
@@ -384,7 +384,7 @@ class _StocktakingListState extends State<StocktakingList> {
                                       cancel: Text('取消', style: TextStyle(color: Colors.redAccent)),
                                     ),
                                     minDateTime: DateTime.parse('2000-01-01'),
-                                    maxDateTime: DateTime.parse('2030-01-01'),
+                                    maxDateTime: DateTime.now().add(Duration(days: 365*10)),
                                     initialDateTime: DateTime.tryParse(endDate)??DateTime.now(),
                                     dateFormat: 'yyyy-MM-dd',
                                     locale: DateTimePickerLocale.en_us,
@@ -628,6 +628,7 @@ class _StocktakingListState extends State<StocktakingList> {
                   ],
                 ),
               ):Container(),
+              SizedBox(width: 18,),
               item['Status']['ID']>=0&&item['Status']['ID']<=3&&role==1?RaisedButton(
                 onPressed: () {
                   showDialog(context: context, builder: (context) => CupertinoAlertDialog(

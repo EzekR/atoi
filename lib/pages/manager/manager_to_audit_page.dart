@@ -9,6 +9,7 @@ import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:atoi/widgets/build_widget.dart';
 import 'package:atoi/utils/constants.dart';
 import 'package:atoi/pages/equipments/equipments_list.dart';
+import 'package:atoi/permissions.dart';
 
 /// 超管待审核列表页面类
 class ManagerToAuditPage extends StatefulWidget {
@@ -19,15 +20,17 @@ class ManagerToAuditPage extends StatefulWidget {
 class _ManagerToAuditPageState extends State<ManagerToAuditPage> {
 
   List<dynamic> _reports = [];
-  Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
+  Future<SharedPreferences> prefs = SharedPreferences.getInstance();
   bool _loading = false;
   bool _noMore = false;
+  Map techPermission;
+  Map specialPermission;
 
   ScrollController _scrollController = new ScrollController();
 
   Future<Null> getData() async {
-    var prefs = await _prefs;
-    var userID = prefs.getInt('userID');
+    var _prefs = await prefs;
+    var userID = _prefs.getInt('userID');
     Map<String, dynamic> params = {
       'userID': userID,
       'statusIDs': 3,
@@ -46,8 +49,18 @@ class _ManagerToAuditPageState extends State<ManagerToAuditPage> {
     });
   }
 
+  void getPermission() async {
+    SharedPreferences _prefs = await prefs;
+    Permission permissionInstance = new Permission();
+    permissionInstance.prefs = _prefs;
+    permissionInstance.initPermissions();
+    techPermission = permissionInstance.getTechPermissions('Operations', 'Request');
+    specialPermission = permissionInstance.getSpecialPermissions('Operations', 'Request');
+  }
+
   void initState() {
     //getData();
+    getPermission();
     refresh();
     super.initState();
     ManagerModel model = MainModel.of(context);

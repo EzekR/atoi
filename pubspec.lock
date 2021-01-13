@@ -428,6 +428,13 @@ packages:
       url: "https://pub.flutter-io.cn"
     source: hosted
     version: "1.0.1"
+  sensors_analytics_flutter_plugin:
+    dependency: "direct main"
+    description:
+      name: sensors_analytics_flutter_plugin
+      url: "https://pub.flutter-io.cn"
+    source: hosted
+    version: "1.0.4"
   shared_preferences:
     dependency: "direct main"
     description:

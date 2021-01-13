@@ -19,6 +19,7 @@ import 'package:atoi/pages/equipments/equipments_list.dart';
 import 'dart:async';
 import 'package:atoi/utils/image_util.dart';
 import 'package:atoi/widgets/search_page.dart';
+import 'package:atoi/permissions.dart';
 
 /// 超管审核报告页面类
 class ManagerAuditReportPage extends StatefulWidget {
@@ -72,6 +73,8 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
   List<TextEditingController> equipmentStatus = [];
 
   List _serviceScope = ['是', '否'];
+  Map techPermission;
+  Map specialPermission;
 
   void changeScope(value) {
     FocusScope.of(context).requestFocus(new FocusNode());
@@ -81,13 +84,22 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
   }
 
   Future<Null> getRole() async {
-    var prefs = await _prefs;
-    var userName = prefs.getString('userName');
-    var mobile = prefs.getString('mobile');
+    var _prefs = await prefs;
+    var userName = _prefs.getString('userName');
+    var mobile = _prefs.getString('mobile');
     setState(() {
       _userName = userName;
       _mobile = mobile;
     });
+  }
+
+  void getPermission() async {
+    SharedPreferences _prefs = await prefs;
+    Permission permissionInstance = new Permission();
+    permissionInstance.prefs = _prefs;
+    permissionInstance.initPermissions();
+    techPermission = permissionInstance.getTechPermissions('Operations', 'DispatchReport');
+    specialPermission = permissionInstance.getSpecialPermissions('Operations', 'DispatchReport');
   }
 
   List iterateMap(Map item) {
@@ -108,6 +120,7 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
   }
 
   void initState(){
+    getPermission();
     getRole();
     model = MainModel.of(context);
     initDropdown();
@@ -179,11 +192,11 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
     );
   }
 
-  Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
+  Future<SharedPreferences> prefs = SharedPreferences.getInstance();
 
   Future<Null> getReport() async {
-    var prefs = await _prefs;
-    var userID = prefs.getInt('userID');
+    var _prefs = await prefs;
+    var userID = _prefs.getInt('userID');
     var reportId = widget.reportId;
     var resp = await HttpRequest.request(
       '/DispatchReport/GetDispatchReport',
@@ -248,8 +261,8 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
   }
 
   Future<Null> getDispatch() async {
-    var prefs = await _prefs;
-    var userID = prefs.getInt('userID');
+    var _prefs = await prefs;
+    var userID = _prefs.getInt('userID');
     var dispatchId = widget.request['ID'];
     var resp = await HttpRequest.request(
       '/Dispatch/GetDispatchByID',
@@ -369,8 +382,8 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
       });
       return;
     }
-    final SharedPreferences prefs = await _prefs;
-    var UserId = await prefs.getInt('userID');
+    final SharedPreferences _prefs = await prefs;
+    var UserId = await _prefs.getInt('userID');
     var _body = new Map<String, dynamic>.from(_report);
     Map _json = {};
     _json['ID'] = _attachId??0;
@@ -489,8 +502,8 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
       });
       return;
     }
-    final SharedPreferences prefs = await _prefs;
-    var UserId = await prefs.getInt('userID');
+    final SharedPreferences _prefs = await prefs;
+    var UserId = await _prefs.getInt('userID');
     var _body = _report;
     Map _json = {};
     _json['ID'] = _attachId??0;
@@ -1158,6 +1171,14 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
                 children: <Widget>[
                   new RaisedButton(
                     onPressed: () {
+                      if (!specialPermission['Approve']) {
+                        showDialog(context: context,
+                            builder: (context) => CupertinoAlertDialog(
+                              title: new Text('暂无审批权限'),
+                            )
+                        );
+                        return;
+                      }
                       FocusScope.of(context).requestFocus(new FocusNode());
                       approveReport();
                     },
@@ -1170,6 +1191,14 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
                   ),
                   new RaisedButton(
                     onPressed: () {
+                      if (!specialPermission['Approve']) {
+                        showDialog(context: context,
+                            builder: (context) => CupertinoAlertDialog(
+                              title: new Text('暂无审批权限'),
+                            )
+                        );
+                        return;
+                      }
                       FocusScope.of(context).requestFocus(new FocusNode());
                       rejectReport();
                     },

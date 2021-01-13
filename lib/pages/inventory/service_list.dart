@@ -170,6 +170,10 @@ class _ServiceListState extends State<ServiceList> {
                                     child: Text('服务名称'),
                                   ),
                                   DropdownMenuItem(
+                                    value: 'se.PurchaseID',
+                                    child: Text('采购单号'),
+                                  ),
+                                  DropdownMenuItem(
                                     value: 'e.ID',
                                     child: Text('设备系统编号'),
                                   ),

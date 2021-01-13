@@ -31,6 +31,13 @@ class _InboundStuffState extends State<InboundStuff> {
   List<TextEditingController> quantityList = [];
 
   void addOneComponent() {
+    Map _component = widget.stuff;
+    if (inboundComponents.length > _component['Qty']) {
+      showDialog(context: context, builder: (context) => CupertinoAlertDialog(
+        title: new Text('入库数量不能超过采购数量'),
+      ));
+      return;
+    }
     Map item = widget.stuff;
     inboundComponents.add({
       'ID': item['ID'],
@@ -90,12 +97,6 @@ class _InboundStuffState extends State<InboundStuff> {
     Map _component = widget.stuff;
     Map _po = widget.purchaseOrder;
     print(_po.toString());
-    if (inboundComponents.length > _component['Qty']) {
-      showDialog(context: context, builder: (context) => CupertinoAlertDialog(
-        title: new Text('入库数量不能超过采购数量'),
-      ));
-      return;
-    }
     if (widget.type == AttachmentType.COMPONENT) {
       if (serialList.any((item) => item.text.isEmpty)) {
         showDialog(context: context, builder: (context) => CupertinoAlertDialog(

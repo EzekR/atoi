@@ -195,6 +195,20 @@ class _PrintQrcodeState extends State<PrintQrcode> {
       appBar: new AppBar(
         title: new Text('二维码打印'),
         elevation: 0.7,
+        leading: IconButton(
+          onPressed: () {
+            if (widget.codeType == CodeType.CONSUMABLE || widget.codeType == CodeType.COMPONENT
+            || widget.codeType == CodeType.SPARE) {
+              int count = 0;
+              Navigator.popUntil(context, (route) {
+                return count ++ == 2;
+              });
+            } else {
+              Navigator.of(context).pop();
+            }
+          },
+          icon: Icon(Icons.arrow_back_ios),
+        ),
         flexibleSpace: Container(
           decoration: BoxDecoration(
             gradient: LinearGradient(

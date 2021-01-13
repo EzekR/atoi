@@ -200,6 +200,23 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
     return _image;
   }
 
+  Future<bool> deleteReportAttachment(int attachID) async {
+    bool deleted = true;
+    Map resp = await HttpRequest.request(
+      '/DispatchReport/DeleteFileByID',
+      method: HttpRequest.POST,
+      data: {
+        'fileID': attachID
+      }
+    );
+    if (resp['ResultCode'] == '00') {
+      deleted = true;
+    } else {
+      deleted = false;
+    }
+    return deleted;
+  }
+
   Future<Null> getReport(int reportId) async {
     await getReportId(_dispatch['RequestType']['ID']);
     var prefs = await _prefs;
@@ -320,13 +337,31 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
     return new FocusNode();
   }).toList();
 
+  Future<bool> deleteAccFile(int fileID) async {
+    bool deleted = true;
+    Map resp = await HttpRequest.request(
+      '/DispatchReport/DeleteAccessoryFileByID',
+      method: HttpRequest.POST,
+      data: {
+        'fileID': fileID
+      }
+    );
+    if (resp['ResultCode'] == '00') {
+      deleted = true;
+    } else {
+      deleted = false;
+    }
+
+    return deleted;
+  }
+
   Map stuffDuplicated() {
     bool duplicated = false;
     String duplicatedStuff;
     for(int i=0; i<_accessory.length; i++) {
-      List _tmp = _accessory.where((item) => item['OldSerialCode']==_accessory[i]['OldSerialCode']).toList();
+      // todo: 新增判断方法
       List _tmp1 = _accessory.where((item) => item['NewInvComponent']['ID']==_accessory[i]['NewInvComponent']['ID']).toList();
-      if (_tmp.length > 1 || _tmp1.length > 1) {
+      if (_tmp1.length > 1) {
         duplicated = true;
         duplicatedStuff = '零件';
       }
@@ -543,6 +578,7 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
       'ReportService': services,
       'ID': _reportId,
     };
+    //log("_acc: ${_accessory[0]['FileInfos']}");
     var _id = _reportList.firstWhere((item) => item['Name'] == _currentType, orElse: () => null);
     _data['Type'] = {
       'ID': _id['ID']??1
@@ -820,10 +856,21 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
                   child: new IconButton(
                       icon: Icon(Icons.cancel),
                       color: Colors.blue,
-                      onPressed: () {
+                      onPressed: () async {
                         setState(() {
                           _imageList = null;
                         });
+                        if (_attachId != null) {
+                          bool deleted = await deleteReportAttachment(_attachId);
+                          if (deleted) {
+                            showDialog(
+                                context: context,
+                                builder: (context) => CupertinoAlertDialog(
+                                  title: new Text('删除成功'),
+                                ));
+                            return;
+                          }
+                        }
                       }),
                 )
               : new Container()
@@ -997,7 +1044,7 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
                                   cancel: Text('取消', style: TextStyle(color: Colors.redAccent)),
                                 ),
                                 minDateTime: DateTime.parse('2000-01-01'),
-                                maxDateTime: DateTime.parse('2030-01-01'),
+                                maxDateTime: DateTime.now().add(Duration(days: 365*10)),
                                 initialDateTime: DateTime.tryParse(_acceptDate)??DateTime.now(),
                                 dateFormat: 'yyyy-MM-dd',
                                 locale: DateTimePickerLocale.en_us,
@@ -1151,14 +1198,14 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
       ],
     ));
     if (_accessory.isNotEmpty) {
-      for (Map _acc in _accessory) {
-        Map _imageNew = _acc['FileInfos'].firstWhere((info) => info['FileType'] == 1, orElse: () => null);
-        Map _imageOld = _acc['FileInfos'].firstWhere((info) => info['FileType'] == 2, orElse: () => null);
-        print("component:$_acc");
+      for (int i=0; i< _accessory.length; i++) {
+        Map _imageNew = _accessory[i]['FileInfos'].firstWhere((info) => info['FileType'] == 1, orElse: () => null);
+        Map _imageOld = _accessory[i]['FileInfos'].firstWhere((info) => info['FileType'] == 2, orElse: () => null);
+        print("component:$_accessory[i]");
         List<Widget> _accList = [
-          BuildWidget.buildRow('简称', _acc['Component']['Name']),
-          BuildWidget.buildRow('新装零件编号', _acc['NewInvComponent']['SerialCode']),
-          BuildWidget.buildRow('金额（元/件）', CommonUtil.CurrencyForm(_acc['NewInvComponent']['Price'], digits: 0, times: 1)),
+          BuildWidget.buildRow('简称', _accessory[i]['Component']['Name']),
+          BuildWidget.buildRow('新装零件编号', _accessory[i]['NewInvComponent']['SerialCode']),
+          BuildWidget.buildRow('金额（元/件）', "***"),
           BuildWidget.buildRow('附件', ''),
           new Row(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -1167,19 +1214,23 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
                 width: 100.0,
                 child: _imageNew!=null&&_imageNew['FileContent']!=null?BuildWidget.buildPhotoPageList(context, base64Decode(_imageNew['FileContent'])):Container(),
               ),
-              _imageNew!=null&&_imageNew['FileContent']!=null?IconButton(
+              _imageNew!=null&&_imageNew['FileContent']!=null?(_edit?IconButton(
                 icon: Icon(Icons.delete, color: Colors.red,),
                 onPressed: () {
+                  if (_imageNew['ID'] != 0) {
+                    deleteAccFile(_imageNew['ID']);
+                  }
                   setState(() {
-                    _acc['FileInfos'].remove(_imageNew);
+                    _accessory[i]['FileInfos'].removeWhere((item) => item['FileType'] == 1);
                   });
+                  print("零件${_accessory[i]['FileInfos']}");
                 },
-              ):IconButton(
+              ):Container()):(_edit?IconButton(
                 icon: Icon(Icons.add, color: Colors.blue,),
                 onPressed: () async {
                   String _image = await getImageAcc();
                   setState(() {
-                    _acc['FileInfos'].add({
+                    _accessory[i]['FileInfos'].add({
                       'FileName': 'acc_new_${Uuid().v1()}.jpg',
                       'ID': 0,
                       'FileType': 1,
@@ -1187,10 +1238,10 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
                     });
                   });
                 },
-              )
+              ):Container())
             ],
           ),
-          BuildWidget.buildRow('拆下零件编号', _acc['OldInvComponent']['SerialCode']),
+          BuildWidget.buildRow('拆下零件编号', _accessory[i]['OldInvComponent']['SerialCode']),
           BuildWidget.buildRow('金额（元/件）', "***"),
           BuildWidget.buildRow('附件', ''),
           new Row(
@@ -1200,19 +1251,23 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
                 width: 100.0,
                 child: _imageOld!=null&&_imageOld['FileContent']!=null?BuildWidget.buildPhotoPageList(context, base64Decode(_imageOld['FileContent'])):Container(),
               ),
-              _imageOld!=null&&_imageOld['FileContent']!=null?IconButton(
+              _imageOld!=null&&_imageOld['FileContent']!=null?(_edit?IconButton(
                 icon: Icon(Icons.delete, color: Colors.red,),
                 onPressed: () {
+                  if (_imageOld['ID'] != 0) {
+                    deleteAccFile(_imageOld['ID']);
+                  }
                   setState(() {
-                    _acc['FileInfos'].remove(_imageOld);
+                    _accessory[i]['FileInfos'].removeWhere((item) => item['FileType'] == 2);
                   });
+                  print("零件${_accessory[i]['FileInfos']}");
                 },
-              ):IconButton(
+              ):Container()):(_edit?IconButton(
                 icon: Icon(Icons.add, color: Colors.blue,),
                 onPressed: () async {
                   String _image = await getImageAcc();
                   setState(() {
-                    _acc['FileInfos'].add({
+                    _accessory[i]['FileInfos'].add({
                       'FileName': 'acc_old_${Uuid().v1()}.jpg',
                       'ID': 0,
                       'FileType': 2,
@@ -1220,7 +1275,7 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
                     });
                   });
                 },
-              )
+              ):Container())
             ],
           ),
           widget.status == 3 || widget.status == 2
@@ -1235,7 +1290,7 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
                         icon: Icon(Icons.delete_forever),
                         onPressed: () {
                           setState(() {
-                            _accessory.remove(_acc);
+                            _accessory.remove(_accessory[i]);
                           });
                         })
                   ],
@@ -1286,7 +1341,7 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
       BuildWidget.buildRow('简称', item['InvConsumable']['Consumable']['Name']),
       BuildWidget.buildRow('批次号', item['InvConsumable']['LotNum']),
       BuildWidget.buildRow('供应商', item['InvConsumable']['Supplier']['Name']),
-      BuildWidget.buildRow('单价', item['InvConsumable']['Price'].toString()),
+      BuildWidget.buildRow('单价', "***"),
       BuildWidget.buildRow('数量', item['Qty'].toString()),
       widget.status == 3 || widget.status == 2
           ? new Container()
@@ -1359,7 +1414,7 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
               icon: Icon(Icons.delete_forever),
               onPressed: () {
                 setState(() {
-                  consumables.remove(item);
+                  services.remove(item);
                 });
               })
         ],
@@ -1634,7 +1689,6 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
 
   @override
   Widget build(BuildContext context) {
-    // TODO: implement build
     return new Scaffold(
       appBar: new AppBar(
         title: new Text(

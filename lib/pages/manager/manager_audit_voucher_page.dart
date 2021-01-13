@@ -10,6 +10,7 @@ import 'package:atoi/models/models.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:atoi/pages/equipments/equipments_list.dart';
 import 'dart:async';
+import 'package:atoi/permissions.dart';
 
 /// 超管审核凭证页面类
 class ManagerAuditVoucherPage extends StatefulWidget {
@@ -36,7 +37,7 @@ class _ManagerAuditVoucherPageState extends State<ManagerAuditVoucherPage> {
   TextEditingController _follow = new TextEditingController();
   ConstantsModel model;
   ScrollController _scrollController = new ScrollController();
-  Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
+  Future<SharedPreferences> prefs = SharedPreferences.getInstance();
 
   List _serviceResults = [
     '完成',
@@ -45,11 +46,13 @@ class _ManagerAuditVoucherPageState extends State<ManagerAuditVoucherPage> {
 
   String _userName = '';
   String _mobile = '';
+  Map techPermission;
+  Map specialPermission;
 
   Future<Null> getRole() async {
-    var prefs = await _prefs;
-    var userName = prefs.getString('userName');
-    var mobile = prefs.getString('mobile');
+    var _prefs = await prefs;
+    var userName = _prefs.getString('userName');
+    var mobile = _prefs.getString('mobile');
     setState(() {
       _userName = userName;
       _mobile = mobile;
@@ -57,11 +60,20 @@ class _ManagerAuditVoucherPageState extends State<ManagerAuditVoucherPage> {
   }
   List<int> imageBytes;
 
+  void getPermission() async {
+    SharedPreferences _prefs = await prefs;
+    Permission permissionInstance = new Permission();
+    permissionInstance.prefs = _prefs;
+    permissionInstance.initPermissions();
+    techPermission = permissionInstance.getTechPermissions('Operations', 'DispatchJournal');
+    specialPermission = permissionInstance.getSpecialPermissions('Operations', 'DispatchJournal');
+  }
+
   Map<String, dynamic> _journal = {};
 
   Future<Null> getJournal() async {
-    var prefs = await _prefs;
-    var userId = prefs.getInt('userID');
+    var _prefs = await prefs;
+    var userId = _prefs.getInt('userID');
     var journalId = widget.journalId;
     var resp = await HttpRequest.request(
       '/DispatchJournal/GetDispatchJournal',
@@ -100,6 +112,7 @@ class _ManagerAuditVoucherPageState extends State<ManagerAuditVoucherPage> {
   }
 
   void initState(){
+    getPermission();
     model = MainModel.of(context);
     getRole();
     initDropdown();
@@ -227,8 +240,8 @@ class _ManagerAuditVoucherPageState extends State<ManagerAuditVoucherPage> {
   }
 
   Future<Null> getDispatch() async {
-    var prefs = await _prefs;
-    var userID = prefs.getInt('userID');
+    var _prefs = await prefs;
+    var userID = _prefs.getInt('userID');
     var dispatchId = widget.request['ID'];
     var resp = await HttpRequest.request(
         '/Dispatch/GetDispatchByID',
@@ -259,8 +272,8 @@ class _ManagerAuditVoucherPageState extends State<ManagerAuditVoucherPage> {
         return true;
       }).toList();
     });
-    final SharedPreferences prefs = await _prefs;
-    var UserId = await prefs.getInt('userID');
+    final SharedPreferences _prefs = await prefs;
+    var UserId = await _prefs.getInt('userID');
     if (_currentResult == '待跟进' && _follow.text.isEmpty) {
       showDialog(context: context,
           builder: (context) => CupertinoAlertDialog(
@@ -317,8 +330,8 @@ class _ManagerAuditVoucherPageState extends State<ManagerAuditVoucherPage> {
         return true;
       }).toList();
     });
-    final SharedPreferences prefs = await _prefs;
-    var UserId = await prefs.getInt('userID');
+    final SharedPreferences _prefs = await prefs;
+    var UserId = await _prefs.getInt('userID');
     print(widget.journalId);
     if (_comment.text.isEmpty) {
       showDialog(context: context,
@@ -612,6 +625,14 @@ class _ManagerAuditVoucherPageState extends State<ManagerAuditVoucherPage> {
                 children: <Widget>[
                   new RaisedButton(
                     onPressed: () {
+                      if (!specialPermission['Approve']) {
+                        showDialog(context: context,
+                            builder: (context) => CupertinoAlertDialog(
+                              title: new Text('暂无审批权限'),
+                            )
+                        );
+                        return;
+                      }
                       FocusScope.of(context).requestFocus(new FocusNode());
                       approveJournal();
                     },
@@ -624,6 +645,14 @@ class _ManagerAuditVoucherPageState extends State<ManagerAuditVoucherPage> {
                   ),
                   new RaisedButton(
                     onPressed: () {
+                      if (!specialPermission['Approve']) {
+                        showDialog(context: context,
+                            builder: (context) => CupertinoAlertDialog(
+                              title: new Text('暂无审批权限'),
+                            )
+                        );
+                        return;
+                      }
                       FocusScope.of(context).requestFocus(new FocusNode());
                       rejectJournal();
                     },
