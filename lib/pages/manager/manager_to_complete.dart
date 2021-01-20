@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:atoi/pages/manager/manager_complete_page.dart';
 import 'dart:async';
@@ -10,6 +12,7 @@ import 'package:atoi/widgets/build_widget.dart';
 import 'package:atoi/utils/constants.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:atoi/pages/equipments/equipments_list.dart';
+import 'package:atoi/permissions.dart';
 
 /// 超管待完成列表页面类
 class ManagerToComplete extends StatefulWidget {
@@ -25,8 +28,20 @@ class _ManagerToCompleteState extends State<ManagerToComplete> {
   bool _loading = false;
   bool _noMore = false;
   ScrollController _scrollController = new ScrollController();
+  Map dispatchTechPermission;
+  Map requestTechPermission;
+
+  Future<Null> getPermission() async {
+    SharedPreferences _prefs = await SharedPreferences.getInstance();
+    Permission permissionInstance = new Permission();
+    permissionInstance.prefs = _prefs;
+    permissionInstance.initPermissions();
+    dispatchTechPermission = permissionInstance.getTechPermissions('Operations', 'Dispatch');
+    requestTechPermission = permissionInstance.getTechPermissions('Operations', 'Request');
+  }
 
   void initState() {
+    getPermission();
     refresh();
     super.initState();
     ManagerModel model = MainModel.of(context);
@@ -258,7 +273,7 @@ class _ManagerToCompleteState extends State<ManagerToComplete> {
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     mainAxisSize: MainAxisSize.max,
                     children: <Widget>[
-                      new RaisedButton(
+                      dispatchTechPermission!=null&&dispatchTechPermission['View']?new RaisedButton(
                         onPressed: () async {
                           var _dispatches = await getDispatchesByRequestId(requestId);
                           if (_dispatches.length>0) {
@@ -303,8 +318,8 @@ class _ManagerToCompleteState extends State<ManagerToComplete> {
                             )
                           ],
                         ),
-                      ),
-                      new RaisedButton(
+                      ):Container(),
+                      requestTechPermission!=null&&requestTechPermission['View']?new RaisedButton(
                         onPressed: (){
                           //Navigator.of(context).pushNamed(ManagerAssignPage.tag);
                           Navigator.of(context).push(new MaterialPageRoute(builder: (_) {
@@ -330,8 +345,8 @@ class _ManagerToCompleteState extends State<ManagerToComplete> {
                             )
                           ],
                         ),
-                      ),
-                      new RaisedButton(
+                      ):Container(),
+                      dispatchTechPermission!=null&&dispatchTechPermission['Cancel']?new RaisedButton(
                         onPressed: () async {
                           if (!task['HasOpenDispatch']) {
                             showDialog(context: context,
@@ -509,7 +524,7 @@ class _ManagerToCompleteState extends State<ManagerToComplete> {
                             )
                           ],
                         ),
-                      ),
+                      ):Container(),
                     ],
                   )
                 ],

@@ -7,6 +7,7 @@ import 'package:atoi/models/models.dart';
 import 'package:atoi/widgets/build_widget.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:atoi/pages/equipments/equipments_list.dart';
+import 'package:atoi/permissions.dart';
 
 /// 工程师待开始工单页面类
 class EngineerToStart extends StatefulWidget {
@@ -20,6 +21,17 @@ class _EngineerToStartState extends State<EngineerToStart> {
   bool _noMore = false;
 
   Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
+  Map techPermission;
+  Map specialPermission;
+
+  void getPermission() async {
+    SharedPreferences _prefs = await SharedPreferences.getInstance();
+    Permission permissionInstance = new Permission();
+    permissionInstance.prefs = _prefs;
+    permissionInstance.initPermissions();
+    techPermission = permissionInstance.getTechPermissions('Operations', 'Dispatch');
+    specialPermission = permissionInstance.getSpecialPermissions('Operations', 'Dispatch');
+  }
 
   Future<Null> getTask() async {
     final SharedPreferences pref = await _prefs;
@@ -36,6 +48,7 @@ class _EngineerToStartState extends State<EngineerToStart> {
   ScrollController _scrollController = ScrollController();
 
   void initState() {
+    getPermission();
     super.initState();
     EngineerModel model = MainModel.of(context);
     _scrollController.addListener(() {
@@ -125,7 +138,7 @@ class _EngineerToStartState extends State<EngineerToStart> {
                       remark.length > 10
                           ? '${remark.substring(0, 10)}...'
                           : remark),
-                  new Row(
+                  techPermission==null||!techPermission['View']?Container():new Row(
                     mainAxisAlignment: MainAxisAlignment.end,
                     mainAxisSize: MainAxisSize.max,
                     children: <Widget>[

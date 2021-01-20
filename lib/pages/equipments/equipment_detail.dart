@@ -334,8 +334,8 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
   void changePatrolPeriod(selectedMethod) {
     FocusScope.of(context).requestFocus(new FocusNode());
     if (selectedMethod == 1) {
-      patrolPeriod.clear();
     }
+    patrolPeriod.clear();
     setState(() {
       currentPatrolPeriod = selectedMethod;
     });
@@ -344,8 +344,8 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
   void changeMandatoryPeriod(selectedMethod) {
     FocusScope.of(context).requestFocus(new FocusNode());
     if (selectedMethod == 1) {
-      maintainPeriod.clear();
     }
+    maintainPeriod.clear();
     setState(() {
       currentMandatoryPeriod = selectedMethod;
     });
@@ -354,8 +354,8 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
   void changeMaintainPeriod(selectedMethod) {
     FocusScope.of(context).requestFocus(new FocusNode());
     if (selectedMethod == 1) {
-      maintainPeriod.clear();
     }
+    maintainPeriod.clear();
     setState(() {
       currentMaintainPeriod = selectedMethod;
     });
@@ -364,8 +364,8 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
   void changeCorrectionPeriod(selectedMethod) {
     FocusScope.of(context).requestFocus(new FocusNode());
     if (selectedMethod == 1) {
-      correctionPeriod.clear();
     }
+    correctionPeriod.clear();
     setState(() {
       currentCorrectionPeriod = selectedMethod;
     });

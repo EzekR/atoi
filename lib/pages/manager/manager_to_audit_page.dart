@@ -25,6 +25,8 @@ class _ManagerToAuditPageState extends State<ManagerToAuditPage> {
   bool _noMore = false;
   Map techPermission;
   Map specialPermission;
+  Map reportPermission;
+  Map journalPermission;
 
   ScrollController _scrollController = new ScrollController();
 
@@ -56,6 +58,8 @@ class _ManagerToAuditPageState extends State<ManagerToAuditPage> {
     permissionInstance.initPermissions();
     techPermission = permissionInstance.getTechPermissions('Operations', 'Request');
     specialPermission = permissionInstance.getSpecialPermissions('Operations', 'Request');
+    reportPermission = permissionInstance.getTechPermissions('Operations', 'DispatchReport');
+    journalPermission = permissionInstance.getTechPermissions('Operations', 'DispatchJournal');
   }
 
   void initState() {
@@ -169,7 +173,7 @@ class _ManagerToAuditPageState extends State<ManagerToAuditPage> {
                     mainAxisAlignment: MainAxisAlignment.end,
                     mainAxisSize: MainAxisSize.max,
                     children: <Widget>[
-                      new RaisedButton(
+                      journalPermission!=null&&journalPermission['View']?new RaisedButton(
                         onPressed: (){
                           dispatch['DispatchJournal']['Status']['ID']==0||dispatch['DispatchJournal']['Status']['ID']==1?null:
                           Navigator.of(context).push(
@@ -196,11 +200,11 @@ class _ManagerToAuditPageState extends State<ManagerToAuditPage> {
                             )
                           ],
                         ),
-                      ),
+                      ):Container(),
                       new Padding(
                         padding: EdgeInsets.symmetric(horizontal: 5.0),
                       ),
-                      new RaisedButton(
+                      reportPermission!=null&&reportPermission['View']?new RaisedButton(
                         onPressed: (){
                           dispatch['DispatchReport']['Status']['ID']==0||dispatch['DispatchReport']['Status']['ID']==1?null:Navigator.of(context).push(new MaterialPageRoute(builder: (_){
                             return new ManagerAuditReportPage(reportId: dispatch['DispatchReport']['ID'], request: dispatch, status: dispatch['DispatchReport']['Status']['ID'],);
@@ -224,7 +228,7 @@ class _ManagerToAuditPageState extends State<ManagerToAuditPage> {
                             )
                           ],
                         ),
-                      )
+                      ):Container()
                     ],
                   )
                 ],

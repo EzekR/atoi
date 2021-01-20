@@ -338,7 +338,7 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
         method: HttpRequest.POST,
         data: {
           'requestID': _dispatch['Request']['ID'],
-          'equipments': _equipments
+          'equipments': _equipmentStock
         }
     );
     if (resp['ResultCode'] == '00') {
@@ -435,6 +435,7 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
     print(_response);
     if (_response['ResultCode'] == '00') {
       if (_dispatch['RequestType']['ID'] == 12) {
+        log("save inv");
         saveInventoryEquipments();
       }
       showDialog(
@@ -535,6 +536,10 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
       'userID': UserId,
       'info': _body
     };
+    if (_dispatch['RequestType']['ID'] == 12) {
+      log("save inv");
+      saveInventoryEquipments();
+    }
     Fluttertoast.showToast(
         msg: "正在提交...",
         toastLength: Toast.LENGTH_SHORT,
@@ -876,14 +881,14 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
         BuildWidget.buildRow('安装地点', _equipments[i]['InstalSite']??''),
         BuildWidget.buildRow('维保状态', _equipments[i]['WarrantyStatus']??''),
         BuildWidget.buildRow('服务范围', _equipments[i]['ContractScope']['Name']??''),
-        new Divider(),
       ]);
       if (_dispatch['Request']['RequestType']['ID'] == 12) {
         _list.addAll([
-          BuildWidget.buildInput('盘点状态', equipmentStatus[i], lines: 1),
-          BuildWidget.buildInput('备注', equipmentComments[i], lines: 1),
+          widget.status >= 3?BuildWidget.buildRow('盘点状态', equipmentStatus[i].text):BuildWidget.buildInput('盘点状态', equipmentStatus[i], lines: 1),
+          widget.status >= 3?BuildWidget.buildRow('备注', equipmentComments[i].text):BuildWidget.buildInput('备注', equipmentComments[i], lines: 1),
         ]);
       }
+      _list.add(new Divider());
     }
     return _list;
   }

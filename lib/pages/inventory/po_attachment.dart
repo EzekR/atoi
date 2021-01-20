@@ -459,6 +459,12 @@ class _POAttachmentState extends State<POAttachment> {
   }
 
   void saveAttachmentToPO() async {
+    if (widget.attachType == AttachmentType.COMPONENT && _equipment == null) {
+      showDialog(context: context, builder: (context) => CupertinoAlertDialog(
+        title: new Text('设备不可为空'),
+      )).then((result) => scrollController.jumpTo(0.0));
+      return;
+    }
     if (widget.attachType == AttachmentType.COMPONENT && _component == null) {
       showDialog(context: context, builder: (context) => CupertinoAlertDialog(
         title: new Text('零件不可为空'),

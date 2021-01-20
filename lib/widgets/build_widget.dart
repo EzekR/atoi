@@ -896,7 +896,7 @@ class BuildWidget {
           child: new TextField(
             controller: controller,
             keyboardType: inputType,
-            enabled: currentItem==0?false:true,
+            enabled: !(currentItem==0),
             focusNode: focusNode,
             decoration: InputDecoration(
               fillColor: Color(0xfff0f0f0),

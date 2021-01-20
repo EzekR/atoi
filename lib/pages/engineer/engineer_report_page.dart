@@ -1454,6 +1454,8 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
                     return SearchPage(equipments: _dispatch['Request']['Equipments']??[], multiType: MultiSearchType.EQUIPMENT,);
                   }));
                   if (selected != null) {
+                    equipmentStatus = selected.map<TextEditingController>((item) => new TextEditingController(text: item['StocktakingStatus']??"")).toList();
+                    equipmentComments = selected.map<TextEditingController>((item) => new TextEditingController(text: item['StocktakingComments']??"")).toList();
                     setState(() {
                      _dispatch['Request']['Equipments']  = selected??[];
                     });
@@ -1674,7 +1676,6 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
         BuildWidget.buildRow('安装地点', _equipments[i]['InstalSite'] ?? ''),
         BuildWidget.buildRow('维保状态', _equipments[i]['WarrantyStatus'] ?? ''),
         BuildWidget.buildRow('服务范围', _equipments[i]['ContractScope']['Name'] ?? ''),
-        new Divider()
       ];
       if (_dispatch['Request']['RequestType']['ID'] == 12) {
         equipList.addAll([
@@ -1682,6 +1683,7 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
           _edit?BuildWidget.buildInput('盘点备注', equipmentComments[i], lines: 1):BuildWidget.buildRow('盘点备注', _equipments[i]['StocktakingComments'])
         ]);
       }
+      equipList.add(new Divider());
       _list.addAll(equipList);
     }
     return _list;

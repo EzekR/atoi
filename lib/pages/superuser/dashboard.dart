@@ -1822,7 +1822,7 @@ class _DashboardState extends State<Dashboard> {
                   child: Padding(
                     padding: EdgeInsets.all(8.0),
                     child: requestList.length==0?Text(
-                      '暂无报修\n参报数量：0',
+                      '暂无报修\n数量：0',
                       style: TextStyle(
                         color: Colors.white
                       ),
@@ -1836,7 +1836,7 @@ class _DashboardState extends State<Dashboard> {
                           ),
                         ),
                         Text(
-                          '参报数量：${requestData[seriesIndex].count}',
+                          '数量：${requestData[seriesIndex].count}',
                           style: TextStyle(
                               color: Colors.white
                           ),

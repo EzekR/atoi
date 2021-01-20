@@ -9,6 +9,7 @@ import 'package:atoi/widgets/build_widget.dart';
 import 'package:atoi/utils/constants.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:atoi/pages/equipments/equipments_list.dart';
+import 'package:atoi/permissions.dart';
 
 /// 工程师待上传报告列表页面类
 class EngineerToReport extends StatefulWidget{
@@ -21,6 +22,17 @@ class _EngineerToReportState extends State<EngineerToReport> {
 
   List<dynamic> _tasks = [];
   bool _noMore = false;
+  Map techPermission;
+  Map specialPermission;
+
+  void getPermission() async {
+    SharedPreferences _prefs = await SharedPreferences.getInstance();
+    Permission permissionInstance = new Permission();
+    permissionInstance.prefs = _prefs;
+    permissionInstance.initPermissions();
+    techPermission = permissionInstance.getTechPermissions('Operations', 'Dispatch');
+    specialPermission = permissionInstance.getSpecialPermissions('Operations', 'Dispatch');
+  }
 
   Future<Null> getTask() async {
     final SharedPreferences pref = await _prefs;
@@ -44,6 +56,7 @@ class _EngineerToReportState extends State<EngineerToReport> {
 
   void initState() {
     //getTask();
+    getPermission();
     super.initState();
     EngineerModel model = MainModel.of(context);
     _scrollController.addListener(() {
@@ -164,7 +177,7 @@ class _EngineerToReportState extends State<EngineerToReport> {
                   BuildWidget.buildCardRow('请求类型', requestType),
                   BuildWidget.buildCardRow('紧急程度', urgency),
                   BuildWidget.buildCardRow('审批状态', task['Status']['Name']),
-                  new Row(
+                  techPermission==null||!techPermission['View']?Container():new Row(
                     mainAxisAlignment: MainAxisAlignment.end,
                     mainAxisSize: MainAxisSize.max,
                     children: <Widget>[

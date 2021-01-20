@@ -1,16 +1,36 @@
 import 'package:flutter/material.dart';
+import 'package:atoi/permissions.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 /// 工程师菜单类
-class EngineerMenu extends StatelessWidget {
-
+class EngineerMenu extends StatefulWidget {
   final bool limited;
+  EngineerMenu({Key key, this.limited}):super(key: key);
+  _EngineerMenuState createState() => new _EngineerMenuState();
+}
 
-  EngineerMenu({Key key, this.limited}):super();
+class _EngineerMenuState extends State<EngineerMenu> {
+
+  Map techPermission;
+  Map specialPermission;
+
+  void getPermission() async {
+    SharedPreferences _prefs = await SharedPreferences.getInstance();
+    Permission permissionInstance = new Permission();
+    permissionInstance.prefs = _prefs;
+    permissionInstance.initPermissions();
+    techPermission = permissionInstance.getTechPermissions('Operations', 'Request');
+    specialPermission = permissionInstance.getSpecialPermissions('Operations', 'Request');
+  }
+
+  void initState() {
+    getPermission();
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
     // TODO: implement build
-
     Column buildIconColumn(IconData icon, String title, String type) {
       Color color = Theme.of(context).primaryColor;
 
@@ -21,7 +41,10 @@ class EngineerMenu extends StatelessWidget {
           new IconButton(
             icon: new Icon(icon),
             onPressed: () {
-              limited?null:Navigator.of(context).pushNamed(type);
+              if (!techPermission['Add']) {
+                return;
+              }
+              Navigator.of(context).pushNamed(type);
             },
             color: color,
             iconSize: 50.0,
@@ -117,6 +140,9 @@ class EngineerMenu extends StatelessWidget {
                         new IconButton(
                           icon: new Icon(Icons.insert_chart),
                           onPressed: () {
+                            if (!techPermission['Add']) {
+                              return;
+                            }
                             showModalBottomSheet(
                                 context: context,
                                 builder: (context) {
@@ -136,7 +162,7 @@ class EngineerMenu extends StatelessWidget {
                                             ),
                                           ),
                                           onTap: () {
-                                            limited?null:Navigator.of(context).pushNamed('equipment-archive');
+                                            widget.limited?null:Navigator.of(context).pushNamed('equipment-archive');
                                           },
                                         ),
                                       ),
@@ -152,7 +178,7 @@ class EngineerMenu extends StatelessWidget {
                                             ),
                                           ),
                                           onTap: () {
-                                            limited?null:Navigator.of(context).pushNamed('equipment-install');
+                                            widget.limited?null:Navigator.of(context).pushNamed('equipment-install');
                                           },
                                         ),
                                       ),
@@ -168,7 +194,7 @@ class EngineerMenu extends StatelessWidget {
                                             ),
                                           ),
                                           onTap: () {
-                                            limited?null:Navigator.of(context).pushNamed('equipment-transfer');
+                                            widget.limited?null:Navigator.of(context).pushNamed('equipment-transfer');
                                           },
                                         ),
                                       ),
@@ -184,7 +210,7 @@ class EngineerMenu extends StatelessWidget {
                                             ),
                                           ),
                                           onTap: () {
-                                            limited?null:Navigator.of(context).pushNamed('equipment-lending');
+                                            widget.limited?null:Navigator.of(context).pushNamed('equipment-lending');
                                           },
                                         ),
                                       ),
@@ -200,7 +226,7 @@ class EngineerMenu extends StatelessWidget {
                                             ),
                                           ),
                                           onTap: () {
-                                            limited?null:Navigator.of(context).pushNamed('equipment-check');
+                                            widget.limited?null:Navigator.of(context).pushNamed('equipment-check');
                                           },
                                         ),
                                       ),
@@ -216,7 +242,7 @@ class EngineerMenu extends StatelessWidget {
                                             ),
                                           ),
                                           onTap: () {
-                                            limited?null:Navigator.of(context).pushNamed('equipment-scrap');
+                                            widget.limited?null:Navigator.of(context).pushNamed('equipment-scrap');
                                           },
                                         ),
                                       ),

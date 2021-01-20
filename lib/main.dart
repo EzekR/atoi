@@ -35,9 +35,6 @@ import 'dart:async';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:atoi/utils/event_bus.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:atoi/pages/superuser/superuser_home.dart';
-import 'package:atoi/models/constants_model.dart';
-import 'package:atoi/pages/superuser/dashboard.dart';
 
 class AtoiApp extends StatefulWidget{
   _AtoiAppState createState() => _AtoiAppState();

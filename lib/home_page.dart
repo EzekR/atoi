@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:atoi/pages/inventory/stocktaking_list.dart';
 import 'package:atoi/pages/valuation/valuation_condition.dart';
 import 'package:atoi/pages/valuation/valuation_history.dart';
@@ -28,6 +30,7 @@ import 'package:atoi/pages/inventory/consumable_list.dart';
 import 'package:atoi/pages/inventory/po_list.dart';
 import 'package:atoi/pages/inventory/service_list.dart';
 import 'package:atoi/pages/inventory/spare_list.dart';
+import 'permissions.dart';
 
 /// 超管首页类
 class HomePage extends StatefulWidget {
@@ -73,6 +76,13 @@ class _HomePageState extends State<HomePage>
   List selectedTypes = [];
   bool showWare = false;
   bool showMeasure = false;
+  Map requestTechPermission;
+  Map dispatchTechPermission;
+  Map medicalPermission;
+  Map measurePermission;
+  Map otherPermission;
+  Map contractPermission;
+  Map supplierPermission;
 
   Future<Null> getRole() async {
     var _prefs = await prefs;
@@ -81,6 +91,20 @@ class _HomePageState extends State<HomePage>
     setState(() {
       _userName = decoded['Name'];
     });
+  }
+
+  Future<Null> getPermission() async {
+    SharedPreferences _prefs = await prefs;
+    Permission permissionInstance = new Permission();
+    permissionInstance.prefs = _prefs;
+    permissionInstance.initPermissions();
+    requestTechPermission = permissionInstance.getTechPermissions('Operations', 'Request');
+    dispatchTechPermission = permissionInstance.getTechPermissions('Operations', 'Dispatch');
+    medicalPermission = permissionInstance.getTechPermissions("Asset", "Equipment");
+    measurePermission = permissionInstance.getTechPermissions("Asset", "MeasInstrum");
+    otherPermission = permissionInstance.getTechPermissions("Asset", "OtherEqpt");
+    contractPermission = permissionInstance.getTechPermissions("Asset", "Contract");
+    supplierPermission = permissionInstance.getTechPermissions("Asset", "Supplier");
   }
 
   Container buildButton() {
@@ -166,7 +190,8 @@ class _HomePageState extends State<HomePage>
       _currentTabIndex==2?field='d.ID':field='r.ID';
       assetType = 0;
     });
-    _currentTabIndex==2?model.getDispatches():model.getRequests();
+    model.getRequests();
+    model.getDispatches();
   }
 
   void setFilter() {
@@ -204,21 +229,23 @@ class _HomePageState extends State<HomePage>
     await _prefs.clear();
     await _prefs.setString('serverUrl', _server);
     _timer.cancel();
+    model.clearCache();
     Navigator.of(context).push(new MaterialPageRoute(builder: (_) => new LoginPage()));
   }
 
   @override
   void initState() {
     getRole();
+    getPermission();
     _tabController = new TabController(length: 4, vsync: this, initialIndex: 0);
     _tabController.addListener(_handleTabChange);
     super.initState();
     model = MainModel.of(context);
     cModel = MainModel.of(context);
     initFilter();
-    model.getDispatches();
     model.getRequests();
     model.getTodos();
+    model.getDispatches();
     model.getCount();
     _timer = new Timer.periodic(new Duration(seconds: 10), (timer) {
       print('polling');
@@ -1165,6 +1192,12 @@ class _HomePageState extends State<HomePage>
                             height: 40.0,
                             child: FlatButton(
                               onPressed: () {
+                                if (!medicalPermission['View']) {
+                                  showDialog(context: context, builder: (context) => CupertinoAlertDialog(
+                                    title: Text("无权限"),
+                                  ));
+                                  return;
+                                }
                                 Navigator.of(context).push(new MaterialPageRoute(builder: (_) {
                                   return new EquipmentsList(equipmentType: EquipmentType.MEDICAL,);
                                 }));
@@ -1193,6 +1226,12 @@ class _HomePageState extends State<HomePage>
                             height: 40.0,
                             child: FlatButton(
                               onPressed: () {
+                                if (!measurePermission['View']) {
+                                  showDialog(context: context, builder: (context) => CupertinoAlertDialog(
+                                    title: Text("无权限"),
+                                  ));
+                                  return;
+                                }
                                 Navigator.of(context).push(new MaterialPageRoute(builder: (_) {
                                   return new EquipmentsList(equipmentType: EquipmentType.MEASURE,);
                                 }));
@@ -1221,6 +1260,12 @@ class _HomePageState extends State<HomePage>
                             height: 40.0,
                             child: FlatButton(
                               onPressed: () {
+                                if (!otherPermission['View']) {
+                                  showDialog(context: context, builder: (context) => CupertinoAlertDialog(
+                                    title: Text("无权限"),
+                                  ));
+                                  return;
+                                }
                                 Navigator.of(context).push(new MaterialPageRoute(builder: (_) {
                                   return new EquipmentsList(equipmentType: EquipmentType.OTHER,);
                                 }));
@@ -1249,6 +1294,12 @@ class _HomePageState extends State<HomePage>
                             height: 40.0,
                             child: FlatButton(
                               onPressed: () {
+                                if (!contractPermission['View']) {
+                                  showDialog(context: context, builder: (context) => CupertinoAlertDialog(
+                                    title: Text("无权限"),
+                                  ));
+                                  return;
+                                }
                                 Navigator.of(context).push(new MaterialPageRoute(builder: (_) {
                                   return new ContractList();
                                 }));
@@ -1276,6 +1327,12 @@ class _HomePageState extends State<HomePage>
                             height: 40.0,
                             child: FlatButton(
                               onPressed: () {
+                                if (!supplierPermission['View']) {
+                                  showDialog(context: context, builder: (context) => CupertinoAlertDialog(
+                                    title: Text("无权限"),
+                                  ));
+                                  return;
+                                }
                                 Navigator.of(context).push(new MaterialPageRoute(builder: (_) {
                                   return new VendorsList();
                                 }));

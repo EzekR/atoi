@@ -56,6 +56,7 @@ class _PODetailState extends State<PODetail> {
   TextEditingController serialCode = new TextEditingController(),
   model = new TextEditingController(),
   spec = new TextEditingController();
+  List<TextEditingController> serviceTimes = [];
 
   List expansionList = new List(5).map((item) {
     return true;
@@ -68,6 +69,11 @@ class _PODetailState extends State<PODetail> {
     });
   }
 
+  void initServiceInput() {
+    serviceTimes = _servicesList.map<TextEditingController>((item) =>
+    new TextEditingController(text: item['TotalTimes'].toString())).toList();
+  }
+
   TextEditingController comments = new TextEditingController(),
                         approveComments = new TextEditingController();
 
@@ -75,7 +81,9 @@ class _PODetailState extends State<PODetail> {
     super.initState();
     cModel = MainModel.of(context);
     if (widget.purchaseOrder != null) {
-      getPurchaseOrder();
+      getPurchaseOrder().then((_) {
+        initServiceInput();
+      });
     }
     getName();
     switch (widget.operation) {
@@ -415,11 +423,9 @@ class _PODetailState extends State<PODetail> {
     }).toList();
     if (widget.operation == PurchaseOrderOperation.INBOUND) {
       if (pageType == AttachmentType.SERVICE && !fullItem['Inbounded']) {
-        TextEditingController _totalTimes = new TextEditingController();
-        _totalTimes.text = fullItem['TotalTimes'].toString();
         _list.removeLast();
         _list.add(
-            BuildWidget.buildCardInput('服务次数', _totalTimes)
+            BuildWidget.buildCardInput('服务次数', serviceTimes[key])
         );
       }
       _list.add(
@@ -429,11 +435,10 @@ class _PODetailState extends State<PODetail> {
               !fullItem['Inbounded']?RaisedButton(
                 onPressed: () {
                   List _service = [
-                    // todo : 改成关联设备
                     {
                       'Equipments': fullItem['Equipments'],
                       'Name': fullItem['Name'],
-                      'TotalTimes': fullItem['TotalTimes'],
+                      'TotalTimes': serviceTimes[key].text,
                       'Price': fullItem['Price'],
                       'StartDate': fullItem['StartDate'],
                       'EndDate': fullItem['EndDate'],
@@ -495,7 +500,7 @@ class _PODetailState extends State<PODetail> {
                   Navigator.of(context).push(new MaterialPageRoute(builder: (context) => POAttachment(po: fullItem, editable: true, attachType: pageType,))).then((result) {
                     if (result !=null) {
                       setState(() {
-                        Map _data = jsonDecode(result);
+                        Map _data = result;
                         switch (pageType) {
                           case AttachmentType.COMPONENT:
                             setState(() {
@@ -529,6 +534,7 @@ class _PODetailState extends State<PODetail> {
                           case AttachmentType.SERVICE:
                             setState(() {
                               _servicesList[key] = _data;
+                              serviceTimes[key].text = _data['TotalTimes'];
                             });
                             _services[key] = {
                               '服务名称': _data['Name'],

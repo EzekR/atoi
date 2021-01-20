@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:atoi/pages/equipments/print_qrcode.dart';
 import 'package:atoi/pages/inventory/po_attachment.dart';
 import 'package:flutter/material.dart';
@@ -32,7 +34,8 @@ class _InboundStuffState extends State<InboundStuff> {
 
   void addOneComponent() {
     Map _component = widget.stuff;
-    if (inboundComponents.length > _component['Qty']) {
+    log("$_component");
+    if (inboundComponents.length > (_component['Qty'] - _component['InboundQty'])) {
       showDialog(context: context, builder: (context) => CupertinoAlertDialog(
         title: new Text('入库数量不能超过采购数量'),
       ));

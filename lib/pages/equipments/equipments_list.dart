@@ -973,11 +973,11 @@ class _EquipmentsListState extends State<EquipmentsList> {
               children: _buildEquipInfo(item),
             ),
           ),
-          specialPermission==null||!specialPermission['QRCode']?Container():new Row(
+          new Row(
             mainAxisAlignment: MainAxisAlignment.center,
             mainAxisSize: MainAxisSize.max,
             children: <Widget>[
-              new RaisedButton(
+                specialPermission==null||!specialPermission['QRCode']?Container():new RaisedButton(
                 onPressed: (){
                   CodeType codeType;
                   switch (widget.equipmentType) {
@@ -1060,7 +1060,7 @@ class _EquipmentsListState extends State<EquipmentsList> {
               new Padding(
                 padding: EdgeInsets.symmetric(horizontal: 5.0),
               ),
-              specialPermission==null||!specialPermission['TimeLine']?Container():new RaisedButton(
+              specialPermission!=null&&specialPermission['TimeLine']?new RaisedButton(
                 onPressed: () async {
                   if (limited&&role!=1) {
                     return;
@@ -1085,7 +1085,7 @@ class _EquipmentsListState extends State<EquipmentsList> {
                     )
                   ],
                 ),
-              ),
+              ):Container(),
             ],
           )
         ],

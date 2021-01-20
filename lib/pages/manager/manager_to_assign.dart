@@ -43,7 +43,7 @@ class _ManagerToAssignState extends State<ManagerToAssign> {
     });
   }
 
-  void getPermission() async {
+  Future<Null> getPermission() async {
     SharedPreferences _prefs = await prefs;
     Permission permissionInstance = new Permission();
     permissionInstance.prefs = _prefs;

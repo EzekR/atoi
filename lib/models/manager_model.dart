@@ -1,6 +1,7 @@
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:scoped_model/scoped_model.dart';
 import 'package:atoi/utils/http_request.dart';
+import 'package:atoi/permissions.dart';
 
 /// 超管模型类
 class ManagerModel extends Model {
@@ -13,6 +14,23 @@ class ManagerModel extends Model {
   int _offset = 10;
   int _offsetDispatch = 10;
   int _offsetTodo = 10;
+  Map requestPermission;
+  Map dispatchPermission;
+
+  void clearCache() {
+    _requests.clear();
+    _dispatches.clear();
+    _todos.clear();
+  }
+
+  Future<Null> getPermission() async {
+    SharedPreferences _prefs = await SharedPreferences.getInstance();
+    Permission permissionInstance = new Permission();
+    permissionInstance.prefs = _prefs;
+    permissionInstance.initPermissions();
+    requestPermission = permissionInstance.getTechPermissions('Operations', 'Request');
+    dispatchPermission = permissionInstance.getTechPermissions('Operations', 'Dispatch');
+  }
 
   int get offset => _offset;
 
@@ -133,6 +151,7 @@ class ManagerModel extends Model {
   }
   /// 获取任务数量
   Future<Null> getCount() async {
+    await getPermission();
     Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
     var prefs = await _prefs;
     var userID = await prefs.getInt('userID');
@@ -149,11 +168,22 @@ class ManagerModel extends Model {
       _badgeB = resp['Data']['dispatchCount'].toString();
       _badgeC = resp['Data']['unfinishedCount'].toString();
     }
+    if (!requestPermission['View']) {
+      _badgeA = '0';
+      _badgeC = '0';
+    }
+    if (!dispatchPermission['View']) {
+      _badgeB = '0';
+    }
     notifyListeners();
   }
 
   /// 获取请求
   Future<Null> getRequests() async {
+    await getPermission();
+    if (!requestPermission['View']) {
+      return;
+    }
     Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
     var prefs = await _prefs;
     var userID = await prefs.getInt('userID');
@@ -177,6 +207,10 @@ class ManagerModel extends Model {
 
   /// 获取更多请求
   Future<Null> getMoreRequests() async {
+    await getPermission();
+    if (!requestPermission['View']) {
+      return;
+    }
     Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
     var prefs = await _prefs;
     var userID = await prefs.getInt('userID');
@@ -199,6 +233,10 @@ class ManagerModel extends Model {
 
   /// 获取派工单
   Future<Null> getDispatches() async {
+    await getPermission();
+    if (!dispatchPermission['View']) {
+      return;
+    }
     Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
     var prefs = await _prefs;
     var userID = await prefs.getInt('userID');
@@ -232,6 +270,10 @@ class ManagerModel extends Model {
 
   /// 获取更多派工单
   Future<Null> getMoreDispatches() async {
+    await getPermission();
+    if (!dispatchPermission['View']) {
+      return;
+    }
     Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
     var prefs = await _prefs;
     var userID = await prefs.getInt('userID');
@@ -265,6 +307,10 @@ class ManagerModel extends Model {
 
   /// 获取未完成请求
   Future<Null> getTodos() async {
+    await getPermission();
+    if (!requestPermission['View']) {
+      return;
+    }
     Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
     var prefs = await _prefs;
     var userID = await prefs.getInt('userID');
@@ -303,6 +349,10 @@ class ManagerModel extends Model {
 
   /// 获取更多未完成请求
   Future<Null> getMoreTodos() async {
+    await getPermission();
+    if (!requestPermission['View']) {
+      return;
+    }
     Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
     var prefs = await _prefs;
     var userID = await prefs.getInt('userID');
