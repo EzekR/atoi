@@ -1078,14 +1078,12 @@ class _StocktakingDetailState extends State<StocktakingDetail> {
                   children: <Widget>[
                     RaisedButton(
                       onPressed: () async {
+                        bool changed = await checkItemChange();
+                        if (changed) {
+                          return;
+                        }
                         bool res = await checkStocktaking(1);
                         if (res) {
-                          //if (approveComment.text.isEmpty) {
-                          //  showDialog(context: context, builder: (context) => CupertinoAlertDialog(
-                          //    title: new Text('备注不可为空'),
-                          //  ));
-                          //  return;
-                          //}
                           bool resp = await approveStock(3);
                           if (resp) {
                             showDialog(context: context, builder: (context) => CupertinoAlertDialog(

@@ -699,7 +699,7 @@ class _ManagerCompletePageState extends State<ManagerCompletePage> {
         isExpanded: _isExpandedReport,
       ));
     }
-    if (_report != null && _report['ReportAccessories'].isNotEmpty) {
+    if (_report != null && _report['ReportComponent'].isNotEmpty) {
       _list.add(new ExpansionPanel(canTapOnHeader: true,
         headerBuilder: (context, isExpanded) {
           return ListTile(

@@ -1,6 +1,7 @@
 import 'package:scoped_model/scoped_model.dart';
 import 'package:atoi/utils/http_request.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:atoi/permissions.dart';
 
 /// 工程师模型类
 class EngineerModel extends Model {
@@ -13,6 +14,20 @@ class EngineerModel extends Model {
   int _offsetReport = 10;
   int _dispatchUrgencyId = 0;
   int _engineerDispatchStatusId = 0;
+  Map dispatchPermission;
+
+  Future<Null> getPermission() async {
+    SharedPreferences _prefs = await SharedPreferences.getInstance();
+    Permission permissionInstance = new Permission();
+    permissionInstance.prefs = _prefs;
+    permissionInstance.initPermissions();
+    dispatchPermission = permissionInstance.getTechPermissions('Operations', 'Dispatch');
+  }
+
+  void clearCache() {
+    _tasksToReport.clear();
+    _tasksToStart.clear();
+  }
 
   int get engineerDispatchStatusId => _engineerDispatchStatusId;
 
@@ -75,6 +90,7 @@ class EngineerModel extends Model {
 
   /// 获取任务数量
   Future<Null> getCountEngineer() async {
+    await getPermission();
     Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
     var prefs = await _prefs;
     var userID = await prefs.getInt('userID');
@@ -90,11 +106,19 @@ class EngineerModel extends Model {
       _badgeEA = resp['Data']['newdispatchCount'].toString();
       _badgeEB = resp['Data']['pendingDispatchCount'].toString();
     }
+    if (!dispatchPermission['View']) {
+      _badgeEB = '0';
+      _badgeEA = '0';
+    }
     notifyListeners();
   }
 
   /// 获取待开始工单
   Future<Null> getTasksToStart() async {
+    await getPermission();
+    if (!dispatchPermission['View']) {
+      return;
+    }
     Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
     var prefs = await _prefs;
     var userID = await prefs.getInt('userID');
@@ -126,6 +150,10 @@ class EngineerModel extends Model {
 
   /// 获取更多待开始工单
   Future<Null> getMoreTasksToStart() async {
+    await getPermission();
+    if (!dispatchPermission['View']) {
+      return;
+    }
     Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
     var prefs = await _prefs;
     var userID = await prefs.getInt('userID');
@@ -156,6 +184,10 @@ class EngineerModel extends Model {
 
   /// 获取待上传报告工单
   Future<Null> getTasksToReport() async {
+    await getPermission();
+    if (!dispatchPermission['View']) {
+      return;
+    }
     Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
     var prefs = await _prefs;
     var userID = await prefs.getInt('userID');
@@ -182,6 +214,10 @@ class EngineerModel extends Model {
 
   /// 获取更多待上传报告工单
   Future<Null> getMoreTasksToReport() async {
+    await getPermission();
+    if (!dispatchPermission['View']) {
+      return;
+    }
     Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
     var prefs = await _prefs;
     var userID = await prefs.getInt('userID');

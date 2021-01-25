@@ -1658,7 +1658,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
           builder: (context) => CupertinoAlertDialog(
                 title: new Text(resp['ResultMessage']),
               )).then((result) {
-                if (resp['ResultMessage'] == '资产编号不可为空') {
+                if (resp['ResultMessage'] == '设备资产编号重复') {
                   FocusScope.of(context).requestFocus(_focusEquip[4]);
                 }
       });

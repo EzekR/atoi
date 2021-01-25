@@ -727,7 +727,7 @@ Future getImage() async {
                                 BuildWidget.buildRow('系统编号', OID),
                                 widget.editable?BuildWidget.buildInput('合同编号', contractNum, maxLength: 20, focusNode: _focusContract[0], required: true):BuildWidget.buildRow('合同编号', contractNum.text),
                                 widget.editable?BuildWidget.buildInput('项目编号', projectNum, maxLength: 20, focusNode: _focusContract[9]):BuildWidget.buildRow('项目编号', projectNum.text),
-                                widget.editable?BuildWidget.buildInput('金额', amount, inputType: TextInputType.numberWithOptions(decimal: true), maxLength: 11, focusNode: _focusContract[1], required: true):BuildWidget.buildRow('金额', CommonUtil.CurrencyForm(double.parse(amount.text), times: 1, digits: 0)),
+                                widget.editable?BuildWidget.buildInput('金额', amount, inputType: TextInputType.numberWithOptions(decimal: true), maxLength: 11, focusNode: _focusContract[1], required: true):BuildWidget.buildRow('金额', CommonUtil.CurrencyForm(double.tryParse(amount.text), times: 1, digits: 0)),
                                 widget.editable?BuildWidget.buildInput('名称', name, maxLength: 50, focusNode: _focusContract[2], required: true):BuildWidget.buildRow('名称', name.text),
                                 widget.editable?BuildWidget.buildDropdown('类型', currentType, dropdownType, changeType, required: true):BuildWidget.buildRow('类型', currentType),
                                 widget.editable?new Padding(

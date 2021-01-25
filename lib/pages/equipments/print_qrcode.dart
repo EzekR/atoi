@@ -13,7 +13,8 @@ class PrintQrcode extends StatefulWidget{
   final int equipmentId;
   final CodeType codeType;
   final List components;
-  PrintQrcode({Key key, this.equipmentId, this.codeType, this.components}):super(key: key);
+  final bool inbound;
+  PrintQrcode({Key key, this.equipmentId, this.codeType, this.components, this.inbound}):super(key: key);
 }
 
 class _PrintQrcodeState extends State<PrintQrcode> {
@@ -197,8 +198,7 @@ class _PrintQrcodeState extends State<PrintQrcode> {
         elevation: 0.7,
         leading: IconButton(
           onPressed: () {
-            if (widget.codeType == CodeType.CONSUMABLE || widget.codeType == CodeType.COMPONENT
-            || widget.codeType == CodeType.SPARE) {
+            if (widget.inbound!=null&&widget.inbound) {
               int count = 0;
               Navigator.popUntil(context, (route) {
                 return count ++ == 2;

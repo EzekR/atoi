@@ -35,7 +35,7 @@ class _InboundStuffState extends State<InboundStuff> {
   void addOneComponent() {
     Map _component = widget.stuff;
     log("$_component");
-    if (inboundComponents.length > (_component['Qty'] - _component['InboundQty'])) {
+    if (inboundComponents.length >= (_component['Qty'] - _component['InboundQty'])) {
       showDialog(context: context, builder: (context) => CupertinoAlertDialog(
         title: new Text('入库数量不能超过采购数量'),
       ));
@@ -185,10 +185,10 @@ class _InboundStuffState extends State<InboundStuff> {
       )).then((result) {
         switch (widget.type) {
           case AttachmentType.COMPONENT:
-            Navigator.of(context).push(new MaterialPageRoute(builder: (_) => PrintQrcode(components: resp['Data']['Components'], codeType: CodeType.COMPONENT,)));
+            Navigator.of(context).push(new MaterialPageRoute(builder: (_) => PrintQrcode(components: resp['Data']['Components'], codeType: CodeType.COMPONENT, inbound: true,)));
             break;
           case AttachmentType.CONSUMABLE:
-            Navigator.of(context).push(new MaterialPageRoute(builder: (_) => PrintQrcode(equipmentId: resp['Data']['Consumables'][0]['ID'], codeType: CodeType.CONSUMABLE,)));
+            Navigator.of(context).push(new MaterialPageRoute(builder: (_) => PrintQrcode(equipmentId: resp['Data']['Consumables'][0]['ID'], codeType: CodeType.CONSUMABLE, inbound: true,)));
             break;
           case AttachmentType.SERVICE:
             break;

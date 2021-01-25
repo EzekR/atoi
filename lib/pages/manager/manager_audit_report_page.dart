@@ -918,7 +918,7 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
                   }
                   final selected = await Navigator.of(context)
                       .push(new MaterialPageRoute(builder: (context) {
-                    return SearchPage(equipments: _equipments, multiType: MultiSearchType.EQUIPMENT,);
+                    return SearchPage(equipments: _equipments, multiType: MultiSearchType.EQUIPMENT, onlyType: EquipmentType.MEDICAL,);
                   }));
                   if (selected != null) {
                     setState(() {

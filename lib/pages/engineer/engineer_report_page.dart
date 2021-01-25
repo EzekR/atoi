@@ -1451,7 +1451,7 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
                   }
                   final selected = await Navigator.of(context)
                       .push(new MaterialPageRoute(builder: (context) {
-                    return SearchPage(equipments: _dispatch['Request']['Equipments']??[], multiType: MultiSearchType.EQUIPMENT,);
+                    return SearchPage(equipments: _dispatch['Request']['Equipments']??[], multiType: MultiSearchType.EQUIPMENT, onlyType: EquipmentType.MEDICAL,);
                   }));
                   if (selected != null) {
                     equipmentStatus = selected.map<TextEditingController>((item) => new TextEditingController(text: item['StocktakingStatus']??"")).toList();

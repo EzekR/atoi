@@ -422,12 +422,12 @@ class _PODetailState extends State<PODetail> {
       return BuildWidget.buildRow(key, item[key]);
     }).toList();
     if (widget.operation == PurchaseOrderOperation.INBOUND) {
-      if (pageType == AttachmentType.SERVICE && !fullItem['Inbounded']) {
-        _list.removeLast();
-        _list.add(
-            BuildWidget.buildCardInput('服务次数', serviceTimes[key])
-        );
-      }
+      //if (pageType == AttachmentType.SERVICE && !fullItem['Inbounded']) {
+      //  _list.removeLast();
+      //  _list.add(
+      //      BuildWidget.buildCardInput('服务次数', serviceTimes[key])
+      //  );
+      //}
       _list.add(
           Row(
             mainAxisAlignment: MainAxisAlignment.end,
@@ -499,54 +499,52 @@ class _PODetailState extends State<PODetail> {
                   // todo: 富士二类改成关联设备
                   Navigator.of(context).push(new MaterialPageRoute(builder: (context) => POAttachment(po: fullItem, editable: true, attachType: pageType,))).then((result) {
                     if (result !=null) {
-                      setState(() {
-                        Map _data = result;
-                        switch (pageType) {
-                          case AttachmentType.COMPONENT:
-                            setState(() {
-                              _componentsList[key] = _data;
-                            });
-                            _accs[key] = {
-                              '简称': _data['Component']['Name'],
-                              '描述': _data['Component']['Description'],
-                              '规格': _data['Specification'],
-                              '型号': _data['Model'],
-                              '类型': _data['Component']['Type']['Name'],
-                              '关联设备': _data['Equipment']['Name'],
-                              '单价': _data['Price'],
-                              '数量': _data['Qty']
-                            };
-                            break;
-                          case AttachmentType.CONSUMABLE:
-                            setState(() {
-                              _consumableList[key] = _data;
-                            });
-                            _consumable[key] = {
-                              '简称': _data['Consumable']['Name'],
-                              '描述': _data['Consumable']['Description'],
-                              '规格': _data['Specification'],
-                              '型号': _data['Model'],
-                              '关联富士II类': _data['Consumable']['FujiClass2']['Name'],
-                              '单价': _data['Price'],
-                              '数量': _data['Qty']
-                            };
-                            break;
-                          case AttachmentType.SERVICE:
-                            setState(() {
-                              _servicesList[key] = _data;
-                              serviceTimes[key].text = _data['TotalTimes'];
-                            });
-                            _services[key] = {
-                              '服务名称': _data['Name'],
-                              '关联设备': _data['Equipments'].map((equip) => equip['Name']).join(";"),
-                              '金额': CommonUtil.CurrencyForm(double.tryParse(_data['Price']), times: 1, digits: 0),
-                              '服务开始时间': _data['StartDate'].toString().split("T")[0],
-                              '服务结束时间': _data['EndDate'].toString().split("T")[0],
-                              '服务次数': _data['TotalTimes']
-                            };
-                            break;
-                        }
-                      });
+                      Map _data = result;
+                      switch (pageType) {
+                        case AttachmentType.COMPONENT:
+                          setState(() {
+                            _componentsList[key] = _data;
+                          });
+                          _accs[key] = {
+                            '简称': _data['Component']['Name'],
+                            '描述': _data['Component']['Description'],
+                            '规格': _data['Specification'],
+                            '型号': _data['Model'],
+                            '类型': _data['Component']['Type']['Name'],
+                            '关联设备': _data['Equipment']['Name'],
+                            '单价': _data['Price'],
+                            '数量': _data['Qty']
+                          };
+                          break;
+                        case AttachmentType.CONSUMABLE:
+                          setState(() {
+                            _consumableList[key] = _data;
+                          });
+                          _consumable[key] = {
+                            '简称': _data['Consumable']['Name'],
+                            '描述': _data['Consumable']['Description'],
+                            '规格': _data['Specification'],
+                            '型号': _data['Model'],
+                            '关联富士II类': _data['Consumable']['FujiClass2']['Name'],
+                            '单价': _data['Price'],
+                            '数量': _data['Qty']
+                          };
+                          break;
+                        case AttachmentType.SERVICE:
+                          setState(() {
+                            _servicesList[key] = _data;
+                            //serviceTimes[key].text = _data['TotalTimes'];
+                          });
+                          _services[key] = {
+                            '服务名称': _data['Name'],
+                            '关联设备': _data['Equipments'].map((equip) => equip['Name']).join(";"),
+                            '金额': CommonUtil.CurrencyForm(double.tryParse(_data['Price']), times: 1, digits: 0),
+                            '服务开始时间': _data['StartDate'].toString().split("T")[0],
+                            '服务结束时间': _data['EndDate'].toString().split("T")[0],
+                            '服务次数': _data['TotalTimes']
+                          };
+                          break;
+                      }
                     }
                   });
                 },
@@ -710,7 +708,7 @@ class _PODetailState extends State<PODetail> {
   bool checkInboundService() {
     bool allInbound = true;
     _servicesList.forEach((_con) {
-      if (_con['InboundQty'] != _con['Qty']) {
+      if (!_con['Inbounded']) {
         allInbound = false;
       }
     });

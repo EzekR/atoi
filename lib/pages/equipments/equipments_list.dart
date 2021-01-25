@@ -69,13 +69,13 @@ class _EquipmentsListState extends State<EquipmentsList> {
     _editable = role==1;
   }
 
-  void getPermission() async {
+  Future<Null> getPermission() async {
     SharedPreferences _prefs = await prefs;
     Permission permissionInstance = new Permission();
     permissionInstance.prefs = _prefs;
     permissionInstance.initPermissions();
     String _type;
-    switch (widget.equipmentType) {
+    switch (widget.equipmentType??eType) {
       case EquipmentType.MEDICAL:
         _type = "Equipment";
         break;
@@ -145,6 +145,9 @@ class _EquipmentsListState extends State<EquipmentsList> {
   }
 
   Future<Null> getEquipments({String filterText}) async {
+    if (!techPermission['View']) {
+      return;
+    }
     filterText = filterText??'';
     String url;
     if (widget.equipmentType != null) {
@@ -671,9 +674,10 @@ class _EquipmentsListState extends State<EquipmentsList> {
     });
   }
 
+  EquipmentType eType;
+
   void initState() {
     super.initState();
-    getPermission();
     switch (widget.equipmentType) {
       case EquipmentType.MEDICAL:
         prefix = 'e';
@@ -696,16 +700,19 @@ class _EquipmentsListState extends State<EquipmentsList> {
         prefix = 'e';
         pageTitle = '医疗设备';
         cardHead = "设备";
+        eType = EquipmentType.MEDICAL;
         break;
       case 2:
         prefix = 'mi';
         pageTitle = '计量器具';
         cardHead = "器具";
+        eType = EquipmentType.MEASURE;
         break;
       case 3:
         prefix = 'oe';
         pageTitle = '其他设备';
         cardHead = "设备";
+        eType = EquipmentType.OTHER;
         break;
     }
     cModel = MainModel.of(context);
@@ -713,9 +720,11 @@ class _EquipmentsListState extends State<EquipmentsList> {
     setState(() {
       _loading = true;
     });
-    getEquipments().then((result) => setState(() {
-      _loading = false;
-    }));
+    getPermission().then((_) {
+      getEquipments().then((result) => setState(() {
+        _loading = false;
+      }));
+    });
     getRole();
     _scrollController.addListener(() {
       if (_scrollController.position.pixels == _scrollController.position.maxScrollExtent) {
@@ -950,7 +959,7 @@ class _EquipmentsListState extends State<EquipmentsList> {
             leading: IconButton(
               icon: Icon(Icons.desktop_mac, size: 36.0, color: Colors.green,),
               onPressed: () {
-                Navigator.of(context).push(new MaterialPageRoute(builder: (_) => new EquipmentDetail(editable: false, equipment: item, equipmentType: widget.equipmentType,)));
+                Navigator.of(context).push(new MaterialPageRoute(builder: (_) => new EquipmentDetail(editable: false, equipment: item, equipmentType: widget.equipmentType??eType,)));
               },
             ),
             title: Text(

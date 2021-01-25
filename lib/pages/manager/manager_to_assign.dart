@@ -32,6 +32,7 @@ class _ManagerToAssignState extends State<ManagerToAssign> {
   int _role = 1;
   Map techPermission;
   Map specialPermission;
+  Map assetPermission;
 
   ScrollController _scrollController = ScrollController();
 
@@ -50,6 +51,7 @@ class _ManagerToAssignState extends State<ManagerToAssign> {
     permissionInstance.initPermissions();
     techPermission = permissionInstance.getTechPermissions('Operations', 'Request');
     specialPermission = permissionInstance.getSpecialPermissions('Operations', 'Request');
+    assetPermission = permissionInstance.getSpecialPermissions('Asset', 'Equipment');
   }
 
   void initState() {

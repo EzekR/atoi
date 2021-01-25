@@ -16,6 +16,7 @@ import 'package:flutter_cupertino_date_picker/flutter_cupertino_date_picker.dart
 import 'package:date_format/date_format.dart';
 import 'package:should_rebuild/should_rebuild.dart';
 import 'package:atoi/pages/equipments/equipments_list.dart';
+import 'package:atoi/permissions.dart';
 
 /// 超管派工页面类
 class ManagerAssignPage extends StatefulWidget {
@@ -159,7 +160,6 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
   String _currentSource;
   String _currentMandatory;
   String _currentRecall;
-
 
   Future<Null> getRequest() async {
     int requestId = widget.request['ID'];
