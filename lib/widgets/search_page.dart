@@ -209,7 +209,9 @@ class _SearchPageState extends State<SearchPage> {
             FlatButton(onPressed: () {
               // todo: 判断非空
               if (selected.isNotEmpty) {
-                selected[0]['AssetType'] = deviceType;
+                selected[0]['AssetType'] = {
+                  "ID": deviceType
+                };
               }
               Navigator.of(context).pop(selected);
             }, child: new Text('确认')),

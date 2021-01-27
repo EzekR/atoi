@@ -148,7 +148,7 @@ Future getImage() async {
           ],
           'FaultDesc': _fault.text,
           'AssetType': {
-            'ID': _equipment['AssetType']
+            'ID': _equipment['AssetType']['ID']
           },
           'Files': fileList
         }

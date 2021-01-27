@@ -169,7 +169,7 @@ class _RepairRequestState extends State<RepairRequest> {
           },
           'FaultDesc': _fault.text,
           'AssetType': {
-            'ID': _equipment['AssetType']
+            'ID': _equipment['AssetType']['ID']
           },
           'Files': fileList
         }

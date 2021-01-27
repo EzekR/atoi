@@ -347,15 +347,17 @@ class _DashboardState extends State<Dashboard> {
       }
     );
     if (resp['ResultCode'] == '00') {
-      equipmentTimeline = resp['Data'];
-      equipmentName = resp['Data']['Name']+'-'+resp['Data']['Manufacturer']['Name']+'-'+resp['Data']['EquipmentCode']+'-'+resp['Data']['AssetCode'];
-      equipmentTimelineName = resp['Data']['Name']+'-'+resp['Data']['EquipmentCode'];
-      equipmentStatus = resp['Data']['EquipmentStatus']['Name'];
-      equipmentStatusId = resp['Data']['EquipmentStatus']['ID'];
-      warrantyStatus = resp['Data']['WarrantyStatus'];
-      equipmentFiles = resp['Data']['EquipmentFile'];
-      installDate = AppConstants.TimeForm(resp['Data']['InstalDate'], 'yyyy-mm-dd');
-      installSite = resp['Data']['Department']['Name'];
+      setState(() {
+        equipmentTimeline = resp['Data'];
+        equipmentName = resp['Data']['Name']+'-'+resp['Data']['Manufacturer']['Name']+'-'+resp['Data']['EquipmentCode']+'-'+resp['Data']['AssetCode'];
+        equipmentTimelineName = resp['Data']['Name']+'-'+resp['Data']['EquipmentCode'];
+        equipmentStatus = resp['Data']['EquipmentStatus']['Name'];
+        equipmentStatusId = resp['Data']['EquipmentStatus']['ID'];
+        warrantyStatus = resp['Data']['WarrantyStatus'];
+        equipmentFiles = resp['Data']['EquipmentFile'];
+        installDate = AppConstants.TimeForm(resp['Data']['InstalDate'], 'yyyy-mm-dd');
+        installSite = resp['Data']['Department']['Name'];
+      });
     }
   }
 
@@ -1534,10 +1536,10 @@ class _DashboardState extends State<Dashboard> {
                 return GestureDetector(
                   onTap: () {
                     if (widget.equipmentId == null && !isDetailPage) {
-                      getEquipmentsIncome(departmentData[pointIndex]['Department']['ID']);
                       setState(() {
                         isDetailPage = !isDetailPage;
                       });
+                      getEquipmentsIncome(departmentData[pointIndex]['Department']['ID']);
                     } else {
                       if (widget.equipmentId == null && isDetailPage) {
                         getTimeline(equipmentId: equipmentData[pointIndex]['ID']);
@@ -1915,6 +1917,22 @@ class _DashboardState extends State<Dashboard> {
     );
   }
 
+  Color requestColor(int status) {
+    Color color;
+    switch (status) {
+      case 1:
+        color = Colors.red;
+        break;
+      case 99:
+        color = Colors.blue;
+        break;
+      default:
+        color = Colors.green;
+        break;
+    }
+    return color;
+  }
+
   //current request
   Padding buildRequest() {
     return Padding(
@@ -1993,7 +2011,7 @@ class _DashboardState extends State<Dashboard> {
                               height: 20,
                               width: 35,
                               decoration: BoxDecoration(
-                                  color: Color(0xffD64040),
+                                  color: requestColor(item['Status']['ID']),
                                   borderRadius: BorderRadius.all(Radius.circular(4.0))
                               ),
                               child: Center(

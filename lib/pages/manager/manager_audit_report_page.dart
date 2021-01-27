@@ -119,12 +119,18 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
     _currentProvider = _dropDownMenuProviders[0].value;
   }
 
+  void initInput() {
+    equipmentComments = _equipments.map<TextEditingController>((item) => new TextEditingController(text: item['StocktakingComments'])).toList();
+    equipmentStatus = _equipments.map<TextEditingController>((item) => new TextEditingController(text: item['StocktakingStatus'])).toList();
+    log("$equipmentComments");
+  }
+
   void initState(){
     getPermission();
     getRole();
     model = MainModel.of(context);
     initDropdown();
-    getDispatch();
+    getDispatch().then((_) => initInput());
     getReport();
     super.initState();
   }
@@ -867,8 +873,6 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
 
   List<Widget> buildEquipments() {
     List<Widget> _list = [];
-    equipmentComments = _equipments.map<TextEditingController>((item) => new TextEditingController(text: item['StocktakingComments'])).toList();
-    equipmentStatus = _equipments.map<TextEditingController>((item) => new TextEditingController(text: item['StocktakingStatus'])).toList();
     for(int i=0; i<_equipments.length; i++) {
       _list.addAll([
         BuildWidget.buildRow('系统编号', _equipments[i]['OID']??''),

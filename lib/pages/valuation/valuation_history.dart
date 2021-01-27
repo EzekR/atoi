@@ -1,4 +1,5 @@
 import 'package:atoi/pages/valuation/valuation_condition.dart';
+import 'package:atoi/pages/valuation/valuation_overview.dart';
 import 'package:atoi/utils/common.dart';
 import 'package:atoi/utils/http_request.dart';
 import 'package:atoi/widgets/build_widget.dart';
@@ -325,6 +326,7 @@ class _ValuationHistoryState extends State<ValuationHistory> {
               RaisedButton(
                 onPressed: () {
                   Navigator.of(context).push(new MaterialPageRoute(builder: (_) => ValuationCondition(condition: item['ValControl'], historyID: item['ID'],)));
+                  //Navigator.of(context).push(new MaterialPageRoute(builder: (_) => ValuationOverview()));
                 },
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(6),

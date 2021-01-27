@@ -1,3 +1,4 @@
+import 'package:atoi/pages/valuation/valuation_detail.dart';
 import 'package:atoi/utils/common.dart';
 import 'package:atoi/utils/http_request.dart';
 import 'package:flutter/material.dart';
@@ -838,6 +839,131 @@ class _ValuationAnalysisState extends State<ValuationAnalysis> {
     }
   }
 
+  List <Widget> renderAnalysis() {
+    List<Widget> _list = [];
+    _list.addAll([
+      SizedBox(height: 80.0,),
+      Row(
+        children: <Widget>[
+          Expanded(
+            flex: 4,
+            child: Container(
+              child: Center(
+                child: Column(
+                  children: <Widget>[
+                    IconButton(
+                      onPressed: () {
+                        Navigator.of(context).push(new MaterialPageRoute(builder: (_) => ValuationDetail(historyID: widget.historyID, analysisType: AnalysisType.CONTRACT,)));
+                      },
+                      icon: Icon(Icons.insert_drive_file, color: Color(0xff41579B), size: 36.0,),
+                    ),
+                    Text("合同金额")
+                  ],
+                ),
+              ),
+            ),
+          ),
+          Expanded(
+            flex: 4,
+            child: Container(
+              child: Center(
+                child: Column(
+                  children: <Widget>[
+                    IconButton(
+                      onPressed: () {
+                        Navigator.of(context).push(new MaterialPageRoute(builder: (_) => ValuationDetail(historyID: widget.historyID, analysisType: AnalysisType.SPARE,)));
+                      },
+                      icon: Icon(Icons.devices, color: Color(0xff41579B), size: 36.0,),
+                    ),
+                    Text("备用机金额")
+                  ],
+                ),
+              ),
+            ),
+          ),
+          Expanded(
+            flex: 4,
+            child: Container(
+              child: Center(
+                child: Column(
+                  children: <Widget>[
+                    IconButton(
+                      onPressed: () {
+                        Navigator.of(context).push(new MaterialPageRoute(builder: (_) => ValuationDetail(historyID: widget.historyID, analysisType: AnalysisType.CONSUMABLE,)));
+                      },
+                      icon: Icon(Icons.battery_charging_full, color: Color(0xff41579B), size: 36.0,),
+                    ),
+                    Text("耗材金额")
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+      SizedBox(height: 80.0,),
+      Row(
+        children: <Widget>[
+          Expanded(
+            flex: 4,
+            child: Container(
+              child: Center(
+                child: Column(
+                  children: <Widget>[
+                    IconButton(
+                      onPressed: () {
+                        Navigator.of(context).push(new MaterialPageRoute(builder: (_) => ValuationDetail(historyID: widget.historyID, analysisType: AnalysisType.COMPONENT,)));
+                      },
+                      icon: Icon(Icons.settings, color: Color(0xff41579B), size: 36.0,),
+                    ),
+                    Text("零件金额")
+                  ],
+                ),
+              ),
+            ),
+          ),
+          Expanded(
+            flex: 4,
+            child: Container(
+              child: Center(
+                child: Column(
+                  children: <Widget>[
+                    IconButton(
+                      onPressed: () {
+                        Navigator.of(context).push(new MaterialPageRoute(builder: (_) => ValuationDetail(historyID: widget.historyID, analysisType: AnalysisType.SERVICE,)));
+                      },
+                      icon: Icon(Icons.assignment_ind, color: Color(0xff41579B), size: 36.0,),
+                    ),
+                    Text("外来服务金额")
+                  ],
+                ),
+              ),
+            ),
+          ),
+          Expanded(
+            flex: 4,
+            child: Container(
+              child: Center(
+                child: Column(
+                  children: <Widget>[
+                    IconButton(
+                      onPressed: () {
+                        Navigator.of(context).push(new MaterialPageRoute(builder: (_) => ValuationDetail(historyID: widget.historyID, analysisType: AnalysisType.CT,)));
+                      },
+                      icon: Icon(Icons.filter, color: Color(0xff41579B), size: 36.0,),
+                    ),
+                    Text("CT金额")
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    ]);
+    return _list;
+  }
+
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
@@ -948,7 +1074,7 @@ class _ValuationAnalysisState extends State<ValuationAnalysis> {
       ),
       body: ListView(
         controller: ScrollController(),
-        children: currentTable==0?renderTotal():renderDetail(),
+        children: currentTable==0?renderTotal():(currentTable==1?renderDetail():renderAnalysis()),
       ),
     );
   }

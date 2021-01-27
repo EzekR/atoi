@@ -311,7 +311,9 @@ class _SearchLazyState extends State<SearchLazy> {
                   ),
                 ),
                 onTap: () {
-                  suggestionList[i]['AssetType'] = deviceType;
+                  suggestionList[i]['AssetType'] = {
+                    "ID": deviceType
+                  };
                   Navigator.of(context).pop(jsonEncode(suggestionList[i]));
                 },
               );

@@ -247,7 +247,7 @@ Future getImage() async {
           'IsRecall': currentRecall == '是' ? true : false,
           'FaultDesc': _fault.text,
           'AssetType': {
-            'ID': _equipment['AssetType']
+            'ID': _equipment['AssetType']['ID']
           },
           'Files': fileList
         }

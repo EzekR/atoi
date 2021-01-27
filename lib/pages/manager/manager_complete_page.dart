@@ -29,6 +29,8 @@ class _ManagerCompletePageState extends State<ManagerCompletePage> {
   var _isExpandedJournal = false;
   var _isExpandedReport = false;
   var _isExpandedAcc = false;
+  bool _expandConsumable = false;
+  bool _expandService = false;
   Map<String, dynamic> _request = {};
   var _dispatch;
   var _journal;
@@ -36,6 +38,8 @@ class _ManagerCompletePageState extends State<ManagerCompletePage> {
   ConstantsModel model;
   List _fileNames = [];
   String _reportFile;
+  List consumables;
+  List services;
 
   Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
 
@@ -130,19 +134,23 @@ class _ManagerCompletePageState extends State<ManagerCompletePage> {
       setState(() {
         _report = resp['Data'];
       });
-      if (ImageUtil.isImageFile(resp['Data']['FileInfo']['FileName'])) {
-        var _reportImage = await getReportFile(resp['Data']['FileInfo']['ID']);
-        if (_reportImage != '') {
+      if (_report['FileInfo']['ID'] != 0) {
+        if (ImageUtil.isImageFile(resp['Data']['FileInfo']['FileName'])) {
+          var _reportImage = await getReportFile(resp['Data']['FileInfo']['ID']);
+          if (_reportImage != '') {
+            setState(() {
+              reportImages.add(base64Decode(_reportImage));
+            });
+          }
+        } else {
           setState(() {
-            reportImages.add(base64Decode(_reportImage));
+            _reportFile = resp['Data']['FileInfo']['FileName'];
           });
         }
-      } else {
-        setState(() {
-          _reportFile = resp['Data']['FileInfo']['FileName'];
-        });
       }
-      _accessory = resp['Data']['ReportAccessories'];
+      _accessory = resp['Data']['ReportComponent'];
+      consumables = resp['Data']['ReportConsumable'];
+      services = resp['Data']['ReportService'];
       for (var _acc in _accessory) {
         var _imageNew = _acc['FileInfos']
             .firstWhere((info) => info['FileType'] == 1, orElse: () => null);
@@ -428,6 +436,42 @@ class _ManagerCompletePageState extends State<ManagerCompletePage> {
     ]);
     return _list;
   }
+
+  List<Widget> buildConsumable() {
+    List<Widget> _list = [];
+    if (consumables != null) {
+      for (var item in consumables) {
+        var consumableList = [
+          BuildWidget.buildRow('简称', item['InvConsumable']['Consumable']['Name']),
+          BuildWidget.buildRow('批次号', item['InvConsumable']['LotNum']),
+          BuildWidget.buildRow('供应商', item['InvConsumable']['Supplier']['Name']),
+          BuildWidget.buildRow('单价', item['InvConsumable']['Price'].toString()),
+          BuildWidget.buildRow('数量', item['Qty'].toString()),
+          new Divider()
+        ];
+        _list.addAll(consumableList);
+      }
+    }
+    return _list;
+  }
+
+  List<Widget> buildService() {
+    List<Widget> _list = [];
+    if (services != null) {
+      for (var item in services) {
+        var serviceList = [
+          BuildWidget.buildRow('维修服务系统编号', item['Service']['OID']),
+          BuildWidget.buildRow('服务名称', item['Service']['Name']),
+          BuildWidget.buildRow('供应商', item['Service']['Supplier']['Name']),
+          BuildWidget.buildRow('金额(元)', CommonUtil.CurrencyForm(item['Service']['Price'], digits: 0, times: 1)),
+          new Divider()
+        ];
+        _list.addAll(serviceList);
+      }
+    }
+    return _list;
+  }
+
   List<Widget> buildEquipment() {
     if (_request.isNotEmpty) {
       var _equipments = _request['Equipments'];
@@ -460,41 +504,25 @@ class _ManagerCompletePageState extends State<ManagerCompletePage> {
     if (_accessory != null) {
       for (var _acc in _accessory) {
         var _accList = [
-          BuildWidget.buildRow('名称', _acc['Name']),
-          BuildWidget.buildRow('来源', _acc['Source']['Name']),
-          _acc['Source']['Name'] == '外部供应商'
-              ? BuildWidget.buildRow('外部供应商', _acc['Supplier']['Name'])
-              : new Container(),
-          BuildWidget.buildRow('新装零件编号', _acc['NewSerialCode']),
+          BuildWidget.buildRow('简称', _acc['Component']['Name']),
+          BuildWidget.buildRow('新装零件编号', _acc['NewInvComponent']['SerialCode']),
+          BuildWidget.buildRow('金额（元/件）', CommonUtil.CurrencyForm(_acc['NewInvComponent']['Price'], digits: 0, times: 1)),
           BuildWidget.buildRow('附件', ''),
           new Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
-              _acc['ImageNew'] != null &&
-                      _acc['ImageNew']['FileContent'] != null
-                  ? new Container(
-                      width: 116.0,
-                      height: 160,
-                      child: BuildWidget.buildPhotoPageList(context, _acc['ImageNew']['FileContent'])
-                    )
-                  : new Container()
+              _acc['ImageNew']!=null&&_acc['ImageNew']['FileContent']!=null?new Container(width: 100.0,
+                  child: BuildWidget.buildPhotoPageList(context, _acc['ImageNew']['FileContent'])):new Container()
             ],
           ),
-          BuildWidget.buildRow('金额（元/件）', CommonUtil.CurrencyForm(_acc['Amount'], times: 1, digits: 0)),
-          BuildWidget.buildRow('数量', _acc['Qty'].toString()),
-          BuildWidget.buildRow('拆下零件编号', _acc['OldSerialCode']),
+          BuildWidget.buildRow('拆下零件编号', _acc['OldInvComponent']['SerialCode']),
+          BuildWidget.buildRow('金额（元/件）', CommonUtil.CurrencyForm(_acc['OldInvComponent']['Price'], digits: 0, times: 1)),
           BuildWidget.buildRow('附件', ''),
           new Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
-              _acc['ImageOld'] != null &&
-                      _acc['ImageOld']['FileContent'] != null
-                  ? new Container(
-                      width: 116.0,
-                      height: 160,
-                      child: BuildWidget.buildPhotoPageList(context, _acc['ImageOld']['FileContent'])
-                    )
-                  : new Container()
+              _acc['ImageOld']!=null&&_acc['ImageOld']['FileContent']!=null?new Container(width: 100.0,
+                  child: BuildWidget.buildPhotoPageList(context, _acc['ImageOld']['FileContent'])):new Container()
             ],
           ),
           new Divider()
@@ -724,7 +752,61 @@ class _ManagerCompletePageState extends State<ManagerCompletePage> {
           ),
         ),
         isExpanded: _isExpandedAcc,
-      ));
+      ),);
+    }
+    if (_report !=null && _report['ReportConsumable'].isNotEmpty) {
+      _list.add(
+        new ExpansionPanel(canTapOnHeader: true,
+          headerBuilder: (context, isExpanded) {
+            return ListTile(
+              leading: new Icon(Icons.battery_charging_full,
+                size: 20.0,
+                color: Colors.blue,
+              ),
+              title: Text('耗材信息',
+                style: new TextStyle(
+                    fontSize: 20.0,
+                    fontWeight: FontWeight.w400
+                ),
+              ),
+            );
+          },
+          body: consumables!=null?new Padding(
+            padding: EdgeInsets.symmetric(horizontal: 8.0),
+            child: new Column(
+              children: buildConsumable(),
+            ),
+          ):new Container(),
+          isExpanded: _expandConsumable,
+        ),
+      );
+    }
+    if (_report !=null && _report['ReportService'].isNotEmpty) {
+      _list.add(
+        new ExpansionPanel(canTapOnHeader: true,
+          headerBuilder: (context, isExpanded) {
+            return ListTile(
+              leading: new Icon(Icons.battery_charging_full,
+                size: 20.0,
+                color: Colors.blue,
+              ),
+              title: Text('服务信息',
+                style: new TextStyle(
+                    fontSize: 20.0,
+                    fontWeight: FontWeight.w400
+                ),
+              ),
+            );
+          },
+          body: services!=null?new Padding(
+            padding: EdgeInsets.symmetric(horizontal: 8.0),
+            child: new Column(
+              children: buildService(),
+            ),
+          ):new Container(),
+          isExpanded: _expandService,
+        ),
+      );
     }
     return _list;
   }
@@ -809,8 +891,23 @@ class _ManagerCompletePageState extends State<ManagerCompletePage> {
                             break;
                           case 5:
                             setState(() {
-                              _isExpandedAcc = !_isExpandedAcc;
+                              _journal == null || _report == null
+                                  ? _expandConsumable = !_expandConsumable
+                                  : _isExpandedAcc = !_isExpandedAcc;
                             });
+                            break;
+                          case 6:
+                            setState(() {
+                              _journal == null || _report == null
+                                  ? _expandService = !_expandService
+                                  : _expandConsumable = !_expandConsumable;
+                            });
+                            break;
+                          case 7:
+                            setState(() {
+                              _expandService = !_expandService;
+                            });
+                            break;
                         }
                       },
                       children: buildExpansion(),
