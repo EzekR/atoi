@@ -77,84 +77,93 @@ class _ValuationOverviewState extends State<ValuationOverview> {
     );
   }
 
+  Padding renderPadding() {
+    return Padding(
+        padding: EdgeInsets.all(8.0),
+        child: Container(
+          child: Column(
+            children: <Widget>[
+              Container(
+                child: Column(
+                  children: <Widget>[
+                    Container(
+                      color: Color(0xff41579B),
+                      height: 40.0,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: <Widget>[
+                          Container(
+                            child: Row(
+                              children: <Widget>[
+                                SizedBox(width: 12.0,),
+                                Icon(Icons.pie_chart, color: Colors.white,),
+                                SizedBox(width: 6.0,),
+                                Text("成本构成分析", style: TextStyle(
+                                  fontSize: 20,
+                                  color: Colors.white,
+                                ),)
+                              ],
+                            ),
+                          ),
+                          Container(
+                              child: Row(
+                                children: <Widget>[
+                                  Text(
+                                    "单位 : 千元",
+                                    style: TextStyle(
+                                        color: Color.fromRGBO(255, 255, 255, 0.85),
+                                        fontSize: 12.0,
+                                        fontWeight: FontWeight.w200
+                                    ),
+                                  ),
+                                  SizedBox(width: 12.0,)
+                                ],
+                              )
+                          ),
+                        ],
+                      ),
+                    )
+                  ],
+                ),
+              ),
+              renderPie(),
+              Container(
+                height: 100,
+                child: ListView(
+                  controller: _horizonController,
+                  scrollDirection: Axis.horizontal,
+                  children: <Widget>[
+                    renderMenuBox(),
+                    renderMenuBox(),
+                    renderMenuBox(),
+                    renderMenuBox(),
+                    renderMenuBox(),
+                  ],
+                ),
+              ),
+              SizedBox(height: 16.0,),
+              Container(),
+            ],
+          ),
+        ),
+    );
+  }
+
+  List<Widget> renderOverviewList() {
+    List<Widget> _list = [];
+    _list.add(renderPadding());
+    return _list;
+  }
+
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text("成本汇总"),
-      ),
-      body: ListView(
-        controller: _verticalController,
-        scrollDirection: Axis.vertical,
-        children: <Widget>[
-          Padding(
-            padding: EdgeInsets.all(8.0),
-            child: Container(
-              child: Column(
-                children: <Widget>[
-                  Container(
-                    child: Column(
-                      children: <Widget>[
-                        Container(
-                          color: Color(0xff41579B),
-                          height: 40.0,
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: <Widget>[
-                              Container(
-                                child: Row(
-                                  children: <Widget>[
-                                    SizedBox(width: 12.0,),
-                                    Icon(Icons.pie_chart, color: Colors.white,),
-                                    SizedBox(width: 6.0,),
-                                    Text("成本构成分析", style: TextStyle(
-                                      fontSize: 20,
-                                      color: Colors.white,
-                                    ),)
-                                  ],
-                                ),
-                              ),
-                              Container(
-                                child: Row(
-                                  children: <Widget>[
-                                    Text(
-                                      "单位 : 千元",
-                                      style: TextStyle(
-                                          color: Color.fromRGBO(255, 255, 255, 0.85),
-                                          fontSize: 12.0,
-                                          fontWeight: FontWeight.w200
-                                      ),
-                                    ),
-                                    SizedBox(width: 12.0,)
-                                  ],
-                                )
-                              ),
-                            ],
-                          ),
-                        )
-                      ],
-                    ),
-                  ),
-                  renderPie(),
-                  Container(
-                    height: 100,
-                    child: ListView(
-                      controller: _horizonController,
-                      scrollDirection: Axis.horizontal,
-                      children: <Widget>[
-                        renderMenuBox(),
-                        renderMenuBox(),
-                        renderMenuBox(),
-                        renderMenuBox(),
-                        renderMenuBox(),
-                      ],
-                    ),
-                  ),
-                  SizedBox(height: 16.0,),
-                  Container(),
-                ],
-              ),
-            ),
-          )
+        appBar: AppBar(
+          title: Text("成本汇总"),
+        ),
+        body: ListView(
+          controller: _verticalController,
+          scrollDirection: Axis.vertical,
+          children: <Widget>[
         ],
       )
     );

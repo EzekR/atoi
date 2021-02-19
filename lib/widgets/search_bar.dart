@@ -107,7 +107,7 @@ class SearchBarDelegate extends SearchDelegate<String>{
                   },
                   title: RichText(
                       text: TextSpan(
-                          text: '${suggestionList[i]['Name']}/${suggestionList[i]['EquipmentCode']}/${suggestionList[i]['SerialCode']}',
+                          text: '${suggestionList[i]['Name']}/${suggestionList[i]['ModelCode']}/${suggestionList[i]['SerialCode']}',
                           style: TextStyle(
                               color: Colors.grey),
                           children: [

@@ -125,13 +125,17 @@ class _SpareDetailState extends State<SpareDetail> {
   Future<bool> spareExist(String serialCode) async {
     Map resp = await HttpRequest.request(
         '/InvSpare/CheckSpareSerialCode',
-        method: HttpRequest.GET,
-        params: {
-          'FujiClass2': {
-            'ID': _fujiClass2
-          },
-          'serialCode': serialCode,
-          'StartDate': startDate
+        method: HttpRequest.POST,
+        data: {
+          "info": {
+            'FujiClass2': {
+              'ID': _fujiClass2
+            },
+            'serialCode': serialCode,
+            'StartDate': startDate,
+            'EndDate': endDate,
+            'Price': price.text
+          }
         }
     );
     if (resp['ResultCode'] == '00') {
@@ -224,11 +228,14 @@ class _SpareDetailState extends State<SpareDetail> {
     };
     if (widget.isStock!=null&&widget.isStock) {
       bool exist = await spareExist(serialCode.text);
-      if (exist) {
-        return;
-      } else {
+      if (!exist) {
         Navigator.of(context).pop(jsonEncode(_info));
+      } else {
+        showDialog(context: context, builder: (context) => CupertinoAlertDialog(
+          title: new Text('备用机已存在'),
+        ));
       }
+      return;
     }
     if (widget.spare != null) {
       _info['ID'] = widget.spare['ID'];

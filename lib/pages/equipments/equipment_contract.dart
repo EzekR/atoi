@@ -500,7 +500,7 @@ Future getImage() async {
             children: <Widget>[
               BuildWidget.buildRow('系统编号', _equipment['OID'] ?? ''),
               BuildWidget.buildRow('名称', _equipment['Name'] ?? ''),
-              BuildWidget.buildRow('型号', _equipment['EquipmentCode'] ?? ''),
+              BuildWidget.buildRow('型号', _equipment['ModelCode'] ?? ''),
               BuildWidget.buildRow('序列号', _equipment['SerialCode'] ?? ''),
               BuildWidget.buildRow('设备厂商', _equipment['Manufacturer']['Name'] ?? ''),
               BuildWidget.buildRow('资产等级', _equipment['AssetLevel']['Name'] ?? ''),
@@ -548,7 +548,7 @@ Future getImage() async {
               BuildWidget.buildCardRow('设备系统编号', item['Equipment']['OID']),
               BuildWidget.buildCardRow('设备资产编号', item['Equipment']['AssetCode']),
               BuildWidget.buildCardRow('关联设备名称', item['Equipment']['Name']),
-              Row(
+              widget.editable?Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: <Widget>[
                   IconButton(
@@ -561,14 +561,14 @@ Future getImage() async {
                     },
                   )
                 ],
-              )
+              ):Container(),
             ],
           ),
         )
       )).toList()
     );
     _list.add(
-        Row(
+        widget.editable?Row(
           mainAxisAlignment: MainAxisAlignment.end,
           children: <Widget>[
             IconButton(
@@ -609,7 +609,7 @@ Future getImage() async {
               },
             )
           ],
-        )
+        ):Container()
     );
 
     return _list;

@@ -288,7 +288,7 @@ class _SearchLazyState extends State<SearchLazy> {
               var _title = '';
               switch (widget.searchType) {
                 case SearchType.DEVICE:
-                  _title = '${suggestionList[i]['Name']}/${suggestionList[i]['EquipmentCode']}/${suggestionList[i]['SerialCode']}';
+                  _title = '${suggestionList[i]['Name']}/${suggestionList[i]['ModelCode']}/${suggestionList[i]['SerialCode']}';
                   break;
                 case SearchType.DEPARTMENT:
                   _title = '${suggestionList[i]['Description']}-${suggestionList[i]['DepartmentType']['Name']}';

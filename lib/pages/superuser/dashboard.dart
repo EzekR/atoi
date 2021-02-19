@@ -350,7 +350,7 @@ class _DashboardState extends State<Dashboard> {
       setState(() {
         equipmentTimeline = resp['Data'];
         equipmentName = resp['Data']['Name']+'-'+resp['Data']['Manufacturer']['Name']+'-'+resp['Data']['EquipmentCode']+'-'+resp['Data']['AssetCode'];
-        equipmentTimelineName = resp['Data']['Name']+'-'+resp['Data']['EquipmentCode'];
+        equipmentTimelineName = resp['Data']['Name']+'-'+resp['Data']['ModelCode'];
         equipmentStatus = resp['Data']['EquipmentStatus']['Name'];
         equipmentStatusId = resp['Data']['EquipmentStatus']['ID'];
         warrantyStatus = resp['Data']['WarrantyStatus'];
@@ -1177,14 +1177,24 @@ class _DashboardState extends State<Dashboard> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
             Container(
-              child: Text(
-                '科室收支概览',
-                style: TextStyle(
-                  color: Color(0xff1e1e1e),
-                  fontSize: 17.0,
-                  fontWeight: FontWeight.w600
+              child: GestureDetector(
+                child: Text(
+                  '科室收支概览',
+                  style: TextStyle(
+                      color: Color(0xff1e1e1e),
+                      fontSize: 17.0,
+                      fontWeight: FontWeight.w600
+                  ),
                 ),
-              ),
+                onTap: () {
+                  if (depart != 0) {
+                    setState(() {
+                      isDetailPage = !isDetailPage;
+                    });
+                    getEquipmentsIncome(depart);
+                  }
+                },
+              )
             ),
             SizedBox(
               height: 9.0,
@@ -1499,6 +1509,9 @@ class _DashboardState extends State<Dashboard> {
     );
   }
 
+  // set department flag
+  int depart = 0;
+
   // income chart
   Container buildIncomeChart() {
     return Container(
@@ -1507,7 +1520,8 @@ class _DashboardState extends State<Dashboard> {
           plotAreaBorderWidth: 0.0,
           borderColor: Colors.white,
           onPointTapped: (PointTapArgs args) {
-            print(args.pointIndex);
+            print("index:${args.pointIndex}");
+            depart = departmentData[args.pointIndex]['Department']['ID'];
             getCount(equipmentId: equipmentData[args.pointIndex]['ID']);
             getTimeline(equipmentId: equipmentData[args.pointIndex]['ID']);
           },
@@ -1539,6 +1553,7 @@ class _DashboardState extends State<Dashboard> {
                       setState(() {
                         isDetailPage = !isDetailPage;
                       });
+                      print("point index:$pointIndex");
                       getEquipmentsIncome(departmentData[pointIndex]['Department']['ID']);
                     } else {
                       if (widget.equipmentId == null && isDetailPage) {
@@ -1625,7 +1640,7 @@ class _DashboardState extends State<Dashboard> {
                           ),
                         ]:<Widget>[
                           Text(
-                            !isDetailPage?departmentData[pointIndex]['Department']['Description']??'':'${equipmentData[pointIndex]['Name']}-${equipmentData[pointIndex]['Manufacturer']['Name']}-${equipmentData[pointIndex]['EquipmentCode']}',
+                            !isDetailPage?departmentData[pointIndex]['Department']['Description']??'':'${equipmentData[pointIndex]['Name']}-${equipmentData[pointIndex]['Manufacturer']['Name']}-${equipmentData[pointIndex]['ModelCode']}',
                             style: TextStyle(
                                 color: Colors.white,
                                 fontSize: 16.0
@@ -1666,7 +1681,7 @@ class _DashboardState extends State<Dashboard> {
                               Expanded(
                                 flex: 10,
                                 child: Text(
-                                  isDetailPage?'型号：${equipmentData[pointIndex]['EquipmentCode']}':'设备价值：${CommonUtil.CurrencyForm(departmentData[pointIndex]['EquipmentAmount'], times: 10000, digits: 0)}万元',
+                                  isDetailPage?'型号：${equipmentData[pointIndex]['ModelCode']}':'设备价值：${CommonUtil.CurrencyForm(departmentData[pointIndex]['EquipmentAmount'], times: 10000, digits: 0)}万元',
                                   style: TextStyle(
                                       color: Colors.white,
                                       fontSize: 11.0

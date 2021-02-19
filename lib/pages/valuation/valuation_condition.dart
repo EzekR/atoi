@@ -1,5 +1,8 @@
+import 'dart:developer';
+
 import 'package:atoi/pages/valuation/valuation_analysis.dart';
 import 'package:atoi/pages/valuation/valuation_equipment.dart';
+import 'package:atoi/pages/valuation/valuation_overview.dart';
 import 'package:atoi/utils/common.dart';
 import 'package:atoi/widgets/build_widget.dart';
 import 'package:flutter/material.dart';
@@ -68,17 +71,19 @@ class _ValuationConditionState extends State<ValuationCondition> {
 
   void initState() {
     super.initState();
+    log("${widget.condition}");
     startDate =  formatDate(DateTime.now(), [yyyy, '-', mm]);
     contractDate =  formatDate(DateTime.now(), [yyyy, '-', mm]);
   }
 
   List<Widget> buildConditions() {
+    String factorKey = "HospitalFactor"+widget.condition['HospitalLevel']['ID'].toString();
     List<Widget> _list = [
-      BuildWidget.buildRow('评估开始月', CommonUtil.TimeForm(widget.condition['AddDate'].toString(), 'yyyy-mm-dd')),
-      BuildWidget.buildRow('合同开始月', CommonUtil.TimeForm(widget.condition['ContractStartDate'].toString(), 'yyyy-mm-dd')),
+      BuildWidget.buildRow('评估开始月', CommonUtil.TimeForm(widget.condition['EndDate'].toString(), 'yyyy-mm')),
+      BuildWidget.buildRow('合同开始月', CommonUtil.TimeForm(widget.condition['ContractStartDate'].toString(), 'yyyy-mm')),
       BuildWidget.buildRow('合同年限', widget.condition['Years'].toString()),
       BuildWidget.buildRow('医院等级', widget.condition['HospitalLevel']['ID'].toString()+'级'),
-      BuildWidget.buildRow('参考系数', widget.condition['HospitalFactor1'].toString()),
+      BuildWidget.buildRow('参考系数', widget.condition[factorKey].toString()),
       BuildWidget.buildRow('导入期成本', widget.condition['ImportCost'].toString()),
       BuildWidget.buildRow('边际利润率', widget.condition['ProfitMargins'].toString()),
       BuildWidget.buildRow('风险控制度', widget.condition['RiskRatio'].toString()),
@@ -92,7 +97,7 @@ class _ValuationConditionState extends State<ValuationCondition> {
         children: <Widget>[
           RaisedButton(
             onPressed: () {
-              Navigator.of(context).push(new MaterialPageRoute(builder: (_) => ValuationAnalysis(historyID: widget.historyID,)));
+              Navigator.of(context).push(new MaterialPageRoute(builder: (_) => ValuationAnalysis(historyID: widget.historyID, pageState: 'overview',)));
             },
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(6),
@@ -131,7 +136,7 @@ class _ValuationConditionState extends State<ValuationCondition> {
               print(val);
               switch (val) {
                 case 1:
-                  Navigator.of(context).push(new MaterialPageRoute(builder: (_) => ValuationEquipment()));
+                  Navigator.of(context).push(new MaterialPageRoute(builder: (_) => ValuationEquipment(historyID: widget.historyID,)));
                   break;
               }
             },

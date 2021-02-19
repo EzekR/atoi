@@ -30,6 +30,7 @@ class _ManagerToCompleteState extends State<ManagerToComplete> {
   ScrollController _scrollController = new ScrollController();
   Map dispatchTechPermission;
   Map requestTechPermission;
+  Map dispatchSpecialPermission;
 
   Future<Null> getPermission() async {
     SharedPreferences _prefs = await SharedPreferences.getInstance();
@@ -37,6 +38,7 @@ class _ManagerToCompleteState extends State<ManagerToComplete> {
     permissionInstance.prefs = _prefs;
     permissionInstance.initPermissions();
     dispatchTechPermission = permissionInstance.getTechPermissions('Operations', 'Dispatch');
+    dispatchSpecialPermission = permissionInstance.getSpecialPermissions('Operations', 'Request');
     requestTechPermission = permissionInstance.getTechPermissions('Operations', 'Request');
   }
 
@@ -262,7 +264,7 @@ class _ManagerToCompleteState extends State<ManagerToComplete> {
                 mainAxisSize: MainAxisSize.max,
                 children: <Widget>[
                   equipmentName==''?new Container():BuildWidget.buildCardRow('设备编号', equipmentName),
-                  equipmentNo==''?new Container():BuildWidget.buildCardRow('设备名称', equipmentNo, onTap: equipmentNo=='多设备'?null:() => Navigator.of(context).push(new MaterialPageRoute(builder: (_) => new EquipmentsList(equipmentId: equipmentName, assetType: task['Equipments'][0]['AssetType']['ID'],)))),
+                  equipmentNo==''?new Container():BuildWidget.buildCardRow('设备名称', equipmentNo, onTap: equipmentNo=='多设备'?null:() => Navigator.of(context).push(new MaterialPageRoute(builder: (_) => new EquipmentsList(equipmentId: equipmentName, assetType: task['AssetType']['ID'],)))),
                   departmentName==''?new Container():BuildWidget.buildCardRow('使用科室', departmentName),
                   BuildWidget.buildCardRow('请求人', requestPerson),
                   BuildWidget.buildCardRow('请求类型', requestType),
@@ -346,9 +348,15 @@ class _ManagerToCompleteState extends State<ManagerToComplete> {
                           ],
                         ),
                       ):Container(),
-                      dispatchTechPermission!=null&&dispatchTechPermission['Cancel']?new RaisedButton(
+                      new RaisedButton(
                         onPressed: () async {
                           if (!task['HasOpenDispatch']) {
+                            if (!requestTechPermission['View'] || !dispatchSpecialPermission['RequestDispatch']) {
+                              showDialog(context: context, builder: (context) => CupertinoAlertDialog(
+                                title: new Text('没有权限终止请求'),
+                              ));
+                              return;
+                            }
                             showDialog(context: context,
                                 builder: (context) => CupertinoAlertDialog(
                                   title: new Text('是否终止请求？'),
@@ -393,6 +401,12 @@ class _ManagerToCompleteState extends State<ManagerToComplete> {
                                 )
                             );
                           } else {
+                            if (!dispatchTechPermission['Cancel']||!dispatchTechPermission['View']) {
+                              showDialog(context: context, builder: (context) => CupertinoAlertDialog(
+                                title: new Text('没有权限取消派工'),
+                              ));
+                              return;
+                            }
                             var _dispatches = await getDispatchesByRequestId(requestId);
                             _dispatches.removeWhere((item) => (item['Status']['ID'] == -1 || item['Status']['ID'] ==4));
                             if (_dispatches.length == 1) {
@@ -524,7 +538,7 @@ class _ManagerToCompleteState extends State<ManagerToComplete> {
                             )
                           ],
                         ),
-                      ):Container(),
+                      ),
                     ],
                   )
                 ],

@@ -545,6 +545,12 @@ class _POAttachmentState extends State<POAttachment> {
         )).then((result) => scrollController.jumpTo(100.0));
         return;
       }
+      if (DateTime.parse(endDate).isBefore(DateTime.parse(startDate))) {
+        showDialog(context: context, builder: (context) => CupertinoAlertDialog(
+          title: new Text('结束日期不可早于开始日期'),
+        )).then((result) => scrollController.jumpTo(100.0));
+        return;
+      }
       if (serviceTimes.text.isEmpty) {
         showDialog(context: context, builder: (context) => CupertinoAlertDialog(
           title: new Text('服务次数不可为空'),
@@ -857,7 +863,7 @@ class _POAttachmentState extends State<POAttachment> {
                         ),
                       ),
                       new Text(
-                        '开始时间',
+                        '开始日期',
                         style: new TextStyle(
                             fontSize: 16.0, fontWeight: FontWeight.w600),
                       )
@@ -919,7 +925,7 @@ class _POAttachmentState extends State<POAttachment> {
                 ),
               ],
             ),
-          ):BuildWidget.buildRow('开始时间', startDate),
+          ):BuildWidget.buildRow('开始日期', startDate),
           widget.editable?new Padding(
             padding: EdgeInsets.symmetric(vertical: 5.0),
             child: new Row(
@@ -937,7 +943,7 @@ class _POAttachmentState extends State<POAttachment> {
                         ),
                       ),
                       new Text(
-                        '结束时间',
+                        '结束日期',
                         style: new TextStyle(
                             fontSize: 16.0, fontWeight: FontWeight.w600),
                       )
@@ -999,7 +1005,7 @@ class _POAttachmentState extends State<POAttachment> {
                 ),
               ],
             ),
-          ):BuildWidget.buildRow('结束时间', endDate),
+          ):BuildWidget.buildRow('结束日期', endDate),
           widget.editable?BuildWidget.buildInput('服务次数', serviceTimes, maxLength: 9, focusNode: _focusComponent[5], required: true, inputType: TextInputType.numberWithOptions(decimal: false)):BuildWidget.buildRow('服务次数', serviceTimes.text),
         ]);
         break;

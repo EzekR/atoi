@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:atoi/widgets/search_bar.dart';
 import 'package:atoi/models/models.dart';
@@ -266,6 +268,7 @@ Future getImage() async {
   Future toSearch() async {
     final _searchResult = await Navigator.of(context).push(new MaterialPageRoute(builder: (_) => SearchLazy(searchType: SearchType.DEVICE)));
     Map _data = jsonDecode(_searchResult);
+    log("$_data");
     setState(() {
       //_result.addAll(_data);
       _equipment = _data;
@@ -385,7 +388,7 @@ Future getImage() async {
                                       BuildWidget.buildRow(
                                           '名称', _equipment['Name'] ?? ''),
                                       BuildWidget.buildRow('型号',
-                                          _equipment['EquipmentCode'] ?? ''),
+                                          _equipment['ModelCode'] ?? ''),
                                       BuildWidget.buildRow('序列号',
                                           _equipment['SerialCode'] ?? ''),
                                       BuildWidget.buildRow(

@@ -154,8 +154,8 @@ class _PODetailState extends State<PODetail> {
             '服务名称': _data['Name'],
             '关联设备': _data['Equipments'].map((equip) => equip['Name']).join(";"),
             '金额': CommonUtil.CurrencyForm(_data['Price'], times: 1, digits: 0),
-            '服务开始时间': _data['StartDate'].toString().split('T')[0],
-            '服务结束时间': _data['EndDate'].toString().split('T')[0],
+            '服务开始日期': _data['StartDate'].toString().split('T')[0],
+            '服务结束日期': _data['EndDate'].toString().split('T')[0],
             '服务次数': _data['TotalTimes'].toString()
           };
         }).toList();
@@ -436,6 +436,7 @@ class _PODetailState extends State<PODetail> {
                 onPressed: () {
                   List _service = [
                     {
+                      'ID': fullItem['ID'],
                       'Equipments': fullItem['Equipments'],
                       'Name': fullItem['Name'],
                       'TotalTimes': serviceTimes[key].text,
@@ -539,8 +540,8 @@ class _PODetailState extends State<PODetail> {
                             '服务名称': _data['Name'],
                             '关联设备': _data['Equipments'].map((equip) => equip['Name']).join(";"),
                             '金额': CommonUtil.CurrencyForm(double.tryParse(_data['Price']), times: 1, digits: 0),
-                            '服务开始时间': _data['StartDate'].toString().split("T")[0],
-                            '服务结束时间': _data['EndDate'].toString().split("T")[0],
+                            '服务开始日期': _data['StartDate'].toString().split("T")[0],
+                            '服务结束日期': _data['EndDate'].toString().split("T")[0],
                             '服务次数': _data['TotalTimes']
                           };
                           break;
@@ -667,8 +668,8 @@ class _PODetailState extends State<PODetail> {
                             '服务名称': _data['Name'],
                             '关联设备': _data['Equipments'].map((equip) => equip['Name']).join(";"),
                             '金额': CommonUtil.CurrencyForm(double.tryParse(_data['Price']), times: 1, digits: 0),
-                            '服务开始时间': _data['StartDate'].toString().split('T')[0],
-                            '服务结束时间': _data['EndDate'].toString().split('T')[0],
+                            '服务开始日期': _data['StartDate'].toString().split('T')[0],
+                            '服务结束日期': _data['EndDate'].toString().split('T')[0],
                             '服务次数': _data['TotalTimes']
                           });
                           break;

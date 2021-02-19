@@ -95,6 +95,17 @@ class _InboundStuffState extends State<InboundStuff> {
       inboundConsumable = inboundConsumable;
     });
   }
+  
+  bool serialCodeDuplicated() {
+    bool duplicated = false;
+    serialList.forEach((item) {
+      int _count = serialList.where((_item) => _item.text == item.text).toList().length;
+      if (_count > 1) {
+        duplicated = true;
+      }
+    });
+    return duplicated;
+  }
 
   void inboundComponent() async {
     Map _component = widget.stuff;
@@ -104,6 +115,12 @@ class _InboundStuffState extends State<InboundStuff> {
       if (serialList.any((item) => item.text.isEmpty)) {
         showDialog(context: context, builder: (context) => CupertinoAlertDialog(
           title: new Text('序列号不可为空'),
+        ));
+        return;
+      }
+      if (serialCodeDuplicated()) {
+        showDialog(context: context, builder: (context) => CupertinoAlertDialog(
+          title: new Text('序列号不可重复'),
         ));
         return;
       }

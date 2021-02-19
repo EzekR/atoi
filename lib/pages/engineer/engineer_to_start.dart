@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:atoi/utils/http_request.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -81,6 +83,7 @@ class _EngineerToStartState extends State<EngineerToStart> {
     // TODO: implement build
 
     Card buildCardItem(
+        Map dispatch,
         int dispatchId,
         String OID,
         String scheduleDate,
@@ -127,7 +130,7 @@ class _EngineerToStartState extends State<EngineerToStart> {
                           '设备名称',
                           deviceName.length > 1
                               ? '多设备'
-                              : deviceName[0]['Name'], onTap: deviceName.length>1?null:() => Navigator.of(context).push(new MaterialPageRoute(builder: (_) => new EquipmentsList(equipmentId: deviceName[0]['OID'], assetType: deviceName[0]['AssetType']['ID'],)))),
+                              : deviceName[0]['Name'], onTap: deviceName.length>1?null:() => Navigator.of(context).push(new MaterialPageRoute(builder: (_) => new EquipmentsList(equipmentId: deviceName[0]['OID'], assetType: dispatch['Request']['AssetType']['ID'],)))),
                   location == ''
                       ? new Container()
                       : BuildWidget.buildCardRow('使用科室', location),
@@ -204,6 +207,7 @@ class _EngineerToStartState extends State<EngineerToStart> {
                     itemBuilder: (context, i) {
                       if (i != model.tasksToStart.length) {
                         return buildCardItem(
+                            model.tasksToStart[i],
                             model.tasksToStart[i]['ID'],
                             model.tasksToStart[i]['OID'],
                             model.tasksToStart[i]['ScheduleDate'],
@@ -216,7 +220,7 @@ class _EngineerToStartState extends State<EngineerToStart> {
                                         .length >
                                     0
                                 ? model.tasksToStart[i]['Request']['Equipments']
-                                    [0]['EquipmentCode']
+                                    [0]['ModelCode']
                                 : null,
                             model.tasksToStart[i]['Request']['DepartmentName'],
                             model.tasksToStart[i]['RequestType']['Name'],

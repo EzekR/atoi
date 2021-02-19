@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:atoi/utils/http_request.dart';
 import 'package:flutter/material.dart';
 import 'package:atoi/utils/common.dart';
@@ -5,7 +7,10 @@ import 'package:atoi/utils/common.dart';
 class ValuationDetail extends StatefulWidget {
   final int historyID;
   final AnalysisType analysisType;
-  ValuationDetail({this.historyID, this.analysisType});
+  final int typeID;
+  final bool percentage;
+  final String title;
+  ValuationDetail({this.historyID, this.analysisType, this.typeID, this.percentage, this.title});
   _ValuationDetailState createState() => new _ValuationDetailState();
 }
 
@@ -14,6 +19,7 @@ class _ValuationDetailState extends State<ValuationDetail> {
   int currentFuji = 0;
   int currentMonth = 0;
   List<FujiItem> fujiItems = [];
+  String title;
 
   void initState() {
     super.initState();
@@ -27,34 +33,48 @@ class _ValuationDetailState extends State<ValuationDetail> {
       case AnalysisType.CONTRACT:
         url = "/Valuation/GetContractAmount";
         key = "AmountList";
+        title = "合同";
         break;
       case AnalysisType.SPARE:
         url = "/Valuation/GetSpareAmount";
         key = "AmountList";
+        title = "备用机";
         break;
       case AnalysisType.COMPONENT:
         url = "/Valuation/GetComponentAmount";
         key = "ForecastAmountList";
+        title = "零件";
         break;
       case AnalysisType.CONSUMABLE:
         url = "/Valuation/GetConsumableAmount";
         key = "AmountList";
+        title = "耗材";
         break;
       case AnalysisType.SERVICE:
         url = "/Valuation/GetServiceAmount";
         key = "ForecastAmountList";
+        title = "服务";
         break;
       case AnalysisType.CT:
         url = "/Valuation/GetCTAmount";
         key = "ForecastAmountList";
+        title = "CT";
         break;
     }
+    Map _params = {
+      'valHisID': widget.historyID
+    };
+    if (widget.typeID != null) {
+      _params['typeID'] = widget.typeID;
+    }
+    if (widget.percentage != null) {
+      _params['isPercentage'] = widget.percentage;
+    }
+    log("$_params");
     Map resp = await HttpRequest.request(
       url,
       method: HttpRequest.GET,
-      params: {
-        'valHisID': widget.historyID
-      }
+      params: _params
     );
     if (resp['ResultCode'] == '00') {
       List items;
@@ -66,7 +86,7 @@ class _ValuationDetailState extends State<ValuationDetail> {
           items = resp['Data']['Equipments'];
           break;
         case AnalysisType.CONSUMABLE:
-          items = resp['Data']['Equipments'];
+          items = resp['Data']['Consumables'];
           break;
         case AnalysisType.COMPONENT:
           items = resp['Data']['Components'];
@@ -170,7 +190,7 @@ class _ValuationDetailState extends State<ValuationDetail> {
               ),
               Container(
                 child: Text(
-                  '${CommonUtil.CurrencyForm(fujiItem.totalAmount, digits: 0, times: 1000)}',
+                  '${CommonUtil.CurrencyForm(fujiItem.totalAmount, digits: 0, times: 1)}',
                   style: TextStyle(
                       fontSize: 16.0,
                       fontWeight: FontWeight.w400,
@@ -276,36 +296,36 @@ class _ValuationDetailState extends State<ValuationDetail> {
     switch (widget.analysisType) {
       case AnalysisType.CONTRACT:
         _list.addAll([
-          _buildContainerRow(Colors.black, header: '合同总价', tail: CommonUtil.CurrencyForm(fujiItem.totalAmount, times: 1000, digits: 0)),
+          _buildContainerRow(Colors.black, header: '合同总价', tail: CommonUtil.CurrencyForm(fujiItem.totalAmount, times: 1, digits: 0, isFloor: false)),
         ]);
         break;
       case AnalysisType.SPARE:
         _list.addAll([
-          _buildContainerRow(Colors.black, header: '备用机成本', tail: CommonUtil.CurrencyForm(fujiItem.totalAmount, times: 1000, digits: 0)),
-          _buildContainerRow(Colors.black, header: '月租租金', tail: CommonUtil.CurrencyForm(fujiItem.rent, times: 1000, digits: 0)),
+          _buildContainerRow(Colors.black, header: '备用机成本', tail: CommonUtil.CurrencyForm(fujiItem.totalAmount, times: 1, digits: 0, isFloor: false)),
+          _buildContainerRow(Colors.black, header: '月租租金', tail: CommonUtil.CurrencyForm(fujiItem.rent, times: 1, digits: 0, isFloor: false)),
           _buildContainerRow(Colors.black, header: '台数', tail: fujiItem.quantity.toString()),
           _buildContainerRow(Colors.black, header: 'SubTotal', tail: fujiItem.subTotal),
-          _buildContainerRow(Colors.black, header: '成本', tail: CommonUtil.CurrencyForm(fujiItem.price, times: 1000, digits: 0)),
+          _buildContainerRow(Colors.black, header: '成本', tail: CommonUtil.CurrencyForm(fujiItem.price, times: 1, digits: 0, isFloor: false)),
         ]);
         break;
       case AnalysisType.COMPONENT:
         _list.addAll([
-          _buildContainerRow(Colors.black, header: '零件成本', tail: CommonUtil.CurrencyForm(fujiItem.totalAmount, times: 1000, digits: 0)),
+          _buildContainerRow(Colors.black, header: '零件成本', tail: CommonUtil.CurrencyForm(fujiItem.totalAmount, times: 1, digits: 0, isFloor: false)),
         ]);
         break;
       case AnalysisType.CONSUMABLE:
         _list.addAll([
-          _buildContainerRow(Colors.black, header: '耗材成本', tail: CommonUtil.CurrencyForm(fujiItem.totalAmount, times: 1000, digits: 0)),
+          _buildContainerRow(Colors.black, header: '耗材成本', tail: CommonUtil.CurrencyForm(fujiItem.totalAmount, times: 1, digits: 0, isFloor: false)),
         ]);
         break;
       case AnalysisType.SERVICE:
         _list.addAll([
-          _buildContainerRow(Colors.black, header: '服务成本', tail: CommonUtil.CurrencyForm(fujiItem.totalAmount, times: 1000, digits: 0)),
+          _buildContainerRow(Colors.black, header: '服务成本', tail: CommonUtil.CurrencyForm(fujiItem.totalAmount, times: 1, digits: 0, isFloor: false)),
         ]);
         break;
       case AnalysisType.CT:
         _list.addAll([
-          _buildContainerRow(Colors.black, header: 'CT球馆成本', tail: CommonUtil.CurrencyForm(fujiItem.totalAmount, times: 1000, digits: 0)),
+          _buildContainerRow(Colors.black, header: 'CT球馆成本', tail: CommonUtil.CurrencyForm(fujiItem.totalAmount, times: 1, digits: 0, isFloor: false)),
         ]);
         break;
     }
@@ -354,7 +374,7 @@ class _ValuationDetailState extends State<ValuationDetail> {
                       ),
                     ),
                     Text(
-                      CommonUtil.CurrencyForm(monthData?.amount, times: 1000, digits: 0),
+                      CommonUtil.CurrencyForm(monthData?.amount, times: 1, digits: 0, isFloor: false),
                       style: TextStyle(
                           color: Color.fromRGBO(0, 0, 0, 0.75),
                           fontSize: 13.0
@@ -372,19 +392,25 @@ class _ValuationDetailState extends State<ValuationDetail> {
 
   List<Widget> buildAnalysisList() {
     List<Widget> _list = [];
-    _list.addAll([
-      buildAnnualSlider(),
-      buildTableForecast(),
-      buildMonthSlider(),
-      buildMonthTable()
-    ]);
+    if (fujiItems.isEmpty) {
+      _list.add(Center(
+        child: Text("暂无数据"),
+      ));
+    } else {
+      _list.addAll([
+        buildAnnualSlider(),
+        buildTableForecast(),
+        buildMonthSlider(),
+        buildMonthTable()
+      ]);
+    }
     return _list;
   }
 
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("分析"),
+        title: Text("${widget.title??title}分析"),
         backgroundColor: Color(0xff41579B),
       ),
       body: ListView(

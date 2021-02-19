@@ -873,12 +873,13 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
 
   List<Widget> buildEquipments() {
     List<Widget> _list = [];
+    log("${_equipments[0]}");
     for(int i=0; i<_equipments.length; i++) {
       _list.addAll([
         BuildWidget.buildRow('系统编号', _equipments[i]['OID']??''),
         BuildWidget.buildRow('资产编号', _equipments[i]['AssetCode']??''),
-        BuildWidget.buildRow('名称', _equipments[i]['Name']??'', onTap: () => Navigator.of(context).push(new MaterialPageRoute(builder: (_) => new EquipmentsList(equipmentId: _equipments[i]['OID'], assetType: _equipments[i]['AssetType']['ID'],)))),
-        BuildWidget.buildRow('型号', _equipments[i]['EquipmentCode']??''),
+        BuildWidget.buildRow('名称', _equipments[i]['Name']??'', onTap: () => Navigator.of(context).push(new MaterialPageRoute(builder: (_) => new EquipmentsList(equipmentId: _equipments[i]['OID'], assetType: _dispatch['Request']['AssetType']['ID'],)))),
+        BuildWidget.buildRow('型号', _equipments[i]['ModelCode']??''),
         BuildWidget.buildRow('序列号', _equipments[i]['SerialCode']??''),
         BuildWidget.buildRow('设备厂商', _equipments[i]['Manufacturer']['Name']??''),
         BuildWidget.buildRow('使用科室', _equipments[i]['Department']['Name']??''),
@@ -920,9 +921,24 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
                   if (widget.status >= 3 || _dispatch['Request']['RequestType']['ID']!=12) {
                     return;
                   }
+                  EquipmentType eType;
+                  switch (_equipments[0]['AssetType']['ID']) {
+                    case 1:
+                      eType = EquipmentType.MEDICAL;
+                      break;
+                    case 2:
+                      eType = EquipmentType.MEASURE;
+                      break;
+                    case 3:
+                      eType = EquipmentType.OTHER;
+                      break;
+                    default:
+                      eType = EquipmentType.MEDICAL;
+                      break;
+                  }
                   final selected = await Navigator.of(context)
                       .push(new MaterialPageRoute(builder: (context) {
-                    return SearchPage(equipments: _equipments, multiType: MultiSearchType.EQUIPMENT, onlyType: EquipmentType.MEDICAL,);
+                    return SearchPage(equipments: _equipments, multiType: MultiSearchType.EQUIPMENT, onlyType: eType,);
                   }));
                   if (selected != null) {
                     setState(() {

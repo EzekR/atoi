@@ -61,6 +61,7 @@ class _EquipmentsListState extends State<EquipmentsList> {
   // permission
   Map techPermission;
   Map specialPermission;
+  EquipmentType eType;
 
   Future<Null> getRole() async {
     var _prefs = await prefs;
@@ -75,7 +76,10 @@ class _EquipmentsListState extends State<EquipmentsList> {
     permissionInstance.prefs = _prefs;
     permissionInstance.initPermissions();
     String _type;
-    switch (widget.equipmentType??eType) {
+    if (widget.equipmentType != null) {
+      eType = widget.equipmentType;
+    }
+    switch (eType) {
       case EquipmentType.MEDICAL:
         _type = "Equipment";
         break;
@@ -84,7 +88,9 @@ class _EquipmentsListState extends State<EquipmentsList> {
         break;
       case EquipmentType.OTHER:
         _type = "OtherEqpt";
+        break;
     }
+    log("$_type");
     techPermission = permissionInstance.getTechPermissions('Asset', _type);
     specialPermission = permissionInstance.getSpecialPermissions('Asset', _type);
   }
@@ -174,6 +180,9 @@ class _EquipmentsListState extends State<EquipmentsList> {
           break;
         case 3:
           url = '/OtherEqpt/QueryOtherEqpts';
+          break;
+        default:
+          url = '/Equipment/Getdevices';
           break;
       }
     }
@@ -275,7 +284,7 @@ class _EquipmentsListState extends State<EquipmentsList> {
                                     child: Text('资产编号'),
                                   ),
                                   DropdownMenuItem(
-                                    value: '$prefix.EquipmentCode',
+                                    value: '$prefix.ModelCode',
                                     child: Text('设备型号'),
                                   ),
                                 ],
@@ -674,46 +683,57 @@ class _EquipmentsListState extends State<EquipmentsList> {
     });
   }
 
-  EquipmentType eType;
 
   void initState() {
     super.initState();
-    switch (widget.equipmentType) {
-      case EquipmentType.MEDICAL:
-        prefix = 'e';
-        pageTitle = '医疗设备';
-        cardHead = "设备";
-        break;
-      case EquipmentType.MEASURE:
-        prefix = 'mi';
-        pageTitle = '计量器具';
-        cardHead = "器具";
-        break;
-      case EquipmentType.OTHER:
-        prefix = 'oe';
-        pageTitle = '其他设备';
-        cardHead = "设备";
-        break;
+    if (widget.equipmentType != null) {
+      switch (widget.equipmentType) {
+        case EquipmentType.MEDICAL:
+          prefix = 'e';
+          pageTitle = '医疗设备';
+          cardHead = "设备";
+          break;
+        case EquipmentType.MEASURE:
+          prefix = 'mi';
+          pageTitle = '计量器具';
+          cardHead = "器具";
+          break;
+        case EquipmentType.OTHER:
+          prefix = 'oe';
+          pageTitle = '其他设备';
+          cardHead = "设备";
+          break;
+      }
+      eType = widget.equipmentType;
     }
-    switch (widget.assetType) {
-      case 1:
-        prefix = 'e';
-        pageTitle = '医疗设备';
-        cardHead = "设备";
-        eType = EquipmentType.MEDICAL;
-        break;
-      case 2:
-        prefix = 'mi';
-        pageTitle = '计量器具';
-        cardHead = "器具";
-        eType = EquipmentType.MEASURE;
-        break;
-      case 3:
-        prefix = 'oe';
-        pageTitle = '其他设备';
-        cardHead = "设备";
-        eType = EquipmentType.OTHER;
-        break;
+    if (widget.assetType != null) {
+      log("${widget.assetType}");
+      switch (widget.assetType) {
+        case 1:
+          prefix = 'e';
+          pageTitle = '医疗设备';
+          cardHead = "设备";
+          eType = EquipmentType.MEDICAL;
+          break;
+        case 2:
+          prefix = 'mi';
+          pageTitle = '计量器具';
+          cardHead = "器具";
+          eType = EquipmentType.MEASURE;
+          break;
+        case 3:
+          prefix = 'oe';
+          pageTitle = '其他设备';
+          cardHead = "设备";
+          eType = EquipmentType.OTHER;
+          break;
+        default:
+          prefix = 'e';
+          pageTitle = '医疗设备';
+          cardHead = "设备";
+          eType = EquipmentType.MEDICAL;
+          break;
+      }
     }
     cModel = MainModel.of(context);
     initFilter();
@@ -870,11 +890,11 @@ class _EquipmentsListState extends State<EquipmentsList> {
 
   List<Widget> _buildEquipInfo(Map item) {
     List<Widget> _list = [];
-    switch (widget.equipmentType) {
+    switch (eType) {
       case EquipmentType.MEDICAL:
         _list.addAll([
           BuildWidget.buildCardRow('资产编号', item['AssetCode']),
-          BuildWidget.buildCardRow('设备型号', item['EquipmentCode']),
+          BuildWidget.buildCardRow('设备型号', item['ModelCode']),
           BuildWidget.buildCardRow('序列号', item['SerialCode']),
           BuildWidget.buildCardRow('厂商', item['Manufacturer']['Name']),
           BuildWidget.buildCardRow('资产等级', item['AssetLevel']['Name']),
@@ -908,44 +928,44 @@ class _EquipmentsListState extends State<EquipmentsList> {
         ]);
         break;
     }
-    switch (widget.assetType) {
-      case 1:
-        _list.addAll([
-          BuildWidget.buildCardRow('资产编号', item['AssetCode']),
-          BuildWidget.buildCardRow('设备型号', item['EquipmentCode']),
-          BuildWidget.buildCardRow('序列号', item['SerialCode']),
-          BuildWidget.buildCardRow('厂商', item['Manufacturer']['Name']),
-          BuildWidget.buildCardRow('资产等级', item['AssetLevel']['Name']),
-          BuildWidget.buildCardRow('使用科室', item['Department']['Name']),
-          BuildWidget.buildCardRow('设备状态', item['EquipmentStatus']['Name']),
-          BuildWidget.buildCardRow('维保状态', item['WarrantyStatus']),
-          BuildWidget.buildCardRow('富士II类', item['FujiClass2']['Name']),
-        ]);
-        break;
-      case 2:
-        _list.addAll([
-          BuildWidget.buildCardRow('资产编号', item['AssetCode']),
-          BuildWidget.buildCardRow('序列号', item['SerialCode']),
-          BuildWidget.buildCardRow('器具型号', item['ModelCode']),
-          BuildWidget.buildCardRow('厂商', item['Manufacturer']['Name']),
-          BuildWidget.buildCardRow('资产等级', item['AssetLevel']['Name']),
-          BuildWidget.buildCardRow('使用科室', item['Department']['Name']),
-          BuildWidget.buildCardRow('器具状态', item['EquipmentStatus']['Name']),
-          BuildWidget.buildCardRow('关联设备', item['Equipment']['Name']),
-        ]);
-        break;
-      case 3:
-        _list.addAll([
-          BuildWidget.buildCardRow('资产编号', item['AssetCode']),
-          BuildWidget.buildCardRow('序列号', item['SerialCode']),
-          BuildWidget.buildCardRow('设备型号', item['OtherEqptCode']),
-          BuildWidget.buildCardRow('厂商', item['Manufacturer']['Name']),
-          BuildWidget.buildCardRow('资产等级', item['AssetLevel']['Name']),
-          BuildWidget.buildCardRow('使用科室', item['Department']['Name']),
-          BuildWidget.buildCardRow('设备状态', item['EquipmentStatus']['Name']),
-        ]);
-        break;
-    }
+    //switch (widget.assetType) {
+    //  case 1:
+    //    _list.addAll([
+    //      BuildWidget.buildCardRow('资产编号', item['AssetCode']),
+    //      BuildWidget.buildCardRow('设备型号', item['ModelCode']),
+    //      BuildWidget.buildCardRow('序列号', item['SerialCode']),
+    //      BuildWidget.buildCardRow('厂商', item['Manufacturer']['Name']),
+    //      BuildWidget.buildCardRow('资产等级', item['AssetLevel']['Name']),
+    //      BuildWidget.buildCardRow('使用科室', item['Department']['Name']),
+    //      BuildWidget.buildCardRow('设备状态', item['EquipmentStatus']['Name']),
+    //      BuildWidget.buildCardRow('维保状态', item['WarrantyStatus']),
+    //      BuildWidget.buildCardRow('富士II类', item['FujiClass2']['Name']),
+    //    ]);
+    //    break;
+    //  case 2:
+    //    _list.addAll([
+    //      BuildWidget.buildCardRow('资产编号', item['AssetCode']),
+    //      BuildWidget.buildCardRow('序列号', item['SerialCode']),
+    //      BuildWidget.buildCardRow('器具型号', item['ModelCode']),
+    //      BuildWidget.buildCardRow('厂商', item['Manufacturer']['Name']),
+    //      BuildWidget.buildCardRow('资产等级', item['AssetLevel']['Name']),
+    //      BuildWidget.buildCardRow('使用科室', item['Department']['Name']),
+    //      BuildWidget.buildCardRow('器具状态', item['EquipmentStatus']['Name']),
+    //      BuildWidget.buildCardRow('关联设备', item['Equipment']['Name']),
+    //    ]);
+    //    break;
+    //  case 3:
+    //    _list.addAll([
+    //      BuildWidget.buildCardRow('资产编号', item['AssetCode']),
+    //      BuildWidget.buildCardRow('序列号', item['SerialCode']),
+    //      BuildWidget.buildCardRow('设备型号', item['OtherEqptCode']),
+    //      BuildWidget.buildCardRow('厂商', item['Manufacturer']['Name']),
+    //      BuildWidget.buildCardRow('资产等级', item['AssetLevel']['Name']),
+    //      BuildWidget.buildCardRow('使用科室', item['Department']['Name']),
+    //      BuildWidget.buildCardRow('设备状态', item['EquipmentStatus']['Name']),
+    //    ]);
+    //    break;
+    //}
     return _list;
   }
 

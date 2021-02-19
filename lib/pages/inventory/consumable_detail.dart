@@ -256,7 +256,7 @@ class _ConsumableDetailState extends State<ConsumableDetail> {
       "userID": prefs.getInt('userID'),
       "info": _info
     };
-    if (widget.isStock) {
+    if (widget.isStock != null && widget.isStock) {
       Navigator.of(context).pop(jsonEncode(_info));
       return;
     }

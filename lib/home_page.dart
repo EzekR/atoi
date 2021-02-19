@@ -1623,38 +1623,38 @@ class _HomePageState extends State<HomePage>
                       },
                     ),
                     AnimatedContainer(
-                      height: showMeasure?80.0:0.0,
+                      height: showMeasure?40.0:0.0,
                       duration: Duration(milliseconds: 200),
                       child: Column(
                         children: <Widget>[
-                          Container(
-                            height: 40.0,
-                            child: FlatButton(
-                              onPressed: () {
-                                Navigator.of(context).push(new MaterialPageRoute(builder: (_) {
-                                  return new ValuationCondition();
-                                }));
-                              },
-                              child: Row(
-                                children: <Widget>[
-                                  SizedBox(
-                                    width: 60.0,
-                                  ),
-                                  Icon(Icons.gavel, color: Colors.grey, size: 16.0,),
-                                  SizedBox(
-                                    width: 10.0,
-                                  ),
-                                  Text(
-                                    '估价条件',
-                                    style: TextStyle(
-                                        fontSize: 14.0,
-                                        color: Colors.black54
-                                    ),
-                                  )
-                                ],
-                              ),
-                            ),
-                          ),
+                          //Container(
+                          //  height: 40.0,
+                          //  child: FlatButton(
+                          //    onPressed: () {
+                          //      Navigator.of(context).push(new MaterialPageRoute(builder: (_) {
+                          //        return new ValuationCondition();
+                          //      }));
+                          //    },
+                          //    child: Row(
+                          //      children: <Widget>[
+                          //        SizedBox(
+                          //          width: 60.0,
+                          //        ),
+                          //        Icon(Icons.gavel, color: Colors.grey, size: 16.0,),
+                          //        SizedBox(
+                          //          width: 10.0,
+                          //        ),
+                          //        Text(
+                          //          '估价条件',
+                          //          style: TextStyle(
+                          //              fontSize: 14.0,
+                          //              color: Colors.black54
+                          //          ),
+                          //        )
+                          //      ],
+                          //    ),
+                          //  ),
+                          //),
                           Container(
                             height: 40.0,
                             child: FlatButton(

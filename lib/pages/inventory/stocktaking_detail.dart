@@ -42,6 +42,7 @@ class _StocktakingDetailState extends State<StocktakingDetail> {
   String barcode;
   FocusNode focusComment = new FocusNode();
   List<FocusNode> focusCards;
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   void changeObj(value) {
     setState(() {
@@ -525,8 +526,8 @@ class _StocktakingDetailState extends State<StocktakingDetail> {
                                     ),
                                     CupertinoDialogAction(
                                       onPressed: () async {
-                                        //Navigator.of(context).pop();
                                         deleteObj(stockItems[i]);
+                                        Navigator.of(context).pop();
                                       },
                                       child: Text(
                                           '确认'
@@ -595,8 +596,8 @@ class _StocktakingDetailState extends State<StocktakingDetail> {
                                   ),
                                   CupertinoDialogAction(
                                     onPressed: () async {
-                                      Navigator.of(context).pop();
                                       deleteObj(stockItems[i]);
+                                      Navigator.of(context).pop();
                                     },
                                     child: Text(
                                         '确认'
@@ -661,8 +662,8 @@ class _StocktakingDetailState extends State<StocktakingDetail> {
                                     ),
                                     CupertinoDialogAction(
                                       onPressed: () async {
-                                        Navigator.of(context).pop();
                                         deleteObj(stockItems[i]);
+                                        Navigator.of(context).pop();
                                       },
                                       child: Text(
                                           '确认'
@@ -727,8 +728,8 @@ class _StocktakingDetailState extends State<StocktakingDetail> {
                                     ),
                                     CupertinoDialogAction(
                                       onPressed: () async {
-                                        Navigator.of(context).pop();
                                         deleteObj(stockItems[i]);
+                                        Navigator.of(context).pop();
                                       },
                                       child: Text(
                                           '确认'
@@ -886,10 +887,11 @@ class _StocktakingDetailState extends State<StocktakingDetail> {
                       widget.editable?IconButton(
                         icon: Icon(Icons.add_circle, color: Colors.blueAccent,),
                         onPressed: () async {
+                          await checkStocktaking(1);
                           Map _info;
                           switch (stockType) {
                             case 1:
-                              final result = await Navigator.of(context).push(new MaterialPageRoute(builder: (context) => new ComponentDetail(editable: true, isStock: true, componentList: stockItems,)));
+                              final result = await Navigator.of(_scaffoldKey.currentContext).push(new MaterialPageRoute(builder: (context) => new ComponentDetail(editable: true, isStock: true, componentList: stockItems,)));
                               if (result != null) {
                                 _info = jsonDecode(result);
                                 _info['InvComponent'] = {
@@ -898,23 +900,24 @@ class _StocktakingDetailState extends State<StocktakingDetail> {
                               }
                               break;
                             case 2:
-                              Navigator.of(context).push(new MaterialPageRoute(builder: (context) => new ConsumableDetail(editable: true, isStock: true,))).then((result) async {
-                                if (result != null){
-                                  _info = jsonDecode(result);
-                                  int ind = stockItems.indexWhere((item) => item['LotNum']==_info['LotNum'] || item['Consumable']['ID']==_info['Consumable']['ID']);
-                                  if (ind > -1) {
-                                    showDialog(context: context, builder: (context) => CupertinoAlertDialog(
-                                      title: new Text('耗材已在库中'),
-                                    ));
-                                  }
-                                  _info['InvConsumable'] = {
-                                    'ID': 0
-                                  };
+                              final result = await Navigator.of(_scaffoldKey.currentContext).push(new MaterialPageRoute(builder: (context) => new ConsumableDetail(editable: true, isStock: true,)));
+                              log("$result");
+                              if (result != null){
+                                _info = jsonDecode(result);
+                                int ind = stockItems.indexWhere((item) => item['LotNum']==_info['LotNum'] && item['Consumable']['ID']==_info['Consumable']['ID']);
+                                if (ind > -1) {
+                                  showDialog(context: context, builder: (context) => CupertinoAlertDialog(
+                                    title: new Text('耗材已在库中'),
+                                  ));
+                                  return;
                                 }
-                              });
+                                _info['InvConsumable'] = {
+                                  'ID': 0
+                                };
+                              }
                               break;
                             case 3:
-                              final String result = await Navigator.of(context).push(new MaterialPageRoute(builder: (context) => new ServiceDetail(editable: true, isStock: true, date: scheduledDate,)));
+                              final String result = await Navigator.of(_scaffoldKey.currentContext).push(new MaterialPageRoute(builder: (context) => new ServiceDetail(editable: true, isStock: true, date: scheduledDate,)));
                               log("$result");
                               if (result != null) {
                                 _info = jsonDecode(result);
@@ -924,22 +927,25 @@ class _StocktakingDetailState extends State<StocktakingDetail> {
                               }
                               break;
                             case 4:
-                              Navigator.of(context).push(new MaterialPageRoute(builder: (context) => new SpareDetail(editable: true, isStock: true,))).then((result) async {
-                                if (result != null) {
-                                  _info = jsonDecode(result);
-                                  int ind = stockItems.indexWhere((item) => item['FujiClass2']['ID']==_info['FujiClass2']['ID']||item['StartDate']==_info['StartDate']);
-                                  if (ind > -1) {
-                                    showDialog(context: context, builder: (context) => CupertinoAlertDialog(
-                                      title: new Text('备用机已在库中'),
-                                    ));
-                                  }
-                                  _info['InvSpare'] = {
-                                    'ID': 0
-                                  };
+                              final result = await Navigator.of(_scaffoldKey.currentContext).push(new MaterialPageRoute(builder: (context) => new SpareDetail(editable: true, isStock: true,)));
+                              if (result != null) {
+                                _info = jsonDecode(result);
+                                log("$_info");
+                                int ind = stockItems.indexWhere((item) => item['FujiClass2']['ID']==_info['FujiClass2']['ID']&&CommonUtil.TimeForm(item['StartDate'], "yyyy-mm-dd")==_info['StartDate']&&item['SerialCode']==_info['SerialCode']);
+                                log("ind:$ind");
+                                if (ind > -1) {
+                                  showDialog(context: context, builder: (context) => CupertinoAlertDialog(
+                                    title: new Text('备用机已在库中'),
+                                  ));
+                                  return;
                                 }
-                              });
+                                _info['InvSpare'] = {
+                                  'ID': 0
+                                };
+                              }
                               break;
                           }
+                          log("$_info");
                           bool save = await saveStuffToStocktaking(_info);
                           if (save) {
                             stockItems.add(_info);
@@ -951,7 +957,8 @@ class _StocktakingDetailState extends State<StocktakingDetail> {
                         },
                       ):Container(),
                       widget.editable&&stockType!=3?IconButton(
-                        onPressed: () {
+                        onPressed: () async {
+                          await checkStocktaking(1);
                           scan();
                         },
                         icon: Icon(Icons.crop_free, color: Colors.blueAccent,),
@@ -979,6 +986,7 @@ class _StocktakingDetailState extends State<StocktakingDetail> {
 
   Widget build(BuildContext context) {
     return new Scaffold(
+        key: _scaffoldKey,
         appBar: new AppBar(
           title: Text('盘点'),
           elevation: 0.7,

@@ -221,7 +221,7 @@ class _ManagerToAssignState extends State<ManagerToAssign> {
                 children: <Widget>[
                   equipmentNo.isNotEmpty?BuildWidget.buildCardRow('设备编号', equipmentNo):new Container(),
                   equipmentName.isNotEmpty?BuildWidget.buildCardRow('设备名称', equipmentName, onTap: equipmentName=='多设备'?null:() => Navigator.of(context).push(new MaterialPageRoute(builder: (_) {
-                    return EquipmentsList(equipmentId: equipmentNo, assetType: _equipments[0]['AssetType']['ID'],);
+                    return EquipmentsList(equipmentId: equipmentNo, assetType: task['AssetType']['ID'],);
                   }))):new Container(),
                   departmentName.isNotEmpty?BuildWidget.buildCardRow('使用科室', departmentName):new Container(),
                   BuildWidget.buildCardRow('请求人', requestPerson),

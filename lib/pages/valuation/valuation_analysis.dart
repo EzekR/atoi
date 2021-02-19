@@ -1,12 +1,17 @@
+import 'dart:developer';
+
 import 'package:atoi/pages/valuation/valuation_detail.dart';
 import 'package:atoi/utils/common.dart';
 import 'package:atoi/utils/http_request.dart';
+import 'package:date_format/date_format.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:atoi_charts/charts.dart';
 
 class ValuationAnalysis extends StatefulWidget {
   final int historyID;
-  ValuationAnalysis({Key key, this.historyID}):super(key: key);
+  final String pageState;
+  ValuationAnalysis({Key key, this.historyID, this.pageState}):super(key: key);
   _ValuationAnalysisState createState() => new _ValuationAnalysisState();
 }
 
@@ -27,20 +32,21 @@ class _ValuationAnalysisState extends State<ValuationAnalysis> {
       method: HttpRequest.GET,
       params: {
         'valHisID': widget.historyID,
-        'priceOnly': currentTable==0,
-        'amountOnly': currentTable==1
+        'priceOnly': currentTable==1,
+        'amountOnly': currentTable==0||currentTable==2
       }
     );
     if (resp['ResultCode'] == '00') {
       setState(() {
         tableData = resp['Data'];
       });
-      currentTable==0?initColumnTotal():initColumnDetail();
+      currentTable==1?initColumnTotal():initColumnDetail();
     }
   }
 
   void initColumnTotal() {
     // total column
+    columnTotal.clear();
     ColumnTotal _columnTotal = new ColumnTotal(
       year: '小计',
       total: tableData['AmountTotal'],
@@ -59,6 +65,7 @@ class _ValuationAnalysisState extends State<ValuationAnalysis> {
       Map item = tableData['FixedForecastAmount'][i];
       List<ColumnTotal> _monthData = [];
       for(int j=0; j<tableData['FixedForecastAmount'][i]['data'].length; j++) {
+        log("${tableData['ImportAmount'][i]['data'][j]}");
         ColumnTotal _columnMonth = new ColumnTotal(
             month: tableData['ForecastDate'][i*12+j]['Name'],
             total: tableData['AmountForecast'][i]['data'][j],
@@ -83,7 +90,7 @@ class _ValuationAnalysisState extends State<ValuationAnalysis> {
         importCost: tableData['ImportAmount'][i]['sum'],
         totalCost: tableData['TotalAmount'][i]['sum'],
         marginProfit: tableData['VaRProfit'][i]['sum'],
-        marginRatio: tableData['VaRRate'][i]['sum'],
+        marginRatio: tableData['VaRRate'][i]['data'][0],
         safeAmount: tableData['SafeProfit'][i]['sum'],
         quotation: tableData['Price'][i]['sum'],
         monthDetail: _monthData
@@ -97,6 +104,7 @@ class _ValuationAnalysisState extends State<ValuationAnalysis> {
   }
 
   void initColumnDetail() {
+    columnForecast.clear();
     List<ColumnDetail> _month = [];
     for(int i=0; i<tableData['ActualDate'].length; i++) {
       Map item = tableData['ActualDate'][i];
@@ -221,6 +229,8 @@ class _ValuationAnalysisState extends State<ValuationAnalysis> {
       columnActual = actual;
       columnForecast = forecast;
     });
+    initChartData();
+    initLineData();
   }
 
   void initState() {
@@ -383,7 +393,7 @@ class _ValuationAnalysisState extends State<ValuationAnalysis> {
                       Padding(
                         padding: EdgeInsets.fromLTRB(16.0, 0, 0, 0),
                         child: Text(
-                          CommonUtil.CurrencyForm(columnActual?.total, times: 1000, digits: 0),
+                          CommonUtil.CurrencyForm(columnActual?.total, times: 1000, digits: 0, isFloor: false),
                           style: TextStyle(
                               fontSize: 22.0,
                               color: Colors.white,
@@ -414,32 +424,32 @@ class _ValuationAnalysisState extends State<ValuationAnalysis> {
                   padding: EdgeInsets.fromLTRB(16.0, 0, 16, 6),
                   child: Column(
                     children: <Widget>[
-                      _buildContainerRow(Colors.white, header: '固定类', tail: CommonUtil.CurrencyForm(columnActual.fixed, times: 1000, digits: 0)),
-                      _buildContainerSplit(Colors.white, headerLeft: '信息系统使用费', tailLeft: CommonUtil.CurrencyForm(columnActual.system, times: 1000, digits: 0,),
-                        headerRight: '人工费', tailRight: CommonUtil.CurrencyForm(columnActual.labour, times: 1000, digits: 0)
+                      _buildContainerRow(Colors.white, header: '固定类', tail: CommonUtil.CurrencyForm(columnActual.fixed, times: 1000, digits: 0, isFloor: false)),
+                      _buildContainerSplit(Colors.white, headerLeft: '信息系统使用费', tailLeft: CommonUtil.CurrencyForm(columnActual.system, times: 1000, digits: 0, isFloor: false,),
+                        headerRight: '人工费', tailRight: CommonUtil.CurrencyForm(columnActual.labour, times: 1000, digits: 0, isFloor: false)
                       ),
-                      _buildContainerSplit(Colors.white, headerLeft: '维保费', tailLeft: CommonUtil.CurrencyForm(columnActual.repairAndMaintain, times: 1000, digits: 0),
-                        headerRight: '备用机成本', tailRight: CommonUtil.CurrencyForm(columnActual.spare, times: 1000, digits: 0)
+                      _buildContainerSplit(Colors.white, headerLeft: '维保费', tailLeft: CommonUtil.CurrencyForm(columnActual.repairAndMaintain, times: 1000, digits: 0, isFloor: false),
+                        headerRight: '备用机成本', tailRight: CommonUtil.CurrencyForm(columnActual.spare, times: 1000, digits: 0, isFloor: false)
                       ),
-                      _buildContainerRow(Colors.white, header: '变动类-保养', tail: CommonUtil.CurrencyForm(columnActual?.maintain, times: 1000, digits: 0)),
-                      _buildContainerSplit(Colors.white, headerLeft: '耗材费', tailLeft: CommonUtil.CurrencyForm(columnActual.consumable, times: 1000, digits: 0),
-                          headerRight: '定期类', tailRight: CommonUtil.CurrencyForm(columnActual.fixedPeriod, times: 1000, digits: 0)
+                      _buildContainerRow(Colors.white, header: '变动类-保养', tail: CommonUtil.CurrencyForm(columnActual?.maintain, times: 1000, digits: 0, isFloor: false)),
+                      _buildContainerSplit(Colors.white, headerLeft: '耗材费', tailLeft: CommonUtil.CurrencyForm(columnActual.consumable, times: 1000, digits: 0, isFloor: false),
+                          headerRight: '定期类', tailRight: CommonUtil.CurrencyForm(columnActual.fixedPeriod, times: 1000, digits: 0, isFloor: false)
                       ),
-                      _buildContainerSplit(Colors.white, headerLeft: '定量类', tailLeft: CommonUtil.CurrencyForm(columnActual.fixedQuantity, times: 1000, digits: 0),
-                          headerRight: '小额汇总成本', tailRight: CommonUtil.CurrencyForm(columnActual.small, times: 1000, digits: 0)
+                      _buildContainerSplit(Colors.white, headerLeft: '定量类', tailLeft: CommonUtil.CurrencyForm(columnActual.fixedQuantity, times: 1000, digits: 0, isFloor: false),
+                          headerRight: '小额汇总成本', tailRight: CommonUtil.CurrencyForm(columnActual.small, times: 1000, digits: 0, isFloor: false)
                       ),
-                      _buildContainerRow(Colors.white, header: '变动类-维修', tail: CommonUtil.CurrencyForm(columnActual.repair, times: 1000, digits: 0)),
-                      _buildContainerSplit(Colors.white, headerLeft: '故障零件成本', tailLeft: CommonUtil.CurrencyForm(columnActual.componentCost, times: 1000, digits: 0),
+                      _buildContainerRow(Colors.white, header: '变动类-维修', tail: CommonUtil.CurrencyForm(columnActual.repair, times: 1000, digits: 0, isFloor: false)),
+                      _buildContainerSplit(Colors.white, headerLeft: '故障零件成本', tailLeft: CommonUtil.CurrencyForm(columnActual.componentCost, times: 1000, digits: 0, isFloor: false),
                           headerRight: '', tailRight: '',
                       ),
-                      _buildContainerSplit(Colors.white, headerLeft: '重点设备', tailLeft: CommonUtil.CurrencyForm(columnActual.essential, times: 1000, digits: 0),
-                          headerRight: '一般设备', tailRight: CommonUtil.CurrencyForm(columnActual.common, times: 1000, digits: 0)
+                      _buildContainerSplit(Colors.white, headerLeft: '重点设备', tailLeft: CommonUtil.CurrencyForm(columnActual.essential, times: 1000, digits: 0, isFloor: false),
+                          headerRight: '一般设备', tailRight: CommonUtil.CurrencyForm(columnActual.common, times: 1000, digits: 0, isFloor: false)
                       ),
-                      _buildContainerSplit(Colors.white, headerLeft: '外来服务费', tailLeft: CommonUtil.CurrencyForm(columnActual.service, times: 1000, digits: 0),
+                      _buildContainerSplit(Colors.white, headerLeft: '外来服务费', tailLeft: CommonUtil.CurrencyForm(columnActual.service, times: 1000, digits: 0, isFloor: false),
                         headerRight: '', tailRight: '',
                       ),
-                      _buildContainerSplit(Colors.white, headerLeft: '重点设备', tailLeft: CommonUtil.CurrencyForm(columnActual.serviceEssential, times: 1000, digits: 0),
-                          headerRight: '一般设备', tailRight: CommonUtil.CurrencyForm(columnActual.serviceCommon, times: 1000, digits: 0)
+                      _buildContainerSplit(Colors.white, headerLeft: '重点设备', tailLeft: CommonUtil.CurrencyForm(columnActual.serviceEssential, times: 1000, digits: 0, isFloor: false),
+                          headerRight: '一般设备', tailRight: CommonUtil.CurrencyForm(columnActual.serviceCommon, times: 1000, digits: 0, isFloor: false)
                       ),
                     ],
                   ),
@@ -506,7 +516,7 @@ class _ValuationAnalysisState extends State<ValuationAnalysis> {
               ),
               Container(
                 child: Text(
-                  '${CommonUtil.CurrencyForm(columnTotal!=null?columnTotal.quotation:columnDetail.total, digits: 0, times: 1000)}',
+                  '${CommonUtil.CurrencyForm(columnTotal!=null?columnTotal.quotation:columnDetail.total, digits: 0, isFloor: false, times: 1000)}',
                   style: TextStyle(
                       fontSize: 16.0,
                       fontWeight: FontWeight.w400,
@@ -524,12 +534,12 @@ class _ValuationAnalysisState extends State<ValuationAnalysis> {
   Container buildAnnualSlider() {
     List<Widget> _list = [];
     switch (currentTable) {
-      case 0:
+      case 1:
         _list.addAll(columnTotal.asMap().keys.map((index) {
           return _buildAnnualTab(index, columnTotal: columnTotal[index]);
         }).toList());
         break;
-      case 1:
+      case 2:
         _list.addAll(columnForecast.asMap().keys.map((index) {
           return _buildAnnualTab(index, columnDetail: columnForecast[index]);
         }).toList());
@@ -554,22 +564,41 @@ class _ValuationAnalysisState extends State<ValuationAnalysis> {
         padding: EdgeInsets.all(16.0),
         child: Column(
           children: <Widget>[
-            _buildContainerRow(Colors.black, header: "成本汇总", tail: CommonUtil.CurrencyForm(columnData.total, times: 1000, digits: 0)),
-            _buildContainerSplit(Colors.black, headerLeft: "固定类", tailLeft: CommonUtil.CurrencyForm(columnData.fixed, times: 1000, digits: 0),
-              headerRight: "变动类-保养", tailRight: CommonUtil.CurrencyForm(columnData.consumable, times: 1000, digits: 0)
+            _buildContainerRow(Colors.black, header: "成本汇总", tail: CommonUtil.CurrencyForm(columnData.total, times: 1000, digits: 0, isFloor: false)),
+            _buildContainerSplit(Colors.black, headerLeft: "固定类", tailLeft: CommonUtil.CurrencyForm(columnData.fixed, times: 1000, digits: 0, isFloor: false),
+              headerRight: "变动类-保养", tailRight: CommonUtil.CurrencyForm(columnData.consumable, times: 1000, digits: 0, isFloor: false)
             ),
-            _buildContainerSplit(Colors.black, headerLeft: "变动类-维修", tailLeft: CommonUtil.CurrencyForm(columnData.repair, times: 1000, digits: 0),
+            _buildContainerSplit(Colors.black, headerLeft: "变动类-维修", tailLeft: CommonUtil.CurrencyForm(columnData.repair, times: 1000, digits: 0, isFloor: false),
               headerRight: "", tailRight: ""
             ),
-            _buildContainerRow(Colors.black, header: "导入期成本", tail: CommonUtil.CurrencyForm(columnData.importCost, times: 1000, digits: 1)),
-            _buildContainerRow(Colors.black, header: "总成本", tail: CommonUtil.CurrencyForm(columnData.totalCost, times: 1000, digits: 0)),
-            _buildContainerRow(Colors.black, header: "边际利润", tail: CommonUtil.CurrencyForm(columnData.marginProfit, times: 1000, digits: 0)),
+            _buildContainerRow(Colors.black, header: "导入期成本", tail: CommonUtil.CurrencyForm(columnData.importCost, times: 1000, digits: 0, isFloor: false)),
+            _buildContainerRow(Colors.black, header: "总成本", tail: CommonUtil.CurrencyForm(columnData.totalCost, times: 1000, digits: 0, isFloor: false)),
+            _buildContainerRow(Colors.black, header: "边际利润", tail: CommonUtil.CurrencyForm(columnData.marginProfit, times: 1000, digits: 0, isFloor: false)),
             _buildContainerSplit(Colors.black, headerLeft: "边际利润率", tailLeft: '${columnData.marginRatio?.toStringAsFixed(0)}%', headerRight: "", tailRight: ""),
-            _buildContainerRow(Colors.black, header: "安全额", tail: CommonUtil.CurrencyForm(columnData.safeAmount, times: 1000, digits: 0)),
+            _buildContainerRow(Colors.black, header: "安全额", tail: CommonUtil.CurrencyForm(columnData.safeAmount, times: 1000, digits: 0, isFloor: false)),
           ],
         ),
       ),
     );
+  }
+
+  void initChartData() {
+    chartData.clear();
+    chartData.add(ChartData("固定类", columnActual.fixed, Color(0xff2FC25B)));
+    chartData.add(ChartData("变动类-保养", columnActual.maintain??0, Color(0xff1890FF)));
+    chartData.add(ChartData("变动类-维修", columnActual.repair, Color(0xff13C2C2)));
+  }
+
+  void initLineData() {
+    lineDataFixed.clear();
+    lineDataMaintain.clear();
+    lineDataRepair.clear();
+    for(int i=0; i<columnActual.monthDetail.length; i++) {
+      ColumnDetail monthDetail = columnActual.monthDetail[i];
+      lineDataFixed.add(MonthData(monthDetail.month, monthDetail.fixed??0));
+      lineDataFixed.add(MonthData(monthDetail.month, monthDetail.maintain??0));
+      lineDataFixed.add(MonthData(monthDetail.month, monthDetail.repair??0));
+    }
   }
 
   Container buildTableForecast() {
@@ -580,32 +609,32 @@ class _ValuationAnalysisState extends State<ValuationAnalysis> {
         padding: EdgeInsets.all(16.0),
         child: Column(
           children: <Widget>[
-            _buildContainerRow(Colors.black, header: '固定类', tail: CommonUtil.CurrencyForm(columnData.fixed, times: 1000, digits: 0)),
-            _buildContainerSplit(Colors.black, headerLeft: '信息系统使用费', tailLeft: CommonUtil.CurrencyForm(columnData.system, times: 1000, digits: 0,),
-                headerRight: '人工费', tailRight: CommonUtil.CurrencyForm(columnData.labour, times: 1000, digits: 0)
+            _buildContainerRow(Colors.black, header: '固定类', tail: CommonUtil.CurrencyForm(columnData.fixed, times: 1000, digits: 0, isFloor: false)),
+            _buildContainerSplit(Colors.black, headerLeft: '信息系统使用费', tailLeft: CommonUtil.CurrencyForm(columnData.system, times: 1000, digits: 0, isFloor: false,),
+                headerRight: '人工费', tailRight: CommonUtil.CurrencyForm(columnData.labour, times: 1000, digits: 0, isFloor: false)
             ),
-            _buildContainerSplit(Colors.black, headerLeft: '维保费', tailLeft: CommonUtil.CurrencyForm(columnData.repairAndMaintain, times: 1000, digits: 0),
-                headerRight: '备用机成本', tailRight: CommonUtil.CurrencyForm(columnData.spare, times: 1000, digits: 0)
+            _buildContainerSplit(Colors.black, headerLeft: '维保费', tailLeft: CommonUtil.CurrencyForm(columnData.repairAndMaintain, times: 1000, digits: 0, isFloor: false),
+                headerRight: '备用机成本', tailRight: CommonUtil.CurrencyForm(columnData.spare, times: 1000, digits: 0, isFloor: false)
             ),
-            _buildContainerRow(Colors.black, header: '变动类-保养', tail: CommonUtil.CurrencyForm(columnData?.maintain, times: 1000, digits: 0)),
-            _buildContainerSplit(Colors.black, headerLeft: '耗材费', tailLeft: CommonUtil.CurrencyForm(columnData.consumable, times: 1000, digits: 0),
-                headerRight: '定期类', tailRight: CommonUtil.CurrencyForm(columnData.fixedPeriod, times: 1000, digits: 0)
+            _buildContainerRow(Colors.black, header: '变动类-保养', tail: CommonUtil.CurrencyForm(columnData?.maintain, times: 1000, digits: 0, isFloor: false)),
+            _buildContainerSplit(Colors.black, headerLeft: '耗材费', tailLeft: CommonUtil.CurrencyForm(columnData.consumable, times: 1000, digits: 0, isFloor: false),
+                headerRight: '定期类', tailRight: CommonUtil.CurrencyForm(columnData.fixedPeriod, times: 1000, digits: 0, isFloor: false)
             ),
-            _buildContainerSplit(Colors.black, headerLeft: '定量类', tailLeft: CommonUtil.CurrencyForm(columnData.fixedQuantity, times: 1000, digits: 0),
-                headerRight: '小额汇总成本', tailRight: CommonUtil.CurrencyForm(columnData.small, times: 1000, digits: 0)
+            _buildContainerSplit(Colors.black, headerLeft: '定量类', tailLeft: CommonUtil.CurrencyForm(columnData.fixedQuantity, times: 1000, digits: 0, isFloor: false),
+                headerRight: '小额汇总成本', tailRight: CommonUtil.CurrencyForm(columnData.small, times: 1000, digits: 0, isFloor: false)
             ),
-            _buildContainerRow(Colors.black, header: '变动类-维修', tail: CommonUtil.CurrencyForm(columnData.repair, times: 1000, digits: 0)),
-            _buildContainerSplit(Colors.black, headerLeft: '故障零件成本', tailLeft: CommonUtil.CurrencyForm(columnData.componentCost, times: 1000, digits: 0),
+            _buildContainerRow(Colors.black, header: '变动类-维修', tail: CommonUtil.CurrencyForm(columnData.repair, times: 1000, digits: 0, isFloor: false)),
+            _buildContainerSplit(Colors.black, headerLeft: '故障零件成本', tailLeft: CommonUtil.CurrencyForm(columnData.componentCost, times: 1000, digits: 0, isFloor: false),
               headerRight: '', tailRight: '',
             ),
-            _buildContainerSplit(Colors.black, headerLeft: '重点设备', tailLeft: CommonUtil.CurrencyForm(columnData.essential, times: 1000, digits: 0),
-                headerRight: '一般设备', tailRight: CommonUtil.CurrencyForm(columnData.common, times: 1000, digits: 0)
+            _buildContainerSplit(Colors.black, headerLeft: '重点设备', tailLeft: CommonUtil.CurrencyForm(columnData.essential, times: 1000, digits: 0, isFloor: false),
+                headerRight: '一般设备', tailRight: CommonUtil.CurrencyForm(columnData.common, times: 1000, digits: 0, isFloor: false)
             ),
-            _buildContainerSplit(Colors.black, headerLeft: '外来服务费', tailLeft: CommonUtil.CurrencyForm(columnData.service, times: 1000, digits: 0),
+            _buildContainerSplit(Colors.black, headerLeft: '外来服务费', tailLeft: CommonUtil.CurrencyForm(columnData.service, times: 1000, digits: 0, isFloor: false),
               headerRight: '', tailRight: '',
             ),
-            _buildContainerSplit(Colors.black, headerLeft: '重点设备', tailLeft: CommonUtil.CurrencyForm(columnData.serviceEssential, times: 1000, digits: 0),
-                headerRight: '一般设备', tailRight: CommonUtil.CurrencyForm(columnData.serviceCommon, times: 1000, digits: 0)
+            _buildContainerSplit(Colors.black, headerLeft: '重点设备', tailLeft: CommonUtil.CurrencyForm(columnData.serviceEssential, times: 1000, digits: 0, isFloor: false),
+                headerRight: '一般设备', tailRight: CommonUtil.CurrencyForm(columnData.serviceCommon, times: 1000, digits: 0, isFloor: false)
             ),
           ],
         ),
@@ -653,18 +682,18 @@ class _ValuationAnalysisState extends State<ValuationAnalysis> {
 
   Container buildMonthSlider() {
     List<Widget> _list = [];
-    if (showCost&&currentTable==1) {
+    if (showCost&&currentTable==2) {
       _list.addAll(columnActual.monthDetail.asMap().keys.map((index) {
         return _buildMonthTab(index, columnDetail: columnActual.monthDetail[index]);
       }).toList());
     } else {
       switch (currentTable) {
-        case 0:
+        case 1:
           _list.addAll(columnTotal[currentYear].monthDetail.asMap().keys.map((index) {
             return _buildMonthTab(index, columnTotal: columnTotal[currentYear].monthDetail[index]);
           }).toList());
           break;
-        case 1:
+        case 2:
           _list.addAll(columnForecast[currentYear].monthDetail.asMap().keys.map((index) {
             return _buildMonthTab(index, columnDetail: columnForecast[currentYear].monthDetail[index]);
           }).toList());
@@ -707,7 +736,7 @@ class _ValuationAnalysisState extends State<ValuationAnalysis> {
                       ),
                     ),
                     Text(
-                      CommonUtil.CurrencyForm(columnData.quotation, times: 1000, digits: 0),
+                      CommonUtil.CurrencyForm(columnData.quotation, times: 1000, digits: 0, isFloor: false),
                       style: TextStyle(
                           color: Color.fromRGBO(0, 0, 0, 0.75),
                           fontSize: 13.0
@@ -717,18 +746,18 @@ class _ValuationAnalysisState extends State<ValuationAnalysis> {
                 ),
               ),
             ),
-            _buildContainerRow(Colors.black54, header: "成本汇总", tail: CommonUtil.CurrencyForm(columnData.total, times: 1000, digits: 0)),
-            _buildContainerSplit(Colors.black54, headerLeft: "固定类", tailLeft: CommonUtil.CurrencyForm(columnData.fixed, times: 1000, digits: 0),
-                headerRight: "变动类-保养", tailRight: CommonUtil.CurrencyForm(columnData.consumable, times: 1000, digits: 0)
+            _buildContainerRow(Colors.black54, header: "成本汇总", tail: CommonUtil.CurrencyForm(columnData.total, times: 1000, digits: 0, isFloor: false)),
+            _buildContainerSplit(Colors.black54, headerLeft: "固定类", tailLeft: CommonUtil.CurrencyForm(columnData.fixed, times: 1000, digits: 0, isFloor: false),
+                headerRight: "变动类-保养", tailRight: CommonUtil.CurrencyForm(columnData.consumable, times: 1000, digits: 0, isFloor: false)
             ),
-            _buildContainerSplit(Colors.black54, headerLeft: "变动类-维修", tailLeft: CommonUtil.CurrencyForm(columnData.repair, times: 1000, digits: 0),
+            _buildContainerSplit(Colors.black54, headerLeft: "变动类-维修", tailLeft: CommonUtil.CurrencyForm(columnData.repair, times: 1000, digits: 0, isFloor: false),
                 headerRight: "", tailRight: ""
             ),
-            _buildContainerRow(Colors.black54, header: "导入期成本", tail: CommonUtil.CurrencyForm(columnData.importCost, times: 1000, digits: 1)),
-            _buildContainerRow(Colors.black54, header: "总成本", tail: CommonUtil.CurrencyForm(columnData.totalCost, times: 1000, digits: 0)),
-            _buildContainerRow(Colors.black54, header: "边际利润", tail: CommonUtil.CurrencyForm(columnData.marginProfit, times: 1000, digits: 0)),
+            _buildContainerRow(Colors.black54, header: "导入期成本", tail: CommonUtil.CurrencyForm(columnData.importCost, times: 1000, digits: 1, isFloor: false)),
+            _buildContainerRow(Colors.black54, header: "总成本", tail: CommonUtil.CurrencyForm(columnData.totalCost, times: 1000, digits: 0, isFloor: false)),
+            _buildContainerRow(Colors.black54, header: "边际利润", tail: CommonUtil.CurrencyForm(columnData.marginProfit, times: 1000, digits: 0, isFloor: false)),
             _buildContainerSplit(Colors.black54, headerLeft: "边际利润率", tailLeft: '${columnData.marginRatio?.toStringAsFixed(0)}%', headerRight: "", tailRight: ""),
-            _buildContainerRow(Colors.black54, header: "安全额", tail: CommonUtil.CurrencyForm(columnData.safeAmount, times: 1000, digits: 0)),
+            _buildContainerRow(Colors.black54, header: "安全额", tail: CommonUtil.CurrencyForm(columnData.safeAmount, times: 1000, digits: 0, isFloor: false)),
           ],
         ),
       ),
@@ -762,7 +791,7 @@ class _ValuationAnalysisState extends State<ValuationAnalysis> {
                       ),
                     ),
                     Text(
-                      CommonUtil.CurrencyForm(columnData.total, times: 1000, digits: 0),
+                      CommonUtil.CurrencyForm(columnData.total, times: 1000, digits: 0, isFloor: false),
                       style: TextStyle(
                           color: Color.fromRGBO(0, 0, 0, 0.75),
                           fontSize: 13.0
@@ -772,32 +801,32 @@ class _ValuationAnalysisState extends State<ValuationAnalysis> {
                 ),
               ),
             ),
-            _buildContainerRow(Colors.black54, header: '固定类', tail: CommonUtil.CurrencyForm(columnData.fixed, times: 1000, digits: 0)),
-            _buildContainerSplit(Colors.black54, headerLeft: '信息系统使用费', tailLeft: CommonUtil.CurrencyForm(columnData.system, times: 1000, digits: 0,),
-                headerRight: '人工费', tailRight: CommonUtil.CurrencyForm(columnData.labour, times: 1000, digits: 0)
+            _buildContainerRow(Colors.black54, header: '固定类', tail: CommonUtil.CurrencyForm(columnData.fixed, times: 1000, digits: 0, isFloor: false)),
+            _buildContainerSplit(Colors.black54, headerLeft: '信息系统使用费', tailLeft: CommonUtil.CurrencyForm(columnData.system, times: 1000, digits: 0, isFloor: false,),
+                headerRight: '人工费', tailRight: CommonUtil.CurrencyForm(columnData.labour, times: 1000, digits: 0, isFloor: false)
             ),
-            _buildContainerSplit(Colors.black54, headerLeft: '维保费', tailLeft: CommonUtil.CurrencyForm(columnData.repairAndMaintain, times: 1000, digits: 0),
-                headerRight: '备用机成本', tailRight: CommonUtil.CurrencyForm(columnData.spare, times: 1000, digits: 0)
+            _buildContainerSplit(Colors.black54, headerLeft: '维保费', tailLeft: CommonUtil.CurrencyForm(columnData.repairAndMaintain, times: 1000, digits: 0, isFloor: false),
+                headerRight: '备用机成本', tailRight: CommonUtil.CurrencyForm(columnData.spare, times: 1000, digits: 0, isFloor: false)
             ),
-            _buildContainerRow(Colors.black54, header: '变动类-保养', tail: CommonUtil.CurrencyForm(columnData?.maintain, times: 1000, digits: 0)),
-            _buildContainerSplit(Colors.black54, headerLeft: '耗材费', tailLeft: CommonUtil.CurrencyForm(columnData.consumable, times: 1000, digits: 0),
-                headerRight: '定期类', tailRight: CommonUtil.CurrencyForm(columnData.fixedPeriod, times: 1000, digits: 0)
+            _buildContainerRow(Colors.black54, header: '变动类-保养', tail: CommonUtil.CurrencyForm(columnData?.maintain, times: 1000, digits: 0, isFloor: false)),
+            _buildContainerSplit(Colors.black54, headerLeft: '耗材费', tailLeft: CommonUtil.CurrencyForm(columnData.consumable, times: 1000, digits: 0, isFloor: false),
+                headerRight: '定期类', tailRight: CommonUtil.CurrencyForm(columnData.fixedPeriod, times: 1000, digits: 0, isFloor: false)
             ),
-            _buildContainerSplit(Colors.black54, headerLeft: '定量类', tailLeft: CommonUtil.CurrencyForm(columnData.fixedQuantity, times: 1000, digits: 0),
-                headerRight: '小额汇总成本', tailRight: CommonUtil.CurrencyForm(columnData.small, times: 1000, digits: 0)
+            _buildContainerSplit(Colors.black54, headerLeft: '定量类', tailLeft: CommonUtil.CurrencyForm(columnData.fixedQuantity, times: 1000, digits: 0, isFloor: false),
+                headerRight: '小额汇总成本', tailRight: CommonUtil.CurrencyForm(columnData.small, times: 1000, digits: 0, isFloor: false)
             ),
-            _buildContainerRow(Colors.black54, header: '变动类-维修', tail: CommonUtil.CurrencyForm(columnData.repair, times: 1000, digits: 0)),
-            _buildContainerSplit(Colors.black54, headerLeft: '故障零件成本', tailLeft: CommonUtil.CurrencyForm(columnData.componentCost, times: 1000, digits: 0),
+            _buildContainerRow(Colors.black54, header: '变动类-维修', tail: CommonUtil.CurrencyForm(columnData.repair, times: 1000, digits: 0, isFloor: false)),
+            _buildContainerSplit(Colors.black54, headerLeft: '故障零件成本', tailLeft: CommonUtil.CurrencyForm(columnData.componentCost, times: 1000, digits: 0, isFloor: false),
               headerRight: '', tailRight: '',
             ),
-            _buildContainerSplit(Colors.black54, headerLeft: '重点设备', tailLeft: CommonUtil.CurrencyForm(columnData.essential, times: 1000, digits: 0),
-                headerRight: '一般设备', tailRight: CommonUtil.CurrencyForm(columnData.common, times: 1000, digits: 0)
+            _buildContainerSplit(Colors.black54, headerLeft: '重点设备', tailLeft: CommonUtil.CurrencyForm(columnData.essential, times: 1000, digits: 0, isFloor: false),
+                headerRight: '一般设备', tailRight: CommonUtil.CurrencyForm(columnData.common, times: 1000, digits: 0, isFloor: false)
             ),
-            _buildContainerSplit(Colors.black54, headerLeft: '外来服务费', tailLeft: CommonUtil.CurrencyForm(columnData.service, times: 1000, digits: 0),
+            _buildContainerSplit(Colors.black54, headerLeft: '外来服务费', tailLeft: CommonUtil.CurrencyForm(columnData.service, times: 1000, digits: 0, isFloor: false),
               headerRight: '', tailRight: '',
             ),
-            _buildContainerSplit(Colors.black54, headerLeft: '重点设备', tailLeft: CommonUtil.CurrencyForm(columnData.serviceEssential, times: 1000, digits: 0),
-                headerRight: '一般设备', tailRight: CommonUtil.CurrencyForm(columnData.serviceCommon, times: 1000, digits: 0)
+            _buildContainerSplit(Colors.black54, headerLeft: '重点设备', tailLeft: CommonUtil.CurrencyForm(columnData.serviceEssential, times: 1000, digits: 0, isFloor: false),
+                headerRight: '一般设备', tailRight: CommonUtil.CurrencyForm(columnData.serviceCommon, times: 1000, digits: 0, isFloor: false)
             ),
           ],
         ),
@@ -837,6 +866,71 @@ class _ValuationAnalysisState extends State<ValuationAnalysis> {
       }
       return _list;
     }
+  }
+  
+  Card _buildOptionTile(String title, int typeID, AnalysisType analysisType, {bool percentage}) {
+    percentage = percentage??false;
+    return Card(
+        child: ListTile(
+          title: new Center(
+            child: Text(
+              title,
+              style: new TextStyle(
+                  fontWeight: FontWeight.w600,
+                  fontSize: 16.0,
+                  color: Colors.blue
+              ),
+            ),
+          ),
+          onTap: () {
+            Navigator.of(context).push(new MaterialPageRoute(builder: (context) =>
+            ValuationDetail(analysisType: analysisType, historyID: widget.historyID, typeID: typeID, percentage: percentage, title: title,)));
+          },
+        ),
+      );
+  }
+
+  List<Widget> _buildOptions(AnalysisType analysisType) {
+    List<Widget> _list = [];
+    switch (analysisType) {
+      case AnalysisType.SERVICE:
+        _list.addAll([
+          _buildOptionTile("外来服务成本-重点", 1, analysisType),
+          _buildOptionTile("外来服务成本-次重点", 2, analysisType),
+        ]);
+        break;
+      case AnalysisType.CONSUMABLE:
+        _list.addAll([
+          _buildOptionTile("耗材成本-定期", 1, analysisType),
+          _buildOptionTile("耗材成本-定量", 2, analysisType),
+        ]);
+        break;
+      case AnalysisType.COMPONENT:
+        _list.addAll([
+          _buildOptionTile("零件成本-重点", 1, analysisType),
+          _buildOptionTile("零件成本-次重点", 2, analysisType),
+          _buildOptionTile("零件成本-一般", 3, analysisType, percentage: false),
+          _buildOptionTile("零件成本-一般(暂定百分比)", 3, analysisType, percentage: true),
+        ]);
+        break;
+      case AnalysisType.CT:
+        break;
+      case AnalysisType.CONTRACT:
+        break;
+      case AnalysisType.SPARE:
+        break;
+    }
+
+    return _list;
+  }
+
+  void showAnalysisOptions(AnalysisType analysisType) {
+    showModalBottomSheet(context: context, builder: (context) {
+      return ListView(
+        shrinkWrap: true,
+        children: _buildOptions(analysisType),
+      );
+    });
   }
 
   List <Widget> renderAnalysis() {
@@ -889,7 +983,7 @@ class _ValuationAnalysisState extends State<ValuationAnalysis> {
                   children: <Widget>[
                     IconButton(
                       onPressed: () {
-                        Navigator.of(context).push(new MaterialPageRoute(builder: (_) => ValuationDetail(historyID: widget.historyID, analysisType: AnalysisType.CONSUMABLE,)));
+                        showAnalysisOptions(AnalysisType.CONSUMABLE);
                       },
                       icon: Icon(Icons.battery_charging_full, color: Color(0xff41579B), size: 36.0,),
                     ),
@@ -912,7 +1006,7 @@ class _ValuationAnalysisState extends State<ValuationAnalysis> {
                   children: <Widget>[
                     IconButton(
                       onPressed: () {
-                        Navigator.of(context).push(new MaterialPageRoute(builder: (_) => ValuationDetail(historyID: widget.historyID, analysisType: AnalysisType.COMPONENT,)));
+                        showAnalysisOptions(AnalysisType.COMPONENT);
                       },
                       icon: Icon(Icons.settings, color: Color(0xff41579B), size: 36.0,),
                     ),
@@ -930,7 +1024,7 @@ class _ValuationAnalysisState extends State<ValuationAnalysis> {
                   children: <Widget>[
                     IconButton(
                       onPressed: () {
-                        Navigator.of(context).push(new MaterialPageRoute(builder: (_) => ValuationDetail(historyID: widget.historyID, analysisType: AnalysisType.SERVICE,)));
+                        showAnalysisOptions(AnalysisType.SERVICE);
                       },
                       icon: Icon(Icons.assignment_ind, color: Color(0xff41579B), size: 36.0,),
                     ),
@@ -964,6 +1058,275 @@ class _ValuationAnalysisState extends State<ValuationAnalysis> {
     return _list;
   }
 
+  // overview
+
+  ScrollController _verticalController = new ScrollController();
+  ScrollController _horizonController = new ScrollController();
+  List<ChartData> chartData = [
+    ChartData('David', 25, Color(0xff2FC25B)),
+    ChartData('Steve', 38, Color(0xff1890FF)),
+    ChartData('Jack', 34, Color(0xff13C2C2)),
+    ChartData('Others', 52)
+  ];
+
+  List<Widget> renderLegendSlider() {
+    List<Widget> _list = [];
+    double _total = 0.0;
+
+    for(int i=0; i<chartData.length; i++) {
+      _total += chartData[i].y;
+    }
+
+    _list = chartData.map((item) {
+      return renderMenuBox(item.x, item.y, item.y/_total);
+    }).toList();
+
+    return _list;
+  }
+
+  Padding renderMenuBox(String title, double total, double percentage) {
+    return Padding(
+      padding: EdgeInsets.fromLTRB(0, 0, 10, 0),
+      child: Container(
+        height: 80,
+        width: 120,
+        color: Color(0xffE3F2FF),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                Text(title),
+              ],
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                Text(
+                  "${CommonUtil.CurrencyForm(total, times: 1000, digits: 0)}千元"
+                )
+              ],
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                Text(
+                    "${(percentage*100).toStringAsFixed(2)}%"
+                )
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Container renderPie() {
+    return Container(
+      height: 400.0,
+      width: 250.0,
+      child: Center(
+        child: SfCircularChart(series: <CircularSeries>[
+          // Render pie chart
+          PieSeries<ChartData, String>(
+              dataSource: chartData,
+              pointColorMapper:(ChartData data,  _) => data.color,
+              xValueMapper: (ChartData data, _) => data.x,
+              yValueMapper: (ChartData data, _) => data.y,
+              dataLabelSettings: DataLabelSettings(
+                  isVisible: true,
+                  labelPosition: ChartDataLabelPosition.outside,
+                  labelIntersectAction: LabelIntersectAction.none
+              ),
+              explode: true,
+              explodeIndex: 1
+          )
+        ],
+          legend: Legend(
+            isVisible: true
+          ),
+        ),
+      ),
+    );
+  }
+
+  List<MonthData> lineDataFixed = [
+    MonthData("1", 123.0),
+    MonthData("2", 213.0),
+    MonthData("3", 143.0),
+    MonthData("4", 1125.0),
+    MonthData("5", 542.0),
+    MonthData("6", 321.0),
+    MonthData("7", 211.0),
+  ];
+
+  List<MonthData> lineDataMaintain = [
+    MonthData("1", 543.0),
+    MonthData("2", 453.0),
+    MonthData("3", 543.0),
+    MonthData("4", 234.0),
+  ];
+
+  List<MonthData> lineDataRepair = [
+    MonthData("4", 1125.0),
+    MonthData("5", 542.0),
+    MonthData("6", 321.0),
+    MonthData("7", 211.0),
+  ];
+
+  Container renderLine() {
+    return Container(
+      height: 400.0,
+      width: 400.0,
+      child: Center(
+        child: SfCartesianChart(
+          primaryXAxis: CategoryAxis(
+              labelRotation: 90,
+              majorGridLines: MajorGridLines(
+                  width: 0
+              ),
+              majorTickLines: MajorTickLines(
+                  width: 0
+              )
+          ),
+          series: <StackedLineSeries<MonthData, String>>[
+            StackedLineSeries<MonthData, String>(
+              dataSource: lineDataFixed,
+              xValueMapper: (MonthData data, _) => data.x,
+              yValueMapper: (MonthData data, _) => data.y,
+              color: Colors.blueAccent
+            ),
+            StackedLineSeries<MonthData, String>(
+              dataSource: lineDataMaintain,
+              xValueMapper: (MonthData data, _) => data.x,
+              yValueMapper: (MonthData data, _) => data.y,
+                color: Colors.redAccent
+            ),
+            StackedLineSeries<MonthData, String>(
+                dataSource: lineDataRepair,
+                xValueMapper: (MonthData data, _) => data.x,
+                yValueMapper: (MonthData data, _) => data.y,
+                color: Colors.greenAccent
+            ),
+        ],
+        ),
+      ),
+    );
+  }
+
+  Container renderBar(String title) {
+    return Container(
+        child: Column(
+          children: <Widget>[
+            Container(
+              color: Color(0xff41579B),
+              height: 40.0,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: <Widget>[
+                  Container(
+                    child: Row(
+                      children: <Widget>[
+                        SizedBox(width: 12.0,),
+                        Icon(Icons.pie_chart, color: Colors.white,),
+                        SizedBox(width: 6.0,),
+                        Text(title, style: TextStyle(
+                          fontSize: 20,
+                          color: Colors.white,
+                        ),)
+                      ],
+                    ),
+                  ),
+                  Container(
+                      child: Row(
+                        children: <Widget>[
+                          Text(
+                            "单位 : 千元",
+                            style: TextStyle(
+                                color: Color.fromRGBO(255, 255, 255, 0.85),
+                                fontSize: 12.0,
+                                fontWeight: FontWeight.w200
+                            ),
+                          ),
+                          SizedBox(width: 12.0,)
+                        ],
+                      )
+                  ),
+                ],
+              ),
+            )
+          ],
+        ),
+      );
+  }
+
+  Padding renderPaddingPie() {
+    return Padding(
+      padding: EdgeInsets.all(8.0),
+      child: Container(
+        child: Column(
+          children: <Widget>[
+            renderBar("成本构成分析"),
+            renderPie(),
+            Container(
+              height: 100,
+              child: ListView(
+                controller: _horizonController,
+                scrollDirection: Axis.horizontal,
+                children: renderLegendSlider(),
+              ),
+            ),
+            SizedBox(height: 16.0,),
+            Container(),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Padding renderPaddingLine() {
+    return Padding(
+      padding: EdgeInsets.all(8.0),
+      child: Container(
+        child: Column(
+          children: <Widget>[
+            renderBar("月度成本分析"),
+            renderLine(),
+          ],
+        ),
+      ),
+    );
+  }
+
+  List<Widget> renderOverviewList() {
+    List<Widget> _list = [];
+    _list.add(renderPaddingPie());
+    _list.add(SizedBox(height: 16.0,));
+    _list.add(renderPaddingLine());
+    return _list;
+  }
+
+  List<Widget> buildBody() {
+    List _list = [];
+    switch (currentTable) {
+      case 0:
+        _list = renderOverviewList();
+        break;
+      case 1:
+        _list = renderTotal();
+        break;
+      case 2:
+        _list = renderDetail();
+        break;
+      case 3:
+        _list = renderAnalysis();
+        break;
+    }
+    return _list;
+  }
+
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
@@ -994,7 +1357,7 @@ class _ValuationAnalysisState extends State<ValuationAnalysis> {
                       )
                   ):BoxDecoration(),
                   child: Center(
-                    child: Text("最终定价表",
+                    child: Text("成本结构",
                       style: currentTable==0?TextStyle(
                           fontSize: 16.0,
                           fontWeight: FontWeight.w600
@@ -1025,7 +1388,7 @@ class _ValuationAnalysisState extends State<ValuationAnalysis> {
                       )
                   ):BoxDecoration(),
                   child: Center(
-                    child: Text("成本明细",
+                    child: Text("最终定价表",
                       style: currentTable==1?TextStyle(
                           fontSize: 16.0,
                           fontWeight: FontWeight.w600
@@ -1042,6 +1405,7 @@ class _ValuationAnalysisState extends State<ValuationAnalysis> {
                   setState(() {
                     currentTable = 2;
                   });
+                  getTableData();
                 },
                 child: Container(
                   width: 100.0,
@@ -1055,8 +1419,38 @@ class _ValuationAnalysisState extends State<ValuationAnalysis> {
                       )
                   ):BoxDecoration(),
                   child: Center(
-                    child: Text("分析",
+                    child: Text("成本明细",
                       style: currentTable==2?TextStyle(
+                          fontSize: 16.0,
+                          fontWeight: FontWeight.w600
+                      ):TextStyle(
+                          fontWeight: FontWeight.w400,
+                          fontSize: 14.0
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              GestureDetector(
+                onTap: () {
+                  setState(() {
+                    currentTable = 3;
+                  });
+                },
+                child: Container(
+                  width: 100.0,
+                  decoration: currentTable==3?BoxDecoration(
+                      border: Border(
+                          bottom: BorderSide(
+                              color: Color(0xff16A2B8),
+                              width: 3.0,
+                              style: BorderStyle.solid
+                          )
+                      )
+                  ):BoxDecoration(),
+                  child: Center(
+                    child: Text("分析",
+                      style: currentTable==3?TextStyle(
                           fontSize: 16.0,
                           fontWeight: FontWeight.w600
                       ):TextStyle(
@@ -1073,8 +1467,8 @@ class _ValuationAnalysisState extends State<ValuationAnalysis> {
         centerTitle: false,
       ),
       body: ListView(
-        controller: ScrollController(),
-        children: currentTable==0?renderTotal():(currentTable==1?renderDetail():renderAnalysis()),
+        controller: _verticalController,
+        children: buildBody(),
       ),
     );
   }
@@ -1158,4 +1552,19 @@ class ColumnDetail {
     this.serviceCommon,
     this.monthDetail
   });
+}
+
+class ChartData {
+  ChartData(this.x, this.y, [this.color]);
+
+  final String x;
+  final double y;
+  final Color color;
+}
+
+class MonthData {
+  MonthData(this.x, this.y);
+
+  final String x;
+  final double y;
 }

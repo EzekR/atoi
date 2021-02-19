@@ -45,6 +45,13 @@ class _ValuationHistoryState extends State<ValuationHistory> {
     }
   }
 
+  Future<Null> setFilter() async {
+    setState(() {
+      executions.clear();
+    });
+    getHistory();
+  }
+
   void initState() {
     super.initState();
     startDate = formatDate(DateTime.now().add(Duration(days: -30)), [yyyy, '-', mm, '-', dd]);
@@ -267,8 +274,10 @@ class _ValuationHistoryState extends State<ValuationHistory> {
                     child: Center(
                       child: FlatButton(onPressed: () {
                         setState((){
-                          field = 'sp.ID';
+                          field = 'vh.Name';
                           _keywords.clear();
+                          startDate = formatDate(DateTime.now().add(Duration(days: -30)), [yyyy, '-', mm, '-', dd]);
+                          endDate = formatDate(DateTime.now(), [yyyy, '-', mm, '-', dd]);
                         });
                       }, child: Text('重置')),
                     ),
@@ -282,6 +291,7 @@ class _ValuationHistoryState extends State<ValuationHistory> {
                     ),
                     child: Center(
                       child: FlatButton(onPressed: () {
+                        setFilter();
                         Navigator.of(context).pop();
                       }, child: Text('确认', style: TextStyle(color: Colors.white),)),
                     ),
@@ -321,7 +331,7 @@ class _ValuationHistoryState extends State<ValuationHistory> {
           BuildWidget.buildCardRow('添加日期', CommonUtil.TimeForm(item['AddDate'], 'yyyy-mm-dd')),
           SizedBox(height: 8.0,),
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            mainAxisAlignment: MainAxisAlignment.end,
             children: <Widget>[
               RaisedButton(
                 onPressed: () {
@@ -335,28 +345,28 @@ class _ValuationHistoryState extends State<ValuationHistory> {
                 color: new Color(0xff2E94B9),
                 child: Text('查看', style: TextStyle(color: Colors.white)),
               ),
-              RaisedButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(6),
-                ),
-                padding: EdgeInsets.all(12.0),
-                color: new Color(0xff2E94B9),
-                child: Text('导入', style: TextStyle(color: Colors.white)),
-              ),
-              RaisedButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(6),
-                ),
-                padding: EdgeInsets.all(12.0),
-                color: Color(0xffD25565),
-                child: Text('删除', style: TextStyle(color: Colors.white)),
-              ),
+              //RaisedButton(
+              //  onPressed: () {
+              //    Navigator.of(context).pop();
+              //  },
+              //  shape: RoundedRectangleBorder(
+              //    borderRadius: BorderRadius.circular(6),
+              //  ),
+              //  padding: EdgeInsets.all(12.0),
+              //  color: new Color(0xff2E94B9),
+              //  child: Text('导入', style: TextStyle(color: Colors.white)),
+              //),
+              //RaisedButton(
+              //  onPressed: () {
+              //    Navigator.of(context).pop();
+              //  },
+              //  shape: RoundedRectangleBorder(
+              //    borderRadius: BorderRadius.circular(6),
+              //  ),
+              //  padding: EdgeInsets.all(12.0),
+              //  color: Color(0xffD25565),
+              //  child: Text('删除', style: TextStyle(color: Colors.white)),
+              //),
             ],
           )
         ],

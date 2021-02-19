@@ -1449,9 +1449,24 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
                   if (!_edit) {
                     return;
                   }
+                  EquipmentType eType;
+                  switch (_dispatch['Request']['Equipments'][0]['AssetType']['ID']) {
+                    case 1:
+                      eType = EquipmentType.MEDICAL;
+                      break;
+                    case 2:
+                      eType = EquipmentType.MEASURE;
+                      break;
+                    case 3:
+                      eType = EquipmentType.OTHER;
+                      break;
+                    default:
+                      eType = EquipmentType.MEDICAL;
+                      break;
+                  }
                   final selected = await Navigator.of(context)
                       .push(new MaterialPageRoute(builder: (context) {
-                    return SearchPage(equipments: _dispatch['Request']['Equipments']??[], multiType: MultiSearchType.EQUIPMENT, onlyType: EquipmentType.MEDICAL,);
+                    return SearchPage(equipments: _dispatch['Request']['Equipments']??[], multiType: MultiSearchType.EQUIPMENT, onlyType: eType,);
                   }));
                   if (selected != null) {
                     equipmentStatus = selected.map<TextEditingController>((item) => new TextEditingController(text: item['StocktakingStatus']??"")).toList();
@@ -1668,8 +1683,8 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
       List<Widget> equipList = [
         BuildWidget.buildRow('系统编号', _equipments[i]['OID'] ?? ''),
         BuildWidget.buildRow('资产编号', _equipments[i]['AssetCode']??''),
-        BuildWidget.buildRow('名称', _equipments[i]['Name']??'', onTap: () => Navigator.of(context).push(new MaterialPageRoute(builder: (_) => new EquipmentsList(equipmentId: _equipments[i]['OID'], assetType: _equipments[i]['AssetType']['ID'],)))),
-        BuildWidget.buildRow('型号', _equipments[i]['EquipmentCode'] ?? ''),
+        BuildWidget.buildRow('名称', _equipments[i]['Name']??'', onTap: () => Navigator.of(context).push(new MaterialPageRoute(builder: (_) => new EquipmentsList(equipmentId: _equipments[i]['OID'], assetType: _dispatch['Request']['AssetType']['ID'],)))),
+        BuildWidget.buildRow('型号', _equipments[i]['ModelCode'] ?? ''),
         BuildWidget.buildRow('序列号', _equipments[i]['SerialCode'] ?? ''),
         BuildWidget.buildRow('设备厂商', _equipments[i]['Manufacturer']['Name'] ?? ''),
         BuildWidget.buildRow('使用科室', _equipments[i]['Department']['Name'] ?? ''),

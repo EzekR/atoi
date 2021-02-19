@@ -423,8 +423,8 @@ class _EngineerVoucherPageState extends State<EngineerVoucherPage> {
       var equipList = [
         BuildWidget.buildRow('系统编号', _equipment['OID']??''),
         BuildWidget.buildRow('资产编号', _equipment['AssetCode']??''),
-        BuildWidget.buildRow('名称', _equipment['Name']??'', onTap: () => Navigator.of(context).push(new MaterialPageRoute(builder: (_) => new EquipmentsList(equipmentId: _equipment['OID'], assetType: _equipment['AssetType']['ID'],)))),
-        BuildWidget.buildRow('型号', _equipment['EquipmentCode']??''),
+        BuildWidget.buildRow('名称', _equipment['Name']??'', onTap: () => Navigator.of(context).push(new MaterialPageRoute(builder: (_) => new EquipmentsList(equipmentId: _equipment['OID'], assetType: _dispatch['Request']['AssetType']['ID'],)))),
+        BuildWidget.buildRow('型号', _equipment['ModelCode']??''),
         BuildWidget.buildRow('序列号', _equipment['SerialCode']??''),
         BuildWidget.buildRow('使用科室', _equipment['Department']['Name']??''),
         BuildWidget.buildRow('安装地点', _equipment['InstalSite']??''),

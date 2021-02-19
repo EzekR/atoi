@@ -24,6 +24,7 @@ class _SearchPageState extends State<SearchPage> {
   int offset = 0;
   bool _noMore = false;
   int deviceType = 1;
+  String deviceUrl = "/Equipment/Getdevices";
 
   void initState() {
     getDevices('');
@@ -56,6 +57,17 @@ class _SearchPageState extends State<SearchPage> {
 
   Future<Null> getDevices(String filter) async {
     Map _params;
+    switch (deviceType) {
+      case 1:
+        deviceUrl = "/Equipment/Getdevices";
+        break;
+      case 2:
+        deviceUrl = "/MeasInstrum/QueryMeasInstrums";
+        break;
+      case 3:
+        deviceUrl = "/OtherEqpt/QueryOtherEqpts";
+        break;
+    }
     switch (deviceType) {
       case 1:
         _params = {
@@ -104,7 +116,7 @@ class _SearchPageState extends State<SearchPage> {
         };
         break;
       case MultiSearchType.EQUIPMENT:
-        _url = '/Equipment/Getdevices';
+        _url = deviceUrl;
         break;
       case MultiSearchType.CONSUMABLE:
         _url = '/InvConsumable/QueryConsumablesByFujiClass2ID';
@@ -138,7 +150,7 @@ class _SearchPageState extends State<SearchPage> {
             value: selected.firstWhere((item) => item['ID'] == suggestionList[i]['ID'], orElse: ()=>null)!=null?true:false,
             title: RichText(
                 text: TextSpan(
-                    text: widget.multiType!=MultiSearchType.EQUIPMENT?'${suggestionList[i]['Name']}/${suggestionList[i]['OID']}/${suggestionList[i]['Type']['Name']}':'${suggestionList[i]['Name']}/${suggestionList[i]['EquipmentCode']}/${suggestionList[i]['SerialCode']}',
+                    text: widget.multiType!=MultiSearchType.EQUIPMENT?'${suggestionList[i]['Name']}/${suggestionList[i]['OID']}/${suggestionList[i]['Type']['Name']}':'${suggestionList[i]['Name']}/${suggestionList[i]['ModelCode']}/${suggestionList[i]['SerialCode']}',
                     style: TextStyle(
                         color: Colors.grey ),
                     children: [
@@ -169,6 +181,7 @@ class _SearchPageState extends State<SearchPage> {
                 setState(() {
                   suggestionList.clear();
                   deviceType = val;
+                  selected.clear();
                 });
                 getDevices(query);
               },

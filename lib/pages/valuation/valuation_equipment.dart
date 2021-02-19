@@ -5,6 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 
 class ValuationEquipment extends StatefulWidget {
+  final int historyID;
+  ValuationEquipment({this.historyID});
   _ValuationEquipmentState createState() => new _ValuationEquipmentState();
 }
 
@@ -41,12 +43,18 @@ class _ValuationEquipmentState extends State<ValuationEquipment> {
     Map resp = await HttpRequest.request(
       '/Valuation/QueryValHisEqpts',
       params: {
-        'valHisID': 2,
-        'equipmentType': 1
+        'valHisID': widget.historyID,
+        'equipmentType': equipmentType,
+        'filterField': field,
+        "filterText": _keywords.text,
+        'curRowNum': offset,
+        'pageSize': 10,
       }
     );
     if (resp['ResultCode'] == '00') {
-      _equipments.addAll(resp['Data']);
+      setState(() {
+        _equipments.addAll(resp['Data']);
+      });
     }
   }
 
@@ -222,7 +230,8 @@ class _ValuationEquipmentState extends State<ValuationEquipment> {
                     child: Center(
                       child: FlatButton(onPressed: () {
                         setState((){
-                          field = 'sp.ID';
+                          field = 've.EquipmentID';
+                          equipmentType = -1;
                           _keywords.clear();
                         });
                       }, child: Text('重置')),
@@ -237,6 +246,9 @@ class _ValuationEquipmentState extends State<ValuationEquipment> {
                     ),
                     child: Center(
                       child: FlatButton(onPressed: () {
+                        _equipments.clear();
+                        offset = 0;
+                        getEquipments();
                         Navigator.of(context).pop();
                       }, child: Text('确认', style: TextStyle(color: Colors.white),)),
                     ),
@@ -263,14 +275,14 @@ class _ValuationEquipmentState extends State<ValuationEquipment> {
               size: 36.0,
             ),
             title: Text(
-              "系统编号： ${item['ID']}",
+              "系统编号： ${item['Equipment']['OID']}",
               style: new TextStyle(
                   fontSize: 16.0,
                   color: Theme.of(context).primaryColor
               ),
             ),
             subtitle: Text(
-              "是否在库：",
+              "是否在库：${item['InSystem']?'是':'否'}",
               style: TextStyle(
                 fontSize: 14.0,
                 color: Colors.blueAccent
@@ -282,10 +294,11 @@ class _ValuationEquipmentState extends State<ValuationEquipment> {
           BuildWidget.buildCardRow('设备序列号', item['Equipment']['SerialCode']),
           BuildWidget.buildCardRow('厂商', item['Equipment']['Manufacturer']['Name']),
           BuildWidget.buildCardRow('科室', item['Equipment']['Department']['Name']),
-          BuildWidget.buildCardRow('金额', CommonUtil.CurrencyForm(item['Equipment']['PurchaseAmount'], times: 0, digits: 0)),
+          BuildWidget.buildCardRow('金额', CommonUtil.CurrencyForm(item['Equipment']['PurchaseAmount'], times: 1, digits: 0)),
           BuildWidget.buildCardRow('设备类型', item['Equipment']['FujiClass2']['EquipmentType']['Name']),
           BuildWidget.buildCardRow('富士I类', item['Equipment']['FujiClass2']['FujiClass1']['Name']),
           BuildWidget.buildCardRow('富士II类', item['Equipment']['FujiClass2']['Name']),
+          SizedBox(height: 8.0,)
         ],
       ),
     );
