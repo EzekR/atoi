@@ -1,3 +1,5 @@
+import 'package:atoi/pages/inventory/service_list.dart';
+import 'package:atoi/pages/inventory/spare_list.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:atoi/pages/equipments/equipments_list.dart';
@@ -8,6 +10,9 @@ import 'package:atoi/pages/superuser/super_request.dart';
 import 'package:atoi/models/main_model.dart';
 import 'package:atoi/models/constants_model.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:atoi/pages/inventory/component_list.dart';
+import 'package:atoi/pages/inventory/consumable_list.dart';
+import 'package:atoi/pages/valuation/valuation_history.dart';
 
 class SuperHome extends StatefulWidget {
   _SuperHomeState createState() => _SuperHomeState();
@@ -107,7 +112,7 @@ class _TabView extends StatelessWidget {
         new IconButton(
           icon: menuOption.menuIcon,
           color: Color(0xff4e8faf),
-          onPressed: () {
+          onPressed: menuOption.onPress!=null?menuOption.onPress:() {
             return menuOption.targetPage != null?Navigator.of(context).push(new MaterialPageRoute(builder: (_) => menuOption.targetPage)):null;
           },
           iconSize: 50.0,
@@ -127,65 +132,159 @@ class _TabView extends StatelessWidget {
     );
   }
 
+  void showInventory() {
+    print("tab tab");
+    showModalBottomSheet(
+        context: context,
+        builder: (context) {
+          return ListView(
+            shrinkWrap: true,
+            children:<Widget>[
+              Card(
+                child: ListTile(
+                  title: new Center(
+                    child: Text(
+                      '服务库',
+                      style: new TextStyle(
+                          fontWeight: FontWeight.w600,
+                          fontSize: 16.0,
+                          color: Colors.blue
+                      ),
+                    ),
+                  ),
+                  onTap: () {
+                    Navigator.of(context).push(new MaterialPageRoute(builder: (_) => new ServiceList()));
+                  },
+                ),
+              ),
+              Card(
+                child: ListTile(
+                  title: new Center(
+                    child: Text('备用机库',
+                      style: new TextStyle(
+                          fontWeight: FontWeight.w600,
+                          fontSize: 16.0,
+                          color: Colors.blue
+                      ),
+                    ),
+                  ),
+                  onTap: () {
+                    Navigator.of(context).push(new MaterialPageRoute(builder: (_) => new SpareList()));
+                  },
+                ),
+              ),
+            ],
+          );
+        }
+    );
+  }
+
   Widget build(BuildContext context) {
     switch (tabType) {
       case TabType.EQUIP:
         _menuList.clear();
         _menuList.addAll([
-          Expanded(
-            flex: 4,
-            child: buildIconColumn(new _MenuItem(Icon(Icons.computer), '设备', targetPage: new EquipmentsList())),
+          SizedBox(height: 50.0,),
+          Row(
+            children: <Widget>[
+              Expanded(
+                flex: 4,
+                child: buildIconColumn(new _MenuItem(Icon(Icons.computer), '医疗设备', targetPage: new EquipmentsList(equipmentType: EquipmentType.MEDICAL,))),
+              ),
+              Expanded(
+                flex: 3,
+                child: buildIconColumn(new _MenuItem(Icon(Icons.straighten), '计量器具', targetPage: new EquipmentsList(equipmentType: EquipmentType.MEASURE,))),
+              ),
+              Expanded(
+                flex: 4,
+                child: buildIconColumn(new _MenuItem(Icon(Icons.devices_other), '其他设备', targetPage: new EquipmentsList(equipmentType: EquipmentType.OTHER,))),
+              )
+            ],
           ),
-          Expanded(
-            flex: 3,
-            child: buildIconColumn(new _MenuItem(Icon(Icons.event_note), '合同', targetPage: new ContractList())),
+          SizedBox(height: 50.0,),
+          Row(
+            children: <Widget>[
+              Expanded(
+                flex: 4,
+                child: buildIconColumn(new _MenuItem(Icon(Icons.store), '库存', onPress: showInventory)),
+              ),
+              Expanded(
+                flex: 3,
+                child: buildIconColumn(new _MenuItem(Icon(Icons.event_note), '合同', targetPage: new ContractList())),
+              ),
+              Expanded(
+                flex: 4,
+                child: buildIconColumn(new _MenuItem(Icon(Icons.store), '供应商', targetPage: new VendorsList())),
+              )
+            ],
           ),
-          Expanded(
-            flex: 4,
-            child: buildIconColumn(new _MenuItem(Icon(Icons.store), '供应商', targetPage: new VendorsList())),
-          )
         ]);
         break;
       case TabType.CONTRACT:
         _menuList.clear();
         _menuList.addAll([
-          Expanded(
-            flex: 4,
-            child: buildIconColumn(new _MenuItem(Icon(Icons.assignment_late), '客户请求', targetPage: SuperRequest(pageType: PageType.REQUEST,))),
+          SizedBox(height: 50.0,),
+          Row(
+            children: <Widget>[
+              Expanded(
+                flex: 4,
+                child: buildIconColumn(new _MenuItem(Icon(Icons.assignment_late), '客户请求', targetPage: SuperRequest(pageType: PageType.REQUEST,))),
+              ),
+              Expanded(
+                flex: 3,
+                child: buildIconColumn(new _MenuItem(Icon(Icons.assignment_ind), '派工单', targetPage: SuperRequest(pageType: PageType.DISPATCH,))),
+              ),
+              Expanded(
+                flex: 4,
+                child: buildIconColumn(new _MenuItem(Icon(Icons.settings), '零配件管理', targetPage: ComponentList())),
+              ),
+            ],
           ),
-          Expanded(
-            flex: 4,
-            child: buildIconColumn(new _MenuItem(Icon(Icons.assignment_ind), '派工单', targetPage: SuperRequest(pageType: PageType.DISPATCH,))),
-          )
+          SizedBox(height: 50.0,),
+          Row(
+            children: <Widget>[
+              Expanded(
+                flex: 4,
+                child: buildIconColumn(new _MenuItem(Icon(Icons.battery_charging_full), '耗材管理', targetPage: ConsumableList())),
+              ),
+              Expanded(
+                flex: 3,
+                child: Container(),
+              ),
+              Expanded(
+                flex: 4,
+                child: Container(),
+              ),
+            ],
+          ),
         ]);
         break;
       case TabType.VENDOR:
         _menuList.clear();
         _menuList.addAll([
-          Expanded(
-            flex: 4,
-            child: buildIconColumn(new _MenuItem(Icon(Icons.show_chart), '设备绩效报表', targetPage: new ReportList(showContent: 'equip',))),
+          SizedBox(height: 50.0,),
+          Row(
+            children: <Widget>[
+              Expanded(
+                flex: 4,
+                child: buildIconColumn(new _MenuItem(Icon(Icons.show_chart), '设备绩效报表', targetPage: new ReportList(showContent: 'equip',))),
+              ),
+              Expanded(
+                flex: 3,
+                child: buildIconColumn(new _MenuItem(Icon(Icons.show_chart), '服务绩效报表', targetPage: new ReportList(showContent: 'service',))),
+              ),
+              Expanded(
+                flex: 4,
+                child: buildIconColumn(new _MenuItem(Icon(Icons.pie_chart), '运营实绩', targetPage: new ValuationHistory())),
+              ),
+            ],
           ),
-          Expanded(
-            flex: 4,
-            child: buildIconColumn(new _MenuItem(Icon(Icons.show_chart), '服务绩效报表', targetPage: new ReportList(showContent: 'service',))),
-          )
         ]);
         break;
     }
     return Column(
       mainAxisAlignment: MainAxisAlignment.start,
-      children: <Widget>[
-        new SizedBox(
-          height: 100.0,
-        ),
-        new Center(
-          child: new Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: _menuList,
-          ),
-        ),
-      ],
+      children: _menuList,
     );
   }
 }
@@ -200,5 +299,6 @@ class _MenuItem {
   final Icon menuIcon;
   final String menuTitle;
   final Widget targetPage;
-  _MenuItem(this.menuIcon, this.menuTitle, {this.targetPage});
+  final Function onPress;
+  _MenuItem(this.menuIcon, this.menuTitle, {this.targetPage, this.onPress});
 }

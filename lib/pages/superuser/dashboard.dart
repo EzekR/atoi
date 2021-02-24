@@ -884,7 +884,7 @@ class _DashboardState extends State<Dashboard> {
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: <Widget>[
                                 Text(
-                                  '其他科室',
+                                  '其它科室',
                                   style: TextStyle(
                                       fontSize: 17.0,
                                       color: Colors.black
