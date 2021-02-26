@@ -1,3 +1,4 @@
+import 'package:atoi/pages/equipments/equipments_list.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:atoi/widgets/build_widget.dart';
@@ -43,6 +44,7 @@ class _SuperRequestState extends State<SuperRequest> {
   int _depart;
   int _urgency;
   List _typeList = [];
+  List _selectedTypes = [];
   List _statusList = [];
   List _departmentList = [];
   List _urgencyList = [];
@@ -87,6 +89,7 @@ class _SuperRequestState extends State<SuperRequest> {
           'PageSize': 10,
           'CurRowNum': offset,
           'typeID': _type,
+          // 'typeList':_selectedTypes,
           'isRecall': _recall,
           'department': _depart,
           'urgency': _urgency,
@@ -104,6 +107,7 @@ class _SuperRequestState extends State<SuperRequest> {
           'userID': _userId,
           'urgency': _urgency,
           'typeIDs': _type,
+          // 'dispatchTypeList': _selectedTypes,
           'pageSize': 10,
           'curRowNum': offset,
           'filterField': _field,
@@ -131,17 +135,20 @@ class _SuperRequestState extends State<SuperRequest> {
     await cModel.getConstants();
     setState(() {
       _status = 0;
-      _type = resetAll?0:widget.type;
+      // _type = resetAll?0:widget.type;
+      _type = 0;
       _depart = -1;
       _recall = false;
       _overDue = false;
-      _field = widget.field;
+      // _field = widget.field;
+      _field = widget.pageType==PageType.REQUEST?'r.ID':'d.RequestID';
       _filter = new TextEditingController();
       _filter.text = resetAll?'':widget.filter;
       _urgency = 0;
       _startDate = '';
       _endDate = formatDate(_end, [yyyy, '-', mm, '-', dd]);
       _typeList = initList(cModel.RequestType);
+      _selectedTypes = [];
       _statusList = initList(cModel.RequestStatus, valueForAll: 0);
       _statusList.removeWhere((item) => item['value'] == -1);
       _departmentList = initList(cModel.Departments, valueForAll: -1);
@@ -269,7 +276,9 @@ class _SuperRequestState extends State<SuperRequest> {
               mainAxisSize: MainAxisSize.max,
               children: <Widget>[
                 equipmentNo.isNotEmpty?BuildWidget.buildCardRow('设备编号', equipmentNo):new Container(),
-                equipmentName.isNotEmpty?BuildWidget.buildCardRow('设备名称', equipmentName):new Container(),
+                equipmentName.isNotEmpty?new GestureDetector(child: BuildWidget.buildCardRow('设备名称', equipmentName),onTap: () {
+                  Navigator.of(context).push(new MaterialPageRoute(builder: (_) => EquipmentsList(equipmentId: equipmentNo, assetType: task['AssetType']['ID'],)));
+                },):new Container(),
                 departmentName.isNotEmpty?BuildWidget.buildCardRow('使用科室', departmentName):new Container(),
                 BuildWidget.buildCardRow('请求人', requestPerson),
                 BuildWidget.buildCardRow('类型', requestType),
@@ -457,7 +466,9 @@ class _SuperRequestState extends State<SuperRequest> {
               mainAxisSize: MainAxisSize.max,
               children: <Widget>[
                 dispatch['Request']['Equipments'].length>0?BuildWidget.buildCardRow('设备编号', dispatch['Request']['EquipmentOID']):new Container(),
-                dispatch['Request']['Equipments'].length>0?BuildWidget.buildCardRow('设备名称', dispatch['Request']['EquipmentName']):new Container(),
+                dispatch['Request']['Equipments'].length>0?GestureDetector(child: BuildWidget.buildCardRow('设备名称', dispatch['Request']['EquipmentName']),onTap: () {
+                  Navigator.of(context).push(new MaterialPageRoute(builder: (_) => EquipmentsList(equipmentId: dispatch['Request']['EquipmentOID'],assetType: dispatch['Request']['AssetType']['ID'],)));
+                },):new Container(),
                 BuildWidget.buildCardRow('派工类型', dispatch['RequestType']['Name']),
                 BuildWidget.buildCardRow('紧急程度', dispatch['Urgency']['Name']),
                 BuildWidget.buildCardRow('请求编号', dispatch['Request']['OID']),
@@ -488,6 +499,153 @@ class _SuperRequestState extends State<SuperRequest> {
                 height: 300.0,
                 child: ListView(
                   children: <Widget>[
+                    Row(
+                      children: <Widget>[
+                        SizedBox(width: 16.0,),
+                        Text('快速筛选', style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.w600),)
+                      ],
+                    ),
+                    SizedBox(height: 6.0,),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: <Widget>[
+                        GestureDetector(
+                          onTap: () {
+                            setState(() {
+                              _selectedTypes.contains(1)?_selectedTypes.remove(1):_selectedTypes.add(1);
+                              _type = 0;
+                            });
+                          },
+                          child: Container(
+                            width: 50.0,
+                            height: 30.0,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(5.0),
+                              border: Border.all(
+                                  color: Color(0xff3394B9),
+                                  width: 1.0
+                              ),
+                              color: _selectedTypes.contains(1)?Color(0xff3394B9):Color(0xffEBF9FF),
+                            ),
+                            child: Center(
+                              child: Text('维修',
+                                style: TextStyle(
+                                  color: _selectedTypes.contains(1)?Colors.white:Colors.black54,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                        GestureDetector(
+                          onTap: () {
+                            setState(() {
+                              _selectedTypes.contains(2)?_selectedTypes.remove(2):_selectedTypes.add(2);
+                              _type = 0;
+                            });
+                          },
+                          child: Container(
+                            width: 50.0,
+                            height: 30.0,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(5.0),
+                              border: Border.all(
+                                  color: Color(0xff3394B9),
+                                  width: 1.0
+                              ),
+                              color: _selectedTypes.contains(2)?Color(0xff3394B9):Color(0xffEBF9FF),
+                            ),
+                            child: Center(
+                              child: Text('保养',
+                                style: TextStyle(
+                                  color: _selectedTypes.contains(2)?Colors.white:Colors.black54,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                        GestureDetector(
+                          onTap: () {
+                            setState(() {
+                              _selectedTypes.contains(4)?_selectedTypes.remove(4):_selectedTypes.add(4);
+                              _type = 0;
+                            });
+                          },
+                          child: Container(
+                            width: 50.0,
+                            height: 30.0,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(5.0),
+                              border: Border.all(
+                                  color: Color(0xff3394B9),
+                                  width: 1.0
+                              ),
+                              color: _selectedTypes.contains(4)?Color(0xff3394B9):Color(0xffEBF9FF),
+                            ),
+                            child: Center(
+                              child: Text('巡检',
+                                style: TextStyle(
+                                  color: _selectedTypes.contains(4)?Colors.white:Colors.black54,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                        GestureDetector(
+                          onTap: () {
+                            setState(() {
+                              _selectedTypes.contains(3)?_selectedTypes.remove(3):_selectedTypes.add(3);
+                              _type = 0;
+                            });
+                          },
+                          child: Container(
+                            width: 50.0,
+                            height: 30.0,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(5.0),
+                              border: Border.all(
+                                  color: Color(0xff3394B9),
+                                  width: 1.0
+                              ),
+                              color: _selectedTypes.contains(3)?Color(0xff3394B9):Color(0xffEBF9FF),
+                            ),
+                            child: Center(
+                              child: Text('强检',
+                                style: TextStyle(
+                                  color: _selectedTypes.contains(3)?Colors.white:Colors.black54,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                        GestureDetector(
+                          onTap: () {
+                            setState(() {
+                              _selectedTypes.contains(5)?_selectedTypes.remove(5):_selectedTypes.add(5);
+                              _type = 0;
+                            });
+                          },
+                          child: Container(
+                            width: 50.0,
+                            height: 30.0,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(5.0),
+                              border: Border.all(
+                                  color: Color(0xff3394B9),
+                                  width: 1.0
+                              ),
+                              color: _selectedTypes.contains(5)?Color(0xff3394B9):Color(0xffEBF9FF),
+                            ),
+                            child: Center(
+                              child: Text('校准',
+                                style: TextStyle(
+                                  color: _selectedTypes.contains(5)?Colors.white:Colors.black54,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                     SizedBox(height: 18.0,),
                     Row(
                       children: <Widget>[
@@ -747,10 +905,12 @@ class _SuperRequestState extends State<SuperRequest> {
                                     );
                                   }).toList(),
                                   onChanged: (val) {
-                                    FocusScope.of(context).requestFocus(new FocusNode());
-                                    setState(() {
-                                      _type = val;
-                                    });
+                                    if (_selectedTypes.length == 0) {
+                                      FocusScope.of(context).requestFocus(new FocusNode());
+                                      setState(() {
+                                        _type = val;
+                                      });
+                                    }
                                   },
                                 )
                               ],

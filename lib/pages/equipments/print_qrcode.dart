@@ -152,14 +152,14 @@ class _PrintQrcodeState extends State<PrintQrcode> {
 
   Future<Null> printQRcode() async {
     for(String code in qrcodesString) {
-      var error = await BrotherPrinter.printImage(code);
-      print(error);
-      showDialog(
-          context: context,
-          builder: (context) => CupertinoAlertDialog(
-            title: new Text(error=='ok'?'打印完成':'请连接打印机'),
-          )
-      );
+      // var error = await BrotherPrinter.printImage(code);
+      // print(error);
+      // showDialog(
+      //     context: context,
+      //     builder: (context) => CupertinoAlertDialog(
+      //       title: new Text(error=='ok'?'打印完成':'请连接打印机'),
+      //     )
+      // );
     }
   }
 

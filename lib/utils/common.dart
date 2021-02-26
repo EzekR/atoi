@@ -13,7 +13,7 @@ class CommonUtil {
     isFloor = isFloor??true;
     double _num = isFloor?double.tryParse((number/times).toStringAsFixed(digits)):
     double.tryParse((number/times).toStringAsFixed(digits));
-    if (_num < 1) {
+    if (_num < 1 && _num > 0) {
       digits==0?digits++:digits;
     }
     NumberFormat _format = NumberFormat.currency(locale: 'en_US', symbol: '', decimalDigits: digits);

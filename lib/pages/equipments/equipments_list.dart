@@ -192,7 +192,7 @@ class _EquipmentsListState extends State<EquipmentsList> {
       params: {
         'filterText': _keywords.text,
         'status': machineStatusId,
-        //'warrantyStatus': warrantyId,
+        'warrantyStatus': warrantyId,
         'departmentID': departmentId,
         'filterTextName': _deviceName.text,
         'filterTextSerialCode': _deviceCode.text,
@@ -489,64 +489,65 @@ class _EquipmentsListState extends State<EquipmentsList> {
                       ],
                     ),
                     SizedBox(height: 18.0,),
-                    Row(
-                      children: <Widget>[
-                        SizedBox(width: 16.0,),
-                        Text('维保状态', style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.w600),)
-                      ],
-                    ),
-                    SizedBox(height: 6.0,),
-                    Row(
-                      children: <Widget>[
-                        SizedBox(width: 16.0,),
-                        Container(
-                            width: 230.0,
-                            height: 40.0,
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(5.0),
-                              color: Color(0xfff2f2f2),
-                            ),
-                            child: Row(
-                              children: <Widget>[
-                                SizedBox(width: 6.0,),
-                                DropdownButton(
-                                  value: warrantyId,
-                                  underline: Container(),
-                                  items: <DropdownMenuItem>[
-                                    DropdownMenuItem(
-                                      value: 0,
-                                      child: Container(
-                                        width: 200.0,
-                                        child: Text('全部'),
-                                      ),
-                                    ),
-                                    DropdownMenuItem(
-                                      value: 1,
-                                      child: Container(
-                                        width: 200.0,
-                                        child: Text('保外'),
-                                      ),
-                                    ),
-                                    DropdownMenuItem(
-                                      value: 2,
-                                      child: Container(
-                                        width: 200.0,
-                                        child: Text('保内'),
-                                      ),
-                                    ),
-                                  ],
-                                  onChanged: (val) {
-                                    FocusScope.of(context).requestFocus(new FocusNode());
-                                    setState(() {
-                                      warrantyId = val;
-                                    });
-                                  },
-                                )
-                              ],
-                            )
+                    widget.equipmentType==EquipmentType.MEDICAL?
+                        Column(children: <Widget>[Row(
+                          children: <Widget>[
+                            SizedBox(width: 16.0,),
+                            Text('维保状态', style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.w600),)
+                          ],
                         ),
-                      ],
-                    ),
+                          SizedBox(height: 6.0,),
+                          Row(
+                            children: <Widget>[
+                              SizedBox(width: 16.0,),
+                              Container(
+                                  width: 230.0,
+                                  height: 40.0,
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(5.0),
+                                    color: Color(0xfff2f2f2),
+                                  ),
+                                  child: Row(
+                                    children: <Widget>[
+                                      SizedBox(width: 6.0,),
+                                      DropdownButton(
+                                        value: warrantyId,
+                                        underline: Container(),
+                                        items: <DropdownMenuItem>[
+                                          DropdownMenuItem(
+                                            value: 0,
+                                            child: Container(
+                                              width: 200.0,
+                                              child: Text('全部'),
+                                            ),
+                                          ),
+                                          DropdownMenuItem(
+                                            value: 1,
+                                            child: Container(
+                                              width: 200.0,
+                                              child: Text('保外'),
+                                            ),
+                                          ),
+                                          DropdownMenuItem(
+                                            value: 2,
+                                            child: Container(
+                                              width: 200.0,
+                                              child: Text('保内'),
+                                            ),
+                                          ),
+                                        ],
+                                        onChanged: (val) {
+                                          FocusScope.of(context).requestFocus(new FocusNode());
+                                          setState(() {
+                                            warrantyId = val;
+                                          });
+                                        },
+                                      )
+                                    ],
+                                  )
+                              ),
+                            ],
+                          ),],):Container(),
                     SizedBox(height: 18.0,),
                     Row(
                       children: <Widget>[
@@ -580,51 +581,52 @@ class _EquipmentsListState extends State<EquipmentsList> {
                       ],
                     ),
                     SizedBox(height: 18.0,),
-                    Row(
-                      children: <Widget>[
-                        SizedBox(width: 16.0,),
-                        Text('富士II类', style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.w600),)
-                      ],
-                    ),
-                    SizedBox(height: 6.0,),
-                    Row(
-                      children: <Widget>[
-                        SizedBox(width: 16.0,),
-                        Container(
-                            width: 230.0,
-                            height: 40.0,
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(5.0),
-                              color: Color(0xfff2f2f2),
-                            ),
-                            child: Row(
-                              children: <Widget>[
-                                SizedBox(width: 6.0,),
-                                DropdownButton(
-                                  value: fujiClass2,
-                                  underline: Container(),
-                                  items: fujiClass2List.map<DropdownMenuItem>((item) {
-                                    return DropdownMenuItem(
-                                      value: item['value'],
-                                      child: Container(
-                                        width: 200,
-                                        child: Text(item['text']),
-                                      ),
-                                    );
-                                  }).toList(),
-                                  onChanged: (val) {
-                                    print(val);
-                                    FocusScope.of(context).requestFocus(new FocusNode());
-                                    setState(() {
-                                      fujiClass2 = val;
-                                    });
-                                  },
-                                )
-                              ],
-                            )
+                    widget.equipmentType==EquipmentType.MEDICAL?
+                        Column(children: <Widget>[Row(
+                          children: <Widget>[
+                            SizedBox(width: 16.0,),
+                            Text('富士II类', style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.w600),)
+                          ],
                         ),
-                      ],
-                    ),
+                          SizedBox(height: 6.0,),
+                          Row(
+                            children: <Widget>[
+                              SizedBox(width: 16.0,),
+                              Container(
+                                  width: 230.0,
+                                  height: 40.0,
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(5.0),
+                                    color: Color(0xfff2f2f2),
+                                  ),
+                                  child: Row(
+                                    children: <Widget>[
+                                      SizedBox(width: 6.0,),
+                                      DropdownButton(
+                                        value: fujiClass2,
+                                        underline: Container(),
+                                        items: fujiClass2List.map<DropdownMenuItem>((item) {
+                                          return DropdownMenuItem(
+                                            value: item['value'],
+                                            child: Container(
+                                              width: 200,
+                                              child: Text(item['text']),
+                                            ),
+                                          );
+                                        }).toList(),
+                                        onChanged: (val) {
+                                          print(val);
+                                          FocusScope.of(context).requestFocus(new FocusNode());
+                                          setState(() {
+                                            fujiClass2 = val;
+                                          });
+                                        },
+                                      )
+                                    ],
+                                  )
+                              ),
+                            ],
+                          ),],):Container(),
                     SizedBox(height: 30.0,),
                   ],
                 ),

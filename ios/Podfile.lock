@@ -26,8 +26,8 @@ PODS:
     - JPush
   - fluttertoast (0.0.2):
     - Flutter
-  - JCore (2.2.5)
-  - JPush (3.3.3):
+  - JCore (2.4.0)
+  - JPush (3.4.0):
     - JCore (< 3.0.0, >= 2.0.0)
   - libwebp (1.1.0):
     - libwebp/demux (= 1.1.0)
@@ -38,28 +38,30 @@ PODS:
   - libwebp/mux (1.1.0):
     - libwebp/demux
   - libwebp/webp (1.1.0)
-  - Mantle (2.1.1):
-    - Mantle/extobjc (= 2.1.1)
-  - Mantle/extobjc (2.1.1)
+  - Mantle (2.1.6):
+    - Mantle/extobjc (= 2.1.6)
+  - Mantle/extobjc (2.1.6)
   - MTBBarcodeScanner (5.0.11)
-  - multi_image_picker (4.7.10):
+  - multi_image_picker (4.7.14):
     - BSImagePicker (~> 2.10.3)
     - Flutter
   - path_provider_linux (0.0.1):
     - Flutter
+  - path_provider_windows (0.0.1):
+    - Flutter
   - "permission_handler (4.4.0+hotfix.4)":
     - Flutter
   - Reachability (3.2)
-  - SDWebImage/Core (5.8.0)
-  - SDWebImageWebPCoder (0.6.1):
+  - SDWebImage/Core (5.10.3)
+  - SDWebImageWebPCoder (0.8.1):
     - libwebp (~> 1.0)
-    - SDWebImage/Core (~> 5.7)
-  - sensors_analytics_flutter_plugin (1.0.4):
+    - SDWebImage/Core (~> 5.10)
+  - sensors_analytics_flutter_plugin (1.0.5):
     - Flutter
     - SensorsAnalyticsSDK
-  - SensorsAnalyticsSDK (2.2.5):
-    - SensorsAnalyticsSDK/Core (= 2.2.5)
-  - SensorsAnalyticsSDK/Core (2.2.5)
+  - SensorsAnalyticsSDK (2.2.7):
+    - SensorsAnalyticsSDK/Core (= 2.2.7)
+  - SensorsAnalyticsSDK/Core (2.2.7)
   - shared_preferences (0.0.1):
     - Flutter
   - shared_preferences_linux (0.0.1):
@@ -67,6 +69,8 @@ PODS:
   - shared_preferences_macos (0.0.1):
     - Flutter
   - shared_preferences_web (0.0.1):
+    - Flutter
+  - shared_preferences_windows (0.0.1):
     - Flutter
 
 DEPENDENCIES:
@@ -81,12 +85,14 @@ DEPENDENCIES:
   - fluttertoast (from `.symlinks/plugins/fluttertoast/ios`)
   - multi_image_picker (from `.symlinks/plugins/multi_image_picker/ios`)
   - path_provider_linux (from `.symlinks/plugins/path_provider_linux/ios`)
+  - path_provider_windows (from `.symlinks/plugins/path_provider_windows/ios`)
   - permission_handler (from `.symlinks/plugins/permission_handler/ios`)
   - sensors_analytics_flutter_plugin (from `.symlinks/plugins/sensors_analytics_flutter_plugin/ios`)
   - shared_preferences (from `.symlinks/plugins/shared_preferences/ios`)
   - shared_preferences_linux (from `.symlinks/plugins/shared_preferences_linux/ios`)
   - shared_preferences_macos (from `.symlinks/plugins/shared_preferences_macos/ios`)
   - shared_preferences_web (from `.symlinks/plugins/shared_preferences_web/ios`)
+  - shared_preferences_windows (from `.symlinks/plugins/shared_preferences_windows/ios`)
 
 SPEC REPOS:
   trunk:
@@ -126,6 +132,8 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/multi_image_picker/ios"
   path_provider_linux:
     :path: ".symlinks/plugins/path_provider_linux/ios"
+  path_provider_windows:
+    :path: ".symlinks/plugins/path_provider_windows/ios"
   permission_handler:
     :path: ".symlinks/plugins/permission_handler/ios"
   sensors_analytics_flutter_plugin:
@@ -138,6 +146,8 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/shared_preferences_macos/ios"
   shared_preferences_web:
     :path: ".symlinks/plugins/shared_preferences_web/ios"
+  shared_preferences_windows:
+    :path: ".symlinks/plugins/shared_preferences_windows/ios"
 
 SPEC CHECKSUMS:
   barcode_scan: 33f586d02270046fc6559135038b34b5754eaa4f
@@ -152,24 +162,26 @@ SPEC CHECKSUMS:
   flutter_image_compress: 082f8daaf6c1b0c9fe798251c750ef0ecd98d7ae
   flutter_jpush: bb278c661136b2a2032e96ffc15bbce871d3fb02
   fluttertoast: b644586ef3b16f67fae9a1f8754cef6b2d6b634b
-  JCore: d75c0306dc99875d323d23e5a063b3a3ef22335a
-  JPush: 61b3dc8c2bdefb7c48e7ca283f9fe42e71bfe063
+  JCore: a29e4b0ee54e1301446dc02d8e1c350404108b34
+  JPush: defaa108c38806f6efdcfaf4c416854d25fca8e5
   libwebp: 946cb3063cea9236285f7e9a8505d806d30e07f3
-  Mantle: 35238ae6f2e2b2d474fa7b67fee82a59fea71915
+  Mantle: 4c0ed6ce47c96eccc4dc3bb071deb3def0e2c3be
   MTBBarcodeScanner: f453b33c4b7dfe545d8c6484ed744d55671788cb
-  multi_image_picker: 5b7a578db2e02d12f30098afdff6983f4d69fbe0
+  multi_image_picker: c068931d08240565e0615fb01437d16984909183
   path_provider_linux: 4d630dc393e1f20364f3e3b4a2ff41d9674a84e4
+  path_provider_windows: a2b81600c677ac1959367280991971cb9a1edb3b
   permission_handler: 8278954f2382902f63f00dd8828769c0bd6d511b
   Reachability: 33e18b67625424e47b6cde6d202dce689ad7af96
-  SDWebImage: 84000f962cbfa70c07f19d2234cbfcf5d779b5dc
-  SDWebImageWebPCoder: d0dac55073088d24b2ac1b191a71a8f8d0adac21
-  sensors_analytics_flutter_plugin: 7a566e45a6db7a1b3008f49f92a8a0d43f5a13c3
-  SensorsAnalyticsSDK: bb0edecb8182c3397f37bb1d957923e8eba2b865
+  SDWebImage: e378178472b735e84b007bfb55514c97948a0598
+  SDWebImageWebPCoder: fac2821bf5a6642a73979d0962dbed5eac45a605
+  sensors_analytics_flutter_plugin: 28c92a16312453a6834eda00ee94d27a5406adf1
+  SensorsAnalyticsSDK: 3ea0d6165b1f773b9ed01f3c53ff7c09b7df4535
   shared_preferences: af6bfa751691cdc24be3045c43ec037377ada40d
   shared_preferences_linux: afefbfe8d921e207f01ede8b60373d9e3b566b78
   shared_preferences_macos: f3f29b71ccbb56bf40c9dd6396c9acf15e214087
   shared_preferences_web: 141cce0c3ed1a1c5bf2a0e44f52d31eeb66e5ea9
+  shared_preferences_windows: 36b76d6f54e76ead957e60b49e2f124b4cd3e6ae
 
-PODFILE CHECKSUM: d50ab995d45007bb7568d51f2c5f0ffdc73dacc3
+PODFILE CHECKSUM: c086637cc9682d618a537731aa90c7cf728f4f04
 
-COCOAPODS: 1.10.0
+COCOAPODS: 1.10.1
