@@ -16,10 +16,11 @@ import 'package:date_format/date_format.dart';
 
 /// 备件详情页
 class SpareDetail extends StatefulWidget {
-  SpareDetail({Key key, this.spare, this.editable, this.isStock}) : super(key: key);
+  SpareDetail({Key key, this.spare, this.editable, this.isStock, this.scheduleDate}) : super(key: key);
   final Map spare;
   final bool editable;
   final bool isStock;
+  final String scheduleDate;
   _SpareDetailState createState() => new _SpareDetailState();
 }
 
@@ -208,6 +209,14 @@ class _SpareDetailState extends State<SpareDetail> {
         title: new Text('开始日期不可在结束日期之后'),
       )).then((result) => scrollController.jumpTo(400.0));
       return;
+    }
+    if (widget.scheduleDate != null) {
+      if (DateTime.parse(widget.scheduleDate).isAfter(DateTime.parse(endDate))) {
+        showDialog(context: context, builder: (context) => CupertinoAlertDialog(
+          title: new Text('结束日期不可早于盘点计划日期'),
+        )).then((result) => scrollController.jumpTo(400.0));
+        return;
+      }
     }
     var prefs = await _prefs;
     var _info = {

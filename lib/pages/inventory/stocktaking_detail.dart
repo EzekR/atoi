@@ -322,7 +322,12 @@ class _StocktakingDetailState extends State<StocktakingDetail> {
 
   void setScanStuff() {
     Map decoded = jsonDecode(barcode);
-    log('$decoded');
+    if (decoded == null || decoded['id'] == null) {
+      showDialog(context: context, builder: (context) => CupertinoAlertDialog(
+        title: new Text('盘点清单不存在该物件'),
+      ));
+      return;
+    }
     String stockObject;
     switch (stockType) {
       case 1:
@@ -706,7 +711,7 @@ class _StocktakingDetailState extends State<StocktakingDetail> {
                         BuildWidget.buildCardRow('型号', stockItems[i]['Model']),
                         BuildWidget.buildCardRow('厂家', stockItems[i]['Manufacturer']),
                         BuildWidget.buildCardRow('起止时间', '${CommonUtil.TimeForm(stockItems[i]['StartDate'], 'yyyy-mm-dd')} - ${CommonUtil.TimeForm(stockItems[i]['EndDate'], 'yyyy-mm-dd')}'),
-                        BuildWidget.buildCardRow('使用状态', stockItems[i]['IsInventory']?'备用':'在库'),
+                        BuildWidget.buildCardRow('使用状态', stockItems[i]['IsInventory']?'备用':"在用"),
                         widget.editable?BuildWidget.buildCardSwitch('是否在库', _changeSwitch, initValue: stockItems[i]['IsInventory']):BuildWidget.buildCardRow('是否在库', stockItems[i]['IsInventory']?'是':'否'),
                         widget.editable?BuildWidget.buildCardInputStock('备注', stockItems[i]['Comments'].toString(), callback: _editorComment, maxLength: 500, focus: focusCards[i]):BuildWidget.buildCardRow('备注', stockItems[i]['Comments'].toString()),
                         widget.editable?Row(
@@ -1112,14 +1117,14 @@ class _StocktakingDetailState extends State<StocktakingDetail> {
                     ),
                     RaisedButton(
                       onPressed: () async {
+                        if (approveComment.text.isEmpty) {
+                          showDialog(context: context, builder: (context) => CupertinoAlertDialog(
+                            title: new Text('审批备注不可为空'),
+                          )).then((result) => FocusScope.of(context).requestFocus(focusComment));
+                          return;
+                        }
                         bool res = await checkStocktaking(1);
                         if (res) {
-                          if (approveComment.text.isEmpty) {
-                            showDialog(context: context, builder: (context) => CupertinoAlertDialog(
-                              title: new Text('审批备注不可为空'),
-                            )).then((result) => FocusScope.of(context).requestFocus(focusComment));
-                            return;
-                          }
                           bool resp = await approveStock(4);
                           if (resp) {
                             showDialog(context: context, builder: (context) => CupertinoAlertDialog(

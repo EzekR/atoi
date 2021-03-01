@@ -122,7 +122,6 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
   void initInput() {
     equipmentComments = _equipments.map<TextEditingController>((item) => new TextEditingController(text: item['StocktakingComments'])).toList();
     equipmentStatus = _equipments.map<TextEditingController>((item) => new TextEditingController(text: item['StocktakingStatus'])).toList();
-    log("$equipmentComments");
   }
 
   void initState(){
@@ -944,6 +943,7 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
                     setState(() {
                       _equipments = selected??[];
                     });
+                    initInput();
                   }
                 },
                 icon: Icon(Icons.add),
@@ -1067,7 +1067,7 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
       ),
     ]);
 
-    if (_dispatch['Request']['RequestType']['ID'] != 14 && _dispatch['Request']['RequestType']['ID'] != 12 && _dispatch['Request']['RequestType']['ID'] != 4) {
+    if (_dispatch['Request']['RequestType']['ID'] != 14 && _dispatch['Request']['RequestType']['ID'] != 12 && _dispatch['Request']['RequestType']['ID'] != 4 && _dispatch['Request']['AssetType']['ID']==1) {
       _list.addAll([
         new ExpansionPanel(canTapOnHeader: true,
           headerBuilder: (context, isExpanded) {

@@ -582,8 +582,8 @@ class _ConsumableDetailState extends State<ConsumableDetail> {
                                     ],
                                   ),
                                 ):BuildWidget.buildRow('供应商', supplier==null?'':supplier['Name']),
-                                widget.editable?BuildWidget.buildInput('单价(元)', price, maxLength: 13, inputType: TextInputType.number, focusNode: _focusComponent[4], required: true):BuildWidget.buildRow('单价(元)', CommonUtil.CurrencyForm(double.tryParse(price.text), times: 1, digits: 0)),
-                                widget.editable&&widget.consumable==null?BuildWidget.buildInput('入库数量', quantity, maxLength: 13, inputType: TextInputType.number, focusNode: _focusComponent[5], required: true):BuildWidget.buildRow('入库数量', CommonUtil.CurrencyForm(double.tryParse(quantity.text), times: 1, digits: 0)),
+                                widget.editable?BuildWidget.buildInput('单价(元)', price, maxLength: 13, inputType: TextInputType.numberWithOptions(decimal: true), focusNode: _focusComponent[4], required: true):BuildWidget.buildRow('单价(元)', CommonUtil.CurrencyForm(double.tryParse(price.text), times: 1, digits: 0)),
+                                widget.editable&&widget.consumable==null?BuildWidget.buildInput('入库数量', quantity, maxLength: 13, inputType: TextInputType.numberWithOptions(decimal: true), focusNode: _focusComponent[5], required: true):BuildWidget.buildRow('入库数量', CommonUtil.CurrencyForm(double.tryParse(quantity.text), times: 1, digits: 0)),
                                 widget.editable&&widget.consumable!=null?BuildWidget.buildInput('可用数量', availableQty, maxLength: 13, inputType: TextInputType.number, focusNode: _focusComponent[6], required: true):Container(),
                                 !widget.editable?BuildWidget.buildRow("可用数量", availableQty.text):Container(),
                                 widget.editable&&widget.consumable==null?new Padding(

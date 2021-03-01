@@ -192,6 +192,7 @@ class _ManagerAssignPageState extends State<ManagerAssignPage> {
         if (resp['Data']['MachineStatus']['ID'] != 0) {
           _currentStatusReq = _request['MachineStatus']['Name'];
           _currentStatus = _request['MachineStatus']['Name'];
+          _currentMethod = _request['DealType']['Name'];
         }
       });
       if (resp['Data']['RequestType']['ID'] == 2) {

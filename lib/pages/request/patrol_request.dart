@@ -14,6 +14,7 @@ import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:atoi/widgets/search_page.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:uuid/uuid.dart';
+import 'package:atoi/pages/equipments/equipments_list.dart';
 
 /// 巡检页面类
 class PatrolRequest extends StatefulWidget{
@@ -336,8 +337,22 @@ Future getImage() async {
                   color: Colors.white,
                   iconSize: 30.0,
                   onPressed: () async {
+                    EquipmentType eType;
+                    if (_equipments.isNotEmpty) {
+                      switch (_equipments[0]['AssetType']['ID']) {
+                        case 1:
+                          eType = EquipmentType.MEDICAL;
+                          break;
+                        case 2:
+                          eType = EquipmentType.MEASURE;
+                          break;
+                        case 3:
+                          eType = EquipmentType.OTHER;
+                          break;
+                      }
+                    }
                     Navigator.of(context).push(new MaterialPageRoute(builder: (context) {
-                      return SearchPage(equipments: _equipments, multiType: MultiSearchType.EQUIPMENT,);
+                      return SearchPage(equipments: _equipments, multiType: MultiSearchType.EQUIPMENT, onlyType: _equipments.isEmpty?null:eType,);
                     })).then((selected) {
                       if (selected != null) {
                         setState(() {

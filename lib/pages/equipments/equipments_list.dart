@@ -1053,7 +1053,7 @@ class _EquipmentsListState extends State<EquipmentsList> {
                     _keywords.clear();
                   });
                   Navigator.of(context).push(new MaterialPageRoute(builder: (_) {
-                    return new EquipmentDetail(equipment: item, editable: _editable, equipmentType: widget.equipmentType,);
+                    return new EquipmentDetail(equipment: item, editable: _editable, equipmentType: eType,);
                   })).then((result) {
                     setState(() {
                       _loading = true;

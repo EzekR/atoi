@@ -182,6 +182,14 @@ class _ServiceDetailState extends State<ServiceDetail> {
       )).then((result) => FocusScope.of(context).requestFocus(_focusComponent[9]));
       return;
     }
+    if (widget.date != null) {
+      if (_end.isBefore(DateTime.tryParse(widget.date))) {
+        showDialog(context: context, builder: (context) => CupertinoAlertDialog(
+          title: new Text('结束日期不可早于盘点计划日期'),
+        )).then((result) => FocusScope.of(context).requestFocus(_focusComponent[9]));
+        return;
+      }
+    }
     if (supplier == null) {
       showDialog(context: context, builder: (context) => CupertinoAlertDialog(
         title: new Text('供应商不可为空'),

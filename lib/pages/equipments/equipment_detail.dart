@@ -974,6 +974,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
             getFujiClass1();
             getFujiClass2();
             fujiClass2 = _data['FujiClass2']['ID'];
+            fujiClass2Name = _data['FujiClass2']['Name'];
             getFujiComponent();
             componentCodes.text = _data['CTSerialCode'];
             componentSeconds.text = _data['CTUsedSeconds'].toString();
@@ -1073,18 +1074,17 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
             currentStatus = _data['UsageStatus']['Name'];
             currentMachine = _data['EquipmentStatus']['Name'];
             currentMandatory = _data['MandatoryTestStatus']['ID'] == 0 ? '无' : _data['MandatoryTestStatus']['Name'];
-            mandatoryDate = formatDateString(_data['MandatoryTestDate'].toString());
             currentRecall = _data['RecallFlag'] ? '是' : '否';
             currentServiceScope = _data['ServiceScope']?"是":"否";
             recallDate = formatDateString(_data['RecallDate'].toString());
             currentPatrolPeriod = _data['PatrolType']['ID'];
             currentMaintainPeriod = _data['MaintenanceType']['ID'];
             currentCorrectionPeriod = _data['CorrectionType']['ID'];
-            currentMandatoryType = _data['MandatoryTestPeriodType']['ID'];
+            relatedEquipment = _data['Equipment'];
+            currentMandatoryType = _data['MandatoryTestPeriodType']['Name'];
             mandatoryDate = formatDateString(_data['MandatoryTestDate'].toString());
             mandatoryInterval.text = _data['MandatoryTestPeriod'].toString();
             currentMandatoryPeriod = _data['MandatoryTestType']['ID'];
-            relatedEquipment = _data['Equipment'];
           });
           downloadFiles(_data['OtherEqptFile']);
           break;
@@ -1171,6 +1171,15 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
       ).then((result) => _scrollController.jumpTo(400.0));
       return;
     }
+    //if ((widget.equipmentType == EquipmentType.MEASURE || widget.equipmentType == EquipmentType.OTHER) && relatedEquipment==null) {
+    //  showDialog(
+    //      context: context,
+    //      builder: (context) => CupertinoAlertDialog(
+    //        title: new Text('关联设备不可为空'),
+    //      )
+    //  ).then((result) => _scrollController.jumpTo(500.0));
+    //  return;
+    //}
     if (name.text.isEmpty) {
       showDialog(
         context: context,
@@ -1472,7 +1481,9 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
           "EquipmentLevel": {
             "ID": equipmentLevel[currentClass],
           },
-          "Equipment": relatedEquipment,
+          "Equipment": relatedEquipment??{
+            "ID": 0
+          },
           "Name": name.text,
           "MeasInstrumCode": equipmentCode.text,
           "ModelCode": equipmentCode.text,
@@ -1530,17 +1541,16 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
           "MandatoryTestStatus": {
             "ID": mandatoryFlagType[currentMandatory],
           },
-          "MandatoryTestDate": mandatoryDate,
           "RecallFlag": currentRecall == '是' ? true : false,
           "RecallDate": recallDate,
           "CreateUser": {'ID': _userId},
           "MeasInstrumFile": _equipmentFiles,
           "MandatoryTestPeriodType": {
-            "ID": mandatoryPeriod.indexOf((item) => item == currentMandatoryType),
+            "ID": mandatoryType[currentMandatoryType],
           },
           "MandatoryTestDate": currentMandatoryType=='固定日期'?mandatoryDate:'YY-MM-DD',
-          "MandatoryTestPeriodType": {
-            'ID': currentMandatoryType=='周期'?mandatoryPeriodList.firstWhere((item) => item['ID'] ==currentMandatoryPeriod)['ID']:0
+          "MandatoryTestType": {
+            'ID': currentMandatoryType=='周期'?periodTypeList.firstWhere((item) => item['ID'] ==currentMandatoryPeriod)['ID']:0
           },
           "MandatoryTestPeriod": currentMandatoryType=='周期'?mandatoryInterval.text:0,
         };
@@ -1613,20 +1623,21 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
           "MandatoryTestStatus": {
             "ID": mandatoryFlagType[currentMandatory],
           },
-          "MandatoryTestDate": mandatoryDate,
           "RecallFlag": currentRecall == '是' ? true : false,
           "RecallDate": recallDate,
           "CreateUser": {'ID': _userId},
           "OtherEqptFile": _equipmentFiles,
           "MandatoryTestPeriodType": {
-            "ID": mandatoryPeriod.indexOf((item) => item == currentMandatoryType),
+            "ID": mandatoryType[currentMandatoryType],
           },
           "MandatoryTestDate": currentMandatoryType=='固定日期'?mandatoryDate:'YY-MM-DD',
-          "MandatoryTestPeriodType": {
-            'ID': currentMandatoryType=='周期'?mandatoryPeriodList.firstWhere((item) => item['ID'] ==currentMandatoryPeriod)['ID']:0
+          "MandatoryTestType": {
+            'ID': currentMandatoryType=='周期'?periodTypeList.firstWhere((item) => item['ID'] ==currentMandatoryPeriod)['ID']:0
           },
           "MandatoryTestPeriod": currentMandatoryType=='周期'?mandatoryInterval.text:0,
-          "Equipment": relatedEquipment
+          "Equipment": relatedEquipment??{
+            "ID": 0
+          }
         };
         break;
     }
@@ -3227,7 +3238,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
         ),
       ):Container(),
       !widget.editable&&currentMandatoryType=="固定日期"?BuildWidget.buildRow('强检时间', displayDate(mandatoryDate)):Container(),
-      widget.editable&&currentMandatoryType=='周期'?BuildWidget.buildDropdownWithInput('强检周期', mandatoryInterval, currentMandatoryPeriod, periodTypeList, changeMandatoryPeriod, showMandatory, inputType: TextInputType.number, focusNode: _focusEquip[19], context: context):Container(),
+      widget.editable&&currentMandatoryType=='周期'?BuildWidget.buildDropdownWithInput('强检周期', mandatoryInterval, currentMandatoryPeriod, periodTypeList, changeMandatoryPeriod, showMandatory, inputType: TextInputType.number, context: context):Container(),
       !widget.editable&&currentMandatoryType=='周期'?Row(
         children: <Widget>[
           new Expanded(
@@ -3259,7 +3270,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
           new Expanded(
             flex: 4,
             child: new Text(
-              currentPatrolPeriod==1?'无强检':'${mandatoryInterval.text} ${periodTypeList.firstWhere((item) => item['ID']==currentMandatoryPeriod)['Name']}',
+              currentMandatoryPeriod==1?'无强检':'${mandatoryInterval.text} ${periodTypeList.firstWhere((item) => item['ID']==currentMandatoryPeriod)['Name']}',
               style: new TextStyle(
                   fontSize: 16.0,
                   fontWeight: FontWeight.w400,
@@ -3527,8 +3538,8 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
             children: <Widget>[
               BuildWidget.buildRow('简称', fujiClass2Components[key]['Name']),
               BuildWidget.buildRow('描述', fujiClass2Components[key]['Description']),
-              widget.editable?BuildWidget.buildInput('序列号', componentCodes, lines: 1, focusNode: _focusEquip[19]):BuildWidget.buildRow('序列号', componentCodes.text),
-              widget.editable?BuildWidget.buildInput('已使用秒次', componentSeconds, lines: 1, maxLength: 13, focusNode: _focusEquip[18]):BuildWidget.buildRow('已使用秒次', componentSeconds.text)
+              widget.editable?BuildWidget.buildInput('序列号', componentCodes, lines: 1, ):BuildWidget.buildRow('序列号', componentCodes.text),
+              widget.editable?BuildWidget.buildInput('已使用秒次', componentSeconds, lines: 1, maxLength: 13, inputType: TextInputType.numberWithOptions(decimal: true)):BuildWidget.buildRow('已使用秒次', componentSeconds.text)
             ],
           ),
         );
@@ -3676,7 +3687,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
         ),
         isExpanded: expansionList[_list.length]));
     //equipment photos
-    if (!widget.editable) {
+    if (!widget.editable && widget.equipmentType == EquipmentType.MEDICAL) {
       _list.add(ExpansionPanel(canTapOnHeader: true,
           headerBuilder: (context, isExpanded) {
             return ListTile(

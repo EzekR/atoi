@@ -115,6 +115,8 @@ class _ValuationAnalysisState extends State<ValuationAnalysis> {
         system: tableData['SystemActualAmount'][0]['data'][i],
         labour: tableData['LabourActualAmount'][0]['data'][i],
         repairAndMaintain: tableData['ContractActualAmount'][0]['data'][i],
+        maintain: tableData['ConsumableActualAmount'][0]['data'][i]+tableData['RegularActualAmount'][0]['data'][i]+
+            tableData['QuanTityActualAmount'][0]['data'][i]+tableData['SmallActualAmount'][0]['data'][i],
         spare: tableData['SpareActualAmount'][0]['data'][i],
         consumable: tableData['ConsumableActualAmount'][0]['data'][i],
         fixedPeriod: tableData['RegularActualAmount'][0]['data'][i],
@@ -138,6 +140,8 @@ class _ValuationAnalysisState extends State<ValuationAnalysis> {
       system: tableData['SystemActualAmount'][0]['sum'],
       labour: tableData['LabourActualAmount'][0]['sum'],
       repairAndMaintain: tableData['ContractActualAmount'][0]['sum'],
+      maintain: tableData['ConsumableActualAmount'][0]['sum']+tableData['RegularActualAmount'][0]['sum']+
+        tableData['QuanTityActualAmount'][0]['sum']+tableData['SmallActualAmount'][0]['sum'],
       spare: tableData['SpareActualAmount'][0]['sum'],
       consumable: tableData['ConsumableActualAmount'][0]['sum'],
       fixedPeriod: tableData['RegularActualAmount'][0]['sum'],
@@ -165,6 +169,8 @@ class _ValuationAnalysisState extends State<ValuationAnalysis> {
           system: tableData['SystemForecastAmount'][j]['data'][k],
           labour: tableData['LabourForecastAmount'][j]['data'][k],
           repairAndMaintain: tableData['ContractForecastAmount'][j]['data'][k],
+          maintain: tableData['ConsumableForecastAmount'][j]['data'][k]+tableData['RegularForecastAmount'][j]['data'][k]+
+              tableData['QuanTityForecastAmount'][j]['data'][k]+tableData['SmallForecastAmount'][j]['data'][k],
           spare: tableData['SpareForecastAmount'][j]['data'][k],
           consumable: tableData['ConsumableForecastAmount'][j]['data'][k],
           fixedPeriod: tableData['RegularForecastAmount'][j]['data'][k],
@@ -189,6 +195,8 @@ class _ValuationAnalysisState extends State<ValuationAnalysis> {
           repairAndMaintain: tableData['ContractForecastAmount'][j]['sum'],
           spare: tableData['SpareForecastAmount'][j]['sum'],
           consumable: tableData['ConsumableForecastAmount'][j]['sum'],
+          maintain: tableData['ConsumableForecastAmount'][j]['sum']+tableData['RegularForecastAmount'][j]['sum']+
+              tableData['QuanTityForecastAmount'][j]['sum']+tableData['SmallForecastAmount'][j]['sum'],
           fixedPeriod: tableData['RegularForecastAmount'][j]['sum'],
           fixedQuantity: tableData['QuanTityForecastAmount'][j]['sum'],
           small: tableData['SmallForecastAmount'][j]['sum'],
@@ -596,8 +604,8 @@ class _ValuationAnalysisState extends State<ValuationAnalysis> {
     for(int i=0; i<columnActual.monthDetail.length; i++) {
       ColumnDetail monthDetail = columnActual.monthDetail[i];
       lineDataFixed.add(MonthData(monthDetail.month, monthDetail.fixed??0));
-      lineDataFixed.add(MonthData(monthDetail.month, monthDetail.maintain??0));
-      lineDataFixed.add(MonthData(monthDetail.month, monthDetail.repair??0));
+      lineDataMaintain.add(MonthData(monthDetail.month, monthDetail.maintain??0));
+      lineDataRepair.add(MonthData(monthDetail.month, monthDetail.repair??0));
     }
   }
 

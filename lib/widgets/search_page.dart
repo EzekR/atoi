@@ -26,7 +26,24 @@ class _SearchPageState extends State<SearchPage> {
   int deviceType = 1;
   String deviceUrl = "/Equipment/Getdevices";
 
+  void initDeviceType () {
+    if (widget.onlyType != null) {
+      switch (widget.onlyType) {
+        case EquipmentType.MEDICAL:
+          deviceType = 1;
+          break;
+        case EquipmentType.MEASURE:
+          deviceType = 2;
+          break;
+        case EquipmentType.OTHER:
+          deviceType = 3;
+          break;
+      }
+    }
+  }
+
   void initState() {
+    initDeviceType();
     getDevices('');
     super.initState();
     if (widget.equipments != null) {
@@ -112,7 +129,9 @@ class _SearchPageState extends State<SearchPage> {
         _params = {
           'fujiClass2ID': widget.fujiClass2,
           'filterField': 'c.Name',
-          'filterText': filter
+          'filterText': filter,
+          "curRowNum": offset,
+          "pageSize": 10
         };
         break;
       case MultiSearchType.EQUIPMENT:
@@ -123,7 +142,9 @@ class _SearchPageState extends State<SearchPage> {
         _params = {
           'fujiClass2ID': widget.fujiClass2,
           'filterField': 'c.Name',
-          'filterText': filter
+          'filterText': filter,
+          "curRowNum": offset,
+          "pageSize": 10
         };
         break;
     }
@@ -236,6 +257,7 @@ class _SearchPageState extends State<SearchPage> {
           query = value;
         });
         suggestionList.clear();
+        offset = 0;
         getDevices(query);
       },
       onTap: () {},

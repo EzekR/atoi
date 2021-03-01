@@ -544,7 +544,10 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
     var userID = prefs.getInt('userID');
     var _data = {
       'Dispatch': {
-        'ID': _dispatch['ID']
+        'ID': _dispatch['ID'],
+        "Request": {
+          "Equipments": _equipments
+        }
       },
       'FaultCode': _code.text,
       'FaultDesc': _description.text,
@@ -1450,7 +1453,7 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
                     return;
                   }
                   EquipmentType eType;
-                  switch (_dispatch['Request']['Equipments'][0]['AssetType']['ID']) {
+                  switch (_dispatch['Request']['AssetType']['ID']) {
                     case 1:
                       eType = EquipmentType.MEDICAL;
                       break;
@@ -1464,15 +1467,16 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
                       eType = EquipmentType.MEDICAL;
                       break;
                   }
+                  print(_dispatch['Request']['AssetType']['ID']);
                   final selected = await Navigator.of(context)
                       .push(new MaterialPageRoute(builder: (context) {
-                    return SearchPage(equipments: _dispatch['Request']['Equipments']??[], multiType: MultiSearchType.EQUIPMENT, onlyType: eType,);
+                    return SearchPage(equipments: _equipments??[], multiType: MultiSearchType.EQUIPMENT, onlyType: eType,);
                   }));
                   if (selected != null) {
                     equipmentStatus = selected.map<TextEditingController>((item) => new TextEditingController(text: item['StocktakingStatus']??"")).toList();
                     equipmentComments = selected.map<TextEditingController>((item) => new TextEditingController(text: item['StocktakingComments']??"")).toList();
                     setState(() {
-                     _dispatch['Request']['Equipments']  = selected??[];
+                     _equipments = selected??[];
                     });
                   }
                 },
@@ -1593,7 +1597,7 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
         isExpanded: _expandList[3],
       ),
     ]);
-    if (_dispatch['RequestType']['ID'] != 4 && _dispatch['RequestType']['ID'] != 12 && _dispatch['RequestType']['ID'] != 14) {
+    if (_dispatch['RequestType']['ID'] != 4 && _dispatch['RequestType']['ID'] != 12 && _dispatch['RequestType']['ID'] != 14 && _dispatch['Request']['AssetType']['ID'] == 1) {
       _list.add(
         new ExpansionPanel(canTapOnHeader: true,
           headerBuilder: (context, isExpanded) {

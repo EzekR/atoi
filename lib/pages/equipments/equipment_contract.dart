@@ -204,7 +204,7 @@ class _EquipmentContractState extends State<EquipmentContract> {
       "EndDate": endDate,
       "Comments": comments.text,
       "Components": relatedComponents.map((comp) => {
-        "ContractID": widget.contract['ID'],
+        "ContractID": widget.contract==null?0:widget.contract['ID'],
         "Equipment": {
           'ID': comp['Equipment']['ID']
         },
@@ -213,7 +213,7 @@ class _EquipmentContractState extends State<EquipmentContract> {
         }
       }).toList(),
       "Consumables": relatedConsumables.map((con) => {
-        "ContractID": widget.contract['ID'],
+        "ContractID": widget.contract==null?0:widget.contract['ID'],
         "Equipment": {
           'ID': con['Equipment']['ID']
         },

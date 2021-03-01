@@ -701,7 +701,7 @@ class _POAttachmentState extends State<POAttachment> {
           widget.editable?buildDropdown('选择零件', _component, _componentsList, changeComponent, required: true):BuildWidget.buildRow('零件', _fujiComponentName),
           widget.editable?BuildWidget.buildInput('规格', spec, maxLength: 20, focusNode: _focusComponent[1], required: true):BuildWidget.buildRow('规格', spec.text),
           widget.editable?BuildWidget.buildInput('型号', model, focusNode: _focusComponent[2], required: true):BuildWidget.buildRow('型号', model.text),
-          widget.editable?BuildWidget.buildInput('单价', price, maxLength: 13, focusNode: _focusComponent[3], inputType: TextInputType.number, required: true):BuildWidget.buildRow('单价', price.text),
+          widget.editable?BuildWidget.buildInput('单价', price, maxLength: 13, focusNode: _focusComponent[3], inputType: TextInputType.numberWithOptions(decimal: true), required: true):BuildWidget.buildRow('单价', price.text),
           widget.editable?BuildWidget.buildInput('数量', quantity, maxLength: 13, inputType: TextInputType.numberWithOptions(), focusNode: _focusComponent[4], required: true):BuildWidget.buildRow('数量', quantity.text),
         ]);
         break;
@@ -772,9 +772,9 @@ class _POAttachmentState extends State<POAttachment> {
           ):BuildWidget.buildRow('关联设备', _equipment==null?'':_equipment['Name']),
           widget.editable?BuildWidget.buildInput('规格', spec, maxLength: 20, focusNode: _focusComponent[1], required: true):BuildWidget.buildRow('规格', spec.text),
           widget.editable?BuildWidget.buildInput('型号', model, focusNode: _focusComponent[2], required: true):BuildWidget.buildRow('型号', model.text),
-          widget.editable?BuildWidget.buildInput('单价（元）', price, maxLength: 13, focusNode: _focusComponent[3], required: true, inputType: TextInputType.numberWithOptions()):BuildWidget.buildRow('单价(元)', price.text),
+          widget.editable?BuildWidget.buildInput('单价（元）', price, maxLength: 13, focusNode: _focusComponent[3], required: true, inputType: TextInputType.numberWithOptions(decimal: true)):BuildWidget.buildRow('单价(元)', price.text),
           widget.editable?BuildWidget.buildInput('单位', unit, maxLength: 10, focusNode: _focusComponent[5], required: true, ):BuildWidget.buildRow('单位', price.text),
-          widget.editable?BuildWidget.buildInput('数量', quantity, maxLength: 13, inputType: TextInputType.number, focusNode: _focusComponent[4], required: true):BuildWidget.buildRow('数量', quantity.text),
+          widget.editable?BuildWidget.buildInput('数量', quantity, maxLength: 13, inputType: TextInputType.numberWithOptions(decimal: true), focusNode: _focusComponent[4], required: true):BuildWidget.buildRow('数量', quantity.text),
         ]);
         break;
       case AttachmentType.SERVICE:
@@ -845,7 +845,7 @@ class _POAttachmentState extends State<POAttachment> {
             ),
           ):BuildWidget.buildRow('关联设备', _equipment==null?'':_equipment['Name']),
           widget.editable?BuildWidget.buildInput('服务名称', serviceName, maxLength: 20, focusNode: _focusComponent[1], required: true):BuildWidget.buildRow('服务名称', serviceName.text),
-          widget.editable?BuildWidget.buildInput('金额', price, maxLength: 13, focusNode: _focusComponent[2], required: true, inputType: TextInputType.numberWithOptions()):BuildWidget.buildRow('金额', price.text),
+          widget.editable?BuildWidget.buildInput('金额', price, maxLength: 13, focusNode: _focusComponent[2], required: true, inputType: TextInputType.numberWithOptions(decimal: true)):BuildWidget.buildRow('金额', price.text),
           widget.editable?new Padding(
             padding: EdgeInsets.symmetric(vertical: 5.0),
             child: new Row(

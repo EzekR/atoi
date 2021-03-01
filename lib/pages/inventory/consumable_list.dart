@@ -8,6 +8,7 @@ import 'package:atoi/models/models.dart';
 import 'package:atoi/pages/inventory/consumable_detail.dart';
 import 'package:atoi/utils/common.dart';
 import 'package:atoi/pages/equipments/print_qrcode.dart';
+import 'package:flutter/cupertino.dart';
 
 /// 耗材列表类
 class ConsumableList extends StatefulWidget{
@@ -34,6 +35,26 @@ class _ConsumableListState extends State<ConsumableList> {
   int offset = 0;
   bool _noMore = false;
   int role;
+
+  // modal
+  TextEditingController _name = new TextEditingController();
+  TextEditingController _desc = new TextEditingController();
+  TextEditingController _price = new TextEditingController();
+  List _typeList = [
+    {
+      'value': 1,
+      'name': "定期"
+    },
+    {
+      'value': 2,
+      'name': "定量"
+    },
+    {
+      'value': 3,
+      'name': "小额成本"
+    },
+  ];
+  int _consumableType = 1;
 
   Future<Null> getRole() async {
     var _prefs = await prefs;
@@ -85,10 +106,242 @@ class _ConsumableListState extends State<ConsumableList> {
     });
   }
 
+  FocusNode _focusName = new FocusNode();
+  FocusNode _focusDesc = new FocusNode();
+  FocusNode _focusPrice = new FocusNode();
+
+  void addConsumable() {
+    showDialog(context: context, builder: (context) => StatefulBuilder(
+      builder: (context, setState) => SimpleDialog(
+        title: Text('新增耗材'),
+        children: <Widget>[
+          Padding(
+            padding: EdgeInsets.fromLTRB(8, 0, 8, 0),
+            child: Column(
+              children: <Widget>[
+                new Row(
+                  children: <Widget>[
+                    new Expanded(
+                      flex: 3,
+                      child: new Wrap(
+                        alignment: WrapAlignment.end,
+                        crossAxisAlignment: WrapCrossAlignment.center,
+                        children: <Widget>[
+                          new Text(
+                            '*',
+                            style: new TextStyle(
+                                color: Colors.red
+                            ),
+                          ),
+                          new Text(
+                            '富士II类',
+                            style: new TextStyle(
+                                fontSize: 16.0,
+                                fontWeight: FontWeight.w600
+                            ),
+                          )
+                        ],
+                      ),
+                    ),
+                    new Expanded(
+                      flex: 1,
+                      child: new Text(
+                        '：',
+                        style: new TextStyle(
+                          fontSize: 16.0,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                    new Expanded(
+                      flex: 7,
+                      child: new DropdownButton(
+                        value: _fujiClass2,
+                        items: _fujiList.map<DropdownMenuItem>((item) {
+                          return DropdownMenuItem(
+                            value: item['value'],
+                            child: Text(
+                              item['text'],
+                              style: TextStyle(
+                                  fontSize: 12.0
+                              ),
+                            ),
+                          );
+                        }).toList(),
+                        onChanged: (value) {
+                          setState(() {
+                            _fujiClass2 = value;
+                          });
+                        },
+                        style: new TextStyle(
+                          color: Colors.black54,
+                          fontSize: 12.0,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                BuildWidget.buildCardInput('简称', _name, required: true, maxLength: 50, focus: _focusName),
+                BuildWidget.buildCardInput('描述', _desc, required: true, maxLength: 200, focus: _focusDesc),
+                new Row(
+                  children: <Widget>[
+                    new Expanded(
+                      flex: 3,
+                      child: new Wrap(
+                        alignment: WrapAlignment.end,
+                        crossAxisAlignment: WrapCrossAlignment.center,
+                        children: <Widget>[
+                          new Text(
+                            '*',
+                            style: new TextStyle(
+                                color: Colors.red
+                            ),
+                          ),
+                          new Text(
+                            '类型',
+                            style: new TextStyle(
+                                fontSize: 16.0,
+                                fontWeight: FontWeight.w600
+                            ),
+                          )
+                        ],
+                      ),
+                    ),
+                    new Expanded(
+                      flex: 1,
+                      child: new Text(
+                        '：',
+                        style: new TextStyle(
+                          fontSize: 16.0,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                    new Expanded(
+                      flex: 7,
+                      child: new DropdownButton(
+                        value: _consumableType,
+                        items: _typeList.map<DropdownMenuItem>((item) {
+                          return DropdownMenuItem(
+                            value: item['value'],
+                            child: Text(
+                              item['name'],
+                              style: TextStyle(
+                                  fontSize: 12.0
+                              ),
+                            ),
+                          );
+                        }).toList(),
+                        onChanged: (value) {
+                          setState(() {
+                            _consumableType = value;
+                          });
+                        },
+                        style: new TextStyle(
+                          color: Colors.black54,
+                          fontSize: 12.0,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                BuildWidget.buildCardInput('标准单价', _price, maxLength: 13, focus: _focusPrice, inputType: TextInputType.numberWithOptions(decimal: true)),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: <Widget>[
+                    RaisedButton(
+                      color: Color(0xffD25565),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                      },
+                      child: Center(
+                        child: Text('取消',
+                          style: TextStyle(
+                              color: Colors.white
+                          ),
+                        ),
+                      ),
+                    ),
+                    RaisedButton(
+                      color: Color(0xff2E94B9),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      onPressed: () async {
+                        if (_name.text.isEmpty) {
+                          showDialog(context: context, builder: (context) => CupertinoAlertDialog(
+                            title: new Text('简称不可为空'),
+                          )).then((result) => FocusScope.of(context).requestFocus(_focusName));
+                          return;
+                        }
+                        if (_desc.text.isEmpty) {
+                          showDialog(context: context, builder: (context) => CupertinoAlertDialog(
+                            title: new Text('描述不可为空'),
+                          )).then((result) => FocusScope.of(context).requestFocus(_focusDesc));
+                          return;
+                        }
+                        if (double.parse(_price.text) > 9999999999.99) {
+                          showDialog(context: context, builder: (context) => CupertinoAlertDialog(
+                            title: new Text('价格不可超过1亿'),
+                          )).then((result) => FocusScope.of(context).requestFocus(_focusPrice));
+                          return;
+                        }
+                        Map _info = {
+                          'FujiClass2': {
+                            'ID': _fujiClass2,
+                          },
+                          'Name': _name.text,
+                          'Description': _desc.text,
+                          'Type': {
+                            'ID': _consumableType
+                          },
+                          'StdPrice': _price.text
+                        };
+                        Map resp = await HttpRequest.request(
+                          '/PurchaseOrder/SaveConsumable',
+                          method: HttpRequest.POST,
+                          data: {
+                            'info': _info
+                          }
+                        );
+                        if (resp['ResultCode'] == '00') {
+                          Navigator.of(context).pop();
+                          showDialog(context: context, builder: (context) => CupertinoAlertDialog(
+                            title: new Text('保存成功'),
+                          )).then((result) => getConsumable());
+                        }
+                      },
+                      child: Center(
+                        child: Text('保存',
+                          style: TextStyle(
+                              color: Colors.white
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                )
+              ],
+            ),
+          )
+        ],
+      ),
+    ));
+  }
+
   Future<Null> getConsumable({String filterText}) async {
     filterText = filterText??'';
+    String url;
+    if (widget.optional != null && widget.optional) {
+      url = "/InvConsumable/QueryConsumableList4PO";
+    } else {
+      url = "/InvConsumable/QueryConsumableList";
+    }
     var resp = await HttpRequest.request(
-        '/InvConsumable/QueryConsumableList',
+        url,
         method: HttpRequest.GET,
         params: {
           'filterText': _keywords.text,
@@ -346,6 +599,31 @@ class _ConsumableListState extends State<ConsumableList> {
   }
 
   Card buildEquipmentCard(Map item) {
+    List<Widget> _list = [];
+    if (widget.optional != null && widget.optional) {
+      _list.addAll([
+        BuildWidget.buildCardRow('富士二类', item['FujiClass2']['Name']),
+        BuildWidget.buildCardRow('简称', item['Name']),
+        BuildWidget.buildCardRow('描述', item['Description']),
+        BuildWidget.buildCardRow('类型', item['Type']['Name']),
+        BuildWidget.buildCardRow('更换频次(次/年)', item['ReplaceTimes'].toString()),
+        BuildWidget.buildCardRow('单次保养耗材成本(元)', item['CostPer'].toString()),
+        BuildWidget.buildCardRow('标准单价(元)', item['StdPrice'].toString()),
+        BuildWidget.buildCardRow('是否参与估值', item['IsIncluded']?"是":"否"),
+      ]);
+    } else {
+      _list.addAll([
+        BuildWidget.buildCardRow('简称', item['Consumable']['Name']),
+        BuildWidget.buildCardRow('描述', item['Consumable']['Description']),
+        BuildWidget.buildCardRow('供应商', item['Supplier']['Name']),
+        BuildWidget.buildCardRow('富士II类', item['Consumable']['FujiClass2']['Name']),
+        BuildWidget.buildCardRow('单价（元）', CommonUtil.CurrencyForm(item['Price'], times: 1, digits: 0)),
+        BuildWidget.buildCardRow('购入日期', item['PurchaseDate'].split('T')[0]),
+        BuildWidget.buildCardRow('采购单号', item['Purchase']['ID']==0?'':'${item['Purchase']['Name']}'),
+        BuildWidget.buildCardRow('可用数量', CommonUtil.CurrencyForm(item['AvaibleQty'], digits: 0, times: 1)),
+        BuildWidget.buildCardRow('上次盘点日期', CommonUtil.TimeForm(item['LastestStocktakingDate']??'', 'yyyy-mm-dd')),
+      ]);
+    }
     return new Card(
       child: new Column(
         mainAxisAlignment: MainAxisAlignment.start,
@@ -368,7 +646,7 @@ class _ConsumableListState extends State<ConsumableList> {
               ),
             ),
             subtitle: Text(
-              "批次号：${item['LotNum']}",
+              widget.optional!=null?"":"批次号：${item['LotNum']}",
               style: new TextStyle(
                   color: Theme.of(context).accentColor
               ),
@@ -377,18 +655,7 @@ class _ConsumableListState extends State<ConsumableList> {
           Padding(
             padding: EdgeInsets.symmetric(horizontal: 8.0),
             child: Column(
-              children: <Widget>[
-                BuildWidget.buildCardRow('简称', item['Consumable']['Name']),
-                BuildWidget.buildCardRow('描述', item['Consumable']['Description']),
-                BuildWidget.buildCardRow('供应商', item['Supplier']['Name']),
-                BuildWidget.buildCardRow('富士II类', item['Consumable']['FujiClass2']['Name']),
-                BuildWidget.buildCardRow('单价（元）', CommonUtil.CurrencyForm(item['Price'], times: 1, digits: 0)),
-                BuildWidget.buildCardRow('购入日期', item['PurchaseDate'].split('T')[0]),
-                BuildWidget.buildCardRow('采购单号', item['Purchase']['ID']==0?'':'${item['Purchase']['Name']}'),
-                BuildWidget.buildCardRow('可用数量', CommonUtil.CurrencyForm(item['AvaibleQty'], digits: 0, times: 1)),
-                BuildWidget.buildCardRow('上次盘点日期', CommonUtil.TimeForm(item['LastestStocktakingDate']??'', 'yyyy-mm-dd')),
-                //BuildWidget.buildCardRow('状态', item['IsActive']?'启用':'停用'),
-              ],
+              children: _list,
             ),
           ),
           new Row(
@@ -552,18 +819,22 @@ class _ConsumableListState extends State<ConsumableList> {
       )),
       floatingActionButton: role==3?Container():FloatingActionButton(
         onPressed: () {
-          Navigator.of(context).push(new MaterialPageRoute(builder: (_) {
-            return new ConsumableDetail(editable: true, isStock: false,);
-          })).then((result) {
-            setState(() {
-              offset = 0;
-              _consumable.clear();
-              _loading = true;
-            });
-            getConsumable().then((result) =>
-                setState(() {
-                  _loading = false;
-                }));});
+          if (widget.optional != null && widget.optional) {
+            addConsumable();
+          } else {
+            Navigator.of(context).push(new MaterialPageRoute(builder: (_) {
+              return new ConsumableDetail(editable: true, isStock: false,);
+            })).then((result) {
+              setState(() {
+                offset = 0;
+                _consumable.clear();
+                _loading = true;
+              });
+              getConsumable().then((result) =>
+                  setState(() {
+                    _loading = false;
+                  }));});
+          }
         },
         child: Icon(Icons.add_circle),
         backgroundColor: Colors.blue,
