@@ -19,7 +19,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  badges: ^1.0.3
+  badges: 1.0.3
   carousel_slider: ^2.2.1
   barcode_scan: ^1.0.0
   dio: any

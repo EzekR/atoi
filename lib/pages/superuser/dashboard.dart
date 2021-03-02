@@ -235,9 +235,9 @@ class _DashboardState extends State<Dashboard> {
     }
   }
 
-  double abs(double num) {
-    return num>=0?num:(num*-1.0);
-  }
+  // double abs(double num) {
+  //   return num>=0?num:(num*-1.0);
+  // }
 
   void getEquipmentsIncome(int departmentId) async {
     Map resp = await HttpRequest.request(
@@ -374,6 +374,7 @@ class _DashboardState extends State<Dashboard> {
     );
     if (resp['ResultCode'] == '00') {
       equipmentCount = resp['Data'];
+      print('shuliang ${equipmentCount}');
     }
   }
 
@@ -1407,7 +1408,7 @@ class _DashboardState extends State<Dashboard> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: <Widget>[
                           Text(
-                            '${(incomeAll['income_rate']).toStringAsFixed(1)}% ${incomeAll['income_rate']>=0?'↑':'↓'} ',
+                            '${((incomeAll['income_rate']).abs()).toStringAsFixed(1)}% ${incomeAll['income_rate']>=0?'↑':'↓'} ',
                             style: TextStyle(
                                 color: incomeAll['income_rate']>=0?Color(0xff33B850):Color(0xffD64040),
                                 fontSize: 15.0,
@@ -1463,7 +1464,7 @@ class _DashboardState extends State<Dashboard> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: <Widget>[
                           Text(
-                            '${incomeAll['expense_rate']>=0?'':''} ${(incomeAll['expense_rate']).toStringAsFixed(1)}%',
+                            '${incomeAll['expense_rate']>=0?'':''} ${((incomeAll['expense_rate']).abs()).toStringAsFixed(1)}%',
                             style: TextStyle(
                                 color: incomeAll['expense_rate']>=0?Color(0xff33B850):Color(0xffD64040),
                                 fontSize: 15.0,
@@ -1523,7 +1524,7 @@ class _DashboardState extends State<Dashboard> {
             print("index:${args.pointIndex}");
             depart = departmentData[args.pointIndex]['Department']['ID'];
             getCount(equipmentId: equipmentData[args.pointIndex]['ID']);
-            getTimeline(equipmentId: equipmentData[args.pointIndex]['ID']);
+            // getTimeline(equipmentId: equipmentData[args.pointIndex]['ID']);
           },
           primaryXAxis: CategoryAxis(
             isVisible: widget.equipmentId!=null?true:false,
@@ -2801,7 +2802,7 @@ class _DashboardState extends State<Dashboard> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: <Widget>[
                           Text(
-                            '${incomeAll['income_rate'].toStringAsFixed(1)}%',
+                            '${((incomeAll['income_rate']).abs()).toStringAsFixed(1)}%',
                             style: TextStyle(
                                 color: incomeAll['income_rate']>=0?Color(0xff33B850):Color(0xffD64040),
                                 fontSize: 15.0,
@@ -2857,7 +2858,7 @@ class _DashboardState extends State<Dashboard> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: <Widget>[
                           Text(
-                            '${incomeAll['expense_rate'].toStringAsFixed(1)}%',
+                            '${((incomeAll['expense_rate']).abs()).toStringAsFixed(1)}%',
                             style: TextStyle(
                                 color: incomeAll['expense_rate']>=0?Color(0xff33B850):Color(0xffD64040),
                                 fontSize: 15.0,
@@ -3032,9 +3033,7 @@ class _DashboardState extends State<Dashboard> {
           padding: EdgeInsets.fromLTRB(0, 50, 0, 0),
           child: Container(
             child: SpiderChart(
-              data: _data.isNotEmpty?_data:[
-                1,2,3,4,5
-              ],
+              data: _data.isNotEmpty?_data:[1,2,3,4,5],
               labels: [
                 '维修','保养','强检','巡检','校准'
               ],
