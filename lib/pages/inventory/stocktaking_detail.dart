@@ -932,7 +932,7 @@ class _StocktakingDetailState extends State<StocktakingDetail> {
                               }
                               break;
                             case 4:
-                              final result = await Navigator.of(_scaffoldKey.currentContext).push(new MaterialPageRoute(builder: (context) => new SpareDetail(editable: true, isStock: true,)));
+                              final result = await Navigator.of(_scaffoldKey.currentContext).push(new MaterialPageRoute(builder: (context) => new SpareDetail(editable: true, isStock: true, scheduleDate: scheduledDate,)));
                               if (result != null) {
                                 _info = jsonDecode(result);
                                 log("$_info");
@@ -1117,6 +1117,10 @@ class _StocktakingDetailState extends State<StocktakingDetail> {
                     ),
                     RaisedButton(
                       onPressed: () async {
+                        bool changed = await checkItemChange();
+                        if (changed) {
+                          return;
+                        }
                         if (approveComment.text.isEmpty) {
                           showDialog(context: context, builder: (context) => CupertinoAlertDialog(
                             title: new Text('审批备注不可为空'),

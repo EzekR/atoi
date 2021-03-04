@@ -105,7 +105,7 @@ class _SearchPageState extends State<SearchPage> {
           'curRowNum': offset,
           'sortField': 'mi.Name',
           'sortDirection': true,
-          'pageSize':10
+          'pageSize':20
         };
         break;
       case 3:
@@ -118,7 +118,7 @@ class _SearchPageState extends State<SearchPage> {
           'curRowNum': offset,
           'sortField': 'oe.Name',
           'sortDirection': true,
-          'pageSize':10
+          'pageSize':20
         };
         break;
     }
@@ -131,7 +131,7 @@ class _SearchPageState extends State<SearchPage> {
           'filterField': 'c.Name',
           'filterText': filter,
           "curRowNum": offset,
-          "pageSize": 10
+          "pageSize": 20
         };
         break;
       case MultiSearchType.EQUIPMENT:
@@ -144,7 +144,7 @@ class _SearchPageState extends State<SearchPage> {
           'filterField': 'c.Name',
           'filterText': filter,
           "curRowNum": offset,
-          "pageSize": 10
+          "pageSize": 20
         };
         break;
     }

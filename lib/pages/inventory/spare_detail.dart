@@ -210,7 +210,7 @@ class _SpareDetailState extends State<SpareDetail> {
       )).then((result) => scrollController.jumpTo(400.0));
       return;
     }
-    if (widget.scheduleDate != null) {
+    if (widget.isStock && widget.scheduleDate != null) {
       if (DateTime.parse(widget.scheduleDate).isAfter(DateTime.parse(endDate))) {
         showDialog(context: context, builder: (context) => CupertinoAlertDialog(
           title: new Text('结束日期不可早于盘点计划日期'),

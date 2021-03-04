@@ -1468,6 +1468,10 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
                       break;
                   }
                   print(_dispatch['Request']['AssetType']['ID']);
+                  for(int i=0; i< _equipments.length; i++) {
+                    _equipments[i]['StocktakingStatus'] = equipmentStatus[i].text;
+                    _equipments[i]['StocktakingComments'] = equipmentComments[i].text;
+                  }
                   final selected = await Navigator.of(context)
                       .push(new MaterialPageRoute(builder: (context) {
                     return SearchPage(equipments: _equipments??[], multiType: MultiSearchType.EQUIPMENT, onlyType: eType,);
@@ -1678,10 +1682,6 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
   }
 
   List<Widget> buildEquipments() {
-    var _equipments;
-    _dispatch['Request'] == null
-        ? _equipments = []
-        : _equipments = _dispatch['Request']['Equipments'];
     List<Widget> _list = [];
     for (int i=0; i<_equipments.length; i++) {
       List<Widget> equipList = [

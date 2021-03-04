@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:atoi/pages/equipments/equipments_list.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:atoi_charts/charts.dart';
@@ -21,7 +22,8 @@ import 'package:atoi/utils/report_dimensions.dart';
 
 class Dashboard extends StatefulWidget {
   final int equipmentId;
-  Dashboard({Key key, this.equipmentId}):super(key: key);
+  final EquipmentType equipmentType;
+  Dashboard({Key key, this.equipmentId, this.equipmentType}):super(key: key);
   _DashboardState createState() => new _DashboardState();
 }
 
@@ -339,9 +341,21 @@ class _DashboardState extends State<Dashboard> {
 
   void getTimeline({int equipmentId}) async {
     equipmentId = equipmentId??widget.equipmentId;
+    String url;
+    switch (widget.equipmentType) {
+      case EquipmentType.MEDICAL:
+        url = '/Equipment/GetTimeline4APP';
+        break;
+      case EquipmentType.MEASURE:
+        url = '/MeasInstrum/GetTimeline4APP';
+        break;
+      case EquipmentType.OTHER:
+        url = '/OtherEpqt/GetTimeline4APP';
+        break;
+    }
     Map resp = await HttpRequest.request(
-      '/Equipment/GetTimeline4APP',
-      method: HttpRequest.POST,
+      url,
+      method: HttpRequest.GET,
       data: {
         'id': equipmentId
       }
@@ -367,8 +381,20 @@ class _DashboardState extends State<Dashboard> {
       'id': equipmentId,
       'Date': '$currentYear-08-12'
     };
+    String url;
+    switch (widget.equipmentType) {
+      case EquipmentType.MEDICAL:
+        url = '/Equipment/GetRequestCountByID';
+        break;
+      case EquipmentType.MEASURE:
+        url = '/MeasInstrum/GetRequestCountByID';
+        break;
+      case EquipmentType.OTHER:
+        url = '/OtherEpqt/GetRequestCountByID';
+        break;
+    }
     Map resp = await HttpRequest.request(
-      '/Equipment/GetRequestCountByID',
+      url,
       method: HttpRequest.GET,
       params: _params
     );
@@ -386,8 +412,20 @@ class _DashboardState extends State<Dashboard> {
     if (timeType == '月') {
       _params['year'] = currentYear;
     }
+    String url;
+    switch (widget.equipmentType) {
+      case EquipmentType.MEDICAL:
+        url = '/Equipment/IncomeExpenseByID';
+        break;
+      case EquipmentType.MEASURE:
+        url = '/MeasInstrum/IncomeExpenseByID';
+        break;
+      case EquipmentType.OTHER:
+        url = '/OtherEpqt/IncomeExpenseByID';
+        break;
+    }
     Map resp = await HttpRequest.request(
-      '/Equipment/IncomeExpenseByID',
+      url,
       method: HttpRequest.GET,
       params: _params
     );

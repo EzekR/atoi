@@ -215,15 +215,15 @@ class _ServiceDetailState extends State<ServiceDetail> {
       }
     };
     if (widget.isStock!=null&&widget.isStock) {
-      if (DateTime.tryParse(startDate).isBefore(DateTime.tryParse(widget.date))) {
-        showDialog(context: context, builder: (context) => CupertinoAlertDialog(
-          title: new Text('开始日期不可早于盘点日期'),
-        ));
-        return;
-      } else {
-        Navigator.of(context).pop(jsonEncode(_info));
-        return;
-      }
+      //if (DateTime.tryParse(startDate).isBefore(DateTime.tryParse(widget.date))) {
+      //  showDialog(context: context, builder: (context) => CupertinoAlertDialog(
+      //    title: new Text('开始日期不可早于盘点日期'),
+      //  ));
+      //  return;
+      //} else {
+      //}
+      Navigator.of(context).pop(jsonEncode(_info));
+      return;
     }
     if (widget.service != null) {
       _info['ID'] = widget.service['ID'];

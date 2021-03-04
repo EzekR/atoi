@@ -1094,7 +1094,7 @@ class _EquipmentsListState extends State<EquipmentsList> {
                   if (limited&&role!=1) {
                     return;
                   }
-                  Navigator.of(context).push(new MaterialPageRoute(builder: (_) => new Dashboard(equipmentId: item['ID'],)));
+                  Navigator.of(context).push(new MaterialPageRoute(builder: (_) => new Dashboard(equipmentId: item['ID'], equipmentType: eType,)));
                 },
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(6),

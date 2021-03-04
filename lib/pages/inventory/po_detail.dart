@@ -440,7 +440,7 @@ class _PODetailState extends State<PODetail> {
                       'Equipments': fullItem['Equipments'],
                       'Name': fullItem['Name'],
                       'TotalTimes': serviceTimes[key].text,
-                      'Price': fullItem['Price'],
+                      '单价': CommonUtil.CurrencyForm(double.tryParse(fullItem['Price']), times: 1, digits: 0),
                       'StartDate': fullItem['StartDate'],
                       'EndDate': fullItem['EndDate'],
                       'Purchase': {
@@ -645,7 +645,7 @@ class _PODetailState extends State<PODetail> {
                             '型号': _data['Model'],
                             '类型': _data['Component']['Type']['Name'],
                             '关联设备': _data['Equipment']['Name'],
-                            '单价': _data['Price'],
+                            '单价': CommonUtil.CurrencyForm(double.tryParse(_data['Price']), times: 1, digits: 0),
                             '数量': _data['Qty']
                           });
                           break;
@@ -657,7 +657,7 @@ class _PODetailState extends State<PODetail> {
                             '规格': _data['Specification'],
                             '型号': _data['Model'],
                             '关联富士II类': _data['Consumable']['FujiClass2']['Name'],
-                            '单价': _data['Price'],
+                            '单价': CommonUtil.CurrencyForm(double.tryParse(_data['Price']), times: 1, digits: 0),
                             '单位': _data['Unit'],
                             '数量': _data['Qty']
                           });

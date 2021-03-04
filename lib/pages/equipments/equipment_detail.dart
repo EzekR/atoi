@@ -343,9 +343,6 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
 
   void changeMandatoryPeriod(selectedMethod) {
     FocusScope.of(context).requestFocus(new FocusNode());
-    if (selectedMethod == 1) {
-    }
-    maintainPeriod.clear();
     setState(() {
       currentMandatoryPeriod = selectedMethod;
     });

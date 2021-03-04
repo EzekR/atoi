@@ -935,6 +935,10 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
                       eType = EquipmentType.MEDICAL;
                       break;
                   }
+                  for(int i=0; i< _equipments.length; i++) {
+                    _equipments[i]['StocktakingStatus'] = equipmentStatus[i].text;
+                    _equipments[i]['StocktakingComments'] = equipmentComments[i].text;
+                  }
                   final selected = await Navigator.of(context)
                       .push(new MaterialPageRoute(builder: (context) {
                     return SearchPage(equipments: _equipments, multiType: MultiSearchType.EQUIPMENT, onlyType: eType,);
