@@ -368,7 +368,7 @@ class _LoginPageState extends State<LoginPage> {
     isConnected();
     _startupJpush();
     super.initState();
-    permissionCheck();
+    //permissionCheck();
     getServer();
     getLimited();
   }

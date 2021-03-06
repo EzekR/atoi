@@ -342,23 +342,31 @@ class _DashboardState extends State<Dashboard> {
   void getTimeline({int equipmentId}) async {
     equipmentId = equipmentId??widget.equipmentId;
     String url;
+    Map data;
     switch (widget.equipmentType) {
       case EquipmentType.MEDICAL:
         url = '/Equipment/GetTimeline4APP';
+        data = {
+          'id': equipmentId
+        };
         break;
       case EquipmentType.MEASURE:
-        url = '/MeasInstrum/GetTimeline4APP';
+        url = '/MeasInstrum/GetTimeline';
+        data = {
+          'measInstrumID': equipmentId
+        };
         break;
       case EquipmentType.OTHER:
-        url = '/OtherEpqt/GetTimeline4APP';
+        url = '/OtherEqpt/GetTimeline';
+        data = {
+          'otherEqptID': equipmentId
+        };
         break;
     }
     Map resp = await HttpRequest.request(
       url,
       method: HttpRequest.GET,
-      data: {
-        'id': equipmentId
-      }
+      data: data
     );
     if (resp['ResultCode'] == '00') {
       setState(() {

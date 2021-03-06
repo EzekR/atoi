@@ -311,7 +311,13 @@ class _ConsumableListState extends State<ConsumableList> {
                           Navigator.of(context).pop();
                           showDialog(context: context, builder: (context) => CupertinoAlertDialog(
                             title: new Text('保存成功'),
-                          )).then((result) => getConsumable());
+                          )).then((result) {
+                            _name.clear();
+                            _consumableType = _typeList[0]['value'];
+                            _fujiClass2 = _fujiList[0]['value'];
+                            _desc.clear();
+                            _price.clear();
+                            getConsumable(); });
                         }
                       },
                       child: Center(
@@ -436,7 +442,16 @@ class _ConsumableListState extends State<ConsumableList> {
                               DropdownButton(
                                 value: field,
                                 underline: Container(),
-                                items: <DropdownMenuItem>[
+                                items: widget.optional!=null&&widget.optional?<DropdownMenuItem>[
+                                  DropdownMenuItem(
+                                    value: 'c.Name',
+                                    child: Text('简称'),
+                                  ),
+                                  DropdownMenuItem(
+                                    value: 'c.Description',
+                                    child: Text('描述'),
+                                  ),
+                                ]:<DropdownMenuItem>[
                                   DropdownMenuItem(
                                     value: 'c.Name',
                                     child: Text('简称'),
@@ -662,36 +677,36 @@ class _ConsumableListState extends State<ConsumableList> {
             mainAxisAlignment: MainAxisAlignment.end,
             mainAxisSize: MainAxisSize.max,
             children: <Widget>[
-              new RaisedButton(
-                onPressed: (){
-                  Navigator.of(context).push(new MaterialPageRoute(builder: (_) => PrintQrcode(equipmentId: item['ID'], codeType: CodeType.CONSUMABLE,)));
-                },
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(6),
-                ),
-                color: new Color(0xff2E94B9),
-                child: new Row(
-                  children: <Widget>[
-                    new Icon(
-                      Icons.widgets,
-                      color: Colors.white,
-                    ),
-                    new Text(
-                      '二维码',
-                      style: new TextStyle(
-                          color: Colors.white
-                      ),
-                    )
-                  ],
-                ),
-              ),
-              SizedBox(
-                width: 20,
-              ),
+              //new RaisedButton(
+              //  onPressed: (){
+              //    Navigator.of(context).push(new MaterialPageRoute(builder: (_) => PrintQrcode(equipmentId: item['ID'], codeType: CodeType.CONSUMABLE,)));
+              //  },
+              //  shape: RoundedRectangleBorder(
+              //    borderRadius: BorderRadius.circular(6),
+              //  ),
+              //  color: new Color(0xff2E94B9),
+              //  child: new Row(
+              //    children: <Widget>[
+              //      new Icon(
+              //        Icons.widgets,
+              //        color: Colors.white,
+              //      ),
+              //      new Text(
+              //        '二维码',
+              //        style: new TextStyle(
+              //            color: Colors.white
+              //        ),
+              //      )
+              //    ],
+              //  ),
+              //),
+              //SizedBox(
+              //  width: 20,
+              //),
               widget.optional!=null?Container(
                 child: RaisedButton(
                   onPressed: () {
-                    Navigator.of(context).pop(jsonEncode(item['Consumable']));
+                    Navigator.of(context).pop(jsonEncode(item));
                   },
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(6),
