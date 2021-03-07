@@ -115,8 +115,7 @@ class _ValuationAnalysisState extends State<ValuationAnalysis> {
         system: tableData['SystemActualAmount'][0]['data'][i],
         labour: tableData['LabourActualAmount'][0]['data'][i],
         repairAndMaintain: tableData['ContractActualAmount'][0]['data'][i],
-        maintain: tableData['ConsumableActualAmount'][0]['data'][i]+tableData['RegularActualAmount'][0]['data'][i]+
-            tableData['QuanTityActualAmount'][0]['data'][i]+tableData['SmallActualAmount'][0]['data'][i],
+        maintain: tableData['ConsumableActualAmount'][0]['data'][i],
         spare: tableData['SpareActualAmount'][0]['data'][i],
         consumable: tableData['ConsumableActualAmount'][0]['data'][i],
         fixedPeriod: tableData['RegularActualAmount'][0]['data'][i],
@@ -140,8 +139,7 @@ class _ValuationAnalysisState extends State<ValuationAnalysis> {
       system: tableData['SystemActualAmount'][0]['sum'],
       labour: tableData['LabourActualAmount'][0]['sum'],
       repairAndMaintain: tableData['ContractActualAmount'][0]['sum'],
-      maintain: tableData['ConsumableActualAmount'][0]['sum']+tableData['RegularActualAmount'][0]['sum']+
-        tableData['QuanTityActualAmount'][0]['sum']+tableData['SmallActualAmount'][0]['sum'],
+      maintain: tableData['ConsumableActualAmount'][0]['sum'],
       spare: tableData['SpareActualAmount'][0]['sum'],
       consumable: tableData['ConsumableActualAmount'][0]['sum'],
       fixedPeriod: tableData['RegularActualAmount'][0]['sum'],
@@ -169,8 +167,7 @@ class _ValuationAnalysisState extends State<ValuationAnalysis> {
           system: tableData['SystemForecastAmount'][j]['data'][k],
           labour: tableData['LabourForecastAmount'][j]['data'][k],
           repairAndMaintain: tableData['ContractForecastAmount'][j]['data'][k],
-          maintain: tableData['ConsumableForecastAmount'][j]['data'][k]+tableData['RegularForecastAmount'][j]['data'][k]+
-              tableData['QuanTityForecastAmount'][j]['data'][k]+tableData['SmallForecastAmount'][j]['data'][k],
+          maintain: tableData['ConsumableForecastAmount'][j]['data'][k],
           spare: tableData['SpareForecastAmount'][j]['data'][k],
           consumable: tableData['ConsumableForecastAmount'][j]['data'][k],
           fixedPeriod: tableData['RegularForecastAmount'][j]['data'][k],
@@ -195,8 +192,7 @@ class _ValuationAnalysisState extends State<ValuationAnalysis> {
           repairAndMaintain: tableData['ContractForecastAmount'][j]['sum'],
           spare: tableData['SpareForecastAmount'][j]['sum'],
           consumable: tableData['ConsumableForecastAmount'][j]['sum'],
-          maintain: tableData['ConsumableForecastAmount'][j]['sum']+tableData['RegularForecastAmount'][j]['sum']+
-              tableData['QuanTityForecastAmount'][j]['sum']+tableData['SmallForecastAmount'][j]['sum'],
+          maintain: tableData['ConsumableForecastAmount'][j]['sum'],
           fixedPeriod: tableData['RegularForecastAmount'][j]['sum'],
           fixedQuantity: tableData['QuanTityForecastAmount'][j]['sum'],
           small: tableData['SmallForecastAmount'][j]['sum'],
@@ -220,6 +216,7 @@ class _ValuationAnalysisState extends State<ValuationAnalysis> {
       repairAndMaintain: tableData['ContractAmountTotal'],
       spare: tableData['SpareAmountTotal'],
       consumable: tableData['ConsumableAmountTotal'],
+      maintain: tableData['ConsumableAmountTotal'],
       fixedPeriod: tableData['RegularAmountTotal'],
       fixedQuantity: tableData['QuanTityAmountTotal'],
       small: tableData['SmallAmountTotal'],
@@ -593,7 +590,7 @@ class _ValuationAnalysisState extends State<ValuationAnalysis> {
   void initChartData() {
     chartData.clear();
     chartData.add(ChartData("固定类", columnActual.fixed, Color(0xff2FC25B)));
-    chartData.add(ChartData("变动类-保养", columnActual.maintain??0, Color(0xff1890FF)));
+    chartData.add(ChartData("变动类-保养", columnActual.maintain, Color(0xff1890FF)));
     chartData.add(ChartData("变动类-维修", columnActual.repair, Color(0xff13C2C2)));
   }
 
@@ -1070,12 +1067,7 @@ class _ValuationAnalysisState extends State<ValuationAnalysis> {
 
   ScrollController _verticalController = new ScrollController();
   ScrollController _horizonController = new ScrollController();
-  List<ChartData> chartData = [
-    ChartData('David', 25, Color(0xff2FC25B)),
-    ChartData('Steve', 38, Color(0xff1890FF)),
-    ChartData('Jack', 34, Color(0xff13C2C2)),
-    ChartData('Others', 52)
-  ];
+  List<ChartData> chartData = [];
 
   List<Widget> renderLegendSlider() {
     List<Widget> _list = [];
@@ -1204,13 +1196,13 @@ class _ValuationAnalysisState extends State<ValuationAnalysis> {
               dataSource: lineDataFixed,
               xValueMapper: (MonthData data, _) => data.x,
               yValueMapper: (MonthData data, _) => data.y,
-              color: Colors.blueAccent
+              color: Color(0xff2FC25B)
             ),
             StackedLineSeries<MonthData, String>(
               dataSource: lineDataMaintain,
               xValueMapper: (MonthData data, _) => data.x,
               yValueMapper: (MonthData data, _) => data.y,
-                color: Colors.redAccent
+                color: Color(0xff1890FF)
             ),
             StackedLineSeries<MonthData, String>(
                 dataSource: lineDataRepair,

@@ -351,7 +351,7 @@ class _DashboardState extends State<Dashboard> {
         };
         break;
       case EquipmentType.MEASURE:
-        url = '/MeasInstrum/GetTimeline';
+        url = '/MeasInstrum/GetTimeLine';
         data = {
           'measInstrumID': equipmentId
         };

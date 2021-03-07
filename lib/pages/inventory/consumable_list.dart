@@ -318,6 +318,10 @@ class _ConsumableListState extends State<ConsumableList> {
                             _desc.clear();
                             _price.clear();
                             getConsumable(); });
+                        } else {
+                          showDialog(context: context, builder: (context) => CupertinoAlertDialog(
+                            title: new Text(resp['ResultMessage']),
+                          ));
                         }
                       },
                       child: Center(

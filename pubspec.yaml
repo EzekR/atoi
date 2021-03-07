@@ -50,7 +50,6 @@ dependencies:
   date_format: ^1.0.8
   should_rebuild: ^0.1.2
   flutter_cupertino_date_picker: ^1.0.12
-  sensors_analytics_flutter_plugin: ^1.0.2
   brother_printer:
       git: https://github.com/EzekR/brother_print.git
   atoi_charts:
