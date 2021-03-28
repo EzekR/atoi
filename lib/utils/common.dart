@@ -10,8 +10,8 @@ class CommonUtil {
     }
     times = times??10000;
     digits = digits??1;
-    isFloor = isFloor??true;
-    double _num = isFloor?double.tryParse((number/times).toStringAsFixed(digits)):
+    isFloor = isFloor??false;
+    double _num = isFloor?double.tryParse((number/times).floor().toStringAsFixed(digits)):
     double.tryParse((number/times).toStringAsFixed(digits));
     if (_num < 1) {
       digits==0?digits++:digits;

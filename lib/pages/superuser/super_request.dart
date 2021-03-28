@@ -1,3 +1,4 @@
+import 'package:atoi/pages/equipments/equipments_list.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:atoi/widgets/build_widget.dart';
@@ -47,6 +48,7 @@ class _SuperRequestState extends State<SuperRequest> {
   List _departmentList = [];
   List _urgencyList = [];
   List _dispatchList = [];
+  List<int> selectedTypes = [];
 
   Future<Null> refresh() async {
     offset = 0;
@@ -80,13 +82,18 @@ class _SuperRequestState extends State<SuperRequest> {
     Map<String, dynamic> _param;
     switch (widget.pageType) {
       case PageType.REQUEST:
-        _url = '/Request/GetRequests';
+        String _ids;
+        if (selectedTypes.isEmpty) {
+          _ids = 'typeID='+_type.toString();
+        } else {
+          _ids = selectedTypes.map((item) => 'typeID=$item').join('&');
+        }
+        _url = '/Request/GetRequests?'+_ids;
         _param = {
           'statusID': _status,
           'userID': _userId,
           'PageSize': 10,
           'CurRowNum': offset,
-          'typeID': _type,
           'isRecall': _recall,
           'department': _depart,
           'urgency': _urgency,
@@ -99,11 +106,16 @@ class _SuperRequestState extends State<SuperRequest> {
         };
         break;
       case PageType.DISPATCH:
-        _url = '/Dispatch/GetDispatchs?statusIDs=2&statusIDs=3&statusIDs=1&statusIDs=4';
+        String _ids;
+        if (selectedTypes.isEmpty) {
+          _ids = 'typeIDs='+_type.toString();
+        } else {
+          _ids = selectedTypes.map((item) => 'typeIDs=$item').join('&');
+        }
+        _url = '/Dispatch/GetDispatchs?statusIDs=2&statusIDs=3&statusIDs=1&statusIDs=4&'+_ids;
         _param = {
           'userID': _userId,
           'urgency': _urgency,
-          'typeIDs': _type,
           'pageSize': 10,
           'curRowNum': offset,
           'filterField': _field,
@@ -135,11 +147,11 @@ class _SuperRequestState extends State<SuperRequest> {
       _depart = -1;
       _recall = false;
       _overDue = false;
-      _field = widget.field;
+      _field = widget.field??'r.ID';
       _filter = new TextEditingController();
       _filter.text = resetAll?'':widget.filter;
       _urgency = 0;
-      _startDate = '';
+      _startDate = formatDate(_start, [yyyy, '-', mm, '-', dd]);
       _endDate = formatDate(_end, [yyyy, '-', mm, '-', dd]);
       _typeList = initList(cModel.RequestType);
       _statusList = initList(cModel.RequestStatus, valueForAll: 0);
@@ -269,7 +281,9 @@ class _SuperRequestState extends State<SuperRequest> {
               mainAxisSize: MainAxisSize.max,
               children: <Widget>[
                 equipmentNo.isNotEmpty?BuildWidget.buildCardRow('设备编号', equipmentNo):new Container(),
-                equipmentName.isNotEmpty?BuildWidget.buildCardRow('设备名称', equipmentName):new Container(),
+                equipmentName.isNotEmpty?new GestureDetector(child: BuildWidget.buildCardRow('设备名称', equipmentName),onTap: () {
+                  Navigator.of(context).push(new MaterialPageRoute(builder: (_) => EquipmentsList(equipmentId: equipmentNo, assetType: task['AssetType']['ID'],)));
+                },):new Container(),
                 departmentName.isNotEmpty?BuildWidget.buildCardRow('使用科室', departmentName):new Container(),
                 BuildWidget.buildCardRow('请求人', requestPerson),
                 BuildWidget.buildCardRow('类型', requestType),
@@ -457,7 +471,9 @@ class _SuperRequestState extends State<SuperRequest> {
               mainAxisSize: MainAxisSize.max,
               children: <Widget>[
                 dispatch['Request']['Equipments'].length>0?BuildWidget.buildCardRow('设备编号', dispatch['Request']['EquipmentOID']):new Container(),
-                dispatch['Request']['Equipments'].length>0?BuildWidget.buildCardRow('设备名称', dispatch['Request']['EquipmentName']):new Container(),
+                dispatch['Request']['Equipments'].length>0?GestureDetector(child: BuildWidget.buildCardRow('设备名称', dispatch['Request']['EquipmentName']),onTap: () {
+                  Navigator.of(context).push(new MaterialPageRoute(builder: (_) => EquipmentsList(equipmentId: dispatch['Request']['EquipmentOID'],assetType: dispatch['Request']['AssetType']['ID'],)));
+                },):new Container(),
                 BuildWidget.buildCardRow('派工类型', dispatch['RequestType']['Name']),
                 BuildWidget.buildCardRow('紧急程度', dispatch['Urgency']['Name']),
                 BuildWidget.buildCardRow('请求编号', dispatch['Request']['OID']),
@@ -488,6 +504,153 @@ class _SuperRequestState extends State<SuperRequest> {
                 height: 300.0,
                 child: ListView(
                   children: <Widget>[
+                    Row(
+                      children: <Widget>[
+                        SizedBox(width: 16.0,),
+                        Text('快速筛选', style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.w600),)
+                      ],
+                    ),
+                    SizedBox(height: 6.0,),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: <Widget>[
+                        GestureDetector(
+                          onTap: () {
+                            setState(() {
+                              selectedTypes.contains(1)?selectedTypes.remove(1):selectedTypes.add(1);
+                              _type = 0;
+                            });
+                          },
+                          child: Container(
+                            width: 50.0,
+                            height: 30.0,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(5.0),
+                              border: Border.all(
+                                  color: Color(0xff3394B9),
+                                  width: 1.0
+                              ),
+                              color: selectedTypes.contains(1)?Color(0xff3394B9):Color(0xffEBF9FF),
+                            ),
+                            child: Center(
+                              child: Text('维修',
+                                style: TextStyle(
+                                  color: selectedTypes.contains(1)?Colors.white:Colors.black54,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                        GestureDetector(
+                          onTap: () {
+                            setState(() {
+                              selectedTypes.contains(2)?selectedTypes.remove(2):selectedTypes.add(2);
+                              _type = 0;
+                            });
+                          },
+                          child: Container(
+                            width: 50.0,
+                            height: 30.0,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(5.0),
+                              border: Border.all(
+                                  color: Color(0xff3394B9),
+                                  width: 1.0
+                              ),
+                              color: selectedTypes.contains(2)?Color(0xff3394B9):Color(0xffEBF9FF),
+                            ),
+                            child: Center(
+                              child: Text('保养',
+                                style: TextStyle(
+                                  color: selectedTypes.contains(2)?Colors.white:Colors.black54,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                        GestureDetector(
+                          onTap: () {
+                            setState(() {
+                              selectedTypes.contains(4)?selectedTypes.remove(4):selectedTypes.add(4);
+                              _type = 0;
+                            });
+                          },
+                          child: Container(
+                            width: 50.0,
+                            height: 30.0,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(5.0),
+                              border: Border.all(
+                                  color: Color(0xff3394B9),
+                                  width: 1.0
+                              ),
+                              color: selectedTypes.contains(4)?Color(0xff3394B9):Color(0xffEBF9FF),
+                            ),
+                            child: Center(
+                              child: Text('巡检',
+                                style: TextStyle(
+                                  color: selectedTypes.contains(4)?Colors.white:Colors.black54,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                        GestureDetector(
+                          onTap: () {
+                            setState(() {
+                              selectedTypes.contains(3)?selectedTypes.remove(3):selectedTypes.add(3);
+                              _type = 0;
+                            });
+                          },
+                          child: Container(
+                            width: 50.0,
+                            height: 30.0,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(5.0),
+                              border: Border.all(
+                                  color: Color(0xff3394B9),
+                                  width: 1.0
+                              ),
+                              color: selectedTypes.contains(3)?Color(0xff3394B9):Color(0xffEBF9FF),
+                            ),
+                            child: Center(
+                              child: Text('强检',
+                                style: TextStyle(
+                                  color: selectedTypes.contains(3)?Colors.white:Colors.black54,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                        GestureDetector(
+                          onTap: () {
+                            setState(() {
+                              selectedTypes.contains(5)?selectedTypes.remove(5):selectedTypes.add(5);
+                              _type = 0;
+                            });
+                          },
+                          child: Container(
+                            width: 50.0,
+                            height: 30.0,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(5.0),
+                              border: Border.all(
+                                  color: Color(0xff3394B9),
+                                  width: 1.0
+                              ),
+                              color: selectedTypes.contains(5)?Color(0xff3394B9):Color(0xffEBF9FF),
+                            ),
+                            child: Center(
+                              child: Text('校准',
+                                style: TextStyle(
+                                  color: selectedTypes.contains(5)?Colors.white:Colors.black54,
+                                ),
+                              ),
+                            ),
+                          ),
+                        )
+                      ],
+                    ),
                     SizedBox(height: 18.0,),
                     Row(
                       children: <Widget>[
@@ -748,9 +911,11 @@ class _SuperRequestState extends State<SuperRequest> {
                                   }).toList(),
                                   onChanged: (val) {
                                     FocusScope.of(context).requestFocus(new FocusNode());
-                                    setState(() {
-                                      _type = val;
-                                    });
+                                    if (selectedTypes.isEmpty) {
+                                      setState(() {
+                                        _type = val;
+                                      });
+                                    }
                                   },
                                 )
                               ],
@@ -955,10 +1120,10 @@ class _SuperRequestState extends State<SuperRequest> {
                       child: FlatButton(onPressed: () {
                         setState(() {
                           _filter.text = widget.filter;
-                          _field = widget.field;
+                          _field = widget.field??'r.ID';
                           _recall = false;
                           _overDue = false;
-                          _startDate = '';
+                          _startDate = formatDate(DateTime.now().add(Duration(days: -365)), [yyyy, '-', mm, '-', dd]);
                           _endDate = formatDate(DateTime.now(), [yyyy, '-', mm, '-', dd]);
                           _type = widget.type;
                           //_dispatchStatusId = 3;

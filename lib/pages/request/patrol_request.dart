@@ -66,7 +66,7 @@ class _PatrolRequestState extends State<PatrolRequest> {
     print(resp);
     if (resp['ResultCode'] == '00') {
       var _obj = _equipments.firstWhere((item) => (item['ID'] == resp['Data']['ID']), orElse: () => null);
-      if (_equipments.isEmpty || (_obj == null && _obj['AssetType']['ID'] == _equipments[0]['AssetType']['ID'])) {
+      if (_equipments.isEmpty || (_obj == null && resp['Data']['AssetType']['ID'] == _equipments[0]['AssetType']['ID'])) {
         setState(() {
           _equipments.add(resp['Data']);
         });

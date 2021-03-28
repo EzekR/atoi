@@ -3267,7 +3267,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
           new Expanded(
             flex: 4,
             child: new Text(
-              currentMandatoryPeriod==1?'无强检':'${mandatoryInterval.text} ${periodTypeList.firstWhere((item) => item['ID']==currentMandatoryPeriod)['Name']}',
+              currentMandatoryPeriod==0?'无强检':'${mandatoryInterval.text} ${periodTypeList.firstWhere((item) => item['ID']==currentMandatoryPeriod)['Name']}',
               style: new TextStyle(
                   fontSize: 16.0,
                   fontWeight: FontWeight.w400,
@@ -3277,7 +3277,7 @@ class _EquipmentDetailState extends State<EquipmentDetail> {
           ),
           new Expanded(
             flex: 2,
-            child: currentMandatoryPeriod==1?Container():IconButton(icon: Icon(Icons.calendar_today), onPressed: () async {
+            child: currentMandatoryPeriod==0?Container():IconButton(icon: Icon(Icons.calendar_today), onPressed: () async {
               await getCheckPeriod(3);
               showPeriodSheet('一年内计划强检');
             }),

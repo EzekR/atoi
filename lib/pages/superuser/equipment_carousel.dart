@@ -1,3 +1,5 @@
+import 'package:atoi/pages/equipments/equipments_list.dart';
+import 'package:date_format/date_format.dart';
 import 'package:flutter/material.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'dart:convert';
@@ -7,7 +9,8 @@ import 'package:atoi/widgets/build_widget.dart';
 
 class EquipmentCarousel extends StatefulWidget {
   final List equipmentFile;
-  EquipmentCarousel({Key key, this.equipmentFile}):super(key: key);
+  final EquipmentType equipmentType;
+  EquipmentCarousel({Key key, this.equipmentFile, this.equipmentType}):super(key: key);
   _EquipmentCarouselState createState() => new _EquipmentCarouselState();
 }
 
@@ -32,8 +35,20 @@ class _EquipmentCarouselState extends State<EquipmentCarousel> {
   ];
 
   void getFile(int fileId, String fileName, int typeId) async {
+    String url;
+    switch (widget.equipmentType) {
+      case EquipmentType.MEDICAL:
+        url = '/Equipment/DownloadUploadFile';
+        break;
+      case EquipmentType.MEASURE:
+        url = '/MeasInstrum/DownloadUploadFile';
+        break;
+      case EquipmentType.OTHER:
+        url = '/OtherEqpt/DownloadUploadFile';
+        break;
+    }
     Map resp = await HttpRequest.request(
-        '/Equipment/DownloadUploadFile',
+        url,
         method: HttpRequest.POST,
         data: {
           'id': fileId

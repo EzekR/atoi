@@ -41,6 +41,7 @@ class _PODetailState extends State<PODetail> {
   ScrollController controller = new ScrollController();
   FocusNode focusApprove = new FocusNode();
   String pageTitle = "新增采购单";
+  String fujiComments;
 
   List _accs = [];
   List _consumable = [];
@@ -114,6 +115,7 @@ class _PODetailState extends State<PODetail> {
         endDate = _data['DueDate'].toString().split('T')[0];
         supplier = _data['Supplier'];
         comments.text = _data['Comments'];
+        fujiComments = _data['FujiComments'];
         userName = _data['User']['Name'];
         _componentsList = _data['Components'];
         _accs = _componentsList.map((_data) {
@@ -124,7 +126,7 @@ class _PODetailState extends State<PODetail> {
             '型号': _data['Model'],
             '类型': _data['Component']['Type']['Name'],
             '关联设备': _data['Equipment']['Name'],
-            '单价': CommonUtil.CurrencyForm(double.tryParse(_data['Price']), times: 1, digits: 0),
+            '单价': CommonUtil.CurrencyForm(_data['Price'], times: 1, digits: 0),
             '数量': _data['Qty'].toString()
           };
           if (widget.operation == PurchaseOrderOperation.INBOUND) {
@@ -140,7 +142,8 @@ class _PODetailState extends State<PODetail> {
             '规格': _data['Specification'],
             '型号': _data['Model'],
             '关联富士II类': _data['Consumable']['FujiClass2']['Name'],
-            '单价': CommonUtil.CurrencyForm(double.tryParse(_data['Price']), times: 1, digits: 0),
+            '单价': CommonUtil.CurrencyForm(_data['Price'], times: 1, digits: 0),
+            '单位': _data['Unit'],
             '数量': _data['Qty'].toString()
           };
           if (widget.operation == PurchaseOrderOperation.INBOUND) {
@@ -440,7 +443,7 @@ class _PODetailState extends State<PODetail> {
                       'Equipments': fullItem['Equipments'],
                       'Name': fullItem['Name'],
                       'TotalTimes': serviceTimes[key].text,
-                      '单价': CommonUtil.CurrencyForm(double.tryParse(fullItem['Price']), times: 1, digits: 0),
+                      'Price': fullItem['Price'],
                       'StartDate': fullItem['StartDate'],
                       'EndDate': fullItem['EndDate'],
                       'Purchase': {
@@ -528,6 +531,7 @@ class _PODetailState extends State<PODetail> {
                             '型号': _data['Model'],
                             '关联富士II类': _data['Consumable']['FujiClass2']['Name'],
                             '单价': CommonUtil.CurrencyForm(double.tryParse(_data['Price']), times: 1, digits: 0),
+                            '单位': _data['Unit'],
                             '数量': _data['Qty']
                           };
                           break;
@@ -999,6 +1003,7 @@ class _PODetailState extends State<PODetail> {
                                   ),
                                 ):BuildWidget.buildRow('供应商', supplier==null?'':supplier['Name']),
                                 widget.editable?BuildWidget.buildInput('备注', comments, maxLength: 500, focusNode: _focusComponent[5]):BuildWidget.buildRow('备注', comments.text),
+                                fujiComments!=null?BuildWidget.buildRow("审批备注", fujiComments):Container(),
                                 new Divider(),
                                 new Padding(
                                     padding:

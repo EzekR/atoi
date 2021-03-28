@@ -13,6 +13,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:atoi/pages/inventory/component_list.dart';
 import 'package:atoi/pages/inventory/consumable_list.dart';
 import 'package:atoi/pages/valuation/valuation_history.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:atoi/permissions.dart';
 
 class SuperHome extends StatefulWidget {
   _SuperHomeState createState() => _SuperHomeState();
@@ -24,6 +26,13 @@ class _SuperHomeState extends State<SuperHome> with SingleTickerProviderStateMix
   ConstantsModel model;
   Future<SharedPreferences> prefs = SharedPreferences.getInstance();
   String userName;
+  Map requestTechPermission;
+  Map dispatchTechPermission;
+  Map medicalPermission;
+  Map measurePermission;
+  Map otherPermission;
+  Map contractPermission;
+  Map supplierPermission;
 
   void getUserName() async {
     SharedPreferences _prefs = await prefs;
@@ -34,10 +43,25 @@ class _SuperHomeState extends State<SuperHome> with SingleTickerProviderStateMix
 
   void initState() {
     super.initState();
+    getPermission();
     getUserName();
     model = MainModel.of(context);
     model.getConstants();
     _tabController = new TabController(length: 3, vsync: this, initialIndex: 0);
+  }
+
+  Future<Null> getPermission() async {
+    SharedPreferences _prefs = await prefs;
+    Permission permissionInstance = new Permission();
+    permissionInstance.prefs = _prefs;
+    permissionInstance.initPermissions();
+    requestTechPermission = permissionInstance.getTechPermissions('Operations', 'Request');
+    dispatchTechPermission = permissionInstance.getTechPermissions('Operations', 'Dispatch');
+    medicalPermission = permissionInstance.getTechPermissions("Asset", "Equipment");
+    measurePermission = permissionInstance.getTechPermissions("Asset", "MeasInstrum");
+    otherPermission = permissionInstance.getTechPermissions("Asset", "OtherEqpt");
+    contractPermission = permissionInstance.getTechPermissions("Asset", "Contract");
+    supplierPermission = permissionInstance.getTechPermissions("Asset", "Supplier");
   }
 
   Widget build (BuildContext context) {
@@ -87,8 +111,10 @@ class _SuperHomeState extends State<SuperHome> with SingleTickerProviderStateMix
       body: new TabBarView(
           controller: _tabController,
           children: [
-            _TabView(context, tabType: TabType.EQUIP,),
-            _TabView(context, tabType: TabType.CONTRACT,),
+            _TabView(context, tabType: TabType.EQUIP, contract: contractPermission,
+            supplier: supplierPermission,),
+            _TabView(context, tabType: TabType.CONTRACT, dispatch: dispatchTechPermission,
+            request: requestTechPermission,),
             _TabView(context, tabType: TabType.VENDOR,),
           ]
       ),
@@ -100,7 +126,13 @@ class _TabView extends StatelessWidget {
 
   final TabType tabType;
   final BuildContext context;
-  _TabView(this.context, {this.tabType});
+  final Map contract;
+  final Map supplier;
+  final Map request;
+  final Map dispatch;
+
+  _TabView(this.context, {this.tabType, this.contract, this.supplier, this.request,
+  this.dispatch});
 
   List<Widget> _menuList = [];
 
@@ -210,11 +242,11 @@ class _TabView extends StatelessWidget {
               ),
               Expanded(
                 flex: 3,
-                child: buildIconColumn(new _MenuItem(Icon(Icons.event_note), '合同', targetPage: new ContractList())),
+                child: buildIconColumn(new _MenuItem(Icon(Icons.event_note), '合同', targetPage: contract['View']!=null&&contract['View']?new ContractList():null)),
               ),
               Expanded(
                 flex: 4,
-                child: buildIconColumn(new _MenuItem(Icon(Icons.store), '供应商', targetPage: new VendorsList())),
+                child: buildIconColumn(new _MenuItem(Icon(Icons.store), '供应商', targetPage: supplier['View']!=null&&supplier['View']?new VendorsList():null)),
               )
             ],
           ),
@@ -228,11 +260,11 @@ class _TabView extends StatelessWidget {
             children: <Widget>[
               Expanded(
                 flex: 4,
-                child: buildIconColumn(new _MenuItem(Icon(Icons.assignment_late), '客户请求', targetPage: SuperRequest(pageType: PageType.REQUEST,))),
+                child: buildIconColumn(new _MenuItem(Icon(Icons.assignment_late), '客户请求', targetPage: request['View']!=null&&request['View']?SuperRequest(pageType: PageType.REQUEST, type: 0,):null)),
               ),
               Expanded(
                 flex: 3,
-                child: buildIconColumn(new _MenuItem(Icon(Icons.assignment_ind), '派工单', targetPage: SuperRequest(pageType: PageType.DISPATCH,))),
+                child: buildIconColumn(new _MenuItem(Icon(Icons.assignment_ind), '派工单', targetPage: dispatch['View']!=null&&dispatch['View']?SuperRequest(pageType: PageType.DISPATCH, type: 0, field: "d.RequestID",):null)),
               ),
               Expanded(
                 flex: 4,

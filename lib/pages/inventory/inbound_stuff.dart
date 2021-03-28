@@ -26,6 +26,7 @@ class _InboundStuffState extends State<InboundStuff> {
   List<TextEditingController> serialList = [];
   List<TextEditingController> specList = [];
   List<TextEditingController> modelList = [];
+  List<TextEditingController> unitList = [];
 
   // consumable
   List inboundConsumable = [];
@@ -79,7 +80,8 @@ class _InboundStuffState extends State<InboundStuff> {
       'Model': item['Model'],
       'Specification': item['Specification'],
       'Price': item['Price'],
-      'Qty': item['Qty']
+      'Qty': item['Qty'],
+      'Unit': item['Unit']
     });
     lotNumList.add(new TextEditingController());
     TextEditingController _specTmp = new TextEditingController();
@@ -184,6 +186,7 @@ class _InboundStuffState extends State<InboundStuff> {
           'Specification': specList[key].text,
           'Model': modelList[key].text,
           'Price': _component['Price'],
+          'Unit': _component['Unit'],
           'Qty': quantityList[key].text
         };
       }).toList();

@@ -271,6 +271,12 @@ class _ConsumableListState extends State<ConsumableList> {
                         borderRadius: BorderRadius.circular(6),
                       ),
                       onPressed: () async {
+                        if (_fujiClass2 == 0) {
+                          showDialog(context: context, builder: (context) => CupertinoAlertDialog(
+                            title: new Text('富士II类不可为空'),
+                          ));
+                          return;
+                        }
                         if (_name.text.isEmpty) {
                           showDialog(context: context, builder: (context) => CupertinoAlertDialog(
                             title: new Text('简称不可为空'),
@@ -281,6 +287,12 @@ class _ConsumableListState extends State<ConsumableList> {
                           showDialog(context: context, builder: (context) => CupertinoAlertDialog(
                             title: new Text('描述不可为空'),
                           )).then((result) => FocusScope.of(context).requestFocus(_focusDesc));
+                          return;
+                        }
+                        if (_price.text.isEmpty) {
+                          showDialog(context: context, builder: (context) => CupertinoAlertDialog(
+                            title: new Text('耗材价格不可为空'),
+                          )).then((result) => FocusScope.of(context).requestFocus(_focusPrice));
                           return;
                         }
                         if (double.parse(_price.text) > 9999999999.99) {
@@ -681,32 +693,32 @@ class _ConsumableListState extends State<ConsumableList> {
             mainAxisAlignment: MainAxisAlignment.end,
             mainAxisSize: MainAxisSize.max,
             children: <Widget>[
-              //new RaisedButton(
-              //  onPressed: (){
-              //    Navigator.of(context).push(new MaterialPageRoute(builder: (_) => PrintQrcode(equipmentId: item['ID'], codeType: CodeType.CONSUMABLE,)));
-              //  },
-              //  shape: RoundedRectangleBorder(
-              //    borderRadius: BorderRadius.circular(6),
-              //  ),
-              //  color: new Color(0xff2E94B9),
-              //  child: new Row(
-              //    children: <Widget>[
-              //      new Icon(
-              //        Icons.widgets,
-              //        color: Colors.white,
-              //      ),
-              //      new Text(
-              //        '二维码',
-              //        style: new TextStyle(
-              //            color: Colors.white
-              //        ),
-              //      )
-              //    ],
-              //  ),
-              //),
-              //SizedBox(
-              //  width: 20,
-              //),
+              widget.optional!=null?Container():new RaisedButton(
+                onPressed: (){
+                  Navigator.of(context).push(new MaterialPageRoute(builder: (_) => PrintQrcode(equipmentId: item['ID'], codeType: CodeType.CONSUMABLE,)));
+                },
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                color: new Color(0xff2E94B9),
+                child: new Row(
+                  children: <Widget>[
+                    new Icon(
+                      Icons.widgets,
+                      color: Colors.white,
+                    ),
+                    new Text(
+                      '二维码',
+                      style: new TextStyle(
+                          color: Colors.white
+                      ),
+                    )
+                  ],
+                ),
+              ),
+              SizedBox(
+                width: 20,
+              ),
               widget.optional!=null?Container(
                 child: RaisedButton(
                   onPressed: () {

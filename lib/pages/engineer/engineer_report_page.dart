@@ -545,9 +545,6 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
     var _data = {
       'Dispatch': {
         'ID': _dispatch['ID'],
-        "Request": {
-          "Equipments": _equipments
-        }
       },
       'FaultCode': _code.text,
       'FaultDesc': _description.text,
@@ -623,10 +620,10 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
   }
 
   Future<bool> saveInventoryEquipments() async {
-    List _equipments = [];
-    for(int i=0; i<_dispatch['Request']['Equipments'].length; i++) {
-      _equipments.add({
-        'equipmentID': _dispatch['Request']['Equipments'][i]['ID'],
+    List _list = [];
+    for(int i=0; i<_equipments.length; i++) {
+      _list.add({
+        'equipmentID': _equipments[i]['ID'],
         'stocktakingStatus': equipmentStatus[i].text,
         'stocktakingComments': equipmentComments[i].text,
         'assetType': _dispatch['Request']['AssetType']['ID']
@@ -637,7 +634,7 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
       method: HttpRequest.POST,
       data: {
         'requestID': _dispatch['Request']['ID'],
-        'equipments': _equipments
+        'equipments': _list
       }
     );
     if (resp['ResultCode'] == '00') {

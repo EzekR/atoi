@@ -1,3 +1,4 @@
+import 'package:atoi/pages/equipments/equipments_list.dart';
 import 'package:flutter/material.dart';
 import 'package:atoi/home_page.dart';
 import 'package:atoi/engineer_home_page.dart';
@@ -56,6 +57,9 @@ class _LoginPageState extends State<LoginPage> {
           break;
         case 2:
           Navigator.of(context).pushNamed(EngineerHomePage.tag);
+          break;
+        case 3:
+          Navigator.of(context).push(new MaterialPageRoute(builder: (_) => new Dashboard(equipmentType: EquipmentType.MEDICAL,)));
           break;
         case 4:
           Navigator.of(context).pushNamed(UserHomePage.tag);
@@ -255,7 +259,7 @@ class _LoginPageState extends State<LoginPage> {
           Navigator.of(context).pushNamed(EngineerHomePage.tag);
           break;
         case 3:
-          Navigator.of(context).push(new MaterialPageRoute(builder: (_) => new Dashboard()));
+          Navigator.of(context).push(new MaterialPageRoute(builder: (_) => new Dashboard(equipmentType: EquipmentType.MEDICAL,)));
           break;
         case 4:
           Navigator.of(context).pushNamed(UserHomePage.tag);

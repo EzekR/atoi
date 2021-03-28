@@ -112,7 +112,7 @@ class _ComponentListState extends State<ComponentList> {
           'statusID': useStatus,
           'CurRowNum': offset,
           'PageSize': 10,
-          'typeID': typeID,
+          'componentTypeID': typeID,
           'eqptID': equipmentCode.text
         }
     );
