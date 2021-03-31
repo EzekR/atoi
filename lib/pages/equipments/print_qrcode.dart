@@ -6,6 +6,10 @@ import 'package:atoi/utils/http_request.dart';
 import 'package:brother_printer/brother_printer.dart';
 import 'dart:convert';
 import 'package:atoi/widgets/build_widget.dart';
+import 'package:flutter_webview_plugin/flutter_webview_plugin.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:url_launcher/url_launcher.dart';
+
 
 /// 打印二维码标签页面类
 class PrintQrcode extends StatefulWidget{
@@ -14,7 +18,8 @@ class PrintQrcode extends StatefulWidget{
   final CodeType codeType;
   final List components;
   final bool inbound;
-  PrintQrcode({Key key, this.equipmentId, this.codeType, this.components, this.inbound}):super(key: key);
+  final bool html;
+  PrintQrcode({Key key, this.equipmentId, this.codeType, this.components, this.inbound, this.html}):super(key: key);
 }
 
 class _PrintQrcodeState extends State<PrintQrcode> {
@@ -23,10 +28,15 @@ class _PrintQrcodeState extends State<PrintQrcode> {
   List _image;
   List qrcodes = [];
   List qrcodesString = [];
+  //String qrUrl = "http://fujifilm.esdpro.com/ATOI_ESD/app/qrcode.html";
+  String qrUrl = "http://localhost:9527/static/qrcode.html";
 
   void initState() {
     super.initState();
     getAllCodes();
+  }
+
+  void initQrUrl() async {
   }
 
   void getAllCodes() async {
@@ -75,6 +85,17 @@ class _PrintQrcodeState extends State<PrintQrcode> {
       default:
         url = '/Equipment/EquipmentLabel';
         break;
+    }
+    // 初始化html链接
+    if (widget.html != null && widget.html) {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      int userID = await prefs.getInt("userID");
+      String session = await prefs.getString("sessionId");
+      qrUrl = qrUrl+"?url=$url&id=$id&session=$session&user=$userID";
+      print(qrUrl);
+      setState(() {
+        qrUrl = qrUrl;
+      });
     }
     var resp = await HttpRequest.request(
       url,
@@ -151,15 +172,23 @@ class _PrintQrcodeState extends State<PrintQrcode> {
   }
 
   Future<Null> printQRcode() async {
-    for(String code in qrcodesString) {
-      var error = await BrotherPrinter.printImage(code);
-      print(error);
-      showDialog(
-          context: context,
-          builder: (context) => CupertinoAlertDialog(
-            title: new Text(error=='ok'?'打印完成':'请连接打印机'),
-          )
-      );
+    if (widget.html !=null && widget.html) {
+      if (await canLaunch(qrUrl)) {
+        await launch(qrUrl);
+      } else {
+        throw 'Could not launch $qrUrl';
+      }
+    } else {
+      for(String code in qrcodesString) {
+        var error = await BrotherPrinter.printImage(code);
+        print(error);
+        showDialog(
+            context: context,
+            builder: (context) => CupertinoAlertDialog(
+              title: new Text(error=='ok'?'打印完成':'请连接打印机'),
+            )
+        );
+      }
     }
   }
 
@@ -192,7 +221,39 @@ class _PrintQrcodeState extends State<PrintQrcode> {
   }
 
   Widget build(BuildContext context) {
-    return new Scaffold(
+//    return widget.html!=null?new WebviewScaffold(
+//      url: qrUrl,
+//      appBar: new AppBar(
+//        title: new Text('二维码打印'),
+//        elevation: 0.7,
+//        leading: IconButton(
+//          onPressed: () {
+//            if (widget.inbound!=null&&widget.inbound) {
+//              int count = 0;
+//              Navigator.popUntil(context, (route) {
+//                return count ++ == 2;
+//              });
+//            } else {
+//              Navigator.of(context).pop();
+//            }
+//          },
+//          icon: Icon(Icons.arrow_back_ios),
+//        ),
+//        flexibleSpace: Container(
+//          decoration: BoxDecoration(
+//            gradient: LinearGradient(
+//              begin: Alignment.centerLeft,
+//              end: Alignment.centerRight,
+//              colors: [
+//                Theme.of(context).primaryColor,
+//                Theme.of(context).accentColor
+//              ],
+//            ),
+//          ),
+//        ),
+//      ),
+//    ):new Scaffold(
+      return new Scaffold(
       appBar: new AppBar(
         title: new Text('二维码打印'),
         elevation: 0.7,

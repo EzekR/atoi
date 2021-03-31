@@ -1023,7 +1023,7 @@ class _EquipmentsListState extends State<EquipmentsList> {
                       break;
                   }
                   Navigator.of(context).push(new MaterialPageRoute(builder: (_) {
-                    return new PrintQrcode(equipmentId: item['ID'], codeType: codeType,);
+                    return new PrintQrcode(equipmentId: item['ID'], codeType: codeType, html: true,);
                   }));
                 },
                 shape: RoundedRectangleBorder(
