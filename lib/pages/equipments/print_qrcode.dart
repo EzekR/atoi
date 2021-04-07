@@ -172,24 +172,24 @@ class _PrintQrcodeState extends State<PrintQrcode> {
   }
 
   Future<Null> printQRcode() async {
-    if (widget.html !=null && widget.html) {
-      if (await canLaunch(qrUrl)) {
-        await launch(qrUrl);
-      } else {
-        throw 'Could not launch $qrUrl';
-      }
-    } else {
-      for(String code in qrcodesString) {
-        var error = await BrotherPrinter.printImage(code);
-        print(error);
-        showDialog(
-            context: context,
-            builder: (context) => CupertinoAlertDialog(
-              title: new Text(error=='ok'?'打印完成':'请连接打印机'),
-            )
-        );
-      }
+    for(String code in qrcodesString) {
+      var error = await BrotherPrinter.printImage(code);
+      print(error);
+      showDialog(
+          context: context,
+          builder: (context) => CupertinoAlertDialog(
+            title: new Text(error=='ok'?'打印完成':'请连接打印机'),
+          )
+      );
     }
+    //if (widget.html !=null && widget.html) {
+    //  if (await canLaunch(qrUrl)) {
+    //    await launch(qrUrl);
+    //  } else {
+    //    throw 'Could not launch $qrUrl';
+    //  }
+    //} else {
+    //}
   }
 
   List<Widget> buildList() {
