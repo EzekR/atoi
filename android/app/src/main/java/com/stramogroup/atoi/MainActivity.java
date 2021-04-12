@@ -5,7 +5,7 @@ import io.flutter.app.FlutterActivity;
 import io.flutter.plugins.GeneratedPluginRegistrant;
 import io.flutter.view.FlutterView;
 
-public class MainActivity extends FlutterActivity {
+public class MainActivitNSContactsUsageDescriptiony extends FlutterActivity {
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
