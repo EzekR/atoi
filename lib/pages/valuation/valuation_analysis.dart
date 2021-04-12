@@ -589,9 +589,9 @@ class _ValuationAnalysisState extends State<ValuationAnalysis> {
 
   void initChartData() {
     chartData.clear();
-    chartData.add(ChartData("固定类", columnActual.fixed, Color(0xff2FC25B)));
-    chartData.add(ChartData("变动类-保养", columnActual.maintain, Color(0xff1890FF)));
-    chartData.add(ChartData("变动类-维修", columnActual.repair, Color(0xff13C2C2)));
+    chartData.add(ChartData("固定类", columnActual.fixed/1000, Color(0xff2FC25B)));
+    chartData.add(ChartData("变动类-保养", columnActual.maintain/1000, Color(0xff1890FF)));
+    chartData.add(ChartData("变动类-维修", columnActual.repair/1000, Color(0xff13C2C2)));
   }
 
   void initLineData() {
@@ -600,9 +600,9 @@ class _ValuationAnalysisState extends State<ValuationAnalysis> {
     lineDataRepair.clear();
     for(int i=0; i<columnActual.monthDetail.length; i++) {
       ColumnDetail monthDetail = columnActual.monthDetail[i];
-      lineDataFixed.add(MonthData(monthDetail.month, monthDetail.fixed??0));
-      lineDataMaintain.add(MonthData(monthDetail.month, monthDetail.maintain??0));
-      lineDataRepair.add(MonthData(monthDetail.month, monthDetail.repair??0));
+      lineDataFixed.add(MonthData(monthDetail.month, monthDetail.fixed/1000??0));
+      lineDataMaintain.add(MonthData(monthDetail.month, monthDetail.maintain/1000??0));
+      lineDataRepair.add(MonthData(monthDetail.month, monthDetail.repair/1000??0));
     }
   }
 
@@ -1105,7 +1105,7 @@ class _ValuationAnalysisState extends State<ValuationAnalysis> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
                 Text(
-                  "${CommonUtil.CurrencyForm(total, times: 1000, digits: 0)}千元"
+                  "${CommonUtil.CurrencyForm(total, times: 1, digits: 0)}千元"
                 )
               ],
             ),
@@ -1191,20 +1191,20 @@ class _ValuationAnalysisState extends State<ValuationAnalysis> {
                   width: 0
               )
           ),
-          series: <StackedLineSeries<MonthData, String>>[
-            StackedLineSeries<MonthData, String>(
+          series: <LineSeries<MonthData, String>>[
+            LineSeries<MonthData, String>(
               dataSource: lineDataFixed,
               xValueMapper: (MonthData data, _) => data.x,
               yValueMapper: (MonthData data, _) => data.y,
               color: Color(0xff2FC25B)
             ),
-            StackedLineSeries<MonthData, String>(
+            LineSeries<MonthData, String>(
               dataSource: lineDataMaintain,
               xValueMapper: (MonthData data, _) => data.x,
               yValueMapper: (MonthData data, _) => data.y,
                 color: Color(0xff1890FF)
             ),
-            StackedLineSeries<MonthData, String>(
+            LineSeries<MonthData, String>(
                 dataSource: lineDataRepair,
                 xValueMapper: (MonthData data, _) => data.x,
                 yValueMapper: (MonthData data, _) => data.y,
