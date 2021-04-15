@@ -15,7 +15,7 @@ import 'package:flutter_cupertino_date_picker/flutter_cupertino_date_picker.dart
 import 'package:atoi/utils/constants.dart';
 import 'package:date_format/date_format.dart';
 
-/// 耗材详情页
+/// 服务详情页
 class ServiceDetail extends StatefulWidget {
   ServiceDetail({Key key, this.service, this.editable, this.isStock, this.date}) : super(key: key);
   final Map service;

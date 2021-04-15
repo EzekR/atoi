@@ -4,6 +4,7 @@ import 'package:atoi/widgets/build_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 
+/// 估价设备页
 class ValuationEquipment extends StatefulWidget {
   final int historyID;
   ValuationEquipment({this.historyID});

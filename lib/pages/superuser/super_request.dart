@@ -13,6 +13,7 @@ import 'package:atoi/widgets/search_lazy.dart';
 import 'dart:convert';
 import 'package:atoi/pages/manager/manager_complete_page.dart';
 
+/// 超级用户请求列表页
 class SuperRequest extends StatefulWidget {
   final PageType pageType;
   final String filter;

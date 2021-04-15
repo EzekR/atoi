@@ -9,6 +9,7 @@ import 'package:date_format/date_format.dart';
 import 'package:flutter_cupertino_date_picker/flutter_cupertino_date_picker.dart';
 import 'package:flutter/cupertino.dart';
 
+/// 盘点列表页
 class StocktakingList extends StatefulWidget {
 
   _StocktakingListState createState() => new _StocktakingListState();

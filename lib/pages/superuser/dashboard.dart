@@ -20,6 +20,7 @@ import 'package:atoi/pages/superuser/super_request.dart';
 import 'dart:convert';
 import 'package:atoi/utils/report_dimensions.dart';
 
+/// 超级用户控制面板页
 class Dashboard extends StatefulWidget {
   final int equipmentId;
   final EquipmentType equipmentType;

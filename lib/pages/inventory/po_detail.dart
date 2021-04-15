@@ -18,7 +18,7 @@ import 'package:date_format/date_format.dart';
 import 'package:atoi/pages/inventory/po_attachment.dart';
 import 'package:atoi/pages/inventory/inbound_stuff.dart';
 
-/// 耗材详情页
+/// 采购单详情页
 class PODetail extends StatefulWidget {
   PODetail({Key key, this.purchaseOrder, this.editable, this.operation}) : super(key: key);
   final Map purchaseOrder;

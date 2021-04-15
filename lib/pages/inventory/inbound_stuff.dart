@@ -7,6 +7,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:atoi/widgets/build_widget.dart';
 import 'package:atoi/utils/http_request.dart';
 
+/// 采购单入库页
 class InboundStuff extends StatefulWidget{
   final AttachmentType type;
   final Map stuff;

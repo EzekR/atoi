@@ -7,6 +7,7 @@ import 'package:atoi/utils/http_request.dart';
 import 'dart:typed_data';
 import 'package:atoi/widgets/build_widget.dart';
 
+/// 设备图片页
 class EquipmentCarousel extends StatefulWidget {
   final List equipmentFile;
   final EquipmentType equipmentType;

@@ -16,6 +16,7 @@ import 'package:atoi/pages/valuation/valuation_history.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:atoi/permissions.dart';
 
+/// 超级用户功能页
 class SuperHome extends StatefulWidget {
   _SuperHomeState createState() => _SuperHomeState();
 }

@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:atoi_charts/charts.dart';
 
+/// 估价分析页
 class ValuationAnalysis extends StatefulWidget {
   final int historyID;
   final String pageState;
