@@ -66,8 +66,8 @@ packages:
     description:
       path: "."
       ref: HEAD
-      resolved-ref: "7d494ba7b8fdad0f7987be4f79495c8c07eab54c"
-      url: "https://github.com/EzekR/brother_print.git"
+      resolved-ref: b85848fead118bd92e9dc7c6ef496fa23b6f1052
+      url: "http://git.stramogroup.com/stef/brother_printer"
     source: git
     version: "0.0.1"
   carousel_slider:
