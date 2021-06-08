@@ -83,6 +83,12 @@ class _HomePageState extends State<HomePage>
   Map otherPermission;
   Map contractPermission;
   Map supplierPermission;
+  Map invComponentPermission;
+  Map invConsumablePermission;
+  Map invServicePermission;
+  Map invSparePermission;
+  Map invStockPermission;
+  Map invPOPermission;
 
   Future<Null> getRole() async {
     var _prefs = await prefs;
@@ -105,6 +111,12 @@ class _HomePageState extends State<HomePage>
     otherPermission = permissionInstance.getTechPermissions("Asset", "OtherEqpt");
     contractPermission = permissionInstance.getTechPermissions("Asset", "Contract");
     supplierPermission = permissionInstance.getTechPermissions("Asset", "Supplier");
+    invComponentPermission = permissionInstance.getTechPermissions("Inv", "InvComponent");
+    invConsumablePermission = permissionInstance.getTechPermissions("Inv", "InvConsumable");
+    invServicePermission = permissionInstance.getTechPermissions("Inv", "InvService");
+    invSparePermission = permissionInstance.getTechPermissions("Inv", "InvSpare");
+    invStockPermission = permissionInstance.getTechPermissions("Inv", "Stocktaking");
+    invPOPermission = permissionInstance.getTechPermissions("Inv", "PurchaseOrder");
   }
 
   Container buildButton() {
@@ -1438,6 +1450,12 @@ class _HomePageState extends State<HomePage>
                             height: 40.0,
                             child: FlatButton(
                               onPressed: () {
+                                if (invComponentPermission == null || !invComponentPermission['View']) {
+                                  showDialog(context: context, builder: (context) => CupertinoAlertDialog(
+                                    title: Text("无权限"),
+                                  ));
+                                  return;
+                                }
                                 Navigator.of(context).push(new MaterialPageRoute(builder: (_) {
                                   return new ComponentList();
                                 }));
@@ -1466,6 +1484,12 @@ class _HomePageState extends State<HomePage>
                             height: 40.0,
                             child: FlatButton(
                               onPressed: () {
+                                if (invConsumablePermission == null || !invConsumablePermission['View']) {
+                                  showDialog(context: context, builder: (context) => CupertinoAlertDialog(
+                                    title: Text("无权限"),
+                                  ));
+                                  return;
+                                }
                                 Navigator.of(context).push(new MaterialPageRoute(builder: (_) {
                                   return new ConsumableList();
                                 }));
@@ -1494,6 +1518,12 @@ class _HomePageState extends State<HomePage>
                             height: 40.0,
                             child: FlatButton(
                               onPressed: () {
+                                if (invServicePermission == null || !invServicePermission['View']) {
+                                  showDialog(context: context, builder: (context) => CupertinoAlertDialog(
+                                    title: Text("无权限"),
+                                  ));
+                                  return;
+                                }
                                 Navigator.of(context).push(new MaterialPageRoute(builder: (_) {
                                   return new ServiceList();
                                 }));
@@ -1522,6 +1552,12 @@ class _HomePageState extends State<HomePage>
                             height: 40.0,
                             child: FlatButton(
                               onPressed: () {
+                                if (invSparePermission == null || !invSparePermission['View']) {
+                                  showDialog(context: context, builder: (context) => CupertinoAlertDialog(
+                                    title: Text("无权限"),
+                                  ));
+                                  return;
+                                }
                                 Navigator.of(context).push(new MaterialPageRoute(builder: (_) {
                                   return new SpareList();
                                 }));
@@ -1550,6 +1586,12 @@ class _HomePageState extends State<HomePage>
                             height: 40.0,
                             child: FlatButton(
                               onPressed: () {
+                                if (invStockPermission == null || !invStockPermission['View']) {
+                                  showDialog(context: context, builder: (context) => CupertinoAlertDialog(
+                                    title: Text("无权限"),
+                                  ));
+                                  return;
+                                }
                                 Navigator.of(context).push(new MaterialPageRoute(builder: (_) {
                                   return new StocktakingList();
                                 }));
@@ -1578,6 +1620,12 @@ class _HomePageState extends State<HomePage>
                             height: 40.0,
                             child: FlatButton(
                               onPressed: () {
+                                if (invPOPermission == null || !invPOPermission['View']) {
+                                  showDialog(context: context, builder: (context) => CupertinoAlertDialog(
+                                    title: Text("无权限"),
+                                  ));
+                                  return;
+                                }
                                 Navigator.of(context).push(new MaterialPageRoute(builder: (_) {
                                   return new POList();
                                 }));

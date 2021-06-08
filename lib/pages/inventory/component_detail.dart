@@ -188,12 +188,12 @@ class _ComponentDetailState extends State<ComponentDetail> {
       )).then((result) => FocusScope.of(context).requestFocus(_focusComponent[0]));
       return;
     }
-    if (spec.text.isEmpty) {
-      showDialog(context: context, builder: (context) => CupertinoAlertDialog(
-        title: new Text('规格不可为空'),
-      )).then((result) => FocusScope.of(context).requestFocus(_focusComponent[1]));
-      return;
-    }
+    // if (spec.text.isEmpty) {
+    //   showDialog(context: context, builder: (context) => CupertinoAlertDialog(
+    //     title: new Text('规格不可为空'),
+    //   )).then((result) => FocusScope.of(context).requestFocus(_focusComponent[1]));
+    //   return;
+    // }
     if (model.text.isEmpty) {
       showDialog(context: context, builder: (context) => CupertinoAlertDialog(
         title: new Text('型号不可为空'),
@@ -224,12 +224,12 @@ class _ComponentDetailState extends State<ComponentDetail> {
       )).then((result) => FocusScope.of(context).requestFocus(_focusComponent[8]));
       return;
     }
-    if (supplier == null) {
-      showDialog(context: context, builder: (context) => CupertinoAlertDialog(
-        title: new Text('供应商不可为空'),
-      )).then((result) => controller.jumpTo(800));
-      return;
-    }
+    // if (supplier == null) {
+    //   showDialog(context: context, builder: (context) => CupertinoAlertDialog(
+    //     title: new Text('供应商不可为空'),
+    //   )).then((result) => controller.jumpTo(800));
+    //   return;
+    // }
     var prefs = await _prefs;
     Map _status = statusList.firstWhere((item) => item['text'] == currentStatus, orElse: null);
     var _info = {
@@ -240,7 +240,7 @@ class _ComponentDetailState extends State<ComponentDetail> {
         'ID': componentDefinition['ID']
       },
       'Supplier': {
-        'ID': supplier['ID']
+        'ID': supplier==null?0:supplier['ID']
       },
       'SerialCode': serialCode.text,
       'Specification': spec.text,
@@ -459,7 +459,7 @@ class _ComponentDetailState extends State<ComponentDetail> {
                                 ):BuildWidget.buildRow('关联设备', relatedEquipment==null?'':relatedEquipment['Name']),
                                 widget.editable&&widget.component==null?BuildWidget.buildDropdown('选择零件', currentComponent, componentsDropdown, changeComponent, required: true):BuildWidget.buildRow('选择零件', currentComponent??''),
                                 widget.editable?BuildWidget.buildInput('序列号', serialCode, maxLength: 30, focusNode: _focusComponent[0], required: true):BuildWidget.buildRow('序列号', serialCode.text),
-                                widget.editable?BuildWidget.buildInput('规格', spec, maxLength: 50, focusNode: _focusComponent[1], required: true):BuildWidget.buildRow('规格', spec.text),
+                                widget.editable?BuildWidget.buildInput('规格', spec, maxLength: 50, focusNode: _focusComponent[1], required: false):BuildWidget.buildRow('规格', spec.text),
                                 widget.editable?BuildWidget.buildInput('型号', model, maxLength: 50, focusNode: _focusComponent[2], required: true):BuildWidget.buildRow('型号', model.text),
                                 widget.editable?new Padding(
                                   padding: EdgeInsets.symmetric(vertical: 5.0),
@@ -471,12 +471,12 @@ class _ComponentDetailState extends State<ComponentDetail> {
                                           alignment: WrapAlignment.end,
                                           crossAxisAlignment: WrapCrossAlignment.center,
                                           children: <Widget>[
-                                            new Text(
-                                              '*',
-                                              style: new TextStyle(
-                                                  color: Colors.red
-                                              ),
-                                            ),
+                                            // new Text(
+                                            //   '*',
+                                            //   style: new TextStyle(
+                                            //       color: Colors.red
+                                            //   ),
+                                            // ),
                                             new Text(
                                               '供应商',
                                               style: new TextStyle(

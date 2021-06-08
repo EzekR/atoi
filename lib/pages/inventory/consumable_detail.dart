@@ -163,12 +163,12 @@ class _ConsumableDetailState extends State<ConsumableDetail> {
       )).then((result) => FocusScope.of(context).requestFocus(_focusComponent[1]));
       return;
     }
-    if (spec.text.isEmpty) {
-      showDialog(context: context, builder: (context) => CupertinoAlertDialog(
-        title: new Text('规格不可为空'),
-      )).then((result) => FocusScope.of(context).requestFocus(_focusComponent[2]));
-      return;
-    }
+    // if (spec.text.isEmpty) {
+    //   showDialog(context: context, builder: (context) => CupertinoAlertDialog(
+    //     title: new Text('规格不可为空'),
+    //   )).then((result) => FocusScope.of(context).requestFocus(_focusComponent[2]));
+    //   return;
+    // }
     if (model.text.isEmpty) {
       showDialog(context: context, builder: (context) => CupertinoAlertDialog(
         title: new Text('型号不可为空'),
@@ -219,12 +219,12 @@ class _ConsumableDetailState extends State<ConsumableDetail> {
         return;
       }
     }
-    if (supplier == null) {
-      showDialog(context: context, builder: (context) => CupertinoAlertDialog(
-        title: new Text('供应商不可为空'),
-      )).then((result) => scrollController.jumpTo(1000));
-      return;
-    }
+    // if (supplier == null) {
+    //   showDialog(context: context, builder: (context) => CupertinoAlertDialog(
+    //     title: new Text('供应商不可为空'),
+    //   )).then((result) => scrollController.jumpTo(1000));
+    //   return;
+    // }
     if (purchaseDate == 'YYYY-MM-DD') {
       showDialog(context: context, builder: (context) => CupertinoAlertDialog(
         title: new Text('购入日期不可为空'),
@@ -243,7 +243,7 @@ class _ConsumableDetailState extends State<ConsumableDetail> {
       "Price": price.text,
       "ReceiveQty": quantity.text,
       "Supplier": {
-        "ID": supplier['ID']
+        "ID": supplier==null?0:supplier['ID']
       },
       "PurchaseDate": purchaseDate,
       "Comments": comments.text
@@ -516,7 +516,7 @@ class _ConsumableDetailState extends State<ConsumableDetail> {
                                 widget.editable&&widget.consumable==null?buildDropdown('富士II类', _fujiClass2, _fujiList, changeFuji, required: true):BuildWidget.buildRow('富士II类', _fujiClass2Name??''),
                                 widget.editable&&widget.consumable==null?buildDropdown('选择耗材', _consumable, _consumableList, changeConsumable, required: true):BuildWidget.buildRow('选择耗材', _consumableName??''),
                                 widget.editable?BuildWidget.buildInput('批次号', lotNum, maxLength: 30, focusNode: _focusComponent[1], required: true):BuildWidget.buildRow('批次号', lotNum.text),
-                                widget.editable?BuildWidget.buildInput('规格', spec, maxLength: 50, focusNode: _focusComponent[2], required: true):BuildWidget.buildRow('规格', spec.text),
+                                widget.editable?BuildWidget.buildInput('规格', spec, maxLength: 50, focusNode: _focusComponent[2], required: false):BuildWidget.buildRow('规格', spec.text),
                                 widget.editable?BuildWidget.buildInput('型号', model, maxLength: 50, focusNode: _focusComponent[3], required: true):BuildWidget.buildRow('型号', model.text),
                                 widget.editable?BuildWidget.buildInput('单位', unit, maxLength: 10, focusNode: _focusComponent[7], required: true):BuildWidget.buildRow('单位', unit.text),
                                 widget.editable?new Padding(
@@ -529,12 +529,12 @@ class _ConsumableDetailState extends State<ConsumableDetail> {
                                           alignment: WrapAlignment.end,
                                           crossAxisAlignment: WrapCrossAlignment.center,
                                           children: <Widget>[
-                                            new Text(
-                                              '*',
-                                              style: new TextStyle(
-                                                  color: Colors.red
-                                              ),
-                                            ),
+                                            // new Text(
+                                            //   '*',
+                                            //   style: new TextStyle(
+                                            //       color: Colors.red
+                                            //   ),
+                                            // ),
                                             new Text(
                                               '供应商',
                                               style: new TextStyle(

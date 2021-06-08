@@ -16,7 +16,6 @@ import 'package:atoi/pages/valuation/valuation_history.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:atoi/permissions.dart';
 
-/// 超级用户功能页
 class SuperHome extends StatefulWidget {
   _SuperHomeState createState() => _SuperHomeState();
 }
@@ -34,6 +33,12 @@ class _SuperHomeState extends State<SuperHome> with SingleTickerProviderStateMix
   Map otherPermission;
   Map contractPermission;
   Map supplierPermission;
+  Map invComponentPermission;
+  Map invConsumablePermission;
+  Map invServicePermission;
+  Map invSparePermission;
+  Map invStockPermission;
+  Map invPOPermission;
 
   void getUserName() async {
     SharedPreferences _prefs = await prefs;
@@ -63,6 +68,12 @@ class _SuperHomeState extends State<SuperHome> with SingleTickerProviderStateMix
     otherPermission = permissionInstance.getTechPermissions("Asset", "OtherEqpt");
     contractPermission = permissionInstance.getTechPermissions("Asset", "Contract");
     supplierPermission = permissionInstance.getTechPermissions("Asset", "Supplier");
+    invComponentPermission = permissionInstance.getTechPermissions("Inv", "InvComponent");
+    invConsumablePermission = permissionInstance.getTechPermissions("Inv", "InvConsumable");
+    invServicePermission = permissionInstance.getTechPermissions("Inv", "InvService");
+    invSparePermission = permissionInstance.getTechPermissions("Inv", "InvSpare");
+    invStockPermission = permissionInstance.getTechPermissions("Inv", "Stocktaking");
+    invPOPermission = permissionInstance.getTechPermissions("Inv", "PurchaseOrder");
   }
 
   Widget build (BuildContext context) {
@@ -113,9 +124,9 @@ class _SuperHomeState extends State<SuperHome> with SingleTickerProviderStateMix
           controller: _tabController,
           children: [
             _TabView(context, tabType: TabType.EQUIP, contract: contractPermission,
-            supplier: supplierPermission,),
+            supplier: supplierPermission, service: invServicePermission, spare: invSparePermission,),
             _TabView(context, tabType: TabType.CONTRACT, dispatch: dispatchTechPermission,
-            request: requestTechPermission,),
+            request: requestTechPermission, component: invComponentPermission, consumable: invConsumablePermission,),
             _TabView(context, tabType: TabType.VENDOR,),
           ]
       ),
@@ -131,9 +142,13 @@ class _TabView extends StatelessWidget {
   final Map supplier;
   final Map request;
   final Map dispatch;
+  final Map service;
+  final Map spare;
+  final Map component;
+  final Map consumable;
 
   _TabView(this.context, {this.tabType, this.contract, this.supplier, this.request,
-  this.dispatch});
+  this.dispatch, this.service, this.spare, this.component, this.consumable});
 
   List<Widget> _menuList = [];
 
@@ -186,6 +201,12 @@ class _TabView extends StatelessWidget {
                     ),
                   ),
                   onTap: () {
+                    if (service == null || !service['View']) {
+                      showDialog(context: context, builder: (context) => CupertinoAlertDialog(
+                        title: Text("无权限"),
+                      ));
+                      return;
+                    }
                     Navigator.of(context).push(new MaterialPageRoute(builder: (_) => new ServiceList()));
                   },
                 ),
@@ -202,6 +223,12 @@ class _TabView extends StatelessWidget {
                     ),
                   ),
                   onTap: () {
+                    if (spare == null || !spare['View']) {
+                      showDialog(context: context, builder: (context) => CupertinoAlertDialog(
+                        title: Text("无权限"),
+                      ));
+                      return;
+                    }
                     Navigator.of(context).push(new MaterialPageRoute(builder: (_) => new SpareList()));
                   },
                 ),
@@ -269,7 +296,7 @@ class _TabView extends StatelessWidget {
               ),
               Expanded(
                 flex: 4,
-                child: buildIconColumn(new _MenuItem(Icon(Icons.settings), '零配件管理', targetPage: ComponentList())),
+                child: buildIconColumn(new _MenuItem(Icon(Icons.settings), '零配件管理', targetPage: component['View']!=null&&component['View']?ComponentList():null)),
               ),
             ],
           ),
@@ -278,7 +305,7 @@ class _TabView extends StatelessWidget {
             children: <Widget>[
               Expanded(
                 flex: 4,
-                child: buildIconColumn(new _MenuItem(Icon(Icons.battery_charging_full), '耗材管理', targetPage: ConsumableList())),
+                child: buildIconColumn(new _MenuItem(Icon(Icons.battery_charging_full), '耗材管理', targetPage: consumable['View']!=null&&consumable['View']?ConsumableList():null)),
               ),
               Expanded(
                 flex: 3,

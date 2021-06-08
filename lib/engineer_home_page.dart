@@ -18,6 +18,7 @@ import 'package:atoi/pages/equipments/contract_list.dart';
 import 'package:atoi/utils/event_bus.dart';
 import 'package:atoi/pages/inventory/stocktaking_list.dart';
 import 'package:atoi/pages/inventory/po_list.dart';
+import 'package:atoi/permissions.dart';
 
 /// 管理员首页类
 class EngineerHomePage extends StatefulWidget {
@@ -49,6 +50,19 @@ class _EngineerHomePageState extends State<EngineerHomePage>
   bool showTable = false;
   bool limited = false;
   bool showWare = false;
+  Map requestTechPermission;
+  Map dispatchTechPermission;
+  Map medicalPermission;
+  Map measurePermission;
+  Map otherPermission;
+  Map contractPermission;
+  Map supplierPermission;
+  Map invComponentPermission;
+  Map invConsumablePermission;
+  Map invServicePermission;
+  Map invSparePermission;
+  Map invStockPermission;
+  Map invPOPermission;
 
   /// 获取用户信息
   Future<Null> getRole() async {
@@ -59,6 +73,26 @@ class _EngineerHomePageState extends State<EngineerHomePage>
     setState(() {
       _userName = decoded['Name'];
     });
+  }
+
+  Future<Null> getPermission() async {
+    SharedPreferences _prefs = await prefs;
+    Permission permissionInstance = new Permission();
+    permissionInstance.prefs = _prefs;
+    permissionInstance.initPermissions();
+    requestTechPermission = permissionInstance.getTechPermissions('Operations', 'Request');
+    dispatchTechPermission = permissionInstance.getTechPermissions('Operations', 'Dispatch');
+    medicalPermission = permissionInstance.getTechPermissions("Asset", "Equipment");
+    measurePermission = permissionInstance.getTechPermissions("Asset", "MeasInstrum");
+    otherPermission = permissionInstance.getTechPermissions("Asset", "OtherEqpt");
+    contractPermission = permissionInstance.getTechPermissions("Asset", "Contract");
+    supplierPermission = permissionInstance.getTechPermissions("Asset", "Supplier");
+    invComponentPermission = permissionInstance.getTechPermissions("Inv", "InvComponent");
+    invConsumablePermission = permissionInstance.getTechPermissions("Inv", "InvConsumable");
+    invServicePermission = permissionInstance.getTechPermissions("Inv", "InvService");
+    invSparePermission = permissionInstance.getTechPermissions("Inv", "InvSpare");
+    invStockPermission = permissionInstance.getTechPermissions("Inv", "Stocktaking");
+    invPOPermission = permissionInstance.getTechPermissions("Inv", "PurchaseOrder");
   }
 
   void initFilter () {
@@ -130,6 +164,7 @@ class _EngineerHomePageState extends State<EngineerHomePage>
   @override
   void initState() {
     getRole();
+    getPermission();
     super.initState();
     _tabController = new TabController(length: 3, vsync: this, initialIndex: 0);
     _tabController.addListener(_handleTabChange);
@@ -590,6 +625,12 @@ class _EngineerHomePageState extends State<EngineerHomePage>
                             height: 40.0,
                             child: FlatButton(
                               onPressed: () {
+                                if (!medicalPermission['View']) {
+                                  showDialog(context: context, builder: (context) => CupertinoAlertDialog(
+                                    title: Text("无权限"),
+                                  ));
+                                  return;
+                                }
                                 Navigator.of(context).push(new MaterialPageRoute(builder: (_) {
                                   return new EquipmentsList(equipmentType: EquipmentType.MEDICAL,);
                                 }));
@@ -618,6 +659,12 @@ class _EngineerHomePageState extends State<EngineerHomePage>
                             height: 40.0,
                             child: FlatButton(
                               onPressed: () {
+                                if (!measurePermission['View']) {
+                                  showDialog(context: context, builder: (context) => CupertinoAlertDialog(
+                                    title: Text("无权限"),
+                                  ));
+                                  return;
+                                }
                                 Navigator.of(context).push(new MaterialPageRoute(builder: (_) {
                                   return new EquipmentsList(equipmentType: EquipmentType.MEASURE,);
                                 }));
@@ -646,6 +693,12 @@ class _EngineerHomePageState extends State<EngineerHomePage>
                             height: 40.0,
                             child: FlatButton(
                               onPressed: () {
+                                if (!otherPermission['View']) {
+                                  showDialog(context: context, builder: (context) => CupertinoAlertDialog(
+                                    title: Text("无权限"),
+                                  ));
+                                  return;
+                                }
                                 Navigator.of(context).push(new MaterialPageRoute(builder: (_) {
                                   return new EquipmentsList(equipmentType: EquipmentType.OTHER,);
                                 }));
@@ -674,6 +727,12 @@ class _EngineerHomePageState extends State<EngineerHomePage>
                             height: 40.0,
                             child: FlatButton(
                               onPressed: () {
+                                if (!contractPermission['View']) {
+                                  showDialog(context: context, builder: (context) => CupertinoAlertDialog(
+                                    title: Text("无权限"),
+                                  ));
+                                  return;
+                                }
                                 Navigator.of(context).push(new MaterialPageRoute(builder: (_) {
                                   return new ContractList();
                                 }));
@@ -701,6 +760,12 @@ class _EngineerHomePageState extends State<EngineerHomePage>
                             height: 40.0,
                             child: FlatButton(
                               onPressed: () {
+                                if (!supplierPermission['View']) {
+                                  showDialog(context: context, builder: (context) => CupertinoAlertDialog(
+                                    title: Text("无权限"),
+                                  ));
+                                  return;
+                                }
                                 Navigator.of(context).push(new MaterialPageRoute(builder: (_) {
                                   return new VendorsList();
                                 }));
@@ -806,6 +871,12 @@ class _EngineerHomePageState extends State<EngineerHomePage>
                             height: 40.0,
                             child: FlatButton(
                               onPressed: () {
+                                if (invStockPermission == null || !invStockPermission['View']) {
+                                  showDialog(context: context, builder: (context) => CupertinoAlertDialog(
+                                    title: Text("无权限"),
+                                  ));
+                                  return;
+                                }
                                 Navigator.of(context).push(new MaterialPageRoute(builder: (_) {
                                   return new StocktakingList();
                                 }));
@@ -834,6 +905,12 @@ class _EngineerHomePageState extends State<EngineerHomePage>
                             height: 40.0,
                             child: FlatButton(
                               onPressed: () {
+                                if (invPOPermission == null || !invPOPermission['View']) {
+                                  showDialog(context: context, builder: (context) => CupertinoAlertDialog(
+                                    title: Text("无权限"),
+                                  ));
+                                  return;
+                                }
                                 Navigator.of(context).push(new MaterialPageRoute(builder: (_) {
                                   return new POList();
                                 }));
