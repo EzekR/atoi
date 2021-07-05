@@ -1598,7 +1598,7 @@ class _EngineerReportPageState extends State<EngineerReportPage> {
         isExpanded: _expandList[3],
       ),
     ]);
-    if (_dispatch['RequestType']['ID'] != 4 && _dispatch['RequestType']['ID'] != 12 && _dispatch['RequestType']['ID'] != 14 && _dispatch['Request']['AssetType']['ID'] == 1) {
+    if (_dispatch['RequestType']['ID'] != 2 &&_dispatch['RequestType']['ID'] != 4 && _dispatch['RequestType']['ID'] != 12 && _dispatch['RequestType']['ID'] != 14 && _dispatch['Request']['AssetType']['ID'] == 1) {
       _list.add(
         new ExpansionPanel(canTapOnHeader: true,
           headerBuilder: (context, isExpanded) {

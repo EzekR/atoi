@@ -41,6 +41,7 @@ class _ManagerMenuState extends State<ManagerMenu> {
             icon: new Icon(icon),
             onPressed: () {
               if (!techPermission['Add']) {
+                print('you shall not pass!');
                 return;
               }
               Navigator.of(context).pushNamed(type);

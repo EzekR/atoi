@@ -15,6 +15,8 @@ import 'package:multi_image_picker/multi_image_picker.dart';
 import 'dart:typed_data';
 import 'package:uuid/uuid.dart';
 import 'package:atoi/widgets/search_lazy.dart';
+import 'package:atoi/pages/equipments/equipments_list.dart';
+import 'package:atoi/widgets/search_page.dart';
 
 /// 保养页面类
 class MaintainRequest extends StatefulWidget{
@@ -40,7 +42,8 @@ class _MaintainRequestState extends State<MaintainRequest> {
   List<dynamic> _imageList = [];
   List _serviceResults = [];
 
-  var _equipment;
+  //var _equipment;
+  List _equipments = [];
 
   List<DropdownMenuItem<String>> _dropDownMenuItems;
   String _currentResult;
@@ -77,13 +80,34 @@ class _MaintainRequestState extends State<MaintainRequest> {
     );
     print(resp);
     if (resp['ResultCode'] == '00') {
-      setState(() {
-        _equipment = resp['Data'];
-      });
+      var _obj = _equipments.firstWhere((item) => (item['ID'] == resp['Data']['ID']), orElse: () => null);
+      if (_equipments.isEmpty || (_obj == null && resp['Data']['AssetType']['ID'] == _equipments[0]['AssetType']['ID'])) {
+        setState(() {
+          _equipments.add(resp['Data']);
+        });
+      }
     } else {
       showDialog(context: context, builder: (context) => CupertinoAlertDialog(title: new Text(resp['ResultMessage']),));
     }
   }
+  //Future<Null> getDevice() async {
+  //  Map<String, dynamic> params = {
+  //    'codeContent': barcode,
+  //  };
+  //  var resp = await HttpRequest.request(
+  //      '/Equipment/GetDeviceByQRCode',
+  //      method: HttpRequest.GET,
+  //      params: params
+  //  );
+  //  print(resp);
+  //  if (resp['ResultCode'] == '00') {
+  //    setState(() {
+  //      _equipments = resp['Data'];
+  //    });
+  //  } else {
+  //    showDialog(context: context, builder: (context) => CupertinoAlertDialog(title: new Text(resp['ResultMessage']),));
+  //  }
+  //}
 
 
 List<String> _imageIdentifiers = [];
@@ -130,7 +154,7 @@ Future getImage() async {
       _isExpandedBasic = true;
       _isExpandedDetail = true;
     });
-    if (_equipment == null) {
+    if (_equipments.isEmpty) {
       showDialog(context: context,
           builder: (context) => CupertinoAlertDialog(
             title: new Text('请选择设备'),
@@ -156,23 +180,23 @@ Future getImage() async {
         };
         fileList.add(file);
       }
+      List ids = _equipments.map((item) => {
+        'ID': item['ID'],
+        "AssetType": item['AssetType']
+      }).toList();
       var _data = {
         'userID': _userID,
         'requestInfo': {
           'RequestType': {
             'ID': 2
           },
-          'Equipments': [
-            {
-              'ID': _equipment['ID']
-            }
-          ],
+          'Equipments': ids,
           'FaultType': {
             'ID': model.FaultMaintain[_currentResult],
           },
           'FaultDesc': _fault.text,
           'AssetType': {
-            'ID': _equipment['AssetType']['ID']
+            'ID': ids[0]['AssetType']['ID']
           },
           'Files': fileList
         }
@@ -203,7 +227,7 @@ Future getImage() async {
   GridView buildImageRow(List imageList) {
     List<Widget> _list = [];
 
-    if (imageList.length >0 ){
+    if (imageList != null && imageList.length >0 ){
       for(var image in imageList) {
         _list.add(
             new Stack(
@@ -264,14 +288,14 @@ Future getImage() async {
     });
   }
 
-  Future toSearch() async {
-    final _searchResult = await Navigator.of(context).push(new MaterialPageRoute(builder: (_) => SearchLazy(searchType: SearchType.DEVICE)));
-    Map _data = jsonDecode(_searchResult);
-    setState(() {
-      //_result.addAll(_data);
-      _equipment = _data;
-    });
-  }
+  //Future toSearch() async {
+  //  final _searchResult = await Navigator.of(context).push(new MaterialPageRoute(builder: (_) => SearchLazy(searchType: SearchType.DEVICE)));
+  //  Map _data = jsonDecode(_searchResult);
+  //  setState(() {
+  //    //_result.addAll(_data);
+  //    _equipment = _data;
+  //  });
+  //}
 
   Padding buildRow(String labelText, String defaultText) {
     return new Padding(
@@ -304,6 +328,50 @@ Future getImage() async {
     );
   }
 
+  Widget buildEquip() {
+    List<Widget> tiles = [];
+    Widget content;
+    for(var _equipment in _equipments) {
+      tiles.add(
+        new Padding(
+          padding: EdgeInsets.symmetric(horizontal: 12.0),
+          child: new Column(
+            children: <Widget>[
+              BuildWidget.buildRow('系统编号', _equipment['OID']??''),
+              BuildWidget.buildRow('资产编号', _equipment['AssetCode']??''),
+              BuildWidget.buildRow('名称', _equipment['Name']??''),
+              BuildWidget.buildRow('型号', _equipment['ModelCode']??''),
+              BuildWidget.buildRow('序列号', _equipment['SerialCode']??''),
+              BuildWidget.buildRow('设备厂商', _equipment['Manufacturer']['Name']??''),
+              BuildWidget.buildRow('使用科室', _equipment['Department']['Name']??''),
+              BuildWidget.buildRow('安装地点', _equipment['InstalSite']??''),
+              BuildWidget.buildRow('维保状态', _equipment['WarrantyStatus']??''),
+              BuildWidget.buildRow('服务范围', _equipment['ContractScope']['Name']??''),
+              new Padding(padding: EdgeInsets.symmetric(vertical: 8.0),
+                child: new Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: <Widget>[
+                    new Text('删除此设备'),
+                    new IconButton(icon: new Icon(Icons.delete_forever), onPressed: (){
+                      _equipments.remove(_equipment);
+                      setState(() {
+                        _equipments = _equipments;
+                      });
+                    })
+                  ],
+                ),
+              )
+            ],
+          ),
+        ),
+      );
+    }
+    content = new Column(
+      children: tiles,
+    );
+    return content;
+  }
+
   Widget build(BuildContext context) {
     return ScopedModelDescendant<MainModel>(
       builder: (context, child, mainModel) {
@@ -329,7 +397,29 @@ Future getImage() async {
                   color: Colors.white,
                   iconSize: 30.0,
                   onPressed: () {
-                    toSearch();
+                    EquipmentType eType;
+                    if (_equipments.isNotEmpty) {
+                      switch (_equipments[0]['AssetType']['ID']) {
+                        case 1:
+                          eType = EquipmentType.MEDICAL;
+                          break;
+                        case 2:
+                          eType = EquipmentType.MEASURE;
+                          break;
+                        case 3:
+                          eType = EquipmentType.OTHER;
+                          break;
+                      }
+                    }
+                    Navigator.of(context).push(new MaterialPageRoute(builder: (context) {
+                      return SearchPage(equipments: _equipments, multiType: MultiSearchType.EQUIPMENT, onlyType: _equipments.isEmpty?null:eType,);
+                    })).then((selected) {
+                      if (selected != null) {
+                        setState(() {
+                          _equipments = selected;
+                        });
+                      }
+                    });
                   }
                   ,
                 ),
@@ -380,21 +470,7 @@ Future getImage() async {
                           },
                           body: new Padding(
                             padding: EdgeInsets.symmetric(horizontal: 12.0),
-                            child: _equipment==null?new Center(child: new Text('请选择设备')):new Column(
-                              children: <Widget>[
-                                BuildWidget.buildRow('系统编号', _equipment['OID']??''),
-                                BuildWidget.buildRow('资产编号', _equipment['AssetCode']??''),
-                                BuildWidget.buildRow('名称', _equipment['Name']??''),
-                                BuildWidget.buildRow('型号', _equipment['ModelCode']??''),
-                                BuildWidget.buildRow('序列号', _equipment['SerialCode']??''),
-                                BuildWidget.buildRow('设备厂商', _equipment['Manufacturer']['Name']??''),
-                                BuildWidget.buildRow('使用科室', _equipment['Department']['Name']??''),
-                                BuildWidget.buildRow('安装地点', _equipment['InstalSite']??''),
-                                BuildWidget.buildRow('维保状态', _equipment['WarrantyStatus']??''),
-                                BuildWidget.buildRow('服务范围', _equipment['ContractScope']['Name']??''),
-                                new Padding(padding: EdgeInsets.symmetric(vertical: 8.0))
-                              ],
-                            ),
+                            child: _equipments.isEmpty?new Center(child: new Text('请选择设备')):buildEquip()
                           ),
                           isExpanded: _isExpandedBasic,
                         ),
@@ -418,7 +494,7 @@ Future getImage() async {
                             child: new Column(
                               children: <Widget>[
                                 BuildWidget.buildRow('类型', '保养'),
-                                BuildWidget.buildRow('主题', _equipment==null?'--保养':'${_equipment['Name']}--保养'),
+                                BuildWidget.buildRow('主题', _equipments.isEmpty?'--保养':'${_equipments[0]['Name']}--保养'),
                                 BuildWidget.buildRow('请求人', roleName),
                                 new Divider(),
                                 BuildWidget.buildDropdown('保养类型', _currentResult, _dropDownMenuItems, changedDropDownMethod, required: true),

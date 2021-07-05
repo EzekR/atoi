@@ -1071,7 +1071,7 @@ class _ManagerAuditReportPageState extends State<ManagerAuditReportPage> {
       ),
     ]);
 
-    if (_dispatch['Request']['RequestType']['ID'] != 14 && _dispatch['Request']['RequestType']['ID'] != 12 && _dispatch['Request']['RequestType']['ID'] != 4 && _dispatch['Request']['AssetType']['ID']==1) {
+    if (_dispatch['Request']['RequestType']['ID'] != 2 && _dispatch['Request']['RequestType']['ID'] != 14 && _dispatch['Request']['RequestType']['ID'] != 12 && _dispatch['Request']['RequestType']['ID'] != 4 && _dispatch['Request']['AssetType']['ID']==1) {
       _list.addAll([
         new ExpansionPanel(canTapOnHeader: true,
           headerBuilder: (context, isExpanded) {

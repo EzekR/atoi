@@ -360,8 +360,7 @@ Future getImage() async {
                         });
                       }
                     });
-                  }
-                  ,
+                  },
                 ),
                 new IconButton(
                     icon: Icon(Icons.crop_free),

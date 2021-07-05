@@ -26,7 +26,7 @@ class HttpRequest {
 
   /// default options
   //static const String API_PREFIX = 'http://159.226.128.250/MEMS_FUJI/APP';
-  static const String APP_VERSION = '1.1.12';
+  static const String APP_VERSION = '2.1.12';
   // default server
   static const String API_PREFIX = 'http://fujifilm.esdpro.com/atoi_esd';
   static const int CONNECT_TIMEOUT = 10000;
@@ -93,7 +93,7 @@ class HttpRequest {
       /// 打印请求失败相关信息
       print('请求出错：' + e.toString());
       // 网络超时且请求地址非轮询接口时，emit超时事件
-      if (url != '/User/GetEngineerCount' && url !='/User/GetAdminCount' && e == DioErrorType.CONNECT_TIMEOUT) {
+      if (url != '/User/GetEngineerCount' && url !='/User/GetAdminCount' && e == DioErrorType.connectTimeout) {
         bus.emit('timeout', url);
       }
     }
